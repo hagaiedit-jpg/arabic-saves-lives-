@@ -1,0 +1,785 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="theme-color" content="#0f1e2c">
+<title>ערבית מצילה חיים</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0;}
+body{background:#1A2B3C;direction:rtl;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;min-height:100vh;}
+.W{max-width:480px;margin:0 auto;min-height:100vh;}
+.topbar{background:#0f1e2c;padding:12px 16px 0;border-bottom:1px solid #1e3348;position:sticky;top:0;z-index:100;}
+.tb-top{display:flex;align-items:center;justify-content:space-between;padding-bottom:10px;}
+.tb-brand{color:#D2B48C;font-size:15px;font-weight:600;}
+.tb-badges{display:flex;gap:5px;}
+.bnew{background:#FF8C00;color:#fff;font-size:10px;padding:2px 8px;border-radius:10px;font-weight:600;}
+.boff{background:#1D9E75;color:#fff;font-size:10px;padding:2px 8px;border-radius:10px;}
+.tb-tabs{display:flex;overflow-x:auto;scrollbar-width:none;}
+.tb-tabs::-webkit-scrollbar{display:none;}
+.tb-tab{white-space:nowrap;padding:8px 11px;color:rgba(210,180,140,0.5);font-size:12px;cursor:pointer;border-bottom:2px solid transparent;flex-shrink:0;transition:all 0.15s;}
+.tb-tab.active{color:#D2B48C;border-bottom-color:#FF8C00;}
+.scr{display:none;}.scr.on{display:block;}
+.sbar{background:#FF8C00;padding:10px 12px;}
+.si{background:#fff;border-radius:8px;display:flex;align-items:center;padding:0 12px;gap:8px;}
+.si input{flex:1;border:none;outline:none;font-size:16px;padding:11px 0;direction:rtl;font-family:inherit;color:#222;background:transparent;}
+.si input::placeholder{color:#aaa;}
+.sx{background:none;border:none;color:#aaa;font-size:20px;cursor:pointer;padding:0 2px;}
+.lrow{background:#e07800;padding:4px 12px;display:flex;gap:6px;}
+.lb{flex:1;padding:5px;border-radius:6px;border:1px solid rgba(255,255,255,0.3);background:transparent;color:rgba(255,255,255,0.65);font-size:12px;cursor:pointer;font-family:inherit;text-align:center;}
+.lb.active{background:rgba(255,255,255,0.2);color:#fff;border-color:rgba(255,255,255,0.8);}
+.cgrid{display:grid;grid-template-columns:1fr 1fr;gap:1px;background:#0f1e2c;}
+.ct{background:#223344;padding:20px 12px 14px;display:flex;flex-direction:column;align-items:center;gap:7px;cursor:pointer;min-height:100px;justify-content:center;transition:background 0.12s;position:relative;}
+.ct:active{background:#2a3f54;}
+.ct.daily{background:#1a3025;}.ct.daily:active{background:#22402f;}
+.ct.heart{background:#2a1828;}.ct.heart:active{background:#361e32;}
+.ci{width:32px;height:32px;border-radius:50%;background:#1A2B3C;display:flex;align-items:center;justify-content:center;font-size:16px;}
+.cn{color:#fff;font-size:12px;font-weight:500;text-align:center;line-height:1.3;}
+.cc{color:#7a9ab5;font-size:11px;}
+.ndot{width:7px;height:7px;border-radius:50%;background:#FF8C00;position:absolute;top:9px;left:9px;}
+.lhdr{background:#0f1e2c;padding:11px 16px;display:flex;align-items:center;gap:10px;border-bottom:1px solid #1e3348;}
+.bbtn{background:#1A2B3C;border:1px solid #2e4558;border-radius:8px;color:#D2B48C;font-size:13px;padding:5px 12px;cursor:pointer;font-family:inherit;}
+.ltitle{color:#D2B48C;font-size:14px;font-weight:500;}
+.litems{background:#1A2B3C;}
+.li{padding:13px 16px;border-bottom:1px solid #1e3348;cursor:pointer;display:flex;justify-content:space-between;align-items:center;}
+.li:last-child{border-bottom:none;}
+.li:active{background:#223344;}
+.lt{color:#fff;font-size:15px;line-height:1.4;}
+.la{color:#7a9ab5;font-size:14px;}
+.lnew{font-size:10px;background:#FF8C00;color:#fff;padding:1px 6px;border-radius:7px;margin-left:7px;}
+.smeta{padding:7px 16px;color:#7a9ab5;font-size:12px;background:#1A2B3C;}
+.pbg{background:rgba(0,0,0,0.65);min-height:100vh;display:flex;align-items:flex-start;justify-content:center;padding:12px;padding-top:16px;}
+.pop{background:#fff;border-radius:18px;width:100%;max-width:440px;padding:18px 16px 14px;}
+.phe{color:#1A2B3C;font-size:18px;font-weight:600;text-align:center;margin-bottom:5px;line-height:1.4;}
+.parsm{color:#D2B48C;font-size:17px;direction:rtl;font-family:Georgia,serif;text-align:center;margin-bottom:12px;font-weight:500;}
+.pbox{background:#1A2B3C;border-radius:12px;padding:16px 14px;margin-bottom:12px;text-align:center;}
+.ptrans{color:#fff;font-size:24px;font-weight:400;line-height:1.6;letter-spacing:0.03em;}
+.ww{display:flex;align-items:center;gap:8px;margin-bottom:10px;background:#f5f5f5;border-radius:10px;padding:8px 12px;}
+.wave{display:flex;align-items:center;gap:2px;flex:1;}
+.wb{width:3px;border-radius:2px;background:#D2B48C;}
+.wt{font-size:12px;color:#888;min-width:30px;}
+.pbr{display:flex;gap:10px;margin-bottom:10px;}
+.pbtn{flex:1;padding:13px 8px;border-radius:12px;border:none;cursor:pointer;font-size:14px;font-weight:600;font-family:inherit;display:flex;align-items:center;justify-content:center;gap:6px;}
+.pbtn.slow{background:#D2B48C;color:#412402;}
+.pbtn.fast{background:#FF8C00;color:#fff;}
+.pbtn:active{opacity:0.85;}
+.ibox{border-radius:10px;padding:10px 14px;margin-bottom:8px;}
+.ibox.b{background:#eef6ff;border:1px solid #c0d8f0;}
+.ibox.o{background:#fff8ee;border:1px solid #ffe0a0;}
+.ilbl{font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:0.06em;margin-bottom:5px;}
+.ilbl.b{color:#1A2B3C;}.ilbl.o{color:#FF8C00;}
+.itxt{font-size:13px;line-height:1.7;}
+.itxt.b{color:#1a3a5c;}.itxt.o{color:#7a5000;}
+.pclose{display:block;text-align:center;color:#aaa;font-size:14px;cursor:pointer;padding:4px 0 0;}
+.sec{padding:14px;}
+.stitle{color:#D2B48C;font-size:11px;text-transform:uppercase;letter-spacing:0.07em;margin-bottom:12px;}
+.card{background:#223344;border:1px solid #2e4558;border-radius:12px;padding:14px 16px;margin-bottom:10px;cursor:pointer;}
+.card:active{background:#2a3f54;}
+.ctags{display:flex;gap:5px;flex-wrap:wrap;margin-bottom:7px;align-items:center;}
+.tag{font-size:9px;padding:2px 8px;border-radius:8px;font-weight:600;white-space:nowrap;}
+.tnew{background:#FF8C00;color:#fff;}
+.tprem{background:#D2B48C;color:#412402;}
+.theart{background:#c0392b;color:#fff;}
+.trh{background:#e74c3c;color:#fff;}
+.trm{background:#FF8C00;color:#fff;}
+.trl{background:#1D9E75;color:#fff;}
+.che{color:#fff;font-size:15px;font-weight:500;margin-bottom:4px;}
+.car{color:#D2B48C;font-size:19px;direction:rtl;font-family:Georgia,serif;margin-bottom:4px;}
+.csub{color:#7a9ab5;font-size:12px;line-height:1.6;}
+.cwarn{color:#ffb0b0;font-size:12px;padding:7px 10px;background:#2a1010;border:1px solid #5a2020;border-radius:7px;margin-top:7px;line-height:1.6;}
+.artfull{padding:16px;}
+.arttitle{color:#fff;font-size:16px;font-weight:600;margin-bottom:10px;line-height:1.4;}
+.artbody{color:#a0b8c8;font-size:14px;line-height:1.9;}
+.artback{background:#223344;border:1px solid #2e4558;border-radius:8px;color:#D2B48C;font-size:13px;padding:6px 12px;cursor:pointer;font-family:inherit;margin-bottom:14px;display:inline-block;}
+.nf{padding:14px 16px;}
+.nfi{display:flex;gap:12px;padding:11px 0;border-bottom:1px solid #1e3348;align-items:flex-start;}
+.nfi:last-child{border-bottom:none;}
+.nfd{width:8px;height:8px;border-radius:50%;background:#FF8C00;flex-shrink:0;margin-top:4px;}
+.nfdate{font-size:11px;color:#7a9ab5;margin-bottom:2px;}
+.nftxt{color:#fff;font-size:14px;line-height:1.5;}
+.nfcat{font-size:11px;color:#FF8C00;margin-top:2px;}
+.adm{padding:14px;}
+.atrow{display:flex;gap:5px;margin-bottom:12px;flex-wrap:wrap;}
+.atab{flex:1;min-width:55px;padding:7px 4px;border-radius:7px;border:1px solid #2e4558;background:#223344;color:#7a9ab5;font-size:11px;cursor:pointer;font-family:inherit;text-align:center;}
+.atab.active{background:#FF8C00;color:#fff;border-color:#FF8C00;}
+.acard{background:#223344;border:1px solid #2e4558;border-radius:12px;padding:14px;margin-bottom:10px;}
+.afl{display:flex;flex-direction:column;gap:4px;margin-bottom:10px;}
+.afl label{color:#D2B48C;font-size:11px;font-weight:500;}
+.afl input,.afl select,.afl textarea{background:#1A2B3C;border:1px solid #2e4558;border-radius:8px;padding:9px 11px;color:#fff;font-size:14px;font-family:inherit;direction:rtl;outline:none;width:100%;}
+.afl input:focus,.afl select:focus,.afl textarea:focus{border-color:#FF8C00;}
+.afl textarea{min-height:58px;resize:vertical;}
+.afl select option{background:#1A2B3C;}
+.sbtn{width:100%;padding:12px;background:#FF8C00;border:none;border-radius:10px;color:#fff;font-size:15px;font-weight:600;cursor:pointer;font-family:inherit;}
+.hlm{background:#FF8C00;color:#fff;border-radius:2px;padding:0 2px;}
+.empty{text-align:center;padding:40px 20px;color:#7a9ab5;font-size:14px;}
+</style>
+</head>
+<body>
+<div class="W">
+<div class="topbar">
+  <div class="tb-top">
+    <div class="tb-brand">ערבית מצילה חיים</div>
+    <div class="tb-badges"><div class="bnew">חדש</div><div class="boff">אופליין</div></div>
+  </div>
+  <div class="tb-tabs">
+    <div class="tb-tab active" onclick="ST('lib',this)">מבצעי</div>
+    <div class="tb-tab" onclick="ST('day',this)">יומיומי</div>
+    <div class="tb-tab" onclick="ST('hrt',this)">פותחים לב</div>
+    <div class="tb-tab" onclick="ST('sem',this)">סמנטי</div>
+    <div class="tb-tab" onclick="ST('cus',this)">מנהגים</div>
+    <div class="tb-tab" onclick="ST('art',this)">מאמרים</div>
+    <div class="tb-tab" onclick="ST('nwf',this)">חדש ●</div>
+    <div class="tb-tab" onclick="ST('adm',this)">ניהול</div>
+  </div>
+</div>
+
+<div class="scr on" id="tab-lib">
+  <div class="sbar"><div class="si">
+    <span style="color:#aaa;font-size:15px;">🔍</span>
+    <input id="sinp" placeholder="חיפוש בעברית, ערבית או תגית..." oninput="doS()"/>
+    <button class="sx" onclick="clrS()">×</button>
+  </div></div>
+  <div class="lrow">
+    <button class="lb active" id="lbhe" onclick="setL('he')">🔍 עברית</button>
+    <button class="lb" id="lbar" onclick="setL('ar')">🔍 ערבית</button>
+  </div>
+  <div id="vcats" class="scr on"><div class="cgrid" id="cgrid"></div></div>
+  <div id="vlist" class="scr">
+    <div class="lhdr"><button class="bbtn" onclick="goB()">→ חזור</button><div class="ltitle" id="ltitle"></div></div>
+    <div class="litems" id="litems"></div>
+  </div>
+  <div id="vsrch" class="scr">
+    <div class="smeta" id="smeta"></div>
+    <div class="litems" id="sres"></div>
+  </div>
+  <div id="vpop" class="scr">
+    <div class="pbg"><div class="pop">
+      <div class="phe" id="phe"></div>
+      <div class="parsm" id="parsm"></div>
+      <div class="pbox"><div class="ptrans" id="ptrans"></div></div>
+      <div class="ww"><div class="wave" id="wbars"></div><span class="wt" id="wtime">0:00</span></div>
+      <div class="pbr">
+        <button class="pbtn slow" onclick="play(this,'slow')">🐢 צב — איטי</button>
+        <button class="pbtn fast" onclick="play(this,'fast')">🐇 ארנב — מהיר</button>
+      </div>
+      <div class="ibox b" id="pwhyb"><div class="ilbl b">למה זה חשוב</div><div class="itxt b" id="pwhy"></div></div>
+      <div class="ibox o" id="ptoneb"><div class="ilbl o">טיפ ללוחם</div><div class="itxt o" id="ptone"></div></div>
+      <span class="pclose" onclick="clsP()">× סגור</span>
+    </div></div>
+  </div>
+</div>
+
+<div class="scr" id="tab-day">
+  <div class="sec"><div class="stitle">ערבית יומיומית</div><div class="cgrid" id="dgrid"></div></div>
+  <div id="dlist" style="display:none;">
+    <div class="lhdr"><button class="bbtn" onclick="clsDL()">→ חזור</button><div class="ltitle" id="dltitle"></div></div>
+    <div class="litems" id="dlitems"></div>
+  </div>
+</div>
+
+<div class="scr" id="tab-hrt">
+  <div class="sec"><div class="stitle">דברים שפותחים לב</div><div id="hlist"></div></div>
+</div>
+
+<div class="scr" id="tab-sem">
+  <div class="sec"><div class="stitle">מילון סמנטי — מילים עם משמעות כפולה</div><div id="semlist"></div></div>
+</div>
+
+<div class="scr" id="tab-cus">
+  <div class="sec"><div class="stitle">מנהגים ותרבות</div><div id="cuslist"></div></div>
+</div>
+
+<div class="scr" id="tab-art">
+  <div id="artlv"><div class="sec"><div class="stitle">מאמרים מהשטח</div><div id="artlist"></div></div></div>
+  <div id="artfv" style="display:none;">
+    <div class="artfull">
+      <button class="artback" onclick="clsA()">→ חזור</button>
+      <div class="arttitle" id="atitle"></div>
+      <div class="artbody" id="abody"></div>
+    </div>
+  </div>
+</div>
+
+<div class="scr" id="tab-nwf"><div class="nf" id="nflist"></div></div>
+
+<div class="scr" id="tab-adm">
+  <div class="adm">
+    <div class="atrow">
+      <button class="atab active" onclick="aT('ap',this)">+ מבצעי</button>
+      <button class="atab" onclick="aT('ad',this)">+ יומיומי</button>
+      <button class="atab" onclick="aT('ah',this)">+ פותח לב</button>
+      <button class="atab" onclick="aT('as',this)">+ סמנטי</button>
+      <button class="atab" onclick="aT('ac',this)">+ מנהג</button>
+      <button class="atab" onclick="aT('aa',this)">+ מאמר</button>
+      <button class="atab" onclick="aT('al',this)">רשימה</button>
+    </div>
+    <div id="at-ap"><div class="acard">
+      <div class="afl"><label>קטגוריה</label><select id="apc"><option>עצירת תנועה</option><option>ניהול מרחב</option><option>בידוק וזיהוי</option><option>שליטה בבית</option><option>הרגעה ושכנוע</option><option>מגע ראשוני</option><option>עזרה ראשונה</option><option>לוח שנה ותרבות</option><option>מילון כללי</option></select></div>
+      <div class="afl"><label>עברית *</label><input id="aphe"/></div>
+      <div class="afl"><label>תעתיק</label><input id="aptr"/></div>
+      <div class="afl"><label>ערבית *</label><textarea id="apar" style="font-family:Georgia,serif;font-size:18px;"></textarea></div>
+      <div class="afl"><label>תגיות</label><input id="aptg" placeholder="עצור,רכב,מחסום"/></div>
+      <div class="afl"><label>למה זה חשוב</label><textarea id="apwy"></textarea></div>
+      <div class="afl"><label>טיפ ללוחם</label><textarea id="aptn"></textarea></div>
+      <button class="sbtn" onclick="addP()">שמור</button>
+    </div></div>
+    <div id="at-ad" style="display:none;"><div class="acard">
+      <div class="afl"><label>קטגוריה</label><select id="adc"><option>שוק ומסחר</option><option>מסעדה ואוכל</option><option>שיחת היכרות</option><option>עזרה וכיוונים</option><option>ילדים ובית ספר</option><option>שכנות וקהילה</option></select></div>
+      <div class="afl"><label>עברית *</label><input id="adhe"/></div>
+      <div class="afl"><label>תעתיק</label><input id="adtr"/></div>
+      <div class="afl"><label>ערבית *</label><textarea id="adar" style="font-family:Georgia,serif;font-size:18px;"></textarea></div>
+      <div class="afl"><label>הקשר / טיפ</label><textarea id="adtp"></textarea></div>
+      <button class="sbtn" onclick="addD()">שמור</button>
+    </div></div>
+    <div id="at-ah" style="display:none;"><div class="acard">
+      <div class="afl"><label>עברית *</label><input id="ahhe"/></div>
+      <div class="afl"><label>תעתיק</label><input id="ahtr"/></div>
+      <div class="afl"><label>ערבית *</label><textarea id="ahar" style="font-family:Georgia,serif;font-size:18px;"></textarea></div>
+      <div class="afl"><label>מתי משתמשים</label><input id="ahwn"/></div>
+      <div class="afl"><label>למה פותח לב</label><textarea id="ahwy"></textarea></div>
+      <button class="sbtn" onclick="addH()">שמור</button>
+    </div></div>
+    <div id="at-as" style="display:none;"><div class="acard">
+      <div class="afl"><label>ערבית *</label><textarea id="asar" style="font-family:Georgia,serif;font-size:20px;min-height:50px;"></textarea></div>
+      <div class="afl"><label>תעתיק</label><input id="astr"/></div>
+      <div class="afl"><label>משמעות מילונית</label><input id="asdc"/></div>
+      <div class="afl"><label>משמעות בשטח *</label><textarea id="asfd"></textarea></div>
+      <div class="afl"><label>סיכון</label><select id="asrk"><option value="high">גבוה</option><option value="mid">בינוני</option><option value="low">נמוך</option></select></div>
+      <button class="sbtn" onclick="addS()">שמור</button>
+    </div></div>
+    <div id="at-ac" style="display:none;"><div class="acard">
+      <div class="afl"><label>כותרת *</label><input id="actit"/></div>
+      <div class="afl"><label>תיאור *</label><textarea id="acbdy"></textarea></div>
+      <div class="afl"><label>קטגוריה</label><select id="accat"><option>אירוח</option><option>אבל ושמחה</option><option>דת</option><option>כבוד וסמכות</option><option>משפחה</option></select></div>
+      <button class="sbtn" onclick="addC()">שמור</button>
+    </div></div>
+    <div id="at-aa" style="display:none;"><div class="acard">
+      <div class="afl"><label>כותרת *</label><input id="aat"/></div>
+      <div class="afl"><label>תוכן *</label><textarea id="aab" style="min-height:140px;"></textarea></div>
+      <button class="sbtn" onclick="addA()">פרסם</button>
+    </div></div>
+  </div>
+
+    <div id="at-al" style="display:none;">
+      <div id="adm-list"></div>
+    </div>
+  </div>
+</div>
+
+<script>
+
+const SUPA_URL = 'https://ukynfcwxsrzpuqecfjuz.supabase.co';
+const SUPA_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InVreW5mY3d4c3J6cHVxZWNmanV6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzc5NTc2ODgsImV4cCI6MjA5MzUzMzY4OH0.lobr6E2Sfo5LMzhK2XklRJsY8FbVxl_v2Ar3XTGW4ew';
+
+async function supaFetch(path, method='GET', body=null) {
+  const opts = {
+    method,
+    headers: {
+      'apikey': SUPA_KEY,
+      'Authorization': 'Bearer ' + SUPA_KEY,
+      'Content-Type': 'application/json',
+      'Prefer': method==='POST' ? 'return=representation' : ''
+    }
+  };
+  if (body) opts.body = JSON.stringify(body);
+  const res = await fetch(SUPA_URL + path, opts);
+  return res.json();
+}
+
+async function loadFromSupabase() {
+  try {
+    const data = await supaFetch('/rest/v1/phrases?select=*&order=created_at.asc');
+    if (Array.isArray(data) && data.length > 0) {
+      // Map Supabase data to app format
+      const military = data.filter(p => p.section === 'military' || !p.section);
+      const daily = data.filter(p => p.section === 'daily');
+      const heart = data.filter(p => p.section === 'heart');
+      
+      if (military.length > 0) {
+        DB = military.map(p => ({
+          cat: p.cat, he: p.he, trans: p.trans||'', ar: p.ar,
+          tags: p.tags||'', why: p.why||'', tone: p.tone||'',
+          audio: p.audio_url||'', isNew: p.is_new||false, id: p.id
+        }));
+      }
+      if (daily.length > 0) {
+        DAILY = daily.map(p => ({
+          cat: p.cat, he: p.he, trans: p.trans||'', ar: p.ar,
+          tip: p.why||'', audio: p.audio_url||'', isNew: p.is_new||false, id: p.id
+        }));
+      }
+      if (heart.length > 0) {
+        HEART = heart.map(p => ({
+          he: p.he, trans: p.trans||'', ar: p.ar,
+          when: p.tags||'', why: p.why||'', audio: p.audio_url||'', isNew: p.is_new||false, id: p.id
+        }));
+      }
+      bldCats();
+      console.log('Loaded from Supabase:', data.length, 'phrases');
+    }
+  } catch(e) {
+    console.log('Offline mode - using local data');
+  }
+}
+
+async function saveToSupabase(phrase, section) {
+  const row = {
+    cat: phrase.cat || '',
+    he: phrase.he,
+    trans: phrase.trans || '',
+    ar: phrase.ar,
+    tags: phrase.tags || phrase.when || '',
+    why: phrase.why || phrase.tip || '',
+    tone: phrase.tone || '',
+    audio_url: phrase.audio || '',
+    is_new: true,
+    section: section
+  };
+  const result = await supaFetch('/rest/v1/phrases', 'POST', row);
+  return result;
+}
+
+async function deleteFromSupabase(id) {
+  await supaFetch('/rest/v1/phrases?id=eq.' + id, 'DELETE');
+}
+
+async function updateInSupabase(id, updates) {
+  await supaFetch('/rest/v1/phrases?id=eq.' + id, 'PATCH', updates);
+}
+
+// Upload audio to Supabase Storage
+async function uploadAudio(file, filename) {
+  const res = await fetch(SUPA_URL + '/storage/v1/object/audio/' + filename, {
+    method: 'POST',
+    headers: {
+      'apikey': SUPA_KEY,
+      'Authorization': 'Bearer ' + SUPA_KEY,
+      'Content-Type': file.type
+    },
+    body: file
+  });
+  const data = await res.json();
+  if (data.Key) {
+    return SUPA_URL + '/storage/v1/object/public/audio/' + filename;
+  }
+  return null;
+}
+
+let DB=[
+  {cat:'עצירת תנועה',he:'הדרך חסומה',audio:'https://res.cloudinary.com/dvjuflgqs/video/upload/v1777898520/%D7%90%D7%9C%D7%98%D7%A8%D7%99%D7%A7_%D7%9E%D7%A1%D7%93%D7%95%D7%93_fo1lvt.m4a',trans:'אַל-טַּרִיק מַסְדוּד',ar:'الطريق مسدود',tags:'חסום,ציר,מעבר',why:'מונע ויכוחים מיותרים ומבהיר שאין טעם לנסות לעבור.',tone:'',isNew:false},
+  {cat:'עצירת תנועה',he:'תסתובב ותחזור',audio:'https://res.cloudinary.com/dvjuflgqs/video/upload/v1777902078/%D7%9C%D7%A4_%D7%95%D7%90%D7%A8%D7%92%D7%A2_ajfe9l.m4a',trans:'לִף וּאִרְגַ׳ע',ar:'لف وارجع',tags:'פרסה,רכב',why:'פקודה חדה גורמת לרכב לבצע פרסה ולהתרחק מיידית.',tone:'שים דגש על הלִף. בשילוב סימון ידיים.',isNew:false},
+  {cat:'עצירת תנועה',he:'סע לאט',audio:'https://res.cloudinary.com/dvjuflgqs/video/upload/v1777898466/%D7%90%D7%9E%D7%A9%D7%99_%D7%A2%D7%9C%D7%90_%D7%9E%D7%94%D7%9C%D7%9B_j01zzm.m4a',trans:'אִמְשִי עַלַא מַהְלַכּ',ar:'امشي على مهلك',tags:'מהירות,רכב',why:'כשרכב מגיע לאט יש זמן לזהות איומים.',tone:'הרימו יד לעצור ואז תנו פקודה זו.',isNew:false},
+  {cat:'עצירת תנועה',he:'אחד אחד הישארו רחוקים',audio:'https://res.cloudinary.com/dvjuflgqs/video/upload/v1777902030/%D7%95%D7%90%D7%97%D7%93_%D7%95%D7%90%D7%97%D7%93_%D7%97%D7%9C%D7%99%D7%9B%D7%95_%D7%91%D7%A2%D7%99%D7%93_ibqhs0.m4a',trans:'וַאחֵד וַאחֵד חַ׳לִּיכּוּ בְּעִיד',ar:'واحد واحد خليكوا بعيد',tags:'תור,מרחק,קהל',why:'יוצרת מרחב סטרילי לבידוק בטוח.',tone:'יד אחת "עצור", בו זמנית פקודה בקול סמכותי.',isNew:false},
+  {cat:'עצירת תנועה',he:'לך ימינה',audio:'https://res.cloudinary.com/dvjuflgqs/video/upload/v1777901928/%D7%A8%D7%95%D7%97_%D7%99%D7%9E%D7%99%D7%9F_qblbtg.m4a',trans:'רוּח יַמִין',ar:'روح يمين',tags:'כיוון,ימין',why:'כיוון ספציפי מונע טעויות.',tone:'"רוּח" — פועל חזק.',isNew:false},
+  {cat:'עצירת תנועה',he:'לך שמאלה',audio:'https://res.cloudinary.com/dvjuflgqs/video/upload/v1777901975/%D7%A8%D7%95%D7%97_%D7%A9%D7%9E%D7%90%D7%9C_%D7%A8%D7%95%D7%97_%D7%A2%D7%9C%D7%90_%D7%90%D7%9C%D7%A9%D7%9E%D7%90%D7%9C_lgsk02.m4a',trans:'רוּח שְׁמָאל',ar:'روح شمال',tags:'כיוון,שמאל',why:'כיוון ספציפי מונע טעויות.',tone:'"רוּח" — פועל חזק.',isNew:false},
+  {cat:'עצירת תנועה',he:'עמוד כאן',audio:'https://res.cloudinary.com/dvjuflgqs/video/upload/v1777898463/%D7%95%D7%90%D7%A7%D7%A3_%D7%94%D7%95%D7%9F_ypa3r8.m4a',trans:'וַאקֶף הוֹן',ar:'واقف هون',tags:'עמידה,מרחק',why:'קביעת עובדה. יוצר מרחק ביטחון.',tone:'קצר, חד וברור.',isNew:false},
+  {cat:'ניהול מרחב',he:'חזור אחורה',audio:'https://res.cloudinary.com/dvjuflgqs/video/upload/v1777898502/%D7%90%D7%A8%D7%92%D7%A2_%D7%9C%D7%95%D7%A8%D7%90_sgj3cy.m4a',trans:'אִרְגַ׳ע לַוַרַא',ar:'ارجع لورا',tags:'מרחק,הרחקה',why:'מרחיק מיידית מי שמתקרב יותר מדי.',tone:'טון יציב, מלווה תנועת יד אחורה.',isNew:false},
+  {cat:'ניהול מרחב',he:'הישאר כאן',audio:'https://res.cloudinary.com/dvjuflgqs/video/upload/v1777898507/%D7%97%D7%9C%D7%99%D7%9B_%D7%94%D7%95%D7%9F_ae4csr.m4a',trans:'חַ׳לִּיכּ הוֹן',ar:'خليك هون',tags:'עמידה',why:'שומר על סטטיות מוחלטת בזמן בדיקה.',tone:'שקט אבל החלטי מאוד.',isNew:false},
+  {cat:'ניהול מרחב',he:'תקשיב לי',audio:'https://res.cloudinary.com/dvjuflgqs/video/upload/v1777898523/%D7%90%D7%A1%D7%9E%D7%A2%D7%A0%D7%99_dauhmt.m4a',trans:'אִסְמַעְנִי',ar:'اسمعني',tags:'קשב',why:'עוצרת הדיבור וגורמת לריכוז בחייל.',tone:'נחרצות לפני כל הוראה חשובה.',isNew:false},
+  {cat:'ניהול מרחב',he:'אסור, בן אדם',audio:'https://res.cloudinary.com/dvjuflgqs/video/upload/v1777898514/%D7%9E%D7%9E%D7%A0%D7%95%D7%A2_%D7%99%D7%90_%D7%96%D7%9C%D7%9E%D7%94_qivm0q.m4a',trans:'מַמְנוּעְ יַא זַלַמֶה',ar:'ممنوع يا زلمة',tags:'גבול,אסור',why:'"יא זלמה" הופך הפקודה לאנושית תוך שמירה על סמכות.',tone:'',isNew:false},
+  {cat:'ניהול מרחב',he:'רגע אחד',audio:'https://res.cloudinary.com/dvjuflgqs/video/upload/v1777898464/%D7%9C%D7%97%D7%96%D7%94_%D7%95%D7%90%D7%97%D7%93%D7%94_bvyv0t.m4a',trans:'לַחְזַ׳ה וַאחְדֶה',ar:'لحظة واحدة',tags:'המתן,זמן',why:'מוריד חוסר וודאות ומשדר עבודה לפי נוהל.',tone:'',isNew:false},
+  {cat:'בידוק וזיהוי',he:'מי איתך ברכב?',audio:'https://res.cloudinary.com/dvjuflgqs/video/upload/v1777898513/%D7%9E%D7%99%D7%9F_%D7%9E%D7%A2%D7%9B_%D7%91%D7%90%D7%9C%D7%A1%D7%99%D7%90%D7%A8%D7%94_ttywqh.m4a',trans:'מִין מַעַכּ בִּאל-סַיָּארָה?',ar:'مين معك بالسيارة؟',tags:'נוסעים,רכב',why:'מחייב חשיפת כל הנוסעים.',tone:'',isNew:false},
+  {cat:'בידוק וזיהוי',he:'לאן אתה הולך?',audio:'https://res.cloudinary.com/dvjuflgqs/video/upload/v1777898509/%D7%9C%D7%95%D7%99%D7%9F_%D7%90%D7%A0%D7%AA_%D7%A8%D7%90%D7%99%D7%97_kk4i9e.m4a',trans:'לַוֵין אִנְתֵ רָאיֵח?',ar:'لوين إنت رايح؟',tags:'יעד',why:'כיוון שגוי = נורה אדומה.',tone:'',isNew:false},
+  {cat:'בידוק וזיהוי',he:'איפה אתה גר?',audio:'https://res.cloudinary.com/dvjuflgqs/video/upload/v1777898444/%D7%A4%D7%99_%D7%9E%D7%A2%D7%9B_%D7%A1%D7%9C%D7%90%D7%97_lnquqi.m4a',trans:'וֵין אִנְתֵ סָאכֶּן?',ar:'وين إنت ساكن؟',tags:'כתובת',why:'בדיקת אמינות מול תעודה.',tone:'',isNew:false},
+  {cat:'בידוק וזיהוי',he:'יש איתך נשק?',audio:'https://res.cloudinary.com/dvjuflgqs/video/upload/v1777898506/%D7%95%D7%99%D7%9F_%D7%90%D7%A0%D7%AA_%D7%A1%D7%90%D7%9B%D7%9F_s4c4nz.m4a',trans:'פִי מַעַכּ סְלַאח?',ar:'في معك سلاح؟',tags:'נשק',why:'מציבה עובדה ומכריחה הצהרה.',tone:'',isNew:false},
+  {cat:'בידוק וזיהוי',he:'צא מהרכב!',audio:'https://res.cloudinary.com/dvjuflgqs/video/upload/v1777898576/%D7%90%D7%A0%D7%96%D7%9C_%D7%9E%D7%9F_%D7%90%D7%9C%D7%A1%D7%99%D7%90%D7%A8%D7%94_tj3wfs.m4a',trans:'אִנְזֵל מִן אֵל-סַיָּארָה!',ar:'انزل من السيارة!',tags:'יציאה,רכב',why:'מוציא מהמרחב המוגן של הרכב.',tone:'פקודה. טון חד ונחרץ.',isNew:false},
+  {cat:'בידוק וזיהוי',he:'תן לי את תעודת הזהות',audio:'https://res.cloudinary.com/dvjuflgqs/video/upload/v1777898501/%D7%90%D7%A2%D7%98%D7%99%D7%A0%D7%99_%D7%90%D7%9C%D7%94%D7%95%D7%99%D7%94_h06lgw.m4a',trans:'אַעְטִינִי אִל-הַוִּיֶה',ar:'أعطيني الهوية',tags:'תעודה,זיהוי',why:'"אַעְטִינִי" כשהתעודה עליו.',tone:'פקודה, לא בקשה.',isNew:false},
+  {cat:'שליטה בבית',he:'שקט! הישארו לשבת',audio:'https://res.cloudinary.com/dvjuflgqs/video/upload/v1777898504/%D7%94%D7%95%D7%93%D7%95_%D7%99%D7%90_%D7%92%D7%9E%D7%90%D7%A2%D7%94_%D7%97%D7%9C%D7%99%D7%9B%D7%95_%D7%A7%D7%90%D7%A2%D7%93%D7%99%D7%9F_vn67xm.m4a',trans:'הוּדוּא יַא ג׳מַאעַה! חַ׳לִּיכּוּ קַאעְדִין',ar:'هدوء يا جماعة! خليكوا قاعدين',tags:'שקט,ישיבה',why:'יושב = פחות מאיים.',tone:'',isNew:false},
+  {cat:'שליטה בבית',he:'הביאו את הטלפונים לפה',audio:'https://res.cloudinary.com/dvjuflgqs/video/upload/v1777898503/%D7%92%D7%99%D7%91%D7%95_%D7%90%D7%9C%D7%92_%D7%95%D7%9C%D7%90%D7%AA_%D7%9B%D7%9C%D7%94%D7%90_%D7%9C%D7%94%D7%95%D7%9F_czttfq.m4a',trans:'גִ׳יבּוּ אִל-גַ׳וַּאלַאת כֻּלְהַא לְהוֹן',ar:'جيبوا الجوالات كلها لهون',tags:'טלפון',why:'חוסך זמן סריקה.',tone:'',isNew:false},
+  {cat:'שליטה בבית',he:'מי גר פה? כולכם משפחה?',audio:'https://res.cloudinary.com/dvjuflgqs/video/upload/v1777901874/%D7%9E%D7%99%D7%9F_%D7%A1%D7%90%D7%9B%D7%9F_%D7%94%D7%95%D7%9F_%D7%9B%D7%9C%D7%9B%D7%9B%D7%9D_%D7%A2%D7%99%D7%9C%D7%94_%D7%95%D7%90%D7%97%D7%93%D7%94_vfqxuy.m4a',trans:'מִין סַאכֵּן הוֹן? כֻּלְכֹּם עֵילֵה וַאחְדֵה?',ar:'مين ساكن هون؟ كلكم عيلة واحدة؟',tags:'משפחה',why:'מסנן זרים שעלולים להיות איומים.',tone:'',isNew:false},
+  {cat:'שליטה בבית',he:'מי בעל הבית?',audio:'https://res.cloudinary.com/dvjuflgqs/video/upload/v1777898464/%D7%9E%D7%99%D7%9F_%D7%A1%D7%90%D7%97%D7%91_%D7%90%D7%9C%D7%93%D7%90%D7%A8_oxzg00.m4a',trans:'מִין סַאחֵבּ אִל-דַאר? אִנְתֵ?',ar:'مين صاحب الدار؟ إنت؟',tags:'אחראי',why:'מזהה כתובת אחת לניהול האירוע.',tone:'',isNew:false},
+  {cat:'שליטה בבית',he:'למי שייכת המכונית בחוץ?',audio:'https://res.cloudinary.com/dvjuflgqs/video/upload/v1777898509/%D7%9C%D7%9E%D7%99%D7%9F_%D7%94%D7%90%D7%93%D7%99_%D7%90%D7%9C%D7%A1%D7%99%D7%90%D7%A8%D7%94_%D7%91%D7%A8%D7%94_nx9ecs.m4a',trans:'לְמִין הַאדִי אִל-סַיַּארַה בַּרַּה?',ar:'لمين هادي السيارة برة؟',tags:'רכב,חשוד',why:'רכב ללא בעלים = נורת אזהרה.',tone:'',isNew:false},
+  {cat:'שליטה בבית',he:'איפה הילדים? כולם פה?',audio:'https://res.cloudinary.com/dvjuflgqs/video/upload/v1777898505/%D7%95%D7%99%D7%9F_%D7%90%D7%9C%D7%90%D7%95%D7%9C%D7%90%D7%93_%D7%9B%D7%9C%D7%94%D7%9D_%D7%94%D7%95%D7%9F_ga6z9n.m4a',trans:'וֵין אִל-אַוְלַאד? כֻּלְּהֹם הוֹן?',ar:'وين الأولاد؟ كلهم هون؟',tags:'ילדים',why:'גמגום = יש מישהו שאתם לא רואים.',tone:'',isNew:false},
+  {cat:'הרגעה ושכנוע',he:'אין בעיה',audio:'https://res.cloudinary.com/dvjuflgqs/video/upload/v1777898511/%D7%9E%D7%90_%D7%A4%D7%99%D7%94_%D7%9E%D7%A9%D7%9B%D7%9C%D7%94_wumzhy.m4a',trans:'מַא פִיה מֻשְכִּלֶה',ar:'ما فيه مشكلة',tags:'הרגעה',why:'משדר שליטה ונוסך ביטחון גם בחייל עצמו.',tone:'ברוגע מוחלט. הטון הוא המסר.',isNew:false},
+  {cat:'הרגעה ושכנוע',he:'למען בטיחותך',audio:'https://res.cloudinary.com/dvjuflgqs/video/upload/v1777898465/%D7%A2%D7%A9%D7%90%D7%9F_%D7%A1%D7%9C%D7%9E%D7%AA%D7%9B_wze6wc.m4a',trans:'עַשַאן סַלַמְתַּכְּ',ar:'عشان سلامتك',tags:'בטיחות',why:'הופך את החייל מ"מאיים" ל"מגן".',tone:'אחרי פקודה. רגוע ואכפתי.',isNew:false},
+  {cat:'מגע ראשוני',he:'מי נמצא כאן?',audio:'https://res.cloudinary.com/dvjuflgqs/video/upload/v1777898512/%D7%9E%D7%99%D7%9F_%D7%9E%D7%95%D7%92_%D7%95%D7%93_%D7%94%D7%95%D7%9F_dfvnuv.m4a',trans:'מִין מַוְג׳וּד הוֹן?',ar:'مين موجود هون؟',tags:'נוכחות,סריקה',why:'דורשת הזדהות לפני מגע קרוב.',tone:'חזק, ברור, שואל.',isNew:false},
+  {cat:'לוח שנה ותרבות',he:'יום עצמאות שמח',audio:'https://res.cloudinary.com/dvjuflgqs/video/upload/v1777898517/%D7%A2%D7%99%D7%93_%D7%90%D7%A1%D7%AA%D7%A7%D7%9C%D7%90%D7%9C_%D7%A1%D7%A2%D7%99%D7%93_zjjzuz.m4a',trans:'עִיד אִסְתִּקְלַאל סָעִיד',ar:'عيد استقلال سعيد',tags:'חג,עיד',why:'בערבית "עיד" ולא "יום".',tone:'',isNew:false},
+];
+
+let DAILY=[
+  {cat:'שוק ומסחר',he:'כמה זה עולה?',audio:'https://res.cloudinary.com/dvjuflgqs/video/upload/v1777898445/%D7%A7%D7%93%D7%99%D7%A9_%D7%94%D7%90%D7%93%D7%90_d61xks.m4a',trans:'קַדֵּישׁ הָאדָא?',ar:'قديش هاذا؟',tip:'שאלה בסיסית לכל קנייה.',isNew:false},
+  {cat:'שוק ומסחר',he:'יקר מאוד',audio:'https://res.cloudinary.com/dvjuflgqs/video/upload/v1777898516/%D7%A2_%D7%90%D7%9C%D7%99_%D7%9B%D7%AA%D7%99%D7%A8_zqebxz.m4a',trans:'עַ׳אלִי כְּתִּיר',ar:'غالي كتير',tip:'לאחר שנקב במחיר.',isNew:false},
+  {cat:'שוק ומסחר',he:'הורד את המחיר',audio:'https://res.cloudinary.com/dvjuflgqs/video/upload/v1777898515/%D7%A0%D7%96%D7%9C_%D7%90%D7%9C%D7%A1%D7%A2%D7%A8_gs9nyo.m4a',trans:'נַזֵּל אִלְסִּעֵר',ar:'نزّل السعر',tip:'בקשה מנומסת.',isNew:false},
+  {cat:'שיחת היכרות',he:'מה שמך?',audio:'https://res.cloudinary.com/dvjuflgqs/video/upload/v1777901643/%D7%A9%D7%95_%D7%90%D7%A1%D7%9E%D7%9B_xlcq48.m4a',trans:'שׁוּ אִסְּמַכּ?',ar:'شو اسمك؟',tip:'תמיד להתחיל בשם.',isNew:false},
+  {cat:'שיחת היכרות',he:'מאיפה אתה?',audio:'https://res.cloudinary.com/dvjuflgqs/video/upload/v1777898515/%D7%9E%D7%9F_%D7%95%D7%99%D7%9F_%D7%90%D7%A0%D7%AA_rbjkcu.m4a',trans:'מִין וֵין אִנְתֵּ?',ar:'مين وين إنت؟',tip:'',isNew:false},
+  {cat:'שיחת היכרות',he:'כמה ילדים יש לך?',audio:'https://res.cloudinary.com/dvjuflgqs/video/upload/v1777901234/%D7%90%D7%9B%D7%9D_%D7%95%D7%9C%D7%93_%D7%A2%D7%A0%D7%93%D7%9B_wa8svb.m4a',trans:'אַכַּם וַלַד עִנְדַכּ?',ar:'أكم ولد عندك؟',tip:'שאלה שמקרבת.',isNew:false},
+  {cat:'שיחת היכרות',he:'שמח להכיר',audio:'https://res.cloudinary.com/dvjuflgqs/video/upload/v1777898574/%D7%A4%D7%A8%D7%A6%D7%94_%D7%A1%D7%A2%D7%99%D7%93%D7%94_hntg0u.m4a',trans:'פֻּרְסָה סַעִידֵה',ar:'فرصة سعيدة',tip:'מחווה אדיבה בסיום שיחה.',isNew:false},
+  {cat:'עזרה וכיוונים',he:'איפה...?',audio:'https://res.cloudinary.com/dvjuflgqs/video/upload/v1777898576/%D7%95%D7%99%D7%9F_nb11vt.m4a',trans:'וֵין...?',ar:'وين...؟',tip:'פשוט ויעיל.',isNew:false},
+  {cat:'עזרה וכיוונים',he:'לך ישר קדימה',audio:'https://res.cloudinary.com/dvjuflgqs/video/upload/v1777898522/%D7%90%D7%9E%D7%A9%D7%99_%D7%93%D7%95%D7%A2_%D7%A8%D7%99_qvviwz.m4a',trans:'אִמְשִׁי דוּעְ׳רִי',ar:'امشي دغري',tip:'',isNew:false},
+  {cat:'עזרה וכיוונים',he:'אני צריך עזרה',audio:'https://res.cloudinary.com/dvjuflgqs/video/upload/v1777898508/%D7%9C%D7%90%D7%96%D7%9E%D7%A0%D7%99_%D7%9E%D7%A1%D7%90%D7%A2%D7%93%D7%94_ikpqvn.m4a',trans:'לַאזִמְנִי מֻסַאעַדֶה',ar:'لازمني مساعدة',tip:'',isNew:false},
+  {cat:'שכנות וקהילה',he:'מה נשמע?',trans:'שׁוּ אִלְאַחְ׳בַּאר?',ar:'شو الأخبار؟',tip:'פתיחת שיחה נפוצה.',isNew:false},
+  {cat:'שכנות וקהילה',he:'הכל בסדר?',trans:'כֻּל שִׁי מְנִיח?',ar:'كل شي منيح؟',tip:'',isNew:false},
+];
+
+let HEART=[
+  {he:'כל שנה ואתה בטוב',trans:'כֻּל סַנֶה וּאִנְתֵּ בְּחֵ׳יר',ar:'كل سنة وانت بخير',when:'חגים, ימי הולדת',why:'נאמר כברכת שנה טובה.',audio:'',isNew:false},
+  {he:'חג שמח',trans:'עִיד מֻבַּארַכּ',ar:'عيد مبارك',when:'כל חגי האסלאם',why:'חל על רוב החגים.',audio:'',isNew:false},
+  {he:'רמדאן כרים',trans:'רַמַדַ׳אן כַּרִים',ar:'رمضان كريم',when:'חודש רמדאן',why:'מחווה = אמון מיידי.',audio:'',isNew:false},
+  {he:'תהיה בריא',trans:'אַלְלָה יִסַלְמַכּ',ar:'الله يسلمك',when:'תגובה לכל דבר טוב',why:'בדיוק כמו "תודה" — אבל חזק יותר.',audio:'',isNew:false},
+  {he:'מזל טוב על הנישואים',trans:'מַבְּרוּכּ עַלַא אַלְזַוַאג׳',ar:'مبروك على الزواج',when:'חתונה, אירוסין',why:'שמחה = גישה.',audio:'',isNew:false},
+  {he:'ינוח בשלום',trans:'אַלְלָה יִרְחֲמוֹ',ar:'الله يرחמه',when:'כשמישהו מדבר על נפטר',why:'תמיד "רחמים" — לא "מת". זה כבוד.',audio:'',isNew:false},
+  {he:'כן, בטח — בבקשה',trans:'אַיְוַה תְּפַדַ׳ל',ar:'أيوه تفضل',when:'הזמנה, כניסה, הגשה',why:'"תְּפַדַ׳ל" — הזמנה מנומסת לכל דבר.',audio:'',isNew:false},
+];
+
+let SEM=[
+  {ar:'عرس',trans:'עַרַס',dict:'חתונה',field:'בשטח: קוד לפיגוע. "פִי עַרַס" בהקשר מבצעי = נורת אזהרה מיידית.',risk:'high',isNew:true},
+  {ar:'كوع',trans:'כּוֹעַ',dict:'מרפק / צינור',field:'בשטח: מתאר לעיתים נשק, מטען או חפץ נפיץ.',risk:'high',isNew:false},
+  {ar:'حديدة',trans:'חֲדִידָה',dict:'ברזל / מתכת',field:'בשטח: לעיתים כינוי לנשק.',risk:'high',isNew:false},
+  {ar:'حاجة',trans:'חָאגָה',dict:'צורך / דבר מה',field:'"פִי חָאגָה" יכול לרמז על הסתרה.',risk:'mid',isNew:false},
+  {ar:'زلمة',trans:'זַלַמֶה',dict:'גבר / בן אדם',field:'פנייה ישירה. לא פוגעני — יוצר קשר.',risk:'low',isNew:false},
+];
+
+let CUS=[
+  {title:'הגשת קפה',cat:'אירוח',body:'הגשת קפה היא אות כבוד. סירוב = עלבון. קח, שב רגע. קפה = פתיחת שיחה.',isNew:false},
+  {title:'הסרת נעלים',cat:'אירוח',body:'בבתים רבים מורידים נעלים. נעלים מסודרות ליד הדלת = בית "נקי".',isNew:false},
+  {title:'אבל — עזאא',cat:'אבל ושמחה',body:'בית פתוח לאבל = הזדמנות מודיעינית. אנשים מדברים חופשי יותר.',isNew:false},
+];
+
+let ARTS=[
+  {title:'איך לקרוא דינמיקה משפחתית בשטח',body:'האב (או הבן הבכור) הוא הכתובת. הוא ידבר בשם כולם.\n\nהאישה תעבור לחדר אחר — זה נורמלי. אם היא לא זזה — משהו לא רגיל.\n\nשפת גוף: מבט ישיר + ידיים פתוחות = שיתוף פעולה. מבט נמוך + ידיים צמודות = מתח.',isNew:false},
+  {title:'סימני שקר בתרבות הערבית',body:'הסטת מבט לא תמיד = שקר. בתרבות ערבית הסטת מבט מבוגר = כבוד.\n\nסימנים לחשד: סתירות בין גרסאות. שהייה ארוכה לפני תשובה פשוטה.\n\nכלל: שאל פעמיים, בניסוח שונה. סתירה = חפור עוד.',isNew:false},
+];
+
+const CATS=[
+  {id:'עצירת תנועה',icon:'🚫'},{id:'ניהול מרחב',icon:'📍'},
+  {id:'בידוק וזיהוי',icon:'🔍'},{id:'שליטה בבית',icon:'🏠'},
+  {id:'הרגעה ושכנוע',icon:'✌️'},{id:'מגע ראשוני',icon:'🕵'},
+  {id:'עזרה ראשונה',icon:'🩹'},{id:'לוח שנה ותרבות',icon:'📅'},
+  {id:'מילון כללי',icon:'💬'},
+];
+const DCATS=[
+  {id:'שוק ומסחר',icon:'🛒'},{id:'מסעדה ואוכל',icon:'🍽️'},
+  {id:'שיחת היכרות',icon:'🤝'},{id:'עזרה וכיוונים',icon:'🗺️'},
+  {id:'ילדים ובית ספר',icon:'🎒'},{id:'שכנות וקהילה',icon:'🏘️'},
+];
+const RC={high:'#e74c3c',mid:'#FF8C00',low:'#1D9E75'};
+const RL={high:'סיכון גבוה',mid:'שים לב',low:'הקשר'};
+
+let sL='he',curC=null;
+
+function ST(t,el){
+  document.querySelectorAll('.tb-tab').forEach(x=>x.classList.remove('active'));
+  el.classList.add('active');
+  document.querySelectorAll('[id^="tab-"]').forEach(x=>x.className='scr');
+  document.getElementById('tab-'+t).className='scr on';
+  if(t==='day')rDG();
+  if(t==='hrt')rHrt();
+  if(t==='sem')rSem();
+  if(t==='cus')rCus();
+  if(t==='art')rArts();
+  if(t==='nwf')rNF();
+}
+
+function cntC(c){return DB.filter(p=>p.cat===c).length;}
+function bldCats(){
+  document.getElementById('cgrid').innerHTML=CATS.map(c=>{
+    const n=DB.some(p=>p.cat===c.id&&p.isNew);
+    return`<div class="ct" onclick="opC('${c.id}')">${n?'<div class="ndot"></div>':''}
+    <div class="ci">${c.icon}</div><div class="cn">${c.id}</div><div class="cc">${cntC(c.id)} משפטים</div></div>`;
+  }).join('');
+}
+function rDG(){
+  document.getElementById('dgrid').innerHTML=DCATS.map(c=>`
+    <div class="ct daily" onclick="opDC('${c.id}')">
+    <div class="ci">${c.icon}</div><div class="cn">${c.id}</div>
+    <div class="cc">${DAILY.filter(d=>d.cat===c.id).length} משפטים</div></div>`).join('');
+  document.getElementById('dgrid').style.display='grid';
+  document.getElementById('dlist').style.display='none';
+}
+function opDC(cat){
+  document.getElementById('dltitle').textContent=cat;
+  document.getElementById('dlitems').innerHTML=DAILY.filter(d=>d.cat===cat).map(d=>{
+    const i=DAILY.indexOf(d);
+    return`<div class="li" onclick="opDP(${i})"><div class="lt">${d.isNew?'<span class="lnew">חדש</span>':''}${d.he}</div><div class="la">‹</div></div>`;
+  }).join('');
+  document.getElementById('dgrid').style.display='none';
+  document.getElementById('dlist').style.display='block';
+}
+function clsDL(){rDG();}
+function opDP(i){
+  const d=DAILY[i];
+  document.getElementById('phe').textContent=d.he;
+  document.getElementById('parsm').textContent=d.ar;
+  document.getElementById('ptrans').textContent=d.trans||'';
+  document.getElementById('pwhy').textContent=d.tip||'';
+  document.getElementById('pwhyb').style.display=d.tip?'block':'none';
+  document.getElementById('ptoneb').style.display='none';
+  bldW();document.getElementById('wtime').textContent='0:00';
+  const pau=(typeof arguments!=='undefined'&&DAILY[arguments[0]]&&DAILY[arguments[0]].audio)||'';
+  document.querySelectorAll('.pbtn').forEach(b=>b.setAttribute('data-audio',pau));
+  document.querySelectorAll('[id^="tab-"]').forEach(x=>x.className='scr');
+  document.getElementById('tab-lib').className='scr on';
+  shV('vpop');
+}
+function shV(id){['vcats','vlist','vsrch','vpop'].forEach(v=>{document.getElementById(v).className='scr'+(v===id?' on':'');});}
+function opC(cat){curC=cat;document.getElementById('ltitle').textContent=cat;rItems(DB.filter(p=>p.cat===cat),document.getElementById('litems'),'');shV('vlist');}
+function goB(){curC=null;document.getElementById('sinp').value='';shV('vcats');}
+function setL(l){sL=l;document.getElementById('lbhe').className='lb'+(l==='he'?' active':'');document.getElementById('lbar').className='lb'+(l==='ar'?' active':'');doS();}
+function doS(){
+  const q=document.getElementById('sinp').value.trim();
+  if(!q){if(curC)shV('vlist');else shV('vcats');return;}
+  const r=DB.filter(p=>sL==='he'?p.he.includes(q)||p.trans.includes(q)||(p.tags&&p.tags.includes(q)):p.ar.includes(q)||p.he.includes(q));
+  document.getElementById('smeta').textContent=r.length+' תוצאות עבור "'+q+'"';
+  rItems(r,document.getElementById('sres'),q);
+  shV('vsrch');
+}
+function hl(t,q){if(!q)return t;return t.replace(new RegExp('('+q.replace(/[.*+?^${}()|[\]\\]/g,'\\$&')+')','gi'),'<span class="hlm">$1</span>');}
+function rItems(items,el,q){
+  if(!items.length){el.innerHTML='<div class="empty">לא נמצאו תוצאות</div>';return;}
+  el.innerHTML=items.map(p=>{const i=DB.indexOf(p);return`<div class="li" onclick="opP(${i})"><div class="lt">${p.isNew?'<span class="lnew">חדש</span>':''}${hl(p.he,q)}</div><div class="la">‹</div></div>`;}).join('');
+}
+function bldW(){const el=document.getElementById('wbars');el.innerHTML='';for(let i=0;i<32;i++){const b=document.createElement('div');b.className='wb';b.style.height=(4+Math.floor(Math.random()*14))+'px';el.appendChild(b);}}
+function opP(i){
+  const p=DB[i];
+  document.getElementById('phe').textContent=p.he;
+  document.getElementById('parsm').textContent=p.ar;
+  document.getElementById('ptrans').textContent=p.trans||'';
+  document.getElementById('pwhy').textContent=p.why||'';
+  document.getElementById('pwhyb').style.display=p.why?'block':'none';
+  document.getElementById('ptone').textContent=p.tone||'';
+  document.getElementById('ptoneb').style.display=p.tone?'block':'none';
+  bldW();document.getElementById('wtime').textContent='0:00';
+  const au=p.audio||'';
+  document.querySelectorAll('.pbtn').forEach(b=>b.setAttribute('data-audio',au));
+  shV('vpop');
+}
+function clsP(){if(document.getElementById('sinp').value.trim())shV('vsrch');else if(curC)shV('vlist');else shV('vcats');}
+function clrS(){document.getElementById('sinp').value='';doS();}
+let pt=null;
+let currentAudio=null;
+function play(btn,speed){
+  if(currentAudio){currentAudio.pause();currentAudio=null;}
+  if(pt)clearInterval(pt);
+  const orig=btn.innerHTML;
+  const bars=document.querySelectorAll('.wb');
+  const tEl=document.getElementById('wtime');
+  // Get audio URL from current popup item
+  const audioUrl=btn.getAttribute('data-audio')||'';
+  if(audioUrl){
+    const audio=new Audio(audioUrl);
+    if(speed==='slow'){audio.playbackRate=0.7;}
+    currentAudio=audio;
+    btn.innerHTML='⏸ מנגן...';
+    bars.forEach((b,i)=>{b.style.background=i<2?'#FF8C00':'#D2B48C';});
+    let el=0;
+    pt=setInterval(()=>{
+      el+=0.1;
+      if(!audio.paused&&audio.duration){
+        const pct=audio.currentTime/audio.duration;
+        bars.forEach((b,i)=>{b.style.background=i<Math.floor(pct*bars.length)?'#FF8C00':'#D2B48C';});
+        const s=Math.floor(audio.currentTime);
+        tEl.textContent='0:'+(s<10?'0':'')+s;
+      }
+    },100);
+    audio.onended=()=>{clearInterval(pt);btn.innerHTML=orig;bars.forEach(b=>{b.style.background='#D2B48C';});tEl.textContent='0:00';currentAudio=null;};
+    audio.onerror=()=>{clearInterval(pt);btn.innerHTML=orig;};
+    audio.play().catch(()=>{btn.innerHTML=orig;});
+  } else {
+    // Simulation fallback
+    const dur=speed==='slow'?8:4;
+    let el=0;btn.innerHTML='⏸ מנגן...';
+    bars.forEach((b,i)=>{b.style.background=i<2?'#FF8C00':'#D2B48C';});
+    pt=setInterval(()=>{el+=0.1;const pct=Math.min(el/dur,1);bars.forEach((b,i)=>{b.style.background=i<Math.floor(pct*bars.length)?'#FF8C00':'#D2B48C';});const s=Math.floor(el);tEl.textContent='0:'+(s<10?'0':'')+s;if(el>=dur){clearInterval(pt);btn.innerHTML=orig;bars.forEach(b=>{b.style.background='#D2B48C';});tEl.textContent='0:00';}},100);
+  }
+}
+function rHrt(){
+  document.getElementById('hlist').innerHTML=HEART.map((h,i)=>`
+    <div class="card" onclick="opHP(${i})">
+      <div class="ctags">${h.isNew?'<span class="tag tnew">חדש</span>':''}<span class="tag theart">❤️ פותח לב</span></div>
+      <div class="che">${h.he}</div>
+      <div class="car">${h.ar}</div>
+      <div class="csub">${h.when}</div>
+    </div>`).join('');
+}
+function opHP(i){
+  const h=HEART[i];
+  document.getElementById('phe').textContent=h.he;
+  document.getElementById('parsm').textContent=h.ar;
+  document.getElementById('ptrans').textContent=h.trans||'';
+  document.getElementById('pwhy').textContent=(h.when?'מתי: '+h.when+'\n':'')+( h.why||'');
+  document.getElementById('pwhyb').style.display=(h.why||h.when)?'block':'none';
+  document.getElementById('ptoneb').style.display='none';
+  bldW();document.getElementById('wtime').textContent='0:00';
+  const pau=(typeof arguments!=='undefined'&&DAILY[arguments[0]]&&DAILY[arguments[0]].audio)||'';
+  document.querySelectorAll('.pbtn').forEach(b=>b.setAttribute('data-audio',pau));
+  document.querySelectorAll('[id^="tab-"]').forEach(x=>x.className='scr');
+  document.getElementById('tab-lib').className='scr on';
+  shV('vpop');
+}
+function rSem(){
+  document.getElementById('semlist').innerHTML=SEM.map(s=>`
+    <div class="card">
+      <div class="ctags">${s.isNew?'<span class="tag tnew">חדש</span>':''}<span class="tag tprem">פרמיום</span><span class="tag tr${s.risk[0]}">${RL[s.risk]}</span></div>
+      <div class="car">${s.ar}</div>
+      <div class="che">${s.trans} — <span style="color:#7a9ab5;">${s.dict}</span></div>
+      <div class="cwarn">⚠️ בשטח: ${s.field}</div>
+    </div>`).join('');
+}
+function rCus(){
+  document.getElementById('cuslist').innerHTML=CUS.map(c=>`
+    <div class="card">
+      <div class="ctags"><span class="tag tprem">פרמיום</span></div>
+      <div class="che">${c.title}</div>
+      <div class="csub" style="margin-top:3px;color:#FF8C00;font-size:11px;">${c.cat}</div>
+      <div class="csub" style="margin-top:6px;color:#a0b8c8;">${c.body}</div>
+    </div>`).join('');
+}
+function rArts(){
+  document.getElementById('artlist').innerHTML=ARTS.map((a,i)=>`
+    <div class="card" onclick="opArt(${i})">
+      <div class="ctags"><span class="tag tprem">פרמיום</span></div>
+      <div class="che">${a.title}</div>
+      <div class="csub" style="margin-top:5px;">${a.body.substring(0,90)}...</div>
+    </div>`).join('');
+}
+function opArt(i){
+  const a=ARTS[i];
+  document.getElementById('atitle').textContent=a.title;
+  document.getElementById('abody').innerHTML=a.body.replace(/\n/g,'<br><br>');
+  document.getElementById('artlv').style.display='none';
+  document.getElementById('artfv').style.display='block';
+}
+function clsA(){document.getElementById('artlv').style.display='block';document.getElementById('artfv').style.display='none';}
+function rNF(){
+  const all=[
+    ...SEM.filter(s=>s.isNew).map(s=>({tp:'סמנטי',tx:s.ar+' — '+s.dict,cat:'מילון סמנטי',dt:'היום'})),
+    ...HEART.filter(h=>h.isNew).map(h=>({tp:'פותח לב',tx:h.he,cat:'דברים שפותחים לב',dt:'היום'})),
+    ...DAILY.filter(d=>d.isNew).map(d=>({tp:'יומיומי',tx:d.he,cat:d.cat,dt:'השבוע'})),
+    ...DB.filter(p=>p.isNew).map(p=>({tp:'משפט',tx:p.he,cat:p.cat,dt:'השבוע'})),
+  ];
+  document.getElementById('nflist').innerHTML=all.length?all.map(n=>`
+    <div class="nfi"><div class="nfd"></div><div><div class="nfdate">${n.dt} · ${n.tp}</div><div class="nftxt">${n.tx}</div><div class="nfcat">${n.cat}</div></div></div>`).join(''):'<div class="empty">אין עדכונים חדשים</div>';
+}
+function aT(t,el){
+  document.querySelectorAll('.atab').forEach(b=>b.classList.remove('active'));
+  el.classList.add('active');
+  ['ap','ad','ah','as','ac','aa','al'].forEach(id=>document.getElementById('at-'+id).style.display='none');
+  document.getElementById('at-'+t).style.display='block';
+  if(t==='al')rAdm();
+}
+function addP(){
+  const he=document.getElementById('aphe').value.trim(),ar=document.getElementById('apar').value.trim();
+  if(!he||!ar){alert('חובה: עברית וערבית');return;}
+  DB.push({cat:document.getElementById('apc').value,he,trans:document.getElementById('aptr').value.trim(),ar,tags:document.getElementById('aptg').value.trim(),why:document.getElementById('apwy').value.trim(),tone:document.getElementById('aptn').value.trim(),isNew:true});
+  ['aphe','apar','aptr','aptg','apwy','aptn'].forEach(id=>document.getElementById(id).value='');
+  
+let editIdx = -1;
+function opEdit(i) {
+  editIdx = i;
+  const p = DB[i];
+  document.getElementById('ecat').value = p.cat;
+  document.getElementById('ehe').value = p.he;
+  document.getElementById('etr').value = p.trans || '';
+  document.getElementById('ear').value = p.ar;
+  document.getElementById('etg').value = p.tags || '';
+  document.getElementById('ewy').value = p.why || '';
+  document.getElementById('etn').value = p.tone || '';
+  const m = document.getElementById('edit-modal');
+  m.style.display = 'flex';
+}
+function clsEdit() {
+  document.getElementById('edit-modal').style.display = 'none';
+  editIdx = -1;
+}
+function saveEdit() {
+  if (editIdx < 0) return;
+  const he = document.getElementById('ehe').value.trim();
+  const ar = document.getElementById('ear').value.trim();
+  if (!he || !ar) { alert('חובה: עברית וערבית'); return; }
+  DB[editIdx] = {
+    cat: document.getElementById('ecat').value,
+    he, trans: document.getElementById('etr').value.trim(),
+    ar, tags: document.getElementById('etg').value.trim(),
+    why: document.getElementById('ewy').value.trim(),
+    tone: document.getElementById('etn').value.trim(),
+    isNew: DB[editIdx].isNew
+  };
+  clsEdit();
+  bldCats();
+  rAdm();
+  alert('נשמר בהצלחה!');
+}
+function delP(i) {
+  if (!confirm('למחוק את המשפט?')) return;
+  DB.splice(i, 1);
+  bldCats();
+  rAdm();
+}
+function rAdm() {
+  const el = document.getElementById('adm-list');
+  if (!el) return;
+  el.innerHTML = DB.map((p, i) => `
+    <div style="background:#1A2B3C;border:1px solid #2e4558;border-radius:8px;padding:10px 12px;margin-bottom:7px;">
+      <div style="color:#fff;font-size:13px;font-weight:500;">${p.he}</div>
+      <div style="color:#7a9ab5;font-size:12px;margin-top:2px;">${p.ar}</div>
+      <div style="color:#FF8C00;font-size:11px;margin-top:2px;">${p.cat}</div>
+      <div style="display:flex;gap:7px;margin-top:8px;">
+        <button onclick="opEdit(${i})" style="flex:1;padding:6px;background:#2e4558;border:none;border-radius:6px;color:#D2B48C;font-size:12px;cursor:pointer;font-family:inherit;">✏️ ערוך</button>
+        <button onclick="delP(${i})" style="flex:1;padding:6px;background:#3a1a1a;border:1px solid #5a2020;border-radius:6px;color:#ff8080;font-size:12px;cursor:pointer;font-family:inherit;">🗑 מחק</button>
+      </div>
+    </div>`).join('');
+}
+
+bldCats();alert('נוסף!');
+}
+async function addD(){
+  const he=document.getElementById('adhe').value.trim(),ar=document.getElementById('adar').value.trim();
+  if(!he||!ar){alert('חובה');return;}
+  const phrase={cat:document.getElementById('adc').value,he,trans:document.getElementById('adtr').value.trim(),ar,tip:document.getElementById('adtp').value.trim(),audio:'',isNew:true};
+  DAILY.push(phrase);
+  ['adhe','adar','adtr','adtp'].forEach(id=>document.getElementById(id).value='');
+  try { await saveToSupabase(phrase,'daily'); } catch(e) {}
+  alert('נוסף!');
+}
+function addH(){
+  const he=document.getElementById('ahhe').value.trim(),ar=document.getElementById('ahar').value.trim();
+  if(!he||!ar){alert('חובה');return;}
+  HEART.push({he,trans:document.getElementById('ahtr').value.trim(),ar,when:document.getElementById('ahwn').value.trim(),why:document.getElementById('ahwy').value.trim(),isNew:true});
+  ['ahhe','ahar','ahtr','ahwn','ahwy'].forEach(id=>document.getElementById(id).value='');
+  alert('נוסף!');
+}
+function addS(){
+  const ar=document.getElementById('asar').value.trim(),field=document.getElementById('asfd').value.trim();
+  if(!ar||!field){alert('חובה');return;}
+  SEM.push({ar,trans:document.getElementById('astr').value.trim(),dict:document.getElementById('asdc').value.trim(),field,risk:document.getElementById('asrk').value,isNew:true});
+  ['asar','astr','asdc','asfd'].forEach(id=>document.getElementById(id).value='');
+  rSem();alert('נוסף!');
+}
+function addC(){
+  const t=document.getElementById('actit').value.trim(),b=document.getElementById('acbdy').value.trim();
+  if(!t||!b){alert('חובה');return;}
+  CUS.push({title:t,body:b,cat:document.getElementById('accat').value,isNew:true});
+  ['actit','acbdy'].forEach(id=>document.getElementById(id).value='');
+  alert('נוסף!');
+}
+function addA(){
+  const t=document.getElementById('aat').value.trim(),b=document.getElementById('aab').value.trim();
+  if(!t||!b){alert('חובה');return;}
+  ARTS.push({title:t,body:b,isNew:true});
+  ['aat','aab'].forEach(id=>document.getElementById(id).value='');
+  alert('פורסם!');
+}
+bldCats();
+loadFromSupabase();
+</script>
+
+<div id="edit-modal" style="display:none;position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.7);z-index:999;display:none;align-items:center;justify-content:center;padding:16px;">
+  <div style="background:#223344;border-radius:14px;padding:16px;width:100%;max-width:440px;max-height:90vh;overflow-y:auto;">
+    <div style="color:#D2B48C;font-size:15px;font-weight:600;margin-bottom:14px;">עריכת משפט</div>
+    <div class="afl"><label>קטגוריה</label><select id="ecat"><option>עצירת תנועה</option><option>ניהול מרחב</option><option>בידוק וזיהוי</option><option>שליטה בבית</option><option>הרגעה ושכנוע</option><option>מגע ראשוני</option><option>עזרה ראשונה</option><option>לוח שנה ותרבות</option><option>מילון כללי</option></select></div>
+    <div class="afl"><label>עברית *</label><input id="ehe"/></div>
+    <div class="afl"><label>תעתיק</label><input id="etr"/></div>
+    <div class="afl"><label>ערבית *</label><textarea id="ear" style="font-family:Georgia,serif;font-size:18px;"></textarea></div>
+    <div class="afl"><label>תגיות</label><input id="etg"/></div>
+    <div class="afl"><label>למה זה חשוב</label><textarea id="ewy"></textarea></div>
+    <div class="afl"><label>טיפ ללוחם</label><textarea id="etn"></textarea></div>
+    <div style="display:flex;gap:8px;margin-top:12px;">
+      <button style="flex:1;padding:11px;background:#2e4558;border:none;border-radius:8px;color:#D2B48C;font-size:14px;cursor:pointer;font-family:inherit;" onclick="clsEdit()">ביטול</button>
+      <button style="flex:2;padding:11px;background:#FF8C00;border:none;border-radius:8px;color:#fff;font-size:14px;font-weight:600;cursor:pointer;font-family:inherit;" onclick="saveEdit()">שמור שינויים</button>
+    </div>
+  </div>
+</div>
+</body>
+</html>
+<!-- edit modal placeholder -->
