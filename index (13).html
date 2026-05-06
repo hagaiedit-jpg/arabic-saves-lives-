@@ -1,0 +1,922 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="theme-color" content="#0f1e2c">
+<title>ערבית מצילה חיים</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0;}
+body{background:#1A2B3C;direction:rtl;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;min-height:100vh;}
+.W{max-width:480px;margin:0 auto;min-height:100vh;}
+.topbar{background:#0f1e2c;padding:12px 16px 0;border-bottom:1px solid #1e3348;position:sticky;top:0;z-index:100;}
+.tb-top{display:flex;align-items:center;justify-content:space-between;padding-bottom:10px;}
+.tb-brand{color:#D2B48C;font-size:15px;font-weight:600;}
+.tb-badges{display:flex;gap:5px;}
+.bnew{background:#FF8C00;color:#fff;font-size:10px;padding:2px 8px;border-radius:10px;font-weight:600;display:none;}
+.bstatus{background:#1D9E75;color:#fff;font-size:10px;padding:2px 8px;border-radius:10px;}
+.tb-tabs{display:flex;overflow-x:auto;scrollbar-width:none;}
+.tb-tabs::-webkit-scrollbar{display:none;}
+.tb-tab{white-space:nowrap;padding:8px 11px;color:rgba(210,180,140,0.5);font-size:12px;cursor:pointer;border-bottom:2px solid transparent;flex-shrink:0;transition:all 0.15s;}
+.tb-tab.active{color:#D2B48C;border-bottom-color:#FF8C00;}
+.scr{display:none;}.scr.on{display:block;}
+.sbar{background:#FF8C00;padding:10px 12px;}
+.si{background:#fff;border-radius:8px;display:flex;align-items:center;padding:0 12px;gap:8px;}
+.si input{flex:1;border:none;outline:none;font-size:16px;padding:11px 0;direction:rtl;font-family:inherit;color:#222;background:transparent;}
+.si input::placeholder{color:#aaa;}
+.sx{background:none;border:none;color:#aaa;font-size:20px;cursor:pointer;}
+.lrow{background:#e07800;padding:4px 12px;display:flex;gap:6px;}
+.lb{flex:1;padding:5px;border-radius:6px;border:1px solid rgba(255,255,255,0.3);background:transparent;color:rgba(255,255,255,0.65);font-size:12px;cursor:pointer;font-family:inherit;text-align:center;}
+.lb.active{background:rgba(255,255,255,0.2);color:#fff;border-color:rgba(255,255,255,0.8);}
+.cgrid{display:grid;grid-template-columns:1fr 1fr;gap:1px;background:#0f1e2c;}
+.ct{background:#223344;padding:20px 12px 14px;display:flex;flex-direction:column;align-items:center;gap:7px;cursor:pointer;min-height:100px;justify-content:center;transition:background 0.12s;position:relative;}
+.ct:active{background:#2a3f54;}
+.ct.daily{background:#1a3025;}.ct.daily:active{background:#22402f;}
+.ct.heart{background:#2a1828;}.ct.heart:active{background:#361e32;}
+.ct.navy{background:#223344;}.ct.navy:active{background:#2a3f54;}
+.ct.announce{background:#223344;}.ct.announce:active{background:#2a3f54;}
+.ci{width:32px;height:32px;border-radius:50%;background:#1A2B3C;display:flex;align-items:center;justify-content:center;font-size:16px;}
+.cn{color:#fff;font-size:12px;font-weight:500;text-align:center;line-height:1.3;}
+.cc{color:#7a9ab5;font-size:11px;}
+.lhdr{background:#0f1e2c;padding:11px 16px;display:flex;align-items:center;gap:10px;border-bottom:1px solid #1e3348;}
+.bbtn{background:#1A2B3C;border:1px solid #2e4558;border-radius:8px;color:#D2B48C;font-size:13px;padding:5px 12px;cursor:pointer;font-family:inherit;}
+.ltitle{color:#D2B48C;font-size:14px;font-weight:500;}
+.litems{background:#1A2B3C;}
+.li{padding:13px 16px;border-bottom:1px solid #1e3348;cursor:pointer;display:flex;justify-content:space-between;align-items:center;}
+.li:last-child{border-bottom:none;}
+.li:active{background:#223344;}
+.lt{color:#fff;font-size:15px;line-height:1.4;}
+.la{color:#7a9ab5;font-size:14px;}
+.smeta{padding:7px 16px;color:#7a9ab5;font-size:12px;background:#1A2B3C;}
+.pbg{background:rgba(0,0,0,0.65);min-height:100vh;display:flex;align-items:flex-start;justify-content:center;padding:12px;padding-top:16px;}
+.pop{background:#fff;border-radius:18px;width:100%;max-width:440px;padding:18px 16px 14px;}
+.phe{color:#1A2B3C;font-size:18px;font-weight:600;text-align:center;margin-bottom:5px;line-height:1.4;}
+.parsm{color:#D2B48C;font-size:17px;direction:rtl;font-family:Georgia,serif;text-align:center;margin-bottom:12px;font-weight:500;}
+.pbox{background:#1A2B3C;border-radius:12px;padding:16px 14px;margin-bottom:12px;text-align:center;}
+.ptrans{color:#fff;font-size:24px;font-weight:400;line-height:1.6;letter-spacing:0.03em;}
+.ww{display:flex;align-items:center;gap:8px;margin-bottom:10px;background:#f5f5f5;border-radius:10px;padding:8px 12px;}
+.wave{display:flex;align-items:center;gap:2px;flex:1;}
+.wb{width:3px;border-radius:2px;background:#D2B48C;}
+.wt{font-size:12px;color:#888;min-width:30px;}
+.pbr{display:flex;gap:10px;margin-bottom:10px;}
+.pbtn{flex:1;padding:13px 8px;border-radius:12px;border:none;cursor:pointer;font-size:14px;font-weight:600;font-family:inherit;display:flex;align-items:center;justify-content:center;gap:6px;}
+.pbtn.slow{background:#D2B48C;color:#412402;}
+.pbtn.fast{background:#FF8C00;color:#fff;}
+.pbtn:active{opacity:0.85;}
+.ibox{border-radius:10px;padding:10px 14px;margin-bottom:8px;}
+.ibox.b{background:#eef6ff;border:1px solid #c0d8f0;}
+.ibox.o{background:#fff8ee;border:1px solid #ffe0a0;}
+.ilbl{font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:0.06em;margin-bottom:5px;}
+.ilbl.b{color:#1A2B3C;}.ilbl.o{color:#FF8C00;}
+.itxt{font-size:13px;line-height:1.7;}
+.itxt.b{color:#1a3a5c;}.itxt.o{color:#7a5000;}
+.pclose{display:block;text-align:center;color:#aaa;font-size:14px;cursor:pointer;padding:4px 0 0;}
+.sec{padding:14px;}
+.stitle{color:#D2B48C;font-size:11px;text-transform:uppercase;letter-spacing:0.07em;margin-bottom:12px;}
+.card{background:#223344;border:1px solid #2e4558;border-radius:12px;padding:14px 16px;margin-bottom:10px;cursor:pointer;}
+.card:active{background:#2a3f54;}
+.ctags{display:flex;gap:5px;flex-wrap:wrap;margin-bottom:7px;align-items:center;}
+.tag{font-size:9px;padding:2px 8px;border-radius:8px;font-weight:600;white-space:nowrap;}
+.theart{background:#c0392b;color:#fff;}
+.tprem{background:#D2B48C;color:#412402;}
+.trh{background:#e74c3c;color:#fff;}.trm{background:#FF8C00;color:#fff;}.trl{background:#1D9E75;color:#fff;}
+.che{color:#fff;font-size:15px;font-weight:500;margin-bottom:4px;}
+.car{color:#D2B48C;font-size:19px;direction:rtl;font-family:Georgia,serif;margin-bottom:4px;}
+.csub{color:#7a9ab5;font-size:12px;line-height:1.6;}
+.cwarn{color:#ffb0b0;font-size:12px;padding:7px 10px;background:#2a1010;border:1px solid #5a2020;border-radius:7px;margin-top:7px;line-height:1.6;}
+.nf{padding:14px 16px;}
+.nfi{display:flex;gap:12px;padding:11px 0;border-bottom:1px solid #1e3348;align-items:flex-start;}
+.nfi:last-child{border-bottom:none;}
+.nfd{width:8px;height:8px;border-radius:50%;background:#FF8C00;flex-shrink:0;margin-top:4px;}
+.nfdate{font-size:11px;color:#7a9ab5;margin-bottom:2px;}
+.nftxt{color:#fff;font-size:14px;line-height:1.5;}
+.nfcat{font-size:11px;color:#FF8C00;margin-top:2px;}
+.adm{padding:14px;}
+.atrow{display:flex;gap:5px;margin-bottom:12px;flex-wrap:wrap;}
+.atab{flex:1;min-width:55px;padding:7px 4px;border-radius:7px;border:1px solid #2e4558;background:#223344;color:#7a9ab5;font-size:11px;cursor:pointer;font-family:inherit;text-align:center;}
+.atab.active{background:#FF8C00;color:#fff;border-color:#FF8C00;}
+.acard{background:#223344;border:1px solid #2e4558;border-radius:12px;padding:14px;margin-bottom:10px;}
+.afl{display:flex;flex-direction:column;gap:4px;margin-bottom:10px;}
+.afl label{color:#D2B48C;font-size:11px;font-weight:500;}
+.afl input,.afl select,.afl textarea{background:#1A2B3C;border:1px solid #2e4558;border-radius:8px;padding:9px 11px;color:#fff;font-size:14px;font-family:inherit;direction:rtl;outline:none;width:100%;}
+.afl input:focus,.afl select:focus,.afl textarea:focus{border-color:#FF8C00;}
+.afl textarea{min-height:58px;resize:vertical;}
+.afl select option{background:#1A2B3C;}
+.sbtn{width:100%;padding:12px;background:#FF8C00;border:none;border-radius:10px;color:#fff;font-size:15px;font-weight:600;cursor:pointer;font-family:inherit;}
+.hlm{background:#FF8C00;color:#fff;border-radius:2px;padding:0 2px;}
+.empty{text-align:center;padding:40px 20px;color:#7a9ab5;font-size:14px;}
+.loading{text-align:center;padding:40px 20px;color:#D2B48C;font-size:14px;}
+.rec-btn{padding:11px;border:none;border-radius:8px;color:#fff;font-size:13px;cursor:pointer;font-family:inherit;font-weight:600;}
+.rec-btn.idle{background:#c0392b;}
+.rec-btn.recording{background:#e74c3c;animation:pulse 1s infinite;}
+@keyframes pulse{0%,100%{opacity:1;}50%{opacity:0.7;}}
+/* Announce styles */
+.announce-text{background:#0d1f3c;border-radius:12px;padding:16px;margin-bottom:12px;color:#fff;font-size:18px;line-height:2;text-align:right;direction:rtl;}
+.announce-trans{background:#1A2B3C;border-radius:12px;padding:14px;margin-bottom:12px;color:#D2B48C;font-size:14px;line-height:1.8;display:none;}
+/* Dictionary styles */
+.dict-item{background:#223344;border:1px solid #2e4558;border-radius:10px;padding:12px 14px;margin-bottom:8px;cursor:pointer;}
+.dict-he{color:#fff;font-size:15px;font-weight:500;}
+.dict-trans{color:#FF8C00;font-size:14px;margin-top:3px;}
+.dict-ar{color:#D2B48C;font-size:16px;font-family:Georgia,serif;margin-top:3px;}
+</style>
+</head>
+<body>
+<div class="W">
+<div class="topbar">
+  <div class="tb-top">
+    <div class="tb-brand">ערבית מצילה חיים</div>
+    <div class="tb-badges">
+      <div class="bnew" id="new-badge">חדש</div>
+      <div class="bstatus" id="status-badge">טוען...</div>
+    </div>
+  </div>
+  <div class="tb-tabs">
+    <div class="tb-tab active" onclick="ST('lib',this)">מבצעי</div>
+    <div class="tb-tab" onclick="ST('day',this)">יומיומי</div>
+    <div class="tb-tab" onclick="ST('hrt',this)">פותחים לב</div>
+    <div class="tb-tab" onclick="ST('dict',this)">מילון</div>
+    <div class="tb-tab" onclick="ST('sem',this)">סמנטי</div>
+    <div class="tb-tab" onclick="ST('cus',this)">מנהגים</div>
+    <div class="tb-tab" onclick="ST('art',this)">מאמרים</div>
+    <div class="tb-tab" onclick="ST('nwf',this)">חדש ●</div>
+    <div class="tb-tab" onclick="ST('adm',this)">ניהול</div>
+  </div>
+</div>
+
+<!-- MILITARY TAB -->
+<div class="scr on" id="tab-lib">
+  <div class="sbar"><div class="si">
+    <span style="color:#aaa;font-size:15px;">🔍</span>
+    <input id="sinp" placeholder="חיפוש..." oninput="doS()"/>
+    <button class="sx" onclick="clrS()">×</button>
+  </div></div>
+  <div class="lrow">
+    <button class="lb active" id="lbhe" onclick="setL('he')">🔍 עברית</button>
+    <button class="lb" id="lbar" onclick="setL('ar')">🔍 ערבית</button>
+  </div>
+  <div id="vcats" class="scr on">
+    <div class="loading" id="cats-loading">טוען...</div>
+    <div class="cgrid" id="cgrid" style="display:none;"></div>
+  </div>
+  <div id="vlist" class="scr">
+    <div class="lhdr"><button class="bbtn" onclick="goB('lib')">→ חזור</button><div class="ltitle" id="ltitle"></div></div>
+    <div class="litems" id="litems"></div>
+  </div>
+  <div id="vsrch" class="scr">
+    <div class="smeta" id="smeta"></div>
+    <div class="litems" id="sres"></div>
+  </div>
+  <div id="vpop" class="scr">
+    <div class="pbg"><div class="pop">
+      <div class="phe" id="phe"></div>
+      <div class="parsm" id="parsm"></div>
+      <div class="pbox"><div class="ptrans" id="ptrans"></div></div>
+      <div class="ww"><div class="wave" id="wbars"></div><span class="wt" id="wtime">0:00</span></div>
+      <div class="pbr">
+        <button class="pbtn slow" onclick="play(this,'slow')">🐢 צב</button>
+        <button class="pbtn fast" onclick="play(this,'fast')">🐇 ארנב</button>
+      </div>
+      <div class="ibox b" id="pwhyb"><div class="ilbl b">למה זה חשוב</div><div class="itxt b" id="pwhy"></div></div>
+      <div class="ibox o" id="ptoneb"><div class="ilbl o">טיפ ללוחם</div><div class="itxt o" id="ptone"></div></div>
+      <span class="pclose" onclick="clsP()">× סגור</span>
+    </div></div>
+  </div>
+</div>
+
+<!-- DAILY TAB -->
+<div class="scr" id="tab-day">
+  <div id="daily-grid-view">
+    <div class="sec"><div class="stitle">ערבית יומיומית</div><div class="cgrid" id="dgrid"></div></div>
+  </div>
+  <div id="daily-list-view" style="display:none;">
+    <div class="lhdr"><button class="bbtn" onclick="goB('day')">→ חזור</button><div class="ltitle" id="dltitle"></div></div>
+    <div class="litems" id="dlitems"></div>
+  </div>
+</div>
+
+<!-- HEART TAB -->
+<div class="scr" id="tab-hrt">
+  <div class="sec"><div class="stitle">דברים שפותחים לב</div><div id="hlist"><div class="empty">טוען...</div></div></div>
+</div>
+
+<!-- DICTIONARY TAB -->
+<div class="scr" id="tab-dict">
+  <div class="sbar"><div class="si">
+    <span style="color:#aaa;font-size:15px;">🔍</span>
+    <input id="dict-search" placeholder="חפש מילה בעברית..." oninput="searchDict()"/>
+    <button class="sx" onclick="document.getElementById('dict-search').value='';searchDict()">×</button>
+  </div></div>
+  <div class="sec" style="padding-top:10px;">
+    <div id="dict-results"></div>
+  </div>
+</div>
+
+<!-- SEMANTIC TAB -->
+<div class="scr" id="tab-sem">
+  <div class="sec"><div class="stitle">מילון סמנטי — מילים עם משמעות כפולה</div><div id="semlist"></div></div>
+</div>
+
+<!-- CUSTOMS TAB -->
+<div class="scr" id="tab-cus">
+  <div class="sec"><div class="stitle">מנהגים ותרבות</div><div id="cuslist"></div></div>
+</div>
+
+<!-- ARTICLES TAB -->
+<div class="scr" id="tab-art">
+  <div id="artlv"><div class="sec"><div class="stitle">מאמרים מהשטח</div><div id="artlist"></div></div></div>
+  <div id="artfv" style="display:none;">
+    <div style="padding:16px;">
+      <button class="bbtn" onclick="clsArt()" style="margin-bottom:14px;">→ חזור</button>
+      <div style="color:#fff;font-size:16px;font-weight:600;margin-bottom:10px;line-height:1.4;" id="art-title"></div>
+      <div style="color:#a0b8c8;font-size:14px;line-height:1.9;" id="art-body"></div>
+    </div>
+  </div>
+</div>
+
+<!-- NEW TAB -->
+<div class="scr" id="tab-nwf"><div class="nf" id="nflist"></div></div>
+
+<!-- ADMIN TAB -->
+<div class="scr" id="tab-adm">
+  <div class="adm">
+    <div class="atrow">
+      <button class="atab active" onclick="aT('ap',this)">+ מבצעי</button>
+      <button class="atab" onclick="aT('ad',this)">+ יומיומי</button>
+      <button class="atab" onclick="aT('ah',this)">+ פותח לב</button>
+      <button class="atab" onclick="aT('ak',this)">+ כריזה</button>
+      <button class="atab" onclick="aT('an',this)">+ ימי</button>
+      <button class="atab" onclick="aT('adict',this)">+ מילון</button>
+      <button class="atab" onclick="aT('al',this)">📋 רשימה</button>
+      <button class="atab" onclick="aT('acat',this)">⚙️ קטגוריות</button>
+    </div>
+
+    <!-- Add Military -->
+    <div id="at-ap"><div class="acard">
+      <div class="afl"><label>קטגוריה</label><select id="apc">
+        <option>עצירת תנועה</option><option>ניהול מרחב</option><option>בידוק וזיהוי</option>
+        <option>שליטה בבית</option><option>הרגעה ושכנוע</option><option>מגע ראשוני</option>
+        <option>עזרה ראשונה</option><option>לוח שנה ותרבות</option><option>מילון כללי</option>
+      </select></div>
+      <div class="afl"><label>עברית *</label><input id="aphe"/></div>
+      <div class="afl"><label>תעתיק</label><input id="aptr"/></div>
+      <div class="afl"><label>ערבית *</label><textarea id="apar" style="font-family:Georgia,serif;font-size:18px;"></textarea></div>
+      <div class="afl"><label>תגיות</label><input id="aptg"/></div>
+      <div class="afl"><label>למה זה חשוב</label><textarea id="apwy"></textarea></div>
+      <div class="afl"><label>טיפ ללוחם</label><textarea id="aptn"></textarea></div>
+      <div class="afl"><label>הקלטה</label>
+        <div style="display:flex;gap:6px;flex-wrap:wrap;">
+          <button class="rec-btn idle" id="ap-rec" onclick="toggleRec('ap')">🎙 הקלט</button>
+          <input type="file" id="ap-file" accept="audio/*" style="display:none;" onchange="onFile('ap')"/>
+          <button type="button" onclick="document.getElementById('ap-file').click()" style="flex:1;padding:11px;background:#2e4558;border:none;border-radius:8px;color:#D2B48C;font-size:13px;cursor:pointer;font-family:inherit;">📁 קובץ</button>
+        </div>
+        <div id="ap-status" style="color:#1D9E75;font-size:12px;margin-top:5px;"></div>
+      </div>
+      <button class="sbtn" onclick="addP()">שמור</button>
+    </div></div>
+
+    <!-- Add Daily -->
+    <div id="at-ad" style="display:none;"><div class="acard">
+      <div class="afl"><label>קטגוריה</label><select id="adc">
+        <option>שוק ומסחר</option><option>מסעדה ואוכל</option><option>שיחת היכרות</option>
+        <option>עזרה וכיוונים</option><option>ילדים ובית ספר</option><option>שכנות וקהילה</option>
+      </select></div>
+      <div class="afl"><label>עברית *</label><input id="adhe"/></div>
+      <div class="afl"><label>תעתיק</label><input id="adtr"/></div>
+      <div class="afl"><label>ערבית *</label><textarea id="adar" style="font-family:Georgia,serif;font-size:18px;"></textarea></div>
+      <div class="afl"><label>הקשר</label><textarea id="adtp"></textarea></div>
+      <div class="afl"><label>הקלטה</label>
+        <div style="display:flex;gap:6px;flex-wrap:wrap;">
+          <button class="rec-btn idle" id="ad-rec" onclick="toggleRec('ad')">🎙 הקלט</button>
+          <input type="file" id="ad-file" accept="audio/*" style="display:none;" onchange="onFile('ad')"/>
+          <button type="button" onclick="document.getElementById('ad-file').click()" style="flex:1;padding:11px;background:#2e4558;border:none;border-radius:8px;color:#D2B48C;font-size:13px;cursor:pointer;font-family:inherit;">📁 קובץ</button>
+        </div>
+        <div id="ad-status" style="color:#1D9E75;font-size:12px;margin-top:5px;"></div>
+      </div>
+      <button class="sbtn" onclick="addD()">שמור</button>
+    </div></div>
+
+    <!-- Add Heart -->
+    <div id="at-ah" style="display:none;"><div class="acard">
+      <div class="afl"><label>עברית *</label><input id="ahhe"/></div>
+      <div class="afl"><label>תעתיק</label><input id="ahtr"/></div>
+      <div class="afl"><label>ערבית *</label><textarea id="ahar" style="font-family:Georgia,serif;font-size:18px;"></textarea></div>
+      <div class="afl"><label>מתי משתמשים</label><input id="ahwn"/></div>
+      <div class="afl"><label>למה פותח לב</label><textarea id="ahwy"></textarea></div>
+      <div class="afl"><label>הקלטה</label>
+        <div style="display:flex;gap:6px;flex-wrap:wrap;">
+          <button class="rec-btn idle" id="ah-rec" onclick="toggleRec('ah')">🎙 הקלט</button>
+          <input type="file" id="ah-file" accept="audio/*" style="display:none;" onchange="onFile('ah')"/>
+          <button type="button" onclick="document.getElementById('ah-file').click()" style="flex:1;padding:11px;background:#2e4558;border:none;border-radius:8px;color:#D2B48C;font-size:13px;cursor:pointer;font-family:inherit;">📁 קובץ</button>
+        </div>
+        <div id="ah-status" style="color:#1D9E75;font-size:12px;margin-top:5px;"></div>
+      </div>
+      <button class="sbtn" onclick="addH()">שמור</button>
+    </div></div>
+
+    <!-- Add Announcement -->
+    <div id="at-ak" style="display:none;"><div class="acard">
+      <div class="afl"><label>קטגוריה כריזה</label><select id="akc">
+        <option>כריזה במחסום</option><option>כריזה לבית</option><option>כריזה כללית</option>
+      </select></div>
+      <div class="afl"><label>שם הכריזה *</label><input id="akhe" placeholder="לדוג׳: עצור ידיך על הגג"/></div>
+      <div class="afl"><label>תעתיק (מה שהחייל קורא) *</label><textarea id="aktr" style="min-height:100px;" placeholder="וַקֵּף! לַא תִּתְחַרַּק..."></textarea></div>
+      <div class="afl"><label>תרגום לעברית</label><textarea id="aktrans" placeholder="עצור! אל תזוז..."></textarea></div>
+      <div class="afl"><label>הקלטה</label>
+        <div style="display:flex;gap:6px;flex-wrap:wrap;">
+          <button class="rec-btn idle" id="ak-rec" onclick="toggleRec('ak')">🎙 הקלט</button>
+          <input type="file" id="ak-file" accept="audio/*" style="display:none;" onchange="onFile('ak')"/>
+          <button type="button" onclick="document.getElementById('ak-file').click()" style="flex:1;padding:11px;background:#2e4558;border:none;border-radius:8px;color:#D2B48C;font-size:13px;cursor:pointer;font-family:inherit;">📁 קובץ</button>
+        </div>
+        <div id="ak-status" style="color:#1D9E75;font-size:12px;margin-top:5px;"></div>
+      </div>
+      <button class="sbtn" onclick="addAnnounce()">שמור</button>
+    </div></div>
+
+    <!-- Add Navy -->
+    <div id="at-an" style="display:none;"><div class="acard">
+      <div class="afl"><label>קטגוריה</label><select id="anc">
+        <option>עצירת כלי שיט</option><option>תשאול ימי</option><option>פקודות על הסיפון</option><option>זיהוי ימי</option>
+      </select></div>
+      <div class="afl"><label>עברית *</label><input id="anhe"/></div>
+      <div class="afl"><label>תעתיק</label><input id="antr"/></div>
+      <div class="afl"><label>ערבית *</label><textarea id="anar" style="font-family:Georgia,serif;font-size:18px;"></textarea></div>
+      <div class="afl"><label>למה זה חשוב</label><textarea id="anwy"></textarea></div>
+      <div class="afl"><label>הקלטה</label>
+        <div style="display:flex;gap:6px;flex-wrap:wrap;">
+          <button class="rec-btn idle" id="an-rec" onclick="toggleRec('an')">🎙 הקלט</button>
+          <input type="file" id="an-file" accept="audio/*" style="display:none;" onchange="onFile('an')"/>
+          <button type="button" onclick="document.getElementById('an-file').click()" style="flex:1;padding:11px;background:#2e4558;border:none;border-radius:8px;color:#D2B48C;font-size:13px;cursor:pointer;font-family:inherit;">📁 קובץ</button>
+        </div>
+        <div id="an-status" style="color:#1D9E75;font-size:12px;margin-top:5px;"></div>
+      </div>
+      <button class="sbtn" onclick="addNavy()">שמור</button>
+    </div></div>
+
+    <!-- Add Dictionary word -->
+    <div id="at-adict" style="display:none;"><div class="acard">
+      <div class="afl"><label>עברית *</label><input id="dche" placeholder="לדוג׳: כלב"/></div>
+      <div class="afl"><label>תעתיק ערבי *</label><input id="dctr" placeholder="כַּלְבּ"/></div>
+      <div class="afl"><label>ערבית</label><textarea id="dcar" style="font-family:Georgia,serif;font-size:18px;" placeholder="كلب"></textarea></div>
+      <div class="afl"><label>הקלטה</label>
+        <div style="display:flex;gap:6px;flex-wrap:wrap;">
+          <button class="rec-btn idle" id="dc-rec" onclick="toggleRec('dc')">🎙 הקלט</button>
+          <input type="file" id="dc-file" accept="audio/*" style="display:none;" onchange="onFile('dc')"/>
+          <button type="button" onclick="document.getElementById('dc-file').click()" style="flex:1;padding:11px;background:#2e4558;border:none;border-radius:8px;color:#D2B48C;font-size:13px;cursor:pointer;font-family:inherit;">📁 קובץ</button>
+        </div>
+        <div id="dc-status" style="color:#1D9E75;font-size:12px;margin-top:5px;"></div>
+      </div>
+      <button class="sbtn" onclick="addDictWord()">שמור</button>
+    </div></div>
+
+    <!-- List -->
+    <div id="at-al" style="display:none;"><div id="admin-list"></div></div>
+
+    <!-- Categories -->
+    <div id="at-acat" style="display:none;"><div class="acard">
+      <div style="color:#D2B48C;font-size:13px;font-weight:500;margin-bottom:12px;">קטגוריות קיימות</div>
+      <div id="cat-list"></div>
+      <div style="border-top:1px solid #2e4558;padding-top:14px;margin-top:8px;">
+        <div style="color:#D2B48C;font-size:13px;font-weight:500;margin-bottom:10px;">+ קטגוריה חדשה</div>
+        <div class="afl"><label>שם *</label><input id="new-cat-name" placeholder="לדוג׳: עזרה ראשונה"/></div>
+        <div class="afl"><label>סמל</label><input id="new-cat-icon" placeholder="🩹" style="font-size:20px;"/></div>
+        <div class="afl"><label>סוג</label><select id="new-cat-sec">
+          <option value="military">מבצעי</option><option value="daily">יומיומי</option>
+          <option value="navy">תשאול ימי</option><option value="announce">כריזה</option>
+        </select></div>
+        <button class="sbtn" onclick="addCat()">הוסף קטגוריה</button>
+      </div>
+    </div></div>
+  </div>
+</div>
+</div>
+
+<!-- Edit Modal -->
+<div id="edit-modal" style="display:none;position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.85);z-index:9999;align-items:center;justify-content:center;padding:16px;direction:rtl;">
+  <div style="background:#1A2B3C;border:1px solid #2e4558;border-radius:16px;padding:18px;width:100%;max-width:440px;max-height:90vh;overflow-y:auto;">
+    <div style="color:#D2B48C;font-size:16px;font-weight:600;margin-bottom:16px;">✏️ עריכה</div>
+    <input type="hidden" id="edit-id"/>
+    <div class="afl"><label>עברית *</label><input id="edit-he"/></div>
+    <div class="afl"><label>תעתיק</label><input id="edit-trans"/></div>
+    <div class="afl"><label>ערבית / טקסט *</label><textarea id="edit-ar" style="font-family:Georgia,serif;font-size:18px;"></textarea></div>
+    <div class="afl"><label>הסבר / תרגום</label><textarea id="edit-why"></textarea></div>
+    <div class="afl"><label>טיפ</label><textarea id="edit-tone"></textarea></div>
+    <div class="afl"><label>הקלטה</label>
+      <div style="color:#7a9ab5;font-size:12px;margin-bottom:6px;" id="edit-audio-cur"></div>
+      <div style="display:flex;gap:6px;flex-wrap:wrap;">
+        <button class="rec-btn idle" id="edit-rec" onclick="toggleRec('edit')">🎙 הקלט חדש</button>
+        <input type="file" id="edit-file" accept="audio/*" style="display:none;" onchange="onFile('edit')"/>
+        <button type="button" onclick="document.getElementById('edit-file').click()" style="flex:1;padding:11px;background:#2e4558;border:none;border-radius:8px;color:#D2B48C;font-size:13px;cursor:pointer;font-family:inherit;">📁 קובץ</button>
+      </div>
+      <div id="edit-status" style="color:#1D9E75;font-size:12px;margin-top:5px;"></div>
+    </div>
+    <div style="display:flex;gap:8px;margin-top:14px;">
+      <button onclick="closeEdit()" style="flex:1;padding:12px;background:#2e4558;border:none;border-radius:8px;color:#D2B48C;font-size:14px;cursor:pointer;font-family:inherit;">ביטול</button>
+      <button id="edit-save-btn" onclick="saveEdit()" style="flex:2;padding:12px;background:#FF8C00;border:none;border-radius:8px;color:#fff;font-size:14px;font-weight:600;cursor:pointer;font-family:inherit;">שמור</button>
+    </div>
+  </div>
+</div>
+
+<!-- Contact button -->
+<div style="position:fixed;bottom:20px;left:16px;z-index:200;">
+  <a href="https://wa.me/972529247768" target="_blank" style="display:flex;align-items:center;gap:8px;background:#25D366;border-radius:30px;padding:12px 18px;text-decoration:none;box-shadow:0 4px 15px rgba(0,0,0,0.3);">
+    <span style="font-size:18px;">💬</span>
+    <span style="color:#fff;font-size:14px;font-weight:600;font-family:-apple-system,sans-serif;">צור קשר</span>
+  </a>
+</div>
+
+<script>
+const SUPA_URL='https://ukynfcwxsrzpuqecfjuz.supabase.co';
+const SUPA_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InVreW5mY3d4c3J6cHVxZWNmanV6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzc5NTc2ODgsImV4cCI6MjA5MzUzMzY4OH0.lobr6E2Sfo5LMzhK2XklRJsY8FbVxl_v2Ar3XTGW4ew';
+const CLOUD='dvjuflgqs', PRESET='arabic_audio';
+
+let DB=[],DAILY=[],HEART=[],NAVY=[],ANNOUNCE=[],DICT=[],SEM=[],CUS=[],ARTS=[];
+let sL='he',curC=null,curTab='lib',curDailyCat=null;
+
+async function sbFetch(path,method='GET',body=null){
+  const opts={method,headers:{'apikey':SUPA_KEY,'Authorization':'Bearer '+SUPA_KEY,'Content-Type':'application/json','Prefer':method==='POST'?'return=representation':''}};
+  if(body)opts.body=JSON.stringify(body);
+  const res=await fetch(SUPA_URL+path,opts);
+  if(!res.ok)throw new Error(await res.text());
+  const t=await res.text();return t?JSON.parse(t):null;
+}
+
+async function loadData(){
+  try{
+    const data=await sbFetch('/rest/v1/phrases?select=*&order=created_at.asc');
+    if(!Array.isArray(data))return;
+    DB=data.filter(p=>p.section==='military').map(mp);
+    DAILY=data.filter(p=>p.section==='daily').map(mp);
+    HEART=data.filter(p=>p.section==='heart').map(mp);
+    NAVY=data.filter(p=>p.section==='navy').map(mp);
+    ANNOUNCE=data.filter(p=>p.section==='announce').map(mp);
+    DICT=data.filter(p=>p.section==='dictionary').map(mp);
+    SEM=data.filter(p=>p.section==='semantic').map(p=>({...mp(p),risk:p.tone||'low',dict:p.ar,field:p.why}));
+    CUS=data.filter(p=>p.section==='customs').map(mp);
+    ARTS=data.filter(p=>p.section==='article').map(mp);
+    document.getElementById('status-badge').textContent='מחובר';
+    document.getElementById('status-badge').style.background='#1D9E75';
+    bldCats();rDG();rHrt();rSem();rCus();rArts();renderDict();
+  }catch(e){
+    document.getElementById('status-badge').textContent='אופליין';
+    document.getElementById('status-badge').style.background='#7a9ab5';
+    bldCats();
+  }
+}
+
+function mp(p){return{id:p.id,cat:p.cat||'',he:p.he||'',trans:p.trans||'',ar:p.ar||'',tags:p.tags||'',why:p.why||'',tone:p.tone||'',audio:p.audio_url||'',when:p.tags||'',tip:p.why||'',isNew:p.is_new||false,section:p.section};}
+
+async function spSave(phrase,section){
+  const row={cat:phrase.cat||'',he:phrase.he,trans:phrase.trans||'',ar:phrase.ar||'',tags:phrase.tags||phrase.when||'',why:phrase.why||phrase.tip||'',tone:phrase.tone||'',audio_url:phrase.audio||'',is_new:true,section};
+  return await sbFetch('/rest/v1/phrases','POST',row);
+}
+
+async function cloudUp(file){
+  const fd=new FormData();fd.append('file',file);fd.append('upload_preset',PRESET);fd.append('resource_type','video');
+  const r=await fetch(`https://api.cloudinary.com/v1_1/${CLOUD}/video/upload`,{method:'POST',body:fd});
+  const d=await r.json();return d.secure_url||null;
+}
+
+let mrec=null,rchunks=[],rfiles={};
+async function toggleRec(p){
+  const btn=document.getElementById(p+'-rec');
+  if(mrec&&mrec.state==='recording'){mrec.stop();btn.textContent='🎙 הקלט';btn.className='rec-btn idle';return;}
+  try{
+    const stream=await navigator.mediaDevices.getUserMedia({audio:true});
+    rchunks=[];mrec=new MediaRecorder(stream);
+    mrec.ondataavailable=e=>{if(e.data.size>0)rchunks.push(e.data);};
+    mrec.onstop=()=>{
+      const blob=new Blob(rchunks,{type:'audio/webm'});
+      rfiles[p]=new File([blob],'rec.webm',{type:'audio/webm'});
+      const st=document.getElementById(p+'-status');if(st)st.textContent='✓ הוקלט';
+      stream.getTracks().forEach(t=>t.stop());
+    };
+    mrec.start();btn.textContent='⏹ עצור';btn.className='rec-btn recording';
+    const st=document.getElementById(p+'-status');if(st)st.textContent='● מקליט...';
+  }catch(e){alert('אנא אשרי גישה למיקרופון');}
+}
+function onFile(p){
+  const f=document.getElementById(p+'-file').files[0];
+  if(f){rfiles[p]=f;const st=document.getElementById(p+'-status');if(st)st.textContent='✓ '+f.name;}
+}
+async function getAudio(p,stEl){
+  const f=rfiles[p];if(!f)return null;
+  stEl.textContent='⏳ מעלה...';
+  try{const u=await cloudUp(f);if(u){stEl.textContent='✓ הועלה';delete rfiles[p];return u;}}catch(e){stEl.textContent='✗ שגיאה';}
+  return null;
+}
+
+// CATS
+const CATS=[{id:'עצירת תנועה',icon:'🚫'},{id:'ניהול מרחב',icon:'📍'},{id:'בידוק וזיהוי',icon:'🔍'},{id:'שליטה בבית',icon:'🏠'},{id:'הרגעה ושכנוע',icon:'✌️'},{id:'מגע ראשוני',icon:'🕵'},{id:'עזרה ראשונה',icon:'🩹'},{id:'לוח שנה ותרבות',icon:'📅'},{id:'מילון כללי',icon:'💬'},{id:'כריזה',icon:'📢',special:'announce'},{id:'תשאול ימי',icon:'⚓',special:'navy'}];
+const DCATS=[{id:'שוק ומסחר',icon:'🛒'},{id:'מסעדה ואוכל',icon:'🍽️'},{id:'שיחת היכרות',icon:'🤝'},{id:'עזרה וכיוונים',icon:'🗺️'},{id:'ילדים ובית ספר',icon:'🎒'},{id:'שכנות וקהילה',icon:'🏘️'}];
+
+function cntC(c){return DB.filter(p=>p.cat===c).length;}
+function bldCats(){
+  document.getElementById('cats-loading').style.display='none';
+  document.getElementById('cgrid').style.display='grid';
+  document.getElementById('cgrid').innerHTML=CATS.map(c=>{
+    const n=DB.some(p=>p.cat===c.id&&p.isNew);
+    const cls='ct'+(c.special==='navy'?' navy':c.special==='announce'?' announce':'');
+    const cnt=c.special==='announce'?ANNOUNCE.length:c.special==='navy'?NAVY.length:cntC(c.id);
+    return`<div class="${cls}" onclick="opC('${c.id}','${c.special||''}')">
+      ${n?'<div style="width:7px;height:7px;border-radius:50%;background:#FF8C00;position:absolute;top:9px;left:9px;"></div>':''}
+      <div class="ci">${c.icon}</div><div class="cn">${c.id}</div><div class="cc">${cnt} פריטים</div></div>`;
+  }).join('');
+}
+
+function opC(cat,special){
+  curC=cat;
+  document.getElementById('ltitle').textContent=cat;
+  if(special==='announce'){
+    const cats=[...new Set(ANNOUNCE.map(a=>a.cat))];
+    if(cats.length===0){document.getElementById('litems').innerHTML='<div class="empty">אין כריזות עדיין</div>';}
+    else{
+      document.getElementById('litems').innerHTML=cats.map(c=>`
+        <div class="li" onclick="opAnnounceList('${c}')"><div class="lt">📢 ${c}</div><div class="la">‹</div></div>`).join('');
+    }
+  } else if(special==='navy'){
+    const cats=[...new Set(NAVY.map(a=>a.cat))];
+    document.getElementById('litems').innerHTML=cats.map(c=>`
+      <div class="li" onclick="opNavyList('${c}')"><div class="lt">⚓ ${c}</div><div class="la">‹</div></div>`).join('') || '<div class="empty">אין עדיין</div>';
+  } else {
+    rItems(DB.filter(p=>p.cat===cat),document.getElementById('litems'),'');
+  }
+  shV('vlist');
+}
+
+function opAnnounceList(cat){
+  document.getElementById('ltitle').textContent=cat;
+  const items=ANNOUNCE.filter(a=>a.cat===cat);
+  document.getElementById('litems').innerHTML=items.map((a,i)=>`
+    <div class="li" onclick="opAnnounce(${ANNOUNCE.indexOf(a)})"><div class="lt">📢 ${a.he}</div><div class="la">‹</div></div>`).join('');
+}
+
+function opNavyList(cat){
+  document.getElementById('ltitle').textContent=cat;
+  const items=NAVY.filter(n=>n.cat===cat);
+  document.getElementById('litems').innerHTML=items.map((n,i)=>`
+    <div class="li" onclick="opNavyP(${NAVY.indexOf(n)})"><div class="lt">${n.he}</div><div class="la">‹</div></div>`).join('');
+}
+
+function opAnnounce(i){
+  const a=ANNOUNCE[i];
+  // Show announcement popup with text + translation toggle
+  document.getElementById('phe').textContent=a.he;
+  document.getElementById('parsm').textContent='';
+  document.getElementById('ptrans').textContent=a.trans||'';
+  document.getElementById('pwhy').textContent=a.why||'';
+  document.getElementById('pwhyb').style.display=a.why?'block':'none';
+  document.getElementById('ptone').textContent='';
+  document.getElementById('ptoneb').style.display='none';
+  document.querySelectorAll('.pbtn').forEach(b=>b.setAttribute('data-audio',a.audio||''));
+  bldW();document.getElementById('wtime').textContent='0:00';
+  shV('vpop');
+}
+
+function opNavyP(i){
+  const p=NAVY[i];
+  document.getElementById('phe').textContent=p.he;
+  document.getElementById('parsm').textContent=p.ar;
+  document.getElementById('ptrans').textContent=p.trans||'';
+  document.getElementById('pwhy').textContent=p.why||'';
+  document.getElementById('pwhyb').style.display=p.why?'block':'none';
+  document.getElementById('ptone').textContent=p.tone||'';
+  document.getElementById('ptoneb').style.display=p.tone?'block':'none';
+  document.querySelectorAll('.pbtn').forEach(b=>b.setAttribute('data-audio',p.audio||''));
+  bldW();document.getElementById('wtime').textContent='0:00';
+  shV('vpop');
+}
+
+function rDG(){
+  document.getElementById('dgrid').innerHTML=DCATS.map(c=>`
+    <div class="ct daily" onclick="opDC('${c.id}')">
+    <div class="ci">${c.icon}</div><div class="cn">${c.id}</div>
+    <div class="cc">${DAILY.filter(d=>d.cat===c.id).length} משפטים</div></div>`).join('');
+}
+
+function opDC(cat){
+  curDailyCat=cat;
+  document.getElementById('dltitle').textContent=cat;
+  document.getElementById('dlitems').innerHTML=DAILY.filter(d=>d.cat===cat).map(d=>{
+    const i=DAILY.indexOf(d);
+    return`<div class="li" onclick="opPop(${i},'daily')"><div class="lt">${d.he}</div><div class="la">‹</div></div>`;
+  }).join('')||'<div class="empty">אין עדיין</div>';
+  document.getElementById('daily-grid-view').style.display='none';
+  document.getElementById('daily-list-view').style.display='block';
+}
+
+function rHrt(){
+  document.getElementById('hlist').innerHTML=HEART.length?HEART.map((h,i)=>`
+    <div class="card" onclick="opPop(${i},'heart')">
+      <div class="ctags"><span class="tag theart">❤️ פותח לב</span></div>
+      <div class="che">${h.he}</div><div class="car">${h.ar}</div>
+      <div class="csub">${h.when||''}</div>
+    </div>`).join(''):'<div class="empty">אין עדיין — הוסיפי דרך ניהול</div>';
+}
+
+// DICTIONARY
+let DICT_DATA=[];
+function renderDict(){
+  DICT_DATA=DICT;
+  searchDict();
+}
+function searchDict(){
+  const q=document.getElementById('dict-search').value.trim().toLowerCase();
+  const filtered=q?DICT_DATA.filter(d=>d.he.toLowerCase().includes(q)||d.trans.toLowerCase().includes(q)):DICT_DATA;
+  document.getElementById('dict-results').innerHTML=filtered.length?filtered.map((d,i)=>`
+    <div class="dict-item" onclick="opDictWord(${DICT.indexOf(d)})">
+      <div class="dict-he">${d.he}</div>
+      <div class="dict-trans">${d.trans}</div>
+      <div class="dict-ar">${d.ar}</div>
+    </div>`).join(''):'<div class="empty">'+(q?'לא נמצא':'הזיני מילים דרך ניהול')+'</div>';
+}
+function opDictWord(i){
+  const d=DICT[i];
+  document.getElementById('phe').textContent=d.he;
+  document.getElementById('parsm').textContent=d.ar;
+  document.getElementById('ptrans').textContent=d.trans||'';
+  document.getElementById('pwhy').textContent='';
+  document.getElementById('pwhyb').style.display='none';
+  document.getElementById('ptone').textContent='';
+  document.getElementById('ptoneb').style.display='none';
+  document.querySelectorAll('.pbtn').forEach(b=>b.setAttribute('data-audio',d.audio||''));
+  bldW();document.getElementById('wtime').textContent='0:00';
+  // Show from dict tab
+  document.querySelectorAll('[id^="tab-"]').forEach(x=>x.className='scr');
+  document.getElementById('tab-lib').className='scr on';
+  shV('vpop');
+}
+
+const RC={high:'#e74c3c',mid:'#FF8C00',low:'#1D9E75'};
+const RL={high:'סיכון גבוה',mid:'שים לב',low:'הקשר'};
+function rSem(){
+  document.getElementById('semlist').innerHTML=SEM.length?SEM.map(s=>`
+    <div class="card"><div class="ctags">
+      <span class="tag tprem">פרמיום</span>
+      <span style="width:8px;height:8px;border-radius:50%;background:${RC[s.risk||'low']};display:inline-block;margin-right:3px;"></span>
+      <span style="color:${RC[s.risk||'low']};font-size:11px;">${RL[s.risk||'low']}</span>
+    </div>
+    <div class="car">${s.ar||s.trans}</div>
+    <div class="che">${s.trans} — <span style="color:#7a9ab5;">${s.he}</span></div>
+    <div class="cwarn">⚠️ ${s.field||s.why}</div></div>`).join(''):'<div class="empty">אין עדיין</div>';
+}
+function rCus(){
+  document.getElementById('cuslist').innerHTML=CUS.length?CUS.map(c=>`
+    <div class="card"><div class="che">${c.he}</div><div style="color:#a0b8c8;font-size:13px;line-height:1.7;margin-top:6px;">${c.why||c.ar}</div></div>`).join(''):'<div class="empty">אין עדיין</div>';
+}
+function rArts(){
+  document.getElementById('artlist').innerHTML=ARTS.length?ARTS.map((a,i)=>`
+    <div class="card" onclick="opArt(${i})"><div class="che">${a.he}</div>
+    <div class="csub" style="margin-top:5px;">${(a.why||a.ar||'').substring(0,90)}...</div></div>`).join(''):'<div class="empty">אין עדיין</div>';
+}
+function opArt(i){
+  const a=ARTS[i];
+  document.getElementById('art-title').textContent=a.he;
+  document.getElementById('art-body').innerHTML=(a.why||a.ar||'').replace(/\n/g,'<br><br>');
+  document.getElementById('artlv').style.display='none';
+  document.getElementById('artfv').style.display='block';
+}
+function clsArt(){document.getElementById('artlv').style.display='block';document.getElementById('artfv').style.display='none';}
+
+function ST(t,el){
+  document.querySelectorAll('.tb-tab').forEach(x=>x.classList.remove('active'));
+  el.classList.add('active');
+  document.querySelectorAll('[id^="tab-"]').forEach(x=>x.className='scr');
+  document.getElementById('tab-'+t).className='scr on';
+  curTab=t;
+  if(t==='dict')renderDict();
+  if(t==='sem')rSem();
+  if(t==='nwf')rNF();
+}
+
+function shV(id){['vcats','vlist','vsrch','vpop'].forEach(v=>{document.getElementById(v).className='scr'+(v===id?' on':'');});}
+
+function goB(tab){
+  if(tab==='day'){
+    document.getElementById('daily-grid-view').style.display='block';
+    document.getElementById('daily-list-view').style.display='none';
+    curDailyCat=null;
+  } else {
+    curC=null;document.getElementById('sinp').value='';shV('vcats');
+  }
+}
+
+function setL(l){sL=l;document.getElementById('lbhe').className='lb'+(l==='he'?' active':'');document.getElementById('lbar').className='lb'+(l==='ar'?' active':'');doS();}
+function doS(){
+  const q=document.getElementById('sinp').value.trim();
+  if(!q){if(curC)shV('vlist');else shV('vcats');return;}
+  const r=DB.filter(p=>sL==='he'?p.he.includes(q)||p.trans.includes(q)||(p.tags&&p.tags.includes(q)):p.ar.includes(q)||p.he.includes(q));
+  document.getElementById('smeta').textContent=r.length+' תוצאות עבור "'+q+'"';
+  rItems(r,document.getElementById('sres'),q);shV('vsrch');
+}
+function hl(t,q){if(!q)return t;return t.replace(new RegExp('('+q.replace(/[.*+?^${}()|[\]\\]/g,'\\$&')+')','gi'),'<span class="hlm">$1</span>');}
+function rItems(items,el,q){
+  if(!items.length){el.innerHTML='<div class="empty">לא נמצאו תוצאות</div>';return;}
+  el.innerHTML=items.map(p=>{const i=DB.indexOf(p);return`<div class="li" onclick="opP(${i})"><div class="lt">${hl(p.he,q)}</div><div class="la">‹</div></div>`;}).join('');
+}
+function bldW(){const el=document.getElementById('wbars');el.innerHTML='';for(let i=0;i<32;i++){const b=document.createElement('div');b.className='wb';b.style.height=(4+Math.floor(Math.random()*14))+'px';el.appendChild(b);}}
+function opP(i){
+  const p=DB[i];
+  document.getElementById('phe').textContent=p.he;document.getElementById('parsm').textContent=p.ar;
+  document.getElementById('ptrans').textContent=p.trans||'';document.getElementById('pwhy').textContent=p.why||'';
+  document.getElementById('pwhyb').style.display=p.why?'block':'none';document.getElementById('ptone').textContent=p.tone||'';
+  document.getElementById('ptoneb').style.display=p.tone?'block':'none';
+  document.querySelectorAll('.pbtn').forEach(b=>b.setAttribute('data-audio',p.audio||''));
+  bldW();document.getElementById('wtime').textContent='0:00';shV('vpop');
+}
+function opPop(i,section){
+  let p=section==='daily'?DAILY[i]:section==='heart'?HEART[i]:DB[i];
+  document.getElementById('phe').textContent=p.he;document.getElementById('parsm').textContent=p.ar;
+  document.getElementById('ptrans').textContent=p.trans||'';
+  document.getElementById('pwhy').textContent=p.why||p.tip||(p.when?'מתי: '+p.when:'');
+  document.getElementById('pwhyb').style.display=(p.why||p.tip||p.when)?'block':'none';
+  document.getElementById('ptone').textContent='';document.getElementById('ptoneb').style.display='none';
+  document.querySelectorAll('.pbtn').forEach(b=>b.setAttribute('data-audio',p.audio||''));
+  bldW();document.getElementById('wtime').textContent='0:00';
+  document.querySelectorAll('[id^="tab-"]').forEach(x=>x.className='scr');
+  document.getElementById('tab-lib').className='scr on';shV('vpop');
+}
+function clsP(){if(document.getElementById('sinp').value.trim())shV('vsrch');else if(curC)shV('vlist');else shV('vcats');}
+function clrS(){document.getElementById('sinp').value='';doS();}
+
+let pt=null,curAudio=null;
+function play(btn,speed){
+  if(curAudio){curAudio.pause();curAudio=null;}if(pt)clearInterval(pt);
+  const orig=btn.innerHTML,bars=document.querySelectorAll('.wb'),tEl=document.getElementById('wtime');
+  const url=btn.getAttribute('data-audio')||'';
+  if(url){
+    const audio=new Audio(url);if(speed==='slow')audio.playbackRate=0.7;curAudio=audio;
+    btn.innerHTML='⏸ מנגן...';bars.forEach((b,i)=>{b.style.background=i<2?'#FF8C00':'#D2B48C';});
+    pt=setInterval(()=>{if(!audio.paused&&audio.duration){const pct=audio.currentTime/audio.duration;bars.forEach((b,i)=>{b.style.background=i<Math.floor(pct*bars.length)?'#FF8C00':'#D2B48C';});const s=Math.floor(audio.currentTime);tEl.textContent='0:'+(s<10?'0':'')+s;}},100);
+    audio.onended=()=>{clearInterval(pt);btn.innerHTML=orig;bars.forEach(b=>{b.style.background='#D2B48C';});tEl.textContent='0:00';curAudio=null;};
+    audio.onerror=()=>{clearInterval(pt);btn.innerHTML=orig;};
+    audio.play().catch(()=>{btn.innerHTML=orig;});
+  } else {
+    const dur=speed==='slow'?8:4;let el=0;btn.innerHTML='⏸ מנגן...';
+    bars.forEach((b,i)=>{b.style.background=i<2?'#FF8C00':'#D2B48C';});
+    pt=setInterval(()=>{el+=0.1;const pct=Math.min(el/dur,1);bars.forEach((b,i)=>{b.style.background=i<Math.floor(pct*bars.length)?'#FF8C00':'#D2B48C';});const s=Math.floor(el);tEl.textContent='0:'+(s<10?'0':'')+s;if(el>=dur){clearInterval(pt);btn.innerHTML=orig;bars.forEach(b=>{b.style.background='#D2B48C';});tEl.textContent='0:00';}},100);
+  }
+}
+
+function rNF(){
+  const all=[...DB.filter(p=>p.isNew).map(p=>({tp:'מבצעי',tx:p.he,cat:p.cat,dt:'חדש'})),...DAILY.filter(d=>d.isNew).map(d=>({tp:'יומיומי',tx:d.he,cat:d.cat,dt:'חדש'})),...HEART.filter(h=>h.isNew).map(h=>({tp:'פותח לב',tx:h.he,cat:'פותחים לב',dt:'חדש'})),...NAVY.filter(n=>n.isNew).map(n=>({tp:'ימי',tx:n.he,cat:n.cat,dt:'חדש'})),...ANNOUNCE.filter(a=>a.isNew).map(a=>({tp:'כריזה',tx:a.he,cat:a.cat,dt:'חדש'}))];
+  document.getElementById('nflist').innerHTML=all.length?all.map(n=>`<div class="nfi"><div class="nfd"></div><div><div class="nfdate">${n.dt} · ${n.tp}</div><div class="nftxt">${n.tx}</div><div class="nfcat">${n.cat}</div></div></div>`).join(''):'<div class="empty">אין עדכונים חדשים</div>';
+}
+
+function aT(t,el){
+  document.querySelectorAll('.atab').forEach(b=>b.classList.remove('active'));el.classList.add('active');
+  ['ap','ad','ah','ak','an','adict','al','acat'].forEach(id=>document.getElementById('at-'+id).style.display='none');
+  document.getElementById('at-'+t).style.display='block';
+  if(t==='al')renderAdminList();if(t==='acat')renderCatList();
+}
+
+// ADD functions
+async function addP(){
+  const he=document.getElementById('aphe').value.trim(),ar=document.getElementById('apar').value.trim();
+  if(!he||!ar){alert('חובה: עברית וערבית');return;}
+  const btn=document.querySelector('#at-ap .sbtn');btn.textContent='שומר...';
+  const phrase={cat:document.getElementById('apc').value,he,trans:document.getElementById('aptr').value.trim(),ar,tags:document.getElementById('aptg').value.trim(),why:document.getElementById('apwy').value.trim(),tone:document.getElementById('aptn').value.trim(),audio:''};
+  const au=await getAudio('ap',document.getElementById('ap-status'));if(au)phrase.audio=au;
+  try{const s=await spSave(phrase,'military');if(s&&s[0])phrase.id=s[0].id;phrase.isNew=true;DB.push(phrase);['aphe','apar','aptr','aptg','apwy','aptn'].forEach(id=>document.getElementById(id).value='');bldCats();btn.textContent='שמור';alert('✓ נוסף!');}catch(e){btn.textContent='שמור';alert('שגיאה: '+e.message);}
+}
+async function addD(){
+  const he=document.getElementById('adhe').value.trim(),ar=document.getElementById('adar').value.trim();
+  if(!he||!ar){alert('חובה');return;}
+  const btn=document.querySelector('#at-ad .sbtn');btn.textContent='שומר...';
+  const phrase={cat:document.getElementById('adc').value,he,trans:document.getElementById('adtr').value.trim(),ar,tip:document.getElementById('adtp').value.trim(),audio:''};
+  const au=await getAudio('ad',document.getElementById('ad-status'));if(au)phrase.audio=au;
+  try{const s=await spSave(phrase,'daily');if(s&&s[0])phrase.id=s[0].id;phrase.isNew=true;DAILY.push(phrase);['adhe','adar','adtr','adtp'].forEach(id=>document.getElementById(id).value='');rDG();btn.textContent='שמור';alert('✓ נוסף!');}catch(e){btn.textContent='שמור';alert('שגיאה: '+e.message);}
+}
+async function addH(){
+  const he=document.getElementById('ahhe').value.trim(),ar=document.getElementById('ahar').value.trim();
+  if(!he||!ar){alert('חובה');return;}
+  const btn=document.querySelector('#at-ah .sbtn');btn.textContent='שומר...';
+  const phrase={he,trans:document.getElementById('ahtr').value.trim(),ar,when:document.getElementById('ahwn').value.trim(),why:document.getElementById('ahwy').value.trim(),audio:''};
+  const au=await getAudio('ah',document.getElementById('ah-status'));if(au)phrase.audio=au;
+  try{const s=await spSave(phrase,'heart');if(s&&s[0])phrase.id=s[0].id;phrase.isNew=true;HEART.push(phrase);['ahhe','ahar','ahtr','ahwn','ahwy'].forEach(id=>document.getElementById(id).value='');rHrt();btn.textContent='שמור';alert('✓ נוסף!');}catch(e){btn.textContent='שמור';alert('שגיאה: '+e.message);}
+}
+async function addAnnounce(){
+  const he=document.getElementById('akhe').value.trim(),trans=document.getElementById('aktr').value.trim();
+  if(!he||!trans){alert('חובה: שם ותעתיק');return;}
+  const btn=document.querySelector('#at-ak .sbtn');btn.textContent='שומר...';
+  const phrase={cat:document.getElementById('akc').value,he,trans,ar:'',why:document.getElementById('aktrans').value.trim(),tone:'',audio:''};
+  const au=await getAudio('ak',document.getElementById('ak-status'));if(au)phrase.audio=au;
+  try{const s=await spSave(phrase,'announce');if(s&&s[0])phrase.id=s[0].id;phrase.isNew=true;ANNOUNCE.push(phrase);['akhe','aktr','aktrans'].forEach(id=>document.getElementById(id).value='');bldCats();btn.textContent='שמור';alert('✓ נוסף!');}catch(e){btn.textContent='שמור';alert('שגיאה: '+e.message);}
+}
+async function addNavy(){
+  const he=document.getElementById('anhe').value.trim(),ar=document.getElementById('anar').value.trim();
+  if(!he||!ar){alert('חובה');return;}
+  const btn=document.querySelector('#at-an .sbtn');btn.textContent='שומר...';
+  const phrase={cat:document.getElementById('anc').value,he,trans:document.getElementById('antr').value.trim(),ar,why:document.getElementById('anwy').value.trim(),tone:'',audio:''};
+  const au=await getAudio('an',document.getElementById('an-status'));if(au)phrase.audio=au;
+  try{const s=await spSave(phrase,'navy');if(s&&s[0])phrase.id=s[0].id;phrase.isNew=true;NAVY.push(phrase);['anhe','anar','antr','anwy'].forEach(id=>document.getElementById(id).value='');bldCats();btn.textContent='שמור';alert('✓ נוסף!');}catch(e){btn.textContent='שמור';alert('שגיאה: '+e.message);}
+}
+async function addDictWord(){
+  const he=document.getElementById('dche').value.trim(),trans=document.getElementById('dctr').value.trim();
+  if(!he||!trans){alert('חובה: עברית ותעתיק');return;}
+  const btn=document.querySelector('#at-adict .sbtn');btn.textContent='שומר...';
+  const phrase={cat:'מילון',he,trans,ar:document.getElementById('dcar').value.trim(),why:'',tone:'',audio:''};
+  const au=await getAudio('dc',document.getElementById('dc-status'));if(au)phrase.audio=au;
+  try{const s=await spSave(phrase,'dictionary');if(s&&s[0])phrase.id=s[0].id;phrase.isNew=true;DICT.push(phrase);['dche','dctr','dcar'].forEach(id=>document.getElementById(id).value='');renderDict();btn.textContent='שמור';alert('✓ נוסף!');}catch(e){btn.textContent='שמור';alert('שגיאה: '+e.message);}
+}
+
+// Admin list
+async function renderAdminList(){
+  const el=document.getElementById('admin-list');
+  el.innerHTML='<div class="loading">טוען...</div>';
+  try{
+    const data=await sbFetch('/rest/v1/phrases?select=*&order=created_at.desc&limit=60');
+    if(!data||!data.length){el.innerHTML='<div class="empty">אין משפטים עדיין</div>';return;}
+    const sN={military:'מבצעי',daily:'יומיומי',heart:'פותחים לב',navy:'ימי',announce:'כריזה',dictionary:'מילון'};
+    const sC={military:'#FF8C00',daily:'#1D9E75',heart:'#c0392b',navy:'#2980b9',announce:'#8e44ad',dictionary:'#27ae60'};
+    el.innerHTML=data.map(p=>`
+      <div style="background:#1A2B3C;border:1px solid #2e4558;border-radius:10px;padding:12px;margin-bottom:8px;">
+        <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:6px;">
+          <div style="flex:1;"><div style="color:#fff;font-size:14px;font-weight:500;">${p.he}</div>
+          <div style="color:#7a9ab5;font-size:11px;">${p.trans||''}</div></div>
+          <span style="font-size:10px;background:${sC[p.section]||'#FF8C00'};color:#fff;padding:2px 7px;border-radius:7px;white-space:nowrap;margin-right:6px;">${sN[p.section]||p.section}</span>
+        </div>
+        <div style="display:flex;gap:5px;align-items:center;margin-top:6px;">
+          <span style="font-size:11px;color:${p.audio_url?'#1D9E75':'#7a9ab5'};">${p.audio_url?'🎵':'🔇'}</span>
+          <div style="flex:1;"></div>
+          <button onclick="openEdit('${p.id}','${(p.he||'').replace(/'/g,"\\'")}','${(p.trans||'').replace(/'/g,"\\'")}','${(p.ar||'').replace(/'/g,"\\'")}','${(p.why||'').replace(/'/g,"\\'")}','${(p.tone||'').replace(/'/g,"\\'")}','${p.audio_url||''}')" style="padding:5px 10px;background:#2e4558;border:none;border-radius:6px;color:#D2B48C;font-size:12px;cursor:pointer;font-family:inherit;">✏️</button>
+          <button onclick="delP('${p.id}')" style="padding:5px 10px;background:#3a1a1a;border:1px solid #5a2020;border-radius:6px;color:#ff8080;font-size:12px;cursor:pointer;font-family:inherit;">🗑</button>
+        </div>
+      </div>`).join('');
+  }catch(e){el.innerHTML='<div class="empty">שגיאה בטעינה</div>';}
+}
+
+
+function openEditIdx(idx) {
+  const p = window._adminItems[idx];
+  if (!p) return;
+  document.getElementById('edit-id').value = p.id;
+  document.getElementById('edit-he').value = p.he || '';
+  document.getElementById('edit-trans').value = p.trans || '';
+  document.getElementById('edit-ar').value = p.ar || '';
+  document.getElementById('edit-why').value = p.why || '';
+  document.getElementById('edit-tone').value = p.tone || '';
+  document.getElementById('edit-audio-cur').textContent = p.audio_url ? '✓ יש הקלטה' : 'אין הקלטה';
+  document.getElementById('edit-status').textContent = '';
+  document.getElementById('edit-modal').style.display = 'flex';
+}
+
+function openEdit(id,he,trans,ar,why,tone,audioUrl){
+  document.getElementById('edit-id').value=id;document.getElementById('edit-he').value=he;
+  document.getElementById('edit-trans').value=trans;document.getElementById('edit-ar').value=ar;
+  document.getElementById('edit-why').value=why;document.getElementById('edit-tone').value=tone;
+  document.getElementById('edit-audio-cur').textContent=audioUrl?'✓ יש הקלטה':'אין הקלטה';
+  document.getElementById('edit-status').textContent='';
+  document.getElementById('edit-modal').style.display='flex';
+}
+async function saveEdit(){
+  const id=document.getElementById('edit-id').value;
+  const btn=document.getElementById('edit-save-btn');btn.textContent='שומר...';
+  const updates={he:document.getElementById('edit-he').value.trim(),trans:document.getElementById('edit-trans').value.trim(),ar:document.getElementById('edit-ar').value.trim(),why:document.getElementById('edit-why').value.trim(),tone:document.getElementById('edit-tone').value.trim()};
+  const au=await getAudio('edit',document.getElementById('edit-status'));if(au)updates.audio_url=au;
+  try{await sbFetch('/rest/v1/phrases?id=eq.'+id,'PATCH',updates);closeEdit();await loadData();renderAdminList();btn.textContent='שמור';alert('✓ נשמר!');}catch(e){btn.textContent='שמור';alert('שגיאה: '+e.message);}
+}
+function closeEdit(){document.getElementById('edit-modal').style.display='none';delete rfiles['edit'];}
+async function delP(id){
+  if(!confirm('למחוק?'))return;
+  try{await sbFetch('/rest/v1/phrases?id=eq.'+id,'DELETE');await loadData();renderAdminList();}catch(e){alert('שגיאה');}
+}
+
+// Categories
+function renderCatList(){
+  const ALLCATS=[...CATS.map(c=>({...c,builtin:true,section:'military'})),...DCATS.map(c=>({...c,builtin:true,section:'daily'}))];
+  document.getElementById('cat-list').innerHTML=ALLCATS.map(c=>`
+    <div style="display:flex;align-items:center;gap:8px;padding:8px 0;border-bottom:1px solid #2e4558;">
+      <span style="font-size:18px;">${c.icon}</span>
+      <span style="color:#fff;font-size:13px;flex:1;">${c.id}</span>
+      <span style="font-size:10px;color:#7a9ab5;">${c.section==='military'?'מבצעי':'יומיומי'}</span>
+      <span style="font-size:10px;color:#2e4558;">קבוע</span>
+    </div>`).join('');
+}
+async function addCat(){
+  const name=document.getElementById('new-cat-name').value.trim();
+  const icon=document.getElementById('new-cat-icon').value.trim()||'📌';
+  const sec=document.getElementById('new-cat-sec').value;
+  if(!name){alert('חובה: שם קטגוריה');return;}
+  
+  if(sec==='military'){
+    CATS.push({id:name,icon});
+    const opt=document.createElement('option');opt.value=name;opt.textContent=name;
+    document.getElementById('apc').appendChild(opt);
+    bldCats();
+  } else if(sec==='daily'){
+    DCATS.push({id:name,icon});
+    const opt=document.createElement('option');opt.value=name;opt.textContent=name;
+    document.getElementById('adc').appendChild(opt);
+    rDG();
+  }
+  document.getElementById('new-cat-name').value='';
+  document.getElementById('new-cat-icon').value='';
+  renderCatList();
+  alert('✓ קטגוריה נוספה!');
+}
+
+loadData();
+</script>
+</body>
+</html>
