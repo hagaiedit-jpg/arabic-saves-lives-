@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html>
+<head><meta charset="UTF-8"><title>Seed Semantic/Customs/Articles</title></head>
+<body style="font-family:sans-serif;padding:20px;direction:rtl;">
+<h2>העלאת סמנטי, מנהגים ומאמרים</h2>
+<button onclick="seedAll()" style="padding:15px 30px;background:#1D9E75;border:none;border-radius:8px;color:#fff;font-size:16px;cursor:pointer;">העלה הכל</button>
+<div id="log" style="margin-top:20px;font-size:14px;"></div>
+<script>
+const SUPA_URL='https://ukynfcwxsrzpuqecfjuz.supabase.co';
+const SUPA_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InVreW5mY3d4c3J6cHVxZWNmanV6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzc5NTc2ODgsImV4cCI6MjA5MzUzMzY4OH0.lobr6E2Sfo5LMzhK2XklRJsY8FbVxl_v2Ar3XTGW4ew';
+
+const DATA = [
+  // Semantic
+  {cat:'סמנטי',he:'חתונה / קוד לפיגוע',trans:'עַרַס',ar:'عرس',why:'בשטח: קוד לפיגוע. "פִי עַרַס" בהקשר מבצעי = נורת אזהרה מיידית.',tone:'high',tags:'סמנטי',audio_url:'',is_new:false,section:'semantic'},
+  {cat:'סמנטי',he:'מרפק / מחבר צינורות',trans:'כּוֹעַ',ar:'كوع',why:'בשטח: מתאר לעיתים נשק, מטען או חפץ נפיץ.',tone:'high',tags:'סמנטי',audio_url:'',is_new:false,section:'semantic'},
+  {cat:'סמנטי',he:'ברזל / מתכת',trans:'חֲדִידָה',ar:'حديدة',why:'בשטח: לעיתים כינוי לנשק. "פִי חֲדִידָה" = יש נשק.',tone:'high',tags:'סמנטי',audio_url:'',is_new:false,section:'semantic'},
+  {cat:'סמנטי',he:'צורך / דבר מה',trans:'חָאגָה',ar:'حاجة',why:'"פִי חָאגָה" (יש משהו) יכול לרמז על הסתרה.',tone:'mid',tags:'סמנטי',audio_url:'',is_new:false,section:'semantic'},
+  {cat:'סמנטי',he:'גבר / בן אדם',trans:'זַלַמֶה',ar:'زلمة',why:'פנייה ישירה. לא פוגעני — יוצר קשר אנושי.',tone:'low',tags:'סמנטי',audio_url:'',is_new:false,section:'semantic'},
+  // Customs
+  {cat:'אירוח',he:'הגשת קפה',trans:'',ar:'',why:'הגשת קפה (קהוה) היא אות כבוד. סירוב = עלבון. קח, שב רגע. קפה = פתיחת שיחה.',tone:'',tags:'מנהגים',audio_url:'',is_new:false,section:'customs'},
+  {cat:'אירוח',he:'הסרת נעלים',trans:'',ar:'',why:'בבתים רבים מורידים נעלים. נעלים מסודרות ליד הדלת = בית "נקי".',tone:'',tags:'מנהגים',audio_url:'',is_new:false,section:'customs'},
+  {cat:'אבל ושמחה',he:'אבל — עזאא',trans:'',ar:'',why:'בית פתוח לאבל = הזדמנות מודיעינית. אנשים מדברים חופשי יותר.',tone:'',tags:'מנהגים',audio_url:'',is_new:false,section:'customs'},
+  // Articles
+  {cat:'מאמרים',he:'איך לקרוא דינמיקה משפחתית בשטח',trans:'',ar:'',why:'האב (או הבן הבכור) הוא הכתובת. הוא ידבר בשם כולם. אם מישהו אחר מתחיל לדבר לפניו — זה חריג.\n\nהאישה תעבור לחדר אחר. זה נורמלי. אם היא לא זזה — משהו לא רגיל.\n\nשפת גוף: מבט ישיר + ידיים פתוחות = שיתוף פעולה. מבט נמוך + ידיים צמודות = מתח.',tone:'',tags:'מאמרים',audio_url:'',is_new:false,section:'article'},
+  {cat:'מאמרים',he:'סימני שקר בתרבות הערבית',trans:'',ar:'',why:'הסטת מבט לא תמיד = שקר. בתרבות ערבית הסטת מבט מבוגר = כבוד.\n\nסימנים לחשד: סתירות בין גרסאות. שהייה ארוכה לפני תשובה פשוטה.\n\nכלל: שאל פעמיים, בניסוח שונה. סתירה = חפור עוד.',tone:'',tags:'מאמרים',audio_url:'',is_new:false,section:'article'},
+];
+
+async function seedAll(){
+  const log=document.getElementById('log');
+  log.innerHTML='';let ok=0,err=0;
+  for(const row of DATA){
+    try{
+      const res=await fetch(SUPA_URL+'/rest/v1/phrases',{
+        method:'POST',
+        headers:{'apikey':SUPA_KEY,'Authorization':'Bearer '+SUPA_KEY,'Content-Type':'application/json','Prefer':'return=minimal'},
+        body:JSON.stringify(row)
+      });
+      if(res.ok){ok++;log.innerHTML+='<div style="color:green;">✓ '+row.he+'</div>';}
+      else{err++;log.innerHTML+='<div style="color:red;">✗ '+row.he+'</div>';}
+    }catch(e){err++;}
+    await new Promise(r=>setTimeout(r,100));
+  }
+  log.innerHTML+='<br><strong style="color:#1D9E75;">סיום! הועלו '+ok+' פריטים. שגיאות: '+err+'</strong>';
+}
+</script>
+</body>
+</html>
