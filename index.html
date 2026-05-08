@@ -878,6 +878,34 @@ function aT(t,el){
 }
 
 // ADD functions
+async function addSem(){
+  const ar=document.getElementById('asem-ar').value.trim();
+  const trans=document.getElementById('asem-tr').value.trim();
+  const field=document.getElementById('asem-field').value.trim();
+  if(!ar||!trans||!field){alert('חובה: ערבית, תעתיק ומשמעות בשטח');return;}
+  const btn=document.querySelector('#at-asem .sbtn');btn.textContent='שומר...';
+  const phrase={
+    cat:'סמנטי',
+    he:document.getElementById('asem-dict').value.trim()||trans,
+    trans,
+    ar,
+    why:field,
+    tone:document.getElementById('asem-risk').value,
+    tags:'סמנטי',
+    audio:''
+  };
+  const au=await getAudio('asem',document.getElementById('asem-status'));
+  if(au)phrase.audio=au;
+  try{
+    await spSave(phrase,'semantic');
+    ['asem-ar','asem-tr','asem-dict','asem-field'].forEach(id=>document.getElementById(id).value='');
+    document.getElementById('asem-file').value='';
+    await loadData();
+    btn.textContent='שמור';
+    alert('✓ נוסף!');
+  }catch(e){btn.textContent='שמור';alert('שגיאה: '+e.message);}
+}
+
 async function addP(){
   const he=document.getElementById('aphe').value.trim(),ar=document.getElementById('apar').value.trim();
   if(!he||!ar){alert('חובה: עברית וערבית');return;}
