@@ -754,11 +754,51 @@ function goB(tab){
 
 function setL(l){sL=l;document.getElementById('lbhe').className='lb'+(l==='he'?' active':'');document.getElementById('lbar').className='lb'+(l==='ar'?' active':'');doS();}
 function doS(){
-  const q=document.getElementById('sinp').value.trim();
+  let q=document.getElementById('sinp').value.trim();
   if(!q){if(curC)shV('vlist');else shV('vcats');return;}
-  const r=DB.filter(p=>sL==='he'?p.he.includes(q)||p.trans.includes(q)||(p.tags&&p.tags.includes(q)):p.ar.includes(q)||p.he.includes(q));
-  document.getElementById('smeta').textContent=r.length+' תוצאות עבור "'+q+'"';
-  rItems(r,document.getElementById('sres'),q);shV('vsrch');
+  
+  // Remove common question prefixes
+  const prefixes = [
+    'איך אומרים ', 'איך אומר ', 'איך אומרת ',
+    'מה זה ', 'מה הפירוש של ', 'תרגם לי את ',
+    'תגיד לי ', 'איך אומרים את ', 'תרגום של ',
+    'איך מתרגמים ', 'מה התרגום של '
+  ];
+  let cleaned = q;
+  for (const p of prefixes) {
+    if (cleaned.startsWith(p)) {
+      cleaned = cleaned.substring(p.length).trim();
+      break;
+    }
+  }
+  // Remove trailing question mark and quotes
+  cleaned = cleaned.replace(/[?״"׳']/g, '').trim();
+  
+  // Try exact match first, then partial match
+  let r = DB.filter(p=>sL==='he'?
+    p.he.includes(cleaned)||p.trans.includes(cleaned)||(p.tags&&p.tags.includes(cleaned)):
+    p.ar.includes(cleaned)||p.he.includes(cleaned)
+  );
+  
+  // If no results with cleaned, try original
+  if (r.length === 0 && cleaned !== q) {
+    r = DB.filter(p=>sL==='he'?
+      p.he.includes(q)||p.trans.includes(q):
+      p.ar.includes(q)||p.he.includes(q)
+    );
+  }
+  
+  // Also search in DAILY, NAVY, DICT
+  if (r.length === 0) {
+    const allItems = [...DAILY, ...NAVY, ...DICT];
+    const found = allItems.filter(p=>
+      p.he && (p.he.includes(cleaned)||p.trans.includes(cleaned))
+    );
+    if (found.length > 0) r = found;
+  }
+  
+  document.getElementById('smeta').textContent=r.length+' תוצאות עבור "'+cleaned+'"';
+  rItems(r,document.getElementById('sres'),cleaned);shV('vsrch');
 }
 function hl(t,q){if(!q)return t;return t.replace(new RegExp('('+q.replace(/[.*+?^${}()|[\]\\]/g,'\\$&')+')','gi'),'<span class="hlm">$1</span>');}
 function rItems(items,el,q){
