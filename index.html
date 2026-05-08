@@ -1081,17 +1081,30 @@ async function startVoice() {
     
     if (e.results[0].isFinal) {
       status.textContent = '✓ זוהה: "' + transcript + '"';
+      window._voiceSearch = true;
       // Check if we found results in app
       setTimeout(() => {
-        const results = document.getElementById('sres').children.length;
-        if (results === 0 || results === 1 && document.querySelector('.empty')) {
-          // No results - try Google Translate
-          translateWithGoogle(transcript);
-        }
-        setTimeout(() => {
+        const sresEl = document.getElementById('sres');
+        const items = sresEl.querySelectorAll('.li');
+        if (items.length === 1) {
+          // One result - auto open it
+          items[0].click();
           status.style.display = 'none';
-          status.textContent = '🔴 מקשיב... דבר עברית';
-        }, 3000);
+        } else if (items.length === 0 || sresEl.querySelector('.empty')) {
+          // No results - show not found message
+          translateWithGoogle(transcript);
+          setTimeout(() => {
+            status.style.display = 'none';
+            status.textContent = '🔴 מקשיב... דבר עברית';
+          }, 3000);
+        } else {
+          // Multiple results - keep search visible
+          setTimeout(() => {
+            status.style.display = 'none';
+            status.textContent = '🔴 מקשיב... דבר עברית';
+          }, 2000);
+        }
+        window._voiceSearch = false;
       }, 500);
     }
   };
