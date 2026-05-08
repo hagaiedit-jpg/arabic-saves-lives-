@@ -1,20 +1,3 @@
-
-arabic-saves-lives-
-/index.html
-Go to file
-t
-T
-hagaiedit-jpg
-hagaiedit-jpg
-Rename index (31).html to index.html
-337d72d
- · 
-34 minutes ago
-
-Code
-
-Blame
-999 lines (943 loc) · 61.6 KB
 <!DOCTYPE html>
 <html lang="he" dir="rtl">
 <head>
@@ -166,12 +149,14 @@ body{background:#1A2B3C;direction:rtl;font-family:-apple-system,BlinkMacSystemFo
   <div class="sbar">
     <div class="si">
       <span style="color:#aaa;font-size:15px;">🔍</span>
-      <input id="sinp" placeholder="חיפוש..." oninput="doS()"/>
+      <input id="sinp" placeholder="חיפוש או דבר..." oninput="doS()"/>
       <button class="sx" onclick="clrS()">×</button>
-      <button id="voice-btn" onclick="startVoice()" style="background:none;border:none;font-size:20px;cursor:pointer;padding:0 4px;" title="חיפוש קולי">🎙</button>
+      <button id="voice-btn" onclick="startVoice()" style="background:none;border:none;font-size:22px;cursor:pointer;padding:0 6px;" title="חיפוש קולי">🎙</button>
     </div>
-    <div id="voice-status" style="display:none;background:#FF8C00;color:#fff;font-size:12px;padding:6px 12px;text-align:center;">
+    <div id="voice-status" style="display:none;background:#FF8C00;color:#fff;font-size:13px;padding:8px 12px;text-align:center;border-radius:0 0 8px 8px;">
       🔴 מקשיב... דבר עברית
+    </div>
+    <div id="ai-result" style="display:none;background:#1A2B3C;color:#fff;font-size:14px;padding:12px;border-radius:8px;margin-top:8px;">
     </div>
   </div>
   <div class="lrow">
@@ -1008,6 +993,107 @@ async function addCat(){
   document.getElementById('new-cat-icon').value='';
   renderCatList();
   alert('✓ קטגוריה נוספה!');
+}
+
+
+// Voice Search with Google Translate fallback
+let voiceRecognition = null;
+
+async function startVoice() {
+  const btn = document.getElementById('voice-btn');
+  const status = document.getElementById('voice-status');
+  
+  if (!('webkitSpeechRecognition' in window) && !('SpeechRecognition' in window)) {
+    alert('הדפדפן שלך לא תומך בזיהוי קול. נסי ב-Chrome.');
+    return;
+  }
+  
+  if (voiceRecognition) {
+    try { voiceRecognition.stop(); } catch(e) {}
+    return;
+  }
+  
+  // Request microphone permission first
+  try {
+    const stream = await navigator.mediaDevices.getUserMedia({audio:true});
+    stream.getTracks().forEach(t => t.stop());
+  } catch(e) {
+    alert('צריך לאשר גישה למיקרופון');
+    return;
+  }
+  
+  const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+  voiceRecognition = new SR();
+  voiceRecognition.lang = 'he-IL';
+  voiceRecognition.continuous = false;
+  voiceRecognition.interimResults = true;
+  
+  btn.textContent = '⏹';
+  status.style.display = 'block';
+  document.getElementById('ai-result').style.display = 'none';
+  
+  voiceRecognition.onresult = (e) => {
+    const transcript = Array.from(e.results)
+      .map(r => r[0].transcript)
+      .join('');
+    document.getElementById('sinp').value = transcript;
+    doS();
+    
+    if (e.results[0].isFinal) {
+      status.textContent = '✓ זוהה: "' + transcript + '"';
+      // Check if we found results in app
+      setTimeout(() => {
+        const results = document.getElementById('sres').children.length;
+        if (results === 0 || results === 1 && document.querySelector('.empty')) {
+          // No results - try Google Translate
+          translateWithGoogle(transcript);
+        }
+        setTimeout(() => {
+          status.style.display = 'none';
+          status.textContent = '🔴 מקשיב... דבר עברית';
+        }, 3000);
+      }, 500);
+    }
+  };
+  
+  voiceRecognition.onerror = (e) => {
+    btn.textContent = '🎙';
+    status.style.display = 'none';
+    voiceRecognition = null;
+    if (e.error !== 'no-speech' && e.error !== 'aborted') {
+      alert('שגיאה: ' + e.error);
+    }
+  };
+  
+  voiceRecognition.onend = () => {
+    btn.textContent = '🎙';
+    voiceRecognition = null;
+  };
+  
+  voiceRecognition.start();
+}
+
+async function translateWithGoogle(text) {
+  const aiResult = document.getElementById('ai-result');
+  aiResult.style.display = 'block';
+  aiResult.innerHTML = '<div style="color:#FF8C00;">🔍 מחפש תרגום באינטרנט...</div>';
+  
+  try {
+    // Use Google Translate's free public endpoint
+    const url = 'https://translate.googleapis.com/translate_a/single?client=gtx&sl=he&tl=ar&dt=t&q=' + encodeURIComponent(text);
+    const res = await fetch(url);
+    const data = await res.json();
+    const translation = data[0].map(t => t[0]).join('');
+    
+    aiResult.innerHTML = `
+      <div style="color:#7a9ab5;font-size:11px;margin-bottom:6px;">🌐 תרגום אוטומטי (גוגל)</div>
+      <div style="color:#fff;font-size:14px;margin-bottom:8px;">${text}</div>
+      <div style="color:#D2B48C;font-size:20px;font-family:Georgia,serif;direction:rtl;">${translation}</div>
+      <div style="color:#888;font-size:10px;margin-top:8px;">⚠️ תרגום אוטומטי — ייתכן שלא מדויק</div>
+    `;
+  } catch(e) {
+    aiResult.innerHTML = '<div style="color:#ff8080;">לא הצלחתי לתרגם. נסי שוב.</div>';
+  }
 }
 
 loadData();
