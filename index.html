@@ -1073,27 +1073,16 @@ async function startVoice() {
   voiceRecognition.start();
 }
 
-async function translateWithGoogle(text) {
+function translateWithGoogle(text) {
   const aiResult = document.getElementById('ai-result');
   aiResult.style.display = 'block';
-  aiResult.innerHTML = '<div style="color:#FF8C00;">🔍 מחפש תרגום באינטרנט...</div>';
-  
-  try {
-    // Use Google Translate's free public endpoint
-    const url = 'https://translate.googleapis.com/translate_a/single?client=gtx&sl=he&tl=ar&dt=t&q=' + encodeURIComponent(text);
-    const res = await fetch(url);
-    const data = await res.json();
-    const translation = data[0].map(t => t[0]).join('');
-    
-    aiResult.innerHTML = `
-      <div style="color:#7a9ab5;font-size:11px;margin-bottom:6px;">🌐 תרגום אוטומטי (גוגל)</div>
-      <div style="color:#fff;font-size:14px;margin-bottom:8px;">${text}</div>
-      <div style="color:#D2B48C;font-size:20px;font-family:Georgia,serif;direction:rtl;">${translation}</div>
-      <div style="color:#888;font-size:10px;margin-top:8px;">⚠️ תרגום אוטומטי — ייתכן שלא מדויק</div>
-    `;
-  } catch(e) {
-    aiResult.innerHTML = '<div style="color:#ff8080;">לא הצלחתי לתרגם. נסי שוב.</div>';
-  }
+  aiResult.innerHTML = `
+    <div style="text-align:center;padding:14px;">
+      <div style="color:#FF8C00;font-size:14px;margin-bottom:8px;">⚠️ לא נמצא במאגר</div>
+      <div style="color:#fff;font-size:13px;margin-bottom:10px;">"${text}"</div>
+      <a href="https://wa.me/972529247768?text=שלום, אני מבקש להוסיף את המילה: ${encodeURIComponent(text)}" target="_blank" style="display:inline-block;padding:8px 16px;background:#25D366;color:#fff;text-decoration:none;border-radius:6px;font-size:13px;font-weight:600;">💬 בקש להוסיף</a>
+    </div>
+  `;
 }
 
 loadData();
