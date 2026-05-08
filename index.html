@@ -686,8 +686,8 @@ function opDictWord(i){
 const RC={high:'#e74c3c',mid:'#FF8C00',low:'#1D9E75'};
 const RL={high:'סיכון גבוה',mid:'שים לב',low:'הקשר'};
 function rSem(){
-  document.getElementById('semlist').innerHTML=SEM.length?SEM.map(s=>`
-    <div class="card"><div class="ctags">
+  document.getElementById('semlist').innerHTML=SEM.length?SEM.map((s,i)=>`
+    <div class="card" onclick="opSem(${i})"><div class="ctags">
       <span class="tag tprem">פרמיום</span>
       <span style="width:8px;height:8px;border-radius:50%;background:${RC[s.risk||'low']};display:inline-block;margin-right:3px;"></span>
       <span style="color:${RC[s.risk||'low']};font-size:11px;">${RL[s.risk||'low']}</span>
@@ -695,6 +695,22 @@ function rSem(){
     <div class="car">${s.ar||s.trans}</div>
     <div class="che">${s.trans} — <span style="color:#7a9ab5;">${s.he}</span></div>
     <div class="cwarn">⚠️ ${s.field||s.why}</div></div>`).join(''):'<div class="empty">אין עדיין</div>';
+}
+
+function opSem(i){
+  const s=SEM[i];
+  document.getElementById('phe').textContent=s.he;
+  document.getElementById('parsm').textContent=s.ar||'';
+  document.getElementById('ptrans').textContent=s.trans||'';
+  document.getElementById('pwhy').textContent=s.field||s.why||'';
+  document.getElementById('pwhyb').style.display=(s.field||s.why)?'block':'none';
+  document.getElementById('ptone').textContent='';
+  document.getElementById('ptoneb').style.display='none';
+  document.querySelectorAll('.pbtn').forEach(b=>b.setAttribute('data-audio',s.audio||''));
+  bldW();document.getElementById('wtime').textContent='0:00';
+  document.querySelectorAll('[id^="tab-"]').forEach(x=>x.className='scr');
+  document.getElementById('tab-lib').className='scr on';
+  shV('vpop');
 }
 function rCus(){
   document.getElementById('cuslist').innerHTML=CUS.length?CUS.map(c=>`
