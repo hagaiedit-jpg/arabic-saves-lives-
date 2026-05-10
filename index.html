@@ -6,20 +6,15 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="theme-color" content="#0f1e2c">
 <title>ערבית מצילה חיים</title>
-  <script async src="https://www.googletagmanager.com/gtag/js?id=G-G91ERLFQ16"></script>
+<!-- Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-G91ERLFQ16"></script>
 <script>
   window.dataLayer = window.dataLayer || [];
   function gtag(){dataLayer.push(arguments);}
   gtag('js', new Date());
   gtag('config', 'G-G91ERLFQ16');
 </script>
-  <script async src="https://www.googletagmanager.com/gtag/js?id=G-G91ERLFQ16"></script>
-<script>
-  window.dataLayer = window.dataLayer || [];
-  function gtag(){dataLayer.push(arguments);}
-  gtag('js', new Date());
-  gtag('config', 'G-G91ERLFQ16');
-</script>
+
 <style>
 *{box-sizing:border-box;margin:0;padding:0;}
 body{background:#1A2B3C;direction:rtl;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;min-height:100vh;}
@@ -504,7 +499,10 @@ async function loadData(){
   }
 }
 
-function mp(p){return{id:p.id,cat:p.cat||'',he:p.he||'',trans:p.trans||'',ar:p.ar||'',tags:p.tags||'',why:p.why||'',tone:p.tone||'',audio:p.audio_url||'',when:p.tags||'',tip:p.why||'',isNew:p.is_new||false,section:p.section};}
+function mp(p){
+  const seen = getSeenIds();
+  return{id:p.id,cat:p.cat||'',he:p.he||'',trans:p.trans||'',ar:p.ar||'',tags:p.tags||'',why:p.why||'',tone:p.tone||'',audio:p.audio_url||'',when:p.tags||'',tip:p.why||'',isNew:(p.is_new||false)&&!seen.includes(p.id),section:p.section};
+}
 
 async function spSave(phrase,section){
   const row={cat:phrase.cat||'',he:phrase.he,trans:phrase.trans||'',ar:phrase.ar||'',tags:phrase.tags||phrase.when||'',why:phrase.why||phrase.tip||'',tone:phrase.tone||'',audio_url:phrase.audio||'',is_new:true,section};
@@ -873,17 +871,37 @@ function play(btn,speed){
   }
 }
 
-async function markAllSeen(){
-  try {
-    await sbFetch('/rest/v1/phrases?is_new=eq.true','PATCH',{is_new:false});
-    DB.forEach(p=>p.isNew=false);
-    DAILY.forEach(p=>p.isNew=false);
-    HEART.forEach(p=>p.isNew=false);
-    NAVY.forEach(p=>p.isNew=false);
-    ANNOUNCE.forEach(p=>p.isNew=false);
-    document.getElementById('new-badge').style.display='none';
-    rNF();
-  } catch(e){}
+function getSeenIds(){
+  try { return JSON.parse(localStorage.getItem('seen_ids') || '[]'); }
+  catch(e) { return []; }
+}
+
+function isItemSeen(id){
+  return getSeenIds().includes(id);
+}
+
+function markAllSeen(){
+  const allIds = [
+    ...DB.filter(p=>p.isNew).map(p=>p.id),
+    ...DAILY.filter(d=>d.isNew).map(d=>d.id),
+    ...HEART.filter(h=>h.isNew).map(h=>h.id),
+    ...NAVY.filter(n=>n.isNew).map(n=>n.id),
+    ...ANNOUNCE.filter(a=>a.isNew).map(a=>a.id),
+  ].filter(id=>id);
+  
+  const seen = getSeenIds();
+  allIds.forEach(id => { if(!seen.includes(id)) seen.push(id); });
+  localStorage.setItem('seen_ids', JSON.stringify(seen));
+  
+  // Update local state
+  DB.forEach(p=>{if(seen.includes(p.id))p.isNew=false;});
+  DAILY.forEach(p=>{if(seen.includes(p.id))p.isNew=false;});
+  HEART.forEach(p=>{if(seen.includes(p.id))p.isNew=false;});
+  NAVY.forEach(p=>{if(seen.includes(p.id))p.isNew=false;});
+  ANNOUNCE.forEach(p=>{if(seen.includes(p.id))p.isNew=false;});
+  
+  bldCats();
+  rNF();
 }
 
 function rNF(){
