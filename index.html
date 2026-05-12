@@ -159,7 +159,7 @@ body{background:#1A2B3C;direction:rtl;font-family:-apple-system,BlinkMacSystemFo
   <div style="padding:14px;">
     <div style="text-align:center;margin-bottom:14px;">
       <div style="color:#c0392b;font-size:18px;font-weight:700;margin-bottom:4px;">🚨 משפטי ברזל לשטח</div>
-      <div style="color:#a0b8c8;font-size:12px;" id="quick-count">משפטים קריטיים — לחיצה לפתיחה</div>
+      <div style="color:#a0b8c8;font-size:12px;">15 משפטים קריטיים — לחיצה לפתיחה</div>
     </div>
     <div id="quick-list"></div>
   </div>
@@ -1250,28 +1250,7 @@ async function saveEdit(){
   const btn=document.getElementById('edit-save-btn');btn.textContent='שומר...';
   const updates={he:document.getElementById('edit-he').value.trim(),trans:document.getElementById('edit-trans').value.trim(),ar:document.getElementById('edit-ar').value.trim(),why:document.getElementById('edit-why').value.trim(),tone:document.getElementById('edit-tone').value.trim()};
   const au=await getAudio('edit',document.getElementById('edit-status'));if(au)updates.audio_url=au;
-  try{
-    await sbFetch('/rest/v1/phrases?id=eq.'+id,'PATCH',updates);
-    closeEdit();
-    await loadData();
-    // Update QUICK_PHRASES if this is one
-    const qi = QUICK_PHRASES.findIndex(q => {
-      const m = DB.find(d => d.id === id);
-      return m && q.he === m.he;
-    });
-    if(qi >= 0){
-      const newDB = DB.find(d => d.id === id);
-      if(newDB){
-        QUICK_PHRASES[qi].he = newDB.he;
-        QUICK_PHRASES[qi].trans = newDB.trans;
-        QUICK_PHRASES[qi].ar = newDB.ar;
-      }
-      rQuick();
-    }
-    renderAdminList();
-    btn.textContent='שמור';
-    alert('✓ נשמר!');
-  }catch(e){btn.textContent='שמור';alert('שגיאה: '+e.message);}
+  try{await sbFetch('/rest/v1/phrases?id=eq.'+id,'PATCH',updates);closeEdit();await loadData();renderAdminList();btn.textContent='שמור';alert('✓ נשמר!');}catch(e){btn.textContent='שמור';alert('שגיאה: '+e.message);}
 }
 function closeEdit(){document.getElementById('edit-modal').style.display='none';delete rfiles['edit'];}
 async function delP(id){
@@ -1501,26 +1480,19 @@ function searchHrt(){
 
 // Quick Mode - 15 critical phrases
 const QUICK_PHRASES = [
-  // שליטה מיידית
-  {he:'שלום, אנחנו מצה"ל / מהמשטרה',trans:'מַרְחַבַּא, אִחְנַא מִן גֵّישׁ אִלדִّפַאע אִלאִסְרַאאִילִי / אִלשֻّרְטָה',ar:'مرحبا، إحنا من جيش الدفاع الإسرائيلي / الشرطة',group:'שליטה מיידית'},
-  {he:'ידיים למעלה!',trans:'עַלִّי אִידַכּ לַפוֹק!',ar:'علي إيدك لفوق',group:'שליטה מיידית'},
-  {he:'תראה לי ידיים!',trans:'וַרِّינִי אִידֵיכּ!',ar:'ورّيني إيديك',group:'שליטה מיידית'},
-  {he:'אל תזוז!',trans:'לַא תִתְחַרַّכּ!',ar:'لا تتحرّك',group:'שליטה מיידית'},
-  {he:'תישאר כאן, אסור לזוז!',trans:'חַ׳לִّיכּ הוֹן, מַמְנוּעַ תִתְחַרַّכּ!',ar:'خليك هون، ممنوع تتحرّك',group:'שליטה מיידית'},
-  {he:'זרוק את הסכין / את הנשק!',trans:'אִרְמִי אִל-סִכִּינֶה / אִל-סְלַאח!',ar:'ارمي السكينة / السلاح',group:'שליטה מיידית'},
-  {he:'כבה את הטלפון עכשיו!',trans:'אִטְפִי אִל-גַ׳וַّאל הַלַّא!',ar:'اطفي الجوال هلق',group:'שליטה מיידית'},
   {he:'כבה את המנוע וצא מהרכב!',trans:'אִטְפִי אִלמוֹתוֹר וּאִטְלַע מִן אִל-סַיָّארָה!',ar:'اطفي الموتور واطلع من السيارة',group:'שליטה מיידית'},
-  // בידוק וזיהוי
-  {he:'תן לי תעודת זהות',trans:'אַעְטִינִי הַוִיّתַכּ',ar:'أعطيني هويتك',group:'בידוק וזיהוי'},
+  {he:'ידיים למעלה!',trans:'עַלִّי אִידַכּ לַפוֹק!',ar:'علي إيدك لفوق',group:'שליטה מיידית'},
+  {he:'אל תזוז!',trans:'לַא תִּתְחַרַّכּ!',ar:'لا تتحرك',group:'שליטה מיידית'},
+  {he:'תישאר כאן, אסור לזוז!',trans:'חַ׳לִّיכּ הוֹן, מַמְנוּעַ תִתְחַרַّכּ!',ar:'خليك هون، ممنوع تتحرك',group:'שליטה מיידית'},
+  {he:'כבה את הטלפון עכשיו!',trans:'אִטְפִי אִל-גַ׳וַّאל הַלַّא!',ar:'اطفي الجوال هلق',group:'שליטה מיידית'},
+  {he:'תן לי תעודת זהות',trans:'עַטִינִי הַוִיّתַכּ',ar:'عطيني هويتك',group:'בידוק וזיהוי'},
+  {he:'מה שם אביך ושם המשפחה?',trans:'שׁוּ אִסְם אַבּוּכּ וַאִסְם אִל-עֵילֶה?',ar:'شو اسم أبوك واسم العيلة؟',group:'בידוק וזיהוי'},
   {he:'מאיפה באת?',trans:'מִן וֵין גִ׳ית?',ar:'من وين جيت؟',group:'בידוק וזיהוי'},
-  {he:'תרים את החולצה / קמיס למעלה',trans:'אִרְפַע אִל-בְּלוּזֶה / קַמִיס לַפוֹק',ar:'ارفع البلوزة / قميص لفوق',group:'בידוק וזיהוי'},
-  // שליטה בבית/רכב
+  {he:'איפה אתה עובד?',trans:'וֵין בְּתִשְׁתֵעֵ׳ל?',ar:'وين بتشتغل؟',group:'בידוק וזיהוי'},
+  {he:'תרים את החולצה למעלה',trans:'אִרְפַע אִל-בְּלוּזֶה לַפוֹק',ar:'ارفع البلوزة لفوق',group:'בידוק וזיהוי'},
   {he:'פתח את הדלת',trans:'אִפְתַח אִל-בָּאבּ',ar:'افتح الباب',group:'שליטה בבית/רכב'},
-  {he:'תפתח לאט!',trans:'אִפְתַח שְׁוַיّ שְׁוַيّ!',ar:'افتح شوي شوي',group:'שליטה בבית/רכב'},
   {he:'פתח את תא המטען',trans:'אִפְתַח אִל-בַּגַ׳אז',ar:'افتح البغاز',group:'שליטה בבית/רכב'},
-  {he:'מי עוד פה?',trans:'מִין כַּמַאן הוֹן?',ar:'مين كمان هون؟',group:'שליטה בבית/רכב'},
-  {he:'יש עוד מישהו בבית?',trans:'פִי חַدّ כַּמַאן בִּלְבֵּית?',ar:'في حدّ كمان بالبيت؟',group:'שליטה בבית/רכב'},
-  // הרגעה ועזרה
+  {he:'שלום, אנחנו מצה"ל',trans:'מַרְחַבַּא, אִחְנַא מִן גֵّישׁ אִלדִّפַאע אִלאִסְרַאאִילִי',ar:'مرحبا، إحنا من جيش الدفاع الإسرائيلي',group:'הרגעה ועזרה'},
   {he:'אל תפחד',trans:'מַא תְּחַ׳אף',ar:'ما تخاف',group:'הרגעה ועזרה'},
   {he:'צריך אמבולנס?',trans:'בִּדַّכּ אִסְעָאף?',ar:'بدك إسعاف؟',group:'הרגעה ועזרה'},
 ];
@@ -1528,16 +1500,6 @@ const QUICK_PHRASES = [
 function rQuick(){
   const el = document.getElementById('quick-list');
   if(!el) return;
-  
-  // Sync each phrase with DB if exists
-  QUICK_PHRASES.forEach(p => {
-    const match = DB.find(d => d.he === p.he);
-    if(match){
-      if(match.trans) p.trans = match.trans;
-      if(match.ar) p.ar = match.ar;
-    }
-  });
-  
   const groups = {};
   QUICK_PHRASES.forEach((p,i) => {
     if(!groups[p.group]) groups[p.group] = [];
@@ -1555,121 +1517,21 @@ function rQuick(){
   for(const g of Object.keys(groups)){
     html += `<div style="color:${colors[g]};font-size:13px;font-weight:600;margin:14px 0 8px 0;">${g}</div>`;
     for(const p of groups[g]){
-      const match = DB.find(d => d.he === p.he);
-      const hasAudio = match && match.audio;
-      const audioIcon = hasAudio ? '🎵' : '🔇';
-      const editBtn = window._adminAuth ? `<button onclick="event.stopPropagation();editQuick(${p.idx})" style="padding:5px 10px;background:#2e4558;border:none;border-radius:6px;color:#D2B48C;font-size:11px;cursor:pointer;font-family:inherit;margin-right:4px;">✏️</button>` : '';
-      
       html += `<div onclick="opQuick(${p.idx})" style="background:#223344;border:1px solid #2e4558;border-radius:10px;padding:12px 14px;margin-bottom:8px;cursor:pointer;border-right:4px solid ${colors[g]};">
-        <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:8px;">
-          <div style="flex:1;">
-            <div style="color:#fff;font-size:14px;font-weight:500;margin-bottom:4px;">${p.he}</div>
-            <div style="color:#D2B48C;font-size:14px;font-family:Georgia,serif;direction:rtl;">${p.trans}</div>
-          </div>
-          <div style="display:flex;align-items:center;gap:5px;">
-            <span style="font-size:14px;">${audioIcon}</span>
-            ${editBtn}
-          </div>
-        </div>
+        <div style="color:#fff;font-size:14px;font-weight:500;margin-bottom:4px;">${p.he}</div>
+        <div style="color:#D2B48C;font-size:14px;font-family:Georgia,serif;direction:rtl;">${p.trans}</div>
       </div>`;
     }
   }
   el.innerHTML = html;
 }
 
-async function editQuick(idx){
-  const p = QUICK_PHRASES[idx];
-  let match = DB.find(d => d.he === p.he);
-  
-  if(!match){
-    // Create in Supabase
-    const newRow = {
-      cat: p.group === 'שליטה מיידית' ? 'ניהול מרחב' : 
-           p.group === 'בידוק וזיהוי' ? 'בידוק וזיהוי' :
-           p.group === 'שליטה בבית/רכב' ? 'שליטה בבית' : 'מגע ראשוני',
-      he: p.he, trans: p.trans, ar: p.ar,
-      tags: 'חירום', why: '', tone: '', audio_url: '',
-      is_new: false, section: 'military'
-    };
-    try{
-      const res = await fetch(SUPA_URL+'/rest/v1/phrases',{
-        method:'POST',
-        headers:{'apikey':SUPA_KEY,'Authorization':'Bearer '+SUPA_KEY,'Content-Type':'application/json','Prefer':'return=representation'},
-        body:JSON.stringify(newRow)
-      });
-      const data = await res.json();
-      if(data && data[0]){
-        match = {id:data[0].id, ...newRow, audio:''};
-        DB.push(match);
-      }
-    }catch(e){alert('שגיאה: '+e.message);return;}
-  }
-  
-  document.getElementById('edit-id').value = match.id;
-  document.getElementById('edit-he').value = match.he || '';
-  document.getElementById('edit-trans').value = match.trans || '';
-  document.getElementById('edit-ar').value = match.ar || '';
-  document.getElementById('edit-why').value = match.why || '';
-  document.getElementById('edit-tone').value = match.tone || '';
-  document.getElementById('edit-audio-cur').textContent = match.audio ? '✓ יש הקלטה' : 'אין הקלטה';
-  document.getElementById('edit-status').textContent = '';
-  document.getElementById('edit-modal').style.display = 'flex';
-}
-
-async function editQuick(idx){
-  const p = QUICK_PHRASES[idx];
-  // Find or create matching DB entry
-  let match = DB.find(d => d.he === p.he);
-  
-  if(!match){
-    // Create in Supabase
-    const newRow = {
-      cat: p.group === 'שליטה מיידית' ? 'ניהול מרחב' : 
-           p.group === 'בידוק וזיהוי' ? 'בידוק וזיהוי' :
-           p.group === 'שליטה בבית/רכב' ? 'שליטה בבית' : 'מגע ראשוני',
-      he: p.he,
-      trans: p.trans,
-      ar: p.ar,
-      tags: 'חירום',
-      why: '',
-      tone: '',
-      audio_url: '',
-      is_new: false,
-      section: 'military'
-    };
-    try{
-      const res = await fetch(SUPA_URL+'/rest/v1/phrases',{
-        method:'POST',
-        headers:{'apikey':SUPA_KEY,'Authorization':'Bearer '+SUPA_KEY,'Content-Type':'application/json','Prefer':'return=representation'},
-        body:JSON.stringify(newRow)
-      });
-      const data = await res.json();
-      if(data && data[0]){
-        match = {id:data[0].id, ...newRow, audio:''};
-        DB.push(match);
-      }
-    }catch(e){alert('שגיאה: '+e.message);return;}
-  }
-  
-  // Open edit modal
-  document.getElementById('edit-id').value = match.id;
-  document.getElementById('edit-he').value = match.he || '';
-  document.getElementById('edit-trans').value = match.trans || '';
-  document.getElementById('edit-ar').value = match.ar || '';
-  document.getElementById('edit-why').value = match.why || '';
-  document.getElementById('edit-tone').value = match.tone || '';
-  document.getElementById('edit-audio-cur').textContent = match.audio ? '✓ יש הקלטה' : 'אין הקלטה';
-  document.getElementById('edit-status').textContent = '';
-  document.getElementById('edit-modal').style.display = 'flex';
-}
-
 function opQuick(i){
   const p = QUICK_PHRASES[i];
-  const match = DB.find(d => d.he === p.he);
   window._popupSource = 'quick';
   document.getElementById('phe').textContent = p.he;
-  document.getElementById('parsm').textContent = (match && match.ar) || p.ar;
-  document.getElementById('ptrans').textContent = (match && match.trans) || p.trans;
+  document.getElementById('parsm').textContent = p.ar;
+  document.getElementById('ptrans').textContent = p.trans;
   document.getElementById('pwhy').textContent = '';
   document.getElementById('pwhyb').style.display = 'none';
   document.getElementById('ptone').textContent = '';
