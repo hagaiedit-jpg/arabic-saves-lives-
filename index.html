@@ -1423,33 +1423,35 @@ function searchHrt(){
 
 
 
-// Long press on logo to reveal admin tab
+// Triple tap on logo to reveal admin tab (works on mobile + desktop)
 (function(){
   const brand = document.getElementById('brand-title');
   if(!brand) return;
-  let pressTimer = null;
   
-  function startPress(){
-    pressTimer = setTimeout(() => {
-      const pw = prompt('סיסמת ניהול:');
-      if(pw === 'אני ואתה נשנה את העולם'){
-        document.getElementById('admin-tab').style.display = 'block';
-        window._adminAuth = true;
-        alert('✓ ניהול פעיל. הלשונית "ניהול" הופיעה.');
-      } else if(pw !== null) {
-        alert('סיסמה שגויה');
+  let tapCount = 0;
+  let tapTimer = null;
+  
+  function handleTap(e){
+    e.preventDefault();
+    tapCount++;
+    if(tapTimer) clearTimeout(tapTimer);
+    
+    tapTimer = setTimeout(() => {
+      if(tapCount >= 3){
+        const pw = prompt('סיסמת ניהול:');
+        if(pw === 'אני ואתה נשנה את העולם'){
+          document.getElementById('admin-tab').style.display = 'block';
+          window._adminAuth = true;
+          alert('✓ ניהול פעיל. הלשונית "ניהול" הופיעה.');
+        } else if(pw !== null) {
+          alert('סיסמה שגויה');
+        }
       }
-    }, 3000);
-  }
-  function cancelPress(){
-    if(pressTimer) { clearTimeout(pressTimer); pressTimer = null; }
+      tapCount = 0;
+    }, 600);
   }
   
-  brand.addEventListener('mousedown', startPress);
-  brand.addEventListener('touchstart', startPress);
-  brand.addEventListener('mouseup', cancelPress);
-  brand.addEventListener('mouseleave', cancelPress);
-  brand.addEventListener('touchend', cancelPress);
+  brand.addEventListener('click', handleTap);
 })();
 
 
