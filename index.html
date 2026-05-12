@@ -1530,6 +1530,16 @@ function rQuick(){
   if(!el) return;
   const cnt = document.getElementById('quick-count');
   if(cnt) cnt.textContent = QUICK_PHRASES.length + ' משפטים קריטיים — לחיצה לפתיחה';
+  
+  // Sync QUICK_PHRASES with DB - update trans/ar from latest DB values
+  QUICK_PHRASES.forEach(p => {
+    const match = DB.find(d => d.he === p.he);
+    if(match){
+      p.trans = match.trans || p.trans;
+      p.ar = match.ar || p.ar;
+    }
+  });
+  
   const groups = {};
   QUICK_PHRASES.forEach((p,i) => {
     if(!groups[p.group]) groups[p.group] = [];
@@ -1619,10 +1629,11 @@ async function editQuick(idx){
 
 function opQuick(i){
   const p = QUICK_PHRASES[i];
+  const match = DB.find(d => d.he === p.he);
   window._popupSource = 'quick';
   document.getElementById('phe').textContent = p.he;
-  document.getElementById('parsm').textContent = p.ar;
-  document.getElementById('ptrans').textContent = p.trans;
+  document.getElementById('parsm').textContent = (match && match.ar) || p.ar;
+  document.getElementById('ptrans').textContent = (match && match.trans) || p.trans;
   document.getElementById('pwhy').textContent = '';
   document.getElementById('pwhyb').style.display = 'none';
   document.getElementById('ptone').textContent = '';
