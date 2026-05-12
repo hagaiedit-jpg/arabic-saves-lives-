@@ -197,6 +197,17 @@ body{background:#1A2B3C;direction:rtl;font-family:-apple-system,BlinkMacSystemFo
 
 <!-- DAILY TAB -->
 <div class="scr" id="tab-day">
+  <div class="sbar">
+    <div class="si">
+      <span style="color:#aaa;font-size:15px;">🔍</span>
+      <input id="day-search" placeholder="חיפוש..." oninput="searchDay()"/>
+      <button class="sx" onclick="document.getElementById('day-search').value='';searchDay()">×</button>
+    </div>
+  </div>
+  <div id="day-search-results" style="display:none;">
+    <div class="smeta" id="day-smeta"></div>
+    <div class="litems" id="day-sres"></div>
+  </div>
   <div id="daily-grid-view">
     <div class="sec"><div class="stitle">ערבית יומיומית</div><div class="cgrid" id="dgrid"></div></div>
   </div>
@@ -208,6 +219,17 @@ body{background:#1A2B3C;direction:rtl;font-family:-apple-system,BlinkMacSystemFo
 
 <!-- HEART TAB -->
 <div class="scr" id="tab-hrt">
+  <div class="sbar">
+    <div class="si">
+      <span style="color:#aaa;font-size:15px;">🔍</span>
+      <input id="hrt-search" placeholder="חיפוש..." oninput="searchHrt()"/>
+      <button class="sx" onclick="document.getElementById('hrt-search').value='';searchHrt()">×</button>
+    </div>
+  </div>
+  <div id="hrt-search-results" style="display:none;">
+    <div class="smeta" id="hrt-smeta"></div>
+    <div id="hrt-sres" style="padding:14px;"></div>
+  </div>
   <div id="hrt-grid-view">
     <div class="sec"><div class="stitle">דברים שפותחים לב</div><div class="cgrid" id="hgrid"></div></div>
   </div>
@@ -1349,6 +1371,55 @@ function translateWithGoogle(text) {
     </div>
   `;
 }
+
+
+function searchDay(){
+  const q=document.getElementById('day-search').value.trim();
+  const sres=document.getElementById('day-search-results');
+  const grid=document.getElementById('daily-grid-view');
+  const list=document.getElementById('daily-list-view');
+  if(!q){
+    sres.style.display='none';
+    grid.style.display='block';
+    list.style.display='none';
+    return;
+  }
+  const r=DAILY.filter(p=>p.he.includes(q)||p.trans.includes(q)||p.ar.includes(q));
+  document.getElementById('day-smeta').textContent=r.length+' תוצאות עבור "'+q+'"';
+  document.getElementById('day-sres').innerHTML=r.length?r.map(p=>{
+    const i=DAILY.indexOf(p);
+    return `<div class="li" onclick="opPop(${i},'daily')"><div class="lt">${p.he}</div><div class="la">‹</div></div>`;
+  }).join(''):'<div class="empty">לא נמצאו תוצאות</div>';
+  grid.style.display='none';
+  list.style.display='none';
+  sres.style.display='block';
+}
+
+function searchHrt(){
+  const q=document.getElementById('hrt-search').value.trim();
+  const sres=document.getElementById('hrt-search-results');
+  const grid=document.getElementById('hrt-grid-view');
+  const list=document.getElementById('hrt-list-view');
+  if(!q){
+    sres.style.display='none';
+    grid.style.display='block';
+    list.style.display='none';
+    return;
+  }
+  const r=HEART.filter(h=>h.he.includes(q)||h.trans.includes(q)||h.ar.includes(q));
+  document.getElementById('hrt-smeta').textContent=r.length+' תוצאות עבור "'+q+'"';
+  document.getElementById('hrt-sres').innerHTML=r.length?r.map(h=>{
+    const i=HEART.indexOf(h);
+    return `<div class="card" onclick="opPop(${i},'heart')">
+      <div class="ctags"><span class="tag theart">❤️ פותח לב</span></div>
+      <div class="che">${h.he}</div><div class="car">${h.ar}</div>
+    </div>`;
+  }).join(''):'<div class="empty">לא נמצאו תוצאות</div>';
+  grid.style.display='none';
+  list.style.display='none';
+  sres.style.display='block';
+}
+
 
 loadData();
 </script>
