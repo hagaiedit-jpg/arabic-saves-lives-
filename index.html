@@ -159,7 +159,7 @@ body{background:#1A2B3C;direction:rtl;font-family:-apple-system,BlinkMacSystemFo
   <div style="padding:14px;">
     <div style="text-align:center;margin-bottom:14px;">
       <div style="color:#c0392b;font-size:18px;font-weight:700;margin-bottom:4px;">🚨 משפטי ברזל לשטח</div>
-      <div style="color:#a0b8c8;font-size:12px;">15 משפטים קריטיים — לחיצה לפתיחה</div>
+      <div style="color:#a0b8c8;font-size:12px;" id="quick-count">משפטים קריטיים — לחיצה לפתיחה</div>
     </div>
     <div id="quick-list"></div>
   </div>
@@ -1250,7 +1250,28 @@ async function saveEdit(){
   const btn=document.getElementById('edit-save-btn');btn.textContent='שומר...';
   const updates={he:document.getElementById('edit-he').value.trim(),trans:document.getElementById('edit-trans').value.trim(),ar:document.getElementById('edit-ar').value.trim(),why:document.getElementById('edit-why').value.trim(),tone:document.getElementById('edit-tone').value.trim()};
   const au=await getAudio('edit',document.getElementById('edit-status'));if(au)updates.audio_url=au;
-  try{await sbFetch('/rest/v1/phrases?id=eq.'+id,'PATCH',updates);closeEdit();await loadData();renderAdminList();btn.textContent='שמור';alert('✓ נשמר!');}catch(e){btn.textContent='שמור';alert('שגיאה: '+e.message);}
+  try{
+    await sbFetch('/rest/v1/phrases?id=eq.'+id,'PATCH',updates);
+    closeEdit();
+    await loadData();
+    // Update QUICK_PHRASES if this is one
+    const qi = QUICK_PHRASES.findIndex(q => {
+      const m = DB.find(d => d.id === id);
+      return m && q.he === m.he;
+    });
+    if(qi >= 0){
+      const newDB = DB.find(d => d.id === id);
+      if(newDB){
+        QUICK_PHRASES[qi].he = newDB.he;
+        QUICK_PHRASES[qi].trans = newDB.trans;
+        QUICK_PHRASES[qi].ar = newDB.ar;
+      }
+      rQuick();
+    }
+    renderAdminList();
+    btn.textContent='שמור';
+    alert('✓ נשמר!');
+  }catch(e){btn.textContent='שמור';alert('שגיאה: '+e.message);}
 }
 function closeEdit(){document.getElementById('edit-modal').style.display='none';delete rfiles['edit'];}
 async function delP(id){
@@ -1507,6 +1528,8 @@ const QUICK_PHRASES = [
 function rQuick(){
   const el = document.getElementById('quick-list');
   if(!el) return;
+  const cnt = document.getElementById('quick-count');
+  if(cnt) cnt.textContent = QUICK_PHRASES.length + ' משפטים קריטיים — לחיצה לפתיחה';
   const groups = {};
   QUICK_PHRASES.forEach((p,i) => {
     if(!groups[p.group]) groups[p.group] = [];
