@@ -1521,13 +1521,74 @@ function rQuick(){
   for(const g of Object.keys(groups)){
     html += `<div style="color:${colors[g]};font-size:13px;font-weight:600;margin:14px 0 8px 0;">${g}</div>`;
     for(const p of groups[g]){
+      // Try to find matching audio in DB
+      const match = DB.find(d => d.he === p.he);
+      const hasAudio = match && match.audio;
+      const audioIcon = hasAudio ? '🎵' : '🔇';
+      const editBtn = window._adminAuth ? `<button onclick="event.stopPropagation();editQuick(${p.idx})" style="padding:5px 10px;background:#2e4558;border:none;border-radius:6px;color:#D2B48C;font-size:11px;cursor:pointer;font-family:inherit;">✏️ ערוך/הקלט</button>` : '';
+      
       html += `<div onclick="opQuick(${p.idx})" style="background:#223344;border:1px solid #2e4558;border-radius:10px;padding:12px 14px;margin-bottom:8px;cursor:pointer;border-right:4px solid ${colors[g]};">
-        <div style="color:#fff;font-size:14px;font-weight:500;margin-bottom:4px;">${p.he}</div>
-        <div style="color:#D2B48C;font-size:14px;font-family:Georgia,serif;direction:rtl;">${p.trans}</div>
+        <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:8px;">
+          <div style="flex:1;">
+            <div style="color:#fff;font-size:14px;font-weight:500;margin-bottom:4px;">${p.he}</div>
+            <div style="color:#D2B48C;font-size:14px;font-family:Georgia,serif;direction:rtl;">${p.trans}</div>
+          </div>
+          <div style="display:flex;flex-direction:column;align-items:flex-end;gap:5px;">
+            <span style="font-size:14px;">${audioIcon}</span>
+            ${editBtn}
+          </div>
+        </div>
       </div>`;
     }
   }
   el.innerHTML = html;
+}
+
+async function editQuick(idx){
+  const p = QUICK_PHRASES[idx];
+  // Find or create matching DB entry
+  let match = DB.find(d => d.he === p.he);
+  
+  if(!match){
+    // Create in Supabase
+    const newRow = {
+      cat: p.group === 'שליטה מיידית' ? 'ניהול מרחב' : 
+           p.group === 'בידוק וזיהוי' ? 'בידוק וזיהוי' :
+           p.group === 'שליטה בבית/רכב' ? 'שליטה בבית' : 'מגע ראשוני',
+      he: p.he,
+      trans: p.trans,
+      ar: p.ar,
+      tags: 'חירום',
+      why: '',
+      tone: '',
+      audio_url: '',
+      is_new: false,
+      section: 'military'
+    };
+    try{
+      const res = await fetch(SUPA_URL+'/rest/v1/phrases',{
+        method:'POST',
+        headers:{'apikey':SUPA_KEY,'Authorization':'Bearer '+SUPA_KEY,'Content-Type':'application/json','Prefer':'return=representation'},
+        body:JSON.stringify(newRow)
+      });
+      const data = await res.json();
+      if(data && data[0]){
+        match = {id:data[0].id, ...newRow, audio:''};
+        DB.push(match);
+      }
+    }catch(e){alert('שגיאה: '+e.message);return;}
+  }
+  
+  // Open edit modal
+  document.getElementById('edit-id').value = match.id;
+  document.getElementById('edit-he').value = match.he || '';
+  document.getElementById('edit-trans').value = match.trans || '';
+  document.getElementById('edit-ar').value = match.ar || '';
+  document.getElementById('edit-why').value = match.why || '';
+  document.getElementById('edit-tone').value = match.tone || '';
+  document.getElementById('edit-audio-cur').textContent = match.audio ? '✓ יש הקלטה' : 'אין הקלטה';
+  document.getElementById('edit-status').textContent = '';
+  document.getElementById('edit-modal').style.display = 'flex';
 }
 
 function opQuick(i){
