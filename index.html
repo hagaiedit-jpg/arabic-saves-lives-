@@ -134,7 +134,7 @@ body{background:#1A2B3C;direction:rtl;font-family:-apple-system,BlinkMacSystemFo
 <div class="W">
 <div class="topbar">
   <div class="tb-top">
-    <div class="tb-brand">ערבית מצילה חיים</div>
+    <div class="tb-brand" id="brand-title" style="cursor:pointer;user-select:none;">ערבית מצילה חיים</div>
     <div class="tb-badges">
       <div class="bnew" id="new-badge">חדש</div>
       <div class="bstatus" id="status-badge">טוען...</div>
@@ -149,7 +149,7 @@ body{background:#1A2B3C;direction:rtl;font-family:-apple-system,BlinkMacSystemFo
     <div class="tb-tab" onclick="ST('cus',this)">מנהגים</div>
     <div class="tb-tab" onclick="ST('art',this)">מאמרים</div>
     <div class="tb-tab" onclick="ST('nwf',this)">חדש ●</div>
-    <div class="tb-tab" onclick="ST('adm',this)">ניהול</div>
+    <div class="tb-tab" id="admin-tab" style="display:none;" onclick="ST('adm',this)">ניהול</div>
   </div>
 </div>
 
@@ -1420,6 +1420,37 @@ function searchHrt(){
   list.style.display='none';
   sres.style.display='block';
 }
+
+
+
+// Long press on logo to reveal admin tab
+(function(){
+  const brand = document.getElementById('brand-title');
+  if(!brand) return;
+  let pressTimer = null;
+  
+  function startPress(){
+    pressTimer = setTimeout(() => {
+      const pw = prompt('סיסמת ניהול:');
+      if(pw === 'אני ואתה נשנה את העולם'){
+        document.getElementById('admin-tab').style.display = 'block';
+        window._adminAuth = true;
+        alert('✓ ניהול פעיל. הלשונית "ניהול" הופיעה.');
+      } else if(pw !== null) {
+        alert('סיסמה שגויה');
+      }
+    }, 3000);
+  }
+  function cancelPress(){
+    if(pressTimer) { clearTimeout(pressTimer); pressTimer = null; }
+  }
+  
+  brand.addEventListener('mousedown', startPress);
+  brand.addEventListener('touchstart', startPress);
+  brand.addEventListener('mouseup', cancelPress);
+  brand.addEventListener('mouseleave', cancelPress);
+  brand.addEventListener('touchend', cancelPress);
+})();
 
 
 loadData();
