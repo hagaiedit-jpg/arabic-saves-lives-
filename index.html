@@ -934,6 +934,15 @@ function clsP(){
   if(pt)clearInterval(pt);
   
   // Check where we came from
+  if(window._popupSource === 'quick'){
+    document.querySelectorAll('[id^="tab-"]').forEach(x=>x.className='scr');
+    document.getElementById('tab-quick').className='scr on';
+    document.querySelectorAll('.tb-tab').forEach(x=>x.classList.remove('active'));
+    document.querySelectorAll('.tb-tab')[0].classList.add('active');
+    shV('vcats');
+    window._popupSource = null;
+    return;
+  }
   if(window._popupSource === 'daily'){
     // Return to daily list
     document.querySelectorAll('[id^="tab-"]').forEach(x=>x.className='scr');
@@ -1494,8 +1503,10 @@ function rQuick(){
   const el = document.getElementById('quick-list');
   if(!el) return;
   
-  // Read from DB - cat === 'מצב מהיר'
   const quickItems = DB.filter(d => d.cat === 'מצב מהיר');
+  
+  const cnt = document.getElementById('quick-count');
+  if(cnt) cnt.textContent = quickItems.length + ' משפטים קריטיים — לחיצה לפתיחה';
   
   if(quickItems.length === 0){
     el.innerHTML = '<div class="empty">אין משפטים עדיין — הוסיפי דרך ניהול תחת קטגוריית "מצב מהיר"</div>';
@@ -1509,17 +1520,35 @@ function rQuick(){
     const audioIcon = hasAudio ? '🎵' : '🔇';
     const dbIdx = DB.indexOf(p);
     
-    html += `<div onclick="opP(${dbIdx})" style="background:#223344;border:1px solid #2e4558;border-radius:10px;padding:12px 14px;margin-bottom:8px;cursor:pointer;border-right:4px solid #c0392b;">
-      <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:8px;">
-        <div style="flex:1;">
-          <div style="color:#fff;font-size:14px;font-weight:500;margin-bottom:4px;">${p.he}</div>
-          <div style="color:#D2B48C;font-size:14px;font-family:Georgia,serif;direction:rtl;">${p.trans}</div>
-        </div>
-        <span style="font-size:14px;">${audioIcon}</span>
-      </div>
-    </div>`;
+    html += '<div onclick="opQuickItem('+dbIdx+')" style="background:#223344;border:1px solid #2e4558;border-radius:10px;padding:12px 14px;margin-bottom:8px;cursor:pointer;border-right:4px solid #c0392b;">' +
+      '<div style="display:flex;justify-content:space-between;align-items:flex-start;gap:8px;">' +
+        '<div style="flex:1;">' +
+          '<div style="color:#fff;font-size:14px;font-weight:500;margin-bottom:4px;">'+p.he+'</div>' +
+          '<div style="color:#D2B48C;font-size:14px;font-family:Georgia,serif;direction:rtl;">'+p.trans+'</div>' +
+        '</div>' +
+        '<span style="font-size:14px;">'+audioIcon+'</span>' +
+      '</div>' +
+    '</div>';
   }
   el.innerHTML = html;
+}
+
+function opQuickItem(i){
+  const p = DB[i];
+  window._popupSource = 'quick';
+  document.getElementById('phe').textContent = p.he;
+  document.getElementById('parsm').textContent = p.ar;
+  document.getElementById('ptrans').textContent = p.trans || '';
+  document.getElementById('pwhy').textContent = p.why || '';
+  document.getElementById('pwhyb').style.display = p.why ? 'block' : 'none';
+  document.getElementById('ptone').textContent = p.tone || '';
+  document.getElementById('ptoneb').style.display = p.tone ? 'block' : 'none';
+  document.querySelectorAll('.pbtn').forEach(b => b.setAttribute('data-audio', p.audio || ''));
+  bldW();
+  document.getElementById('wtime').textContent = '0:00';
+  document.querySelectorAll('[id^="tab-"]').forEach(x => x.className = 'scr');
+  document.getElementById('tab-lib').className = 'scr on';
+  shV('vpop');
 }
 
 
