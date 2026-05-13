@@ -141,7 +141,7 @@ body{background:#1A2B3C;direction:rtl;font-family:-apple-system,BlinkMacSystemFo
     </div>
   </div>
   <div class="tb-tabs">
-    <div class="tb-tab active" onclick="ST('quick',this)" style="color:#c0392b !important;font-weight:700;">🚨 מצב מהיר</div>
+    <div class="tb-tab active" onclick="ST('quick',this)" style="background:#c0392b;color:#fff !important;border-radius:6px 6px 0 0;font-weight:700;">🚨 מצב מהיר</div>
     <div class="tb-tab" onclick="ST('lib',this)">מבצעי</div>
     <div class="tb-tab" onclick="ST('day',this)">יומיומי</div>
     <div class="tb-tab" onclick="ST('hrt',this)">פותחים לב</div>
@@ -149,7 +149,7 @@ body{background:#1A2B3C;direction:rtl;font-family:-apple-system,BlinkMacSystemFo
     <div class="tb-tab" onclick="ST('sem',this)">סמנטי</div>
     <div class="tb-tab" onclick="ST('cus',this)">מנהגים</div>
     <div class="tb-tab" onclick="ST('art',this)">מאמרים</div>
-    <div class="tb-tab" id="new-tab-label" onclick="ST('nwf',this)">חדש</div>
+    <div class="tb-tab" onclick="ST('nwf',this)">חדש ●</div>
     <div class="tb-tab" id="admin-tab" style="display:none;" onclick="ST('adm',this)">ניהול</div>
   </div>
 </div>
@@ -159,7 +159,7 @@ body{background:#1A2B3C;direction:rtl;font-family:-apple-system,BlinkMacSystemFo
   <div style="padding:14px;">
     <div style="text-align:center;margin-bottom:14px;">
       <div style="color:#c0392b;font-size:18px;font-weight:700;margin-bottom:4px;">🚨 משפטי ברזל לשטח</div>
-      <div style="color:#a0b8c8;font-size:12px;" id="quick-count">משפטים קריטיים — לחיצה לפתיחה</div>
+      <div style="color:#a0b8c8;font-size:12px;">15 משפטים קריטיים — לחיצה לפתיחה</div>
     </div>
     <div id="quick-list"></div>
   </div>
@@ -306,7 +306,7 @@ body{background:#1A2B3C;direction:rtl;font-family:-apple-system,BlinkMacSystemFo
     <!-- Add Military -->
     <div id="at-ap"><div class="acard">
       <div class="afl"><label>קטגוריה</label><select id="apc">
-        <option>מצב מהיר</option><option>עצירת תנועה</option><option>ניהול מרחב</option><option>בידוק וזיהוי</option>
+        <option>עצירת תנועה</option><option>ניהול מרחב</option><option>בידוק וזיהוי</option>
         <option>שליטה בבית</option><option>הרגעה ושכנוע</option><option>מגע ראשוני</option>
         <option>עזרה ראשונה</option><option>קהל ואזרחים</option><option>ילדים ואוכלוסיות רגישות</option>
         <option>לוח שנה ותרבות</option><option>מילון כללי</option>
@@ -538,7 +538,7 @@ async function loadData(){
     ARTS=data.filter(p=>p.section==='article').map(mp);
     document.getElementById('status-badge').textContent='מחובר';
     document.getElementById('status-badge').style.background='#1D9E75';
-    bldCats();rDG();rHrt();rSem();rCus();rArts();renderDict();updateNewTabBadge();
+    bldCats();rDG();rHrt();rSem();rCus();rArts();renderDict();
   }catch(e){
     document.getElementById('status-badge').textContent='אופליין';
     document.getElementById('status-badge').style.background='#7a9ab5';
@@ -608,11 +608,10 @@ function bldCats(){
   document.getElementById('cgrid').innerHTML=CATS.map(c=>{
     const n=DB.some(p=>p.cat===c.id&&p.isNew);
     const cls='ct'+(c.special==='navy'?' navy':c.special==='announce'?' announce':'');
-    const style = c.quick ? 'style="background:#c0392b !important;"' : '';
     const cnt=c.special==='announce'?ANNOUNCE.length:c.special==='navy'?NAVY.length:cntC(c.id);
-    return`<div class="${cls}" ${style} onclick="opC('${c.id}','${c.special||''}')">
+    return`<div class="${cls}" onclick="opC('${c.id}','${c.special||''}')">
       ${n?'<div style="width:7px;height:7px;border-radius:50%;background:#FF8C00;position:absolute;top:9px;left:9px;"></div>':''}
-      <div class="ci" ${c.quick ? 'style="background:#8b1810;"' : ''}>${c.icon}</div><div class="cn">${c.id}</div><div class="cc">${cnt} פריטים</div></div>`;
+      <div class="ci">${c.icon}</div><div class="cn">${c.id}</div><div class="cc">${cnt} פריטים</div></div>`;
   }).join('');
 }
 
@@ -934,15 +933,6 @@ function clsP(){
   if(pt)clearInterval(pt);
   
   // Check where we came from
-  if(window._popupSource === 'quick'){
-    document.querySelectorAll('[id^="tab-"]').forEach(x=>x.className='scr');
-    document.getElementById('tab-quick').className='scr on';
-    document.querySelectorAll('.tb-tab').forEach(x=>x.classList.remove('active'));
-    document.querySelectorAll('.tb-tab')[0].classList.add('active');
-    shV('vcats');
-    window._popupSource = null;
-    return;
-  }
   if(window._popupSource === 'daily'){
     // Return to daily list
     document.querySelectorAll('[id^="tab-"]').forEach(x=>x.className='scr');
@@ -968,6 +958,15 @@ function clsP(){
     document.getElementById('tab-sem').className='scr on';
     document.querySelectorAll('.tb-tab').forEach(x=>x.classList.remove('active'));
     document.querySelectorAll('.tb-tab')[4].classList.add('active');
+    shV('vcats');
+    window._popupSource = null;
+    return;
+  }
+  if(window._popupSource === 'quick'){
+    document.querySelectorAll('[id^="tab-"]').forEach(x=>x.className='scr');
+    document.getElementById('tab-quick').className='scr on';
+    document.querySelectorAll('.tb-tab').forEach(x=>x.classList.remove('active'));
+    document.querySelectorAll('.tb-tab')[0].classList.add('active');
     shV('vcats');
     window._popupSource = null;
     return;
@@ -1090,15 +1089,6 @@ function markAllSeen(){
   
   bldCats();
   rNF();
-  updateNewTabBadge();
-}
-
-
-function updateNewTabBadge(){
-  const tabLabel = document.getElementById('new-tab-label');
-  if(!tabLabel) return;
-  const hasNew = DB.some(p=>p.isNew) || DAILY.some(d=>d.isNew) || HEART.some(h=>h.isNew) || NAVY.some(n=>n.isNew) || ANNOUNCE.some(a=>a.isNew);
-  tabLabel.textContent = hasNew ? 'חדש ●' : 'חדש';
 }
 
 function rNF(){
@@ -1260,16 +1250,7 @@ async function saveEdit(){
   const btn=document.getElementById('edit-save-btn');btn.textContent='שומר...';
   const updates={he:document.getElementById('edit-he').value.trim(),trans:document.getElementById('edit-trans').value.trim(),ar:document.getElementById('edit-ar').value.trim(),why:document.getElementById('edit-why').value.trim(),tone:document.getElementById('edit-tone').value.trim()};
   const au=await getAudio('edit',document.getElementById('edit-status'));if(au)updates.audio_url=au;
-  try{
-    await sbFetch('/rest/v1/phrases?id=eq.'+id,'PATCH',updates);
-    closeEdit();
-    await loadData();
-    // Refresh quick mode if needed
-    rQuick();
-    renderAdminList();
-    btn.textContent='שמור';
-    alert('✓ נשמר!');
-  }catch(e){btn.textContent='שמור';alert('שגיאה: '+e.message);}
+  try{await sbFetch('/rest/v1/phrases?id=eq.'+id,'PATCH',updates);closeEdit();await loadData();renderAdminList();btn.textContent='שמור';alert('✓ נשמר!');}catch(e){btn.textContent='שמור';alert('שגיאה: '+e.message);}
 }
 function closeEdit(){document.getElementById('edit-modal').style.display='none';delete rfiles['edit'];}
 async function delP(id){
@@ -1497,65 +1478,74 @@ function searchHrt(){
 
 
 
-
+// Quick Mode - 15 critical phrases
+const QUICK_PHRASES = [
+  {he:'כבה את המנוע וצא מהרכב!',trans:'אִטְפִי אִלמוֹתוֹר וּאִטְלַע מִן אִל-סַיָّארָה!',ar:'اطفي الموتور واطلع من السيارة',group:'שליטה מיידית'},
+  {he:'ידיים למעלה!',trans:'עַלִّי אִידַכּ לַפוֹק!',ar:'علي إيدك لفوق',group:'שליטה מיידית'},
+  {he:'אל תזוז!',trans:'לַא תִּתְחַרַّכּ!',ar:'لا تتحرك',group:'שליטה מיידית'},
+  {he:'תישאר כאן, אסור לזוז!',trans:'חַ׳לִّיכּ הוֹן, מַמְנוּעַ תִתְחַרַّכּ!',ar:'خليك هون، ممنوع تتحرك',group:'שליטה מיידית'},
+  {he:'כבה את הטלפון עכשיו!',trans:'אִטְפִי אִל-גַ׳וַّאל הַלַّא!',ar:'اطفي الجوال هلق',group:'שליטה מיידית'},
+  {he:'תן לי תעודת זהות',trans:'עַטִינִי הַוִיّתַכּ',ar:'عطيني هويتك',group:'בידוק וזיהוי'},
+  {he:'מה שם אביך ושם המשפחה?',trans:'שׁוּ אִסְם אַבּוּכּ וַאִסְם אִל-עֵילֶה?',ar:'شو اسم أبوك واسم العيلة؟',group:'בידוק וזיהוי'},
+  {he:'מאיפה באת?',trans:'מִן וֵין גִ׳ית?',ar:'من وين جيت؟',group:'בידוק וזיהוי'},
+  {he:'איפה אתה עובד?',trans:'וֵין בְּתִשְׁתֵעֵ׳ל?',ar:'وين بتشتغل؟',group:'בידוק וזיהוי'},
+  {he:'תרים את החולצה למעלה',trans:'אִרְפַע אִל-בְּלוּזֶה לַפוֹק',ar:'ارفع البلوزة لفوق',group:'בידוק וזיהוי'},
+  {he:'פתח את הדלת',trans:'אִפְתַח אִל-בָּאבּ',ar:'افتح الباب',group:'שליטה בבית/רכב'},
+  {he:'פתח את תא המטען',trans:'אִפְתַח אִל-בַּגַ׳אז',ar:'افتح البغاز',group:'שליטה בבית/רכב'},
+  {he:'שלום, אנחנו מצה"ל',trans:'מַרְחַבַּא, אִחְנַא מִן גֵّישׁ אִלדִّפַאע אִלאִסְרַאאִילִי',ar:'مرحبا، إحنا من جيش الدفاع الإسرائيلي',group:'הרגעה ועזרה'},
+  {he:'אל תפחד',trans:'מַא תְּחַ׳אף',ar:'ما تخاف',group:'הרגעה ועזרה'},
+  {he:'צריך אמבולנס?',trans:'בִּדַّכּ אִסְעָאף?',ar:'بدك إسعاف؟',group:'הרגעה ועזרה'},
+];
 
 function rQuick(){
   const el = document.getElementById('quick-list');
   if(!el) return;
+  const groups = {};
+  QUICK_PHRASES.forEach((p,i) => {
+    if(!groups[p.group]) groups[p.group] = [];
+    groups[p.group].push({...p, idx: i});
+  });
   
-  const quickItems = DB.filter(d => d.cat === 'מצב מהיר');
-  
-  const cnt = document.getElementById('quick-count');
-  if(cnt) cnt.textContent = quickItems.length + ' משפטים קריטיים — לחיצה לפתיחה';
-  
-  if(quickItems.length === 0){
-    el.innerHTML = '<div class="empty">אין משפטים עדיין — הוסיפי דרך ניהול תחת קטגוריית "מצב מהיר"</div>';
-    return;
-  }
+  const colors = {
+    'שליטה מיידית':'#c0392b',
+    'בידוק וזיהוי':'#FF8C00',
+    'שליטה בבית/רכב':'#8e44ad',
+    'הרגעה ועזרה':'#1D9E75'
+  };
   
   let html = '';
-  for(let i=0; i<quickItems.length; i++){
-    const p = quickItems[i];
-    const hasAudio = p.audio;
-    const audioIcon = hasAudio ? '🎵' : '🔇';
-    const dbIdx = DB.indexOf(p);
-    
-    html += '<div onclick="opQuickItem('+dbIdx+')" style="background:#223344;border:1px solid #2e4558;border-radius:10px;padding:12px 14px;margin-bottom:8px;cursor:pointer;border-right:4px solid #c0392b;">' +
-      '<div style="display:flex;justify-content:space-between;align-items:flex-start;gap:8px;">' +
-        '<div style="flex:1;">' +
-          '<div style="color:#fff;font-size:14px;font-weight:500;margin-bottom:4px;">'+p.he+'</div>' +
-          '<div style="color:#D2B48C;font-size:14px;font-family:Georgia,serif;direction:rtl;">'+p.trans+'</div>' +
-        '</div>' +
-        '<span style="font-size:14px;">'+audioIcon+'</span>' +
-      '</div>' +
-    '</div>';
+  for(const g of Object.keys(groups)){
+    html += `<div style="color:${colors[g]};font-size:13px;font-weight:600;margin:14px 0 8px 0;">${g}</div>`;
+    for(const p of groups[g]){
+      html += `<div onclick="opQuick(${p.idx})" style="background:#223344;border:1px solid #2e4558;border-radius:10px;padding:12px 14px;margin-bottom:8px;cursor:pointer;border-right:4px solid ${colors[g]};">
+        <div style="color:#fff;font-size:14px;font-weight:500;margin-bottom:4px;">${p.he}</div>
+        <div style="color:#D2B48C;font-size:14px;font-family:Georgia,serif;direction:rtl;">${p.trans}</div>
+      </div>`;
+    }
   }
   el.innerHTML = html;
 }
 
-function opQuickItem(i){
-  const p = DB[i];
+function opQuick(i){
+  const p = QUICK_PHRASES[i];
   window._popupSource = 'quick';
   document.getElementById('phe').textContent = p.he;
   document.getElementById('parsm').textContent = p.ar;
-  document.getElementById('ptrans').textContent = p.trans || '';
-  document.getElementById('pwhy').textContent = p.why || '';
-  document.getElementById('pwhyb').style.display = p.why ? 'block' : 'none';
-  document.getElementById('ptone').textContent = p.tone || '';
-  document.getElementById('ptoneb').style.display = p.tone ? 'block' : 'none';
-  document.querySelectorAll('.pbtn').forEach(b => b.setAttribute('data-audio', p.audio || ''));
+  document.getElementById('ptrans').textContent = p.trans;
+  document.getElementById('pwhy').textContent = '';
+  document.getElementById('pwhyb').style.display = 'none';
+  document.getElementById('ptone').textContent = '';
+  document.getElementById('ptoneb').style.display = 'none';
+  // Try to find matching audio from DB
+  const match = DB.find(d => d.he === p.he);
+  const audioUrl = match ? match.audio : '';
+  document.querySelectorAll('.pbtn').forEach(b => b.setAttribute('data-audio', audioUrl));
   bldW();
   document.getElementById('wtime').textContent = '0:00';
   document.querySelectorAll('[id^="tab-"]').forEach(x => x.className = 'scr');
   document.getElementById('tab-lib').className = 'scr on';
   shV('vpop');
 }
-
-
-
-
-
-
 
 
 rQuick();
