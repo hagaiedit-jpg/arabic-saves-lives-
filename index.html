@@ -190,7 +190,7 @@ body{background:#1A2B3C;direction:rtl;font-family:-apple-system,BlinkMacSystemFo
       <div class="ww"><div class="wave" id="wbars"></div><span class="wt" id="wtime">0:00</span></div>
       <div class="pbr">
         <button class="pbtn slow" onclick="play(this,'slow')">🐢 צב</button>
-        <button class="pbtn fast" onclick="play(this,'fast')">🐇 ארנב</button>
+        <button class="pbtn fast" onclick="play(this,'fast')">🔊 השמע</button>
       </div>
       <div class="ibox b" id="pwhyb"><div class="ilbl b">למה זה חשוב</div><div class="itxt b" id="pwhy"></div></div>
       <div class="ibox o" id="ptoneb"><div class="ilbl o">טיפ ללוחם</div><div class="itxt o" id="ptone"></div></div>
@@ -486,7 +486,7 @@ body{background:#1A2B3C;direction:rtl;font-family:-apple-system,BlinkMacSystemFo
     </div>
     <div style="display:flex;gap:8px;margin-top:14px;">
       <button onclick="closeEdit()" style="flex:1;padding:12px;background:#2e4558;border:none;border-radius:8px;color:#D2B48C;font-size:14px;cursor:pointer;font-family:inherit;">ביטול</button>
-      <button id="edit-save-btn" onclick="saveEdit()" style="flex:2;padding:12px;background:#FF8C00;border:none;border-radius:8px;color:#fff;font-size:14px;font-weight:600;cursor:pointer;font-family:inherit;">שמור</button>
+      <button id="edit-save-btn" onclick="saveEdit()" style="flex:2;padding:12px;background:#c0392b;border:none;border-radius:10px;color:#fff;font-size:14px;font-weight:600;cursor:pointer;font-family:inherit;">שמור</button>
     </div>
   </div>
 </div>
@@ -1468,11 +1468,10 @@ function rQK(){
     var i=DB.indexOf(p);
     var au=p.audio||'';
     return '<div style="background:#223344;border:1px solid #2e4558;border-radius:10px;padding:14px;margin-bottom:10px;border-right:4px solid #c0392b;">'+
-      '<div style="color:#fff;font-size:15px;font-weight:600;margin-bottom:6px;">'+p.he+'</div>'+
-      '<div style="color:#D2B48C;font-size:15px;font-family:Georgia,serif;margin-bottom:4px;">'+p.trans+'</div>'+
-      '<div style="color:#a0b8c8;font-size:17px;text-align:center;margin-bottom:10px;font-family:Georgia,serif;">'+p.ar+'</div>'+
+      '<div style="color:#a0b8c8;font-size:13px;margin-bottom:4px;">'+p.he+'</div>'+
+      '<div style="color:#fff;font-size:20px;font-weight:600;text-align:center;margin-bottom:6px;font-family:Georgia,serif;letter-spacing:0.03em;">'+p.trans+'</div>'+
+      '<div style="color:#D2B48C;font-size:16px;text-align:center;margin-bottom:10px;font-family:Georgia,serif;">'+p.ar+'</div>'+
       '<div style="display:flex;gap:8px;">'+
-        '<button onclick="playQK('+i+',0.7)" style="flex:1;padding:10px;background:#D2B48C;border:none;border-radius:8px;color:#412402;font-size:13px;font-weight:600;cursor:pointer;font-family:inherit;">🐢 צב</button>'+
         '<button onclick="playQK('+i+',1)" style="flex:1;padding:10px;background:#FF8C00;border:none;border-radius:8px;color:#fff;font-size:13px;font-weight:600;cursor:pointer;font-family:inherit;">🐇 ארנב</button>'+
       '</div>'+
     '</div>';
