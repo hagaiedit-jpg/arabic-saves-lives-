@@ -925,7 +925,7 @@ function clsP(){
   
   // Check where we came from
  if(window._popupSource==='qk'){document.querySelectorAll('[id^="tab-"]').forEach(function(x){x.className='scr';});document.getElementById('tab-qk').className='scr on';document.querySelectorAll('.tb-tab').forEach(function(x){x.classList.remove('active');});document.querySelectorAll('.tb-tab')[0].classList.add('active');shV('vcats');window._popupSource=null;return;}
-  if(window._popupSource === 'daily'){
+ if(window._popupSource==='qk'){document.querySelectorAll('[id^="tab-"]').forEach(function(x){x.className='scr';});document.getElementById('tab-qk').className='scr on';document.querySelectorAll('.tb-tab').forEach(function(x){x.classList.remove('active');});document.querySelectorAll('.tb-tab')[0].classList.add('active');shV('vcats');window._popupSource=null;return;} if(window._popupSource === 'daily'){
     // Return to daily list
     document.querySelectorAll('[id^="tab-"]').forEach(x=>x.className='scr');
     document.getElementById('tab-day').className='scr on';
