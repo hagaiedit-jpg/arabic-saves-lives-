@@ -141,7 +141,8 @@ body{background:#1A2B3C;direction:rtl;font-family:-apple-system,BlinkMacSystemFo
     </div>
   </div>
   <div class="tb-tabs">
-    <div class="tb-tab active" onclick="ST('lib',this)">מבצעי</div>
+    <div class="tb-tab active" onclick="ST('quick',this)" style="color:#c0392b !important;font-weight:700;">🚨 מצב מהיר</div>
+    <div class="tb-tab" onclick="ST('lib',this)">מבצעי</div>
     <div class="tb-tab" onclick="ST('day',this)">יומיומי</div>
     <div class="tb-tab" onclick="ST('hrt',this)">פותחים לב</div>
     <div class="tb-tab" onclick="ST('dict',this)">מילון</div>
@@ -165,7 +166,7 @@ body{background:#1A2B3C;direction:rtl;font-family:-apple-system,BlinkMacSystemFo
 </div>
 
 <!-- MILITARY TAB -->
-<div class="scr on" id="tab-lib">
+<div class="scr" id="tab-lib">
   <div class="sbar">
     <div class="si">
       <span style="color:#aaa;font-size:15px;">🔍</span>
@@ -305,7 +306,7 @@ body{background:#1A2B3C;direction:rtl;font-family:-apple-system,BlinkMacSystemFo
     <!-- Add Military -->
     <div id="at-ap"><div class="acard">
       <div class="afl"><label>קטגוריה</label><select id="apc">
-        <option>עצירת תנועה</option><option>ניהול מרחב</option><option>בידוק וזיהוי</option>
+        <option>מצב מהיר</option><option>עצירת תנועה</option><option>ניהול מרחב</option><option>בידוק וזיהוי</option>
         <option>שליטה בבית</option><option>הרגעה ושכנוע</option><option>מגע ראשוני</option>
         <option>עזרה ראשונה</option><option>קהל ואזרחים</option><option>ילדים ואוכלוסיות רגישות</option>
         <option>לוח שנה ותרבות</option><option>מילון כללי</option>
@@ -591,7 +592,7 @@ async function getAudio(p,stEl){
 }
 
 // CATS
-const CATS=[{id:'מצב מהיר',icon:'🚨',quick:true},{id:'עצירת תנועה',icon:'🚫'},{id:'ניהול מרחב',icon:'📍'},{id:'בידוק וזיהוי',icon:'🔍'},{id:'שליטה בבית',icon:'🏠'},{id:'הרגעה ושכנוע',icon:'✌️'},{id:'מגע ראשוני',icon:'🕵'},{id:'עזרה ראשונה',icon:'🩹'},{id:'קהל ואזרחים',icon:'👥'},{id:'ילדים ואוכלוסיות רגישות',icon:'👶'},{id:'לוח שנה ותרבות',icon:'📅'},{id:'מילון כללי',icon:'💬'},{id:'כריזה',icon:'📢',special:'announce'},{id:'תשאול ימי',icon:'⚓',special:'navy'}];
+const CATS=[{id:'עצירת תנועה',icon:'🚫'},{id:'ניהול מרחב',icon:'📍'},{id:'בידוק וזיהוי',icon:'🔍'},{id:'שליטה בבית',icon:'🏠'},{id:'הרגעה ושכנוע',icon:'✌️'},{id:'מגע ראשוני',icon:'🕵'},{id:'עזרה ראשונה',icon:'🩹'},{id:'קהל ואזרחים',icon:'👥'},{id:'ילדים ואוכלוסיות רגישות',icon:'👶'},{id:'לוח שנה ותרבות',icon:'📅'},{id:'מילון כללי',icon:'💬'},{id:'כריזה',icon:'📢',special:'announce'},{id:'תשאול ימי',icon:'⚓',special:'navy'}];
 const DCATS=[{id:'שוק ומסחר',icon:'🛒'},{id:'מסעדה ואוכל',icon:'🍽️'},{id:'שיחת היכרות',icon:'🤝'},{id:'עזרה וכיוונים',icon:'🗺️'},{id:'ילדים ובית ספר',icon:'🎒'},{id:'שכנות וקהילה',icon:'🏘️'}];
 const HCATS=[
   {id:'פתיחת שיח',icon:'👋'},
@@ -815,6 +816,7 @@ function ST(t,el){
   document.querySelectorAll('[id^="tab-"]').forEach(x=>x.className='scr');
   document.getElementById('tab-'+t).className='scr on';
   curTab=t;
+  if(t==='quick')rQuick();
   if(t==='dict')renderDict();
   if(t==='sem')rSem();
   if(t==='nwf')rNF();
@@ -1527,6 +1529,7 @@ function rQuick(){
 
 
 
+rQuick();
 loadData();
 </script>
 </body>
