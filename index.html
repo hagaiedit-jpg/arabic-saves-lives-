@@ -141,6 +141,7 @@ body{background:#1A2B3C;direction:rtl;font-family:-apple-system,BlinkMacSystemFo
     </div>
   </div>
   <div class="tb-tabs">
+    <div class="tb-tab" onclick="ST('qk',this)" style="color:#c0392b !important;font-weight:700;">🚨 מצב מהיר</div>
     <div class="tb-tab active" onclick="ST('lib',this)">מבצעי</div>
     <div class="tb-tab" onclick="ST('day',this)">יומיומי</div>
     <div class="tb-tab" onclick="ST('hrt',this)">פותחים לב</div>
@@ -153,7 +154,10 @@ body{background:#1A2B3C;direction:rtl;font-family:-apple-system,BlinkMacSystemFo
   </div>
 </div>
 
-<!-- MILITARY TAB -->
+
+ <div class="scr" id="tab-qk">
+  <div class="sec"><div class="stitle">🚨 מצב מהיר</div><div id="qklist"><div class="empty">טוען...</div></div></div>
+</div> <!-- MILITARY TAB -->
 <div class="scr on" id="tab-lib">
   <div class="sbar">
     <div class="si">
@@ -526,7 +530,7 @@ async function loadData(){
     ARTS=data.filter(p=>p.section==='article').map(mp);
     document.getElementById('status-badge').textContent='מחובר';
     document.getElementById('status-badge').style.background='#1D9E75';
-    bldCats();rDG();rHrt();rSem();rCus();rArts();renderDict();
+    bldCats();rDG();rHrt();rQK();rSem();rCus();rArts();renderDict();
   }catch(e){
     document.getElementById('status-badge').textContent='אופליין';
     document.getElementById('status-badge').style.background='#7a9ab5';
@@ -580,7 +584,7 @@ async function getAudio(p,stEl){
 }
 
 // CATS
-const CATS=[{id:'מצב מהיר',icon:'🚨'},{id:'עצירת תנועה',icon:'🚫'},{id:'ניהול מרחב',icon:'📍'},{id:'בידוק וזיהוי',icon:'🔍'},{id:'שליטה בבית',icon:'🏠'},{id:'הרגעה ושכנוע',icon:'✌️'},{id:'מגע ראשוני',icon:'🕵'},{id:'עזרה ראשונה',icon:'🩹'},{id:'קהל ואזרחים',icon:'👥'},{id:'ילדים ואוכלוסיות רגישות',icon:'👶'},{id:'לוח שנה ותרבות',icon:'📅'},{id:'מילון כללי',icon:'💬'},{id:'כריזה',icon:'📢',special:'announce'},{id:'תשאול ימי',icon:'⚓',special:'navy'}];
+const CATS=[,{id:'עצירת תנועה',icon:'🚫'},{id:'ניהול מרחב',icon:'📍'},{id:'בידוק וזיהוי',icon:'🔍'},{id:'שליטה בבית',icon:'🏠'},{id:'הרגעה ושכנוע',icon:'✌️'},{id:'מגע ראשוני',icon:'🕵'},{id:'עזרה ראשונה',icon:'🩹'},{id:'קהל ואזרחים',icon:'👥'},{id:'ילדים ואוכלוסיות רגישות',icon:'👶'},{id:'לוח שנה ותרבות',icon:'📅'},{id:'מילון כללי',icon:'💬'},{id:'כריזה',icon:'📢',special:'announce'},{id:'תשאול ימי',icon:'⚓',special:'navy'}];
 const DCATS=[{id:'שוק ומסחר',icon:'🛒'},{id:'מסעדה ואוכל',icon:'🍽️'},{id:'שיחת היכרות',icon:'🤝'},{id:'עזרה וכיוונים',icon:'🗺️'},{id:'ילדים ובית ספר',icon:'🎒'},{id:'שכנות וקהילה',icon:'🏘️'}];
 const HCATS=[
   {id:'פתיחת שיח',icon:'👋'},
@@ -920,6 +924,7 @@ function clsP(){
   if(pt)clearInterval(pt);
   
   // Check where we came from
+ if(window._popupSource==='qk'){document.querySelectorAll('[id^="tab-"]').forEach(function(x){x.className='scr';});document.getElementById('tab-qk').className='scr on';document.querySelectorAll('.tb-tab').forEach(function(x){x.classList.remove('active');});document.querySelectorAll('.tb-tab')[0].classList.add('active');shV('vcats');window._popupSource=null;return;}
   if(window._popupSource === 'daily'){
     // Return to daily list
     document.querySelectorAll('[id^="tab-"]').forEach(x=>x.className='scr');
@@ -1107,7 +1112,8 @@ async function addSem(){
     await spSave(phrase,'semantic');
     ['asem-ar','asem-tr','asem-dict','asem-field'].forEach(id=>document.getElementById(id).value='');
     document.getElementById('asem-file').value='';
-    await loadData();
+    awaitfunction rQK(){var items=DB.filter(function(d){return d.cat==='מצב מהיר';});document.getElementById('qklist').innerHTML=items.length?items.map(function(p){var i=DB.indexOf(p);return '<div class="li" onclick="opQK('+i+')"><div class="lt">'+p.he+'</div><div class="la">‹</div></div>';}).join(''):'<div class="empty">אין משפטים</div>';}
+function opQK(i){var p=DB[i];window._popupSource='qk';document.getElementById('phe').textContent=p.he;document.getElementById('parsm').textContent=p.ar;document.getElementById('ptrans').textContent=p.trans||'';document.getElementById('pwhy').textContent=p.why||'';document.getElementById('pwhyb').style.display=p.why?'block':'none';document.getElementById('ptone').textContent=p.tone||'';document.getElementById('ptoneb').style.display=p.tone?'block':'none';document.querySelectorAll('.pbtn').forEach(function(b){b.setAttribute('data-audio',p.audio||'');});bldW();document.getElementById('wtime').textContent='0:00';document.querySelectorAll('[id^="tab-"]').forEach(function(x){x.className='scr';});document.getElementById('tab-lib').className='scr on';shV('vpop');} loadData();
     btn.textContent='שמור';
     alert('✓ נוסף!');
   }catch(e){btn.textContent='שמור';alert('שגיאה: '+e.message);}
