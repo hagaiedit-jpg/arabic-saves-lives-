@@ -298,7 +298,7 @@ body{background:#1A2B3C;direction:rtl;font-family:-apple-system,BlinkMacSystemFo
     <!-- Add Military -->
     <div id="at-ap"><div class="acard">
       <div class="afl"><label>קטגוריה</label><select id="apc">
-        <option>עצירת תנועה</option><option>ניהול מרחב</option><option>בידוק וזיהוי</option>
+        <option>מצב מהיר</option><option>עצירת תנועה</option><option>ניהול מרחב</option><option>בידוק וזיהוי</option>
         <option>שליטה בבית</option><option>הרגעה ושכנוע</option><option>מגע ראשוני</option>
         <option>עזרה ראשונה</option><option>קהל ואזרחים</option><option>ילדים ואוכלוסיות רגישות</option>
         <option>לוח שנה ותרבות</option><option>מילון כללי</option>
@@ -584,7 +584,7 @@ async function getAudio(p,stEl){
 }
 
 // CATS
-const CATS=[,{id:'עצירת תנועה',icon:'🚫'},{id:'ניהול מרחב',icon:'📍'},{id:'בידוק וזיהוי',icon:'🔍'},{id:'שליטה בבית',icon:'🏠'},{id:'הרגעה ושכנוע',icon:'✌️'},{id:'מגע ראשוני',icon:'🕵'},{id:'עזרה ראשונה',icon:'🩹'},{id:'קהל ואזרחים',icon:'👥'},{id:'ילדים ואוכלוסיות רגישות',icon:'👶'},{id:'לוח שנה ותרבות',icon:'📅'},{id:'מילון כללי',icon:'💬'},{id:'כריזה',icon:'📢',special:'announce'},{id:'תשאול ימי',icon:'⚓',special:'navy'}];
+const CATS=[{id:'עצירת תנועה',icon:'🚫'},{id:'ניהול מרחב',icon:'📍'},{id:'בידוק וזיהוי',icon:'🔍'},{id:'שליטה בבית',icon:'🏠'},{id:'הרגעה ושכנוע',icon:'✌️'},{id:'מגע ראשוני',icon:'🕵'},{id:'עזרה ראשונה',icon:'🩹'},{id:'קהל ואזרחים',icon:'👥'},{id:'ילדים ואוכלוסיות רגישות',icon:'👶'},{id:'לוח שנה ותרבות',icon:'📅'},{id:'מילון כללי',icon:'💬'},{id:'כריזה',icon:'📢',special:'announce'},{id:'תשאול ימי',icon:'⚓',special:'navy'}];
 const DCATS=[{id:'שוק ומסחר',icon:'🛒'},{id:'מסעדה ואוכל',icon:'🍽️'},{id:'שיחת היכרות',icon:'🤝'},{id:'עזרה וכיוונים',icon:'🗺️'},{id:'ילדים ובית ספר',icon:'🎒'},{id:'שכנות וקהילה',icon:'🏘️'}];
 const HCATS=[
   {id:'פתיחת שיח',icon:'👋'},
@@ -925,12 +925,12 @@ function clsP(){
   
   // Check where we came from
  if(window._popupSource==='qk'){document.querySelectorAll('[id^="tab-"]').forEach(function(x){x.className='scr';});document.getElementById('tab-qk').className='scr on';document.querySelectorAll('.tb-tab').forEach(function(x){x.classList.remove('active');});document.querySelectorAll('.tb-tab')[0].classList.add('active');shV('vcats');window._popupSource=null;return;}
- if(window._popupSource==='qk'){document.querySelectorAll('[id^="tab-"]').forEach(function(x){x.className='scr';});document.getElementById('tab-qk').className='scr on';document.querySelectorAll('.tb-tab').forEach(function(x){x.classList.remove('active');});document.querySelectorAll('.tb-tab')[0].classList.add('active');shV('vcats');window._popupSource=null;return;} if(window._popupSource === 'daily'){
+  if(window._popupSource === 'daily'){
     // Return to daily list
     document.querySelectorAll('[id^="tab-"]').forEach(x=>x.className='scr');
     document.getElementById('tab-day').className='scr on';
     document.querySelectorAll('.tb-tab').forEach(x=>x.classList.remove('active'));
-    document.querySelectorAll('.tb-tab')[1].classList.add('active');
+    document.querySelectorAll('.tb-tab')[2].classList.add('active');
     shV('vcats'); // Reset military view
     window._popupSource = null;
     return;
@@ -940,7 +940,7 @@ function clsP(){
     document.querySelectorAll('[id^="tab-"]').forEach(x=>x.className='scr');
     document.getElementById('tab-dict').className='scr on';
     document.querySelectorAll('.tb-tab').forEach(x=>x.classList.remove('active'));
-    document.querySelectorAll('.tb-tab')[3].classList.add('active');
+    document.querySelectorAll('.tb-tab')[4].classList.add('active');
     shV('vcats'); // Reset military view
     window._popupSource = null;
     return;
@@ -949,7 +949,7 @@ function clsP(){
     document.querySelectorAll('[id^="tab-"]').forEach(x=>x.className='scr');
     document.getElementById('tab-sem').className='scr on';
     document.querySelectorAll('.tb-tab').forEach(x=>x.classList.remove('active'));
-    document.querySelectorAll('.tb-tab')[4].classList.add('active');
+    document.querySelectorAll('.tb-tab')[5].classList.add('active');
     shV('vcats');
     window._popupSource = null;
     return;
@@ -958,7 +958,7 @@ function clsP(){
     document.querySelectorAll('[id^="tab-"]').forEach(x=>x.className='scr');
     document.getElementById('tab-hrt').className='scr on';
     document.querySelectorAll('.tb-tab').forEach(x=>x.classList.remove('active'));
-    document.querySelectorAll('.tb-tab')[2].classList.add('active');
+    document.querySelectorAll('.tb-tab')[3].classList.add('active');
     shV('vcats');
     window._popupSource = null;
     return;
@@ -1112,8 +1112,7 @@ async function addSem(){
     await spSave(phrase,'semantic');
     ['asem-ar','asem-tr','asem-dict','asem-field'].forEach(id=>document.getElementById(id).value='');
     document.getElementById('asem-file').value='';
-    awaitfunction rQK(){var items=DB.filter(function(d){return d.cat==='מצב מהיר';});document.getElementById('qklist').innerHTML=items.length?items.map(function(p){var i=DB.indexOf(p);return '<div class="li" onclick="opQK('+i+')"><div class="lt">'+p.he+'</div><div class="la">‹</div></div>';}).join(''):'<div class="empty">אין משפטים</div>';}
-function opQK(i){var p=DB[i];window._popupSource='qk';document.getElementById('phe').textContent=p.he;document.getElementById('parsm').textContent=p.ar;document.getElementById('ptrans').textContent=p.trans||'';document.getElementById('pwhy').textContent=p.why||'';document.getElementById('pwhyb').style.display=p.why?'block':'none';document.getElementById('ptone').textContent=p.tone||'';document.getElementById('ptoneb').style.display=p.tone?'block':'none';document.querySelectorAll('.pbtn').forEach(function(b){b.setAttribute('data-audio',p.audio||'');});bldW();document.getElementById('wtime').textContent='0:00';document.querySelectorAll('[id^="tab-"]').forEach(function(x){x.className='scr';});document.getElementById('tab-lib').className='scr on';shV('vpop');} loadData();
+    await loadData();
     btn.textContent='שמור';
     alert('✓ נוסף!');
   }catch(e){btn.textContent='שמור';alert('שגיאה: '+e.message);}
@@ -1461,6 +1460,33 @@ function searchHrt(){
 })();
 
 
+function rQK(){
+  var items=DB.filter(function(d){return d.cat==='מצב מהיר';});
+  var el=document.getElementById('qklist');
+  if(!items.length){el.innerHTML='<div class="empty">אין משפטים עדיין</div>';return;}
+  el.innerHTML=items.map(function(p){
+    var i=DB.indexOf(p);
+    var au=p.audio||'';
+    return '<div style="background:#223344;border:1px solid #2e4558;border-radius:10px;padding:14px;margin-bottom:10px;border-right:4px solid #c0392b;">'+
+      '<div style="color:#fff;font-size:15px;font-weight:600;margin-bottom:6px;">'+p.he+'</div>'+
+      '<div style="color:#D2B48C;font-size:15px;font-family:Georgia,serif;margin-bottom:4px;">'+p.trans+'</div>'+
+      '<div style="color:#a0b8c8;font-size:17px;text-align:center;margin-bottom:10px;font-family:Georgia,serif;">'+p.ar+'</div>'+
+      '<div style="display:flex;gap:8px;">'+
+        '<button onclick="playQK('+i+',0.7)" style="flex:1;padding:10px;background:#D2B48C;border:none;border-radius:8px;color:#412402;font-size:13px;font-weight:600;cursor:pointer;font-family:inherit;">🐢 צב</button>'+
+        '<button onclick="playQK('+i+',1)" style="flex:1;padding:10px;background:#FF8C00;border:none;border-radius:8px;color:#fff;font-size:13px;font-weight:600;cursor:pointer;font-family:inherit;">🐇 ארנב</button>'+
+      '</div>'+
+    '</div>';
+  }).join('');
+}
+function playQK(i,speed){
+  if(curAudio){curAudio.pause();curAudio=null;}
+  var u=DB[i].audio;
+  if(!u){alert('אין הקלטה');return;}
+  var a=new Audio(u);
+  a.playbackRate=speed;
+  a.play();
+  curAudio=a;
+}
 loadData();
 </script>
 </body>
