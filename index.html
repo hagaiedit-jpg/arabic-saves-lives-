@@ -1537,7 +1537,7 @@ function opQuick(i){
   document.getElementById('ptone').textContent = '';
   document.getElementById('ptoneb').style.display = 'none';
   // Try to find matching audio from DB
-  const match = DB.find(d => d.trans === p.trans
+  const match = DB.find(d => d.he === p.he
                        );
   const audioUrl = match ? match.audio : '';
   document.querySelectorAll('.pbtn').forEach(b => b.setAttribute('data-audio', audioUrl));
