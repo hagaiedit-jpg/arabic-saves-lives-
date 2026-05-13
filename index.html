@@ -141,8 +141,7 @@ body{background:#1A2B3C;direction:rtl;font-family:-apple-system,BlinkMacSystemFo
     </div>
   </div>
   <div class="tb-tabs">
-    <div class="tb-tab active" onclick="ST('quick',this)" style="background:#c0392b;color:#fff !important;border-radius:6px 6px 0 0;font-weight:700;">🚨 מצב מהיר</div>
-    <div class="tb-tab" onclick="ST('lib',this)">מבצעי</div>
+    <div class="tb-tab active" onclick="ST('lib',this)">מבצעי</div>
     <div class="tb-tab" onclick="ST('day',this)">יומיומי</div>
     <div class="tb-tab" onclick="ST('hrt',this)">פותחים לב</div>
     <div class="tb-tab" onclick="ST('dict',this)">מילון</div>
@@ -154,19 +153,8 @@ body{background:#1A2B3C;direction:rtl;font-family:-apple-system,BlinkMacSystemFo
   </div>
 </div>
 
-<!-- QUICK MODE TAB -->
-<div class="scr on" id="tab-quick">
-  <div style="padding:14px;">
-    <div style="text-align:center;margin-bottom:14px;">
-      <div style="color:#c0392b;font-size:18px;font-weight:700;margin-bottom:4px;">🚨 משפטי ברזל לשטח</div>
-      <div style="color:#a0b8c8;font-size:12px;">15 משפטים קריטיים — לחיצה לפתיחה</div>
-    </div>
-    <div id="quick-list"></div>
-  </div>
-</div>
-
 <!-- MILITARY TAB -->
-<div class="scr" id="tab-lib">
+<div class="scr on" id="tab-lib">
   <div class="sbar">
     <div class="si">
       <span style="color:#aaa;font-size:15px;">🔍</span>
@@ -592,7 +580,7 @@ async function getAudio(p,stEl){
 }
 
 // CATS
-const CATS=[{id:'מצב מהיר',icon:'🚨'},{id:'עצירת תנועה',icon:'🚫'},{id:'ניהול מרחב',icon:'📍'},{id:'בידוק וזיהוי',icon:'🔍'},{id:'שליטה בבית',icon:'🏠'},{id:'הרגעה ושכנוע',icon:'✌️'},{id:'מגע ראשוני',icon:'🕵'},{id:'עזרה ראשונה',icon:'🩹'},{id:'קהל ואזרחים',icon:'👥'},{id:'ילדים ואוכלוסיות רגישות',icon:'👶'},{id:'לוח שנה ותרבות',icon:'📅'},{id:'מילון כללי',icon:'💬'},{id:'כריזה',icon:'📢',special:'announce'},{id:'תשאול ימי',icon:'⚓',special:'navy'}];
+const CATS=[{id:'עצירת תנועה',icon:'🚫'},{id:'ניהול מרחב',icon:'📍'},{id:'בידוק וזיהוי',icon:'🔍'},{id:'שליטה בבית',icon:'🏠'},{id:'הרגעה ושכנוע',icon:'✌️'},{id:'מגע ראשוני',icon:'🕵'},{id:'עזרה ראשונה',icon:'🩹'},{id:'קהל ואזרחים',icon:'👥'},{id:'ילדים ואוכלוסיות רגישות',icon:'👶'},{id:'לוח שנה ותרבות',icon:'📅'},{id:'מילון כללי',icon:'💬'},{id:'כריזה',icon:'📢',special:'announce'},{id:'תשאול ימי',icon:'⚓',special:'navy'}];
 const DCATS=[{id:'שוק ומסחר',icon:'🛒'},{id:'מסעדה ואוכל',icon:'🍽️'},{id:'שיחת היכרות',icon:'🤝'},{id:'עזרה וכיוונים',icon:'🗺️'},{id:'ילדים ובית ספר',icon:'🎒'},{id:'שכנות וקהילה',icon:'🏘️'}];
 const HCATS=[
   {id:'פתיחת שיח',icon:'👋'},
@@ -815,7 +803,6 @@ function ST(t,el){
   document.querySelectorAll('[id^="tab-"]').forEach(x=>x.className='scr');
   document.getElementById('tab-'+t).className='scr on';
   curTab=t;
-  if(t==='quick')rQuick();
   if(t==='dict')renderDict();
   if(t==='sem')rSem();
   if(t==='nwf')rNF();
@@ -958,15 +945,6 @@ function clsP(){
     document.getElementById('tab-sem').className='scr on';
     document.querySelectorAll('.tb-tab').forEach(x=>x.classList.remove('active'));
     document.querySelectorAll('.tb-tab')[4].classList.add('active');
-    shV('vcats');
-    window._popupSource = null;
-    return;
-  }
-  if(window._popupSource === 'quick'){
-    document.querySelectorAll('[id^="tab-"]').forEach(x=>x.className='scr');
-    document.getElementById('tab-quick').className='scr on';
-    document.querySelectorAll('.tb-tab').forEach(x=>x.classList.remove('active'));
-    document.querySelectorAll('.tb-tab')[0].classList.add('active');
     shV('vcats');
     window._popupSource = null;
     return;
@@ -1477,79 +1455,6 @@ function searchHrt(){
 })();
 
 
-
-// Quick Mode - 15 critical phrases
-const QUICK_PHRASES = [
-  {he:'כבה את המנוע וצא מהרכב!',trans:'אִטְפִי אִלמוֹתוֹר וּאִטְלַע מִן אִל-סַיָّארָה!',ar:'اطفي الموتور واطلع من السيارة',group:'שליטה מיידית'},
-  {he:'ידיים למעלה!',trans:'עַלִّי אִידַכּ לַפוֹק!',ar:'علي إيدك لفوق',group:'שליטה מיידית'},
-  {he:'אל תזוז!',trans:'לַא תִּתְחַרַّכּ!',ar:'لا تتحرك',group:'שליטה מיידית'},
-  {he:'תישאר כאן, אסור לזוז!',trans:'חַ׳לִّיכּ הוֹן, מַמְנוּעַ תִתְחַרַّכּ!',ar:'خليك هون، ممنوع تتحرك',group:'שליטה מיידית'},
-  {he:'כבה את הטלפון עכשיו!',trans:'אִטְפִי אִל-גַ׳וַّאל הַלַّא!',ar:'اطفي الجوال هلق',group:'שליטה מיידית'},
-  {he:'תן לי תעודת זהות',trans:'עַטִינִי הַוִיّתַכּ',ar:'عطيني هويتك',group:'בידוק וזיהוי'},
-  {he:'מה שם אביך ושם המשפחה?',trans:'שׁוּ אִסְם אַבּוּכּ וַאִסְם אִל-עֵילֶה?',ar:'شو اسم أبوك واسم العيلة؟',group:'בידוק וזיהוי'},
-  {he:'מאיפה באת?',trans:'מִן וֵין גִ׳ית?',ar:'من وين جيت؟',group:'בידוק וזיהוי'},
-  {he:'איפה אתה עובד?',trans:'וֵין בְּתִשְׁתֵעֵ׳ל?',ar:'وين بتشتغل؟',group:'בידוק וזיהוי'},
-  {he:'תרים את החולצה למעלה',trans:'אִרְפַע אִל-בְּלוּזֶה לַפוֹק',ar:'ارفع البلوزة لفوق',group:'בידוק וזיהוי'},
-  {he:'פתח את הדלת',trans:'אִפְתַח אִל-בָּאבּ',ar:'افتح الباب',group:'שליטה בבית/רכב'},
-  {he:'פתח את תא המטען',trans:'אִפְתַח אִל-בַּגַ׳אז',ar:'افتح البغاز',group:'שליטה בבית/רכב'},
-  {he:'שלום, אנחנו מצה"ל',trans:'מַרְחַבַּא, אִחְנַא מִן גֵّישׁ אִלדִّפַאע אִלאִסְרַאאִילִי',ar:'مرحبا، إحنا من جيش الدفاع الإسرائيلي',group:'הרגעה ועזרה'},
-  {he:'אל תפחד',trans:'מַא תְּחַ׳אף',ar:'ما تخاف',group:'הרגעה ועזרה'},
-  {he:'צריך אמבולנס?',trans:'בִּדַّכּ אִסְעָאף?',ar:'بدك إسعاف؟',group:'הרגעה ועזרה'},
-];
-
-function rQuick(){
-  const el = document.getElementById('quick-list');
-  if(!el) return;
-  const groups = {};
-  QUICK_PHRASES.forEach((p,i) => {
-    if(!groups[p.group]) groups[p.group] = [];
-    groups[p.group].push({...p, idx: i});
-  });
-  
-  const colors = {
-    'שליטה מיידית':'#c0392b',
-    'בידוק וזיהוי':'#FF8C00',
-    'שליטה בבית/רכב':'#8e44ad',
-    'הרגעה ועזרה':'#1D9E75'
-  };
-  
-  let html = '';
-  for(const g of Object.keys(groups)){
-    html += `<div style="color:${colors[g]};font-size:13px;font-weight:600;margin:14px 0 8px 0;">${g}</div>`;
-    for(const p of groups[g]){
-      html += `<div onclick="opQuick(${p.idx})" style="background:#223344;border:1px solid #2e4558;border-radius:10px;padding:12px 14px;margin-bottom:8px;cursor:pointer;border-right:4px solid ${colors[g]};">
-        <div style="color:#fff;font-size:14px;font-weight:500;margin-bottom:4px;">${p.he}</div>
-        <div style="color:#D2B48C;font-size:14px;font-family:Georgia,serif;direction:rtl;">${p.trans}</div>
-      </div>`;
-    }
-  }
-  el.innerHTML = html;
-}
-
-function opQuick(i){
-  const p = QUICK_PHRASES[i];
-  window._popupSource = 'quick';
-  document.getElementById('phe').textContent = p.he;
-  document.getElementById('parsm').textContent = p.ar;
-  document.getElementById('ptrans').textContent = p.trans;
-  document.getElementById('pwhy').textContent = '';
-  document.getElementById('pwhyb').style.display = 'none';
-  document.getElementById('ptone').textContent = '';
-  document.getElementById('ptoneb').style.display = 'none';
-  // Try to find matching audio from DB
-  const match = DB.find(d => d.he === p.he
-                       );
-  const audioUrl = match ? match.audio : '';
-  document.querySelectorAll('.pbtn').forEach(b => b.setAttribute('data-audio', audioUrl));
-  bldW();
-  document.getElementById('wtime').textContent = '0:00';
-  document.querySelectorAll('[id^="tab-"]').forEach(x => x.className = 'scr');
-  document.getElementById('tab-lib').className = 'scr on';
-  shV('vpop');
-}
-
-
-rQuick();
 loadData();
 </script>
 </body>
