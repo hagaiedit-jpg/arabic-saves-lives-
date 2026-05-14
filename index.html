@@ -141,7 +141,17 @@ body{background:#1A2B3C;direction:rtl;font-family:-apple-system,BlinkMacSystemFo
     </div>
   </div>
   <div class="tb-tabs">
-    <div class="tb-tab active" onclick="ST('qk',this)" style="color:#c0392b !important;font-weight:700;">🚨 מצב מהיר</div>
+    <div class="tb-tab" onclick="ST('qk',this)" style="color:#c0392b !important;font-weight:700;">🚨 מצב מהיר</div>
+    <div class="tb-tab active" onclick="ST('lib',this)">מבצעי</div>
+    <div class="tb-tab" onclick="ST('hrt',this)">פותחים לב</div>
+    <div class="tb-tab" onclick="ST('cus',this)">התנהגות בשטח</div>
+    <div class="tb-tab" onclick="ST('day',this)">יומיומי</div>
+    <div class="tb-tab" onclick="ST('dict',this)">מילון</div>
+    <div class="tb-tab" onclick="ST('sem',this)">סמנטי</div>
+    <div class="tb-tab" onclick="ST('art',this)">מאמרים</div>
+    <div class="tb-tab" onclick="ST('nwf',this)">חדש</div>
+    <div class="tb-tab" id="admin-tab" style="display:none;" onclick="ST('adm',this)">ניהול</div>
+  </div>
     <div class="tb-tab active" onclick="ST('lib',this)">מבצעי</div>
     <div class="tb-tab" onclick="ST('day',this)">יומיומי</div>
     <div class="tb-tab" onclick="ST('hrt',this)">תרבות ולב</div>
@@ -259,7 +269,7 @@ body{background:#1A2B3C;direction:rtl;font-family:-apple-system,BlinkMacSystemFo
 
 <!-- CUSTOMS TAB -->
 <div class="scr" id="tab-cus">
-  <div class="sec"><div class="stitle">מנהגים ותרבות</div><div id="cuslist"></div></div>
+  <div class="sec"><div class="stitle">התנהגות בשטח</div><div id="cuslist"></div></div>
 </div>
 
 <!-- ARTICLES TAB -->
@@ -946,7 +956,7 @@ function clsP(){
     document.querySelectorAll('[id^="tab-"]').forEach(x=>x.className='scr');
     document.getElementById('tab-day').className='scr on';
     document.querySelectorAll('.tb-tab').forEach(x=>x.classList.remove('active'));
-    document.querySelectorAll('.tb-tab')[2].classList.add('active');
+    document.querySelectorAll('.tb-tab')[4].classList.add('active');
     shV('vcats'); // Reset military view
     window._popupSource = null;
     return;
@@ -956,7 +966,7 @@ function clsP(){
     document.querySelectorAll('[id^="tab-"]').forEach(x=>x.className='scr');
     document.getElementById('tab-dict').className='scr on';
     document.querySelectorAll('.tb-tab').forEach(x=>x.classList.remove('active'));
-    document.querySelectorAll('.tb-tab')[4].classList.add('active');
+    document.querySelectorAll('.tb-tab')[5].classList.add('active');
     shV('vcats'); // Reset military view
     window._popupSource = null;
     return;
@@ -965,7 +975,7 @@ function clsP(){
     document.querySelectorAll('[id^="tab-"]').forEach(x=>x.className='scr');
     document.getElementById('tab-sem').className='scr on';
     document.querySelectorAll('.tb-tab').forEach(x=>x.classList.remove('active'));
-    document.querySelectorAll('.tb-tab')[5].classList.add('active');
+    document.querySelectorAll('.tb-tab')[6].classList.add('active');
     shV('vcats');
     window._popupSource = null;
     return;
@@ -974,7 +984,7 @@ function clsP(){
     document.querySelectorAll('[id^="tab-"]').forEach(x=>x.className='scr');
     document.getElementById('tab-hrt').className='scr on';
     document.querySelectorAll('.tb-tab').forEach(x=>x.classList.remove('active'));
-    document.querySelectorAll('.tb-tab')[3].classList.add('active');
+    document.querySelectorAll('.tb-tab')[2].classList.add('active');
     shV('vcats');
     window._popupSource = null;
     return;
