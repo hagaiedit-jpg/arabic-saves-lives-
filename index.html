@@ -60,10 +60,10 @@ body{background:#1A2B3C;direction:rtl;font-family:-apple-system,BlinkMacSystemFo
 .smeta{padding:7px 16px;color:#7a9ab5;font-size:12px;background:#1A2B3C;}
 .pbg{background:rgba(0,0,0,0.65);min-height:100vh;display:flex;align-items:flex-start;justify-content:center;padding:12px;padding-top:16px;}
 .pop{background:#fff;border-radius:18px;width:100%;max-width:440px;padding:18px 16px 14px;}
-.phe{color:#1A2B3C;font-size:18px;font-weight:600;text-align:center;margin-bottom:5px;line-height:1.4;}
-.parsm{color:#D2B48C;font-size:17px;direction:rtl;font-family:Georgia,serif;text-align:center;margin-bottom:12px;font-weight:500;}
+.phe{color:#1A2B3C;font-size:16px;font-weight:400;text-align:center;margin-bottom:5px;line-height:1.4;}
+.parsm{color:#D2B48C;font-size:14px;direction:rtl;font-family:Georgia,serif;text-align:center;margin-bottom:12px;font-weight:400;}
 .pbox{background:#1A2B3C;border-radius:12px;padding:16px 14px;margin-bottom:12px;text-align:center;}
-.ptrans{color:#fff;font-size:24px;font-weight:400;line-height:1.6;letter-spacing:0.03em;}
+.ptrans{color:#fff;font-size:22px;font-weight:400;line-height:1.6;letter-spacing:0.03em;}
 .ww{display:flex;align-items:center;gap:8px;margin-bottom:10px;background:#f5f5f5;border-radius:10px;padding:8px 12px;}
 .wave{display:flex;align-items:center;gap:2px;flex:1;}
 .wb{width:3px;border-radius:2px;background:#D2B48C;}
@@ -90,8 +90,8 @@ body{background:#1A2B3C;direction:rtl;font-family:-apple-system,BlinkMacSystemFo
 .theart{background:#c0392b;color:#fff;}
 .tprem{background:#D2B48C;color:#412402;}
 .trh{background:#e74c3c;color:#fff;}.trm{background:#FF8C00;color:#fff;}.trl{background:#1D9E75;color:#fff;}
-.che{color:#fff;font-size:15px;font-weight:500;margin-bottom:4px;}
-.car{color:#D2B48C;font-size:19px;direction:rtl;font-family:Georgia,serif;margin-bottom:4px;}
+.che{color:#fff;font-size:14px;font-weight:400;margin-bottom:4px;}
+.car{color:#D2B48C;font-size:13px;direction:rtl;font-family:Georgia,serif;margin-bottom:4px;}
 .csub{color:#7a9ab5;font-size:12px;line-height:1.6;}
 .cwarn{color:#ffb0b0;font-size:12px;padding:7px 10px;background:#2a1010;border:1px solid #5a2020;border-radius:7px;margin-top:7px;line-height:1.6;}
 .nf{padding:14px 16px;}
@@ -144,12 +144,9 @@ body{background:#1A2B3C;direction:rtl;font-family:-apple-system,BlinkMacSystemFo
     <div class="tb-tab active" onclick="ST('qk',this)" style="color:#c0392b !important;font-weight:700;">🚨 מצב מהיר</div>
     <div class="tb-tab active" onclick="ST('lib',this)">מבצעי</div>
     <div class="tb-tab" onclick="ST('day',this)">יומיומי</div>
-    <div class="tb-tab" onclick="ST('hrt',this)">פותחים לב</div>
-    <div class="tb-tab" onclick="ST('dict',this)">מילון</div>
-    <div class="tb-tab" onclick="ST('sem',this)">סמנטי</div>
-    <div class="tb-tab" onclick="ST('cus',this)">מנהגים</div>
-    <div class="tb-tab" onclick="ST('art',this)">מאמרים</div>
-    <div class="tb-tab" onclick="ST('nwf',this)">חדש ●</div>
+    <div class="tb-tab" onclick="ST('hrt',this)">תרבות ולב</div>
+    <div class="tb-tab" onclick="ST('more',this)">📚 עוד</div>
+    <div class="tb-tab" onclick="ST('nwf',this)">חדש</div>
     <div class="tb-tab" id="admin-tab" style="display:none;" onclick="ST('adm',this)">ניהול</div>
   </div>
 </div>
@@ -235,7 +232,7 @@ body{background:#1A2B3C;direction:rtl;font-family:-apple-system,BlinkMacSystemFo
     <div id="hrt-sres" style="padding:14px;"></div>
   </div>
   <div id="hrt-grid-view">
-    <div class="sec"><div class="stitle">דברים שפותחים לב</div><div class="cgrid" id="hgrid"></div></div>
+    <div class="sec"><div class="stitle">תרבות ולב</div><div class="cgrid" id="hgrid"></div></div>
   </div>
   <div id="hrt-list-view" style="display:none;">
     <div class="lhdr"><button class="bbtn" onclick="goB('hrt')">→ חזור</button><div class="ltitle" id="hltitle"></div></div>
@@ -277,6 +274,18 @@ body{background:#1A2B3C;direction:rtl;font-family:-apple-system,BlinkMacSystemFo
   </div>
 </div>
 
+<div class="scr" id="tab-more">
+  <div class="sec"><div class="stitle">📚 עוד</div>
+    <div class="cgrid" style="display:grid;">
+      <div class="ct" onclick="ST('dict',document.querySelector('[onclick*=more]'))">
+        <div class="ci">📖</div><div class="cn">מילון</div></div>
+      <div class="ct" onclick="ST('sem',document.querySelector('[onclick*=more]'))">
+        <div class="ci">🔮</div><div class="cn">סמנטי</div></div>
+      <div class="ct" onclick="ST('art',document.querySelector('[onclick*=more]'))">
+        <div class="ci">📰</div><div class="cn">מאמרים</div></div>
+    </div>
+  </div>
+</div>
 <!-- NEW TAB -->
 <div class="scr" id="tab-nwf"><div class="nf" id="nflist"></div></div>
 
@@ -590,7 +599,8 @@ const HCATS=[
   {id:'פתיחת שיח',icon:'👋'},
   {id:'סגירת שיח',icon:'🤲'},
   {id:'חגים וימי הולדת',icon:'🎉'},
-  {id:'פתגמים',icon:'📜'}
+  {id:'פתגמים',icon:'📜'},
+  {id:'מנהגים',icon:'🕌'}
 ];
 
 function cntC(c){return DB.filter(p=>p.cat===c).length;}
