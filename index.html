@@ -787,7 +787,7 @@ function opSem(i){
 }
 function rCus(){
   document.getElementById('cuslist').innerHTML=CUS.length?CUS.map(c=>`
-    <div class="card"><div class="che">${c.he}</div><div style="color:#a0b8c8;font-size:13px;line-height:1.7;margin-top:6px;">${c.why||c.ar}</div></div>`).join(''):'<div class="empty">אין עדיין</div>';
+    <div class="card"><div class="che">${c.he}</div><div style="color:#fff;font-size:14px;font-weight:600;line-height:1.8;margin-top:8px;">${c.why||c.ar}</div></div>`).join(''):'<div class="empty">אין עדיין</div>';
 }
 function rArts(){
   document.getElementById('artlist').innerHTML=ARTS.length?ARTS.map((a,i)=>`
