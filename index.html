@@ -141,6 +141,7 @@ body{background:#1A2B3C;direction:rtl;font-family:-apple-system,BlinkMacSystemFo
     </div>
   </div>
   <div class="tb-tabs">
+    <div class="tb-tab active" onclick="ST('qk',this)" style="color:#c0392b !important;font-weight:700;">🚨 מצב מהיר</div>
     <div class="tb-tab active" onclick="ST('lib',this)">מבצעי</div>
     <div class="tb-tab" onclick="ST('day',this)">יומיומי</div>
     <div class="tb-tab" onclick="ST('hrt',this)">פותחים לב</div>
@@ -153,6 +154,9 @@ body{background:#1A2B3C;direction:rtl;font-family:-apple-system,BlinkMacSystemFo
   </div>
 </div>
 
+<div class="scr" id="tab-qk">
+  <div class="sec"><div class="stitle">🚨 מצב מהיר</div><div id="qklist"><div class="empty">טוען...</div></div></div>
+</div>
 <!-- MILITARY TAB -->
 <div class="scr on" id="tab-lib">
   <div class="sbar">
@@ -294,7 +298,7 @@ body{background:#1A2B3C;direction:rtl;font-family:-apple-system,BlinkMacSystemFo
     <!-- Add Military -->
     <div id="at-ap"><div class="acard">
       <div class="afl"><label>קטגוריה</label><select id="apc">
-        <option>עצירת תנועה</option><option>ניהול מרחב</option><option>בידוק וזיהוי</option>
+        <option>מצב מהיר</option><option>עצירת תנועה</option><option>ניהול מרחב</option><option>בידוק וזיהוי</option>
         <option>שליטה בבית</option><option>הרגעה ושכנוע</option><option>מגע ראשוני</option>
         <option>עזרה ראשונה</option><option>קהל ואזרחים</option><option>ילדים ואוכלוסיות רגישות</option>
         <option>לוח שנה ותרבות</option><option>מילון כללי</option>
@@ -526,7 +530,7 @@ async function loadData(){
     ARTS=data.filter(p=>p.section==='article').map(mp);
     document.getElementById('status-badge').textContent='מחובר';
     document.getElementById('status-badge').style.background='#1D9E75';
-    bldCats();rDG();rHrt();rSem();rCus();rArts();renderDict();
+    bldCats();rDG();rHrt();rSem();rCus();rArts();renderDict();rQK();
   }catch(e){
     document.getElementById('status-badge').textContent='אופליין';
     document.getElementById('status-badge').style.background='#7a9ab5';
@@ -920,12 +924,19 @@ function clsP(){
   if(pt)clearInterval(pt);
   
   // Check where we came from
+  if(window._popupSource==='qk'){
+    document.querySelectorAll('[id^="tab-"]').forEach(function(x){x.className='scr';});
+    document.getElementById('tab-qk').className='scr on';
+    document.querySelectorAll('.tb-tab').forEach(function(x){x.classList.remove('active');});
+    document.querySelectorAll('.tb-tab')[0].classList.add('active');
+    window._popupSource=null;return;
+  }
   if(window._popupSource === 'daily'){
     // Return to daily list
     document.querySelectorAll('[id^="tab-"]').forEach(x=>x.className='scr');
     document.getElementById('tab-day').className='scr on';
     document.querySelectorAll('.tb-tab').forEach(x=>x.classList.remove('active'));
-    document.querySelectorAll('.tb-tab')[1].classList.add('active');
+    document.querySelectorAll('.tb-tab')[2].classList.add('active');
     shV('vcats'); // Reset military view
     window._popupSource = null;
     return;
@@ -935,7 +946,7 @@ function clsP(){
     document.querySelectorAll('[id^="tab-"]').forEach(x=>x.className='scr');
     document.getElementById('tab-dict').className='scr on';
     document.querySelectorAll('.tb-tab').forEach(x=>x.classList.remove('active'));
-    document.querySelectorAll('.tb-tab')[3].classList.add('active');
+    document.querySelectorAll('.tb-tab')[4].classList.add('active');
     shV('vcats'); // Reset military view
     window._popupSource = null;
     return;
@@ -944,7 +955,7 @@ function clsP(){
     document.querySelectorAll('[id^="tab-"]').forEach(x=>x.className='scr');
     document.getElementById('tab-sem').className='scr on';
     document.querySelectorAll('.tb-tab').forEach(x=>x.classList.remove('active'));
-    document.querySelectorAll('.tb-tab')[4].classList.add('active');
+    document.querySelectorAll('.tb-tab')[5].classList.add('active');
     shV('vcats');
     window._popupSource = null;
     return;
@@ -953,7 +964,7 @@ function clsP(){
     document.querySelectorAll('[id^="tab-"]').forEach(x=>x.className='scr');
     document.getElementById('tab-hrt').className='scr on';
     document.querySelectorAll('.tb-tab').forEach(x=>x.classList.remove('active'));
-    document.querySelectorAll('.tb-tab')[2].classList.add('active');
+    document.querySelectorAll('.tb-tab')[3].classList.add('active');
     shV('vcats');
     window._popupSource = null;
     return;
@@ -1454,6 +1465,25 @@ function searchHrt(){
   brand.addEventListener('click', handleTap);
 })();
 
+
+function rQK(){
+  var items=DB.filter(function(d){return d.cat==="מצב מהיר";});
+  var el=document.getElementById("qklist");
+  if(!el)return;
+  if(!items.length){el.innerHTML='<div class="empty">אין משפטים עדיין</div>';return;}
+  var h="";
+  for(var j=0;j<items.length;j++){
+    var p=items[j],idx=DB.indexOf(p);
+    h+='<div style="background:#223344;border:1px solid #2e4558;border-radius:10px;padding:14px;margin-bottom:10px;border-right:4px solid #c0392b;">';
+    h+='<div style="color:#fff;font-size:15px;font-weight:500;margin-bottom:6px;">'+p.he+'</div>';
+    h+='<div style="color:#fff;font-size:15px;font-weight:600;margin-bottom:6px;font-family:Georgia,serif;letter-spacing:0.03em;">'+p.trans+'</div>';
+    h+='<div style="color:#D2B48C;font-size:16px;margin-bottom:10px;font-family:Georgia,serif;">'+p.ar+'</div>';
+    h+='<button onclick="playQK('+idx+')" style="width:100%;padding:12px;background:#c0392b;border:none;border-radius:10px;color:#fff;font-size:15px;font-weight:600;cursor:pointer;font-family:inherit;">🔊 השמע</button>';
+    h+='</div>';
+  }
+  el.innerHTML=h;
+}
+function playQK(i){if(curAudio){curAudio.pause();curAudio=null;}var u=DB[i].audio;if(!u)return;var a=new Audio(u);a.playbackRate=1;a.play();curAudio=a;}
 
 loadData();
 </script>
