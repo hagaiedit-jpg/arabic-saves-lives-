@@ -526,7 +526,7 @@ async function loadData(){
     ARTS=data.filter(p=>p.section==='article').map(mp);
     document.getElementById('status-badge').textContent='מחובר';
     document.getElementById('status-badge').style.background='#1D9E75';
-    bldCats();rDG();rHrt();rSem();rCus();rArts();renderDict();
+    bldCats();rDG();rHrt();rSem();rCus();rArts();renderDict();rQK();
   }catch(e){
     document.getElementById('status-badge').textContent='אופליין';
     document.getElementById('status-badge').style.background='#7a9ab5';
@@ -1455,6 +1455,25 @@ function searchHrt(){
 })();
 
 
+
+function rQK(){
+  var items=DB.filter(function(d){return d.cat==="מצב מהיר";});
+  var el=document.getElementById("qklist");
+  if(!el)return;
+  if(!items.length){el.innerHTML="<div class=\"empty\">אין משפטים עדיין</div>";return;}
+  var h="";
+  for(var j=0;j<items.length;j++){
+    var p=items[j],idx=DB.indexOf(p);
+    h+="<div style=\"background:#223344;border:1px solid #2e4558;border-radius:10px;padding:14px;margin-bottom:10px;border-right:4px solid #c0392b;\">";
+    h+="<div style=\"color:#fff;font-size:15px;font-weight:500;margin-bottom:6px;\">"+p.he+"</div>";
+    h+="<div style=\"color:#fff;font-size:15px;font-weight:600;margin-bottom:6px;font-family:Georgia,serif;letter-spacing:0.03em;\">"+p.trans+"</div>";
+    h+="<div style=\"color:#D2B48C;font-size:16px;margin-bottom:10px;font-family:Georgia,serif;\">"+p.ar+"</div>";
+    h+="<button onclick=\"playQK("+idx+")\" style=\"width:100%;padding:12px;background:#c0392b;border:none;border-radius:10px;color:#fff;font-size:15px;font-weight:600;cursor:pointer;font-family:inherit;\">🔊 השמע</button>";
+    h+="</div>";
+  }
+  el.innerHTML=h;
+}
+function playQK(i){if(curAudio){curAudio.pause();curAudio=null;}var u=DB[i].audio;if(!u)return;var a=new Audio(u);a.playbackRate=1;a.play();curAudio=a;}
 loadData();
 </script>
 </body>
