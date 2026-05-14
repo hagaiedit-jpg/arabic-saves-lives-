@@ -152,13 +152,6 @@ body{background:#1A2B3C;direction:rtl;font-family:-apple-system,BlinkMacSystemFo
     <div class="tb-tab" onclick="ST('nwf',this)">חדש</div>
     <div class="tb-tab" id="admin-tab" style="display:none;" onclick="ST('adm',this)">ניהול</div>
   </div>
-    <div class="tb-tab active" onclick="ST('lib',this)">מבצעי</div>
-    <div class="tb-tab" onclick="ST('day',this)">יומיומי</div>
-    <div class="tb-tab" onclick="ST('hrt',this)">תרבות ולב</div>
-    <div class="tb-tab" onclick="ST('more',this)">📚 עוד</div>
-    <div class="tb-tab" onclick="ST('nwf',this)">חדש</div>
-    <div class="tb-tab" id="admin-tab" style="display:none;" onclick="ST('adm',this)">ניהול</div>
-  </div>
 </div>
 
 <div class="scr" id="tab-qk">
@@ -242,7 +235,7 @@ body{background:#1A2B3C;direction:rtl;font-family:-apple-system,BlinkMacSystemFo
     <div id="hrt-sres" style="padding:14px;"></div>
   </div>
   <div id="hrt-grid-view">
-    <div class="sec"><div class="stitle">תרבות ולב</div><div class="cgrid" id="hgrid"></div></div>
+    <div class="sec"><div class="stitle">פותחים לב</div><div class="cgrid" id="hgrid"></div></div>
   </div>
   <div id="hrt-list-view" style="display:none;">
     <div class="lhdr"><button class="bbtn" onclick="goB('hrt')">→ חזור</button><div class="ltitle" id="hltitle"></div></div>
@@ -284,18 +277,7 @@ body{background:#1A2B3C;direction:rtl;font-family:-apple-system,BlinkMacSystemFo
   </div>
 </div>
 
-<div class="scr" id="tab-more">
-  <div class="sec"><div class="stitle">📚 עוד</div>
-    <div class="cgrid" style="display:grid;">
-      <div class="ct" onclick="ST('dict',document.querySelector('[onclick*=more]'))">
-        <div class="ci">📖</div><div class="cn">מילון</div></div>
-      <div class="ct" onclick="ST('sem',document.querySelector('[onclick*=more]'))">
-        <div class="ci">🔮</div><div class="cn">סמנטי</div></div>
-      <div class="ct" onclick="ST('art',document.querySelector('[onclick*=more]'))">
-        <div class="ci">📰</div><div class="cn">מאמרים</div></div>
-    </div>
-  </div>
-</div>
+
 <!-- NEW TAB -->
 <div class="scr" id="tab-nwf"><div class="nf" id="nflist"></div></div>
 
