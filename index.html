@@ -786,8 +786,14 @@ function opSem(i){
   shV('vpop');
 }
 function rCus(){
-  document.getElementById('cuslist').innerHTML=CUS.length?CUS.map(c=>`
-    <div class="card"><div class="che">${c.he}</div><div style="color:#fff;font-size:14px;font-weight:600;line-height:1.8;margin-top:8px;">${c.why||c.ar}</div></div>`).join(''):'<div class="empty">אין עדיין</div>';
+  document.getElementById('cuslist').innerHTML=CUS.length?CUS.map(function(c){
+    var txt=c.why||c.ar||'';
+    txt=txt.replace(/(המלצה ללוחם[:]?)/g,'<span style="color:#FF8C00;font-weight:700;font-size:14px;">$1</span>');
+    txt=txt.replace(/(ההקשר ללוחם[:]?)/g,'<span style="color:#FF8C00;font-weight:700;font-size:14px;">$1</span>');
+    txt=txt.replace(/(הקשר ללוחם[:]?)/g,'<span style="color:#FF8C00;font-weight:700;font-size:14px;">$1</span>');
+    txt=txt.replace(/(טיפ ללוחם[:]?)/g,'<span style="color:#FF8C00;font-weight:700;font-size:14px;">$1</span>');
+    return '<div class="card"><div class="che">'+c.he+'</div><div style="color:#a0b8c8;font-size:13px;line-height:1.7;margin-top:6px;">'+txt+'</div></div>';
+  }).join(''):'<div class="empty">אין עדיין</div>';
 }
 function rArts(){
   document.getElementById('artlist').innerHTML=ARTS.length?ARTS.map((a,i)=>`
