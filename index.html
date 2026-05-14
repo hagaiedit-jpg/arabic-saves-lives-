@@ -1475,15 +1475,15 @@ function rQK(){
   for(var j=0;j<items.length;j++){
     var p=items[j],idx=DB.indexOf(p);
     h+='<div style="background:#223344;border:1px solid #2e4558;border-radius:10px;padding:14px;margin-bottom:10px;border-right:4px solid #c0392b;">';
-    h+='<div style="color:#fff;font-size:15px;font-weight:500;margin-bottom:6px;">'+p.he+'</div>';
-    h+='<div style="color:#fff;font-size:15px;font-weight:600;margin-bottom:6px;font-family:Georgia,serif;letter-spacing:0.03em;">'+p.trans+'</div>';
-    h+='<div style="color:#D2B48C;font-size:16px;margin-bottom:10px;font-family:Georgia,serif;">'+p.ar+'</div>';
-    h+='<button onclick="playQK('+idx+')" style="width:100%;padding:12px;background:#c0392b;border:none;border-radius:10px;color:#fff;font-size:15px;font-weight:600;cursor:pointer;font-family:inherit;">🔊 השמע</button>';
+    h+='<div style="color:#fff;font-size:15px;font-weight:600;margin-bottom:6px;">'+p.he+'</div>';
+    h+='<div style="color:#fff;font-size:15px;font-weight:400;margin-bottom:6px;font-family:Georgia,serif;letter-spacing:0.03em;">'+p.trans+'</div>';
+    h+='<div style="color:#D2B48C;font-size:14px;margin-bottom:10px;font-family:Georgia,serif;">'+p.ar+'</div>';
+    h+='<button onclick="playQK('+idx+')" id="qb'+idx+'" style="padding:7px 20px;background:transparent;border:1.5px solid #c0392b;border-radius:20px;color:#c0392b;font-size:13px;cursor:pointer;font-family:inherit;">🔊 השמע</button>';
     h+='</div>';
   }
   el.innerHTML=h;
 }
-function playQK(i){if(curAudio){curAudio.pause();curAudio=null;}var u=DB[i].audio;if(!u)return;var a=new Audio(u);a.playbackRate=1;a.play();curAudio=a;}
+function playQK(i){var btn=document.getElementById("qb"+i);if(curAudio&&!curAudio.paused){curAudio.pause();curAudio=null;if(window._qb)window._qb.innerHTML="🔊 השמע";if(window._qb===btn){window._qb=null;return;}}var u=DB[i].audio;if(!u)return;var a=new Audio(u);a.playbackRate=1;a.play();curAudio=a;window._qb=btn;btn.innerHTML="⏹ עצור";a.onended=function(){btn.innerHTML="🔊 השמע";curAudio=null;window._qb=null;};}
 
 loadData();
 </script>
