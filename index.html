@@ -144,6 +144,7 @@ body{background:#1A2B3C;direction:rtl;font-family:-apple-system,BlinkMacSystemFo
     <div class="tb-tab" onclick="ST('qk',this)" style="color:#c0392b !important;font-weight:700;">🚨 מצב מהיר</div>
     <div class="tb-tab active" onclick="ST('lib',this)">מבצעי</div>
     <div class="tb-tab" onclick="ST('fav',this)">⭐ מועדפים</div>
+    <div class="tb-tab" onclick="ST('fav',this)">⭐ מועדפים</div>
     <div class="tb-tab" onclick="ST('hrt',this)">פותחים לב</div>
     <div class="tb-tab" onclick="ST('cus',this)">התנהגות בשטח</div>
     <div class="tb-tab" onclick="ST('day',this)">יומיומי</div>
@@ -157,6 +158,9 @@ body{background:#1A2B3C;direction:rtl;font-family:-apple-system,BlinkMacSystemFo
 
 <div class="scr" id="tab-qk">
   <div class="sec"><div class="stitle">🚨 מצב מהיר</div><div id="qklist"><div class="empty">טוען...</div></div></div>
+</div>
+<div class="scr" id="tab-fav">
+  <div class="sec"><div class="stitle">⭐ המועדפים שלי</div><div id="favlist"><div class="empty">אין מועדפים עדיין. לחצו ⭐ ליד משפט כדי לשמור אותו כאן.</div></div></div>
 </div>
 <div class="scr" id="tab-fav">
   <div class="sec"><div class="stitle">⭐ המועדפים שלי</div><div id="favlist"><div class="empty">אין מועדפים עדיין. לחצו ⭐ ליד משפט כדי לשמור אותו כאן.</div></div></div>
@@ -821,6 +825,7 @@ function ST(t,el){
   document.getElementById('tab-'+t).className='scr on';
   curTab=t;
   if(t==='fav')rFav();
+  if(t==='fav')rFav();
   if(t==='dict')renderDict();
   if(t==='sem')rSem();
   if(t==='nwf')rNF();
@@ -945,6 +950,14 @@ function clsP(){
     document.getElementById('tab-qk').className='scr on';
     document.querySelectorAll('.tb-tab').forEach(function(x){x.classList.remove('active');});
     document.querySelectorAll('.tb-tab')[0].classList.add('active');
+    window._popupSource=null;return;
+  }
+  if(window._popupSource==='fav'){
+    document.querySelectorAll('[id^="tab-"]').forEach(function(x){x.className='scr';});
+    document.getElementById('tab-fav').className='scr on';
+    document.querySelectorAll('.tb-tab').forEach(function(x){x.classList.remove('active');});
+    document.querySelectorAll('.tb-tab')[2].classList.add('active');
+    rFav();
     window._popupSource=null;return;
   }
   if(window._popupSource==='fav'){
@@ -1530,6 +1543,62 @@ function updateFavBtn(id){
   window._currentPopupId=id;
   var btn=document.getElementById("fav-btn");
   if(btn)btn.textContent=isFav(id)?"⭐":"☆";
+}
+function rFav(){
+  var el=document.getElementById("favlist");
+  if(!el)return;
+  var favs=getFavIds();
+  var all=[].concat(DB,DAILY,HEART,NAVY);
+  var items=all.filter(function(p){return favs.includes(p.id);});
+  if(!items.length){el.innerHTML='<div class="empty">אין מועדפים עדיין. לחצו ⭐ ליד משפט כדי לשמור אותו כאן.</div>';return;}
+  var h="";
+  for(var j=0;j<items.length;j++){
+    var p=items[j];
+    var sec=DB.includes(p)?"military":DAILY.includes(p)?"daily":HEART.includes(p)?"heart":"navy";
+    var idx=sec==="military"?DB.indexOf(p):sec==="daily"?DAILY.indexOf(p):sec==="heart"?HEART.indexOf(p):NAVY.indexOf(p);
+    h+='<div style="background:#223344;border:1px solid #2e4558;border-radius:10px;padding:12px 14px;margin-bottom:8px;cursor:pointer;border-right:4px solid #FF8C00;" onclick="opFavItem(\''+sec+'\','+idx+')">';
+    h+='<div style="display:flex;justify-content:space-between;align-items:flex-start;">';
+    h+='<div style="flex:1;"><div style="color:#fff;font-size:14px;margin-bottom:4px;">'+p.he+'</div>';
+    h+='<div style="color:#fff;font-size:14px;font-family:Georgia,serif;">'+p.trans+'</div></div>';
+    h+='<span onclick="event.stopPropagation();removeFav(\''+p.id+'\',this)" style="cursor:pointer;font-size:18px;">⭐</span>';
+    h+='</div></div>';
+  }
+  el.innerHTML=h;
+}
+function opFavItem(sec,idx){
+  if(sec==="military"){opPop(idx,"military");}
+  else if(sec==="daily"){opPop(idx,"daily");}
+  else if(sec==="heart"){opPop(idx,"heart");}
+  else{opPop(idx,"navy");}
+  window._popupSource="fav";
+}
+function removeFav(id,el){
+  var favs=getFavIds().filter(function(f){return f!==id;});
+  localStorage.setItem("fav_ids",JSON.stringify(favs));
+  rFav();
+}
+
+// === FAVORITES ===
+function getFavIds(){try{return JSON.parse(localStorage.getItem("fav_ids")||"[]");}catch(e){return [];}}
+function isFav(id){return getFavIds().includes(id);}
+function toggleFav(){
+  var id=window._currentPopupId;
+  if(!id)return;
+  var favs=getFavIds();
+  var btn=document.getElementById("fav-btn");
+  if(favs.includes(id)){
+    favs=favs.filter(function(f){return f!==id;});
+    btn.innerHTML="☆ שמור למועדפים";
+  }else{
+    favs.push(id);
+    btn.innerHTML="⭐ הסר ממועדפים";
+  }
+  localStorage.setItem("fav_ids",JSON.stringify(favs));
+}
+function updateFavBtn(id){
+  window._currentPopupId=id;
+  var btn=document.getElementById("fav-btn");
+  if(btn)btn.innerHTML=isFav(id)?"⭐ הסר ממועדפים":"☆ שמור למועדפים";
 }
 function rFav(){
   var el=document.getElementById("favlist");
