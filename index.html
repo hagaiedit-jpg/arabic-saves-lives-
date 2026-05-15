@@ -147,6 +147,7 @@ body{background:#1A2B3C;direction:rtl;font-family:-apple-system,BlinkMacSystemFo
     <div class="tb-tab" onclick="ST('fav',this)">⭐ מועדפים</div>
     <div class="tb-tab" onclick="ST('fav',this)">⭐ מועדפים</div>
     <div class="tb-tab" onclick="ST('fav',this)">⭐ מועדפים</div>
+    <div class="tb-tab" onclick="ST('fav',this)">⭐ מועדפים</div>
     <div class="tb-tab" onclick="ST('hrt',this)">פותחים לב</div>
     <div class="tb-tab" onclick="ST('cus',this)">התנהגות בשטח</div>
     <div class="tb-tab" onclick="ST('day',this)">יומיומי</div>
@@ -161,6 +162,7 @@ body{background:#1A2B3C;direction:rtl;font-family:-apple-system,BlinkMacSystemFo
 <div class="scr" id="tab-qk">
   <div class="sec"><div class="stitle">🚨 מצב מהיר</div><div id="qklist"><div class="empty">טוען...</div></div></div>
 </div>
+
 
 
 
@@ -1533,6 +1535,7 @@ function rQK(){
 }
 function playQK(i){var btn=document.getElementById("qb"+i);if(curAudio&&!curAudio.paused){curAudio.pause();curAudio=null;if(window._qb)window._qb.innerHTML="🔊 השמע";if(window._qb===btn){window._qb=null;return;}}var u=DB[i].audio;if(!u)return;var a=new Audio(u);a.playbackRate=1;a.play();curAudio=a;window._qb=btn;btn.innerHTML="⏹ עצור";a.onended=function(){btn.innerHTML="🔊 השמע";curAudio=null;window._qb=null;};}
 
+// === FAVORITES ===
 // === FAVORITES ===
 // === FAVORITES ===
 // === FAVORITES ===
