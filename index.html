@@ -150,6 +150,7 @@ body{background:#1A2B3C;direction:rtl;font-family:-apple-system,BlinkMacSystemFo
   <div class="tb-tabs">
     <div class="tb-tab" onclick="ST('qk',this)" style="color:#c0392b !important;font-weight:700;">🚨 חירום</div>
     <div class="tb-tab active" onclick="ST('lib',this)">מבצעי</div>
+    <div class="tb-tab" onclick="ST('fav',this)">⭐ מועדפים</div>
     <div class="tb-tab" onclick="ST('cus',this)">התנהגות בשטח</div>
     <div class="tb-tab" onclick="ST('hrt',this)">פותחים לב</div>
     <div class="tb-tab" id="more-tab" onclick="ST('more',this)">⋯ עוד</div>
@@ -157,7 +158,6 @@ body{background:#1A2B3C;direction:rtl;font-family:-apple-system,BlinkMacSystemFo
   </div>
   <div class="more-overlay" id="more-overlay">
     <div class="more-grid">
-      <div class="more-item" onclick="goMore('fav')"><span class="more-icon">⭐</span><span class="more-label">מועדפים</span></div>
       <div class="more-item" onclick="goMore('day')"><span class="more-icon">🌅</span><span class="more-label">יומיומי</span></div>
       <div class="more-item" onclick="goMore('dict')"><span class="more-icon">📖</span><span class="more-label">מילון</span></div>
       <div class="more-item" onclick="goMore('sem')"><span class="more-icon">⚠️</span><span class="more-label">סמנטי</span></div>
@@ -1000,7 +1000,14 @@ function clsP(){
     var t=document.querySelector('.tb-tab[onclick*="hrt"]');if(t)t.classList.add('active');
     window._popupSource=null;return;
   }
-  if(src==='fav'){goMore('fav');window._popupSource=null;return;}
+  if(src==='fav'){
+    document.querySelectorAll('[id^="tab-"]').forEach(function(x){x.className='scr';});
+    document.getElementById('tab-fav').className='scr on';
+    document.querySelectorAll('.tb-tab').forEach(function(x){x.classList.remove('active');});
+    var t=document.querySelector('.tb-tab[onclick*="fav"]');if(t)t.classList.add('active');
+    rFav();rRecent();
+    window._popupSource=null;return;
+  }
   if(src==='daily'){goMore('day');window._popupSource=null;return;}
   if(src==='dict'){goMore('dict');window._popupSource=null;return;}
   if(src==='sem'){goMore('sem');window._popupSource=null;return;}
