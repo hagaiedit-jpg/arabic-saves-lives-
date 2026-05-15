@@ -150,7 +150,7 @@ body{background:#1A2B3C;direction:rtl;font-family:-apple-system,BlinkMacSystemFo
     <div class="tb-tab" onclick="ST('dict',this)">מילון</div>
     <div class="tb-tab" onclick="ST('sem',this)">סמנטי</div>
     <div class="tb-tab" onclick="ST('art',this)">מאמרים</div>
-    <div class="tb-tab" onclick="ST('nwf',this)">חדש</div>
+    <div class="tb-tab" onclick="ST('nwf',this)" id="new-tab-label">חדש</div>
     <div class="tb-tab" id="admin-tab" style="display:none;" onclick="ST('adm',this)">ניהול</div>
   </div>
 </div>
@@ -165,7 +165,7 @@ body{background:#1A2B3C;direction:rtl;font-family:-apple-system,BlinkMacSystemFo
 
 
 <div class="scr" id="tab-fav">
-  <div class="sec"><div class="stitle">⭐ המועדפים שלי</div><div id="favlist"><div class="empty">אין מועדפים עדיין. לחצו ☆ שמור למועדפים ליד משפט.</div></div></div>
+  <div class="sec"><div class="stitle">⭐ המועדפים שלי</div><div id="favlist"><div class="empty">אין מועדפים עדיין. לחצו ☆ שמור למועדפים ליד משפט.</div></div><div id="recentlist" style="margin-top:16px;"></div></div>
 </div>
 <!-- MILITARY TAB -->
 <div class="scr on" id="tab-lib">
@@ -321,6 +321,7 @@ body{background:#1A2B3C;direction:rtl;font-family:-apple-system,BlinkMacSystemFo
       <div class="afl"><label>תגיות</label><input id="aptg"/></div>
       <div class="afl"><label>למה זה חשוב</label><textarea id="apwy"></textarea></div>
       <div class="afl"><label>טיפ ללוחם</label><textarea id="aptn"></textarea></div>
+      <div class="afl"><label>דחיפות</label><select id="apurg"><option value="">רגיל</option><option value="urgent">🔴 מיידי</option><option value="sensitive">🟡 רגיש</option></select></div>
       <div class="afl"><label>הקלטה</label>
         <div style="display:flex;gap:6px;flex-wrap:wrap;">
           <button class="rec-btn idle" id="ap-rec" onclick="toggleRec('ap')">🎙 הקלט</button>
@@ -542,7 +543,7 @@ async function loadData(){
     ARTS=data.filter(p=>p.section==='article').map(mp);
     document.getElementById('status-badge').textContent='מחובר';
     document.getElementById('status-badge').style.background='#1D9E75';
-    bldCats();rDG();rHrt();rSem();rCus();rArts();renderDict();rQK();
+    bldCats();rDG();rHrt();rSem();rCus();rArts();renderDict();rQK();updateNewDot();
   }catch(e){
     document.getElementById('status-badge').textContent='אופליין';
     document.getElementById('status-badge').style.background='#7a9ab5';
@@ -827,7 +828,7 @@ function ST(t,el){
   document.querySelectorAll('[id^="tab-"]').forEach(x=>x.className='scr');
   document.getElementById('tab-'+t).className='scr on';
   curTab=t;
-  if(t==='fav')rFav();
+  if(t==='fav'){rFav();rRecent();}
   if(t==='fav')rFav();
   if(t==='fav')rFav();
   if(t==='dict')renderDict();
@@ -916,7 +917,7 @@ function doS(){
 function hl(t,q){if(!q)return t;return t.replace(new RegExp('('+q.replace(/[.*+?^${}()|[\]\\]/g,'\\$&')+')','gi'),'<span class="hlm">$1</span>');}
 function rItems(items,el,q){
   if(!items.length){el.innerHTML='<div class="empty">לא נמצאו תוצאות</div>';return;}
-  el.innerHTML=items.map(p=>{const i=DB.indexOf(p);return`<div class="li" onclick="opP(${i})"><div class="lt">${hl(p.he,q)}</div><div class="la">‹</div></div>`;}).join('');
+  el.innerHTML=items.map(p=>{const i=DB.indexOf(p);return`<div class="li" onclick="opP(${i})"><div class="lt">${hl(p.he,q)+(typeof urgDot==='function'?urgDot(p.tone):'')}</div><div class="la">‹</div></div>`;}).join('');
 }
 function bldW(){const el=document.getElementById('wbars');el.innerHTML='';for(let i=0;i<32;i++){const b=document.createElement('div');b.className='wb';b.style.height=(4+Math.floor(Math.random()*14))+'px';el.appendChild(b);}}
 function opP(i){
@@ -1127,6 +1128,7 @@ function markAllSeen(){
   
   bldCats();
   rNF();
+  updateNewDot();
 }
 
 function rNF(){
@@ -1177,7 +1179,7 @@ async function addP(){
   const he=document.getElementById('aphe').value.trim(),ar=document.getElementById('apar').value.trim();
   if(!he||!ar){alert('חובה: עברית וערבית');return;}
   const btn=document.querySelector('#at-ap .sbtn');btn.textContent='שומר...';
-  const phrase={cat:document.getElementById('apc').value,he,trans:document.getElementById('aptr').value.trim(),ar,tags:document.getElementById('aptg').value.trim(),why:document.getElementById('apwy').value.trim(),tone:document.getElementById('aptn').value.trim(),audio:''};
+  const phrase={cat:document.getElementById('apc').value,he,trans:document.getElementById('aptr').value.trim(),ar,tags:document.getElementById('aptg').value.trim(),why:document.getElementById('apwy').value.trim(),tone:document.getElementById('apurg').value||document.getElementById('aptn').value.trim(),audio:''};
   const au=await getAudio('ap',document.getElementById('ap-status'));if(au)phrase.audio=au;
   try{const s=await spSave(phrase,'military');if(s&&s[0])phrase.id=s[0].id;phrase.isNew=true;DB.push(phrase);['aphe','apar','aptr','aptg','apwy','aptn'].forEach(id=>document.getElementById(id).value='');bldCats();btn.textContent='שמור';alert('✓ נוסף!');}catch(e){btn.textContent='שמור';alert('שגיאה: '+e.message);}
 }
@@ -1578,6 +1580,49 @@ function opFavItem(sec,idx){opPop(idx,sec);window._popupSource="fav";}
 function removeFav(id){
   var favs=getFavIds().filter(function(f){return f!==id;});
   localStorage.setItem("fav_ids",JSON.stringify(favs));rFav();
+}
+
+function updateNewDot(){
+  var el=document.getElementById("new-tab-label");if(!el)return;
+  var hasNew=DB.some(function(p){return p.isNew;})||DAILY.some(function(p){return p.isNew;})||HEART.some(function(p){return p.isNew;})||NAVY.some(function(p){return p.isNew;});
+  el.textContent=hasNew?"חדש ●":"חדש";
+}
+
+// === RECENTLY USED ===
+function getRecent(){try{return JSON.parse(localStorage.getItem("recent_ids")||"[]");}catch(e){return [];}}
+function saveRecent(id){
+  if(!id)return;var r=getRecent();
+  r=r.filter(function(x){return x!==id;});
+  r.unshift(id);
+  if(r.length>15)r=r.slice(0,15);
+  localStorage.setItem("recent_ids",JSON.stringify(r));
+}
+function rRecent(){
+  var el=document.getElementById("recentlist");if(!el)return;
+  var rIds=getRecent();
+  var all=[].concat(DB,DAILY,HEART,NAVY);
+  var items=[];
+  for(var i=0;i<rIds.length;i++){
+    var found=all.find(function(p){return p.id===rIds[i];});
+    if(found)items.push(found);
+  }
+  if(!items.length){el.innerHTML="";return;}
+  var h="<div style=\"color:#D2B48C;font-size:11px;margin-bottom:8px;\">🕐 אחרונים</div>";
+  for(var j=0;j<items.length;j++){
+    var p=items[j];
+    var sec=DB.includes(p)?"military":DAILY.includes(p)?"daily":HEART.includes(p)?"heart":"navy";
+    var idx=sec==="military"?DB.indexOf(p):sec==="daily"?DAILY.indexOf(p):sec==="heart"?HEART.indexOf(p):NAVY.indexOf(p);
+    h+='<div style="background:#1a2535;border:1px solid #2e4558;border-radius:8px;padding:10px 12px;margin-bottom:6px;cursor:pointer;" onclick="opPop('+idx+',\''+sec+'\')">';
+    h+='<div style="color:#fff;font-size:13px;">'+p.he+'</div>';
+    h+='<div style="color:#7a9ab5;font-size:12px;">'+p.trans+'</div></div>';
+  }
+  el.innerHTML=h;
+}
+
+function urgDot(tone){
+  if(tone==="urgent")return '<span style="color:#e74c3c;font-size:8px;margin-left:4px;">🔴</span>';
+  if(tone==="sensitive")return '<span style="color:#f1c40f;font-size:8px;margin-left:4px;">🟡</span>';
+  return "";
 }
 
 loadData();
