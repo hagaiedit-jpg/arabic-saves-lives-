@@ -25,11 +25,12 @@ body{background:#1A2B3C;direction:rtl;font-family:-apple-system,BlinkMacSystemFo
 .tb-badges{display:flex;gap:5px;}
 .bnew{background:#FF8C00;color:#fff;font-size:10px;padding:2px 8px;border-radius:10px;font-weight:600;display:none;}
 .bstatus{background:#1D9E75;color:#fff;font-size:10px;padding:2px 8px;border-radius:10px;}
-.tb-tabs{display:flex;overflow-x:hidden;justify-content:space-between;padding:0 4px;}
+.tb-tabs{display:flex;overflow-x:auto;scrollbar-width:none;-ms-overflow-style:none;padding:0 4px;}
 .tb-tabs::-webkit-scrollbar{display:none;}
 .tb-tab{white-space:nowrap;padding:14px 10px;color:rgba(210,180,140,0.92);font-size:12px;font-weight:600;cursor:pointer;border-bottom:2px solid transparent;flex-shrink:0;transition:all 0.15s;}
+.tb-tabs::-webkit-scrollbar{display:none;}
 .tb-tab.active{color:#D2B48C;border-bottom-color:#FF8C00;}
-.tb-tabs-sec{display:flex;overflow-x:hidden;background:#0a1622;border-bottom:1px solid #1e3348;padding:0 4px;justify-content:space-between;}
+.tb-tabs-sec{display:flex;overflow-x:auto;background:#0a1622;border-bottom:1px solid #1e3348;padding:0 4px;-webkit-overflow-scrolling:touch;scrollbar-width:none;}
 .tb-tabs-sec::-webkit-scrollbar{display:none;}
 .tb-tab-sec{padding:8px 10px;color:rgba(210,180,140,0.7);font-size:11px;font-weight:500;cursor:pointer;white-space:nowrap;border-bottom:2px solid transparent;transition:color 0.15s,border-color 0.15s;flex-shrink:0;}
 .tb-tab-sec.active{color:#D2B48C;border-bottom-color:#FF8C00;}
@@ -1579,17 +1580,41 @@ function rRecent(){
     var found=all.find(function(p){return p.id===rIds[i];});
     if(found)items.push(found);
   }
-  if(!items.length){el.innerHTML="";return;}
-  var h="<div style=\"color:#D2B48C;font-size:11px;margin-bottom:8px;\">🕐 אחרונים</div>";
+  // Always show header so users know the section exists
+  var h='<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;border-top:1px solid #2e4558;padding-top:14px;">';
+  h+='<div style="color:#D2B48C;font-size:13px;font-weight:600;">🕐 אחרונים שצפית בהם</div>';
+  if(items.length){
+    h+='<div onclick="clearRecent()" style="color:#7a9ab5;font-size:11px;cursor:pointer;padding:4px 8px;">נקה הכל ✕</div>';
+  }
+  h+='</div>';
+  if(!items.length){
+    h+='<div style="color:#7a9ab5;font-size:12px;padding:10px 0;font-style:italic;">משפטים שתפתחי יופיעו כאן (עד 15 אחרונים)</div>';
+    el.innerHTML=h;return;
+  }
   for(var j=0;j<items.length;j++){
     var p=items[j];
     var sec=DB.includes(p)?"military":DAILY.includes(p)?"daily":HEART.includes(p)?"heart":"navy";
     var idx=sec==="military"?DB.indexOf(p):sec==="daily"?DAILY.indexOf(p):sec==="heart"?HEART.indexOf(p):NAVY.indexOf(p);
-    h+='<div style="background:#1a2535;border:1px solid #2e4558;border-radius:8px;padding:10px 12px;margin-bottom:6px;cursor:pointer;" onclick="opPop('+idx+',\''+sec+'\')">';
+    h+='<div style="background:#1a2535;border:1px solid #2e4558;border-radius:8px;padding:10px 12px;margin-bottom:6px;display:flex;align-items:center;gap:8px;">';
+    h+='<div style="flex:1;cursor:pointer;" onclick="opPop('+idx+',\''+sec+'\')">';
     h+='<div style="color:#fff;font-size:13px;">'+p.he+urgDot(p.tone)+'</div>';
     h+='<div style="color:#7a9ab5;font-size:12px;">'+p.trans+'</div></div>';
+    h+='<div onclick="removeRecent(\''+p.id+'\')" style="color:#7a9ab5;font-size:18px;padding:6px 10px;cursor:pointer;">✕</div>';
+    h+='</div>';
   }
   el.innerHTML=h;
+}
+
+function clearRecent(){
+  if(!confirm("למחוק את כל רשימת האחרונים?"))return;
+  localStorage.setItem("recent_ids","[]");
+  rRecent();
+}
+
+function removeRecent(id){
+  var r=getRecent().filter(function(x){return x!==id;});
+  localStorage.setItem("recent_ids",JSON.stringify(r));
+  rRecent();
 }
 
 function urgDot(tone){
