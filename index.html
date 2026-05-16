@@ -25,14 +25,13 @@ body{background:#1A2B3C;direction:rtl;font-family:-apple-system,BlinkMacSystemFo
 .tb-badges{display:flex;gap:5px;}
 .bnew{background:#FF8C00;color:#fff;font-size:10px;padding:2px 8px;border-radius:10px;font-weight:600;display:none;}
 .bstatus{background:#1D9E75;color:#fff;font-size:10px;padding:2px 8px;border-radius:10px;}
-.tb-tabs{display:flex;overflow-x:auto;scrollbar-width:none;-ms-overflow-style:none;padding:0 4px;}
+.tb-tabs{display:flex;overflow-x:hidden;padding:0 4px;}
 .tb-tabs::-webkit-scrollbar{display:none;}
-.tb-tab{white-space:nowrap;padding:14px 10px;color:rgba(210,180,140,0.92);font-size:12px;font-weight:600;cursor:pointer;border-bottom:2px solid transparent;flex-shrink:0;transition:all 0.15s;}
-.tb-tabs::-webkit-scrollbar{display:none;}
+.tb-tab{flex:1 1 0;min-width:0;text-align:center;padding:14px 4px;color:rgba(210,180,140,0.92);font-size:12px;font-weight:600;line-height:1.2;cursor:pointer;border-bottom:2px solid transparent;transition:all 0.15s;}
 .tb-tab.active{color:#D2B48C;border-bottom-color:#FF8C00;}
-.tb-tabs-sec{display:flex;overflow-x:auto;background:#0a1622;border-bottom:1px solid #1e3348;padding:0 4px;-webkit-overflow-scrolling:touch;scrollbar-width:none;}
+.tb-tabs-sec{display:flex;overflow-x:hidden;background:#0a1622;border-bottom:1px solid #1e3348;padding:0 4px;}
 .tb-tabs-sec::-webkit-scrollbar{display:none;}
-.tb-tab-sec{padding:8px 10px;color:rgba(210,180,140,0.7);font-size:11px;font-weight:500;cursor:pointer;white-space:nowrap;border-bottom:2px solid transparent;transition:color 0.15s,border-color 0.15s;flex-shrink:0;}
+.tb-tab-sec{flex:1 1 0;min-width:0;text-align:center;padding:12px 4px;color:rgba(210,180,140,0.7);font-size:12px;font-weight:500;line-height:1.2;cursor:pointer;border-bottom:2px solid transparent;transition:color 0.15s,border-color 0.15s;}
 .tb-tab-sec.active{color:#D2B48C;border-bottom-color:#FF8C00;}
 .scr{display:none;}.scr.on{display:block;}
 .sbar{background:#FF8C00;padding:10px 12px;}
@@ -149,7 +148,7 @@ body{background:#1A2B3C;direction:rtl;font-family:-apple-system,BlinkMacSystemFo
     <div class="tb-tab" onclick="ST('qk',this)" style="color:#c0392b !important;font-weight:700;">🚨 חירום</div>
     <div class="tb-tab active" onclick="ST('lib',this)">מבצעי</div>
     <div class="tb-tab" onclick="ST('fav',this)">⭐ מועדפים</div>
-    <div class="tb-tab" onclick="ST('cus',this)">מנהג וקוד התנהגות</div>
+    <div class="tb-tab" onclick="ST('cus',this)">מנהג והתנהגות</div>
     <div class="tb-tab" onclick="ST('hrt',this)">פותחים לב</div>
     <div class="tb-tab" id="admin-tab" style="display:none;" onclick="ST('adm',this)">ניהול</div>
   </div>
@@ -280,7 +279,7 @@ body{background:#1A2B3C;direction:rtl;font-family:-apple-system,BlinkMacSystemFo
 
 <!-- CUSTOMS TAB -->
 <div class="scr" id="tab-cus">
-  <div class="sec"><div class="stitle">מנהג וקוד התנהגות</div><div id="cuslist"></div></div>
+  <div class="sec"><div class="stitle">מנהג והתנהגות</div><div id="cuslist"></div></div>
 </div>
 
 <!-- ARTICLES TAB -->
@@ -1588,7 +1587,7 @@ function rRecent(){
   }
   h+='</div>';
   if(!items.length){
-    h+='<div style="color:#7a9ab5;font-size:12px;padding:10px 0;font-style:italic;">משפטים שתפתחי יופיעו כאן (עד 15 אחרונים)</div>';
+    h+='<div style="color:#7a9ab5;font-size:12px;padding:10px 0;font-style:italic;">משפטים שתפתחו יופיעו כאן (עד 15 אחרונים)</div>';
     el.innerHTML=h;return;
   }
   for(var j=0;j<items.length;j++){
