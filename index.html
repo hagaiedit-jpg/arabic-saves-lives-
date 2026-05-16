@@ -31,7 +31,7 @@ body{background:#1A2B3C;direction:rtl;font-family:-apple-system,BlinkMacSystemFo
 .tb-tab.active{color:#D2B48C;border-bottom-color:#FF8C00;}
 .tb-tabs-sec{display:flex;overflow-x:auto;background:#0a1622;border-bottom:1px solid #1e3348;padding:0 4px;-webkit-overflow-scrolling:touch;scrollbar-width:none;}
 .tb-tabs-sec::-webkit-scrollbar{display:none;}
-.tb-tab-sec{padding:9px 12px;color:#7a9ab5;font-size:12px;cursor:pointer;white-space:nowrap;border-bottom:2px solid transparent;transition:color 0.15s,border-color 0.15s;flex-shrink:0;}
+.tb-tab-sec{padding:9px 12px;color:rgba(210,180,140,0.7);font-size:13px;font-weight:500;cursor:pointer;white-space:nowrap;border-bottom:2px solid transparent;transition:color 0.15s,border-color 0.15s;flex-shrink:0;}
 .tb-tab-sec.active{color:#D2B48C;border-bottom-color:#FF8C00;}
 .scr{display:none;}.scr.on{display:block;}
 .sbar{background:#FF8C00;padding:10px 12px;}
@@ -148,7 +148,7 @@ body{background:#1A2B3C;direction:rtl;font-family:-apple-system,BlinkMacSystemFo
     <div class="tb-tab" onclick="ST('qk',this)" style="color:#c0392b !important;font-weight:700;">🚨 חירום</div>
     <div class="tb-tab active" onclick="ST('lib',this)">מבצעי</div>
     <div class="tb-tab" onclick="ST('fav',this)">⭐ מועדפים</div>
-    <div class="tb-tab" onclick="ST('cus',this)">התנהגות בשטח</div>
+    <div class="tb-tab" onclick="ST('cus',this)">מנהג וקוד התנהגות</div>
     <div class="tb-tab" onclick="ST('hrt',this)">פותחים לב</div>
     <div class="tb-tab" id="admin-tab" style="display:none;" onclick="ST('adm',this)">ניהול</div>
   </div>
@@ -279,7 +279,7 @@ body{background:#1A2B3C;direction:rtl;font-family:-apple-system,BlinkMacSystemFo
 
 <!-- CUSTOMS TAB -->
 <div class="scr" id="tab-cus">
-  <div class="sec"><div class="stitle">התנהגות בשטח</div><div id="cuslist"></div></div>
+  <div class="sec"><div class="stitle">מנהג וקוד התנהגות</div><div id="cuslist"></div></div>
 </div>
 
 <!-- ARTICLES TAB -->
@@ -363,10 +363,8 @@ body{background:#1A2B3C;direction:rtl;font-family:-apple-system,BlinkMacSystemFo
     <!-- Add Heart -->
     <div id="at-ah" style="display:none;"><div class="acard">
       <div class="afl"><label>קטגוריה</label><select id="ahc">
-        <option>פתיחת שיח</option>
-        <option>סגירת שיח</option>
-        <option>חגים וימי הולדת</option>
-        <option>פתגמים</option>
+        <option>פתיחה וסגירת שיחה</option>
+        <option>ביטויים ופתגמים</option>
       </select></div>
       <div class="afl"><label>עברית *</label><input id="ahhe"/></div>
       <div class="afl"><label>תעתיק</label><input id="ahtr"/></div>
@@ -540,12 +538,17 @@ async function loadData(){
     if(!Array.isArray(data))return;
     DB=data.filter(p=>p.section==='military').map(mp);
     DAILY=data.filter(p=>p.section==='daily').map(mp);
-    HEART=data.filter(p=>p.section==='heart').map(mp);
+    HEART=data.filter(p=>p.section==='heart' && p.cat!=='מנהגים').map(p=>{
+      var m=mp(p);
+      if(m.cat==='פתיחת שיח'||m.cat==='פתיחת שיחה'||m.cat==='סגירת שיח'||m.cat==='סגירת שיחה')m.cat='פתיחה וסגירת שיחה';
+      else if(m.cat==='פתגמים'||m.cat==='ימי הולדת'||m.cat==='חגים'||m.cat==='חגים וימי הולדת')m.cat='ביטויים ופתגמים';
+      return m;
+    });
     NAVY=data.filter(p=>p.section==='navy').map(mp);
     ANNOUNCE=data.filter(p=>p.section==='announce').map(mp);
     DICT=data.filter(p=>p.section==='dictionary').map(mp);
     SEM=data.filter(p=>p.section==='semantic').map(p=>({...mp(p),risk:p.tone||'low',dict:p.ar,field:p.why}));
-    CUS=data.filter(p=>p.section==='customs').map(mp);
+    CUS=data.filter(p=>p.section==='customs' || (p.section==='heart' && p.cat==='מנהגים')).map(mp);
     ARTS=data.filter(p=>p.section==='article').map(mp);
     document.getElementById('status-badge').textContent='מחובר';
     document.getElementById('status-badge').style.background='#1D9E75';
