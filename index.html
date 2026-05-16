@@ -25,13 +25,13 @@ body{background:#1A2B3C;direction:rtl;font-family:-apple-system,BlinkMacSystemFo
 .tb-badges{display:flex;gap:5px;}
 .bnew{background:#FF8C00;color:#fff;font-size:10px;padding:2px 8px;border-radius:10px;font-weight:600;display:none;}
 .bstatus{background:#1D9E75;color:#fff;font-size:10px;padding:2px 8px;border-radius:10px;}
-.tb-tabs{display:flex;overflow-x:auto;scrollbar-width:none;}
+.tb-tabs{display:flex;overflow-x:auto;scrollbar-width:none;padding-left:8px;padding-right:8px;}
 .tb-tabs::-webkit-scrollbar{display:none;}
-.tb-tab{white-space:nowrap;padding:10px 14px;color:rgba(210,180,140,0.7);font-size:14px;font-weight:500;cursor:pointer;border-bottom:2px solid transparent;flex-shrink:0;transition:all 0.15s;}
+.tb-tab{white-space:nowrap;padding:10px 16px;color:rgba(210,180,140,0.7);font-size:14px;font-weight:500;cursor:pointer;border-bottom:2px solid transparent;flex-shrink:0;transition:all 0.15s;}
 .tb-tab.active{color:#D2B48C;border-bottom-color:#FF8C00;}
-.tb-tabs-sec{display:flex;overflow-x:auto;background:#0a1622;border-bottom:1px solid #1e3348;padding:0 4px;-webkit-overflow-scrolling:touch;scrollbar-width:none;}
+.tb-tabs-sec{display:flex;overflow-x:auto;background:#0a1622;border-bottom:1px solid #1e3348;padding:0 8px;-webkit-overflow-scrolling:touch;scrollbar-width:none;}
 .tb-tabs-sec::-webkit-scrollbar{display:none;}
-.tb-tab-sec{padding:9px 12px;color:rgba(210,180,140,0.7);font-size:13px;font-weight:500;cursor:pointer;white-space:nowrap;border-bottom:2px solid transparent;transition:color 0.15s,border-color 0.15s;flex-shrink:0;}
+.tb-tab-sec{padding:9px 14px;color:rgba(210,180,140,0.7);font-size:13px;font-weight:500;cursor:pointer;white-space:nowrap;border-bottom:2px solid transparent;transition:color 0.15s,border-color 0.15s;flex-shrink:0;}
 .tb-tab-sec.active{color:#D2B48C;border-bottom-color:#FF8C00;}
 .scr{display:none;}.scr.on{display:block;}
 .sbar{background:#FF8C00;padding:10px 12px;}
@@ -609,11 +609,8 @@ async function getAudio(p,stEl){
 const CATS=[{id:'עצירת תנועה',icon:'🚫'},{id:'ניהול מרחב',icon:'📍'},{id:'בידוק וזיהוי',icon:'🔍'},{id:'שליטה בבית',icon:'🏠'},{id:'הרגעה ושכנוע',icon:'✌️'},{id:'מגע ראשוני',icon:'🕵'},{id:'עזרה ראשונה',icon:'🩹'},{id:'קהל ואזרחים',icon:'👥'},{id:'ילדים ואוכלוסיות רגישות',icon:'👶'},{id:'לוח שנה ותרבות',icon:'📅'},{id:'מילון כללי',icon:'💬'},{id:'כריזה',icon:'📢',special:'announce'},{id:'תשאול ימי',icon:'⚓',special:'navy'}];
 const DCATS=[{id:'שוק ומסחר',icon:'🛒'},{id:'מסעדה ואוכל',icon:'🍽️'},{id:'שיחת היכרות',icon:'🤝'},{id:'עזרה וכיוונים',icon:'🗺️'},{id:'ילדים ובית ספר',icon:'🎒'},{id:'שכנות וקהילה',icon:'🏘️'}];
 const HCATS=[
-  {id:'פתיחת שיח',icon:'👋'},
-  {id:'סגירת שיח',icon:'🤲'},
-  {id:'חגים וימי הולדת',icon:'🎉'},
-  {id:'פתגמים',icon:'📜'},
-  {id:'מנהגים',icon:'🕌'}
+  {id:'פתיחה וסגירת שיחה',icon:'👋'},
+  {id:'ביטויים ופתגמים',icon:'📜'}
 ];
 
 function cntC(c){return DB.filter(p=>p.cat===c).length;}
