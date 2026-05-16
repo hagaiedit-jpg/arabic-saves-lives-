@@ -562,7 +562,7 @@ async function loadData(){
 
 function mp(p){
   const seen = getSeenIds();
-  return{id:p.id,cat:p.cat||'',he:p.he||'',trans:p.trans||'',ar:p.ar||'',tags:p.tags||'',why:p.why||'',tone:p.tone||'',audio:p.audio_url||'',when:p.tags||'',tip:p.why||'',isNew:(p.is_new||false)&&!seen.includes(p.id),section:p.section};
+  return{id:p.id,cat:p.cat||'',he:p.he||'',trans:p.trans||'',ar:p.ar||'',tags:p.tags||'',why:p.why||'',tone:p.tone||'',urgency:p.urgency||'',audio:p.audio_url||'',when:p.tags||'',tip:p.why||'',isNew:(p.is_new||false)&&!seen.includes(p.id),section:p.section};
 }
 
 async function spSave(phrase,section){
@@ -937,7 +937,7 @@ function doS(){
 function hl(t,q){if(!q)return t;return t.replace(new RegExp('('+q.replace(/[.*+?^${}()|[\]\\]/g,'\\$&')+')','gi'),'<span class="hlm">$1</span>');}
 function rItems(items,el,q){
   if(!items.length){el.innerHTML='<div class="empty">לא נמצאו תוצאות</div>';return;}
-  el.innerHTML=items.map(p=>{const i=DB.indexOf(p);return`<div class="li" onclick="opP(${i})"><div class="lt">${hl(p.he,q)+(typeof urgDot==='function'?urgDot(p.tone):'')}</div><div class="la">‹</div></div>`;}).join('');
+  el.innerHTML=items.map(p=>{const i=DB.indexOf(p);return`<div class="li" onclick="opP(${i})"><div class="lt">${hl(p.he,q)+(typeof urgDot==='function'?urgDot(p.urgency):'')}</div><div class="la">‹</div></div>`;}).join('');
 }
 function bldW(){const el=document.getElementById('wbars');el.innerHTML='';for(let i=0;i<32;i++){const b=document.createElement('div');b.className='wb';b.style.height=(4+Math.floor(Math.random()*14))+'px';el.appendChild(b);}}
 function opP(i){
@@ -1152,7 +1152,7 @@ async function addP(){
   const he=document.getElementById('aphe').value.trim(),ar=document.getElementById('apar').value.trim();
   if(!he||!ar){alert('חובה: עברית וערבית');return;}
   const btn=document.querySelector('#at-ap .sbtn');btn.textContent='שומר...';
-  const phrase={cat:document.getElementById('apc').value,he,trans:document.getElementById('aptr').value.trim(),ar,tags:document.getElementById('aptg').value.trim(),why:document.getElementById('apwy').value.trim(),tone:document.getElementById('apurg').value||document.getElementById('aptn').value.trim(),audio:''};
+  const phrase={cat:document.getElementById('apc').value,he,trans:document.getElementById('aptr').value.trim(),ar,tags:document.getElementById('aptg').value.trim(),why:document.getElementById('apwy').value.trim(),tone:document.getElementById('aptn').value.trim(),urgency:document.getElementById('apurg').value||null,audio:''};
   const au=await getAudio('ap',document.getElementById('ap-status'));if(au)phrase.audio=au;
   try{const s=await spSave(phrase,'military');if(s&&s[0])phrase.id=s[0].id;phrase.isNew=true;DB.push(phrase);['aphe','apar','aptr','aptg','apwy','aptn'].forEach(id=>document.getElementById(id).value='');bldCats();btn.textContent='שמור';alert('✓ נוסף!');}catch(e){btn.textContent='שמור';alert('שגיאה: '+e.message);}
 }
@@ -1542,7 +1542,7 @@ function rFav(){
     var idx=sec==="military"?DB.indexOf(p):sec==="daily"?DAILY.indexOf(p):sec==="heart"?HEART.indexOf(p):NAVY.indexOf(p);
     h+='<div style="background:#223344;border:1px solid #2e4558;border-radius:10px;padding:12px 14px;margin-bottom:8px;cursor:pointer;border-right:4px solid #FF8C00;" onclick="opFavItem(\''+sec+'\','+idx+')">';
     h+='<div style="display:flex;justify-content:space-between;align-items:flex-start;">';
-    h+='<div style="flex:1;"><div style="color:#fff;font-size:14px;margin-bottom:4px;">'+p.he+urgDot(p.tone)+'</div>';
+    h+='<div style="flex:1;"><div style="color:#fff;font-size:14px;margin-bottom:4px;">'+p.he+urgDot(p.urgency)+'</div>';
     h+='<div style="color:#fff;font-size:14px;font-family:Georgia,serif;">'+p.trans+'</div></div>';
     h+='<span onclick="event.stopPropagation();removeFav(\''+p.id+'\')" style="cursor:pointer;font-size:16px;">⭐</span>';
     h+='</div></div>';
@@ -1596,7 +1596,7 @@ function rRecent(){
     var idx=sec==="military"?DB.indexOf(p):sec==="daily"?DAILY.indexOf(p):sec==="heart"?HEART.indexOf(p):NAVY.indexOf(p);
     h+='<div style="background:#1a2535;border:1px solid #2e4558;border-radius:8px;padding:10px 12px;margin-bottom:6px;display:flex;align-items:center;gap:8px;">';
     h+='<div style="flex:1;cursor:pointer;" onclick="opPop('+idx+',\''+sec+'\')">';
-    h+='<div style="color:#fff;font-size:13px;">'+p.he+urgDot(p.tone)+'</div>';
+    h+='<div style="color:#fff;font-size:13px;">'+p.he+urgDot(p.urgency)+'</div>';
     h+='<div style="color:#7a9ab5;font-size:12px;">'+p.trans+'</div></div>';
     h+='<div onclick="removeRecent(\''+p.id+'\')" style="color:#7a9ab5;font-size:18px;padding:6px 10px;cursor:pointer;">✕</div>';
     h+='</div>';
@@ -1616,9 +1616,9 @@ function removeRecent(id){
   rRecent();
 }
 
-function urgDot(tone){
-  if(tone==="urgent")return '<span style="color:#e74c3c;font-size:8px;margin-left:4px;">🔴</span>';
-  if(tone==="sensitive")return '<span style="color:#f1c40f;font-size:8px;margin-left:4px;">🟡</span>';
+function urgDot(u){
+  if(u==="urgent")return '<span style="color:#e74c3c;font-size:8px;margin-left:4px;">🔴</span>';
+  if(u==="sensitive")return '<span style="color:#f1c40f;font-size:8px;margin-left:4px;">🟡</span>';
   return "";
 }
 
