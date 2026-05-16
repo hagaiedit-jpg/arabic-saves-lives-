@@ -29,13 +29,10 @@ body{background:#1A2B3C;direction:rtl;font-family:-apple-system,BlinkMacSystemFo
 .tb-tabs::-webkit-scrollbar{display:none;}
 .tb-tab{white-space:nowrap;padding:10px 14px;color:rgba(210,180,140,0.7);font-size:14px;font-weight:500;cursor:pointer;border-bottom:2px solid transparent;flex-shrink:0;transition:all 0.15s;}
 .tb-tab.active{color:#D2B48C;border-bottom-color:#FF8C00;}
-.more-overlay{position:absolute;top:100%;left:0;right:0;background:#0f1e2c;border-bottom:1px solid #1e3348;z-index:99;padding:10px;display:none;box-shadow:0 6px 14px rgba(0,0,0,0.35);}
-.more-overlay.on{display:block;}
-.more-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;max-width:480px;margin:0 auto;}
-.more-item{background:#223344;border:1px solid #2e4558;border-radius:10px;padding:13px 12px;display:flex;align-items:center;gap:10px;cursor:pointer;transition:background 0.12s;}
-.more-item:active{background:#2a3f54;}
-.more-icon{font-size:18px;min-width:24px;text-align:center;}
-.more-label{color:#fff;font-size:13px;font-weight:500;}
+.tb-tabs-sec{display:flex;overflow-x:auto;background:#0a1622;border-bottom:1px solid #1e3348;padding:0 4px;-webkit-overflow-scrolling:touch;scrollbar-width:none;}
+.tb-tabs-sec::-webkit-scrollbar{display:none;}
+.tb-tab-sec{padding:9px 12px;color:#7a9ab5;font-size:12px;cursor:pointer;white-space:nowrap;border-bottom:2px solid transparent;transition:color 0.15s,border-color 0.15s;flex-shrink:0;}
+.tb-tab-sec.active{color:#D2B48C;border-bottom-color:#FF8C00;}
 .scr{display:none;}.scr.on{display:block;}
 .sbar{background:#FF8C00;padding:10px 12px;}
 .si{background:#fff;border-radius:8px;display:flex;align-items:center;padding:0 12px;gap:8px;}
@@ -153,17 +150,14 @@ body{background:#1A2B3C;direction:rtl;font-family:-apple-system,BlinkMacSystemFo
     <div class="tb-tab" onclick="ST('fav',this)">⭐ מועדפים</div>
     <div class="tb-tab" onclick="ST('cus',this)">התנהגות בשטח</div>
     <div class="tb-tab" onclick="ST('hrt',this)">פותחים לב</div>
-    <div class="tb-tab" id="more-tab" onclick="ST('more',this)">⋯ עוד</div>
     <div class="tb-tab" id="admin-tab" style="display:none;" onclick="ST('adm',this)">ניהול</div>
   </div>
-  <div class="more-overlay" id="more-overlay">
-    <div class="more-grid">
-      <div class="more-item" onclick="goMore('day')"><span class="more-icon">🌅</span><span class="more-label">יומיומי</span></div>
-      <div class="more-item" onclick="goMore('dict')"><span class="more-icon">📖</span><span class="more-label">מילון</span></div>
-      <div class="more-item" onclick="goMore('sem')"><span class="more-icon">⚠️</span><span class="more-label">סמנטי</span></div>
-      <div class="more-item" onclick="goMore('art')"><span class="more-icon">📰</span><span class="more-label">מאמרים</span></div>
-      <div class="more-item" onclick="goMore('nwf')"><span class="more-icon">🆕</span><span class="more-label" id="new-tab-label">חדש</span></div>
-    </div>
+  <div class="tb-tabs-sec">
+    <div class="tb-tab-sec" onclick="ST('sem',this)">⚠️ סמנטי</div>
+    <div class="tb-tab-sec" onclick="ST('day',this)">🌅 יומיומי</div>
+    <div class="tb-tab-sec" onclick="ST('art',this)">📰 מאמרים</div>
+    <div class="tb-tab-sec" onclick="ST('dict',this)">📖 מילון</div>
+    <div class="tb-tab-sec" onclick="ST('nwf',this)" id="new-tab-label">🆕 חדש</div>
   </div>
 </div>
 
@@ -836,18 +830,10 @@ function opArt(i){
 function clsArt(){document.getElementById('artlv').style.display='block';document.getElementById('artfv').style.display='none';}
 
 function ST(t,el){
-  if(t==='more'){
-    var ov=document.getElementById('more-overlay');
-    var willOpen=!ov.classList.contains('on');
-    document.querySelectorAll('.tb-tab').forEach(x=>x.classList.remove('active'));
-    if(willOpen){ov.classList.add('on');el.classList.add('active');}
-    else{ov.classList.remove('on');}
-    return;
-  }
-  document.getElementById('more-overlay').classList.remove('on');
-  document.querySelectorAll('.tb-tab').forEach(x=>x.classList.remove('active'));
-  el.classList.add('active');
-  document.querySelectorAll('[id^="tab-"]').forEach(x=>x.className='scr');
+  document.querySelectorAll('.tb-tab').forEach(function(x){x.classList.remove('active');});
+  document.querySelectorAll('.tb-tab-sec').forEach(function(x){x.classList.remove('active');});
+  if(el)el.classList.add('active');
+  document.querySelectorAll('[id^="tab-"]').forEach(function(x){x.className='scr';});
   document.getElementById('tab-'+t).className='scr on';
   curTab=t;
   if(t==='fav'){rFav();rRecent();}
@@ -874,16 +860,15 @@ function ST(t,el){
 }
 
 function goMore(t){
-  document.getElementById('more-overlay').classList.remove('on');
-  document.querySelectorAll('[id^="tab-"]').forEach(function(x){x.className='scr';});
-  document.getElementById('tab-'+t).className='scr on';
-  document.querySelectorAll('.tb-tab').forEach(function(x){x.classList.remove('active');});
-  var mt=document.getElementById('more-tab');if(mt)mt.classList.add('active');
-  curTab=t;
-  if(t==='fav'){rFav();rRecent();}
-  if(t==='dict')renderDict();
-  if(t==='sem')rSem();
-  if(t==='nwf')rNF();
+  // legacy shim: route to ST via secondary or primary tab
+  var primaryEl=document.querySelector('.tb-tab[onclick*="ST(\''+t+'\','+'"]');
+  var secEl=document.querySelector('.tb-tab-sec[onclick*="ST(\''+t+'\','+'"]');
+  var el=primaryEl||secEl;
+  ST(t,el);
+  if(t==='fav'){if(typeof rFav==='function')rFav();if(typeof rRecent==='function')rRecent();}
+  if(t==='dict'&&typeof renderDict==='function')renderDict();
+  if(t==='sem'&&typeof rSem==='function')rSem();
+  if(t==='nwf'&&typeof rNF==='function')rNF();
 }
 
 function shV(id){['vcats','vlist','vsrch','vpop'].forEach(v=>{document.getElementById(v).className='scr'+(v===id?' on':'');});}
@@ -986,31 +971,27 @@ function clsP(){
   if(pt)clearInterval(pt);
   
   var src=window._popupSource;
-  if(src==='qk'){
+  // Map popup source -> target tab key + which row + post-switch callback
+  var routes={
+    'qk':   {tab:'qk',  row:'primary',   cb:null},
+    'heart':{tab:'hrt', row:'primary',   cb:null},
+    'fav':  {tab:'fav', row:'primary',   cb:function(){rFav();rRecent();}},
+    'daily':{tab:'day', row:'secondary', cb:null},
+    'dict': {tab:'dict',row:'secondary', cb:function(){renderDict();}},
+    'sem':  {tab:'sem', row:'secondary', cb:function(){if(typeof rSem==='function')rSem();}}
+  };
+  if(src && routes[src]){
+    var r=routes[src];
     document.querySelectorAll('[id^="tab-"]').forEach(function(x){x.className='scr';});
-    document.getElementById('tab-qk').className='scr on';
+    document.getElementById('tab-'+r.tab).className='scr on';
     document.querySelectorAll('.tb-tab').forEach(function(x){x.classList.remove('active');});
-    var t=document.querySelector('.tb-tab[onclick*="qk"]');if(t)t.classList.add('active');
+    document.querySelectorAll('.tb-tab-sec').forEach(function(x){x.classList.remove('active');});
+    var selector=r.row==='secondary'?'.tb-tab-sec[onclick*="'+r.tab+'"]':'.tb-tab[onclick*="'+r.tab+'"]';
+    var tabEl=document.querySelector(selector);
+    if(tabEl)tabEl.classList.add('active');
+    if(r.cb)r.cb();
     window._popupSource=null;return;
   }
-  if(src==='heart'){
-    document.querySelectorAll('[id^="tab-"]').forEach(function(x){x.className='scr';});
-    document.getElementById('tab-hrt').className='scr on';
-    document.querySelectorAll('.tb-tab').forEach(function(x){x.classList.remove('active');});
-    var t=document.querySelector('.tb-tab[onclick*="hrt"]');if(t)t.classList.add('active');
-    window._popupSource=null;return;
-  }
-  if(src==='fav'){
-    document.querySelectorAll('[id^="tab-"]').forEach(function(x){x.className='scr';});
-    document.getElementById('tab-fav').className='scr on';
-    document.querySelectorAll('.tb-tab').forEach(function(x){x.classList.remove('active');});
-    var t=document.querySelector('.tb-tab[onclick*="fav"]');if(t)t.classList.add('active');
-    rFav();rRecent();
-    window._popupSource=null;return;
-  }
-  if(src==='daily'){goMore('day');window._popupSource=null;return;}
-  if(src==='dict'){goMore('dict');window._popupSource=null;return;}
-  if(src==='sem'){goMore('sem');window._popupSource=null;return;}
   
   if(document.getElementById('sinp').value.trim())shV('vsrch');
   else if(curC)shV('vlist');
@@ -1575,15 +1556,9 @@ function removeFav(id){
 }
 
 function updateNewDot(){
+  var el=document.getElementById("new-tab-label");if(!el)return;
   var hasNew=DB.some(function(p){return p.isNew;})||DAILY.some(function(p){return p.isNew;})||HEART.some(function(p){return p.isNew;})||NAVY.some(function(p){return p.isNew;});
-  var el=document.getElementById("new-tab-label");
-  if(el)el.textContent=hasNew?"חדש ●":"חדש";
-  var mt=document.getElementById("more-tab");
-  if(mt){
-    var isActive=mt.classList.contains("active");
-    mt.textContent=hasNew?"⋯ עוד ●":"⋯ עוד";
-    if(isActive)mt.classList.add("active");
-  }
+  el.textContent=hasNew?"🆕 חדש ●":"🆕 חדש";
 }
 
 // === RECENTLY USED ===
