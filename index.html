@@ -289,7 +289,7 @@ body.day-mode .ct{border:none;border-bottom:1px solid #ebe0c5;border-left:1px so
         <button class="pbtn slow" onclick="play(this,'slow')">🐢 צב</button>
         <button class="pbtn fast" onclick="play(this,'fast')">🐇 ארנב</button>
       </div>
-      <div class="ibox b" id="pwhyb"><div class="ilbl b">למה זה חשוב</div><div class="itxt b" id="pwhy"></div></div>
+      <div class="ibox b" id="pwhyb"><div class="ilbl b" id="pwhylbl">למה זה חשוב</div><div class="itxt b" id="pwhy"></div></div>
       <div class="ibox o" id="ptoneb"><div class="ilbl o">טיפ ללוחם</div><div class="itxt o" id="ptone"></div></div>
       
     <div style="display:flex;justify-content:center;align-items:center;gap:20px;margin-top:8px;"><span onclick="toggleFav()" id="fav-btn" style="cursor:pointer;font-size:11px;color:#7a9ab5;">☆ שמור למועדפים</span><span style="cursor:pointer;color:#aaa;font-size:14px;" onclick="clsP()">× סגור</span></div>
@@ -429,7 +429,7 @@ body.day-mode .ct{border:none;border-bottom:1px solid #ebe0c5;border-left:1px so
       <div class="afl"><label>עברית *</label><input id="adhe"/></div>
       <div class="afl"><label>תעתיק</label><input id="adtr"/></div>
       <div class="afl"><label>ערבית *</label><textarea id="adar" style="font-family:Georgia,serif;font-size:18px;"></textarea></div>
-      <div class="afl"><label>הקשר</label><textarea id="adtp"></textarea></div>
+      <div class="afl"><label>מתי משתמשים</label><textarea id="adtp"></textarea></div>
       <div class="afl"><label>הקלטה</label>
         <div style="display:flex;gap:6px;flex-wrap:wrap;">
           <button class="rec-btn idle" id="ad-rec" onclick="toggleRec('ad')">🎙 הקלט</button>
@@ -451,7 +451,7 @@ body.day-mode .ct{border:none;border-bottom:1px solid #ebe0c5;border-left:1px so
       <div class="afl"><label>תעתיק</label><input id="ahtr"/></div>
       <div class="afl"><label>ערבית *</label><textarea id="ahar" style="font-family:Georgia,serif;font-size:18px;"></textarea></div>
       <div class="afl"><label>מתי משתמשים</label><input id="ahwn"/></div>
-      <div class="afl"><label>למה פותח לב</label><textarea id="ahwy"></textarea></div>
+      <div class="afl"><label>למה זה בונה אמון</label><textarea id="ahwy"></textarea></div>
       <div class="afl"><label>הקלטה</label>
         <div style="display:flex;gap:6px;flex-wrap:wrap;">
           <button class="rec-btn idle" id="ah-rec" onclick="toggleRec('ah')">🎙 הקלט</button>
@@ -768,6 +768,7 @@ function opAnnounce(i){
 function opNavyP(i){
   const p=NAVY[i];
   saveRecent(p.id);
+  setPopupLabel('navy');
   document.getElementById('phe').textContent=p.he;
   document.getElementById('parsm').textContent=p.ar;
   document.getElementById('ptrans').textContent=p.trans||'';
@@ -960,6 +961,15 @@ function goMore(t){
   if(t==='nwf'&&typeof rNF==='function')rNF();
 }
 
+function setPopupLabel(section){
+  var lbl=document.getElementById('pwhylbl');if(!lbl)return;
+  if(section==='heart')lbl.textContent='למה זה בונה אמון';
+  else if(section==='daily')lbl.textContent='מתי משתמשים';
+  else if(section==='semantic'||section==='sem')lbl.textContent='משמעות בשטח';
+  else if(section==='dict')lbl.textContent='דוגמה';
+  else lbl.textContent='למה זה חשוב';
+}
+
 function shV(id){['vcats','vlist','vsrch','vpop'].forEach(v=>{document.getElementById(v).className='scr'+(v===id?' on':'');});}
 
 function goB(tab){
@@ -1032,6 +1042,7 @@ function bldW(){const el=document.getElementById('wbars');el.innerHTML='';for(le
 function opP(i){
   const p=DB[i];
   saveRecent(p.id);
+  setPopupLabel('military');
   document.getElementById('phe').textContent=p.he;document.getElementById('parsm').textContent=p.ar;
   document.getElementById('ptrans').textContent=p.trans||'';document.getElementById('pwhy').textContent=p.why||'';
   document.getElementById('pwhyb').style.display=p.why?'block':'none';document.getElementById('ptone').textContent=p.tone||'';
@@ -1043,6 +1054,7 @@ function opP(i){
 function opPop(i,section){
   let p=section==='daily'?DAILY[i]:section==='heart'?HEART[i]:DB[i];
   saveRecent(p.id);
+  setPopupLabel(section);
   window._popupSource = section;
   document.getElementById('phe').textContent=p.he;document.getElementById('parsm').textContent=p.ar;
   document.getElementById('ptrans').textContent=p.trans||'';
