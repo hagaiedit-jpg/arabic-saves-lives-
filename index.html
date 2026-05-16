@@ -30,37 +30,38 @@ body{background:#1A2B3C;direction:rtl;font-family:-apple-system,BlinkMacSystemFo
 .tb-tab{flex:1 1 0;min-width:0;text-align:center;padding:14px 4px;color:rgba(210,180,140,0.92);font-size:12px;font-weight:600;line-height:1.2;cursor:pointer;border-bottom:2px solid transparent;transition:all 0.15s;}
 .tb-tab.active{color:#D2B48C;border-bottom-color:#FF8C00;}
 
-/* === Day mode (rich, navy+orange+sand-gold theme) === */
+/* === Day mode: navy chrome top + cream body bottom (cohesive with orange) === */
 body.day-mode{background:#faf3e3;color:#1a2b3c;}
-body.day-mode header{background:#d4b76a;border-bottom:1px solid #b89c4a;}
-body.day-mode .tb-tabs{background:#d4b76a;}
-body.day-mode .tb-tabs-sec{background:#e8d8a8;border-bottom:1px solid #c4a85a;}
-body.day-mode .tb-tab{color:rgba(26,43,60,0.7);}
-body.day-mode .tb-tab.active{color:#1a2b3c;border-bottom-color:#FF8C00;}
-body.day-mode .tb-tab-sec{color:rgba(26,43,60,0.65);}
-body.day-mode .tb-tab-sec.active{color:#1a2b3c;border-bottom-color:#FF8C00;}
+/* Top chrome: navy + orange (like night mode — these colors work together) */
+body.day-mode header{background:#1A2B3C;border-bottom:1px solid #0f1e2c;}
+body.day-mode .tb-tabs{background:#1A2B3C;}
+body.day-mode .tb-tabs-sec{background:#0f1e2c;border-bottom:1px solid #1A2B3C;}
+body.day-mode .tb-tab{color:rgba(210,180,140,0.7);}
+body.day-mode .tb-tab.active{color:#D2B48C;border-bottom-color:#FF8C00;}
+body.day-mode .tb-tab-sec{color:rgba(210,180,140,0.6);}
+body.day-mode .tb-tab-sec.active{color:#D2B48C;border-bottom-color:#FF8C00;}
 /* Header title and badges */
-body.day-mode .tb-title,body.day-mode header > div:first-child{color:#1a2b3c !important;}
-body.day-mode .bnew{background:#c0392b;color:#fff;}
+body.day-mode .tb-title,body.day-mode header > div:first-child{color:#D2B48C !important;}
+body.day-mode .bnew{background:#FF8C00;color:#fff;}
 body.day-mode .bstatus{background:#1D9E75;color:#fff;}
-/* Search and language bars stay ORANGE — bold and visible */
+/* Search and language bars: ORANGE (continuous from navy header) */
 body.day-mode .sbar{background:#FF8C00;}
 body.day-mode .lrow{background:#e07800;}
 body.day-mode .si{background:#fff;border:none;}
 body.day-mode .lb{background:transparent;color:rgba(255,255,255,0.7);border:1px solid rgba(255,255,255,0.3);}
 body.day-mode .lb.active{color:#fff;background:rgba(0,0,0,0.18);border-color:rgba(255,255,255,0.5);}
-/* Categories grid: keep DARK NAVY like night mode — attractive and bold */
+/* Categories grid: dark navy (continues from chrome — visual continuity) */
 body.day-mode .cgrid{background:#0f1e2c;gap:1px;}
 body.day-mode .ct{background:#223344;color:#fff;border:none;}
 body.day-mode .cn{color:#fff;}
 body.day-mode .cc{color:#a0b8c8;}
 body.day-mode .ci{background:#1A2B3C;color:#D2B48C;}
-/* General screens and content */
+/* Body content: cream background, dark text — the "day" part */
 body.day-mode .scr{background:#faf3e3;color:#1a2b3c;}
 body.day-mode .sec{background:transparent;}
 body.day-mode .stitle{color:#1a2b3c;}
 body.day-mode .empty{color:#7a6a4a;}
-/* Phrase cards (lists) */
+/* Phrase cards in lists */
 body.day-mode .li{background:#fff;border:1px solid #e8dec9;color:#1a2b3c;}
 body.day-mode .lt{color:#1a2b3c;}
 body.day-mode .la{color:#888;}
