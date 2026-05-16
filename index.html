@@ -30,57 +30,60 @@ body{background:#1A2B3C;direction:rtl;font-family:-apple-system,BlinkMacSystemFo
 .tb-tab{flex:1 1 0;min-width:0;text-align:center;padding:14px 4px;color:rgba(210,180,140,0.92);font-size:12px;font-weight:600;line-height:1.2;cursor:pointer;border-bottom:2px solid transparent;transition:all 0.15s;}
 .tb-tab.active{color:#D2B48C;border-bottom-color:#FF8C00;}
 
-/* === Day mode === */
-body.day-mode{background:#f5efe3;color:#1a2b3c;}
-body.day-mode header{background:#e8dec9;border-bottom:1px solid #cbb98a;}
-body.day-mode .tb-tabs{background:#e8dec9;}
-body.day-mode .tb-tabs-sec{background:#ddd0b0;border-bottom:1px solid #c4b48a;}
-body.day-mode .tb-tab{color:rgba(60,40,20,0.7);}
-body.day-mode .tb-tab.active{color:#5a3a1a;border-bottom-color:#c0392b;}
-body.day-mode .tb-tab-sec{color:rgba(60,40,20,0.7);}
-body.day-mode .tb-tab-sec.active{color:#5a3a1a;border-bottom-color:#c0392b;}
-body.day-mode .scr{background:#f5efe3;color:#1a2b3c;}
+/* === Day mode (rich, navy+orange+sand-gold theme) === */
+body.day-mode{background:#faf3e3;color:#1a2b3c;}
+body.day-mode header{background:#d4b76a;border-bottom:1px solid #b89c4a;}
+body.day-mode .tb-tabs{background:#d4b76a;}
+body.day-mode .tb-tabs-sec{background:#e8d8a8;border-bottom:1px solid #c4a85a;}
+body.day-mode .tb-tab{color:rgba(26,43,60,0.7);}
+body.day-mode .tb-tab.active{color:#1a2b3c;border-bottom-color:#FF8C00;}
+body.day-mode .tb-tab-sec{color:rgba(26,43,60,0.65);}
+body.day-mode .tb-tab-sec.active{color:#1a2b3c;border-bottom-color:#FF8C00;}
+/* Header title and badges */
+body.day-mode .tb-title,body.day-mode header > div:first-child{color:#1a2b3c !important;}
+body.day-mode .bnew{background:#c0392b;color:#fff;}
+body.day-mode .bstatus{background:#1D9E75;color:#fff;}
+/* Search and language bars stay ORANGE — bold and visible */
+body.day-mode .sbar{background:#FF8C00;}
+body.day-mode .lrow{background:#e07800;}
+body.day-mode .si{background:#fff;border:none;}
+body.day-mode .lb{background:transparent;color:rgba(255,255,255,0.7);border:1px solid rgba(255,255,255,0.3);}
+body.day-mode .lb.active{color:#fff;background:rgba(0,0,0,0.18);border-color:rgba(255,255,255,0.5);}
+/* Categories grid: keep DARK NAVY like night mode — attractive and bold */
+body.day-mode .cgrid{background:#0f1e2c;gap:1px;}
+body.day-mode .ct{background:#223344;color:#fff;border:none;}
+body.day-mode .cn{color:#fff;}
+body.day-mode .cc{color:#a0b8c8;}
+body.day-mode .ci{background:#1A2B3C;color:#D2B48C;}
+/* General screens and content */
+body.day-mode .scr{background:#faf3e3;color:#1a2b3c;}
 body.day-mode .sec{background:transparent;}
 body.day-mode .stitle{color:#1a2b3c;}
-body.day-mode .li{background:#fff;border:1px solid #d4c7a8;color:#1a2b3c;}
+body.day-mode .empty{color:#7a6a4a;}
+/* Phrase cards (lists) */
+body.day-mode .li{background:#fff;border:1px solid #e8dec9;color:#1a2b3c;}
 body.day-mode .lt{color:#1a2b3c;}
 body.day-mode .la{color:#888;}
-body.day-mode .empty{color:#7a6a4a;}
-body.day-mode .ct{background:#fff;border:1px solid #d4c7a8;color:#1a2b3c;}
-body.day-mode .ctn{color:#888;}
+/* Popup */
 body.day-mode .pop{background:#fff;color:#1a2b3c;}
 body.day-mode .phe{color:#1a2b3c;}
 body.day-mode .parsm{color:#5a3a1a;}
 body.day-mode .ptrans{color:#1a2b3c;}
-body.day-mode .pbox{background:#f5efe3;border:1px solid #d4c7a8;}
-body.day-mode #sinp{background:#fff;color:#1a2b3c;border:1px solid #d4c7a8;}
+body.day-mode .pbox{background:#faf3e3;border:1px solid #e8dec9;}
+/* New tab */
+body.day-mode .nftxt{color:#1a2b3c;}
+body.day-mode .nfdate{color:#5a6a7a;}
+body.day-mode .nfi{border-bottom-color:#e8dec9;}
+/* Admin forms */
 body.day-mode .afl input,body.day-mode .afl textarea,body.day-mode .afl select{background:#fff;color:#1a2b3c;border:1px solid #d4c7a8;}
 body.day-mode .afl label{color:#5a3a1a;}
-body.day-mode #recentlist > div[style*="background:#1a2535"]{background:#fff !important;border-color:#d4c7a8 !important;}
-body.day-mode #favlist > div[style*="background:#223344"]{background:#fff !important;border-color:#d4c7a8 !important;color:#1a2b3c !important;}
+/* Recent + favorites inline overrides */
+body.day-mode #recentlist > div[style*="background:#1a2535"]{background:#fff !important;border-color:#e8dec9 !important;}
+body.day-mode #favlist > div[style*="background:#223344"]{background:#fff !important;border-color:#e8dec9 !important;color:#1a2b3c !important;}
 body.day-mode #recentlist [style*="color:#fff"]{color:#1a2b3c !important;}
 body.day-mode #favlist [style*="color:#fff"]{color:#1a2b3c !important;}
 body.day-mode #favlist [style*="color:#7a9ab5"]{color:#5a3a1a !important;}
 body.day-mode #recentlist [style*="color:#7a9ab5"]{color:#5a3a1a !important;}
-/* Category names + counts */
-body.day-mode .cn{color:#1a2b3c;}
-body.day-mode .cc{color:#5a6a7a;}
-body.day-mode .ci{background:#f5efe3;color:#1a2b3c;}
-/* New phrases tab */
-body.day-mode .nftxt{color:#1a2b3c;}
-body.day-mode .nfdate{color:#5a6a7a;}
-body.day-mode .nfi{border-bottom-color:#d4c7a8;}
-/* Header */
-body.day-mode .tb-title,body.day-mode header > div:first-child{color:#1a2b3c !important;}
-body.day-mode .bnew{background:#c0392b;color:#fff;}
-body.day-mode .bstatus{background:#1D9E75;color:#fff;}
-/* Search + language bars (were orange) */
-body.day-mode .sbar{background:#e8dec9;}
-body.day-mode .lrow{background:#ddd0b0;}
-body.day-mode .si{background:#fff;border:1px solid #d4c7a8;}
-body.day-mode .si input{color:#1a2b3c;}
-body.day-mode .lb{background:rgba(255,255,255,0.5);color:#5a3a1a;border:1px solid rgba(90,58,26,0.2);}
-body.day-mode .lb.active{background:#fff;color:#1a2b3c;border-color:#FF8C00;}
 
 .theme-btn{
   position:fixed;
