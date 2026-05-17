@@ -901,6 +901,9 @@ function searchDict(){
 function opDictWord(i){
   const d=DICT[i];
   window._popupSource = 'dict';
+  window._popupAudio = d.audio || '';
+  setPopupLabel('dict');
+  setPopupExtras(d);
   document.getElementById('phe').textContent=d.he;
   document.getElementById('parsm').textContent=d.ar;
   document.getElementById('ptrans').textContent=d.trans||'';
@@ -933,6 +936,9 @@ function rSem(){
 function opSem(i){
   const s=SEM[i];
   window._popupSource = 'sem';
+  window._popupAudio = s.audio || '';
+  setPopupLabel('semantic');
+  setPopupExtras(s);
   document.getElementById('phe').textContent=s.he;
   document.getElementById('parsm').textContent=s.ar||'';
   document.getElementById('ptrans').textContent=s.trans||'';
@@ -1233,8 +1239,9 @@ function resetPopupControls() {
 
 // Set category badge & cultural fact in popup
 function setPopupExtras(p) {
-  // Store audio URL for repeat/loop buttons
-  window._popupAudio = (p && p.audio) ? p.audio : '';
+  // Store audio URL for repeat/loop buttons (caller may have set it; prefer p.audio if available)
+  if (p && p.audio) window._popupAudio = p.audio;
+  else if (!window._popupAudio) window._popupAudio = '';
   // Category badge
   var badge = document.getElementById('pcatbadge');
   if (badge) {
