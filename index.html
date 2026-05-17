@@ -30,6 +30,29 @@ body{background:#1A2B3C;direction:rtl;font-family:-apple-system,BlinkMacSystemFo
 .tb-tab{flex:1 1 0;min-width:0;text-align:center;padding:14px 4px;color:rgba(210,180,140,0.92);font-size:12px;font-weight:600;line-height:1.2;cursor:pointer;border-bottom:2px solid transparent;transition:all 0.15s;}
 .tb-tab.active{color:#D2B48C;border-bottom-color:#FF8C00;}
 
+/* === Enhanced popup === */
+.pcat-badge{display:inline-flex;align-items:center;gap:6px;background:rgba(255,140,0,0.18);border:1px solid rgba(255,140,0,0.45);border-radius:999px;padding:4px 12px;font-size:11px;font-weight:700;color:#FF8C00;letter-spacing:0.5px;margin-bottom:14px;}
+body.day-mode .pcat-badge{background:rgba(255,140,0,0.12);border-color:rgba(255,140,0,0.55);color:#c66700;}
+.play-locals-btn{display:flex;align-items:center;justify-content:center;gap:10px;background:#FF8C00;color:#fff;border:none;border-radius:14px;padding:16px 22px;font-size:16px;font-weight:700;cursor:pointer;width:100%;margin:14px 0 10px;box-shadow:0 4px 14px rgba(255,140,0,0.3);transition:transform 0.1s,box-shadow 0.15s;font-family:inherit;}
+.play-locals-btn:hover{box-shadow:0 6px 20px rgba(255,140,0,0.4);}
+.play-locals-btn:active{transform:scale(0.98);}
+.play-locals-btn.playing{background:#c0392b;box-shadow:0 4px 14px rgba(192,57,43,0.4);}
+.rep-row{display:flex;align-items:center;justify-content:center;gap:8px;margin-bottom:14px;flex-wrap:wrap;font-size:12px;}
+.rep-lbl{color:#7a9ab5;font-size:12px;}
+body.day-mode .rep-lbl{color:#5a3a1a;}
+.rep-btn{background:rgba(255,255,255,0.08);border:1px solid rgba(210,180,140,0.3);color:#D2B48C;border-radius:999px;padding:5px 14px;font-size:12px;font-weight:600;cursor:pointer;font-family:inherit;transition:all 0.15s;}
+.rep-btn.active{background:#FF8C00;border-color:#FF8C00;color:#fff;}
+body.day-mode .rep-btn{background:rgba(0,0,0,0.04);border-color:rgba(90,58,26,0.25);color:#5a3a1a;}
+body.day-mode .rep-btn.active{background:#FF8C00;border-color:#FF8C00;color:#fff;}
+.loop-btn{background:rgba(255,255,255,0.08);border:1px solid rgba(210,180,140,0.3);color:#D2B48C;border-radius:999px;padding:5px 14px;font-size:12px;font-weight:600;cursor:pointer;font-family:inherit;display:inline-flex;align-items:center;gap:5px;}
+.loop-btn.on{background:#1D9E75;border-color:#1D9E75;color:#fff;}
+body.day-mode .loop-btn{background:rgba(0,0,0,0.04);border-color:rgba(90,58,26,0.25);color:#5a3a1a;}
+body.day-mode .loop-btn.on{background:#1D9E75;border-color:#1D9E75;color:#fff;}
+.ibox.c{background:rgba(255,215,140,0.08);border:1px solid rgba(255,215,140,0.25);}
+.ibox.c .ilbl{color:#FFD580;}
+body.day-mode .ibox.c{background:rgba(255,215,140,0.18);border-color:rgba(180,130,40,0.3);}
+body.day-mode .ibox.c .ilbl{color:#a06820;}
+
 /* === Day mode: navy chrome top + cream body bottom (cohesive with orange) === */
 body.day-mode{background:#faf3e3;color:#1a2b3c;}
 /* Top chrome: navy + orange (like night mode — these colors work together) */
@@ -281,16 +304,26 @@ body.day-mode .ct{border:none;border-bottom:1px solid #ebe0c5;border-left:1px so
   </div>
   <div id="vpop" class="scr">
     <div class="pbg"><div class="pop">
+      <div id="pcatbadge" class="pcat-badge" style="display:none;"></div>
       <div class="phe" id="phe"></div>
       <div class="parsm" id="parsm"></div>
       <div class="pbox"><div class="ptrans" id="ptrans"></div></div>
       <div class="ww"><div class="wave" id="wbars"></div><span class="wt" id="wtime">0:00</span></div>
+      <button class="play-locals-btn" id="playLocalsBtn" onclick="playForLocals(this)">▶ השמע למקומיים</button>
+      <div class="rep-row">
+        <span class="rep-lbl">חזרות:</span>
+        <button class="rep-btn active" data-rep="1" onclick="setRepeat(this,1)">1×</button>
+        <button class="rep-btn" data-rep="3" onclick="setRepeat(this,3)">3×</button>
+        <button class="rep-btn" data-rep="5" onclick="setRepeat(this,5)">5×</button>
+        <button class="loop-btn" id="loopBtn" onclick="toggleLoop(this)">🔁 לולאה</button>
+      </div>
       <div class="pbr">
         <button class="pbtn slow" onclick="play(this,'slow')">🐢 צב</button>
         <button class="pbtn fast" onclick="play(this,'fast')">🐇 ארנב</button>
       </div>
       <div class="ibox b" id="pwhyb"><div class="ilbl b" id="pwhylbl">למה זה חשוב</div><div class="itxt b" id="pwhy"></div></div>
       <div class="ibox o" id="ptoneb"><div class="ilbl o">טיפ ללוחם</div><div class="itxt o" id="ptone"></div></div>
+      <div class="ibox c" id="pcultb" style="display:none;"><div class="ilbl c">✨ פאקט תרבותי</div><div class="itxt c" id="pcult"></div></div>
       
     <div style="display:flex;justify-content:center;align-items:center;gap:20px;margin-top:8px;"><span onclick="toggleFav()" id="fav-btn" style="cursor:pointer;font-size:11px;color:#7a9ab5;">☆ שמור למועדפים</span><span style="cursor:pointer;color:#aaa;font-size:14px;" onclick="clsP()">× סגור</span></div>
     </div></div>
@@ -408,6 +441,7 @@ body.day-mode .ct{border:none;border-bottom:1px solid #ebe0c5;border-left:1px so
       <div class="afl"><label>תגיות</label><input id="aptg"/></div>
       <div class="afl"><label>למה זה חשוב</label><textarea id="apwy"></textarea></div>
       <div class="afl"><label>טיפ ללוחם</label><textarea id="aptn"></textarea></div>
+      <div class="afl"><label>פאקט תרבותי <span style="color:#7a9ab5;font-size:11px;">(אופציונלי - רקע תרבותי על הביטוי)</span></label><textarea id="apcult" placeholder="לדוגמה: ביטוי דתי, ברכה מקובלת באזור הזה..."></textarea></div>
       <div class="afl"><label>דחיפות</label><select id="apurg"><option value="">רגיל</option><option value="urgent">🔴 מיידי</option><option value="sensitive">🟡 רגיש</option></select></div>
       <div class="afl"><label>הקלטה</label>
         <div style="display:flex;gap:6px;flex-wrap:wrap;">
@@ -643,7 +677,7 @@ async function loadData(){
 
 function mp(p){
   const seen = getSeenIds();
-  var res={id:p.id,cat:p.cat||'',he:p.he||'',trans:p.trans||'',ar:p.ar||'',tags:p.tags||'',why:p.why||'',tone:p.tone||'',audio:p.audio_url||'',when:p.tags||'',tip:p.why||'',isNew:(p.is_new||false)&&!seen.includes(p.id),section:p.section,urgency:''};
+  var res={id:p.id,cat:p.cat||'',he:p.he||'',trans:p.trans||'',ar:p.ar||'',tags:p.tags||'',why:p.why||'',tone:p.tone||'',audio:p.audio_url||'',when:p.tags||'',tip:p.why||'',cultural:p.cultural||p.context||'',isNew:(p.is_new||false)&&!seen.includes(p.id),section:p.section,urgency:''};
   var _t=res.tone||'';
   var _m=_t.match(/^\[(urgent|sensitive)\]\s*/);
   if(_m){res.urgency=_m[1];res.tone=_t.substring(_m[0].length);}
@@ -769,6 +803,7 @@ function opNavyP(i){
   const p=NAVY[i];
   saveRecent(p.id);
   setPopupLabel('navy');
+  setPopupExtras(p);
   document.getElementById('phe').textContent=p.he;
   document.getElementById('parsm').textContent=p.ar;
   document.getElementById('ptrans').textContent=p.trans||'';
@@ -1043,6 +1078,7 @@ function opP(i){
   const p=DB[i];
   saveRecent(p.id);
   setPopupLabel('military');
+  setPopupExtras(p);
   document.getElementById('phe').textContent=p.he;document.getElementById('parsm').textContent=p.ar;
   document.getElementById('ptrans').textContent=p.trans||'';document.getElementById('pwhy').textContent=p.why||'';
   document.getElementById('pwhyb').style.display=p.why?'block':'none';document.getElementById('ptone').textContent=p.tone||'';
@@ -1055,6 +1091,7 @@ function opPop(i,section){
   let p=section==='daily'?DAILY[i]:section==='heart'?HEART[i]:DB[i];
   saveRecent(p.id);
   setPopupLabel(section);
+  setPopupExtras(p);
   window._popupSource = section;
   document.getElementById('phe').textContent=p.he;document.getElementById('parsm').textContent=p.ar;
   document.getElementById('ptrans').textContent=p.trans||'';
@@ -1101,6 +1138,122 @@ function clsP(){
 function clrS(){document.getElementById('sinp').value='';doS();}
 
 let pt=null,curAudio=null;
+// === Popup enhancements: repeat / loop / cultural fact ===
+var _repeatCount = 1;
+var _looping = false;
+var _localsPlaying = false;
+var _localsStopFlag = false;
+
+function setRepeat(btn, n) {
+  _repeatCount = n;
+  document.querySelectorAll('.rep-btn').forEach(function(b){b.classList.remove('active');});
+  btn.classList.add('active');
+}
+
+function toggleLoop(btn) {
+  _looping = !_looping;
+  if (_looping) btn.classList.add('on');
+  else btn.classList.remove('on');
+}
+
+function setLocalsButtonState(playing) {
+  _localsPlaying = playing;
+  var btn = document.getElementById('playLocalsBtn');
+  if (!btn) return;
+  if (playing) {
+    btn.classList.add('playing');
+    btn.innerHTML = '■ עצור';
+  } else {
+    btn.classList.remove('playing');
+    btn.innerHTML = '▶ השמע למקומיים';
+  }
+}
+
+function playForLocals(btn) {
+  // If already playing - stop
+  if (_localsPlaying) {
+    _localsStopFlag = true;
+    if (curAudio) { curAudio.pause(); curAudio.currentTime = 0; curAudio = null; }
+    if (pt) clearInterval(pt);
+    setLocalsButtonState(false);
+    return;
+  }
+  
+  // Find the slow/fast button to get the audio URL
+  var slowBtn = document.querySelector('.pop .pbtn.slow');
+  if (!slowBtn) return;
+  var url = slowBtn.getAttribute('data-audio') || '';
+  if (!url) { alert('אין הקלטה למשפט זה'); return; }
+  
+  _localsStopFlag = false;
+  setLocalsButtonState(true);
+  var remaining = _repeatCount;
+  
+  function playNext() {
+    if (_localsStopFlag) { setLocalsButtonState(false); return; }
+    if (remaining <= 0 && !_looping) { setLocalsButtonState(false); return; }
+    if (remaining <= 0 && _looping) remaining = _repeatCount;
+    remaining--;
+    
+    if (curAudio) { curAudio.pause(); curAudio = null; }
+    curAudio = new Audio(url);
+    curAudio.onended = function() {
+      curAudio = null;
+      if (_localsStopFlag) { setLocalsButtonState(false); return; }
+      setTimeout(playNext, 500);
+    };
+    curAudio.onerror = function() {
+      curAudio = null;
+      setLocalsButtonState(false);
+      alert('שגיאה בנגינת ההקלטה');
+    };
+    curAudio.play().catch(function(){
+      setLocalsButtonState(false);
+    });
+  }
+  playNext();
+}
+
+// Reset popup controls each time it opens
+function resetPopupControls() {
+  _localsStopFlag = true;
+  if (_localsPlaying) setLocalsButtonState(false);
+  _repeatCount = 1;
+  _looping = false;
+  document.querySelectorAll('.rep-btn').forEach(function(b){
+    b.classList.toggle('active', b.dataset.rep === '1');
+  });
+  var lb = document.getElementById('loopBtn');
+  if (lb) lb.classList.remove('on');
+}
+
+// Set category badge & cultural fact in popup
+function setPopupExtras(p) {
+  // Category badge
+  var badge = document.getElementById('pcatbadge');
+  if (badge) {
+    if (p && p.cat) {
+      badge.textContent = p.cat;
+      badge.style.display = 'inline-flex';
+    } else {
+      badge.style.display = 'none';
+    }
+  }
+  // Cultural fact
+  var cb = document.getElementById('pcultb');
+  var ct = document.getElementById('pcult');
+  if (cb && ct) {
+    var fact = p && p.cultural ? p.cultural : '';
+    if (fact) {
+      ct.textContent = fact;
+      cb.style.display = 'block';
+    } else {
+      cb.style.display = 'none';
+    }
+  }
+  resetPopupControls();
+}
+
 function play(btn,speed){
   const bars=document.querySelectorAll('.wb');
   const tEl=document.getElementById('wtime');
@@ -1253,7 +1406,7 @@ async function addP(){
   const he=document.getElementById('aphe').value.trim(),ar=document.getElementById('apar').value.trim();
   if(!he||!ar){alert('חובה: עברית וערבית');return;}
   const btn=document.querySelector('#at-ap .sbtn');btn.textContent='שומר...';
-  const phrase={cat:document.getElementById('apc').value,he,trans:document.getElementById('aptr').value.trim(),ar,tags:document.getElementById('aptg').value.trim(),why:document.getElementById('apwy').value.trim(),tone:(function(){var u=document.getElementById('apurg').value;var t=document.getElementById('aptn').value.trim();return u&&t?'['+u+'] '+t:(u||t);})(),audio:''};
+  const phrase={cat:document.getElementById('apc').value,he,trans:document.getElementById('aptr').value.trim(),ar,tags:document.getElementById('aptg').value.trim(),why:document.getElementById('apwy').value.trim(),tone:(function(){var u=document.getElementById('apurg').value;var t=document.getElementById('aptn').value.trim();return u&&t?'['+u+'] '+t:(u||t);})(),context:document.getElementById('apcult').value.trim(),audio:''};
   const au=await getAudio('ap',document.getElementById('ap-status'));if(au)phrase.audio=au;
   try{const s=await spSave(phrase,'military');if(s&&s[0])phrase.id=s[0].id;phrase.isNew=true;DB.push(phrase);['aphe','apar','aptr','aptg','apwy','aptn'].forEach(id=>document.getElementById(id).value='');bldCats();btn.textContent='שמור';alert('✓ נוסף!');}catch(e){btn.textContent='שמור';alert('שגיאה: '+e.message);}
 }
