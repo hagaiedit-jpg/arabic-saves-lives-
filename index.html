@@ -141,6 +141,45 @@ body.day-mode #recentlist [style*="color:#7a9ab5"]{color:#5a3a1a !important;}
 }
 body.day-mode .theme-toggle{background:rgba(255,255,255,0.6);}
 body.day-mode .theme-circle.active{background:#1A2B3C;}
+
+/* Role indicator button */
+.role-btn{
+  position:fixed;
+  top:10px;
+  right:10px;
+  padding:6px 12px;
+  border-radius:18px;
+  background:rgba(0,0,0,0.35);
+  color:#D2B48C;
+  border:1px solid rgba(210,180,140,0.4);
+  font-size:12px;
+  font-weight:600;
+  cursor:pointer;
+  font-family:inherit;
+  display:flex;
+  align-items:center;
+  gap:5px;
+  transition:all 0.18s;
+  z-index:1000;
+}
+.role-btn:hover{background:rgba(255,140,0,0.15);border-color:#FF8C00;color:#FF8C00;}
+body.day-mode .role-btn{background:rgba(255,255,255,0.6);color:#5a3a1a;border-color:rgba(90,58,26,0.3);}
+body.day-mode .role-btn:hover{background:#fff;border-color:#5a3a1a;}
+
+/* Welcome modal */
+.welcome-bg{position:fixed;inset:0;background:rgba(0,0,0,0.85);z-index:9999;display:flex;align-items:center;justify-content:center;padding:20px;}
+.welcome-pop{background:#1A2B3C;border:2px solid #FF8C00;border-radius:18px;padding:24px 20px;max-width:420px;width:100%;text-align:center;color:#fff;box-shadow:0 12px 40px rgba(0,0,0,0.6);}
+.welcome-title{font-size:20px;font-weight:700;color:#FF8C00;margin-bottom:8px;}
+.welcome-sub{font-size:14px;color:#D2B48C;margin-bottom:22px;line-height:1.5;}
+.role-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
+.role-choice{background:rgba(255,255,255,0.06);border:1.5px solid rgba(210,180,140,0.35);border-radius:14px;padding:18px 10px;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:6px;transition:all 0.18s;font-family:inherit;color:#fff;}
+.role-choice:hover,.role-choice:active{background:rgba(255,140,0,0.15);border-color:#FF8C00;transform:translateY(-2px);}
+.role-emoji{font-size:32px;line-height:1;}
+.role-name{font-size:14px;font-weight:700;}
+.role-desc{font-size:11px;color:#7a9ab5;line-height:1.3;}
+
+/* Gold marker */
+.gold-marker{display:inline-block;color:#FFD700;font-size:13px;margin-right:4px;filter:drop-shadow(0 0 3px rgba(255,215,0,0.5));}
 .tb-tabs-sec{display:flex;overflow-x:hidden;background:#0a1622;border-bottom:1px solid #1e3348;padding:0 4px;}
 .tb-tabs-sec::-webkit-scrollbar{display:none;}
 .tb-tab-sec{flex:1 1 0;min-width:0;text-align:center;padding:12px 4px;color:rgba(210,180,140,0.7);font-size:12px;font-weight:500;line-height:1.2;cursor:pointer;border-bottom:2px solid transparent;transition:color 0.15s,border-color 0.15s;}
@@ -253,6 +292,10 @@ body.day-mode .ct{border:none;border-bottom:1px solid #ebe0c5;border-left:1px so
   <button class="theme-circle moon" id="moonBtn" onclick="setTheme('night')" title="לילה">🌙</button>
   <button class="theme-circle sun" id="sunBtn" onclick="setTheme('day')" title="יום">☀️</button>
 </div>
+<button class="role-btn" id="roleBtn" onclick="showWelcome()" title="שינוי תפקיד">
+  <span id="roleBtnEmoji">🪖</span>
+  <span id="roleBtnText">בחר תפקיד</span>
+</button>
 <div class="W">
 <div class="topbar">
   <div class="tb-top">
@@ -458,6 +501,15 @@ body.day-mode .ct{border:none;border-bottom:1px solid #ebe0c5;border-left:1px so
       <div class="afl"><label>למה זה חשוב</label><textarea id="apwy"></textarea></div>
       <div class="afl"><label>טיפ ללוחם</label><textarea id="aptn"></textarea></div>
       <div class="afl"><label>פאקט תרבותי <span style="color:#7a9ab5;font-size:11px;">(אופציונלי - רקע תרבותי על הביטוי)</span></label><textarea id="apcult" placeholder="לדוגמה: ביטוי דתי, ברכה מקובלת באזור הזה..."></textarea></div>
+      <div class="afl"><label>למי המשפט מתאים? <span style="color:#7a9ab5;font-size:11px;">(אפשר לסמן כמה. ללא סימון = יוצג לכולם)</span></label>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-top:4px;">
+          <label style="display:flex;align-items:center;gap:6px;background:rgba(255,255,255,0.04);padding:9px;border-radius:8px;cursor:pointer;font-weight:normal;color:#fff;font-size:13px;"><input type="checkbox" id="role_idf" style="margin:0;cursor:pointer;width:16px;height:16px;"> 🪖 צה"ל</label>
+          <label style="display:flex;align-items:center;gap:6px;background:rgba(255,255,255,0.04);padding:9px;border-radius:8px;cursor:pointer;font-weight:normal;color:#fff;font-size:13px;"><input type="checkbox" id="role_police" style="margin:0;cursor:pointer;width:16px;height:16px;"> 🚓 משטרה</label>
+          <label style="display:flex;align-items:center;gap:6px;background:rgba(255,255,255,0.04);padding:9px;border-radius:8px;cursor:pointer;font-weight:normal;color:#fff;font-size:13px;"><input type="checkbox" id="role_security" style="margin:0;cursor:pointer;width:16px;height:16px;"> 🛡️ ביטחון</label>
+          <label style="display:flex;align-items:center;gap:6px;background:rgba(255,255,255,0.04);padding:9px;border-radius:8px;cursor:pointer;font-weight:normal;color:#fff;font-size:13px;"><input type="checkbox" id="role_preidf" style="margin:0;cursor:pointer;width:16px;height:16px;"> 🎒 מלש"ב</label>
+        </div>
+      </div>
+      <div class="afl"><label style="display:flex;align-items:center;gap:8px;cursor:pointer;background:rgba(255,215,0,0.06);padding:10px;border-radius:8px;border:1px solid rgba(255,215,0,0.25);"><input type="checkbox" id="ap_gold" style="margin:0;cursor:pointer;width:16px;height:16px;"> ⭐ <strong style="color:#FFD700;">משפט זהב</strong> <span style="color:#7a9ab5;font-size:11px;font-weight:normal;">(יופיע בראש מסך החירום)</span></label></div>
       <div class="afl"><label>דחיפות</label><select id="apurg"><option value="">רגיל</option><option value="urgent">🔴 מיידי</option><option value="sensitive">🟡 רגיש</option></select></div>
       <div class="afl"><label>הקלטה</label>
         <div style="display:flex;gap:6px;flex-wrap:wrap;">
@@ -1092,8 +1144,9 @@ function doS(){
 }
 function hl(t,q){if(!q)return t;return t.replace(new RegExp('('+q.replace(/[.*+?^${}()|[\]\\]/g,'\\$&')+')','gi'),'<span class="hlm">$1</span>');}
 function rItems(items,el,q){
-  if(!items.length){el.innerHTML='<div class="empty">לא נמצאו תוצאות</div>';return;}
-  el.innerHTML=items.map(p=>{const i=DB.indexOf(p);return`<div class="li" onclick="opP(${i})"><div class="lt">${hl(p.he,q)+(typeof urgDot==='function'?urgDot(p.urgency):'')}</div><div class="la">‹</div></div>`;}).join('');
+  var filtered = items.filter(function(p){return typeof visibleToRole==='function'?visibleToRole(p):true;});
+  if(!filtered.length){el.innerHTML='<div class="empty">לא נמצאו תוצאות</div>';return;}
+  el.innerHTML=filtered.map(p=>{const i=DB.indexOf(p);var star=(typeof isGoldPhrase==='function'&&isGoldPhrase(p))?'<span class="gold-marker">⭐</span>':'';return`<div class="li" onclick="opP(${i})"><div class="lt">${star+hl(p.he,q)+(typeof urgDot==='function'?urgDot(p.urgency):'')}</div><div class="la">‹</div></div>`;}).join('');
 }
 function bldW(){const el=document.getElementById('wbars');el.innerHTML='';for(let i=0;i<32;i++){const b=document.createElement('div');b.className='wb';b.style.height=(4+Math.floor(Math.random()*14))+'px';el.appendChild(b);}}
 function opP(i){
@@ -1758,15 +1811,20 @@ function searchHrt(){
 
 
 function rQK(){
-  var items=DB.filter(function(d){return d.cat==="מצב מהיר";});
+  // Gold phrases first (regardless of category), then "מצב מהיר" category
+  var gold=DB.filter(function(d){return isGoldPhrase(d)&&visibleToRole(d);});
+  var quick=DB.filter(function(d){return d.cat==="מצב מהיר"&&!isGoldPhrase(d)&&visibleToRole(d);});
+  var items=gold.concat(quick);
   var el=document.getElementById("qklist");
   if(!el)return;
   if(!items.length){el.innerHTML='<div class="empty">אין משפטים עדיין</div>';return;}
   var h="";
   for(var j=0;j<items.length;j++){
     var p=items[j],idx=DB.indexOf(p);
-    h+='<div style="background:#223344;border:1px solid #2e4558;border-radius:10px;padding:14px;margin-bottom:10px;border-right:4px solid #c0392b;">';
-    h+='<div style="color:#fff;font-size:15px;font-weight:600;margin-bottom:6px;">'+p.he+'</div>';
+    var bcol=isGoldPhrase(p)?'#FFD700':'#c0392b';
+    var star=isGoldPhrase(p)?'<span class="gold-marker">⭐</span>':'';
+    h+='<div style="background:#223344;border:1px solid #2e4558;border-radius:10px;padding:14px;margin-bottom:10px;border-right:4px solid '+bcol+';">';
+    h+='<div style="color:#fff;font-size:15px;font-weight:600;margin-bottom:6px;">'+star+p.he+'</div>';
     h+='<div style="color:#fff;font-size:15px;font-weight:400;margin-bottom:6px;font-family:Georgia,serif;letter-spacing:0.03em;">'+p.trans+'</div>';
     h+='<div style="color:#D2B48C;font-size:14px;margin-bottom:10px;font-family:Georgia,serif;">'+p.ar+'</div>';
     h+='<button onclick="playQK('+idx+')" id="qb'+idx+'" style="padding:7px 20px;background:transparent;border:1.5px solid #c0392b;border-radius:20px;color:#c0392b;font-size:13px;cursor:pointer;font-family:inherit;">🔊 השמע</button>';
@@ -1907,7 +1965,98 @@ function loadTheme(){
 }
 loadTheme();
 
+// === Role selection ===
+var ROLE_INFO = {
+  idf:      {emoji:'🪖', name:'צה"ל'},
+  police:   {emoji:'🚓', name:'משטרה'},
+  security: {emoji:'🛡️', name:'ביטחון'},
+  preidf:   {emoji:'🎒', name:'מלש"ב'}
+};
+
+function getCurrentRole(){return localStorage.getItem('user_role')||'';}
+
+function setRole(role){
+  localStorage.setItem('user_role',role);
+  var info=ROLE_INFO[role];
+  var em=document.getElementById('roleBtnEmoji');
+  var tx=document.getElementById('roleBtnText');
+  if(em&&info)em.textContent=info.emoji;
+  if(tx&&info)tx.textContent=info.name;
+  document.getElementById('welcomePopup').style.display='none';
+  if(typeof rQK==='function')rQK();
+  if(typeof bldCats==='function')bldCats();
+  if(typeof bldDailyCats==='function')bldDailyCats();
+  if(typeof bldHrtCats==='function')bldHrtCats();
+  if(typeof bldCusCats==='function')bldCusCats();
+  if(typeof rFav==='function')rFav();
+  if(typeof rRecent==='function')rRecent();
+  if(typeof doS==='function')doS();
+}
+
+function showWelcome(){document.getElementById('welcomePopup').style.display='flex';}
+
+function loadRole(){
+  var role=getCurrentRole();
+  if(!role){setTimeout(showWelcome,300);return;}
+  var info=ROLE_INFO[role];
+  if(info){
+    var em=document.getElementById('roleBtnEmoji');
+    var tx=document.getElementById('roleBtnText');
+    if(em)em.textContent=info.emoji;
+    if(tx)tx.textContent=info.name;
+  }
+}
+
+function visibleToRole(p){
+  var role=getCurrentRole();
+  if(!role)return true;
+  var tags=((p&&p.tags)||'').toLowerCase();
+  var hasRoleTag=/@(idf|police|security|preidf)/.test(tags);
+  if(!hasRoleTag)return true;
+  return tags.indexOf('@'+role)!==-1;
+}
+
+function isGoldPhrase(p){
+  var tags=((p&&p.tags)||'').toLowerCase();
+  return tags.indexOf('@gold')!==-1;
+}
+
+window.visibleToRole=visibleToRole;
+window.isGoldPhrase=isGoldPhrase;
+
+loadRole();
+
 loadData();
 </script>
+<!-- Welcome / Role selector modal -->
+<div id="welcomePopup" class="welcome-bg" style="display:none;">
+  <div class="welcome-pop">
+    <div class="welcome-title">ברוכים הבאים</div>
+    <div class="welcome-sub">בחרו את התפקיד שלכם<br>נציג את המשפטים המתאימים לכם בלבד</div>
+    <div class="role-grid">
+      <button class="role-choice" onclick="setRole('idf')">
+        <span class="role-emoji">🪖</span>
+        <span class="role-name">צה"ל</span>
+        <span class="role-desc">חיילים סדירים</span>
+      </button>
+      <button class="role-choice" onclick="setRole('police')">
+        <span class="role-emoji">🚓</span>
+        <span class="role-name">משטרה</span>
+        <span class="role-desc">שוטרים</span>
+      </button>
+      <button class="role-choice" onclick="setRole('security')">
+        <span class="role-emoji">🛡️</span>
+        <span class="role-name">ביטחון</span>
+        <span class="role-desc">מאבטחים</span>
+      </button>
+      <button class="role-choice" onclick="setRole('preidf')">
+        <span class="role-emoji">🎒</span>
+        <span class="role-name">מלש"ב</span>
+        <span class="role-desc">לפני גיוס - לימוד</span>
+      </button>
+    </div>
+    <div style="margin-top:18px;font-size:12px;color:#7a9ab5;">תוכלו לשנות בכל זמן בכפתור למעלה</div>
+  </div>
+</div>
 </body>
 </html>
