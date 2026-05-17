@@ -1155,9 +1155,8 @@ function ST(t,el){
   document.querySelectorAll('[id^="tab-"]').forEach(function(x){x.className='scr';});
   document.getElementById('tab-'+t).className='scr on';
   curTab=t;
+  if(t==='qk')rQK();
   if(t==='fav'){rFav();rRecent();}
-  if(t==='fav')rFav();
-  if(t==='fav')rFav();
   if(t==='dict')renderDict();
   if(t==='sem')rSem();
   if(t==='nwf')rNF();
