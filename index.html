@@ -774,6 +774,18 @@ body.day-mode .ct{border:none;border-bottom:1px solid #ebe0c5;border-left:1px so
     <div class="afl"><label>ערבית / טקסט *</label><textarea id="edit-ar" style="font-family:Georgia,serif;font-size:18px;"></textarea></div>
     <div class="afl"><label>הסבר / תרגום</label><textarea id="edit-why"></textarea></div>
     <div class="afl"><label>טיפ</label><textarea id="edit-tone"></textarea></div>
+    <div class="afl"><label>קטגוריה</label><input id="edit-cat" placeholder="לדוגמה: הוראות מיידיות"/></div>
+    <div class="afl"><label>פאקט תרבותי <span style="color:#7a9ab5;font-size:11px;">(אופציונלי)</span></label><textarea id="edit-cult"></textarea></div>
+    <div class="afl"><label>למי המשפט מתאים? <span style="color:#7a9ab5;font-size:11px;">(ניתן לסמן כמה. ללא סימון = יוצג לכולם)</span></label>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-top:4px;">
+        <label style="display:flex;align-items:center;gap:6px;background:rgba(255,255,255,0.04);padding:9px;border-radius:8px;cursor:pointer;font-weight:normal;color:#fff;font-size:13px;"><input type="checkbox" id="edit_role_idf" style="margin:0;cursor:pointer;width:16px;height:16px;"> 🪖 צה"ל</label>
+        <label style="display:flex;align-items:center;gap:6px;background:rgba(255,255,255,0.04);padding:9px;border-radius:8px;cursor:pointer;font-weight:normal;color:#fff;font-size:13px;"><input type="checkbox" id="edit_role_police" style="margin:0;cursor:pointer;width:16px;height:16px;"> 🚓 משטרה</label>
+        <label style="display:flex;align-items:center;gap:6px;background:rgba(255,255,255,0.04);padding:9px;border-radius:8px;cursor:pointer;font-weight:normal;color:#fff;font-size:13px;"><input type="checkbox" id="edit_role_security" style="margin:0;cursor:pointer;width:16px;height:16px;"> 🛡️ ביטחון</label>
+        <label style="display:flex;align-items:center;gap:6px;background:rgba(255,255,255,0.04);padding:9px;border-radius:8px;cursor:pointer;font-weight:normal;color:#fff;font-size:13px;"><input type="checkbox" id="edit_role_preidf" style="margin:0;cursor:pointer;width:16px;height:16px;"> 🎒 מלש"ב</label>
+      </div>
+    </div>
+    <div class="afl"><label style="display:flex;align-items:center;gap:8px;cursor:pointer;background:rgba(255,215,0,0.06);padding:10px;border-radius:8px;border:1px solid rgba(255,215,0,0.25);"><input type="checkbox" id="edit_gold" style="margin:0;cursor:pointer;width:16px;height:16px;"> ⭐ <strong style="color:#FFD700;">משפט זהב</strong> <span style="color:#7a9ab5;font-size:11px;font-weight:normal;">(יופיע בחירום)</span></label></div>
+    <div class="afl"><label>דחיפות</label><select id="edit-urg"><option value="">רגיל</option><option value="urgent">🔴 מיידי</option><option value="sensitive">🟡 רגיש</option></select></div>
     <div class="afl"><label>הקלטה</label>
       <div style="color:#7a9ab5;font-size:12px;margin-bottom:6px;" id="edit-audio-cur"></div>
       <div style="display:flex;gap:6px;flex-wrap:wrap;">
@@ -1661,7 +1673,37 @@ function openEditIdx(idx) {
     document.getElementById('edit-trans').value = p.trans || '';
     document.getElementById('edit-ar').value = p.ar || '';
     document.getElementById('edit-why').value = p.why || '';
-    document.getElementById('edit-tone').value = p.tone || '';
+    
+    // Parse urgency from tone field (encoded as "[urgent] tip" or "[sensitive] tip")
+    var rawTone = p.tone || '';
+    var urgMatch = rawTone.match(/^\[(urgent|sensitive)\]\s*/);
+    var cleanTone = rawTone, urgVal = '';
+    if (urgMatch) {
+      urgVal = urgMatch[1];
+      cleanTone = rawTone.substring(urgMatch[0].length);
+    } else if (rawTone === 'urgent' || rawTone === 'sensitive') {
+      urgVal = rawTone;
+      cleanTone = '';
+    }
+    document.getElementById('edit-tone').value = cleanTone;
+    document.getElementById('edit-urg').value = urgVal;
+    
+    // Category + cultural fact (context column)
+    document.getElementById('edit-cat').value = p.cat || '';
+    document.getElementById('edit-cult').value = p.context || '';
+    
+    // Parse tags for roles + gold flag
+    var tagsLower = (p.tags || '').toLowerCase();
+    document.getElementById('edit_role_idf').checked      = tagsLower.indexOf('@idf') !== -1;
+    document.getElementById('edit_role_police').checked   = tagsLower.indexOf('@police') !== -1;
+    document.getElementById('edit_role_security').checked = tagsLower.indexOf('@security') !== -1;
+    document.getElementById('edit_role_preidf').checked   = tagsLower.indexOf('@preidf') !== -1;
+    document.getElementById('edit_gold').checked          = tagsLower.indexOf('@gold') !== -1;
+    
+    // Strip the @-tags from displayed tags (if there's a tags field shown in future)
+    // For now, we store them back as-is during save.
+    window._editOriginalTags = p.tags || '';
+    
     document.getElementById('edit-audio-cur').textContent = p.audio_url ? '✓ יש הקלטה' : 'אין הקלטה';
     document.getElementById('edit-status').textContent = '';
     if(mrec && mrec.state==='recording') { mrec.stop(); }
@@ -1680,7 +1722,37 @@ function openEdit(id,he,trans,ar,why,tone,audioUrl){
 async function saveEdit(){
   const id=document.getElementById('edit-id').value;
   const btn=document.getElementById('edit-save-btn');btn.textContent='שומר...';
-  const updates={he:document.getElementById('edit-he').value.trim(),trans:document.getElementById('edit-trans').value.trim(),ar:document.getElementById('edit-ar').value.trim(),why:document.getElementById('edit-why').value.trim(),tone:document.getElementById('edit-tone').value.trim()};
+  
+  // Compose tone field: encode urgency if set, prepend to tip
+  var urgVal = document.getElementById('edit-urg').value;
+  var tipVal = document.getElementById('edit-tone').value.trim();
+  var combinedTone = urgVal && tipVal ? '['+urgVal+'] '+tipVal : (urgVal || tipVal);
+  
+  // Rebuild tags: preserve any non-@ tags, then add current role + gold flags
+  var origTags = window._editOriginalTags || '';
+  var nonRoleTags = origTags.split(/\s+/).filter(function(t){
+    var l = t.toLowerCase();
+    return t && l.indexOf('@idf')===-1 && l.indexOf('@police')===-1 && l.indexOf('@security')===-1 && l.indexOf('@preidf')===-1 && l.indexOf('@gold')===-1;
+  }).join(' ');
+  var newTags = [nonRoleTags];
+  if (document.getElementById('edit_role_idf').checked)      newTags.push('@idf');
+  if (document.getElementById('edit_role_police').checked)   newTags.push('@police');
+  if (document.getElementById('edit_role_security').checked) newTags.push('@security');
+  if (document.getElementById('edit_role_preidf').checked)   newTags.push('@preidf');
+  if (document.getElementById('edit_gold').checked)          newTags.push('@gold');
+  var finalTags = newTags.filter(function(s){return s;}).join(' ').trim();
+  
+  const updates = {
+    he:    document.getElementById('edit-he').value.trim(),
+    trans: document.getElementById('edit-trans').value.trim(),
+    ar:    document.getElementById('edit-ar').value.trim(),
+    why:   document.getElementById('edit-why').value.trim(),
+    cat:   document.getElementById('edit-cat').value.trim(),
+    context: document.getElementById('edit-cult').value.trim(),
+    tone:  combinedTone,
+    tags:  finalTags
+  };
+  
   const au=await getAudio('edit',document.getElementById('edit-status'));if(au)updates.audio_url=au;
   try{await sbFetch('/rest/v1/phrases?id=eq.'+id,'PATCH',updates);closeEdit();await loadData();renderAdminList();btn.textContent='שמור';alert('✓ נשמר!');}catch(e){btn.textContent='שמור';alert('שגיאה: '+e.message);}
 }
