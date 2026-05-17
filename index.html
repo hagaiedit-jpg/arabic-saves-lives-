@@ -255,12 +255,39 @@ body.day-mode .emerg-back{color:#5a3a1a;border-color:rgba(90,58,26,0.3);}
   background:#223344;
   border:1px solid #2e4558;
   border-radius:10px;
-  padding:14px;
+  padding:0;
   margin-bottom:10px;
   border-right:4px solid #FFD700;
-  cursor:pointer;
+  display:flex;
+  align-items:stretch;
+  gap:0;
+  overflow:hidden;
   transition:all 0.12s;
 }
+.emerg-card-content{
+  flex:1;
+  padding:14px;
+  cursor:pointer;
+  min-width:0;
+}
+.emerg-card-content:active{transform:scale(0.99);}
+.emerg-play-btn{
+  background:#FF8C00;
+  color:#fff;
+  border:none;
+  width:60px;
+  font-size:22px;
+  cursor:pointer;
+  font-family:inherit;
+  flex-shrink:0;
+  border-left:1px solid #2e4558;
+  transition:background 0.12s;
+}
+.emerg-play-btn:active{background:#c0392b;}
+.emerg-play-btn.playing{background:#c0392b;}
+.emerg-play-btn:disabled{background:#555;color:#888;cursor:not-allowed;}
+body.day-mode .emerg-play-btn{background:#FF8C00;color:#fff;border-left-color:#e8dec9;}
+body.day-mode .emerg-play-btn:disabled{background:#ccc;color:#888;}
 .emerg-card:active{transform:scale(0.99);}
 .emerg-card-he{color:#fff;font-size:15px;font-weight:600;margin-bottom:6px;}
 .emerg-card-trans{color:#fff;font-size:14px;font-weight:400;margin-bottom:4px;font-family:Georgia,serif;letter-spacing:0.03em;}
@@ -2019,8 +2046,7 @@ var EMERG_CATS = [
   {key:'orders',  emoji:'🟥', name:'הוראות מיידיות', color:'red',    cats:['הוראות מיידיות','הוראות']},
   {key:'check',   emoji:'🟦', name:'בידוק וזיהוי',  color:'blue',   cats:['בידוק וזיהוי','זיהוי ובידוק','בידוק']},
   {key:'vehicle', emoji:'🟧', name:'רכב ומחסום',    color:'orange', cats:['רכב ומחסום','מחסום','רכב']},
-  {key:'medical', emoji:'🟩', name:'רפואה ועזרה',   color:'green',  cats:['רפואה ועזרה','סיוע רפואי','רפואה','עזרה ראשונה']},
-  {key:'legacy',  emoji:'⚡', name:'משפטים ישנים',   color:'gray',   cats:['מצב מהיר','חירום','קריטי'], legacy:true}
+  {key:'medical', emoji:'🟩', name:'רפואה ועזרה',   color:'green',  cats:['רפואה ועזרה','סיוע רפואי','רפואה','עזרה ראשונה']}
 ];
 
 function _emergPhrasesForCat(emergCat){
@@ -2085,21 +2111,67 @@ function openEmergCat(key){
     return;
   }
   
-  var isLegacy = (ec.key === 'legacy');
   var h='';
-  if(isLegacy){
-    h+='<div style="background:rgba(255,215,0,0.08);border:1px solid rgba(255,215,0,0.3);border-radius:8px;padding:10px;margin-bottom:12px;color:#FFD700;font-size:12px;line-height:1.5;">💡 משפטים אלה מקטגוריה ישנה. לחצי ערוך → סמני ⭐ + בחרי קטגוריה חדשה כדי להעבירם.</div>';
-  }
   for(var j=0;j<items.length;j++){
     var p=items[j],idx=DB.indexOf(p);
-    var star=isLegacy?'':'⭐ ';
-    h+='<div class="emerg-card" onclick="opP('+idx+')">';
-    h+='<div class="emerg-card-he">'+star+p.he+'</div>';
+    h+='<div class="emerg-card">';
+    h+='<div class="emerg-card-content" onclick="opP('+idx+')">';
+    h+='<div class="emerg-card-he">⭐ '+p.he+'</div>';
     if(p.trans)h+='<div class="emerg-card-trans">'+p.trans+'</div>';
     if(p.ar)h+='<div class="emerg-card-ar">'+p.ar+'</div>';
     h+='</div>';
+    h+='<button class="emerg-play-btn" onclick="playEmergCard(\''+(p.audio||'')+'\',this)" '+(p.audio?'':'disabled')+'>▶</button>';
+    h+='</div>';
   }
   el.innerHTML=h;
+}
+
+function playEmergCard(url, btn) {
+  // Stop click propagation to parent (which would open popup)
+  if (event) event.stopPropagation();
+  if (!url) return;
+  
+  // If already playing this audio - stop
+  if (curAudio && !curAudio.paused && window._emergCardBtn === btn) {
+    curAudio.pause();
+    curAudio.currentTime = 0;
+    curAudio = null;
+    btn.classList.remove('playing');
+    btn.textContent = '▶';
+    window._emergCardBtn = null;
+    return;
+  }
+  
+  // Stop any other audio
+  if (curAudio) { try{curAudio.pause();}catch(e){} curAudio = null; }
+  document.querySelectorAll('.emerg-play-btn.playing').forEach(function(b){
+    b.classList.remove('playing');
+    b.textContent = '▶';
+  });
+  
+  // Play
+  curAudio = new Audio(url);
+  window._emergCardBtn = btn;
+  btn.classList.add('playing');
+  btn.textContent = '■';
+  curAudio.onended = function() {
+    curAudio = null;
+    btn.classList.remove('playing');
+    btn.textContent = '▶';
+    window._emergCardBtn = null;
+  };
+  curAudio.onerror = function() {
+    curAudio = null;
+    btn.classList.remove('playing');
+    btn.textContent = '▶';
+    window._emergCardBtn = null;
+    alert('שגיאה בנגינת ההקלטה');
+  };
+  curAudio.play().catch(function(){
+    btn.classList.remove('playing');
+    btn.textContent = '▶';
+    window._emergCardBtn = null;
+  });
 }
 
 function backToEmergHome(){
