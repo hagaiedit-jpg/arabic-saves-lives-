@@ -107,26 +107,20 @@ body.day-mode #favlist [style*="color:#7a9ab5"]{color:#5a3a1a !important;}
 body.day-mode #recentlist [style*="color:#7a9ab5"]{color:#5a3a1a !important;}
 
 .theme-toggle{
-  position:fixed;
-  top:10px;
-  left:10px;
   display:flex;
-  gap:4px;
-  z-index:1000;
-  background:rgba(0,0,0,0.5);
-  border-radius:999px;
-  padding:3px;
-  box-shadow:0 2px 8px rgba(0,0,0,0.3);
+  gap:2px;
+  background:transparent;
+  padding:0;
 }
 .theme-circle{
-  width:30px;
-  height:30px;
+  width:26px;
+  height:26px;
   border-radius:50%;
   background:transparent;
-  border:none;
-  font-size:15px;
+  border:1px solid rgba(210,180,140,0.3);
+  font-size:12px;
   cursor:pointer;
-  opacity:0.45;
+  opacity:0.55;
   display:flex;
   align-items:center;
   justify-content:center;
@@ -136,21 +130,21 @@ body.day-mode #recentlist [style*="color:#7a9ab5"]{color:#5a3a1a !important;}
 }
 .theme-circle.active{
   background:rgba(255,140,0,0.95);
+  border-color:#FF8C00;
   opacity:1;
-  box-shadow:0 2px 8px rgba(255,140,0,0.4);
 }
-body.day-mode .theme-toggle{background:rgba(255,255,255,0.6);}
+body.day-mode .theme-toggle{background:transparent;}
 body.day-mode .theme-circle.active{background:#1A2B3C;}
 
 /* Role indicator button */
 /* Role circle inside theme-toggle pill (same styling as theme-circle, plus tooltip) */
 .role-circle{
-  width:30px;
-  height:30px;
+  width:26px;
+  height:26px;
   border-radius:50%;
   background:transparent;
-  border:none;
-  font-size:15px;
+  border:1px solid rgba(210,180,140,0.3);
+  font-size:13px;
   cursor:pointer;
   opacity:0.7;
   display:flex;
@@ -164,9 +158,9 @@ body.day-mode .theme-circle.active{background:#1A2B3C;}
 .role-circle.has-role{opacity:1;background:rgba(255,140,0,0.25);}
 .role-circle-divider{
   width:1px;
-  height:20px;
-  background:rgba(210,180,140,0.3);
-  margin:0 4px;
+  height:14px;
+  background:rgba(210,180,140,0.2);
+  margin:0 2px;
   align-self:center;
 }
 
@@ -513,21 +507,22 @@ body.day-mode .ct{border:none;border-bottom:1px solid #ebe0c5;border-left:1px so
 </style>
 </head>
 <body>
-<div class="theme-toggle">
-  <button class="theme-circle moon" id="moonBtn" onclick="setTheme('night')" title="לילה">🌙</button>
-  <button class="theme-circle sun" id="sunBtn" onclick="setTheme('day')" title="יום">☀️</button>
-  <div class="role-circle-divider"></div>
-  <button class="role-circle" id="roleBtn" onclick="showWelcome()" title="בחר את התפקיד שלי">
-    <span id="roleBtnEmoji">👤</span>
-  </button>
-  <div class="role-circle-divider"></div>
-  <button class="role-circle" id="helpBtn" onclick="showHelp()" title="עזרה ומקרא איקונים">
-    <span>❓</span>
-  </button>
-</div>
+
 <div class="W">
 <div class="topbar">
   <div class="tb-top">
+    <div class="theme-toggle">
+      <button class="theme-circle moon active" id="moonBtn" onclick="setTheme('night')" title="לילה">🌙</button>
+      <button class="theme-circle sun" id="sunBtn" onclick="setTheme('day')" title="יום">☀️</button>
+      <div class="role-circle-divider"></div>
+      <button class="role-circle" id="roleBtn" onclick="showWelcome()" title="בחר את התפקיד שלי">
+        <span id="roleBtnEmoji">👤</span>
+      </button>
+      <div class="role-circle-divider"></div>
+      <button class="role-circle" id="helpBtn" onclick="showHelp()" title="עזרה ומקרא איקונים">
+        <span>❓</span>
+      </button>
+    </div>
     <div class="tb-brand" id="brand-title" style="cursor:pointer;user-select:none;">ערבית מצילה חיים</div>
     <div class="tb-badges">
       <div class="bnew" id="new-badge">חדש</div>
