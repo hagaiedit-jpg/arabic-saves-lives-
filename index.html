@@ -33,17 +33,17 @@ body{background:#1A2B3C;direction:rtl;font-family:-apple-system,BlinkMacSystemFo
 /* === Enhanced popup (large touch targets for gloved hands) === */
 .pcat-badge{display:inline-flex;align-items:center;gap:6px;background:rgba(255,140,0,0.18);border:1px solid rgba(255,140,0,0.45);border-radius:999px;padding:5px 14px;font-size:11px;font-weight:700;color:#FF8C00;letter-spacing:0.5px;margin-bottom:14px;}
 body.day-mode .pcat-badge{background:rgba(255,140,0,0.12);border-color:rgba(255,140,0,0.55);color:#c66700;}
-.play-row{display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:8px;margin:16px 0 10px;}
-.big-pbtn{background:rgba(255,255,255,0.06);border:1.5px solid rgba(210,180,140,0.35);color:#D2B48C;border-radius:14px;padding:14px 4px;font-size:18px;font-weight:700;cursor:pointer;font-family:inherit;text-align:center;transition:all 0.12s;min-height:64px;line-height:1.15;}
+.play-row{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin:16px 0 10px;}
+.big-pbtn{background:rgba(255,255,255,0.06);border:1.5px solid rgba(210,180,140,0.35);color:#D2B48C;border-radius:14px;padding:12px 4px 10px;cursor:pointer;font-family:inherit;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:5px;transition:all 0.12s;min-height:74px;}
+.big-icon{font-size:26px;line-height:1;display:block;}
+.big-pbtn.play-normal .big-icon{color:#FF8C00;font-weight:700;}
+.big-lbl{font-size:12px;font-weight:600;opacity:0.9;display:block;letter-spacing:0.3px;}
 .big-pbtn:active{transform:scale(0.96);}
-.big-pbtn-lbl{font-size:11px;font-weight:600;opacity:0.8;}
-.big-pbtn.active{background:#FF8C00;border-color:#FF8C00;color:#fff;}
-.big-pbtn.loop.on{background:#1D9E75;border-color:#1D9E75;color:#fff;}
-.big-pbtn.playing{background:#c0392b;border-color:#c0392b;color:#fff;}
+.big-pbtn.playing{background:#FF8C00;border-color:#FF8C00;color:#fff;}
+.big-pbtn.playing .big-icon{color:#fff;}
+.big-pbtn.play-loop.playing{background:#1D9E75;border-color:#1D9E75;}
 body.day-mode .big-pbtn{background:rgba(0,0,0,0.04);border-color:rgba(90,58,26,0.3);color:#5a3a1a;}
-body.day-mode .big-pbtn.active{background:#FF8C00;border-color:#FF8C00;color:#fff;}
-body.day-mode .big-pbtn.loop.on{background:#1D9E75;border-color:#1D9E75;color:#fff;}
-body.day-mode .big-pbtn.playing{background:#c0392b;border-color:#c0392b;color:#fff;}
+body.day-mode .big-pbtn.playing{background:#FF8C00;border-color:#FF8C00;color:#fff;}
 .ibox.c{background:rgba(255,215,140,0.08);border:1px solid rgba(255,215,140,0.25);}
 .ibox.c .ilbl{color:#FFD580;}
 body.day-mode .ibox.c{background:rgba(255,215,140,0.18);border-color:rgba(180,130,40,0.3);}
@@ -106,27 +106,41 @@ body.day-mode #favlist [style*="color:#fff"]{color:#1a2b3c !important;}
 body.day-mode #favlist [style*="color:#7a9ab5"]{color:#5a3a1a !important;}
 body.day-mode #recentlist [style*="color:#7a9ab5"]{color:#5a3a1a !important;}
 
-.theme-btn{
+.theme-toggle{
   position:fixed;
   top:10px;
   left:50%;
   transform:translateX(-50%);
-  width:36px;
-  height:36px;
-  border-radius:50%;
-  background:rgba(0,0,0,0.35);
-  color:#FF8C00;
-  border:1px solid rgba(255,140,0,0.5);
-  font-size:17px;
-  cursor:pointer;
+  display:flex;
+  gap:6px;
   z-index:1000;
+  background:rgba(0,0,0,0.35);
+  border-radius:999px;
+  padding:3px;
+}
+.theme-circle{
+  width:30px;
+  height:30px;
+  border-radius:50%;
+  background:transparent;
+  border:none;
+  font-size:15px;
+  cursor:pointer;
+  opacity:0.45;
   display:flex;
   align-items:center;
   justify-content:center;
   transition:all 0.2s;
+  padding:0;
+  font-family:inherit;
 }
-.theme-btn:hover{background:rgba(255,140,0,0.15);}
-body.day-mode .theme-btn{background:rgba(255,255,255,0.9);color:#5a3a1a;border-color:rgba(90,58,26,0.5);}
+.theme-circle.active{
+  background:rgba(255,140,0,0.95);
+  opacity:1;
+  box-shadow:0 2px 8px rgba(255,140,0,0.4);
+}
+body.day-mode .theme-toggle{background:rgba(255,255,255,0.6);}
+body.day-mode .theme-circle.active{background:#1A2B3C;}
 .tb-tabs-sec{display:flex;overflow-x:hidden;background:#0a1622;border-bottom:1px solid #1e3348;padding:0 4px;}
 .tb-tabs-sec::-webkit-scrollbar{display:none;}
 .tb-tab-sec{flex:1 1 0;min-width:0;text-align:center;padding:12px 4px;color:rgba(210,180,140,0.7);font-size:12px;font-weight:500;line-height:1.2;cursor:pointer;border-bottom:2px solid transparent;transition:color 0.15s,border-color 0.15s;}
@@ -235,7 +249,10 @@ body.day-mode .ct{border:none;border-bottom:1px solid #ebe0c5;border-left:1px so
 </style>
 </head>
 <body>
-<button class="theme-btn" onclick="toggleTheme()" id="themeBtn" title="מצב יום/לילה">🌙</button>
+<div class="theme-toggle">
+  <button class="theme-circle moon" id="moonBtn" onclick="setTheme('night')" title="לילה">🌙</button>
+  <button class="theme-circle sun" id="sunBtn" onclick="setTheme('day')" title="יום">☀️</button>
+</div>
 <div class="W">
 <div class="topbar">
   <div class="tb-top">
@@ -307,10 +324,18 @@ body.day-mode .ct{border:none;border-bottom:1px solid #ebe0c5;border-left:1px so
       <div class="pbox"><div class="ptrans" id="ptrans"></div></div>
       <div class="ww"><div class="wave" id="wbars"></div><span class="wt" id="wtime">0:00</span></div>
       <div class="play-row">
-        <button class="big-pbtn" onclick="play(this,'slow')">🐢<br><span class="big-pbtn-lbl">צב</span></button>
-        <button class="big-pbtn rep1 active" data-rep="1" onclick="playReps(this,1)">1×<br><span class="big-pbtn-lbl">פעם</span></button>
-        <button class="big-pbtn rep3" data-rep="3" onclick="playReps(this,3)">3×<br><span class="big-pbtn-lbl">חזרות</span></button>
-        <button class="big-pbtn loop" id="loopBtn" onclick="playLoop(this)">🔁<br><span class="big-pbtn-lbl">לולאה</span></button>
+        <button class="big-pbtn play-normal" onclick="playPopupAudio(this,'normal')">
+          <span class="big-icon">▶</span>
+          <span class="big-lbl">השמע</span>
+        </button>
+        <button class="big-pbtn play-slow" onclick="playPopupAudio(this,'slow')">
+          <span class="big-icon">🐢</span>
+          <span class="big-lbl">איטי</span>
+        </button>
+        <button class="big-pbtn play-loop" onclick="playPopupAudio(this,'loop')">
+          <span class="big-icon">🔁</span>
+          <span class="big-lbl">לולאה</span>
+        </button>
       </div>
       <div class="ibox b" id="pwhyb"><div class="ilbl b" id="pwhylbl">למה זה חשוב</div><div class="itxt b" id="pwhy"></div></div>
       <div class="ibox o" id="ptoneb"><div class="ilbl o">טיפ ללוחם</div><div class="itxt o" id="ptone"></div></div>
@@ -1129,144 +1154,81 @@ function clsP(){
 function clrS(){document.getElementById('sinp').value='';doS();}
 
 let pt=null,curAudio=null;
-// === Popup enhancements: unified repeat/loop player ===
-var _repPlaying = false;
-var _repStopFlag = false;
+// === Popup audio: slow / normal / loop ===
+var _audioPlaying = false;
+var _audioStopFlag = false;
 
-function _setRepButtonState(btn, playing) {
-  _repPlaying = playing;
-  if (btn) {
-    if (playing) btn.classList.add('playing');
-    else {
-      document.querySelectorAll('.big-pbtn').forEach(function(b){b.classList.remove('playing');});
-    }
-  }
-}
-
-function _getAudioUrl() {
-  // The current visible popup phrase audio URL is on the play(this,'slow') button via data-audio
-  // But that only gets set when slow/fast is clicked. Need another way:
-  // Look at the current popup phrase data stored at popup-open time
-  return window._popupAudio || '';
-}
-
-function playReps(btn, n) {
-  // Stop if already playing
-  if (_repPlaying) {
-    _repStopFlag = true;
+function playPopupAudio(btn, mode) {
+  // If already playing - stop
+  if (_audioPlaying) {
+    _audioStopFlag = true;
     if (curAudio) { curAudio.pause(); curAudio.currentTime = 0; curAudio = null; }
-    if (pt) clearInterval(pt);
     document.querySelectorAll('.big-pbtn').forEach(function(b){b.classList.remove('playing');});
-    _repPlaying = false;
+    _audioPlaying = false;
     return;
   }
   
-  var url = _getAudioUrl();
+  var url = window._popupAudio || '';
   if (!url) { alert('אין הקלטה למשפט זה'); return; }
   
-  // Mark this button as active
-  document.querySelectorAll('.big-pbtn').forEach(function(b){b.classList.remove('active');});
-  btn.classList.add('active');
+  document.querySelectorAll('.big-pbtn').forEach(function(b){b.classList.remove('playing');});
   btn.classList.add('playing');
-  _repPlaying = true;
-  _repStopFlag = false;
+  _audioPlaying = true;
+  _audioStopFlag = false;
   
-  var remaining = n;
-  function playNext() {
-    if (_repStopFlag || remaining <= 0) {
-      document.querySelectorAll('.big-pbtn').forEach(function(b){b.classList.remove('playing');});
-      _repPlaying = false;
-      return;
-    }
-    remaining--;
+  function playOnce(onDone) {
     if (curAudio) { curAudio.pause(); curAudio = null; }
     curAudio = new Audio(url);
+    curAudio.playbackRate = (mode === 'slow') ? 0.7 : 1.0;
     curAudio.onended = function() {
       curAudio = null;
-      if (_repStopFlag) {
-        document.querySelectorAll('.big-pbtn').forEach(function(b){b.classList.remove('playing');});
-        _repPlaying = false;
-        return;
-      }
-      if (remaining > 0) setTimeout(playNext, 400);
-      else {
-        document.querySelectorAll('.big-pbtn').forEach(function(b){b.classList.remove('playing');});
-        _repPlaying = false;
-      }
+      if (onDone) onDone();
     };
     curAudio.onerror = function() {
       curAudio = null;
       document.querySelectorAll('.big-pbtn').forEach(function(b){b.classList.remove('playing');});
-      _repPlaying = false;
+      _audioPlaying = false;
       alert('שגיאה בנגינת ההקלטה');
     };
-    curAudio.play().catch(function(){
-      document.querySelectorAll('.big-pbtn').forEach(function(b){b.classList.remove('playing');});
-      _repPlaying = false;
-    });
-  }
-  playNext();
-}
-
-function playLoop(btn) {
-  // Stop if already in loop
-  if (btn.classList.contains('on') || _repPlaying) {
-    _repStopFlag = true;
-    if (curAudio) { curAudio.pause(); curAudio.currentTime = 0; curAudio = null; }
-    if (pt) clearInterval(pt);
-    btn.classList.remove('on');
-    document.querySelectorAll('.big-pbtn').forEach(function(b){b.classList.remove('playing');});
-    _repPlaying = false;
-    return;
-  }
-  
-  var url = _getAudioUrl();
-  if (!url) { alert('אין הקלטה למשפט זה'); return; }
-  
-  document.querySelectorAll('.big-pbtn').forEach(function(b){b.classList.remove('active');});
-  btn.classList.add('on');
-  _repPlaying = true;
-  _repStopFlag = false;
-  
-  function playLoopOnce() {
-    if (_repStopFlag) {
-      btn.classList.remove('on');
-      _repPlaying = false;
-      return;
+    var p = curAudio.play();
+    if (p && p.catch) {
+      p.catch(function(){
+        document.querySelectorAll('.big-pbtn').forEach(function(b){b.classList.remove('playing');});
+        _audioPlaying = false;
+      });
     }
-    if (curAudio) { curAudio.pause(); curAudio = null; }
-    curAudio = new Audio(url);
-    curAudio.onended = function() {
-      curAudio = null;
-      if (_repStopFlag) {
-        btn.classList.remove('on');
-        _repPlaying = false;
+  }
+  
+  if (mode === 'loop') {
+    function loopOnce() {
+      if (_audioStopFlag) {
+        document.querySelectorAll('.big-pbtn').forEach(function(b){b.classList.remove('playing');});
+        _audioPlaying = false;
         return;
       }
-      setTimeout(playLoopOnce, 400);
-    };
-    curAudio.onerror = function() {
-      curAudio = null;
-      btn.classList.remove('on');
-      _repPlaying = false;
-      alert('שגיאה בנגינת ההקלטה');
-    };
-    curAudio.play().catch(function(){
-      btn.classList.remove('on');
-      _repPlaying = false;
+      playOnce(function() {
+        if (_audioStopFlag) {
+          document.querySelectorAll('.big-pbtn').forEach(function(b){b.classList.remove('playing');});
+          _audioPlaying = false;
+          return;
+        }
+        setTimeout(loopOnce, 500);
+      });
+    }
+    loopOnce();
+  } else {
+    // single play (slow or normal)
+    playOnce(function() {
+      document.querySelectorAll('.big-pbtn').forEach(function(b){b.classList.remove('playing');});
+      _audioPlaying = false;
     });
   }
-  playLoopOnce();
 }
 
 function resetPopupControls() {
-  _repStopFlag = true;
-  _repPlaying = false;
-  document.querySelectorAll('.big-pbtn').forEach(function(b){
-    b.classList.remove('playing');
-    b.classList.remove('on');
-    b.classList.toggle('active', b.dataset.rep === '1');
-  });
+  _audioStopFlag = true;
+  _audioPlaying = false;
+  document.querySelectorAll('.big-pbtn').forEach(function(b){b.classList.remove('playing');});
 }
 
 // Set category badge & cultural fact in popup
@@ -1920,19 +1882,21 @@ function urgDot(u){
   return "";
 }
 
-function toggleTheme(){
-  var isDay=document.body.classList.toggle('day-mode');
-  localStorage.setItem('theme',isDay?'day':'night');
-  var btn=document.getElementById('themeBtn');
-  if(btn)btn.textContent=isDay?'☀️':'🌙';
+function setTheme(mode){
+  if(mode==='day'){
+    document.body.classList.add('day-mode');
+  } else {
+    document.body.classList.remove('day-mode');
+  }
+  localStorage.setItem('theme',mode);
+  var moon=document.getElementById('moonBtn');
+  var sun=document.getElementById('sunBtn');
+  if(moon)moon.classList.toggle('active',mode==='night');
+  if(sun)sun.classList.toggle('active',mode==='day');
 }
 function loadTheme(){
-  var saved=localStorage.getItem('theme');
-  if(saved==='day'){
-    document.body.classList.add('day-mode');
-    var btn=document.getElementById('themeBtn');
-    if(btn)btn.textContent='☀️';
-  }
+  var saved=localStorage.getItem('theme')||'night';
+  setTheme(saved);
 }
 loadTheme();
 
