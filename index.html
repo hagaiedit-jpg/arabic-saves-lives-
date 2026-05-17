@@ -856,7 +856,16 @@ async function loadData(){
 
 function mp(p){
   const seen = getSeenIds();
-  var res={id:p.id,cat:p.cat||'',he:p.he||'',trans:p.trans||'',ar:p.ar||'',tags:p.tags||'',why:p.why||'',tone:p.tone||'',audio:p.audio_url||'',when:p.tags||'',tip:p.why||'',cultural:p.cultural||p.context||'',isNew:(p.is_new||false)&&!seen.includes(p.id),section:p.section,urgency:''};
+  // Parse why field: may contain "real why\n---\ncultural fact"
+  var rawWhy = p.why || '';
+  var sepIdx = rawWhy.indexOf('\n---\n');
+  var parsedWhy = '', parsedCult = '';
+  if (sepIdx === 0) { parsedCult = rawWhy.substring(5); }
+  else if (sepIdx > 0) { parsedWhy = rawWhy.substring(0, sepIdx); parsedCult = rawWhy.substring(sepIdx + 5); }
+  else if (rawWhy.indexOf('---\n') === 0) { parsedCult = rawWhy.substring(4); }
+  else { parsedWhy = rawWhy; }
+  
+  var res={id:p.id,cat:p.cat||'',he:p.he||'',trans:p.trans||'',ar:p.ar||'',tags:p.tags||'',why:parsedWhy,tone:p.tone||'',audio:p.audio_url||'',when:p.tags||'',tip:parsedWhy,cultural:parsedCult,isNew:(p.is_new||false)&&!seen.includes(p.id),section:p.section,urgency:''};
   var _t=res.tone||'';
   var _m=_t.match(/^\[(urgent|sensitive)\]\s*/);
   if(_m){res.urgency=_m[1];res.tone=_t.substring(_m[0].length);}
@@ -1583,7 +1592,11 @@ async function addP(){
   const he=document.getElementById('aphe').value.trim(),ar=document.getElementById('apar').value.trim();
   if(!he||!ar){alert('חובה: עברית וערבית');return;}
   const btn=document.querySelector('#at-ap .sbtn');btn.textContent='שומר...';
-  const phrase={cat:document.getElementById('apc').value,he,trans:document.getElementById('aptr').value.trim(),ar,tags:document.getElementById('aptg').value.trim(),why:document.getElementById('apwy').value.trim(),tone:(function(){var u=document.getElementById('apurg').value;var t=document.getElementById('aptn').value.trim();return u&&t?'['+u+'] '+t:(u||t);})(),context:document.getElementById('apcult').value.trim(),audio:''};
+  const phrase={cat:document.getElementById('apc').value,he,trans:document.getElementById('aptr').value.trim(),ar,tags:document.getElementById('aptg').value.trim(),why:(function(){
+          var w=document.getElementById('apwy').value.trim();
+          var c=document.getElementById('apcult').value.trim();
+          return c?(w?w+'\n---\n'+c:'---\n'+c):w;
+        })(),tone:(function(){var u=document.getElementById('apurg').value;var t=document.getElementById('aptn').value.trim();return u&&t?'['+u+'] '+t:(u||t);})(),audio:''};
   const au=await getAudio('ap',document.getElementById('ap-status'));if(au)phrase.audio=au;
   try{const s=await spSave(phrase,'military');if(s&&s[0])phrase.id=s[0].id;phrase.isNew=true;DB.push(phrase);['aphe','apar','aptr','aptg','apwy','aptn'].forEach(id=>document.getElementById(id).value='');bldCats();btn.textContent='שמור';alert('✓ נוסף!');}catch(e){btn.textContent='שמור';alert('שגיאה: '+e.message);}
 }
@@ -1672,7 +1685,25 @@ function openEditIdx(idx) {
     document.getElementById('edit-he').value = p.he || '';
     document.getElementById('edit-trans').value = p.trans || '';
     document.getElementById('edit-ar').value = p.ar || '';
-    document.getElementById('edit-why').value = p.why || '';
+    (function(){
+      var raw = p.why || '';
+      var sep = raw.indexOf('\n---\n');
+      if (sep === 0) {
+        // Starts with separator — only cultural fact
+        document.getElementById('edit-why').value = '';
+        document.getElementById('edit-cult').value = raw.substring(5);
+      } else if (sep > 0) {
+        document.getElementById('edit-why').value = raw.substring(0, sep);
+        document.getElementById('edit-cult').value = raw.substring(sep + 5);
+      } else if (raw.indexOf('---\n') === 0) {
+        // Just "---\n..." (no why)
+        document.getElementById('edit-why').value = '';
+        document.getElementById('edit-cult').value = raw.substring(4);
+      } else {
+        document.getElementById('edit-why').value = raw;
+        document.getElementById('edit-cult').value = '';
+      }
+    })();
     
     // Parse urgency from tone field (encoded as "[urgent] tip" or "[sensitive] tip")
     var rawTone = p.tone || '';
@@ -1690,7 +1721,7 @@ function openEditIdx(idx) {
     
     // Category + cultural fact (context column)
     document.getElementById('edit-cat').value = p.cat || '';
-    document.getElementById('edit-cult').value = p.context || '';
+    
     
     // Parse tags for roles + gold flag
     var tagsLower = (p.tags || '').toLowerCase();
@@ -1746,9 +1777,12 @@ async function saveEdit(){
     he:    document.getElementById('edit-he').value.trim(),
     trans: document.getElementById('edit-trans').value.trim(),
     ar:    document.getElementById('edit-ar').value.trim(),
-    why:   document.getElementById('edit-why').value.trim(),
+    why: (function(){
+      var w=document.getElementById('edit-why').value.trim();
+      var c=document.getElementById('edit-cult').value.trim();
+      return c?(w?w+'\n---\n'+c:'---\n'+c):w;
+    })(),
     cat:   document.getElementById('edit-cat').value.trim(),
-    context: document.getElementById('edit-cult').value.trim(),
     tone:  combinedTone,
     tags:  finalTags
   };
