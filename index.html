@@ -2049,9 +2049,78 @@ var EMERG_CATS = [
   {key:'medical', emoji:'🟩', name:'רפואה ועזרה',   color:'green',  cats:['רפואה ועזרה','סיוע רפואי','רפואה','עזרה ראשונה']}
 ];
 
+// === Scenario-based ordering keywords ===
+// Each emergency category has stages; phrases match the EARLIEST stage they contain a keyword from
+var SCENARIO_KEYWORDS = {
+  // 🟥 הוראות מיידיות - הוראה ראשונה: עצירה → ידיים → תזוזה → כלים → הקשבה → ישיבה
+  orders: [
+    ['עצור', 'אל תזוז', 'תישאר', 'תעצור'],
+    ['תרים ידיים', 'הראה לי את הידיים', 'ידיים למעלה', 'הרם ידי', 'ידיים'],
+    ['חולצה', 'הרם את החולצה'],
+    ['תסתובב', 'הסתובב', 'הסתובבי'],
+    ['תתרחק', 'אחורה', 'התרחק'],
+    ['תתקרב', 'בוא הנה', 'תקרב'],
+    ['תכבה את הטלפון', 'כבה את הטלפון', 'טלפון'],
+    ['תזרוק', 'זרוק', 'השלך', 'תניח', 'הניח'],
+    ['תקשיב', 'תשמע', 'הקשב'],
+    ['שב', 'כריעה', 'תכרע']
+  ],
+  // 🟦 בידוק וזיהוי - פתיחה → שם → מקום → תעודות → בידוק → סביבה
+  check: [
+    ['שלום', 'אנחנו'],
+    ['איך קוראים', 'מה שמך', 'שמך', 'אסמכ'],
+    ['השם המלא', 'שם מלא', 'רבאעי', 'הרבאעי'],
+    ['מאיפה', 'מן וין', 'איפה גר', 'איפה הבית'],
+    ['לאן', 'איפה הולך', 'לאן הולך'],
+    ['תעודת זהות', 'תעודה', 'הויה', 'תן תעודה', 'תן לי את התעודה', 'תן רישיון', 'רישיון'],
+    ['פתח לאט', 'פתח'],
+    ['הרם את החולצה', 'חולצה'],
+    ['הראה לי את הידיים', 'ידיים שלך'],
+    ['מי עוד', 'יש עוד מישהו', 'יש פה', 'מי איתך'],
+    ['בבית', 'בדירה', 'בחדר']
+  ],
+  // 🟧 רכב ומחסום - עצירה → כיבוי → תקשורת → רישיון → השתלטות → תשאול → בידוק → יציאה
+  vehicle: [
+    ['עצור את הרכב', 'וקף', 'תעצור'],
+    ['כבה את המנוע', 'תכבה את המנוע', 'אטפי'],
+    ['פתח את החלון', 'תפתח חלון', 'חלון'],
+    ['תן לי רישיון', 'תן רישיון', 'רישיון', 'אעטיני'],
+    ['הרימו', 'הרם ידי', 'ארפעו'],
+    ['נשק ברכב', 'יש נשק', 'סלאח'],
+    ['כמה אנשים', 'כמה ברכב', 'כם'],
+    ['פתח את תא המטען', 'תא מטען', 'תא הניטען', 'בגאז', 'תפתח תא'],
+    ['מפתחות', 'מפאתיח'],
+    ['צא מהרכב', 'צאו מהרכב', 'תרד', 'אטלעו', 'חזור לרכב']
+  ],
+  // 🟩 רפואה ועזרה - הערכה → כאב → הכרה → דימום → הרגעה → הגבלה → מידע → טיפול
+  medical: [
+    ['אתה פצוע', 'פצוע', 'מגרוח'],
+    ['איפה כואב', 'איפה הכאב', 'וין'],
+    ['שומע אותי', 'אתה שומע', 'סאמע'],
+    ['רואה אותי', 'אתה רואה'],
+    ['דימום', 'נזיף', 'יש דם'],
+    ['אמבולנס', 'אסעאף', 'הירגע'],
+    ['פצועים נוספים', 'יש פצועים', 'עוד פצועים', 'מגרוחין'],
+    ['אל תזוז', 'אל תפחד', 'תישאר', 'חכה'],
+    ['אלרגי', 'חססיה', 'אלרגיה'],
+    ['נשימה', 'נפס', 'תנשום']
+  ]
+};
+
+function _getScenarioOrder(phrase, categoryKey){
+  var stages = SCENARIO_KEYWORDS[categoryKey];
+  if (!stages) return 999;
+  var text = (phrase.he || '').toLowerCase().trim();
+  for (var i = 0; i < stages.length; i++) {
+    var stage = stages[i];
+    for (var j = 0; j < stage.length; j++) {
+      if (text.indexOf(stage[j].toLowerCase()) !== -1) return i;
+    }
+  }
+  return 999;  // Unknown phrases go to the end
+}
+
 function _emergPhrasesForCat(emergCat){
-  // Get all matching phrases, then cap at 15
-  // Legacy cube shows phrases from old "מצב מהיר" cat regardless of gold flag
   var matches = DB.filter(function(p){
     if(!visibleToRole(p))return false;
     var pcat=(p.cat||'').trim();
@@ -2060,10 +2129,19 @@ function _emergPhrasesForCat(emergCat){
       if(pcat===emergCat.cats[i]||pcat.indexOf(emergCat.cats[i])!==-1){inCat=true;break;}
     }
     if(!inCat)return false;
-    // For legacy cube: any phrase in old category. For new cubes: must be gold-marked.
     if(emergCat.legacy)return true;
     return isGoldPhrase(p);
   });
+  
+  // Sort by scenario order (stages in real-life encounter)
+  matches.sort(function(a, b){
+    var oa = _getScenarioOrder(a, emergCat.key);
+    var ob = _getScenarioOrder(b, emergCat.key);
+    if (oa !== ob) return oa - ob;
+    // Tiebreak: alphabetical by Hebrew
+    return (a.he||'').localeCompare(b.he||'', 'he');
+  });
+  
   return matches.slice(0, 15);
 }
 
