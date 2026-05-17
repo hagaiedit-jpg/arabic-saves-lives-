@@ -143,30 +143,32 @@ body.day-mode .theme-toggle{background:rgba(255,255,255,0.6);}
 body.day-mode .theme-circle.active{background:#1A2B3C;}
 
 /* Role indicator button */
-.role-btn{
-  position:fixed;
-  top:10px;
-  left:calc(50% + 50px);
+/* Role circle inside theme-toggle pill (same styling as theme-circle, plus tooltip) */
+.role-circle{
   width:30px;
   height:30px;
-  padding:0;
   border-radius:50%;
-  background:rgba(0,0,0,0.35);
-  color:#fff;
-  border:1px solid rgba(210,180,140,0.4);
-  font-size:16px;
-  font-weight:600;
+  background:transparent;
+  border:none;
+  font-size:15px;
   cursor:pointer;
-  font-family:inherit;
+  opacity:0.7;
   display:flex;
   align-items:center;
   justify-content:center;
-  transition:all 0.18s;
-  z-index:1000;
+  transition:all 0.2s;
+  padding:0;
+  font-family:inherit;
 }
-.role-btn:hover{background:rgba(255,140,0,0.15);border-color:#FF8C00;color:#FF8C00;}
-body.day-mode .role-btn{background:rgba(255,255,255,0.6);color:#5a3a1a;border-color:rgba(90,58,26,0.3);}
-body.day-mode .role-btn:hover{background:#fff;border-color:#5a3a1a;}
+.role-circle:hover{opacity:1;background:rgba(255,140,0,0.2);}
+.role-circle.has-role{opacity:1;background:rgba(255,140,0,0.25);}
+.role-circle-divider{
+  width:1px;
+  height:20px;
+  background:rgba(210,180,140,0.3);
+  margin:0 4px;
+  align-self:center;
+}
 
 /* Welcome modal */
 .welcome-bg{position:fixed;inset:0;background:rgba(0,0,0,0.85);z-index:9999;display:flex;align-items:center;justify-content:center;padding:20px;}
@@ -293,10 +295,11 @@ body.day-mode .ct{border:none;border-bottom:1px solid #ebe0c5;border-left:1px so
 <div class="theme-toggle">
   <button class="theme-circle moon" id="moonBtn" onclick="setTheme('night')" title="לילה">🌙</button>
   <button class="theme-circle sun" id="sunBtn" onclick="setTheme('day')" title="יום">☀️</button>
+  <div class="role-circle-divider"></div>
+  <button class="role-circle" id="roleBtn" onclick="showWelcome()" title="בחר את התפקיד שלי">
+    <span id="roleBtnEmoji">👤</span>
+  </button>
 </div>
-<button class="role-btn" id="roleBtn" onclick="showWelcome()" title="שינוי תפקיד">
-  <span id="roleBtnEmoji">👤</span>
-</button>
 <div class="W">
 <div class="topbar">
   <div class="tb-top">
@@ -1980,7 +1983,9 @@ function setRole(role){
   localStorage.setItem('user_role',role);
   var info=ROLE_INFO[role];
   var em=document.getElementById('roleBtnEmoji');
+  var btn=document.getElementById('roleBtn');
   if(em&&info)em.textContent=info.emoji;
+  if(btn)btn.classList.add('has-role');
   document.getElementById('welcomePopup').style.display='none';
   if(typeof rQK==='function')rQK();
   if(typeof bldCats==='function')bldCats();
@@ -2000,7 +2005,9 @@ function loadRole(){
   var info=ROLE_INFO[role];
   if(info){
     var em=document.getElementById('roleBtnEmoji');
+    var btn=document.getElementById('roleBtn');
     if(em)em.textContent=info.emoji;
+    if(btn)btn.classList.add('has-role');
   }
 }
 
@@ -2028,8 +2035,8 @@ loadData();
 <!-- Welcome / Role selector modal -->
 <div id="welcomePopup" class="welcome-bg" style="display:none;">
   <div class="welcome-pop">
-    <div class="welcome-title">ברוכים הבאים</div>
-    <div class="welcome-sub">בחרו את התפקיד שלכם<br>נציג את המשפטים המתאימים לכם בלבד</div>
+    <div class="welcome-title">👤 מה התפקיד שלך?</div>
+    <div class="welcome-sub">בחרו תפקיד כדי לראות רק משפטים<br>שמתאימים לכם בשטח</div>
     <div class="role-grid">
       <button class="role-choice" onclick="setRole('idf')">
         <span class="role-emoji">🪖</span>
