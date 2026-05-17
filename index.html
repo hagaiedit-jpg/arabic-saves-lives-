@@ -184,6 +184,66 @@ body.day-mode .theme-circle.active{background:#1A2B3C;}
 
 /* Gold marker */
 .gold-marker{display:inline-block;color:#FFD700;font-size:15px;margin-left:6px;text-shadow:0 0 6px rgba(255,215,0,0.7);vertical-align:middle;}
+
+/* Emergency mode grid */
+.emerg-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;padding:0;}
+.emerg-cube{
+  border-radius:14px;
+  padding:24px 14px;
+  min-height:130px;
+  cursor:pointer;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  justify-content:center;
+  gap:8px;
+  text-align:center;
+  border:2px solid transparent;
+  transition:all 0.15s;
+  position:relative;
+}
+.emerg-cube:active{transform:scale(0.97);}
+.emerg-cube.red{background:#a82318;border-color:#c0392b;}
+.emerg-cube.blue{background:#1e3a5f;border-color:#2c5d8f;}
+.emerg-cube.orange{background:#a85d1e;border-color:#c97825;}
+.emerg-cube.green{background:#1d6e4f;border-color:#1D9E75;}
+.emerg-cube-emoji{font-size:36px;line-height:1;}
+.emerg-cube-name{color:#fff;font-size:16px;font-weight:700;line-height:1.2;}
+.emerg-cube-count{color:rgba(255,255,255,0.85);font-size:11px;font-weight:600;background:rgba(0,0,0,0.25);padding:3px 10px;border-radius:99px;}
+.emerg-cube-empty{opacity:0.5;}
+
+.emerg-back{
+  background:transparent;
+  border:1px solid rgba(210,180,140,0.3);
+  color:#D2B48C;
+  padding:7px 14px;
+  border-radius:18px;
+  font-size:13px;
+  cursor:pointer;
+  font-family:inherit;
+  margin-bottom:14px;
+  display:inline-block;
+}
+.emerg-back:hover{background:rgba(255,140,0,0.1);border-color:#FF8C00;color:#FF8C00;}
+body.day-mode .emerg-back{color:#5a3a1a;border-color:rgba(90,58,26,0.3);}
+
+.emerg-card{
+  background:#223344;
+  border:1px solid #2e4558;
+  border-radius:10px;
+  padding:14px;
+  margin-bottom:10px;
+  border-right:4px solid #FFD700;
+  cursor:pointer;
+  transition:all 0.12s;
+}
+.emerg-card:active{transform:scale(0.99);}
+.emerg-card-he{color:#fff;font-size:15px;font-weight:600;margin-bottom:6px;}
+.emerg-card-trans{color:#fff;font-size:14px;font-weight:400;margin-bottom:4px;font-family:Georgia,serif;letter-spacing:0.03em;}
+.emerg-card-ar{color:#D2B48C;font-size:14px;font-family:Georgia,serif;direction:rtl;}
+body.day-mode .emerg-card{background:#fff;border-color:#e8dec9;}
+body.day-mode .emerg-card-he{color:#1a2b3c;}
+body.day-mode .emerg-card-trans{color:#1a2b3c;}
 .tb-tabs-sec{display:flex;overflow-x:hidden;background:#0a1622;border-bottom:1px solid #1e3348;padding:0 4px;}
 .tb-tabs-sec::-webkit-scrollbar{display:none;}
 .tb-tab-sec{flex:1 1 0;min-width:0;text-align:center;padding:12px 4px;color:rgba(210,180,140,0.7);font-size:12px;font-weight:500;line-height:1.2;cursor:pointer;border-bottom:2px solid transparent;transition:color 0.15s,border-color 0.15s;}
@@ -327,7 +387,18 @@ body.day-mode .ct{border:none;border-bottom:1px solid #ebe0c5;border-left:1px so
 </div>
 
 <div class="scr" id="tab-qk">
-  <div class="sec"><div class="stitle">🚨 חירום</div><div id="qklist"><div class="empty">טוען...</div></div></div>
+  <div class="sec">
+    <div id="emerg-home">
+      <div class="stitle">🚨 חירום</div>
+      <div style="color:#7a9ab5;font-size:12px;margin-bottom:14px;">בחר את הסיטואציה</div>
+      <div class="emerg-grid" id="emerg-grid"></div>
+    </div>
+    <div id="emerg-list" style="display:none;">
+      <button class="emerg-back" onclick="backToEmergHome()">‹ חזרה לחירום</button>
+      <div class="stitle" id="emerg-list-title">🚨</div>
+      <div id="emerg-items"></div>
+    </div>
+  </div>
 </div>
 
 
@@ -1814,27 +1885,83 @@ function searchHrt(){
 })();
 
 
+// === Emergency mode: 4 category cubes + drill-down ===
+var EMERG_CATS = [
+  {key:'orders',  emoji:'🟥', name:'הוראות מיידיות', color:'red',    cats:['הוראות מיידיות','הוראות']},
+  {key:'check',   emoji:'🟦', name:'בידוק וזיהוי',  color:'blue',   cats:['בידוק וזיהוי','זיהוי ובידוק','בידוק']},
+  {key:'vehicle', emoji:'🟧', name:'רכב ומחסום',    color:'orange', cats:['רכב ומחסום','מחסום','רכב']},
+  {key:'medical', emoji:'🟩', name:'רפואה ועזרה',   color:'green',  cats:['רפואה ועזרה','סיוע רפואי','רפואה','עזרה ראשונה']}
+];
+
+function _emergPhrasesForCat(emergCat){
+  return DB.filter(function(p){
+    if(!isGoldPhrase(p))return false;
+    if(!visibleToRole(p))return false;
+    var pcat=(p.cat||'').trim();
+    for(var i=0;i<emergCat.cats.length;i++){
+      if(pcat===emergCat.cats[i]||pcat.indexOf(emergCat.cats[i])!==-1)return true;
+    }
+    return false;
+  });
+}
+
 function rQK(){
-  // Gold phrases first (regardless of category), then "מצב מהיר" category
-  var gold=DB.filter(function(d){return isGoldPhrase(d)&&visibleToRole(d);});
-  var quick=DB.filter(function(d){return d.cat==="מצב מהיר"&&!isGoldPhrase(d)&&visibleToRole(d);});
-  var items=gold.concat(quick);
-  var el=document.getElementById("qklist");
-  if(!el)return;
-  if(!items.length){el.innerHTML='<div class="empty">אין משפטים עדיין</div>';return;}
-  var h="";
+  // Always show home grid (with 4 cubes)
+  var home=document.getElementById('emerg-home');
+  var list=document.getElementById('emerg-list');
+  var grid=document.getElementById('emerg-grid');
+  if(!home||!grid)return;
+  
+  // Reset to home view
+  home.style.display='block';
+  if(list)list.style.display='none';
+  
+  var h='';
+  for(var i=0;i<EMERG_CATS.length;i++){
+    var ec=EMERG_CATS[i];
+    var count=_emergPhrasesForCat(ec).length;
+    var emptyClass=count===0?' emerg-cube-empty':'';
+    h+='<div class="emerg-cube '+ec.color+emptyClass+'" onclick="openEmergCat(\''+ec.key+'\')">';
+    h+='<div class="emerg-cube-emoji">'+ec.emoji+'</div>';
+    h+='<div class="emerg-cube-name">'+ec.name+'</div>';
+    h+='<div class="emerg-cube-count">'+count+' משפטים</div>';
+    h+='</div>';
+  }
+  grid.innerHTML=h;
+}
+
+function openEmergCat(key){
+  var ec=null;
+  for(var i=0;i<EMERG_CATS.length;i++){if(EMERG_CATS[i].key===key){ec=EMERG_CATS[i];break;}}
+  if(!ec)return;
+  
+  var items=_emergPhrasesForCat(ec);
+  
+  document.getElementById('emerg-home').style.display='none';
+  document.getElementById('emerg-list').style.display='block';
+  document.getElementById('emerg-list-title').textContent=ec.emoji+' '+ec.name;
+  
+  var el=document.getElementById('emerg-items');
+  if(!items.length){
+    el.innerHTML='<div class="empty">אין עדיין משפטים בקטגוריה זו.<br>סמני משפטים ב⭐ כדי שיופיעו כאן.</div>';
+    return;
+  }
+  
+  var h='';
   for(var j=0;j<items.length;j++){
     var p=items[j],idx=DB.indexOf(p);
-    var bcol=isGoldPhrase(p)?'#FFD700':'#c0392b';
-    var star=isGoldPhrase(p)?'<span class="gold-marker">⭐</span>':'';
-    h+='<div style="background:#223344;border:1px solid #2e4558;border-radius:10px;padding:14px;margin-bottom:10px;border-right:4px solid '+bcol+';">';
-    h+='<div style="color:#fff;font-size:15px;font-weight:600;margin-bottom:6px;">'+star+p.he+'</div>';
-    h+='<div style="color:#fff;font-size:15px;font-weight:400;margin-bottom:6px;font-family:Georgia,serif;letter-spacing:0.03em;">'+p.trans+'</div>';
-    h+='<div style="color:#D2B48C;font-size:14px;margin-bottom:10px;font-family:Georgia,serif;">'+p.ar+'</div>';
-    h+='<button onclick="playQK('+idx+')" id="qb'+idx+'" style="padding:7px 20px;background:transparent;border:1.5px solid #c0392b;border-radius:20px;color:#c0392b;font-size:13px;cursor:pointer;font-family:inherit;">🔊 השמע</button>';
+    h+='<div class="emerg-card" onclick="opP('+idx+')">';
+    h+='<div class="emerg-card-he">⭐ '+p.he+'</div>';
+    if(p.trans)h+='<div class="emerg-card-trans">'+p.trans+'</div>';
+    if(p.ar)h+='<div class="emerg-card-ar">'+p.ar+'</div>';
     h+='</div>';
   }
   el.innerHTML=h;
+}
+
+function backToEmergHome(){
+  document.getElementById('emerg-list').style.display='none';
+  document.getElementById('emerg-home').style.display='block';
 }
 function playQK(i){var btn=document.getElementById("qb"+i);if(curAudio&&!curAudio.paused){curAudio.pause();curAudio=null;if(window._qb)window._qb.innerHTML="🔊 השמע";if(window._qb===btn){window._qb=null;return;}}var u=DB[i].audio;if(!u)return;var a=new Audio(u);a.playbackRate=1;a.play();curAudio=a;window._qb=btn;btn.innerHTML="⏹ עצור";a.onended=function(){btn.innerHTML="🔊 השמע";curAudio=null;window._qb=null;};}
 
