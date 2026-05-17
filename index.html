@@ -30,24 +30,20 @@ body{background:#1A2B3C;direction:rtl;font-family:-apple-system,BlinkMacSystemFo
 .tb-tab{flex:1 1 0;min-width:0;text-align:center;padding:14px 4px;color:rgba(210,180,140,0.92);font-size:12px;font-weight:600;line-height:1.2;cursor:pointer;border-bottom:2px solid transparent;transition:all 0.15s;}
 .tb-tab.active{color:#D2B48C;border-bottom-color:#FF8C00;}
 
-/* === Enhanced popup === */
-.pcat-badge{display:inline-flex;align-items:center;gap:6px;background:rgba(255,140,0,0.18);border:1px solid rgba(255,140,0,0.45);border-radius:999px;padding:4px 12px;font-size:11px;font-weight:700;color:#FF8C00;letter-spacing:0.5px;margin-bottom:14px;}
+/* === Enhanced popup (large touch targets for gloved hands) === */
+.pcat-badge{display:inline-flex;align-items:center;gap:6px;background:rgba(255,140,0,0.18);border:1px solid rgba(255,140,0,0.45);border-radius:999px;padding:5px 14px;font-size:11px;font-weight:700;color:#FF8C00;letter-spacing:0.5px;margin-bottom:14px;}
 body.day-mode .pcat-badge{background:rgba(255,140,0,0.12);border-color:rgba(255,140,0,0.55);color:#c66700;}
-.play-locals-btn{display:flex;align-items:center;justify-content:center;gap:10px;background:#FF8C00;color:#fff;border:none;border-radius:14px;padding:16px 22px;font-size:16px;font-weight:700;cursor:pointer;width:100%;margin:14px 0 10px;box-shadow:0 4px 14px rgba(255,140,0,0.3);transition:transform 0.1s,box-shadow 0.15s;font-family:inherit;}
-.play-locals-btn:hover{box-shadow:0 6px 20px rgba(255,140,0,0.4);}
-.play-locals-btn:active{transform:scale(0.98);}
-.play-locals-btn.playing{background:#c0392b;box-shadow:0 4px 14px rgba(192,57,43,0.4);}
-.rep-row{display:flex;align-items:center;justify-content:center;gap:8px;margin-bottom:14px;flex-wrap:wrap;font-size:12px;}
-.rep-lbl{color:#7a9ab5;font-size:12px;}
-body.day-mode .rep-lbl{color:#5a3a1a;}
-.rep-btn{background:rgba(255,255,255,0.08);border:1px solid rgba(210,180,140,0.3);color:#D2B48C;border-radius:999px;padding:5px 14px;font-size:12px;font-weight:600;cursor:pointer;font-family:inherit;transition:all 0.15s;}
-.rep-btn.active{background:#FF8C00;border-color:#FF8C00;color:#fff;}
-body.day-mode .rep-btn{background:rgba(0,0,0,0.04);border-color:rgba(90,58,26,0.25);color:#5a3a1a;}
-body.day-mode .rep-btn.active{background:#FF8C00;border-color:#FF8C00;color:#fff;}
-.loop-btn{background:rgba(255,255,255,0.08);border:1px solid rgba(210,180,140,0.3);color:#D2B48C;border-radius:999px;padding:5px 14px;font-size:12px;font-weight:600;cursor:pointer;font-family:inherit;display:inline-flex;align-items:center;gap:5px;}
-.loop-btn.on{background:#1D9E75;border-color:#1D9E75;color:#fff;}
-body.day-mode .loop-btn{background:rgba(0,0,0,0.04);border-color:rgba(90,58,26,0.25);color:#5a3a1a;}
-body.day-mode .loop-btn.on{background:#1D9E75;border-color:#1D9E75;color:#fff;}
+.play-row{display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:8px;margin:16px 0 10px;}
+.big-pbtn{background:rgba(255,255,255,0.06);border:1.5px solid rgba(210,180,140,0.35);color:#D2B48C;border-radius:14px;padding:14px 4px;font-size:18px;font-weight:700;cursor:pointer;font-family:inherit;text-align:center;transition:all 0.12s;min-height:64px;line-height:1.15;}
+.big-pbtn:active{transform:scale(0.96);}
+.big-pbtn-lbl{font-size:11px;font-weight:600;opacity:0.8;}
+.big-pbtn.active{background:#FF8C00;border-color:#FF8C00;color:#fff;}
+.big-pbtn.loop.on{background:#1D9E75;border-color:#1D9E75;color:#fff;}
+.big-pbtn.playing{background:#c0392b;border-color:#c0392b;color:#fff;}
+body.day-mode .big-pbtn{background:rgba(0,0,0,0.04);border-color:rgba(90,58,26,0.3);color:#5a3a1a;}
+body.day-mode .big-pbtn.active{background:#FF8C00;border-color:#FF8C00;color:#fff;}
+body.day-mode .big-pbtn.loop.on{background:#1D9E75;border-color:#1D9E75;color:#fff;}
+body.day-mode .big-pbtn.playing{background:#c0392b;border-color:#c0392b;color:#fff;}
 .ibox.c{background:rgba(255,215,140,0.08);border:1px solid rgba(255,215,140,0.25);}
 .ibox.c .ilbl{color:#FFD580;}
 body.day-mode .ibox.c{background:rgba(255,215,140,0.18);border-color:rgba(180,130,40,0.3);}
@@ -112,15 +108,16 @@ body.day-mode #recentlist [style*="color:#7a9ab5"]{color:#5a3a1a !important;}
 
 .theme-btn{
   position:fixed;
-  top:8px;
-  left:8px;
-  width:34px;
-  height:34px;
+  top:10px;
+  left:50%;
+  transform:translateX(-50%);
+  width:36px;
+  height:36px;
   border-radius:50%;
-  background:rgba(26,43,60,0.85);
+  background:rgba(0,0,0,0.35);
   color:#FF8C00;
   border:1px solid rgba(255,140,0,0.5);
-  font-size:16px;
+  font-size:17px;
   cursor:pointer;
   z-index:1000;
   display:flex;
@@ -309,17 +306,11 @@ body.day-mode .ct{border:none;border-bottom:1px solid #ebe0c5;border-left:1px so
       <div class="parsm" id="parsm"></div>
       <div class="pbox"><div class="ptrans" id="ptrans"></div></div>
       <div class="ww"><div class="wave" id="wbars"></div><span class="wt" id="wtime">0:00</span></div>
-      <button class="play-locals-btn" id="playLocalsBtn" onclick="playForLocals(this)">▶ השמע למקומיים</button>
-      <div class="rep-row">
-        <span class="rep-lbl">חזרות:</span>
-        <button class="rep-btn active" data-rep="1" onclick="setRepeat(this,1)">1×</button>
-        <button class="rep-btn" data-rep="3" onclick="setRepeat(this,3)">3×</button>
-        <button class="rep-btn" data-rep="5" onclick="setRepeat(this,5)">5×</button>
-        <button class="loop-btn" id="loopBtn" onclick="toggleLoop(this)">🔁 לולאה</button>
-      </div>
-      <div class="pbr">
-        <button class="pbtn slow" onclick="play(this,'slow')">🐢 צב</button>
-        <button class="pbtn fast" onclick="play(this,'fast')">🐇 ארנב</button>
+      <div class="play-row">
+        <button class="big-pbtn" onclick="play(this,'slow')">🐢<br><span class="big-pbtn-lbl">צב</span></button>
+        <button class="big-pbtn rep1 active" data-rep="1" onclick="playReps(this,1)">1×<br><span class="big-pbtn-lbl">פעם</span></button>
+        <button class="big-pbtn rep3" data-rep="3" onclick="playReps(this,3)">3×<br><span class="big-pbtn-lbl">חזרות</span></button>
+        <button class="big-pbtn loop" id="loopBtn" onclick="playLoop(this)">🔁<br><span class="big-pbtn-lbl">לולאה</span></button>
       </div>
       <div class="ibox b" id="pwhyb"><div class="ilbl b" id="pwhylbl">למה זה חשוב</div><div class="itxt b" id="pwhy"></div></div>
       <div class="ibox o" id="ptoneb"><div class="ilbl o">טיפ ללוחם</div><div class="itxt o" id="ptone"></div></div>
@@ -1138,97 +1129,150 @@ function clsP(){
 function clrS(){document.getElementById('sinp').value='';doS();}
 
 let pt=null,curAudio=null;
-// === Popup enhancements: repeat / loop / cultural fact ===
-var _repeatCount = 1;
-var _looping = false;
-var _localsPlaying = false;
-var _localsStopFlag = false;
+// === Popup enhancements: unified repeat/loop player ===
+var _repPlaying = false;
+var _repStopFlag = false;
 
-function setRepeat(btn, n) {
-  _repeatCount = n;
-  document.querySelectorAll('.rep-btn').forEach(function(b){b.classList.remove('active');});
-  btn.classList.add('active');
-}
-
-function toggleLoop(btn) {
-  _looping = !_looping;
-  if (_looping) btn.classList.add('on');
-  else btn.classList.remove('on');
-}
-
-function setLocalsButtonState(playing) {
-  _localsPlaying = playing;
-  var btn = document.getElementById('playLocalsBtn');
-  if (!btn) return;
-  if (playing) {
-    btn.classList.add('playing');
-    btn.innerHTML = '■ עצור';
-  } else {
-    btn.classList.remove('playing');
-    btn.innerHTML = '▶ השמע למקומיים';
+function _setRepButtonState(btn, playing) {
+  _repPlaying = playing;
+  if (btn) {
+    if (playing) btn.classList.add('playing');
+    else {
+      document.querySelectorAll('.big-pbtn').forEach(function(b){b.classList.remove('playing');});
+    }
   }
 }
 
-function playForLocals(btn) {
-  // If already playing - stop
-  if (_localsPlaying) {
-    _localsStopFlag = true;
+function _getAudioUrl() {
+  // The current visible popup phrase audio URL is on the play(this,'slow') button via data-audio
+  // But that only gets set when slow/fast is clicked. Need another way:
+  // Look at the current popup phrase data stored at popup-open time
+  return window._popupAudio || '';
+}
+
+function playReps(btn, n) {
+  // Stop if already playing
+  if (_repPlaying) {
+    _repStopFlag = true;
     if (curAudio) { curAudio.pause(); curAudio.currentTime = 0; curAudio = null; }
     if (pt) clearInterval(pt);
-    setLocalsButtonState(false);
+    document.querySelectorAll('.big-pbtn').forEach(function(b){b.classList.remove('playing');});
+    _repPlaying = false;
     return;
   }
   
-  // Find the slow/fast button to get the audio URL
-  var slowBtn = document.querySelector('.pop .pbtn.slow');
-  if (!slowBtn) return;
-  var url = slowBtn.getAttribute('data-audio') || '';
+  var url = _getAudioUrl();
   if (!url) { alert('אין הקלטה למשפט זה'); return; }
   
-  _localsStopFlag = false;
-  setLocalsButtonState(true);
-  var remaining = _repeatCount;
+  // Mark this button as active
+  document.querySelectorAll('.big-pbtn').forEach(function(b){b.classList.remove('active');});
+  btn.classList.add('active');
+  btn.classList.add('playing');
+  _repPlaying = true;
+  _repStopFlag = false;
   
+  var remaining = n;
   function playNext() {
-    if (_localsStopFlag) { setLocalsButtonState(false); return; }
-    if (remaining <= 0 && !_looping) { setLocalsButtonState(false); return; }
-    if (remaining <= 0 && _looping) remaining = _repeatCount;
+    if (_repStopFlag || remaining <= 0) {
+      document.querySelectorAll('.big-pbtn').forEach(function(b){b.classList.remove('playing');});
+      _repPlaying = false;
+      return;
+    }
     remaining--;
-    
     if (curAudio) { curAudio.pause(); curAudio = null; }
     curAudio = new Audio(url);
     curAudio.onended = function() {
       curAudio = null;
-      if (_localsStopFlag) { setLocalsButtonState(false); return; }
-      setTimeout(playNext, 500);
+      if (_repStopFlag) {
+        document.querySelectorAll('.big-pbtn').forEach(function(b){b.classList.remove('playing');});
+        _repPlaying = false;
+        return;
+      }
+      if (remaining > 0) setTimeout(playNext, 400);
+      else {
+        document.querySelectorAll('.big-pbtn').forEach(function(b){b.classList.remove('playing');});
+        _repPlaying = false;
+      }
     };
     curAudio.onerror = function() {
       curAudio = null;
-      setLocalsButtonState(false);
+      document.querySelectorAll('.big-pbtn').forEach(function(b){b.classList.remove('playing');});
+      _repPlaying = false;
       alert('שגיאה בנגינת ההקלטה');
     };
     curAudio.play().catch(function(){
-      setLocalsButtonState(false);
+      document.querySelectorAll('.big-pbtn').forEach(function(b){b.classList.remove('playing');});
+      _repPlaying = false;
     });
   }
   playNext();
 }
 
-// Reset popup controls each time it opens
+function playLoop(btn) {
+  // Stop if already in loop
+  if (btn.classList.contains('on') || _repPlaying) {
+    _repStopFlag = true;
+    if (curAudio) { curAudio.pause(); curAudio.currentTime = 0; curAudio = null; }
+    if (pt) clearInterval(pt);
+    btn.classList.remove('on');
+    document.querySelectorAll('.big-pbtn').forEach(function(b){b.classList.remove('playing');});
+    _repPlaying = false;
+    return;
+  }
+  
+  var url = _getAudioUrl();
+  if (!url) { alert('אין הקלטה למשפט זה'); return; }
+  
+  document.querySelectorAll('.big-pbtn').forEach(function(b){b.classList.remove('active');});
+  btn.classList.add('on');
+  _repPlaying = true;
+  _repStopFlag = false;
+  
+  function playLoopOnce() {
+    if (_repStopFlag) {
+      btn.classList.remove('on');
+      _repPlaying = false;
+      return;
+    }
+    if (curAudio) { curAudio.pause(); curAudio = null; }
+    curAudio = new Audio(url);
+    curAudio.onended = function() {
+      curAudio = null;
+      if (_repStopFlag) {
+        btn.classList.remove('on');
+        _repPlaying = false;
+        return;
+      }
+      setTimeout(playLoopOnce, 400);
+    };
+    curAudio.onerror = function() {
+      curAudio = null;
+      btn.classList.remove('on');
+      _repPlaying = false;
+      alert('שגיאה בנגינת ההקלטה');
+    };
+    curAudio.play().catch(function(){
+      btn.classList.remove('on');
+      _repPlaying = false;
+    });
+  }
+  playLoopOnce();
+}
+
 function resetPopupControls() {
-  _localsStopFlag = true;
-  if (_localsPlaying) setLocalsButtonState(false);
-  _repeatCount = 1;
-  _looping = false;
-  document.querySelectorAll('.rep-btn').forEach(function(b){
+  _repStopFlag = true;
+  _repPlaying = false;
+  document.querySelectorAll('.big-pbtn').forEach(function(b){
+    b.classList.remove('playing');
+    b.classList.remove('on');
     b.classList.toggle('active', b.dataset.rep === '1');
   });
-  var lb = document.getElementById('loopBtn');
-  if (lb) lb.classList.remove('on');
 }
 
 // Set category badge & cultural fact in popup
 function setPopupExtras(p) {
+  // Store audio URL for repeat/loop buttons
+  window._popupAudio = (p && p.audio) ? p.audio : '';
   // Category badge
   var badge = document.getElementById('pcatbadge');
   if (badge) {
