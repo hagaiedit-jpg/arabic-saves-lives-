@@ -1291,6 +1291,10 @@ function doS(){
 function hl(t,q){if(!q)return t;return t.replace(new RegExp('('+q.replace(/[.*+?^${}()|[\]\\]/g,'\\$&')+')','gi'),'<span class="hlm">$1</span>');}
 function rItems(items,el,q){
   var filtered = items.filter(function(p){return typeof visibleToRole==='function'?visibleToRole(p):true;});
+  // Apply scenario-based sorting if all items share an emergency category
+  if (typeof sortPhrasesByScenario === 'function') {
+    filtered = sortPhrasesByScenario(filtered);
+  }
   if(!filtered.length){el.innerHTML='<div class="empty">לא נמצאו תוצאות</div>';return;}
   el.innerHTML=filtered.map(p=>{const i=DB.indexOf(p);var star=(typeof isGoldPhrase==='function'&&isGoldPhrase(p))?'<span class="gold-marker">⭐</span>':'';return`<div class="li" onclick="opP(${i})"><div class="lt">${star+hl(p.he,q)+(typeof urgDot==='function'?urgDot(p.urgency):'')}</div><div class="la">‹</div></div>`;}).join('');
 }
@@ -2117,7 +2121,32 @@ function _getScenarioOrder(phrase, categoryKey){
       if (text.indexOf(stage[j].toLowerCase()) !== -1) return i;
     }
   }
-  return 999;  // Unknown phrases go to the end
+  return 999;
+}
+
+// Map a Hebrew category name (string) to a scenario key
+function _categoryToScenarioKey(catName){
+  if (!catName) return null;
+  var c = catName.trim();
+  if (c==='הוראות מיידיות' || c==='הוראות') return 'orders';
+  if (c==='בידוק וזיהוי' || c==='זיהוי ובידוק' || c==='בידוק') return 'check';
+  if (c==='רכב ומחסום' || c==='מחסום' || c==='רכב') return 'vehicle';
+  if (c==='רפואה ועזרה' || c==='סיוע רפואי' || c==='רפואה' || c==='עזרה ראשונה') return 'medical';
+  return null;
+}
+
+// Universal sort: sort phrases by scenario order if the category matches
+function sortPhrasesByScenario(phrases){
+  if (!phrases || !phrases.length) return phrases;
+  // Get scenario key from FIRST phrase's category (they should all share a category in a list)
+  var key = _categoryToScenarioKey((phrases[0] && phrases[0].cat) || '');
+  if (!key) return phrases;  // No scenario defined - leave as-is
+  return phrases.slice().sort(function(a,b){
+    var oa = _getScenarioOrder(a, key);
+    var ob = _getScenarioOrder(b, key);
+    if (oa !== ob) return oa - ob;
+    return (a.he||'').localeCompare(b.he||'', 'he');
+  });
 }
 
 function _emergPhrasesForCat(emergCat){
