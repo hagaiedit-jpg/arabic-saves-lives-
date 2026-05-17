@@ -109,14 +109,14 @@ body.day-mode #recentlist [style*="color:#7a9ab5"]{color:#5a3a1a !important;}
 .theme-toggle{
   position:fixed;
   top:10px;
-  left:50%;
-  transform:translateX(-50%);
+  left:10px;
   display:flex;
-  gap:6px;
+  gap:4px;
   z-index:1000;
-  background:rgba(0,0,0,0.35);
+  background:rgba(0,0,0,0.5);
   border-radius:999px;
   padding:3px;
+  box-shadow:0 2px 8px rgba(0,0,0,0.3);
 }
 .theme-circle{
   width:30px;
@@ -199,30 +199,115 @@ body.day-mode .theme-circle.active{background:#1A2B3C;}
   font-weight:600;
   transition:all 0.18s;
 }
-/* Help modal sections */
-.help-section{margin-bottom:14px;text-align:right;}
-.help-title{color:#FF8C00;font-size:13px;font-weight:700;margin-bottom:8px;padding-bottom:4px;border-bottom:1px solid rgba(255,140,0,0.3);}
-.help-row{display:flex;align-items:flex-start;gap:10px;padding:6px 0;}
-.help-icon{font-size:18px;line-height:1.4;min-width:28px;text-align:center;flex-shrink:0;}
-.help-txt{font-size:13px;color:#fff;line-height:1.4;flex:1;}
-.help-txt strong{color:#D2B48C;}
-.help-close-btn{
+/* Help modal - redesigned */
+.help-pop{
+  background:#1A2B3C;
+  border:2px solid #FF8C00;
+  border-radius:18px;
   width:100%;
-  margin-top:16px;
-  padding:14px;
-  background:#FF8C00;
+  max-width:460px;
+  max-height:88vh;
+  display:flex;
+  flex-direction:column;
+  color:#fff;
+  box-shadow:0 12px 40px rgba(0,0,0,0.6);
+  position:relative;
+  overflow:hidden;
+}
+body.day-mode .help-pop{background:#fff8e7;border-color:#FF8C00;color:#1a2b3c;}
+
+.help-x{
+  position:absolute;
+  top:10px;
+  left:10px;
+  width:36px;
+  height:36px;
+  border-radius:50%;
+  background:rgba(255,255,255,0.1);
   color:#fff;
   border:none;
-  border-radius:12px;
-  font-size:14px;
+  font-size:18px;
   font-weight:700;
   cursor:pointer;
   font-family:inherit;
+  z-index:2;
+  display:flex;
+  align-items:center;
+  justify-content:center;
 }
-.help-close-btn:hover{background:#ff9c1f;}
+.help-x:hover,.help-x:active{background:rgba(255,75,75,0.85);}
+body.day-mode .help-x{background:rgba(0,0,0,0.08);color:#5a3a1a;}
+body.day-mode .help-x:hover{background:#c0392b;color:#fff;}
+
+.help-header{
+  padding:22px 60px 16px;
+  text-align:center;
+  border-bottom:1px solid rgba(210,180,140,0.2);
+}
+.help-h-title{font-size:22px;font-weight:800;color:#FF8C00;margin-bottom:4px;}
+.help-h-sub{font-size:13px;color:#D2B48C;}
+body.day-mode .help-h-sub{color:#7a4f1f;}
+
+.help-body{
+  flex:1;
+  overflow-y:auto;
+  padding:16px 20px 8px;
+  text-align:right;
+}
+
+.help-section{margin-bottom:18px;}
+.help-section:last-child{margin-bottom:6px;}
+.help-title{
+  color:#FF8C00;
+  font-size:15px;
+  font-weight:700;
+  margin-bottom:10px;
+  padding-bottom:6px;
+  border-bottom:1px solid rgba(255,140,0,0.3);
+}
+.help-row{
+  display:flex;
+  align-items:center;
+  gap:12px;
+  padding:8px 0;
+}
+.help-icon{
+  font-size:22px;
+  line-height:1;
+  min-width:34px;
+  text-align:center;
+  flex-shrink:0;
+}
+.help-txt{
+  font-size:14px;
+  color:#fff;
+  line-height:1.4;
+  flex:1;
+  display:flex;
+  flex-direction:column;
+  gap:2px;
+}
+.help-txt strong{color:#fff;font-weight:700;font-size:14px;}
+.help-desc{color:#7a9ab5;font-size:12px;font-weight:400;}
 body.day-mode .help-txt{color:#1a2b3c;}
-body.day-mode .help-txt strong{color:#5a3a1a;}
+body.day-mode .help-txt strong{color:#1a2b3c;}
+body.day-mode .help-desc{color:#5a7488;}
 body.day-mode .help-title{color:#c66700;border-bottom-color:rgba(198,103,0,0.3);}
+
+.help-close-btn{
+  margin:8px 16px 16px;
+  padding:16px;
+  background:#1D9E75;
+  color:#fff;
+  border:none;
+  border-radius:12px;
+  font-size:16px;
+  font-weight:700;
+  cursor:pointer;
+  font-family:inherit;
+  box-shadow:0 4px 12px rgba(29,158,117,0.3);
+}
+.help-close-btn:hover,.help-close-btn:active{background:#168a64;transform:translateY(-1px);}
 
 .role-choice-all:hover,.role-choice-all:active{
   background:rgba(255,140,0,0.12);
@@ -2546,44 +2631,49 @@ loadData();
 </div>
 <!-- Help / Icon legend modal -->
 <div id="helpPopup" class="welcome-bg" style="display:none;" onclick="if(event.target===this)hideHelp()">
-  <div class="welcome-pop" style="max-width:480px;text-align:right;">
-    <div class="welcome-title" style="text-align:center;">❓ מקרא וסמלים</div>
-    <div class="welcome-sub" style="text-align:center;margin-bottom:18px;">מה כל סמל באפליקציה אומר</div>
-    
-    <div class="help-section">
-      <div class="help-title">דחיפות</div>
-      <div class="help-row"><span class="help-icon">🔴</span><div class="help-txt"><strong>מיידי</strong> - חירום, פעולה דחופה</div></div>
-      <div class="help-row"><span class="help-icon">🟡</span><div class="help-txt"><strong>רגיש</strong> - לטיפול עדין</div></div>
+  <div class="help-pop">
+    <button class="help-x" onclick="hideHelp()" aria-label="סגור">✕</button>
+    <div class="help-header">
+      <div class="help-h-title">מקרא וסמלים</div>
+      <div class="help-h-sub">מה כל סמל באפליקציה אומר</div>
     </div>
     
-    <div class="help-section">
-      <div class="help-title">משפטים</div>
-      <div class="help-row"><span class="help-icon" style="color:#FFD700;">⭐</span><div class="help-txt"><strong>משפט זהב</strong> - הכי קריטי בשטח, מופיע בחירום</div></div>
+    <div class="help-body">
+      <div class="help-section">
+        <div class="help-title">🚨 דחיפות</div>
+        <div class="help-row"><span class="help-icon">🔴</span><div class="help-txt"><strong>מיידי</strong><span class="help-desc">חירום, פעולה דחופה</span></div></div>
+        <div class="help-row"><span class="help-icon">🟡</span><div class="help-txt"><strong>רגיש</strong><span class="help-desc">לטיפול עדין ומתון</span></div></div>
+      </div>
+      
+      <div class="help-section">
+        <div class="help-title">⭐ משפטים מיוחדים</div>
+        <div class="help-row"><span class="help-icon" style="color:#FFD700;">⭐</span><div class="help-txt"><strong>משפט זהב</strong><span class="help-desc">הכי קריטי בשטח. מופיע במסך החירום.</span></div></div>
+      </div>
+      
+      <div class="help-section">
+        <div class="help-title">🔊 השמעה</div>
+        <div class="help-row"><span class="help-icon">▶</span><div class="help-txt"><strong>השמע</strong><span class="help-desc">לחיצה אחת לשמיעה</span></div></div>
+        <div class="help-row"><span class="help-icon">🐢</span><div class="help-txt"><strong>איטי</strong><span class="help-desc">השמעה איטית ללימוד הגייה</span></div></div>
+        <div class="help-row"><span class="help-icon">🔁</span><div class="help-txt"><strong>לולאה</strong><span class="help-desc">חזרה אינסופית עד עצירה</span></div></div>
+      </div>
+      
+      <div class="help-section">
+        <div class="help-title">👤 תפקידים</div>
+        <div class="help-row"><span class="help-icon">🪖</span><div class="help-txt"><strong>צה"ל</strong><span class="help-desc">חיילים סדירים</span></div></div>
+        <div class="help-row"><span class="help-icon">🚓</span><div class="help-txt"><strong>משטרה</strong><span class="help-desc">שוטרים</span></div></div>
+        <div class="help-row"><span class="help-icon">🛡️</span><div class="help-txt"><strong>ביטחון</strong><span class="help-desc">מאבטחים</span></div></div>
+        <div class="help-row"><span class="help-icon">🎒</span><div class="help-txt"><strong>מלש"ב</strong><span class="help-desc">לפני גיוס</span></div></div>
+        <div class="help-row"><span class="help-icon">👁️</span><div class="help-txt"><strong>הכל</strong><span class="help-desc">רואה את כל המשפטים</span></div></div>
+      </div>
+      
+      <div class="help-section">
+        <div class="help-title">📂 לשוניות עיקריות</div>
+        <div class="help-row"><span class="help-icon">🚨</span><div class="help-txt"><strong>חירום</strong><span class="help-desc">4 קוביות סיטואציה למצבי שטח</span></div></div>
+        <div class="help-row"><span class="help-icon">⭐</span><div class="help-txt"><strong>מועדפים</strong><span class="help-desc">משפטים ששמרת + 15 אחרונים</span></div></div>
+      </div>
     </div>
     
-    <div class="help-section">
-      <div class="help-title">השמעה</div>
-      <div class="help-row"><span class="help-icon">▶</span><div class="help-txt"><strong>השמע</strong> - לחיצה אחת לשמיעה</div></div>
-      <div class="help-row"><span class="help-icon">🐢</span><div class="help-txt"><strong>איטי</strong> - השמעה איטית ללימוד הגייה</div></div>
-      <div class="help-row"><span class="help-icon">🔁</span><div class="help-txt"><strong>לולאה</strong> - חזרה אינסופית עד עצירה</div></div>
-    </div>
-    
-    <div class="help-section">
-      <div class="help-title">תפקידים</div>
-      <div class="help-row"><span class="help-icon">🪖</span><div class="help-txt"><strong>צה"ל</strong> - חיילים סדירים</div></div>
-      <div class="help-row"><span class="help-icon">🚓</span><div class="help-txt"><strong>משטרה</strong> - שוטרים</div></div>
-      <div class="help-row"><span class="help-icon">🛡️</span><div class="help-txt"><strong>ביטחון</strong> - מאבטחים</div></div>
-      <div class="help-row"><span class="help-icon">🎒</span><div class="help-txt"><strong>מלש"ב</strong> - לפני גיוס</div></div>
-      <div class="help-row"><span class="help-icon">👁️</span><div class="help-txt"><strong>הכל</strong> - רואה את כל המשפטים</div></div>
-    </div>
-    
-    <div class="help-section">
-      <div class="help-title">לשוניות</div>
-      <div class="help-row"><span class="help-icon">🚨</span><div class="help-txt"><strong>חירום</strong> - 4 קוביות סיטואציה למצבי שטח</div></div>
-      <div class="help-row"><span class="help-icon">⭐</span><div class="help-txt"><strong>מועדפים</strong> - משפטים ששמרת + 15 אחרונים</div></div>
-    </div>
-    
-    <button class="help-close-btn" onclick="hideHelp()">הבנתי, סגור</button>
+    <button class="help-close-btn" onclick="hideHelp()">✓ הבנתי, סגור</button>
   </div>
 </div>
 </body>
