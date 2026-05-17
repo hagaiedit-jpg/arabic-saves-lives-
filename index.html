@@ -230,6 +230,7 @@ body.day-mode .theme-circle.active{background:#1A2B3C;}
 .emerg-cube.blue{background:#1e3a5f;border-color:#2c5d8f;}
 .emerg-cube.orange{background:#a85d1e;border-color:#c97825;}
 .emerg-cube.green{background:#1d6e4f;border-color:#1D9E75;}
+.emerg-cube.gray{background:#3d3d3d;border-color:#666;}
 .emerg-cube-emoji{font-size:36px;line-height:1;}
 .emerg-cube-name{color:#fff;font-size:16px;font-weight:700;line-height:1.2;}
 .emerg-cube-count{color:rgba(255,255,255,0.85);font-size:11px;font-weight:600;background:rgba(0,0,0,0.25);padding:3px 10px;border-radius:99px;}
@@ -1913,21 +1914,26 @@ var EMERG_CATS = [
   {key:'orders',  emoji:'🟥', name:'הוראות מיידיות', color:'red',    cats:['הוראות מיידיות','הוראות']},
   {key:'check',   emoji:'🟦', name:'בידוק וזיהוי',  color:'blue',   cats:['בידוק וזיהוי','זיהוי ובידוק','בידוק']},
   {key:'vehicle', emoji:'🟧', name:'רכב ומחסום',    color:'orange', cats:['רכב ומחסום','מחסום','רכב']},
-  {key:'medical', emoji:'🟩', name:'רפואה ועזרה',   color:'green',  cats:['רפואה ועזרה','סיוע רפואי','רפואה','עזרה ראשונה']}
+  {key:'medical', emoji:'🟩', name:'רפואה ועזרה',   color:'green',  cats:['רפואה ועזרה','סיוע רפואי','רפואה','עזרה ראשונה']},
+  {key:'legacy',  emoji:'⚡', name:'משפטים ישנים',   color:'gray',   cats:['מצב מהיר','חירום','קריטי'], legacy:true}
 ];
 
 function _emergPhrasesForCat(emergCat){
-  // Get all matching phrases, then cap at 15 most recent
+  // Get all matching phrases, then cap at 15
+  // Legacy cube shows phrases from old "מצב מהיר" cat regardless of gold flag
   var matches = DB.filter(function(p){
-    if(!isGoldPhrase(p))return false;
     if(!visibleToRole(p))return false;
     var pcat=(p.cat||'').trim();
+    var inCat=false;
     for(var i=0;i<emergCat.cats.length;i++){
-      if(pcat===emergCat.cats[i]||pcat.indexOf(emergCat.cats[i])!==-1)return true;
+      if(pcat===emergCat.cats[i]||pcat.indexOf(emergCat.cats[i])!==-1){inCat=true;break;}
     }
-    return false;
+    if(!inCat)return false;
+    // For legacy cube: any phrase in old category. For new cubes: must be gold-marked.
+    if(emergCat.legacy)return true;
+    return isGoldPhrase(p);
   });
-  return matches.slice(0, 15);  // Cap at 15 critical phrases per category
+  return matches.slice(0, 15);
 }
 
 function rQK(){
@@ -1945,6 +1951,8 @@ function rQK(){
   for(var i=0;i<EMERG_CATS.length;i++){
     var ec=EMERG_CATS[i];
     var count=_emergPhrasesForCat(ec).length;
+    // Legacy cube only appears if there are phrases there (otherwise hide)
+    if(ec.legacy && count===0)continue;
     var emptyClass=count===0?' emerg-cube-empty':'';
     h+='<div class="emerg-cube '+ec.color+emptyClass+'" onclick="openEmergCat(\''+ec.key+'\')">';
     h+='<div class="emerg-cube-emoji">'+ec.emoji+'</div>';
@@ -1972,11 +1980,16 @@ function openEmergCat(key){
     return;
   }
   
+  var isLegacy = (ec.key === 'legacy');
   var h='';
+  if(isLegacy){
+    h+='<div style="background:rgba(255,215,0,0.08);border:1px solid rgba(255,215,0,0.3);border-radius:8px;padding:10px;margin-bottom:12px;color:#FFD700;font-size:12px;line-height:1.5;">💡 משפטים אלה מקטגוריה ישנה. לחצי ערוך → סמני ⭐ + בחרי קטגוריה חדשה כדי להעבירם.</div>';
+  }
   for(var j=0;j<items.length;j++){
     var p=items[j],idx=DB.indexOf(p);
+    var star=isLegacy?'':'⭐ ';
     h+='<div class="emerg-card" onclick="opP('+idx+')">';
-    h+='<div class="emerg-card-he">⭐ '+p.he+'</div>';
+    h+='<div class="emerg-card-he">'+star+p.he+'</div>';
     if(p.trans)h+='<div class="emerg-card-trans">'+p.trans+'</div>';
     if(p.ar)h+='<div class="emerg-card-ar">'+p.ar+'</div>';
     h+='</div>';
