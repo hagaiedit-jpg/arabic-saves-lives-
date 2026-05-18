@@ -1053,21 +1053,12 @@ let sL='he',curC=null,curTab='lib',curDailyCat=null;
 async function sbFetch(path,method='GET',body=null){
   const opts={method,headers:{'apikey':SUPA_KEY,'Authorization':'Bearer '+SUPA_KEY,'Content-Type':'application/json','Prefer':method==='POST'?'return=representation':''}};
   if(body)opts.body=JSON.stringify(body);
-  let res;
-  try{
-    res = await fetch(SUPA_URL+path,opts);
-  } catch(networkErr) {
-    // Network-level failure (no connection, DNS, etc.)
-    throw new Error('network: ' + (networkErr.message || 'no connection'));
-  }
-  if(!res.ok){
-    const txt = await res.text();
-    throw new Error(res.status + ': ' + txt);
-  }
+  const res=await fetch(SUPA_URL+path,opts);
+  if(!res.ok)throw new Error(await res.text());
   const t=await res.text();return t?JSON.parse(t):null;
 }
 
-async // === Error handling system ===
+async // Simple toast helper (non-blocking notifications)
 function showToast(msg, type){
   var el = document.getElementById('toast');
   if (!el) return;
@@ -1077,35 +1068,6 @@ function showToast(msg, type){
   clearTimeout(window._toastTimer);
   window._toastTimer = setTimeout(function(){ el.style.display = 'none'; }, 3500);
 }
-window.showToast = showToast;
-
-function showErrPopup(msg){
-  var el = document.getElementById('errPopup');
-  if (!el) return;
-  if (msg) document.getElementById('errMsg').innerHTML = msg;
-  el.style.display = 'flex';
-}
-function dismissErr(){
-  document.getElementById('errPopup').style.display = 'none';
-}
-function retryLoad(){
-  dismissErr();
-  showToast('🔄 מנסה להתחבר שוב...', '');
-  loadData();
-}
-window.retryLoad = retryLoad;
-window.dismissErr = dismissErr;
-
-// Classify error type for user-friendly message
-function _errMessage(error){
-  var msg = (error && error.message) || String(error || '');
-  if (/network|fetch|failed to fetch/i.test(msg)) return 'אין חיבור אינטרנט.<br>בדקי את הסלולר/וייפיי ונסי שוב.';
-  if (/timeout/i.test(msg)) return 'השרת לא הגיב בזמן.<br>החיבור איטי - נסי שוב.';
-  if (/401|403|unauthorized/i.test(msg)) return 'אין הרשאה לגשת לנתונים.<br>פני למנהל המערכת.';
-  if (/500|502|503|504/i.test(msg)) return 'תקלה בשרת.<br>נסי שוב בעוד כמה דקות.';
-  return 'בעיה בחיבור לשרת.<br>נסי שוב.';
-}
-window._errMessage = _errMessage;
 
 async function loadData(){
   try{
@@ -1130,18 +1092,9 @@ async function loadData(){
     bldCats();rDG();rHrt();rSem();rCus();rArts();renderDict();rQK();updateNewDot();
   }catch(e){
     console.error('loadData failed:', e);
-    try{
-      var sb = document.getElementById('status-badge');
-      if(sb){sb.textContent='אופליין';sb.style.background='#7a9ab5';}
-    }catch(_){}
-    // ALWAYS render the UI - never block the app
-    try{ bldCats(); }catch(_){}
-    // Show non-blocking toast
-    try{
-      if (typeof showToast==='function'){
-        showToast('⚠️ ' + (_errMessage(e).replace(/<br>/g,' ')), 'warn');
-      }
-    }catch(_){}
+    document.getElementById('status-badge').textContent='אופליין';
+    document.getElementById('status-badge').style.background='#7a9ab5';
+    bldCats();
   }
 }
 
@@ -1879,7 +1832,7 @@ async function addSem(){
     await loadData();
     btn.textContent='שמור';
     alert('✓ נוסף!');
-  }catch(e){btn.textContent='שמור';showToast('❌ ' + _errMessage(e).replace(/<br>/g, ' '), 'error');}
+  }catch(e){btn.textContent='שמור';alert('שגיאה: '+e.message);}
 }
 
 async function addP(){
@@ -1892,7 +1845,7 @@ async function addP(){
           return c?(w?w+'\n---\n'+c:'---\n'+c):w;
         })(),tone:(function(){var u=document.getElementById('apurg').value;var t=document.getElementById('aptn').value.trim();return u&&t?'['+u+'] '+t:(u||t);})(),audio:''};
   const au=await getAudio('ap',document.getElementById('ap-status'));if(au)phrase.audio=au;
-  try{const s=await spSave(phrase,'military');if(s&&s[0])phrase.id=s[0].id;phrase.isNew=true;DB.push(phrase);['aphe','apar','aptr','aptg','apwy','aptn'].forEach(id=>document.getElementById(id).value='');bldCats();btn.textContent='שמור';alert('✓ נוסף!');}catch(e){btn.textContent='שמור';showToast('❌ ' + _errMessage(e).replace(/<br>/g, ' '), 'error');}
+  try{const s=await spSave(phrase,'military');if(s&&s[0])phrase.id=s[0].id;phrase.isNew=true;DB.push(phrase);['aphe','apar','aptr','aptg','apwy','aptn'].forEach(id=>document.getElementById(id).value='');bldCats();btn.textContent='שמור';alert('✓ נוסף!');}catch(e){btn.textContent='שמור';alert('שגיאה: '+e.message);}
 }
 async function addD(){
   const he=document.getElementById('adhe').value.trim(),ar=document.getElementById('adar').value.trim();
@@ -1900,7 +1853,7 @@ async function addD(){
   const btn=document.querySelector('#at-ad .sbtn');btn.textContent='שומר...';
   const phrase={cat:document.getElementById('adc').value,he,trans:document.getElementById('adtr').value.trim(),ar,tip:document.getElementById('adtp').value.trim(),audio:''};
   const au=await getAudio('ad',document.getElementById('ad-status'));if(au)phrase.audio=au;
-  try{const s=await spSave(phrase,'daily');if(s&&s[0])phrase.id=s[0].id;phrase.isNew=true;DAILY.push(phrase);['adhe','adar','adtr','adtp'].forEach(id=>document.getElementById(id).value='');rDG();btn.textContent='שמור';alert('✓ נוסף!');}catch(e){btn.textContent='שמור';showToast('❌ ' + _errMessage(e).replace(/<br>/g, ' '), 'error');}
+  try{const s=await spSave(phrase,'daily');if(s&&s[0])phrase.id=s[0].id;phrase.isNew=true;DAILY.push(phrase);['adhe','adar','adtr','adtp'].forEach(id=>document.getElementById(id).value='');rDG();btn.textContent='שמור';alert('✓ נוסף!');}catch(e){btn.textContent='שמור';alert('שגיאה: '+e.message);}
 }
 async function addH(){
   const he=document.getElementById('ahhe').value.trim(),ar=document.getElementById('ahar').value.trim();
@@ -1908,7 +1861,7 @@ async function addH(){
   const btn=document.querySelector('#at-ah .sbtn');btn.textContent='שומר...';
   const phrase={cat:document.getElementById('ahc').value,he,trans:document.getElementById('ahtr').value.trim(),ar,when:document.getElementById('ahwn').value.trim(),why:document.getElementById('ahwy').value.trim(),audio:''};
   const au=await getAudio('ah',document.getElementById('ah-status'));if(au)phrase.audio=au;
-  try{const s=await spSave(phrase,'heart');if(s&&s[0])phrase.id=s[0].id;phrase.isNew=true;HEART.push(phrase);['ahhe','ahar','ahtr','ahwn','ahwy'].forEach(id=>document.getElementById(id).value='');rHrt();btn.textContent='שמור';alert('✓ נוסף!');}catch(e){btn.textContent='שמור';showToast('❌ ' + _errMessage(e).replace(/<br>/g, ' '), 'error');}
+  try{const s=await spSave(phrase,'heart');if(s&&s[0])phrase.id=s[0].id;phrase.isNew=true;HEART.push(phrase);['ahhe','ahar','ahtr','ahwn','ahwy'].forEach(id=>document.getElementById(id).value='');rHrt();btn.textContent='שמור';alert('✓ נוסף!');}catch(e){btn.textContent='שמור';alert('שגיאה: '+e.message);}
 }
 async function addAnnounce(){
   const he=document.getElementById('akhe').value.trim(),trans=document.getElementById('aktr').value.trim();
@@ -1916,7 +1869,7 @@ async function addAnnounce(){
   const btn=document.querySelector('#at-ak .sbtn');btn.textContent='שומר...';
   const phrase={cat:document.getElementById('akc').value,he,trans,ar:'',why:document.getElementById('aktrans').value.trim(),tone:'',audio:''};
   const au=await getAudio('ak',document.getElementById('ak-status'));if(au)phrase.audio=au;
-  try{const s=await spSave(phrase,'announce');if(s&&s[0])phrase.id=s[0].id;phrase.isNew=true;ANNOUNCE.push(phrase);['akhe','aktr','aktrans'].forEach(id=>document.getElementById(id).value='');bldCats();btn.textContent='שמור';alert('✓ נוסף!');}catch(e){btn.textContent='שמור';showToast('❌ ' + _errMessage(e).replace(/<br>/g, ' '), 'error');}
+  try{const s=await spSave(phrase,'announce');if(s&&s[0])phrase.id=s[0].id;phrase.isNew=true;ANNOUNCE.push(phrase);['akhe','aktr','aktrans'].forEach(id=>document.getElementById(id).value='');bldCats();btn.textContent='שמור';alert('✓ נוסף!');}catch(e){btn.textContent='שמור';alert('שגיאה: '+e.message);}
 }
 async function addNavy(){
   const he=document.getElementById('anhe').value.trim(),ar=document.getElementById('anar').value.trim();
@@ -1924,7 +1877,7 @@ async function addNavy(){
   const btn=document.querySelector('#at-an .sbtn');btn.textContent='שומר...';
   const phrase={cat:document.getElementById('anc').value,he,trans:document.getElementById('antr').value.trim(),ar,why:document.getElementById('anwy').value.trim(),tone:'',audio:''};
   const au=await getAudio('an',document.getElementById('an-status'));if(au)phrase.audio=au;
-  try{const s=await spSave(phrase,'navy');if(s&&s[0])phrase.id=s[0].id;phrase.isNew=true;NAVY.push(phrase);['anhe','anar','antr','anwy'].forEach(id=>document.getElementById(id).value='');bldCats();btn.textContent='שמור';alert('✓ נוסף!');}catch(e){btn.textContent='שמור';showToast('❌ ' + _errMessage(e).replace(/<br>/g, ' '), 'error');}
+  try{const s=await spSave(phrase,'navy');if(s&&s[0])phrase.id=s[0].id;phrase.isNew=true;NAVY.push(phrase);['anhe','anar','antr','anwy'].forEach(id=>document.getElementById(id).value='');bldCats();btn.textContent='שמור';alert('✓ נוסף!');}catch(e){btn.textContent='שמור';alert('שגיאה: '+e.message);}
 }
 async function addDictWord(){
   const he=document.getElementById('dche').value.trim(),trans=document.getElementById('dctr').value.trim();
@@ -1932,7 +1885,7 @@ async function addDictWord(){
   const btn=document.querySelector('#at-adict .sbtn');btn.textContent='שומר...';
   const phrase={cat:'מילון',he,trans,ar:document.getElementById('dcar').value.trim(),why:'',tone:'',audio:''};
   const au=await getAudio('dc',document.getElementById('dc-status'));if(au)phrase.audio=au;
-  try{const s=await spSave(phrase,'dictionary');if(s&&s[0])phrase.id=s[0].id;phrase.isNew=true;DICT.push(phrase);['dche','dctr','dcar'].forEach(id=>document.getElementById(id).value='');renderDict();btn.textContent='שמור';alert('✓ נוסף!');}catch(e){btn.textContent='שמור';showToast('❌ ' + _errMessage(e).replace(/<br>/g, ' '), 'error');}
+  try{const s=await spSave(phrase,'dictionary');if(s&&s[0])phrase.id=s[0].id;phrase.isNew=true;DICT.push(phrase);['dche','dctr','dcar'].forEach(id=>document.getElementById(id).value='');renderDict();btn.textContent='שמור';alert('✓ נוסף!');}catch(e){btn.textContent='שמור';alert('שגיאה: '+e.message);}
 }
 
 // Admin list
@@ -2082,7 +2035,7 @@ async function saveEdit(){
   };
   
   const au=await getAudio('edit',document.getElementById('edit-status'));if(au)updates.audio_url=au;
-  try{await sbFetch('/rest/v1/phrases?id=eq.'+id,'PATCH',updates);closeEdit();await loadData();renderAdminList();btn.textContent='שמור';alert('✓ נשמר!');}catch(e){btn.textContent='שמור';showToast('❌ ' + _errMessage(e).replace(/<br>/g, ' '), 'error');}
+  try{await sbFetch('/rest/v1/phrases?id=eq.'+id,'PATCH',updates);closeEdit();await loadData();renderAdminList();btn.textContent='שמור';alert('✓ נשמר!');}catch(e){btn.textContent='שמור';alert('שגיאה: '+e.message);}
 }
 function closeEdit(){document.getElementById('edit-modal').style.display='none';delete rfiles['edit'];}
 async function delP(id){
@@ -2749,20 +2702,6 @@ loadRole();
 
 loadData();
 </script>
-<!-- Connection error overlay -->
-<div id="errPopup" class="err-overlay" style="display:none;">
-  <div class="err-box">
-    <div class="err-icon">⚠️</div>
-    <div class="err-title">בעיית חיבור</div>
-    <div class="err-msg" id="errMsg">לא הצלחנו להתחבר לשרת.<br>בדקי חיבור אינטרנט ונסי שוב.</div>
-    <div class="err-actions">
-      <button class="err-retry" onclick="retryLoad()">🔄 נסה שוב</button>
-      <button class="err-dismiss" onclick="dismissErr()">המשך לאפליקציה</button>
-    </div>
-    <div class="err-hint">המשפטים שנטענו קודם זמינים לצפייה</div>
-  </div>
-</div>
-
 <!-- Toast notification -->
 <div id="toast" class="toast" style="display:none;"></div>
 
