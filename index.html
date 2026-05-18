@@ -320,27 +320,38 @@ body.day-mode .help-title{color:#c66700;border-bottom-color:rgba(198,103,0,0.3);
 }
 .help-close-btn:hover,.help-close-btn:active{background:#168a64;transform:translateY(-1px);}
 
-/* Popup close button - prominent and visible */
-.popup-close-btn{
+/* Popup action buttons (Favorites + Close) - proportionate */
+.popup-actions{
+  display:flex;
+  justify-content:center;
+  align-items:center;
+  gap:10px;
+  margin-top:12px;
+}
+.popup-action-btn{
   background:#c0392b;
   color:#fff;
   border:none;
-  border-radius:10px;
-  padding:12px 28px;
-  font-size:15px;
-  font-weight:700;
+  border-radius:8px;
+  padding:8px 16px;
+  font-size:12px;
+  font-weight:600;
   cursor:pointer;
   font-family:inherit;
-  letter-spacing:0.5px;
-  box-shadow:0 3px 10px rgba(192,57,43,0.3);
   transition:all 0.15s;
 }
-.popup-close-btn:hover,.popup-close-btn:active{
+.popup-action-btn:hover,.popup-action-btn:active{
   background:#a82318;
   transform:translateY(-1px);
-  box-shadow:0 4px 14px rgba(192,57,43,0.4);
 }
-body.day-mode .popup-close-btn{background:#c0392b;color:#fff;}
+.popup-action-btn.fav.active{
+  background:#FF8C00;
+}
+.popup-action-btn.fav.active:hover{
+  background:#e57c00;
+}
+body.day-mode .popup-action-btn{background:#c0392b;color:#fff;}
+body.day-mode .popup-action-btn.fav.active{background:#FF8C00;}
 
 /* Error overlay (connection issue) */
 .err-overlay{
@@ -701,7 +712,7 @@ body.day-mode .ct{border:none;border-bottom:1px solid #ebe0c5;border-left:1px so
     <button class="lb" id="lbar" onclick="setL('ar')">🔍 ערבית</button>
   </div>
   <div id="vcats" class="scr on">
-    <div class="loading" id="cats-loading"><div style="text-align:center;padding:20px;"><div style="font-size:16px;color:#FF8C00;margin-bottom:8px;">טוען...</div><div style="font-size:10px;color:#7a9ab5;opacity:0.6;">v20260518-1710</div></div></div>
+    <div class="loading" id="cats-loading"><div style="text-align:center;padding:20px;"><div style="font-size:16px;color:#FF8C00;margin-bottom:8px;">טוען...</div><div style="font-size:10px;color:#7a9ab5;opacity:0.6;">v20260518-1727</div></div></div>
     <div class="cgrid" id="cgrid" style="display:none;"></div>
   </div>
   <div id="vlist" class="scr">
@@ -737,7 +748,7 @@ body.day-mode .ct{border:none;border-bottom:1px solid #ebe0c5;border-left:1px so
       <div class="ibox o" id="ptoneb"><div class="ilbl o">טיפ ללוחם</div><div class="itxt o" id="ptone"></div></div>
       <div class="ibox c" id="pcultb" style="display:none;"><div class="ilbl c">✨ פאקט תרבותי</div><div class="itxt c" id="pcult"></div></div>
       
-    <div style="display:flex;justify-content:center;align-items:center;gap:20px;margin-top:8px;"><span onclick="toggleFav()" id="fav-btn" style="cursor:pointer;font-size:11px;color:#7a9ab5;">☆ שמור למועדפים</span><button onclick="clsP()" class="popup-close-btn">✕ סגור</button></div>
+    <div class="popup-actions"><button onclick="toggleFav()" id="fav-btn" class="popup-action-btn fav">☆ שמור למועדפים</button><button onclick="clsP()" class="popup-action-btn close">✕ סגור</button></div>
     </div></div>
   </div>
 </div>
@@ -1238,7 +1249,7 @@ function bldCats(){
   if (!DB || DB.length === 0) {
     loadEl.innerHTML = '<div style="text-align:center;padding:20px;color:#FF8C00;">' +
       'מתחבר לשרת...<br><br>' +
-      '<div style="font-size:11px;color:#7a9ab5;">v20260518-1710</div><br>' +
+      '<div style="font-size:11px;color:#7a9ab5;">v20260518-1727</div><br>' +
       '<button onclick="location.reload(true)" style="padding:10px 20px;background:#FF8C00;color:#fff;border:none;border-radius:8px;font-family:inherit;cursor:pointer;font-weight:700;margin-top:10px;">🔄 רענן</button>' +
       '</div>';
     return;
