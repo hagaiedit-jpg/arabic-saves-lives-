@@ -679,7 +679,7 @@ body.day-mode .ct{border:none;border-bottom:1px solid #ebe0c5;border-left:1px so
     <button class="lb" id="lbar" onclick="setL('ar')">🔍 ערבית</button>
   </div>
   <div id="vcats" class="scr on">
-    <div class="loading" id="cats-loading"><div style="text-align:center;padding:20px;"><div style="font-size:16px;color:#FF8C00;margin-bottom:8px;">טוען...</div><div style="font-size:10px;color:#7a9ab5;opacity:0.6;">v20260518-0913</div></div></div>
+    <div class="loading" id="cats-loading"><div style="text-align:center;padding:20px;"><div style="font-size:16px;color:#FF8C00;margin-bottom:8px;">טוען...</div><div style="font-size:10px;color:#7a9ab5;opacity:0.6;">v20260518-0921</div></div></div>
     <div class="cgrid" id="cgrid" style="display:none;"></div>
   </div>
   <div id="vlist" class="scr">
@@ -1043,6 +1043,36 @@ body.day-mode .ct{border:none;border-bottom:1px solid #ebe0c5;border-left:1px so
 </div>
 
 <script>
+// === Global error capture (debug) ===
+window._debugErrors = [];
+window.onerror = function(msg, src, line, col, err){
+  window._debugErrors.push({msg:String(msg), line:line, src:String(src).substring(0,100)});
+  setTimeout(showDebugErrors, 100);
+};
+window.addEventListener('unhandledrejection', function(e){
+  var msg = e.reason && e.reason.message ? e.reason.message : String(e.reason);
+  window._debugErrors.push({msg:'Promise rejected: ' + msg});
+  setTimeout(showDebugErrors, 100);
+});
+function showDebugErrors(){
+  if (!window._debugErrors || !window._debugErrors.length) return;
+  var el = document.getElementById('cats-loading');
+  if (!el) return;
+  var html = '<div style="text-align:right;padding:20px;color:#fff;background:#a82318;border-radius:10px;margin:10px;direction:rtl;">';
+  html += '<div style="font-size:16px;font-weight:700;margin-bottom:10px;">⚠️ שגיאה באפליקציה</div>';
+  for (var i=0; i<window._debugErrors.length; i++){
+    var e = window._debugErrors[i];
+    html += '<div style="font-size:11px;margin-bottom:8px;direction:ltr;text-align:left;font-family:monospace;background:rgba(0,0,0,0.3);padding:6px;border-radius:4px;">';
+    html += (e.msg || 'unknown') + (e.line ? ' (line ' + e.line + ')' : '');
+    html += '</div>';
+  }
+  html += '<button onclick="location.reload(true)" style="padding:10px 20px;background:#FF8C00;color:#fff;border:none;border-radius:8px;font-family:inherit;cursor:pointer;font-weight:700;margin-top:10px;">🔄 נסה שוב</button>';
+  html += '</div>';
+  el.innerHTML = html;
+  el.style.display = 'block';
+}
+window.showDebugErrors = showDebugErrors;
+
 const SUPA_URL='https://ukynfcwxsrzpuqecfjuz.supabase.co';
 const SUPA_KEY='sb_publishable_ugMP9beQh9-TJVGL3uzIAA_xhAgWJQP';
 const CLOUD='dvjuflgqs', PRESET='arabic_audio';
@@ -1186,7 +1216,7 @@ function bldCats(){
   if (!DB || DB.length === 0) {
     loadEl.innerHTML = '<div style="text-align:center;padding:20px;color:#FF8C00;">' +
       'מתחבר לשרת...<br><br>' +
-      '<div style="font-size:11px;color:#7a9ab5;">v20260518-0913</div><br>' +
+      '<div style="font-size:11px;color:#7a9ab5;">v20260518-0921</div><br>' +
       '<button onclick="location.reload(true)" style="padding:10px 20px;background:#FF8C00;color:#fff;border:none;border-radius:8px;font-family:inherit;cursor:pointer;font-weight:700;margin-top:10px;">🔄 רענן</button>' +
       '</div>';
     return;
@@ -2745,9 +2775,10 @@ try { bldCats(); } catch(_){}
     console.error('loadData failed at boot:', err);
     var el = document.getElementById('cats-loading');
     if (el) {
-      el.innerHTML = '<div style="text-align:center;color:#FF8C00;padding:20px;font-size:14px;">' +
-        '⚠️ לא הצלחנו להתחבר<br>' +
-        '<small style="color:#7a9ab5;">' + (err.message||'שגיאה לא ידועה').substring(0,80) + '</small><br><br>' +
+      var errText = (err && err.message) || String(err) || 'שגיאה לא ידועה';
+      el.innerHTML = '<div style="text-align:right;color:#fff;padding:20px;background:#a82318;border-radius:10px;margin:10px;direction:rtl;">' +
+        '<div style="font-size:16px;font-weight:700;margin-bottom:10px;">⚠️ שגיאה בחיבור לשרת</div>' +
+        '<div style="font-size:11px;margin-bottom:12px;direction:ltr;text-align:left;font-family:monospace;background:rgba(0,0,0,0.3);padding:8px;border-radius:4px;color:#fff;">' + errText + '</div>' +
         '<button onclick="location.reload(true)" style="padding:10px 20px;background:#FF8C00;color:#fff;border:none;border-radius:8px;font-family:inherit;cursor:pointer;font-weight:700;">🔄 נסה שוב</button>' +
         '</div>';
     }
