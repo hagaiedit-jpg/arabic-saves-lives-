@@ -320,6 +320,85 @@ body.day-mode .help-title{color:#c66700;border-bottom-color:rgba(198,103,0,0.3);
 }
 .help-close-btn:hover,.help-close-btn:active{background:#168a64;transform:translateY(-1px);}
 
+/* Error overlay (connection issue) */
+.err-overlay{
+  position:fixed;
+  inset:0;
+  background:rgba(0,0,0,0.88);
+  z-index:10000;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  padding:20px;
+}
+.err-box{
+  background:#1A2B3C;
+  border:2px solid #c0392b;
+  border-radius:18px;
+  padding:28px 24px;
+  max-width:420px;
+  width:100%;
+  text-align:center;
+  color:#fff;
+  box-shadow:0 12px 40px rgba(192,57,43,0.4);
+}
+.err-icon{font-size:48px;margin-bottom:12px;}
+.err-title{font-size:22px;font-weight:800;color:#FF8C00;margin-bottom:10px;}
+.err-msg{font-size:14px;color:#D2B48C;line-height:1.6;margin-bottom:22px;}
+.err-actions{display:flex;flex-direction:column;gap:10px;margin-bottom:14px;}
+.err-retry{
+  background:#1D9E75;
+  color:#fff;
+  border:none;
+  border-radius:12px;
+  padding:16px;
+  font-size:16px;
+  font-weight:700;
+  cursor:pointer;
+  font-family:inherit;
+}
+.err-retry:hover,.err-retry:active{background:#168a64;}
+.err-dismiss{
+  background:transparent;
+  color:#7a9ab5;
+  border:1px solid rgba(210,180,140,0.3);
+  border-radius:12px;
+  padding:12px;
+  font-size:13px;
+  cursor:pointer;
+  font-family:inherit;
+}
+.err-dismiss:hover{background:rgba(210,180,140,0.08);color:#D2B48C;}
+.err-hint{font-size:11px;color:#7a9ab5;font-style:italic;}
+body.day-mode .err-box{background:#fff8e7;color:#1a2b3c;}
+body.day-mode .err-msg{color:#5a3a1a;}
+
+/* Toast notification */
+.toast{
+  position:fixed;
+  bottom:24px;
+  left:50%;
+  transform:translateX(-50%);
+  background:#1A2B3C;
+  color:#fff;
+  padding:14px 22px;
+  border-radius:99px;
+  font-size:14px;
+  font-weight:600;
+  z-index:9999;
+  box-shadow:0 6px 20px rgba(0,0,0,0.4);
+  border:1px solid #FF8C00;
+  min-width:240px;
+  max-width:90%;
+  text-align:center;
+  animation:toastIn 0.25s ease-out;
+}
+.toast.success{border-color:#1D9E75;}
+.toast.error{border-color:#c0392b;}
+.toast.warn{border-color:#FFD700;}
+@keyframes toastIn{from{transform:translateX(-50%) translateY(20px);opacity:0;}to{transform:translateX(-50%) translateY(0);opacity:1;}}
+body.day-mode .toast{background:#fff;color:#1a2b3c;}
+
 .role-choice-all:hover,.role-choice-all:active{
   background:rgba(255,140,0,0.12);
   border-color:#FF8C00;
@@ -974,10 +1053,59 @@ let sL='he',curC=null,curTab='lib',curDailyCat=null;
 async function sbFetch(path,method='GET',body=null){
   const opts={method,headers:{'apikey':SUPA_KEY,'Authorization':'Bearer '+SUPA_KEY,'Content-Type':'application/json','Prefer':method==='POST'?'return=representation':''}};
   if(body)opts.body=JSON.stringify(body);
-  const res=await fetch(SUPA_URL+path,opts);
-  if(!res.ok)throw new Error(await res.text());
+  let res;
+  try{
+    res = await fetch(SUPA_URL+path,opts);
+  } catch(networkErr) {
+    // Network-level failure (no connection, DNS, etc.)
+    throw new Error('network: ' + (networkErr.message || 'no connection'));
+  }
+  if(!res.ok){
+    const txt = await res.text();
+    throw new Error(res.status + ': ' + txt);
+  }
   const t=await res.text();return t?JSON.parse(t):null;
 }
+
+async // === Error handling system ===
+function showToast(msg, type){
+  var el = document.getElementById('toast');
+  if (!el) return;
+  el.className = 'toast' + (type ? ' ' + type : '');
+  el.textContent = msg;
+  el.style.display = 'block';
+  clearTimeout(window._toastTimer);
+  window._toastTimer = setTimeout(function(){ el.style.display = 'none'; }, 3500);
+}
+window.showToast = showToast;
+
+function showErrPopup(msg){
+  var el = document.getElementById('errPopup');
+  if (!el) return;
+  if (msg) document.getElementById('errMsg').innerHTML = msg;
+  el.style.display = 'flex';
+}
+function dismissErr(){
+  document.getElementById('errPopup').style.display = 'none';
+}
+function retryLoad(){
+  dismissErr();
+  showToast('🔄 מנסה להתחבר שוב...', '');
+  loadData();
+}
+window.retryLoad = retryLoad;
+window.dismissErr = dismissErr;
+
+// Classify error type for user-friendly message
+function _errMessage(error){
+  var msg = (error && error.message) || String(error || '');
+  if (/network|fetch|failed to fetch/i.test(msg)) return 'אין חיבור אינטרנט.<br>בדקי את הסלולר/וייפיי ונסי שוב.';
+  if (/timeout/i.test(msg)) return 'השרת לא הגיב בזמן.<br>החיבור איטי - נסי שוב.';
+  if (/401|403|unauthorized/i.test(msg)) return 'אין הרשאה לגשת לנתונים.<br>פני למנהל המערכת.';
+  if (/500|502|503|504/i.test(msg)) return 'תקלה בשרת.<br>נסי שוב בעוד כמה דקות.';
+  return 'בעיה בחיבור לשרת.<br>נסי שוב.';
+}
+window._errMessage = _errMessage;
 
 async function loadData(){
   try{
@@ -1001,8 +1129,16 @@ async function loadData(){
     document.getElementById('status-badge').style.background='#1D9E75';
     bldCats();rDG();rHrt();rSem();rCus();rArts();renderDict();rQK();updateNewDot();
   }catch(e){
+    console.error('loadData failed:', e);
     document.getElementById('status-badge').textContent='אופליין';
     document.getElementById('status-badge').style.background='#7a9ab5';
+    // If we have NO data yet, show the error overlay (blocking)
+    if (typeof DB === 'undefined' || !DB || DB.length === 0) {
+      showErrPopup(_errMessage(e));
+    } else {
+      // We have cached data - just show a toast
+      showToast('⚠️ אין חיבור. מציג נתונים ישנים', 'warn');
+    }
     bldCats();
   }
 }
@@ -1741,7 +1877,7 @@ async function addSem(){
     await loadData();
     btn.textContent='שמור';
     alert('✓ נוסף!');
-  }catch(e){btn.textContent='שמור';alert('שגיאה: '+e.message);}
+  }catch(e){btn.textContent='שמור';showToast('❌ ' + _errMessage(e).replace(/<br>/g, ' '), 'error');}
 }
 
 async function addP(){
@@ -1754,7 +1890,7 @@ async function addP(){
           return c?(w?w+'\n---\n'+c:'---\n'+c):w;
         })(),tone:(function(){var u=document.getElementById('apurg').value;var t=document.getElementById('aptn').value.trim();return u&&t?'['+u+'] '+t:(u||t);})(),audio:''};
   const au=await getAudio('ap',document.getElementById('ap-status'));if(au)phrase.audio=au;
-  try{const s=await spSave(phrase,'military');if(s&&s[0])phrase.id=s[0].id;phrase.isNew=true;DB.push(phrase);['aphe','apar','aptr','aptg','apwy','aptn'].forEach(id=>document.getElementById(id).value='');bldCats();btn.textContent='שמור';alert('✓ נוסף!');}catch(e){btn.textContent='שמור';alert('שגיאה: '+e.message);}
+  try{const s=await spSave(phrase,'military');if(s&&s[0])phrase.id=s[0].id;phrase.isNew=true;DB.push(phrase);['aphe','apar','aptr','aptg','apwy','aptn'].forEach(id=>document.getElementById(id).value='');bldCats();btn.textContent='שמור';alert('✓ נוסף!');}catch(e){btn.textContent='שמור';showToast('❌ ' + _errMessage(e).replace(/<br>/g, ' '), 'error');}
 }
 async function addD(){
   const he=document.getElementById('adhe').value.trim(),ar=document.getElementById('adar').value.trim();
@@ -1762,7 +1898,7 @@ async function addD(){
   const btn=document.querySelector('#at-ad .sbtn');btn.textContent='שומר...';
   const phrase={cat:document.getElementById('adc').value,he,trans:document.getElementById('adtr').value.trim(),ar,tip:document.getElementById('adtp').value.trim(),audio:''};
   const au=await getAudio('ad',document.getElementById('ad-status'));if(au)phrase.audio=au;
-  try{const s=await spSave(phrase,'daily');if(s&&s[0])phrase.id=s[0].id;phrase.isNew=true;DAILY.push(phrase);['adhe','adar','adtr','adtp'].forEach(id=>document.getElementById(id).value='');rDG();btn.textContent='שמור';alert('✓ נוסף!');}catch(e){btn.textContent='שמור';alert('שגיאה: '+e.message);}
+  try{const s=await spSave(phrase,'daily');if(s&&s[0])phrase.id=s[0].id;phrase.isNew=true;DAILY.push(phrase);['adhe','adar','adtr','adtp'].forEach(id=>document.getElementById(id).value='');rDG();btn.textContent='שמור';alert('✓ נוסף!');}catch(e){btn.textContent='שמור';showToast('❌ ' + _errMessage(e).replace(/<br>/g, ' '), 'error');}
 }
 async function addH(){
   const he=document.getElementById('ahhe').value.trim(),ar=document.getElementById('ahar').value.trim();
@@ -1770,7 +1906,7 @@ async function addH(){
   const btn=document.querySelector('#at-ah .sbtn');btn.textContent='שומר...';
   const phrase={cat:document.getElementById('ahc').value,he,trans:document.getElementById('ahtr').value.trim(),ar,when:document.getElementById('ahwn').value.trim(),why:document.getElementById('ahwy').value.trim(),audio:''};
   const au=await getAudio('ah',document.getElementById('ah-status'));if(au)phrase.audio=au;
-  try{const s=await spSave(phrase,'heart');if(s&&s[0])phrase.id=s[0].id;phrase.isNew=true;HEART.push(phrase);['ahhe','ahar','ahtr','ahwn','ahwy'].forEach(id=>document.getElementById(id).value='');rHrt();btn.textContent='שמור';alert('✓ נוסף!');}catch(e){btn.textContent='שמור';alert('שגיאה: '+e.message);}
+  try{const s=await spSave(phrase,'heart');if(s&&s[0])phrase.id=s[0].id;phrase.isNew=true;HEART.push(phrase);['ahhe','ahar','ahtr','ahwn','ahwy'].forEach(id=>document.getElementById(id).value='');rHrt();btn.textContent='שמור';alert('✓ נוסף!');}catch(e){btn.textContent='שמור';showToast('❌ ' + _errMessage(e).replace(/<br>/g, ' '), 'error');}
 }
 async function addAnnounce(){
   const he=document.getElementById('akhe').value.trim(),trans=document.getElementById('aktr').value.trim();
@@ -1778,7 +1914,7 @@ async function addAnnounce(){
   const btn=document.querySelector('#at-ak .sbtn');btn.textContent='שומר...';
   const phrase={cat:document.getElementById('akc').value,he,trans,ar:'',why:document.getElementById('aktrans').value.trim(),tone:'',audio:''};
   const au=await getAudio('ak',document.getElementById('ak-status'));if(au)phrase.audio=au;
-  try{const s=await spSave(phrase,'announce');if(s&&s[0])phrase.id=s[0].id;phrase.isNew=true;ANNOUNCE.push(phrase);['akhe','aktr','aktrans'].forEach(id=>document.getElementById(id).value='');bldCats();btn.textContent='שמור';alert('✓ נוסף!');}catch(e){btn.textContent='שמור';alert('שגיאה: '+e.message);}
+  try{const s=await spSave(phrase,'announce');if(s&&s[0])phrase.id=s[0].id;phrase.isNew=true;ANNOUNCE.push(phrase);['akhe','aktr','aktrans'].forEach(id=>document.getElementById(id).value='');bldCats();btn.textContent='שמור';alert('✓ נוסף!');}catch(e){btn.textContent='שמור';showToast('❌ ' + _errMessage(e).replace(/<br>/g, ' '), 'error');}
 }
 async function addNavy(){
   const he=document.getElementById('anhe').value.trim(),ar=document.getElementById('anar').value.trim();
@@ -1786,7 +1922,7 @@ async function addNavy(){
   const btn=document.querySelector('#at-an .sbtn');btn.textContent='שומר...';
   const phrase={cat:document.getElementById('anc').value,he,trans:document.getElementById('antr').value.trim(),ar,why:document.getElementById('anwy').value.trim(),tone:'',audio:''};
   const au=await getAudio('an',document.getElementById('an-status'));if(au)phrase.audio=au;
-  try{const s=await spSave(phrase,'navy');if(s&&s[0])phrase.id=s[0].id;phrase.isNew=true;NAVY.push(phrase);['anhe','anar','antr','anwy'].forEach(id=>document.getElementById(id).value='');bldCats();btn.textContent='שמור';alert('✓ נוסף!');}catch(e){btn.textContent='שמור';alert('שגיאה: '+e.message);}
+  try{const s=await spSave(phrase,'navy');if(s&&s[0])phrase.id=s[0].id;phrase.isNew=true;NAVY.push(phrase);['anhe','anar','antr','anwy'].forEach(id=>document.getElementById(id).value='');bldCats();btn.textContent='שמור';alert('✓ נוסף!');}catch(e){btn.textContent='שמור';showToast('❌ ' + _errMessage(e).replace(/<br>/g, ' '), 'error');}
 }
 async function addDictWord(){
   const he=document.getElementById('dche').value.trim(),trans=document.getElementById('dctr').value.trim();
@@ -1794,7 +1930,7 @@ async function addDictWord(){
   const btn=document.querySelector('#at-adict .sbtn');btn.textContent='שומר...';
   const phrase={cat:'מילון',he,trans,ar:document.getElementById('dcar').value.trim(),why:'',tone:'',audio:''};
   const au=await getAudio('dc',document.getElementById('dc-status'));if(au)phrase.audio=au;
-  try{const s=await spSave(phrase,'dictionary');if(s&&s[0])phrase.id=s[0].id;phrase.isNew=true;DICT.push(phrase);['dche','dctr','dcar'].forEach(id=>document.getElementById(id).value='');renderDict();btn.textContent='שמור';alert('✓ נוסף!');}catch(e){btn.textContent='שמור';alert('שגיאה: '+e.message);}
+  try{const s=await spSave(phrase,'dictionary');if(s&&s[0])phrase.id=s[0].id;phrase.isNew=true;DICT.push(phrase);['dche','dctr','dcar'].forEach(id=>document.getElementById(id).value='');renderDict();btn.textContent='שמור';alert('✓ נוסף!');}catch(e){btn.textContent='שמור';showToast('❌ ' + _errMessage(e).replace(/<br>/g, ' '), 'error');}
 }
 
 // Admin list
@@ -1944,7 +2080,7 @@ async function saveEdit(){
   };
   
   const au=await getAudio('edit',document.getElementById('edit-status'));if(au)updates.audio_url=au;
-  try{await sbFetch('/rest/v1/phrases?id=eq.'+id,'PATCH',updates);closeEdit();await loadData();renderAdminList();btn.textContent='שמור';alert('✓ נשמר!');}catch(e){btn.textContent='שמור';alert('שגיאה: '+e.message);}
+  try{await sbFetch('/rest/v1/phrases?id=eq.'+id,'PATCH',updates);closeEdit();await loadData();renderAdminList();btn.textContent='שמור';alert('✓ נשמר!');}catch(e){btn.textContent='שמור';showToast('❌ ' + _errMessage(e).replace(/<br>/g, ' '), 'error');}
 }
 function closeEdit(){document.getElementById('edit-modal').style.display='none';delete rfiles['edit'];}
 async function delP(id){
@@ -2611,6 +2747,23 @@ loadRole();
 
 loadData();
 </script>
+<!-- Connection error overlay -->
+<div id="errPopup" class="err-overlay" style="display:none;">
+  <div class="err-box">
+    <div class="err-icon">⚠️</div>
+    <div class="err-title">בעיית חיבור</div>
+    <div class="err-msg" id="errMsg">לא הצלחנו להתחבר לשרת.<br>בדקי חיבור אינטרנט ונסי שוב.</div>
+    <div class="err-actions">
+      <button class="err-retry" onclick="retryLoad()">🔄 נסה שוב</button>
+      <button class="err-dismiss" onclick="dismissErr()">המשך לאפליקציה</button>
+    </div>
+    <div class="err-hint">המשפטים שנטענו קודם זמינים לצפייה</div>
+  </div>
+</div>
+
+<!-- Toast notification -->
+<div id="toast" class="toast" style="display:none;"></div>
+
 <!-- Welcome / Role selector modal -->
 <div id="welcomePopup" class="welcome-bg" style="display:none;">
   <div class="welcome-pop">
