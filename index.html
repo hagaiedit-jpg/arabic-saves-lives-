@@ -3,22 +3,18 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>שילוב תוכן תרבותי (אופציה 3)</title>
+<title>🚨 הסרה מיידית של תוכן תרבותי</title>
 <style>
 *{box-sizing:border-box;margin:0;padding:0;}
 body{background:#0f1e2c;color:#fff;font-family:-apple-system,sans-serif;padding:20px;min-height:100vh;direction:rtl;line-height:1.5;}
-.box{max-width:660px;margin:20px auto;background:#1A2B3C;border:1px solid #2e4558;border-radius:14px;padding:24px;}
-h1{color:#D2B48C;font-size:22px;margin-bottom:6px;}
-.sub{color:#7a9ab5;font-size:13px;margin-bottom:16px;line-height:1.6;}
-h2{color:#FF8C00;font-size:16px;margin:18px 0 10px;border-bottom:1px solid #2e4558;padding-bottom:6px;}
-.preview-item{background:#0f1e2c;border:1px solid #2e4558;border-radius:6px;padding:10px;margin-bottom:8px;font-size:12px;}
-.preview-item .he{color:#fff;font-weight:600;margin-bottom:4px;}
-.preview-item .fact{color:#FFD700;font-style:italic;font-size:11px;}
-.warn{background:rgba(255,140,0,0.1);border:1px solid #FF8C00;color:#ffb84d;padding:12px;border-radius:8px;font-size:12px;line-height:1.6;margin-bottom:16px;}
-.btn{background:#FF8C00;color:#fff;border:none;border-radius:10px;padding:18px 24px;font-size:16px;font-weight:700;cursor:pointer;width:100%;font-family:inherit;}
+.box{max-width:560px;margin:20px auto;background:#1A2B3C;border:2px solid #c0392b;border-radius:14px;padding:24px;}
+h1{color:#FF8C00;font-size:22px;margin-bottom:10px;}
+.danger{background:rgba(192,57,43,0.2);border:1px solid #c0392b;color:#ff8a7a;padding:14px;border-radius:8px;font-size:13px;line-height:1.6;margin-bottom:18px;}
+.btn{background:#c0392b;color:#fff;border:none;border-radius:10px;padding:18px 24px;font-size:16px;font-weight:700;cursor:pointer;width:100%;font-family:inherit;}
+.btn:hover,.btn:active{background:#a82318;}
 .btn:disabled{background:#666;cursor:wait;}
 .btn.green{background:#1D9E75;}
-#log{margin-top:18px;font-size:12px;line-height:1.6;max-height:300px;overflow-y:auto;background:#0f1e2c;border:1px solid #2e4558;border-radius:8px;padding:12px;font-family:monospace;direction:rtl;}
+#log{margin-top:18px;font-size:12px;line-height:1.6;max-height:380px;overflow-y:auto;background:#0f1e2c;border:1px solid #2e4558;border-radius:8px;padding:12px;font-family:monospace;direction:rtl;}
 .ok{color:#1D9E75;}
 .warn-line{color:#FFD700;}
 .err{color:#e74c3c;}
@@ -30,28 +26,16 @@ h2{color:#FF8C00;font-size:16px;margin:18px 0 10px;border-bottom:1px solid #2e45
 </head>
 <body>
 <div class="box">
-  <h1>📜 שילוב תוכן תרבותי - אופציה 3</h1>
-  <p class="sub">
-    הכלי יבצע <strong>2 פעולות בו-זמנית:</strong><br>
-    1. יוסיף 2 כניסות חדשות בלשונית "מנהגים"<br>
-    2. יוסיף פאקט תרבותי קצר ל-10 משפטים קיימים בקטגוריות "מגע ראשוני" ו"ילדים ואוכלוסיות רגישות"
-  </p>
-
-  <h2>📜 חלק א' - 2 כניסות חדשות במנהגים</h2>
-  <div class="preview-item">
-    <div class="he">🤝 לחיצת ידיים</div>
-    <div class="fact">הסבר מלא + טיפ ללוחם (בכתום)</div>
+  <h1>🚨 הסרה מיידית - תוכן תרבותי</h1>
+  <div class="danger">
+    <strong>פעולה זו תסיר:</strong><br>
+    • 2 הכניסות במנהגים (לחיצת ידיים + סוליית הנעל)<br>
+    • 10 פאקטים תרבותיים שנוספו למשפטים קיימים<br>
+    <br>
+    המשפטים עצמם יישארו - רק הפאקט התרבותי יוסר.
   </div>
-  <div class="preview-item">
-    <div class="he">👟 סוליית הנעל</div>
-    <div class="fact">הסבר מלא + טיפ ללוחם (בכתום)</div>
-  </div>
-
-  <h2>💡 חלק ב' - פאקטים תרבותיים במשפטים קיימים</h2>
-  <div id="factsList"></div>
-
-  <div class="warn">⚠️ הפאקטים יתווספו ל-why הקיים (אחרי הפרדה ב-"---"). משפטים שכבר יש להם את הפאקט - יידלגו.</div>
-  <button class="btn" id="goBtn" onclick="runIt()">🚀 הפעל את הכל</button>
+  
+  <button class="btn" id="goBtn" onclick="runIt()">🗑️ הסר הכל עכשיו</button>
   <div class="summary" id="summary"></div>
   <div id="log"></div>
 </div>
@@ -59,19 +43,8 @@ h2{color:#FF8C00;font-size:16px;margin:18px 0 10px;border-bottom:1px solid #2e45
 <script>
 const SUPA_URL = 'https://ukynfcwxsrzpuqecfjuz.supabase.co';
 const SUPA_KEY = 'sb_publishable_ugMP9beQh9-TJVGL3uzIAA_xhAgWJQP';
-const CUSTOMS = [{"he": "🤝 לחיצת ידיים", "why": "בחברה הערבית נהוג ללחוץ את יד ימין בכל פעם שנפגשים וכאשר מכירים אנשים חדשים. האמונה סוברת כי יד שמאל מסמלת רוע, מלחמה וטומאה.\n\nלגבי האישה - אין ללחוץ לה יד בשום אופן ופנים. במקום זאת, נהוג לשים יד ימין על החזה כברכה.\n\nטיפ ללוחם:\n• עם גברים - לחץ יד ימין בכל פגישה\n• לעולם אל תושיט יד שמאל - ייתפס כעלבון\n• עם נשים - אסור מגע יד. שים יד ימין על החזה\n• אם טעית והושטת יד לאישה - תוכל לתקן באמירת \"אסמחי לי\" ולשים יד על החזה"}, {"he": "👟 סוליית הנעל", "why": "הנעל בחברה הערבית מסמלת דריכה וזלזול. לכן לא נהוג לשבת כאשר הנעל מופנית כלפי אדם אחר - זה נחשב פגיעה חמורה בכבוד.\n\nעוד נהוג לחלוץ נעליים בכניסה למסגד בשל טומאת הנעליים.\n\nטיפ ללוחם:\n• אל תשב באופן שהסוליה מופנית אל מולך\n• אם ישבת על הרצפה - שב עם רגליים מקופלות הצידה או צלובות\n• במקום מקודש - חלוץ נעליים בכניסה\n• אם החייל יושב מולך והוא רואה סוליית נעלך מופנית אליו - הוא יחשוב שאתה מזלזל בו, גם אם זה לא היה במכוון"}];
+const CUSTOMS = ["🤝 לחיצת ידיים", "👟 סוליית הנעל"];
 const FACTS_BY_PHRASE = {"שלום עליכם": "🤝 לחיצת יד ימין בלבד עם גברים. בדיוק מסיבה זו - לא להושיט יד לאישה - הנח יד ימין על החזה כברכה.", "שלום, מה שלומך?": "🤝 לחיצת יד ימין בלבד עם גברים. בדיוק מסיבה זו - לא להושיט יד לאישה - הנח יד ימין על החזה כברכה.", "בוקר טוב": "🤝 לחיצת יד ימין בלבד עם גברים. בדיוק מסיבה זו - לא להושיט יד לאישה - הנח יד ימין על החזה כברכה.", "אנחנו מכוחות הביטחון": "🤝 לחיצת יד ימין בלבד עם גברים. בדיוק מסיבה זו - לא להושיט יד לאישה - הנח יד ימין על החזה כברכה.", "איך קוראים לך?": "🤝 לחיצת יד ימין בלבד עם גברים. בדיוק מסיבה זו - לא להושיט יד לאישה - הנח יד ימין על החזה כברכה.", "סלחי לי, גברתי": "🤝 בלי מגע יד עם נשים. הנח יד ימין על החזה כברכה במקום.", "יש כאן חיילת?": "🤝 בלי מגע יד עם נשים. הנח יד ימין על החזה כברכה במקום.", "אני קוראת לחיילת": "🤝 בלי מגע יד עם נשים. הנח יד ימין על החזה כברכה במקום.", "יש לך משהו בתיק?": "👟 שים לב לסוליית הנעל - לא להפנות אותה כלפי המבוקש. ייתפס כזלזול חמור.", "יש לך תעודה?": "👟 שים לב לסוליית הנעל - לא להפנות אותה כלפי המבוקש. ייתפס כזלזול חמור."};
-
-// Render facts list
-const factsListEl = document.getElementById('factsList');
-let factsHtml = '';
-for (const [phrase, fact] of Object.entries(FACTS_BY_PHRASE)) {
-  factsHtml += '<div class="preview-item">';
-  factsHtml += '<div class="he">"' + phrase + '"</div>';
-  factsHtml += '<div class="fact">+ ' + fact.substring(0, 80) + (fact.length > 80 ? '...' : '') + '</div>';
-  factsHtml += '</div>';
-}
-factsListEl.innerHTML = factsHtml;
 
 function log(msg, cls) {
   const el = document.getElementById('log');
@@ -87,109 +60,92 @@ async function sbFetch(path, method, body) {
     apikey: SUPA_KEY,
     Authorization: 'Bearer ' + SUPA_KEY,
     Accept: 'application/json',
-    'Content-Type': 'application/json',
-    Prefer: 'return=representation'
+    'Content-Type': 'application/json'
   };
+  if (method !== 'DELETE') headers.Prefer = 'return=representation';
   const opts = {method:method||'GET', headers};
   if (body) opts.body = JSON.stringify(body);
   const r = await fetch(SUPA_URL + path, opts);
   if (!r.ok) { const t = await r.text(); throw new Error('HTTP ' + r.status + ': ' + t); }
+  if (method === 'DELETE') return null;
   return r.json();
 }
 
 async function runIt() {
   const btn = document.getElementById('goBtn');
   btn.disabled = true;
-  btn.textContent = '⏳ עובד...';
+  btn.textContent = '⏳ מסיר...';
   document.getElementById('log').innerHTML = '';
   document.getElementById('summary').classList.remove('show');
   
+  let customsDeleted = 0, factsRemoved = 0, errors = 0;
+  
   try {
-    // ============================================================
-    // PART A: Add 2 customs entries
-    // ============================================================
-    log('═══ חלק א\': מוסיף 2 כניסות במנהגים ═══', 'info');
-    const existingCustoms = await sbFetch('/rest/v1/phrases?select=he&section=eq.customs&limit=200');
-    const existingCustomsHe = new Set(existingCustoms.map(p => (p.he||'').trim()));
-    
-    let customsAdded = 0, customsSkipped = 0;
-    for (const entry of CUSTOMS) {
-      if (existingCustomsHe.has(entry.he.trim())) {
-        log('⊘ קיים כבר ב"מנהגים": "' + entry.he + '"', 'warn-line');
-        customsSkipped++;
-        continue;
-      }
+    // PART A: Delete the 2 customs entries
+    log('═══ חלק א\': מסיר 2 כניסות במנהגים ═══', 'info');
+    for (const he of CUSTOMS) {
       try {
-        await sbFetch('/rest/v1/phrases', 'POST', {
-          he: entry.he, trans: '', ar: '',
-          cat: 'תרבות והתנהגות',
-          section: 'customs',
-          tags: '@idf @police @security',
-          audio_url: null, why: entry.why, tone: ''
-        });
-        log('✓ נוסף ל"מנהגים": "' + entry.he + '"', 'ok');
-        customsAdded++;
+        const found = await sbFetch('/rest/v1/phrases?he=eq.' + encodeURIComponent(he) + '&section=eq.customs&select=id');
+        if (!found || found.length === 0) {
+          log('? לא נמצא: "' + he + '"', 'warn-line');
+          continue;
+        }
+        for (const item of found) {
+          await sbFetch('/rest/v1/phrases?id=eq.' + encodeURIComponent(item.id), 'DELETE');
+          log('🗑️ נמחק: "' + he + '"', 'ok');
+          customsDeleted++;
+        }
       } catch(e) {
-        log('✗ שגיאה: ' + entry.he + ' - ' + e.message.substring(0,60), 'err');
+        log('✗ שגיאה: ' + he + ' - ' + e.message.substring(0,60), 'err');
+        errors++;
       }
     }
     
     log('', '');
-    log('═══ חלק ב\': מוסיף פאקטים למשפטים קיימים ═══', 'info');
+    log('═══ חלק ב\': מסיר פאקטים ממשפטים ═══', 'info');
     
-    // ============================================================
-    // PART B: Add cultural facts to existing phrases
-    // ============================================================
-    let factsAdded = 0, factsSkipped = 0, notFound = 0;
-    
+    // PART B: Remove the cultural facts from phrases
     for (const [phraseHe, fact] of Object.entries(FACTS_BY_PHRASE)) {
       try {
-        // Find the phrase by exact 'he' match
-        const found = await sbFetch('/rest/v1/phrases?he=eq.' + encodeURIComponent(phraseHe) + '&select=id,he,why');
+        const found = await sbFetch('/rest/v1/phrases?he=eq.' + encodeURIComponent(phraseHe) + '&select=id,why');
         if (!found || found.length === 0) {
           log('? לא נמצא: "' + phraseHe + '"', 'warn-line');
-          notFound++;
           continue;
         }
         
         const p = found[0];
-        const currentWhy = (p.why || '').trim();
+        let currentWhy = (p.why || '');
         
-        // Skip if fact already present
-        if (currentWhy.indexOf(fact) !== -1) {
-          log('⊘ פאקט כבר קיים: "' + phraseHe + '"', 'warn-line');
-          factsSkipped++;
+        if (currentWhy.indexOf(fact) === -1) {
+          log('⊘ אין פאקט: "' + phraseHe + '"', 'warn-line');
           continue;
         }
         
-        // Append with separator
-        let newWhy;
-        if (currentWhy && currentWhy.length > 0) {
-          newWhy = currentWhy + '\n---\n' + fact;
-        } else {
-          newWhy = fact;
-        }
+        // Remove fact + any preceding separator
+        let newWhy = currentWhy.replace('\n---\n' + fact, '');
+        newWhy = newWhy.replace(fact + '\n---\n', '');
+        newWhy = newWhy.replace(fact, '');
+        newWhy = newWhy.trim();
         
-        // Update via PATCH
         await sbFetch('/rest/v1/phrases?id=eq.' + encodeURIComponent(p.id), 'PATCH', {why: newWhy});
-        log('✓ נוסף פאקט ל-"' + phraseHe + '"', 'ok');
-        factsAdded++;
+        log('✓ הוסר מ-"' + phraseHe + '"', 'ok');
+        factsRemoved++;
       } catch(e) {
-        log('✗ שגיאה ב-"' + phraseHe + '" - ' + e.message.substring(0,60), 'err');
+        log('✗ שגיאה: "' + phraseHe + '" - ' + e.message.substring(0,60), 'err');
+        errors++;
       }
     }
     
     log('', '');
-    log('═══════════ סיכום סופי ═══════════', 'info');
-    log('חלק א\' (מנהגים): ✓ ' + customsAdded + ' נוספו | ⊘ ' + customsSkipped + ' דולגו', 'ok');
-    log('חלק ב\' (פאקטים): ✓ ' + factsAdded + ' נוספו | ⊘ ' + factsSkipped + ' דולגו | ? ' + notFound + ' לא נמצאו', 'ok');
+    log('═══════════ סיכום ═══════════', 'info');
+    log('🗑️ כניסות במנהגים נמחקו: ' + customsDeleted, 'ok');
+    log('🗑️ פאקטים הוסרו ממשפטים: ' + factsRemoved, 'ok');
+    if (errors > 0) log('⚠️ שגיאות: ' + errors, 'warn-line');
     
     const sum = document.getElementById('summary');
-    sum.innerHTML = '<strong>🎉 ' + (customsAdded + factsAdded) + ' פעולות בוצעו</strong>' +
-      '✓ ' + customsAdded + ' כניסות חדשות במנהגים<br>' +
-      '✓ ' + factsAdded + ' פאקטים נוספו למשפטים קיימים<br><br>' +
-      'רענני את האפליקציה (Ctrl+Shift+R).<br>' +
-      'בלחיצה על משפט עם פאקט - יופיע התוכן התרבותי בפופאפ.';
+    sum.innerHTML = '<strong>🎉 הסרה הושלמה</strong>' +
+      'נמחקו ' + (customsDeleted + factsRemoved) + ' פריטים.<br>' +
+      'רענני את האפליקציה (Ctrl+Shift+R) כדי לראות.';
     sum.classList.add('show');
     
     btn.textContent = '✓ סיים';
@@ -197,7 +153,7 @@ async function runIt() {
   } catch(e) {
     log('שגיאה כללית: ' + e.message, 'err');
     btn.disabled = false;
-    btn.textContent = '🚀 נסה שוב';
+    btn.textContent = '🗑️ נסה שוב';
   }
 }
 </script>
