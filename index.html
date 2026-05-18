@@ -1130,16 +1130,18 @@ async function loadData(){
     bldCats();rDG();rHrt();rSem();rCus();rArts();renderDict();rQK();updateNewDot();
   }catch(e){
     console.error('loadData failed:', e);
-    document.getElementById('status-badge').textContent='אופליין';
-    document.getElementById('status-badge').style.background='#7a9ab5';
-    // If we have NO data yet, show the error overlay (blocking)
-    if (typeof DB === 'undefined' || !DB || DB.length === 0) {
-      showErrPopup(_errMessage(e));
-    } else {
-      // We have cached data - just show a toast
-      showToast('⚠️ אין חיבור. מציג נתונים ישנים', 'warn');
-    }
-    bldCats();
+    try{
+      var sb = document.getElementById('status-badge');
+      if(sb){sb.textContent='אופליין';sb.style.background='#7a9ab5';}
+    }catch(_){}
+    // ALWAYS render the UI - never block the app
+    try{ bldCats(); }catch(_){}
+    // Show non-blocking toast
+    try{
+      if (typeof showToast==='function'){
+        showToast('⚠️ ' + (_errMessage(e).replace(/<br>/g,' ')), 'warn');
+      }
+    }catch(_){}
   }
 }
 
