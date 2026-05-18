@@ -2700,7 +2700,40 @@ window.isGoldPhrase=isGoldPhrase;
 
 loadRole();
 
-loadData();
+// === Safety net: if loading hangs >10 sec, show diagnostics ===
+window._loadStartTime = Date.now();
+window._loadStatus = 'starting';
+
+setTimeout(function(){
+  if (window._loadStatus !== 'done') {
+    var el = document.getElementById('cats-loading');
+    if (el) {
+      var elapsed = Math.round((Date.now() - window._loadStartTime)/1000);
+      el.innerHTML = '<div style="text-align:center;color:#FF8C00;padding:20px;">' +
+        '⚠️ הטעינה לוקחת זמן<br><br>' +
+        '<small style="color:#7a9ab5;">סטטוס: ' + window._loadStatus + '<br>' +
+        'עברו ' + elapsed + ' שניות</small><br><br>' +
+        '<button onclick="location.reload(true)" style="padding:12px 24px;background:#FF8C00;color:#fff;border:none;border-radius:10px;font-size:14px;font-weight:700;cursor:pointer;font-family:inherit;">🔄 נסה שוב</button>' +
+        '</div>';
+    }
+  }
+}, 10000);
+
+// Track loadData progress
+(async function bootApp(){
+  try {
+    window._loadStatus = 'fetching data';
+    await loadData();
+    window._loadStatus = 'done';
+  } catch(err) {
+    window._loadStatus = 'error: ' + (err.message || err);
+    console.error('Boot failed:', err);
+    // Force render even on error
+    try { bldCats(); } catch(_){}
+    var el = document.getElementById('cats-loading');
+    if (el) el.innerHTML = '<div style="color:#FF8C00;padding:20px;text-align:center;">⚠️ שגיאה: ' + (err.message||err) + '<br><br><button onclick="location.reload(true)" style="padding:10px 20px;background:#FF8C00;color:#fff;border:none;border-radius:8px;font-family:inherit;cursor:pointer;">🔄 רענן</button></div>';
+  }
+})();
 </script>
 <!-- Toast notification -->
 <div id="toast" class="toast" style="display:none;"></div>
