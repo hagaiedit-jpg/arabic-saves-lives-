@@ -1051,11 +1051,20 @@ let DB=[],DAILY=[],HEART=[],NAVY=[],ANNOUNCE=[],DICT=[],SEM=[],CUS=[],ARTS=[];
 let sL='he',curC=null,curTab='lib',curDailyCat=null;
 
 async function sbFetch(path,method='GET',body=null){
-  const opts={method,headers:{'apikey':SUPA_KEY,'Authorization':'Bearer '+SUPA_KEY,'Content-Type':'application/json','Prefer':method==='POST'?'return=representation':''}};
+  const ctrl = new AbortController();
+  const timer = setTimeout(function(){ ctrl.abort(); }, 8000); // 8-second timeout
+  const opts={method,signal:ctrl.signal,headers:{'apikey':SUPA_KEY,'Authorization':'Bearer '+SUPA_KEY,'Content-Type':'application/json','Prefer':method==='POST'?'return=representation':''}};
   if(body)opts.body=JSON.stringify(body);
-  const res=await fetch(SUPA_URL+path,opts);
-  if(!res.ok)throw new Error(await res.text());
-  const t=await res.text();return t?JSON.parse(t):null;
+  try {
+    const res=await fetch(SUPA_URL+path,opts);
+    clearTimeout(timer);
+    if(!res.ok)throw new Error(await res.text());
+    const t=await res.text();return t?JSON.parse(t):null;
+  } catch(e) {
+    clearTimeout(timer);
+    if (e.name === 'AbortError') throw new Error('timeout - השרת לא מגיב');
+    throw e;
+  }
 }
 
 async // Simple toast helper (non-blocking notifications)
@@ -2700,38 +2709,40 @@ window.isGoldPhrase=isGoldPhrase;
 
 loadRole();
 
-// === Safety net: if loading hangs >10 sec, show diagnostics ===
-window._loadStartTime = Date.now();
-window._loadStatus = 'starting';
+// === Boot with optimistic UI ===
+// Step 1: Render UI immediately with empty data (so user sees the app)
+try { bldCats(); } catch(_){}
 
-setTimeout(function(){
-  if (window._loadStatus !== 'done') {
+// Step 2: Try to load data. If success → re-render. If fail → show error inline.
+(async function bootApp(){
+  var elapsedTimer = setTimeout(function(){
     var el = document.getElementById('cats-loading');
-    if (el) {
-      var elapsed = Math.round((Date.now() - window._loadStartTime)/1000);
-      el.innerHTML = '<div style="text-align:center;color:#FF8C00;padding:20px;">' +
-        '⚠️ הטעינה לוקחת זמן<br><br>' +
-        '<small style="color:#7a9ab5;">סטטוס: ' + window._loadStatus + '<br>' +
-        'עברו ' + elapsed + ' שניות</small><br><br>' +
-        '<button onclick="location.reload(true)" style="padding:12px 24px;background:#FF8C00;color:#fff;border:none;border-radius:10px;font-size:14px;font-weight:700;cursor:pointer;font-family:inherit;">🔄 נסה שוב</button>' +
+    if (el && el.textContent && el.textContent.indexOf('טוען') !== -1) {
+      el.innerHTML = '<div style="text-align:center;color:#FF8C00;padding:20px;font-size:14px;">' +
+        '⏳ עדיין מנסה להתחבר לשרת...<br><br>' +
+        '<button onclick="location.reload(true)" style="padding:10px 20px;background:#FF8C00;color:#fff;border:none;border-radius:8px;font-family:inherit;cursor:pointer;font-weight:700;">🔄 רענן עכשיו</button>' +
         '</div>';
     }
-  }
-}, 10000);
-
-// Track loadData progress
-(async function bootApp(){
+  }, 5000);
+  
   try {
-    window._loadStatus = 'fetching data';
     await loadData();
-    window._loadStatus = 'done';
+    clearTimeout(elapsedTimer);
   } catch(err) {
-    window._loadStatus = 'error: ' + (err.message || err);
-    console.error('Boot failed:', err);
-    // Force render even on error
-    try { bldCats(); } catch(_){}
+    clearTimeout(elapsedTimer);
+    console.error('loadData failed at boot:', err);
     var el = document.getElementById('cats-loading');
-    if (el) el.innerHTML = '<div style="color:#FF8C00;padding:20px;text-align:center;">⚠️ שגיאה: ' + (err.message||err) + '<br><br><button onclick="location.reload(true)" style="padding:10px 20px;background:#FF8C00;color:#fff;border:none;border-radius:8px;font-family:inherit;cursor:pointer;">🔄 רענן</button></div>';
+    if (el) {
+      el.innerHTML = '<div style="text-align:center;color:#FF8C00;padding:20px;font-size:14px;">' +
+        '⚠️ לא הצלחנו להתחבר<br>' +
+        '<small style="color:#7a9ab5;">' + (err.message||'שגיאה לא ידועה').substring(0,80) + '</small><br><br>' +
+        '<button onclick="location.reload(true)" style="padding:10px 20px;background:#FF8C00;color:#fff;border:none;border-radius:8px;font-family:inherit;cursor:pointer;font-weight:700;">🔄 נסה שוב</button>' +
+        '</div>';
+    }
+    try {
+      var sb=document.getElementById('status-badge');
+      if(sb){sb.textContent='אופליין';sb.style.background='#7a9ab5';}
+    }catch(_){}
   }
 })();
 </script>
