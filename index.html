@@ -679,7 +679,7 @@ body.day-mode .ct{border:none;border-bottom:1px solid #ebe0c5;border-left:1px so
     <button class="lb" id="lbar" onclick="setL('ar')">🔍 ערבית</button>
   </div>
   <div id="vcats" class="scr on">
-    <div class="loading" id="cats-loading"><div style="text-align:center;padding:20px;"><div style="font-size:16px;color:#FF8C00;margin-bottom:8px;">טוען...</div><div style="font-size:10px;color:#7a9ab5;opacity:0.6;">v20260518-0924</div></div></div>
+    <div class="loading" id="cats-loading"><div style="text-align:center;padding:20px;"><div style="font-size:16px;color:#FF8C00;margin-bottom:8px;">טוען...</div><div style="font-size:10px;color:#7a9ab5;opacity:0.6;">v20260518-0932</div></div></div>
     <div class="cgrid" id="cgrid" style="display:none;"></div>
   </div>
   <div id="vlist" class="scr">
@@ -823,7 +823,7 @@ body.day-mode .ct{border:none;border-bottom:1px solid #ebe0c5;border-left:1px so
         <option>מצב מהיר</option><option>עצירת תנועה</option><option>ניהול מרחב</option><option>בידוק וזיהוי</option>
         <option>שליטה בבית</option><option>הרגעה ושכנוע</option><option>מגע ראשוני</option>
         <option>עזרה ראשונה</option><option>קהל ואזרחים</option><option>ילדים ואוכלוסיות רגישות</option>
-        <option>לוח שנה ותרבות</option><option>מילון כללי</option>
+        <option>לוח שנה ותרבות</option>
       </select></div>
       <div class="afl"><label>עברית *</label><input id="aphe"/></div>
       <div class="afl"><label>תעתיק</label><input id="aptr"/></div>
@@ -1200,7 +1200,7 @@ async function getAudio(p,stEl){
 }
 
 // CATS
-const CATS=[{id:'עצירת תנועה',icon:'🚫'},{id:'ניהול מרחב',icon:'📍'},{id:'בידוק וזיהוי',icon:'🔍'},{id:'שליטה בבית',icon:'🏠'},{id:'הרגעה ושכנוע',icon:'✌️'},{id:'מגע ראשוני',icon:'🕵'},{id:'עזרה ראשונה',icon:'🩹'},{id:'קהל ואזרחים',icon:'👥'},{id:'ילדים ואוכלוסיות רגישות',icon:'👶'},{id:'לוח שנה ותרבות',icon:'📅'},{id:'מילון כללי',icon:'💬'},{id:'כריזה',icon:'📢',special:'announce'},{id:'תשאול ימי',icon:'⚓',special:'navy'}];
+const CATS=[{id:'עצירת תנועה',icon:'🚫'},{id:'ניהול מרחב',icon:'📍'},{id:'בידוק וזיהוי',icon:'🔍'},{id:'שליטה בבית',icon:'🏠'},{id:'הרגעה ושכנוע',icon:'✌️'},{id:'מגע ראשוני',icon:'🕵'},{id:'עזרה ראשונה',icon:'🩹'},{id:'קהל ואזרחים',icon:'👥'},{id:'ילדים ואוכלוסיות רגישות',icon:'👶'},{id:'לוח שנה ותרבות',icon:'📅'},{id:'כריזה',icon:'📢',special:'announce'},{id:'תשאול ימי',icon:'⚓',special:'navy'}];
 const DCATS=[{id:'שוק ומסחר',icon:'🛒'},{id:'מסעדה ואוכל',icon:'🍽️'},{id:'שיחת היכרות',icon:'🤝'},{id:'עזרה וכיוונים',icon:'🗺️'},{id:'ילדים ובית ספר',icon:'🎒'},{id:'שכנות וקהילה',icon:'🏘️'}];
 const HCATS=[
   {id:'פתיחה וסגירת שיחה',icon:'👋'},
@@ -1216,7 +1216,7 @@ function bldCats(){
   if (!DB || DB.length === 0) {
     loadEl.innerHTML = '<div style="text-align:center;padding:20px;color:#FF8C00;">' +
       'מתחבר לשרת...<br><br>' +
-      '<div style="font-size:11px;color:#7a9ab5;">v20260518-0924</div><br>' +
+      '<div style="font-size:11px;color:#7a9ab5;">v20260518-0932</div><br>' +
       '<button onclick="location.reload(true)" style="padding:10px 20px;background:#FF8C00;color:#fff;border:none;border-radius:8px;font-family:inherit;cursor:pointer;font-weight:700;margin-top:10px;">🔄 רענן</button>' +
       '</div>';
     return;
