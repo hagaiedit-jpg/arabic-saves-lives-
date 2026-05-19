@@ -350,44 +350,50 @@ body.day-mode .help-title{color:#c66700;border-bottom-color:rgba(198,103,0,0.3);
 
 /* Responses section in popup */
 .responses-section{
-  margin-top:14px;
+  margin-top:16px;
   padding-top:14px;
-  border-top:2px solid rgba(255,140,0,0.3);
+  border-top:2px solid rgba(255,140,0,0.4);
 }
 .responses-title{
   color:#FF8C00;
-  font-size:14px;
+  font-size:15px;
   font-weight:700;
-  margin-bottom:10px;
+  margin-bottom:12px;
   text-align:right;
 }
 .responses-list{
   display:flex;
   flex-direction:column;
-  gap:8px;
+  gap:10px;
 }
 .response-item{
-  background:rgba(255,140,0,0.08);
-  border:1px solid rgba(255,140,0,0.25);
+  background:rgba(255,140,0,0.15);
+  border:1px solid rgba(255,140,0,0.5);
   border-radius:10px;
-  padding:10px 12px;
+  padding:12px 14px;
   text-align:right;
 }
 .response-he{
-  color:#fff;
-  font-size:13px;
-  font-weight:600;
-  margin-bottom:3px;
+  color:#ffffff;
+  font-size:15px;
+  font-weight:700;
+  margin-bottom:5px;
 }
 .response-trans{
-  color:#D2B48C;
-  font-size:13px;
-  margin-bottom:3px;
+  color:#ffd9a8;
+  font-size:14px;
+  font-weight:600;
+  margin-bottom:5px;
 }
 .response-ar{
   color:#FFD700;
-  font-size:15px;
+  font-size:17px;
+  font-weight:600;
   font-family:Georgia,serif;
+}
+body.day-mode .response-item{
+  background:rgba(255,140,0,0.1);
+  border-color:rgba(198,103,0,0.4);
 }
 body.day-mode .response-he{color:#1a2b3c;}
 body.day-mode .response-trans{color:#5a3a1a;}
@@ -757,7 +763,7 @@ body.day-mode .ct{border:none;border-bottom:1px solid #ebe0c5;border-left:1px so
     <button class="lb" id="lbar" onclick="setL('ar')">🔍 ערבית</button>
   </div>
   <div id="vcats" class="scr on">
-    <div class="loading" id="cats-loading"><div style="text-align:center;padding:20px;"><div style="font-size:16px;color:#FF8C00;margin-bottom:8px;">טוען...</div><div style="font-size:10px;color:#7a9ab5;opacity:0.6;">v20260519-1134</div></div></div>
+    <div class="loading" id="cats-loading"><div style="text-align:center;padding:20px;"><div style="font-size:16px;color:#FF8C00;margin-bottom:8px;">טוען...</div><div style="font-size:10px;color:#7a9ab5;opacity:0.6;">v20260519-1141</div></div></div>
     <div class="cgrid" id="cgrid" style="display:none;"></div>
   </div>
   <div id="vlist" class="scr">
@@ -1307,7 +1313,7 @@ function bldCats(){
   if (!DB || DB.length === 0) {
     loadEl.innerHTML = '<div style="text-align:center;padding:20px;color:#FF8C00;">' +
       'מתחבר לשרת...<br><br>' +
-      '<div style="font-size:11px;color:#7a9ab5;">v20260519-1134</div><br>' +
+      '<div style="font-size:11px;color:#7a9ab5;">v20260519-1141</div><br>' +
       '<button onclick="location.reload(true)" style="padding:10px 20px;background:#FF8C00;color:#fff;border:none;border-radius:8px;font-family:inherit;cursor:pointer;font-weight:700;margin-top:10px;">🔄 רענן</button>' +
       '</div>';
     return;
