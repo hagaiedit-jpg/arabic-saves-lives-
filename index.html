@@ -763,7 +763,7 @@ body.day-mode .ct{border:none;border-bottom:1px solid #ebe0c5;border-left:1px so
     <button class="lb" id="lbar" onclick="setL('ar')">🔍 ערבית</button>
   </div>
   <div id="vcats" class="scr on">
-    <div class="loading" id="cats-loading"><div style="text-align:center;padding:20px;"><div style="font-size:16px;color:#FF8C00;margin-bottom:8px;">טוען...</div><div style="font-size:10px;color:#7a9ab5;opacity:0.6;">v20260519-1145</div></div></div>
+    <div class="loading" id="cats-loading"><div style="text-align:center;padding:20px;"><div style="font-size:16px;color:#FF8C00;margin-bottom:8px;">טוען...</div><div style="font-size:10px;color:#7a9ab5;opacity:0.6;">v20260519-1150</div></div></div>
     <div class="cgrid" id="cgrid" style="display:none;"></div>
   </div>
   <div id="vlist" class="scr">
@@ -1318,7 +1318,7 @@ function bldCats(){
   if (!DB || DB.length === 0) {
     loadEl.innerHTML = '<div style="text-align:center;padding:20px;color:#FF8C00;">' +
       'מתחבר לשרת...<br><br>' +
-      '<div style="font-size:11px;color:#7a9ab5;">v20260519-1145</div><br>' +
+      '<div style="font-size:11px;color:#7a9ab5;">v20260519-1150</div><br>' +
       '<button onclick="location.reload(true)" style="padding:10px 20px;background:#FF8C00;color:#fff;border:none;border-radius:8px;font-family:inherit;cursor:pointer;font-weight:700;margin-top:10px;">🔄 רענן</button>' +
       '</div>';
     return;
@@ -2142,16 +2142,19 @@ function openEditIdx(idx) {
     // Category + cultural fact (context column)
     document.getElementById('edit-cat').value = p.cat || '';
     
-    // Load existing responses
-    window._editResponses = [];
-    if (p.responses) {
-      try {
+    // Load existing responses (safe — wrap so errors don't break edit)
+    try {
+      window._editResponses = [];
+      if (p.responses) {
         var rawResp = typeof p.responses === 'string' ? p.responses : JSON.stringify(p.responses);
         var parsed = JSON.parse(rawResp);
         if (Array.isArray(parsed)) window._editResponses = parsed;
-      } catch(e) { window._editResponses = []; }
+      }
+      if (typeof refreshResponsesUI === 'function') refreshResponsesUI();
+    } catch(respErr) {
+      console.warn('responses load failed:', respErr);
+      window._editResponses = [];
     }
-    refreshResponsesUI();
     
     
     // Parse tags for roles + gold flag
@@ -2314,23 +2317,28 @@ async function saveEdit(){
   if (document.getElementById('edit_gold').checked)          newTags.push('@gold');
   var finalTags = newTags.filter(function(s){return s;}).join(' ').trim();
   
-  // Collect responses from UI
-  var collectedResponses = [];
-  var respArr = window._editResponses || [];
-  for (var ri = 0; ri < respArr.length; ri++) {
-    var heInp = document.getElementById('resp-he-'+ri);
-    var trInp = document.getElementById('resp-trans-'+ri);
-    var arInp = document.getElementById('resp-ar-'+ri);
-    if (!heInp) continue;
-    var he = heInp.value.trim();
-    var tr = trInp ? trInp.value.trim() : '';
-    var ar = arInp ? arInp.value.trim() : '';
-    var aud = respArr[ri].audio_url || '';
-    if (he || ar) {
-      collectedResponses.push({he:he, trans:tr, ar:ar, audio_url:aud});
+  // Collect responses from UI (safe — wrap so errors don't break save)
+  var responsesJson = null;
+  try {
+    var collectedResponses = [];
+    var respArr = window._editResponses || [];
+    for (var ri = 0; ri < respArr.length; ri++) {
+      var heInp = document.getElementById('resp-he-'+ri);
+      var trInp = document.getElementById('resp-trans-'+ri);
+      var arInp = document.getElementById('resp-ar-'+ri);
+      if (!heInp) continue;
+      var he = heInp.value.trim();
+      var tr = trInp ? trInp.value.trim() : '';
+      var ar = arInp ? arInp.value.trim() : '';
+      var aud = respArr[ri].audio_url || '';
+      if (he || ar) {
+        collectedResponses.push({he:he, trans:tr, ar:ar, audio_url:aud});
+      }
     }
+    responsesJson = collectedResponses.length > 0 ? JSON.stringify(collectedResponses) : null;
+  } catch(respCollectErr) {
+    console.warn('responses collect failed:', respCollectErr);
   }
-  var responsesJson = collectedResponses.length > 0 ? JSON.stringify(collectedResponses) : null;
   
   const updates = {
     he:    document.getElementById('edit-he').value.trim(),
