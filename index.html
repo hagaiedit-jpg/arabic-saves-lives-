@@ -763,7 +763,7 @@ body.day-mode .ct{border:none;border-bottom:1px solid #ebe0c5;border-left:1px so
     <button class="lb" id="lbar" onclick="setL('ar')">🔍 ערבית</button>
   </div>
   <div id="vcats" class="scr on">
-    <div class="loading" id="cats-loading"><div style="text-align:center;padding:20px;"><div style="font-size:16px;color:#FF8C00;margin-bottom:8px;">טוען...</div><div style="font-size:10px;color:#7a9ab5;opacity:0.6;">v20260519-1200</div></div></div>
+    <div class="loading" id="cats-loading"><div style="text-align:center;padding:20px;"><div style="font-size:16px;color:#FF8C00;margin-bottom:8px;">טוען...</div><div style="font-size:10px;color:#7a9ab5;opacity:0.6;">v20260519-1210</div></div></div>
     <div class="cgrid" id="cgrid" style="display:none;"></div>
   </div>
   <div id="vlist" class="scr">
@@ -1318,7 +1318,7 @@ function bldCats(){
   if (!DB || DB.length === 0) {
     loadEl.innerHTML = '<div style="text-align:center;padding:20px;color:#FF8C00;">' +
       'מתחבר לשרת...<br><br>' +
-      '<div style="font-size:11px;color:#7a9ab5;">v20260519-1200</div><br>' +
+      '<div style="font-size:11px;color:#7a9ab5;">v20260519-1210</div><br>' +
       '<button onclick="location.reload(true)" style="padding:10px 20px;background:#FF8C00;color:#fff;border:none;border-radius:8px;font-family:inherit;cursor:pointer;font-weight:700;margin-top:10px;">🔄 רענן</button>' +
       '</div>';
     return;
@@ -2310,19 +2310,10 @@ async function recordResponse(idx){
       statusEl.style.color = '#FFD700';
       
       try {
-        // Use Cloudinary (same as the rest of the app)
-        var fd = new FormData();
-        fd.append('file', blob, 'response_' + Date.now() + '.webm');
-        fd.append('upload_preset', PRESET);
-        fd.append('resource_type', 'video');
-        var resp = await fetch('https://api.cloudinary.com/v1_1/' + CLOUD + '/video/upload', {
-          method: 'POST',
-          body: fd
-        });
-        if (!resp.ok) throw new Error('upload failed: ' + resp.status);
-        var uploadData = await resp.json();
-        var publicUrl = uploadData.secure_url;
-        if (!publicUrl) throw new Error('no URL returned');
+        // Use the SAME cloudUp helper that works for main phrases
+        var file = new File([blob], 'rec.webm', {type: 'audio/webm'});
+        var publicUrl = await cloudUp(file);
+        if (!publicUrl) throw new Error('no URL returned from Cloudinary');
         
         window._editResponses[idx].audio_url = publicUrl;
         document.getElementById('resp-row-'+idx).setAttribute('data-audio', publicUrl);
