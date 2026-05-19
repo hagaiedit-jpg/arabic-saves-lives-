@@ -350,54 +350,72 @@ body.day-mode .help-title{color:#c66700;border-bottom-color:rgba(198,103,0,0.3);
 
 /* Responses section in popup */
 .responses-section{
-  margin-top:16px;
-  padding-top:14px;
-  border-top:2px solid rgba(255,140,0,0.4);
+  margin-top:14px;
+  padding-top:12px;
+  border-top:1px solid rgba(255,140,0,0.3);
 }
 .responses-title{
   color:#FF8C00;
-  font-size:15px;
+  font-size:13px;
   font-weight:700;
-  margin-bottom:12px;
+  margin-bottom:8px;
   text-align:right;
 }
 .responses-list{
   display:flex;
   flex-direction:column;
-  gap:10px;
+  gap:6px;
 }
 .response-item{
-  background:rgba(255,140,0,0.15);
-  border:1px solid rgba(255,140,0,0.5);
-  border-radius:10px;
-  padding:12px 14px;
+  background:rgba(255,243,227,0.95);
+  border:1px solid rgba(198,103,0,0.4);
+  border-radius:8px;
+  padding:8px 10px;
   text-align:right;
+  display:flex;
+  align-items:flex-start;
+  gap:8px;
+}
+.response-content{
+  flex:1;
 }
 .response-he{
-  color:#ffffff;
-  font-size:15px;
+  color:#1a2b3c;
+  font-size:13px;
   font-weight:700;
-  margin-bottom:5px;
+  margin-bottom:2px;
 }
 .response-trans{
-  color:#ffd9a8;
-  font-size:14px;
-  font-weight:600;
-  margin-bottom:5px;
+  color:#5a3a1a;
+  font-size:12px;
+  font-weight:500;
+  margin-bottom:2px;
 }
 .response-ar{
-  color:#FFD700;
-  font-size:17px;
-  font-weight:600;
+  color:#c66700;
+  font-size:15px;
+  font-weight:700;
   font-family:Georgia,serif;
 }
-body.day-mode .response-item{
-  background:rgba(255,140,0,0.1);
-  border-color:rgba(198,103,0,0.4);
+.response-play-btn{
+  background:#FF8C00;
+  color:#fff;
+  border:none;
+  border-radius:50%;
+  width:32px;
+  height:32px;
+  font-size:14px;
+  cursor:pointer;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  flex-shrink:0;
+  margin-top:2px;
+  font-family:inherit;
 }
-body.day-mode .response-he{color:#1a2b3c;}
-body.day-mode .response-trans{color:#5a3a1a;}
-body.day-mode .response-ar{color:#c66700;}
+.response-play-btn:hover,.response-play-btn:active{background:#e57c00;}
+.response-play-btn:disabled{background:#aaa;cursor:not-allowed;}
+.response-play-btn.no-audio{background:#999;opacity:0.4;cursor:not-allowed;}
 .popup-action-btn.fav.active:hover{
   background:#e57c00;
 }
@@ -763,7 +781,7 @@ body.day-mode .ct{border:none;border-bottom:1px solid #ebe0c5;border-left:1px so
     <button class="lb" id="lbar" onclick="setL('ar')">🔍 ערבית</button>
   </div>
   <div id="vcats" class="scr on">
-    <div class="loading" id="cats-loading"><div style="text-align:center;padding:20px;"><div style="font-size:16px;color:#FF8C00;margin-bottom:8px;">טוען...</div><div style="font-size:10px;color:#7a9ab5;opacity:0.6;">v20260519-1210</div></div></div>
+    <div class="loading" id="cats-loading"><div style="text-align:center;padding:20px;"><div style="font-size:16px;color:#FF8C00;margin-bottom:8px;">טוען...</div><div style="font-size:10px;color:#7a9ab5;opacity:0.6;">v20260519-1243</div></div></div>
     <div class="cgrid" id="cgrid" style="display:none;"></div>
   </div>
   <div id="vlist" class="scr">
@@ -1318,7 +1336,7 @@ function bldCats(){
   if (!DB || DB.length === 0) {
     loadEl.innerHTML = '<div style="text-align:center;padding:20px;color:#FF8C00;">' +
       'מתחבר לשרת...<br><br>' +
-      '<div style="font-size:11px;color:#7a9ab5;">v20260519-1210</div><br>' +
+      '<div style="font-size:11px;color:#7a9ab5;">v20260519-1243</div><br>' +
       '<button onclick="location.reload(true)" style="padding:10px 20px;background:#FF8C00;color:#fff;border:none;border-radius:8px;font-family:inherit;cursor:pointer;font-weight:700;margin-top:10px;">🔄 רענן</button>' +
       '</div>';
     return;
@@ -1669,6 +1687,31 @@ function rItems(items,el,q){
   el.innerHTML=filtered.map(p=>{const i=DB.indexOf(p);var star=(typeof isGoldPhrase==='function'&&isGoldPhrase(p))?'<span class="gold-marker">⭐</span>':'';return`<div class="li" onclick="opP(${i})"><div class="lt">${star+hl(p.he,q)+(typeof urgDot==='function'?urgDot(p.urgency):'')}</div><div class="la">‹</div></div>`;}).join('');
 }
 function bldW(){const el=document.getElementById('wbars');el.innerHTML='';for(let i=0;i<32;i++){const b=document.createElement('div');b.className='wb';b.style.height=(4+Math.floor(Math.random()*14))+'px';el.appendChild(b);}}
+// Play audio for a response
+function playResponseAudio(url, btn) {
+  if (!url) return;
+  try {
+    // Stop any existing audio
+    if (window._responseAudio) {
+      try { window._responseAudio.pause(); } catch(e) {}
+    }
+    var audio = new Audio(url);
+    window._responseAudio = audio;
+    if (btn) {
+      btn.textContent = '⏸';
+      audio.onended = function() { btn.textContent = '▶'; };
+      audio.onerror = function() { btn.textContent = '▶'; alert('שגיאה בהשמעה'); };
+    }
+    audio.play().catch(function(e) {
+      if (btn) btn.textContent = '▶';
+      alert('שגיאה בהשמעה: ' + e.message);
+    });
+  } catch(e) {
+    alert('שגיאה: ' + e.message);
+  }
+}
+window.playResponseAudio = playResponseAudio;
+
 function opP(i){
   const p=DB[i];
   saveRecent(p.id);
@@ -1689,9 +1732,17 @@ function opP(i){
       for (var ri = 0; ri < p.responses.length; ri++) {
         var r = p.responses[ri];
         html += '<div class="response-item">';
+        html += '<div class="response-content">';
         if (r.he) html += '<div class="response-he">' + r.he + '</div>';
         if (r.trans) html += '<div class="response-trans">' + r.trans + '</div>';
         if (r.ar) html += '<div class="response-ar">' + r.ar + '</div>';
+        html += '</div>';
+        // Play button
+        if (r.audio_url) {
+          html += '<button class="response-play-btn" onclick="playResponseAudio(\'' + r.audio_url.replace(/\'/g, "\\'") + '\', this)" title="השמע">▶</button>';
+        } else {
+          html += '<button class="response-play-btn no-audio" title="אין הקלטה">▶</button>';
+        }
         html += '</div>';
       }
       respList.innerHTML = html;
