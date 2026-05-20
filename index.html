@@ -781,7 +781,7 @@ body.day-mode .ct{border:none;border-bottom:1px solid #ebe0c5;border-left:1px so
     <button class="lb" id="lbar" onclick="setL('ar')">🔍 ערבית</button>
   </div>
   <div id="vcats" class="scr on">
-    <div class="loading" id="cats-loading"><div style="text-align:center;padding:20px;"><div style="font-size:16px;color:#FF8C00;margin-bottom:8px;">טוען...</div><div style="font-size:10px;color:#7a9ab5;opacity:0.6;">v20260519-1243</div></div></div>
+    <div class="loading" id="cats-loading"><div style="text-align:center;padding:20px;"><div style="font-size:16px;color:#FF8C00;margin-bottom:8px;">טוען...</div><div style="font-size:10px;color:#7a9ab5;opacity:0.6;">v20260520-1653</div></div></div>
     <div class="cgrid" id="cgrid" style="display:none;"></div>
   </div>
   <div id="vlist" class="scr">
@@ -1336,7 +1336,7 @@ function bldCats(){
   if (!DB || DB.length === 0) {
     loadEl.innerHTML = '<div style="text-align:center;padding:20px;color:#FF8C00;">' +
       'מתחבר לשרת...<br><br>' +
-      '<div style="font-size:11px;color:#7a9ab5;">v20260519-1243</div><br>' +
+      '<div style="font-size:11px;color:#7a9ab5;">v20260520-1653</div><br>' +
       '<button onclick="location.reload(true)" style="padding:10px 20px;background:#FF8C00;color:#fff;border:none;border-radius:8px;font-family:inherit;cursor:pointer;font-weight:700;margin-top:10px;">🔄 רענן</button>' +
       '</div>';
     return;
@@ -2139,12 +2139,27 @@ async function renderAdminList(){
     var noAudioCount = data.filter(p => !p.audio_url).length;
     var hasRespCount = data.filter(p => p.responses && p.responses.length > 5).length;
     
-    // Build filter bar
-    var filterBar = '<div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:12px;padding:10px;background:#1c2e44;border-radius:10px;">'
+    // Apply search if active
+    var searchTerm = (window._adminSearch || '').trim().toLowerCase();
+    if (searchTerm) {
+      filteredItems = filteredItems.filter(p => 
+        ((p.he||'').toLowerCase().indexOf(searchTerm) !== -1) ||
+        ((p.ar||'').toLowerCase().indexOf(searchTerm) !== -1) ||
+        ((p.trans||'').toLowerCase().indexOf(searchTerm) !== -1) ||
+        ((p.cat||'').toLowerCase().indexOf(searchTerm) !== -1)
+      );
+    }
+    
+    // Build search box + filter bar
+    var filterBar = '<div style="margin-bottom:12px;">'
+      + '<input type="text" id="admin-search-box" placeholder="🔍 חיפוש בעברית / ערבית / תעתיק / קטגוריה" oninput="onAdminSearch(this.value)" value="'+(window._adminSearch||'').replace(/"/g,'&quot;')+'" style="width:100%;padding:12px 16px;background:#1c2e44;border:2px solid #FF8C00;border-radius:10px;color:#fff;font-size:14px;font-family:inherit;direction:rtl;margin-bottom:10px;">'
+      + '<div style="display:flex;gap:6px;flex-wrap:wrap;padding:10px;background:#1c2e44;border-radius:10px;">'
       + '<button onclick="setAdminFilter(\'all\')" style="padding:6px 12px;border:none;border-radius:6px;font-size:11px;cursor:pointer;font-family:inherit;background:'+(filterMode==='all'?'#FF8C00':'#2e4558')+';color:#fff;font-weight:600;">הכל ('+totalCount+')</button>'
       + '<button onclick="setAdminFilter(\'no-audio\')" style="padding:6px 12px;border:none;border-radius:6px;font-size:11px;cursor:pointer;font-family:inherit;background:'+(filterMode==='no-audio'?'#FF8C00':'#2e4558')+';color:#fff;font-weight:600;">🔇 צריך הקלטה ('+noAudioCount+')</button>'
       + '<button onclick="setAdminFilter(\'no-responses\')" style="padding:6px 12px;border:none;border-radius:6px;font-size:11px;cursor:pointer;font-family:inherit;background:'+(filterMode==='no-responses'?'#FF8C00':'#2e4558')+';color:#fff;font-weight:600;">💬 בלי תשובות ('+(totalCount-hasRespCount)+')</button>'
       + '<button onclick="setAdminFilter(\'has-responses\')" style="padding:6px 12px;border:none;border-radius:6px;font-size:11px;cursor:pointer;font-family:inherit;background:'+(filterMode==='has-responses'?'#FF8C00':'#2e4558')+';color:#fff;font-weight:600;">✓ עם תשובות ('+hasRespCount+')</button>'
+      + '</div>'
+      + '<div style="text-align:center;color:#7a9ab5;font-size:11px;margin-top:6px;">מציג '+filteredItems.length+' מתוך '+totalCount+'</div>'
       + '</div>';
     
     let html=filterBar;
@@ -2203,6 +2218,20 @@ async function renderAdminList(){
 function setAdminFilter(mode){
   window._adminFilter = mode;
   renderAdminList();
+}
+
+function onAdminSearch(val){
+  window._adminSearch = val;
+  // Debounce - rerender after 200ms of no typing
+  clearTimeout(window._adminSearchTimer);
+  window._adminSearchTimer = setTimeout(function(){
+    renderAdminList();
+    // Keep focus on search box
+    setTimeout(function(){
+      var el = document.getElementById('admin-search-box');
+      if (el) { el.focus(); el.setSelectionRange(el.value.length, el.value.length); }
+    }, 10);
+  }, 200);
 }
 
 
