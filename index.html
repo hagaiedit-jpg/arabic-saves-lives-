@@ -150,6 +150,59 @@ body.day-mode #recentlist [style*="color:#7a9ab5"]{color:#5a3a1a !important;}
   border-color:#FF8C00;
   opacity:1;
 }
+
+.dict-icon-btn{
+  width:36px;
+  height:36px;
+  border-radius:50%;
+  background:rgba(29,158,117,0.25);
+  border:1.5px solid #1D9E75;
+  color:#fff;
+  font-size:17px;
+  cursor:pointer;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  transition:all 0.2s;
+  font-family:inherit;
+  padding:0;
+  line-height:1;
+  margin-left:4px;
+}
+.dict-icon-btn:hover,.dict-icon-btn:active{
+  background:rgba(29,158,117,0.45);
+}
+body.day-mode .dict-icon-btn{
+  background:rgba(29,158,117,0.15);
+  border-color:#1D9E75;
+  color:#1A2B3C;
+}
+
+.theme-toggle-single{
+  width:36px;
+  height:36px;
+  border-radius:50%;
+  background:rgba(255,140,0,0.25);
+  border:1.5px solid #FF8C00;
+  color:#fff;
+  font-size:18px;
+  cursor:pointer;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  transition:all 0.2s;
+  font-family:inherit;
+  padding:0;
+  line-height:1;
+}
+.theme-toggle-single:hover,.theme-toggle-single:active{
+  background:rgba(255,140,0,0.45);
+}
+body.day-mode .theme-toggle-single{
+  background:rgba(26,43,60,0.2);
+  border-color:#1A2B3C;
+  color:#1A2B3C;
+}
 body.day-mode .theme-toggle{background:transparent;}
 body.day-mode .theme-circle.active{background:#1A2B3C;}
 
@@ -512,6 +565,24 @@ body.day-mode .toast{background:#fff;color:#1a2b3c;}
 
 /* Emergency mode grid */
 .emerg-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;padding:0;}
+.customs-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:6px;}
+.customs-cube{
+  border-radius:14px;
+  padding:18px 12px;
+  text-align:center;
+  cursor:pointer;
+  border:1px solid rgba(255,255,255,0.1);
+  transition:all 0.15s;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  justify-content:center;
+  min-height:90px;
+}
+.customs-cube:hover,.customs-cube:active{transform:translateY(-2px);box-shadow:0 4px 14px rgba(0,0,0,0.4);}
+.customs-cube-icon{font-size:32px;margin-bottom:6px;}
+.customs-cube-title{color:#fff;font-size:13px;font-weight:700;line-height:1.3;}
+.customs-cube-count{color:rgba(255,255,255,0.7);font-size:10px;margin-top:4px;}
 .emerg-cube{
   border-radius:14px;
   padding:24px 14px;
@@ -710,8 +781,8 @@ body.day-mode .ct{border:none;border-bottom:1px solid #ebe0c5;border-left:1px so
 <div class="topbar">
   <div class="tb-top">
     <div class="theme-toggle">
-      <button class="theme-circle moon active" id="moonBtn" onclick="setTheme('night')" title="לילה">🌙</button>
-      <button class="theme-circle sun" id="sunBtn" onclick="setTheme('day')" title="יום">☀️</button>
+      <button class="dict-icon-btn" id="dictIconBtn" onclick="openDictTab()" title="מילון">📖</button><button class="theme-toggle-single" id="themeToggleBtn" onclick="toggleTheme()" title="לחצי להחלפת מצב יום/לילה">🌙</button>
+      
       <div class="role-circle-divider"></div>
       <button class="role-circle" id="roleBtn" onclick="showWelcome()" title="בחר את התפקיד שלי">
         <span id="roleBtnEmoji">👤</span>
@@ -739,7 +810,6 @@ body.day-mode .ct{border:none;border-bottom:1px solid #ebe0c5;border-left:1px so
     <div class="tb-tab-sec" onclick="ST('sem',this)">⚠️ סמנטי</div>
     <div class="tb-tab-sec" onclick="ST('day',this)">🌅 יומיומי</div>
     <div class="tb-tab-sec" onclick="ST('art',this)">📰 מאמרים</div>
-    <div class="tb-tab-sec" onclick="ST('dict',this)">📖 מילון</div>
     <div class="tb-tab-sec" onclick="ST('nwf',this)" id="new-tab-label">🆕 חדש</div>
   </div>
 </div>
@@ -781,7 +851,7 @@ body.day-mode .ct{border:none;border-bottom:1px solid #ebe0c5;border-left:1px so
     <button class="lb" id="lbar" onclick="setL('ar')">🔍 ערבית</button>
   </div>
   <div id="vcats" class="scr on">
-    <div class="loading" id="cats-loading"><div style="text-align:center;padding:20px;"><div style="font-size:16px;color:#FF8C00;margin-bottom:8px;">טוען...</div><div style="font-size:10px;color:#7a9ab5;opacity:0.6;">v20260522-1443</div></div></div>
+    <div class="loading" id="cats-loading"><div style="text-align:center;padding:20px;"><div style="font-size:16px;color:#FF8C00;margin-bottom:8px;">טוען...</div><div style="font-size:10px;color:#7a9ab5;opacity:0.6;">v20260522-1617</div></div></div>
     <div class="cgrid" id="cgrid" style="display:none;"></div>
   </div>
   <div id="vlist" class="scr">
@@ -889,7 +959,18 @@ body.day-mode .ct{border:none;border-bottom:1px solid #ebe0c5;border-left:1px so
 
 <!-- CUSTOMS TAB -->
 <div class="scr" id="tab-cus">
-  <div class="sec"><div class="stitle">מנהגים</div><div id="cuslist"></div></div>
+  <div class="sec">
+    <div id="customs-home">
+      <div class="stitle">📜 מנהגים</div>
+      <div style="color:#7a9ab5;font-size:12px;margin-bottom:14px;">בחר נושא</div>
+      <div class="customs-grid" id="customs-grid"></div>
+    </div>
+    <div id="customs-list" style="display:none;">
+      <button class="emerg-back" onclick="backToCustomsHome()">‹ חזרה למנהגים</button>
+      <div class="stitle" id="customs-list-title">📜</div>
+      <div id="cuslist"></div>
+    </div>
+  </div>
 </div>
 
 <!-- ARTICLES TAB -->
@@ -1336,7 +1417,7 @@ function bldCats(){
   if (!DB || DB.length === 0) {
     loadEl.innerHTML = '<div style="text-align:center;padding:20px;color:#FF8C00;">' +
       'מתחבר לשרת...<br><br>' +
-      '<div style="font-size:11px;color:#7a9ab5;">v20260522-1443</div><br>' +
+      '<div style="font-size:11px;color:#7a9ab5;">v20260522-1617</div><br>' +
       '<button onclick="location.reload(true)" style="padding:10px 20px;background:#FF8C00;color:#fff;border:none;border-radius:8px;font-family:inherit;cursor:pointer;font-weight:700;margin-top:10px;">🔄 רענן</button>' +
       '</div>';
     return;
@@ -1540,14 +1621,70 @@ function opSem(i){
   shV('vpop');
 }
 function rCus(){
-  document.getElementById('cuslist').innerHTML=CUS.length?CUS.map(function(c){
-    var txt=c.why||c.ar||'';
-    txt=txt.replace(/(המלצה ללוחם[:]?)/g,'<span style="color:#FF8C00;font-weight:700;font-size:14px;">$1</span>');
-    txt=txt.replace(/(ההקשר ללוחם[:]?)/g,'<span style="color:#FF8C00;font-weight:700;font-size:14px;">$1</span>');
-    txt=txt.replace(/(הקשר ללוחם[:]?)/g,'<span style="color:#FF8C00;font-weight:700;font-size:14px;">$1</span>');
-    txt=txt.replace(/(טיפ ללוחם[:]?)/g,'<span style="color:#FF8C00;font-weight:700;font-size:14px;">$1</span>');
-    return '<div class="card"><div class="che">'+c.he+'</div><div style="color:#a0b8c8;font-size:13px;line-height:1.7;margin-top:6px;">'+txt+'</div></div>';
-  }).join(''):'<div class="empty">אין עדיין</div>';
+  var grid = document.getElementById('customs-grid');
+  if (!grid) return;
+  if (!CUS.length) {
+    grid.innerHTML = '<div class="empty" style="grid-column:1/-1;">אין מנהגים עדיין</div>';
+    return;
+  }
+  var groups = {};
+  CUS.forEach(function(c){
+    var cat = c.cat || 'תרבות והתנהגות';
+    if (!groups[cat]) groups[cat] = [];
+    groups[cat].push(c);
+  });
+  var colors = [
+    'linear-gradient(135deg,#c0392b 0%,#922b21 100%)',
+    'linear-gradient(135deg,#1D9E75 0%,#147a59 100%)',
+    'linear-gradient(135deg,#2980b9 0%,#1f5f8b 100%)',
+    'linear-gradient(135deg,#8e44ad 0%,#6c3483 100%)',
+    'linear-gradient(135deg,#FF8C00 0%,#c66700 100%)',
+    'linear-gradient(135deg,#16a085 0%,#0e6655 100%)'
+  ];
+  var iconMap = {
+    'תרבות והתנהגות': '🤝',
+    'לוח שנה ותרבות': '📅',
+    'דת ואסלאם': '🕌',
+    'משפחה ונישואים': '👨‍👩‍👧',
+    'אוכל ואירוח': '🍽️',
+    'לבוש וכבוד': '👔'
+  };
+  var html = '';
+  var i = 0;
+  for (var cat in groups) {
+    var icon = iconMap[cat] || '📜';
+    var color = colors[i % colors.length];
+    var safeCat = cat.replace(/'/g, "\\'");
+    html += '<div class="customs-cube" style="background:' + color + ';" onclick="openCustomsCat(\'' + safeCat + '\')">'
+      + '<div class="customs-cube-icon">' + icon + '</div>'
+      + '<div class="customs-cube-title">' + cat + '</div>'
+      + '<div class="customs-cube-count">' + groups[cat].length + ' פריטים</div>'
+      + '</div>';
+    i++;
+  }
+  grid.innerHTML = html;
+}
+
+function openCustomsCat(cat){
+  var items = CUS.filter(function(c){ return (c.cat || 'תרבות והתנהגות') === cat; });
+  document.getElementById('customs-home').style.display = 'none';
+  document.getElementById('customs-list').style.display = 'block';
+  document.getElementById('customs-list-title').textContent = cat;
+  var html = '';
+  items.forEach(function(c){
+    var txt = c.why || c.ar || '';
+    txt = txt.replace(/(המלצה ללוחם[:]?)/g, '<span style="color:#FF8C00;font-weight:700;font-size:14px;">$1</span>');
+    txt = txt.replace(/(ההקשר ללוחם[:]?)/g, '<span style="color:#FF8C00;font-weight:700;font-size:14px;">$1</span>');
+    txt = txt.replace(/(הקשר ללוחם[:]?)/g, '<span style="color:#FF8C00;font-weight:700;font-size:14px;">$1</span>');
+    txt = txt.replace(/(טיפ ללוחם[:]?)/g, '<span style="color:#FF8C00;font-weight:700;font-size:14px;">$1</span>');
+    html += '<div class="card"><div class="che">' + c.he + '</div><div style="color:#a0b8c8;font-size:13px;line-height:1.7;margin-top:6px;">' + txt + '</div></div>';
+  });
+  document.getElementById('cuslist').innerHTML = html;
+}
+
+function backToCustomsHome(){
+  document.getElementById('customs-home').style.display = 'block';
+  document.getElementById('customs-list').style.display = 'none';
 }
 function rArts(){
   document.getElementById('artlist').innerHTML=ARTS.length?ARTS.map((a,i)=>`
@@ -3078,6 +3215,17 @@ function setTheme(mode){
     btn.textContent = mode === 'day' ? '☀️' : '🌙';
     btn.title = mode === 'day' ? 'מצב יום - לחצי למצב לילה' : 'מצב לילה - לחצי למצב יום';
   }
+}
+function openDictTab(){
+  // Find dict tab in any list and activate it
+  ST('dict', null);
+  // Visual feedback: remove active from all tabs (since dict has no tab now)
+  document.querySelectorAll('.tb-tab, .tb-tab-sec').forEach(function(t){t.classList.remove('active');});
+}
+
+function toggleTheme(){
+  var current = document.body.classList.contains('day-mode') ? 'day' : 'night';
+  setTheme(current === 'day' ? 'night' : 'day');
 }
 function loadTheme(){
   var saved=localStorage.getItem('theme')||'night';
