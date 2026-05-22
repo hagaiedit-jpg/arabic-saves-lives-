@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
 <meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="theme-color" content="#1c2e44">
+<meta name="theme-color" content="#18293E">
 <title>ערבית מצילה חיים</title>
 <!-- Google Analytics -->
 <script async src="https://www.googletagmanager.com/gtag/js?id=G-G91ERLFQ16"></script>
@@ -17,9 +17,9 @@
 
 <style>
 *{box-sizing:border-box;margin:0;padding:0;}
-body{background:#1A2B3C;direction:rtl;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;min-height:100vh;}
+body{background:#0E1B2E;direction:rtl;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;min-height:100vh;}
 .W{max-width:480px;margin:0 auto;min-height:100vh;}
-.topbar{background:#1c2e44;padding:12px 16px 0;border-bottom:1px solid #1e3348;position:sticky;top:0;z-index:100;}
+.topbar{background:#18293E;padding:12px 16px 0;border-bottom:1px solid #1e3348;position:sticky;top:0;z-index:100;}
 .tb-top{display:flex;align-items:center;justify-content:space-between;padding-bottom:10px;position:relative;}
 .tb-brand{
   position:absolute;
@@ -39,19 +39,20 @@ body.day-mode .tb-brand{
   color:#c66700;
   text-shadow:0 0 8px rgba(255,140,0,0.5), 0 0 16px rgba(255,140,0,0.25);
 }
-.tb-badges{display:flex;gap:5px;}
+.tb-badges{display:flex;gap:5px;align-items:center;}
+.tb-left-group{display:flex;gap:5px;align-items:center;}
 .bnew{background:#FF8C00;color:#fff;font-size:10px;padding:2px 8px;border-radius:10px;font-weight:600;display:none;}
 .bstatus{background:#1D9E75;color:#fff;font-size:10px;padding:2px 8px;border-radius:10px;}
 .tb-tabs{display:flex;overflow-x:hidden;padding:0 4px;}
 .tb-tabs::-webkit-scrollbar{display:none;}
 .tb-tab{flex:1 1 0;min-width:0;text-align:center;padding:14px 3px;color:rgba(210,180,140,0.92);font-size:13.5px;font-weight:600;line-height:1.2;cursor:pointer;border-bottom:2px solid transparent;transition:all 0.15s;}
-.tb-tab.active{color:#D2B48C;border-bottom-color:#FF8C00;}
+.tb-tab.active{color:#E8D9B8;border-bottom-color:#FF8C00;}
 
 /* === Enhanced popup (large touch targets for gloved hands) === */
 .pcat-badge{display:inline-flex;align-items:center;gap:6px;background:rgba(255,140,0,0.18);border:1px solid rgba(255,140,0,0.45);border-radius:999px;padding:5px 14px;font-size:11px;font-weight:700;color:#FF8C00;letter-spacing:0.5px;margin-bottom:14px;}
 body.day-mode .pcat-badge{background:rgba(255,140,0,0.12);border-color:rgba(255,140,0,0.55);color:#c66700;}
 .play-row{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin:16px 0 10px;}
-.big-pbtn{background:rgba(255,255,255,0.06);border:1.5px solid rgba(210,180,140,0.35);color:#D2B48C;border-radius:14px;padding:12px 4px 10px;cursor:pointer;font-family:inherit;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:5px;transition:all 0.12s;min-height:74px;}
+.big-pbtn{background:rgba(255,255,255,0.06);border:1.5px solid rgba(210,180,140,0.35);color:#E8D9B8;border-radius:14px;padding:12px 4px 10px;cursor:pointer;font-family:inherit;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:5px;transition:all 0.12s;min-height:74px;}
 .big-icon{font-size:26px;line-height:1;display:block;}
 .big-pbtn.play-normal .big-icon{color:#FF8C00;font-weight:700;}
 .big-lbl{font-size:12px;font-weight:600;opacity:0.9;display:block;letter-spacing:0.3px;}
@@ -67,17 +68,17 @@ body.day-mode .ibox.c{background:rgba(255,215,140,0.18);border-color:rgba(180,13
 body.day-mode .ibox.c .ilbl{color:#a06820;}
 
 /* === Day mode: navy chrome top + cream body bottom (cohesive with orange) === */
-body.day-mode{background:#faf3e3;color:#1a2b3c;}
+body.day-mode{background:#faf3e3;color:#0e1b2e;}
 /* Top chrome: navy + orange (like night mode — these colors work together) */
-body.day-mode header{background:#1A2B3C;border-bottom:1px solid #1c2e44;}
-body.day-mode .tb-tabs{background:#1A2B3C;}
-body.day-mode .tb-tabs-sec{background:#1c2e44;border-bottom:1px solid #1A2B3C;}
+body.day-mode header{background:#0E1B2E;border-bottom:1px solid #18293E;}
+body.day-mode .tb-tabs{background:#0E1B2E;}
+body.day-mode .tb-tabs-sec{background:#18293E;border-bottom:1px solid #0E1B2E;}
 body.day-mode .tb-tab{color:rgba(210,180,140,0.7);}
-body.day-mode .tb-tab.active{color:#D2B48C;border-bottom-color:#FF8C00;}
+body.day-mode .tb-tab.active{color:#E8D9B8;border-bottom-color:#FF8C00;}
 body.day-mode .tb-tab-sec{color:rgba(210,180,140,0.6);}
-body.day-mode .tb-tab-sec.active{color:#D2B48C;border-bottom-color:#FF8C00;}
+body.day-mode .tb-tab-sec.active{color:#E8D9B8;border-bottom-color:#FF8C00;}
 /* Header title and badges */
-body.day-mode .tb-title,body.day-mode header > div:first-child{color:#D2B48C !important;}
+body.day-mode .tb-title,body.day-mode header > div:first-child{color:#E8D9B8 !important;}
 body.day-mode .bnew{background:#FF8C00;color:#fff;}
 body.day-mode .bstatus{background:#1D9E75;color:#fff;}
 /* Search and language bars: ORANGE (continuous from navy header) */
@@ -87,39 +88,39 @@ body.day-mode .si{background:#fff;border:none;}
 body.day-mode .lb{background:transparent;color:rgba(255,255,255,0.7);border:1px solid rgba(255,255,255,0.3);}
 body.day-mode .lb.active{color:#fff;background:rgba(0,0,0,0.18);border-color:rgba(255,255,255,0.5);}
 /* Categories grid: dark navy (continues from chrome — visual continuity) */
-body.day-mode .cgrid{background:#1c2e44;gap:1px;}
-body.day-mode .ct{background:#2a3d52;color:#fff;border:none;}
+body.day-mode .cgrid{background:#18293E;gap:1px;}
+body.day-mode .ct{background:#1F3147;color:#fff;border:none;}
 body.day-mode .cn{color:#fff;}
 body.day-mode .cc{color:#a0b8c8;}
-body.day-mode .ci{background:#1A2B3C;color:#D2B48C;}
+body.day-mode .ci{background:#0E1B2E;color:#E8D9B8;}
 /* Body content: cream background, dark text — the "day" part */
-body.day-mode .scr{background:#faf3e3;color:#1a2b3c;}
+body.day-mode .scr{background:#faf3e3;color:#0e1b2e;}
 body.day-mode .sec{background:transparent;}
-body.day-mode .stitle{color:#1a2b3c;}
+body.day-mode .stitle{color:#0e1b2e;}
 body.day-mode .empty{color:#7a6a4a;}
 /* Phrase cards in lists */
-body.day-mode .li{background:#fff;border:1px solid #e8dec9;color:#1a2b3c;}
-body.day-mode .lt{color:#1a2b3c;}
+body.day-mode .li{background:#fff;border:1px solid #e8dec9;color:#0e1b2e;}
+body.day-mode .lt{color:#0e1b2e;}
 body.day-mode .la{color:#888;}
 /* Popup */
 body.day-mode .pbg{background:#faf3e3;}
-body.day-mode .pop{background:#fff;color:#1a2b3c;box-shadow:0 4px 20px rgba(0,0,0,0.08);}
-body.day-mode .phe{color:#1a2b3c;}
+body.day-mode .pop{background:#fff;color:#0e1b2e;box-shadow:0 4px 20px rgba(0,0,0,0.08);}
+body.day-mode .phe{color:#0e1b2e;}
 body.day-mode .parsm{color:#5a3a1a;}
-body.day-mode .ptrans{color:#1a2b3c;}
+body.day-mode .ptrans{color:#0e1b2e;}
 body.day-mode .pbox{background:#faf3e3;border:1px solid #e8dec9;}
 /* New tab */
-body.day-mode .nftxt{color:#1a2b3c;}
+body.day-mode .nftxt{color:#0e1b2e;}
 body.day-mode .nfdate{color:#5a6a7a;}
 body.day-mode .nfi{border-bottom-color:#e8dec9;}
 /* Admin forms */
-body.day-mode .afl input,body.day-mode .afl textarea,body.day-mode .afl select{background:#fff;color:#1a2b3c;border:1px solid #d4c7a8;}
+body.day-mode .afl input,body.day-mode .afl textarea,body.day-mode .afl select{background:#fff;color:#0e1b2e;border:1px solid #d4c7a8;}
 body.day-mode .afl label{color:#5a3a1a;}
 /* Recent + favorites inline overrides */
 body.day-mode #recentlist > div[style*="background:#1a2535"]{background:#fff !important;border-color:#e8dec9 !important;}
-body.day-mode #favlist > div[style*="background:#2a3d52"]{background:#fff !important;border-color:#e8dec9 !important;color:#1a2b3c !important;}
-body.day-mode #recentlist [style*="color:#fff"]{color:#1a2b3c !important;}
-body.day-mode #favlist [style*="color:#fff"]{color:#1a2b3c !important;}
+body.day-mode #favlist > div[style*="background:#1F3147"]{background:#fff !important;border-color:#e8dec9 !important;color:#0e1b2e !important;}
+body.day-mode #recentlist [style*="color:#fff"]{color:#0e1b2e !important;}
+body.day-mode #favlist [style*="color:#fff"]{color:#0e1b2e !important;}
 body.day-mode #favlist [style*="color:#7a9ab5"]{color:#5a3a1a !important;}
 body.day-mode #recentlist [style*="color:#7a9ab5"]{color:#5a3a1a !important;}
 
@@ -175,7 +176,7 @@ body.day-mode #recentlist [style*="color:#7a9ab5"]{color:#5a3a1a !important;}
 body.day-mode .dict-icon-btn{
   background:rgba(29,158,117,0.15);
   border-color:#1D9E75;
-  color:#1A2B3C;
+  color:#0E1B2E;
 }
 
 .theme-toggle-single{
@@ -200,11 +201,11 @@ body.day-mode .dict-icon-btn{
 }
 body.day-mode .theme-toggle-single{
   background:rgba(26,43,60,0.2);
-  border-color:#1A2B3C;
-  color:#1A2B3C;
+  border-color:#0E1B2E;
+  color:#0E1B2E;
 }
 body.day-mode .theme-toggle{background:transparent;}
-body.day-mode .theme-circle.active{background:#1A2B3C;}
+body.day-mode .theme-circle.active{background:#0E1B2E;}
 
 /* Role indicator button */
 /* Role circle inside theme-toggle pill (same styling as theme-circle, plus tooltip) */
@@ -236,9 +237,9 @@ body.day-mode .theme-circle.active{background:#1A2B3C;}
 
 /* Welcome modal */
 .welcome-bg{position:fixed;inset:0;background:rgba(0,0,0,0.85);z-index:9999;display:flex;align-items:center;justify-content:center;padding:20px;}
-.welcome-pop{background:#1A2B3C;border:2px solid #FF8C00;border-radius:18px;padding:24px 20px;max-width:420px;width:100%;text-align:center;color:#fff;box-shadow:0 12px 40px rgba(0,0,0,0.6);}
+.welcome-pop{background:#0E1B2E;border:2px solid #FF8C00;border-radius:18px;padding:24px 20px;max-width:420px;width:100%;text-align:center;color:#fff;box-shadow:0 12px 40px rgba(0,0,0,0.6);}
 .welcome-title{font-size:20px;font-weight:700;color:#FF8C00;margin-bottom:8px;}
-.welcome-sub{font-size:14px;color:#D2B48C;margin-bottom:22px;line-height:1.5;}
+.welcome-sub{font-size:14px;color:#E8D9B8;margin-bottom:22px;line-height:1.5;}
 .role-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
 .role-choice{background:rgba(255,255,255,0.06);border:1.5px solid rgba(210,180,140,0.35);border-radius:14px;padding:18px 10px;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:6px;transition:all 0.18s;font-family:inherit;color:#fff;}
 .role-choice:hover,.role-choice:active{background:rgba(255,140,0,0.15);border-color:#FF8C00;transform:translateY(-2px);}
@@ -257,7 +258,7 @@ body.day-mode .theme-circle.active{background:#1A2B3C;}
   border-radius:14px;
   padding:14px;
   cursor:pointer;
-  color:#D2B48C;
+  color:#E8D9B8;
   font-family:inherit;
   font-size:14px;
   font-weight:600;
@@ -265,7 +266,7 @@ body.day-mode .theme-circle.active{background:#1A2B3C;}
 }
 /* Help modal - redesigned */
 .help-pop{
-  background:#1A2B3C;
+  background:#0E1B2E;
   border:2px solid #FF8C00;
   border-radius:18px;
   width:100%;
@@ -278,7 +279,7 @@ body.day-mode .theme-circle.active{background:#1A2B3C;}
   position:relative;
   overflow:hidden;
 }
-body.day-mode .help-pop{background:#fff8e7;border-color:#FF8C00;color:#1a2b3c;}
+body.day-mode .help-pop{background:#fff8e7;border-color:#FF8C00;color:#0e1b2e;}
 
 .help-x{
   position:absolute;
@@ -309,7 +310,7 @@ body.day-mode .help-x:hover{background:#c0392b;color:#fff;}
   border-bottom:1px solid rgba(210,180,140,0.2);
 }
 .help-h-title{font-size:22px;font-weight:800;color:#FF8C00;margin-bottom:4px;}
-.help-h-sub{font-size:13px;color:#D2B48C;}
+.help-h-sub{font-size:13px;color:#E8D9B8;}
 body.day-mode .help-h-sub{color:#7a4f1f;}
 
 .help-body{
@@ -353,8 +354,8 @@ body.day-mode .help-h-sub{color:#7a4f1f;}
 }
 .help-txt strong{color:#fff;font-weight:700;font-size:14px;}
 .help-desc{color:#7a9ab5;font-size:12px;font-weight:400;}
-body.day-mode .help-txt{color:#1a2b3c;}
-body.day-mode .help-txt strong{color:#1a2b3c;}
+body.day-mode .help-txt{color:#0e1b2e;}
+body.day-mode .help-txt strong{color:#0e1b2e;}
 body.day-mode .help-desc{color:#5a7488;}
 body.day-mode .help-title{color:#c66700;border-bottom-color:rgba(198,103,0,0.3);}
 
@@ -374,6 +375,11 @@ body.day-mode .help-title{color:#c66700;border-bottom-color:rgba(198,103,0,0.3);
 .help-close-btn:hover,.help-close-btn:active{background:#168a64;transform:translateY(-1px);}
 
 /* Popup action buttons (Favorites + Close) - proportionate */
+/* Premium gold accents */
+.gold-accent{color:#D4A24E;}
+.gold-bg{background:rgba(212,162,78,0.12);border-color:rgba(212,162,78,0.3);}
+.gold-border{border-color:rgba(212,162,78,0.4)!important;}
+
 .popup-actions{
   display:flex;
   justify-content:center;
@@ -433,7 +439,7 @@ body.day-mode .help-title{color:#c66700;border-bottom-color:rgba(198,103,0,0.3);
   flex:1;
 }
 .response-he{
-  color:#1a2b3c;
+  color:#0e1b2e;
   font-size:13px;
   font-weight:700;
   margin-bottom:2px;
@@ -487,7 +493,7 @@ body.day-mode .popup-action-btn.fav.active{background:#FF8C00;}
   padding:20px;
 }
 .err-box{
-  background:#1A2B3C;
+  background:#0E1B2E;
   border:2px solid #c0392b;
   border-radius:18px;
   padding:28px 24px;
@@ -499,7 +505,7 @@ body.day-mode .popup-action-btn.fav.active{background:#FF8C00;}
 }
 .err-icon{font-size:48px;margin-bottom:12px;}
 .err-title{font-size:22px;font-weight:800;color:#FF8C00;margin-bottom:10px;}
-.err-msg{font-size:14px;color:#D2B48C;line-height:1.6;margin-bottom:22px;}
+.err-msg{font-size:14px;color:#E8D9B8;line-height:1.6;margin-bottom:22px;}
 .err-actions{display:flex;flex-direction:column;gap:10px;margin-bottom:14px;}
 .err-retry{
   background:#1D9E75;
@@ -523,9 +529,9 @@ body.day-mode .popup-action-btn.fav.active{background:#FF8C00;}
   cursor:pointer;
   font-family:inherit;
 }
-.err-dismiss:hover{background:rgba(210,180,140,0.08);color:#D2B48C;}
+.err-dismiss:hover{background:rgba(210,180,140,0.08);color:#E8D9B8;}
 .err-hint{font-size:11px;color:#7a9ab5;font-style:italic;}
-body.day-mode .err-box{background:#fff8e7;color:#1a2b3c;}
+body.day-mode .err-box{background:#fff8e7;color:#0e1b2e;}
 body.day-mode .err-msg{color:#5a3a1a;}
 
 /* Toast notification */
@@ -534,7 +540,7 @@ body.day-mode .err-msg{color:#5a3a1a;}
   bottom:24px;
   left:50%;
   transform:translateX(-50%);
-  background:#1A2B3C;
+  background:#0E1B2E;
   color:#fff;
   padding:14px 22px;
   border-radius:99px;
@@ -552,7 +558,7 @@ body.day-mode .err-msg{color:#5a3a1a;}
 .toast.error{border-color:#c0392b;}
 .toast.warn{border-color:#FFD700;}
 @keyframes toastIn{from{transform:translateX(-50%) translateY(20px);opacity:0;}to{transform:translateX(-50%) translateY(0);opacity:1;}}
-body.day-mode .toast{background:#fff;color:#1a2b3c;}
+body.day-mode .toast{background:#fff;color:#0e1b2e;}
 
 .role-choice-all:hover,.role-choice-all:active{
   background:rgba(255,140,0,0.12);
@@ -612,7 +618,7 @@ body.day-mode .toast{background:#fff;color:#1a2b3c;}
 .emerg-back{
   background:transparent;
   border:1px solid rgba(210,180,140,0.3);
-  color:#D2B48C;
+  color:#E8D9B8;
   padding:7px 14px;
   border-radius:18px;
   font-size:13px;
@@ -625,8 +631,8 @@ body.day-mode .toast{background:#fff;color:#1a2b3c;}
 body.day-mode .emerg-back{color:#5a3a1a;border-color:rgba(90,58,26,0.3);}
 
 .emerg-card{
-  background:#2a3d52;
-  border:1px solid #2e4558;
+  background:#1F3147;
+  border:1px solid #2A3D52;
   border-radius:10px;
   padding:0;
   margin-bottom:10px;
@@ -653,7 +659,7 @@ body.day-mode .emerg-back{color:#5a3a1a;border-color:rgba(90,58,26,0.3);}
   cursor:pointer;
   font-family:inherit;
   flex-shrink:0;
-  border-left:1px solid #2e4558;
+  border-left:1px solid #2A3D52;
   transition:background 0.12s;
 }
 .emerg-play-btn:active{background:#c0392b;}
@@ -664,14 +670,14 @@ body.day-mode .emerg-play-btn:disabled{background:#ccc;color:#888;}
 .emerg-card:active{transform:scale(0.99);}
 .emerg-card-he{color:#fff;font-size:15px;font-weight:600;margin-bottom:6px;}
 .emerg-card-trans{color:#fff;font-size:14px;font-weight:400;margin-bottom:4px;font-family:Georgia,serif;letter-spacing:0.03em;}
-.emerg-card-ar{color:#D2B48C;font-size:14px;font-family:Georgia,serif;direction:rtl;}
+.emerg-card-ar{color:#E8D9B8;font-size:14px;font-family:Georgia,serif;direction:rtl;}
 body.day-mode .emerg-card{background:#fff;border-color:#e8dec9;}
-body.day-mode .emerg-card-he{color:#1a2b3c;}
-body.day-mode .emerg-card-trans{color:#1a2b3c;}
-.tb-tabs-sec{display:flex;overflow-x:hidden;background:#1c2e44;border-bottom:1px solid #1e3348;padding:0 4px;}
+body.day-mode .emerg-card-he{color:#0e1b2e;}
+body.day-mode .emerg-card-trans{color:#0e1b2e;}
+.tb-tabs-sec{display:flex;overflow-x:hidden;background:#18293E;border-bottom:1px solid #1e3348;padding:0 4px;}
 .tb-tabs-sec::-webkit-scrollbar{display:none;}
 .tb-tab-sec{flex:1 1 0;min-width:0;text-align:center;padding:12px 3px;color:rgba(210,180,140,0.7);font-size:13.5px;font-weight:500;line-height:1.2;cursor:pointer;border-bottom:2px solid transparent;transition:color 0.15s,border-color 0.15s;}
-.tb-tab-sec.active{color:#D2B48C;border-bottom-color:#FF8C00;}
+.tb-tab-sec.active{color:#E8D9B8;border-bottom-color:#FF8C00;}
 .scr{display:none;}.scr.on{display:block;}
 .sbar{background:#FF8C00;padding:10px 12px;}
 .si{background:#fff;border-radius:8px;display:flex;align-items:center;padding:0 12px;gap:8px;}
@@ -681,62 +687,62 @@ body.day-mode .emerg-card-trans{color:#1a2b3c;}
 .lrow{background:#e07800;padding:4px 12px;display:flex;gap:6px;}
 .lb{flex:1;padding:5px;border-radius:6px;border:1px solid rgba(255,255,255,0.3);background:transparent;color:rgba(255,255,255,0.65);font-size:12px;cursor:pointer;font-family:inherit;text-align:center;}
 .lb.active{background:rgba(255,255,255,0.2);color:#fff;border-color:rgba(255,255,255,0.8);}
-.cgrid{display:grid;grid-template-columns:1fr 1fr;gap:1px;background:#1c2e44;}
+.cgrid{display:grid;grid-template-columns:1fr 1fr;gap:1px;background:#18293E;}
 body.day-mode .cgrid{background:#fff;gap:0;}
 body.day-mode .ct{border:none;border-bottom:1px solid #ebe0c5;border-left:1px solid #ebe0c5;}
-.ct{background:#2a3d52;padding:22px 12px 16px;display:flex;flex-direction:column;align-items:center;gap:9px;cursor:pointer;min-height:115px;justify-content:center;transition:background 0.12s;position:relative;}
+.ct{background:#1F3147;padding:22px 12px 16px;display:flex;flex-direction:column;align-items:center;gap:9px;cursor:pointer;min-height:115px;justify-content:center;transition:background 0.12s;position:relative;}
 .ct:active{background:#2a3f54;}
 .ct.daily{background:#1a3025;}.ct.daily:active{background:#22402f;}
 .ct.heart{background:#2a1828;}.ct.heart:active{background:#361e32;}
-.ct.navy{background:#2a3d52;}.ct.navy:active{background:#2a3f54;}
-.ct.announce{background:#2a3d52;}.ct.announce:active{background:#2a3f54;}
-.ci{width:38px;height:38px;border-radius:50%;background:#1A2B3C;display:flex;align-items:center;justify-content:center;font-size:18px;}
+.ct.navy{background:#1F3147;}.ct.navy:active{background:#2a3f54;}
+.ct.announce{background:#1F3147;}.ct.announce:active{background:#2a3f54;}
+.ci{width:38px;height:38px;border-radius:50%;background:#0E1B2E;display:flex;align-items:center;justify-content:center;font-size:18px;}
 .cn{color:#fff;font-size:14px;font-weight:600;text-align:center;line-height:1.35;}
 .cc{color:#a0b8c8;font-size:12px;}
-.lhdr{background:#1c2e44;padding:11px 16px;display:flex;align-items:center;gap:10px;border-bottom:1px solid #1e3348;}
-.bbtn{background:#1A2B3C;border:1px solid #2e4558;border-radius:8px;color:#D2B48C;font-size:13px;padding:5px 12px;cursor:pointer;font-family:inherit;}
-.ltitle{color:#D2B48C;font-size:14px;font-weight:500;}
-.litems{background:#1A2B3C;}
+.lhdr{background:#18293E;padding:11px 16px;display:flex;align-items:center;gap:10px;border-bottom:1px solid #1e3348;}
+.bbtn{background:#0E1B2E;border:1px solid #2A3D52;border-radius:8px;color:#E8D9B8;font-size:13px;padding:5px 12px;cursor:pointer;font-family:inherit;}
+.ltitle{color:#E8D9B8;font-size:14px;font-weight:500;}
+.litems{background:#0E1B2E;}
 .li{padding:13px 16px;border-bottom:1px solid #1e3348;cursor:pointer;display:flex;justify-content:space-between;align-items:center;}
 .li:last-child{border-bottom:none;}
-.li:active{background:#2a3d52;}
+.li:active{background:#1F3147;}
 .lt{color:#fff;font-size:15px;line-height:1.4;}
 .la{color:#7a9ab5;font-size:14px;}
-.smeta{padding:7px 16px;color:#7a9ab5;font-size:12px;background:#1A2B3C;}
+.smeta{padding:7px 16px;color:#7a9ab5;font-size:12px;background:#0E1B2E;}
 .pbg{background:rgba(0,0,0,0.65);min-height:100vh;display:flex;align-items:flex-start;justify-content:center;padding:12px;padding-top:16px;}
 .pop{background:#fff;border-radius:18px;width:100%;max-width:440px;padding:18px 16px 14px;}
-.phe{color:#1A2B3C;font-size:16px;font-weight:400;text-align:center;margin-bottom:5px;line-height:1.4;}
-.parsm{color:#D2B48C;font-size:18px;direction:rtl;font-family:Georgia,serif;text-align:center;margin-bottom:12px;font-weight:400;line-height:1.4;}
-.pbox{background:#1A2B3C;border-radius:12px;padding:16px 14px;margin-bottom:12px;text-align:center;}
+.phe{color:#0E1B2E;font-size:16px;font-weight:400;text-align:center;margin-bottom:5px;line-height:1.4;}
+.parsm{color:#E8D9B8;font-size:18px;direction:rtl;font-family:Georgia,serif;text-align:center;margin-bottom:12px;font-weight:400;line-height:1.4;}
+.pbox{background:#0E1B2E;border-radius:12px;padding:16px 14px;margin-bottom:12px;text-align:center;}
 .ptrans{color:#fff;font-size:22px;font-weight:400;line-height:1.6;letter-spacing:0.03em;}
 .ww{display:flex;align-items:center;gap:8px;margin-bottom:10px;background:#f5f5f5;border-radius:10px;padding:8px 12px;}
 .wave{display:flex;align-items:center;gap:2px;flex:1;}
-.wb{width:3px;border-radius:2px;background:#D2B48C;}
+.wb{width:3px;border-radius:2px;background:#E8D9B8;}
 .wt{font-size:12px;color:#888;min-width:30px;}
 .pbr{display:flex;gap:10px;margin-bottom:10px;}
 .pbtn{flex:1;padding:13px 8px;border-radius:12px;border:none;cursor:pointer;font-size:14px;font-weight:600;font-family:inherit;display:flex;align-items:center;justify-content:center;gap:6px;}
-.pbtn.slow{background:#D2B48C;color:#412402;}
+.pbtn.slow{background:#E8D9B8;color:#412402;}
 .pbtn.fast{background:#FF8C00;color:#fff;}
 .pbtn:active{opacity:0.85;}
 .ibox{border-radius:10px;padding:10px 14px;margin-bottom:8px;}
 .ibox.b{background:#eef6ff;border:1px solid #c0d8f0;}
 .ibox.o{background:#fff8ee;border:1px solid #ffe0a0;}
 .ilbl{font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:0.06em;margin-bottom:5px;}
-.ilbl.b{color:#1A2B3C;}.ilbl.o{color:#FF8C00;}
+.ilbl.b{color:#0E1B2E;}.ilbl.o{color:#FF8C00;}
 .itxt{font-size:13px;line-height:1.7;}
 .itxt.b{color:#1a3a5c;}.itxt.o{color:#7a5000;}
 .pclose{display:block;text-align:center;color:#aaa;font-size:14px;cursor:pointer;padding:4px 0 0;}
 .sec{padding:14px;}
-.stitle{color:#D2B48C;font-size:11px;text-transform:uppercase;letter-spacing:0.07em;margin-bottom:12px;}
-.card{background:#2a3d52;border:1px solid #2e4558;border-radius:12px;padding:14px 16px;margin-bottom:10px;cursor:pointer;}
+.stitle{color:#E8D9B8;font-size:11px;text-transform:uppercase;letter-spacing:0.07em;margin-bottom:12px;}
+.card{background:#1F3147;border:1px solid #2A3D52;border-radius:12px;padding:14px 16px;margin-bottom:10px;cursor:pointer;}
 .card:active{background:#2a3f54;}
 .ctags{display:flex;gap:5px;flex-wrap:wrap;margin-bottom:7px;align-items:center;}
 .tag{font-size:9px;padding:2px 8px;border-radius:8px;font-weight:600;white-space:nowrap;}
 .theart{background:#c0392b;color:#fff;}
-.tprem{background:#D2B48C;color:#412402;}
+.tprem{background:#E8D9B8;color:#412402;}
 .trh{background:#e74c3c;color:#fff;}.trm{background:#FF8C00;color:#fff;}.trl{background:#1D9E75;color:#fff;}
 .che{color:#fff;font-size:14px;font-weight:400;margin-bottom:4px;}
-.car{color:#D2B48C;font-size:13px;direction:rtl;font-family:Georgia,serif;margin-bottom:4px;}
+.car{color:#E8D9B8;font-size:13px;direction:rtl;font-family:Georgia,serif;margin-bottom:4px;}
 .csub{color:#7a9ab5;font-size:12px;line-height:1.6;}
 .cwarn{color:#ffb0b0;font-size:12px;padding:7px 10px;background:#2a1010;border:1px solid #5a2020;border-radius:7px;margin-top:7px;line-height:1.6;}
 .nf{padding:14px 16px;}
@@ -748,31 +754,31 @@ body.day-mode .ct{border:none;border-bottom:1px solid #ebe0c5;border-left:1px so
 .nfcat{font-size:11px;color:#FF8C00;margin-top:2px;}
 .adm{padding:14px;}
 .atrow{display:flex;gap:5px;margin-bottom:12px;flex-wrap:wrap;}
-.atab{flex:1;min-width:55px;padding:7px 4px;border-radius:7px;border:1px solid #2e4558;background:#2a3d52;color:#7a9ab5;font-size:11px;cursor:pointer;font-family:inherit;text-align:center;}
+.atab{flex:1;min-width:55px;padding:7px 4px;border-radius:7px;border:1px solid #2A3D52;background:#1F3147;color:#7a9ab5;font-size:11px;cursor:pointer;font-family:inherit;text-align:center;}
 .atab.active{background:#FF8C00;color:#fff;border-color:#FF8C00;}
-.acard{background:#2a3d52;border:1px solid #2e4558;border-radius:12px;padding:14px;margin-bottom:10px;}
+.acard{background:#1F3147;border:1px solid #2A3D52;border-radius:12px;padding:14px;margin-bottom:10px;}
 .afl{display:flex;flex-direction:column;gap:4px;margin-bottom:10px;}
-.afl label{color:#D2B48C;font-size:11px;font-weight:500;}
-.afl input,.afl select,.afl textarea{background:#1A2B3C;border:1px solid #2e4558;border-radius:8px;padding:9px 11px;color:#fff;font-size:14px;font-family:inherit;direction:rtl;outline:none;width:100%;}
+.afl label{color:#E8D9B8;font-size:11px;font-weight:500;}
+.afl input,.afl select,.afl textarea{background:#0E1B2E;border:1px solid #2A3D52;border-radius:8px;padding:9px 11px;color:#fff;font-size:14px;font-family:inherit;direction:rtl;outline:none;width:100%;}
 .afl input:focus,.afl select:focus,.afl textarea:focus{border-color:#FF8C00;}
 .afl textarea{min-height:58px;resize:vertical;}
-.afl select option{background:#1A2B3C;}
+.afl select option{background:#0E1B2E;}
 .sbtn{width:100%;padding:12px;background:#FF8C00;border:none;border-radius:10px;color:#fff;font-size:15px;font-weight:600;cursor:pointer;font-family:inherit;}
 .hlm{background:#FF8C00;color:#fff;border-radius:2px;padding:0 2px;}
 .empty{text-align:center;padding:40px 20px;color:#7a9ab5;font-size:14px;}
-.loading{text-align:center;padding:40px 20px;color:#D2B48C;font-size:14px;}
+.loading{text-align:center;padding:40px 20px;color:#E8D9B8;font-size:14px;}
 .rec-btn{padding:11px;border:none;border-radius:8px;color:#fff;font-size:13px;cursor:pointer;font-family:inherit;font-weight:600;}
 .rec-btn.idle{background:#c0392b;}
 .rec-btn.recording{background:#e74c3c;animation:pulse 1s infinite;}
 @keyframes pulse{0%,100%{opacity:1;}50%{opacity:0.7;}}
 /* Announce styles */
 .announce-text{background:#0d1f3c;border-radius:12px;padding:16px;margin-bottom:12px;color:#fff;font-size:18px;line-height:2;text-align:right;direction:rtl;}
-.announce-trans{background:#1A2B3C;border-radius:12px;padding:14px;margin-bottom:12px;color:#D2B48C;font-size:14px;line-height:1.8;display:none;}
+.announce-trans{background:#0E1B2E;border-radius:12px;padding:14px;margin-bottom:12px;color:#E8D9B8;font-size:14px;line-height:1.8;display:none;}
 /* Dictionary styles */
-.dict-item{background:#2a3d52;border:1px solid #2e4558;border-radius:10px;padding:12px 14px;margin-bottom:8px;cursor:pointer;}
+.dict-item{background:#1F3147;border:1px solid #2A3D52;border-radius:10px;padding:12px 14px;margin-bottom:8px;cursor:pointer;}
 .dict-he{color:#fff;font-size:15px;font-weight:500;}
 .dict-trans{color:#FF8C00;font-size:14px;margin-top:3px;}
-.dict-ar{color:#D2B48C;font-size:16px;font-family:Georgia,serif;margin-top:3px;}
+.dict-ar{color:#E8D9B8;font-size:16px;font-family:Georgia,serif;margin-top:3px;}
 </style>
 </head>
 <body>
@@ -781,21 +787,21 @@ body.day-mode .ct{border:none;border-bottom:1px solid #ebe0c5;border-left:1px so
 <div class="topbar">
   <div class="tb-top">
     <div class="theme-toggle">
-      <button class="dict-icon-btn" id="dictIconBtn" onclick="openDictTab()" title="מילון">📖</button><button class="theme-toggle-single" id="themeToggleBtn" onclick="toggleTheme()" title="לחצי להחלפת מצב יום/לילה">🌙</button>
-      
-      <div class="role-circle-divider"></div>
+      <button class="dict-icon-btn" id="dictIconBtn" onclick="openDictTab()" title="מילון">📖</button>
+      <button class="theme-toggle-single" id="themeToggleBtn" onclick="toggleTheme()" title="לחצי להחלפת מצב יום/לילה">🌙</button>
+    </div>
+    <div class="tb-brand" id="brand-title" style="cursor:pointer;user-select:none;">ערבית מצילה חיים</div>
+    <div class="tb-left-group">
       <button class="role-circle" id="roleBtn" onclick="showWelcome()" title="בחר את התפקיד שלי">
         <span id="roleBtnEmoji">👤</span>
       </button>
-      <div class="role-circle-divider"></div>
       <button class="role-circle" id="helpBtn" onclick="showHelp()" title="עזרה ומקרא איקונים">
         <span>❓</span>
       </button>
-    </div>
-    <div class="tb-brand" id="brand-title" style="cursor:pointer;user-select:none;">ערבית מצילה חיים</div>
-    <div class="tb-badges">
-      <div class="bnew" id="new-badge">חדש</div>
-      <div class="bstatus" id="status-badge">טוען...</div>
+      <div class="tb-badges">
+        <div class="bnew" id="new-badge">חדש</div>
+        <div class="bstatus" id="status-badge">טוען...</div>
+      </div>
     </div>
   </div>
   <div class="tb-tabs">
@@ -851,7 +857,7 @@ body.day-mode .ct{border:none;border-bottom:1px solid #ebe0c5;border-left:1px so
     <button class="lb" id="lbar" onclick="setL('ar')">🔍 ערבית</button>
   </div>
   <div id="vcats" class="scr on">
-    <div class="loading" id="cats-loading"><div style="text-align:center;padding:20px;"><div style="font-size:16px;color:#FF8C00;margin-bottom:8px;">טוען...</div><div style="font-size:10px;color:#7a9ab5;opacity:0.6;">v20260522-1617</div></div></div>
+    <div class="loading" id="cats-loading"><div style="text-align:center;padding:20px;"><div style="font-size:16px;color:#FF8C00;margin-bottom:8px;">טוען...</div><div style="font-size:10px;color:#7a9ab5;opacity:0.6;">v20260522-1650</div></div></div>
     <div class="cgrid" id="cgrid" style="display:none;"></div>
   </div>
   <div id="vlist" class="scr">
@@ -1033,7 +1039,7 @@ body.day-mode .ct{border:none;border-bottom:1px solid #ebe0c5;border-left:1px so
         <div style="display:flex;gap:6px;flex-wrap:wrap;">
           <button class="rec-btn idle" id="ap-rec" onclick="toggleRec('ap')">🎙 הקלט</button>
           <input type="file" id="ap-file" accept="audio/*" style="display:none;" onchange="onFile('ap')"/>
-          <button type="button" onclick="document.getElementById('ap-file').click()" style="flex:1;padding:11px;background:#2e4558;border:none;border-radius:8px;color:#D2B48C;font-size:13px;cursor:pointer;font-family:inherit;">📁 קובץ</button>
+          <button type="button" onclick="document.getElementById('ap-file').click()" style="flex:1;padding:11px;background:#2A3D52;border:none;border-radius:8px;color:#E8D9B8;font-size:13px;cursor:pointer;font-family:inherit;">📁 קובץ</button>
         </div>
         <div id="ap-status" style="color:#1D9E75;font-size:12px;margin-top:5px;"></div>
       </div>
@@ -1054,7 +1060,7 @@ body.day-mode .ct{border:none;border-bottom:1px solid #ebe0c5;border-left:1px so
         <div style="display:flex;gap:6px;flex-wrap:wrap;">
           <button class="rec-btn idle" id="ad-rec" onclick="toggleRec('ad')">🎙 הקלט</button>
           <input type="file" id="ad-file" accept="audio/*" style="display:none;" onchange="onFile('ad')"/>
-          <button type="button" onclick="document.getElementById('ad-file').click()" style="flex:1;padding:11px;background:#2e4558;border:none;border-radius:8px;color:#D2B48C;font-size:13px;cursor:pointer;font-family:inherit;">📁 קובץ</button>
+          <button type="button" onclick="document.getElementById('ad-file').click()" style="flex:1;padding:11px;background:#2A3D52;border:none;border-radius:8px;color:#E8D9B8;font-size:13px;cursor:pointer;font-family:inherit;">📁 קובץ</button>
         </div>
         <div id="ad-status" style="color:#1D9E75;font-size:12px;margin-top:5px;"></div>
       </div>
@@ -1076,7 +1082,7 @@ body.day-mode .ct{border:none;border-bottom:1px solid #ebe0c5;border-left:1px so
         <div style="display:flex;gap:6px;flex-wrap:wrap;">
           <button class="rec-btn idle" id="ah-rec" onclick="toggleRec('ah')">🎙 הקלט</button>
           <input type="file" id="ah-file" accept="audio/*" style="display:none;" onchange="onFile('ah')"/>
-          <button type="button" onclick="document.getElementById('ah-file').click()" style="flex:1;padding:11px;background:#2e4558;border:none;border-radius:8px;color:#D2B48C;font-size:13px;cursor:pointer;font-family:inherit;">📁 קובץ</button>
+          <button type="button" onclick="document.getElementById('ah-file').click()" style="flex:1;padding:11px;background:#2A3D52;border:none;border-radius:8px;color:#E8D9B8;font-size:13px;cursor:pointer;font-family:inherit;">📁 קובץ</button>
         </div>
         <div id="ah-status" style="color:#1D9E75;font-size:12px;margin-top:5px;"></div>
       </div>
@@ -1095,7 +1101,7 @@ body.day-mode .ct{border:none;border-bottom:1px solid #ebe0c5;border-left:1px so
         <div style="display:flex;gap:6px;flex-wrap:wrap;">
           <button class="rec-btn idle" id="ak-rec" onclick="toggleRec('ak')">🎙 הקלט</button>
           <input type="file" id="ak-file" accept="audio/*" style="display:none;" onchange="onFile('ak')"/>
-          <button type="button" onclick="document.getElementById('ak-file').click()" style="flex:1;padding:11px;background:#2e4558;border:none;border-radius:8px;color:#D2B48C;font-size:13px;cursor:pointer;font-family:inherit;">📁 קובץ</button>
+          <button type="button" onclick="document.getElementById('ak-file').click()" style="flex:1;padding:11px;background:#2A3D52;border:none;border-radius:8px;color:#E8D9B8;font-size:13px;cursor:pointer;font-family:inherit;">📁 קובץ</button>
         </div>
         <div id="ak-status" style="color:#1D9E75;font-size:12px;margin-top:5px;"></div>
       </div>
@@ -1115,7 +1121,7 @@ body.day-mode .ct{border:none;border-bottom:1px solid #ebe0c5;border-left:1px so
         <div style="display:flex;gap:6px;flex-wrap:wrap;">
           <button class="rec-btn idle" id="an-rec" onclick="toggleRec('an')">🎙 הקלט</button>
           <input type="file" id="an-file" accept="audio/*" style="display:none;" onchange="onFile('an')"/>
-          <button type="button" onclick="document.getElementById('an-file').click()" style="flex:1;padding:11px;background:#2e4558;border:none;border-radius:8px;color:#D2B48C;font-size:13px;cursor:pointer;font-family:inherit;">📁 קובץ</button>
+          <button type="button" onclick="document.getElementById('an-file').click()" style="flex:1;padding:11px;background:#2A3D52;border:none;border-radius:8px;color:#E8D9B8;font-size:13px;cursor:pointer;font-family:inherit;">📁 קובץ</button>
         </div>
         <div id="an-status" style="color:#1D9E75;font-size:12px;margin-top:5px;"></div>
       </div>
@@ -1131,7 +1137,7 @@ body.day-mode .ct{border:none;border-bottom:1px solid #ebe0c5;border-left:1px so
         <div style="display:flex;gap:6px;flex-wrap:wrap;">
           <button class="rec-btn idle" id="dc-rec" onclick="toggleRec('dc')">🎙 הקלט</button>
           <input type="file" id="dc-file" accept="audio/*" style="display:none;" onchange="onFile('dc')"/>
-          <button type="button" onclick="document.getElementById('dc-file').click()" style="flex:1;padding:11px;background:#2e4558;border:none;border-radius:8px;color:#D2B48C;font-size:13px;cursor:pointer;font-family:inherit;">📁 קובץ</button>
+          <button type="button" onclick="document.getElementById('dc-file').click()" style="flex:1;padding:11px;background:#2A3D52;border:none;border-radius:8px;color:#E8D9B8;font-size:13px;cursor:pointer;font-family:inherit;">📁 קובץ</button>
         </div>
         <div id="dc-status" style="color:#1D9E75;font-size:12px;margin-top:5px;"></div>
       </div>
@@ -1156,7 +1162,7 @@ body.day-mode .ct{border:none;border-bottom:1px solid #ebe0c5;border-left:1px so
         <div style="display:flex;gap:6px;flex-wrap:wrap;">
           <button class="rec-btn idle" id="asem-rec" onclick="toggleRec('asem')">🎙 הקלט</button>
           <input type="file" id="asem-file" accept="audio/*" style="display:none;" onchange="onFile('asem')"/>
-          <button type="button" onclick="document.getElementById('asem-file').click()" style="flex:1;padding:11px;background:#2e4558;border:none;border-radius:8px;color:#D2B48C;font-size:13px;cursor:pointer;font-family:inherit;">📁 קובץ</button>
+          <button type="button" onclick="document.getElementById('asem-file').click()" style="flex:1;padding:11px;background:#2A3D52;border:none;border-radius:8px;color:#E8D9B8;font-size:13px;cursor:pointer;font-family:inherit;">📁 קובץ</button>
         </div>
         <div id="asem-status" style="color:#1D9E75;font-size:12px;margin-top:5px;"></div>
       </div>
@@ -1166,10 +1172,10 @@ body.day-mode .ct{border:none;border-bottom:1px solid #ebe0c5;border-left:1px so
 
     <!-- Categories -->
     <div id="at-acat" style="display:none;"><div class="acard">
-      <div style="color:#D2B48C;font-size:13px;font-weight:500;margin-bottom:12px;">קטגוריות קיימות</div>
+      <div style="color:#E8D9B8;font-size:13px;font-weight:500;margin-bottom:12px;">קטגוריות קיימות</div>
       <div id="cat-list"></div>
-      <div style="border-top:1px solid #2e4558;padding-top:14px;margin-top:8px;">
-        <div style="color:#D2B48C;font-size:13px;font-weight:500;margin-bottom:10px;">+ קטגוריה חדשה</div>
+      <div style="border-top:1px solid #2A3D52;padding-top:14px;margin-top:8px;">
+        <div style="color:#E8D9B8;font-size:13px;font-weight:500;margin-bottom:10px;">+ קטגוריה חדשה</div>
         <div class="afl"><label>שם *</label><input id="new-cat-name" placeholder="לדוג׳: עזרה ראשונה"/></div>
         <div class="afl"><label>סמל</label><input id="new-cat-icon" placeholder="🩹" style="font-size:20px;"/></div>
         <div class="afl"><label>סוג</label><select id="new-cat-sec">
@@ -1185,8 +1191,8 @@ body.day-mode .ct{border:none;border-bottom:1px solid #ebe0c5;border-left:1px so
 
 <!-- Edit Modal -->
 <div id="edit-modal" style="display:none;position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.85);z-index:9999;align-items:center;justify-content:center;padding:16px;direction:rtl;">
-  <div style="background:#1A2B3C;border:1px solid #2e4558;border-radius:16px;padding:18px;width:100%;max-width:440px;max-height:90vh;overflow-y:auto;">
-    <div style="color:#D2B48C;font-size:16px;font-weight:600;margin-bottom:16px;">✏️ עריכה</div>
+  <div style="background:#0E1B2E;border:1px solid #2A3D52;border-radius:16px;padding:18px;width:100%;max-width:440px;max-height:90vh;overflow-y:auto;">
+    <div style="color:#E8D9B8;font-size:16px;font-weight:600;margin-bottom:16px;">✏️ עריכה</div>
     <input type="hidden" id="edit-id"/>
     <div class="afl"><label>עברית *</label><input id="edit-he"/></div>
     <div class="afl"><label>תעתיק</label><input id="edit-trans"/></div>
@@ -1215,12 +1221,12 @@ body.day-mode .ct{border:none;border-bottom:1px solid #ebe0c5;border-left:1px so
       <div style="display:flex;gap:6px;flex-wrap:wrap;">
         <button class="rec-btn idle" id="edit-rec" onclick="toggleRec('edit')">🎙 הקלט חדש</button>
         <input type="file" id="edit-file" accept="audio/*" style="display:none;" onchange="onFile('edit')"/>
-        <button type="button" onclick="document.getElementById('edit-file').click()" style="flex:1;padding:11px;background:#2e4558;border:none;border-radius:8px;color:#D2B48C;font-size:13px;cursor:pointer;font-family:inherit;">📁 קובץ</button>
+        <button type="button" onclick="document.getElementById('edit-file').click()" style="flex:1;padding:11px;background:#2A3D52;border:none;border-radius:8px;color:#E8D9B8;font-size:13px;cursor:pointer;font-family:inherit;">📁 קובץ</button>
       </div>
       <div id="edit-status" style="color:#1D9E75;font-size:12px;margin-top:5px;"></div>
     </div>
     <div style="display:flex;gap:8px;margin-top:14px;">
-      <button onclick="closeEdit()" style="flex:1;padding:12px;background:#2e4558;border:none;border-radius:8px;color:#D2B48C;font-size:14px;cursor:pointer;font-family:inherit;">ביטול</button>
+      <button onclick="closeEdit()" style="flex:1;padding:12px;background:#2A3D52;border:none;border-radius:8px;color:#E8D9B8;font-size:14px;cursor:pointer;font-family:inherit;">ביטול</button>
       <button id="edit-save-btn" onclick="saveEdit()" style="flex:2;padding:12px;background:#FF8C00;border:none;border-radius:8px;color:#fff;font-size:14px;font-weight:600;cursor:pointer;font-family:inherit;">שמור</button>
     </div>
   </div>
@@ -1417,7 +1423,7 @@ function bldCats(){
   if (!DB || DB.length === 0) {
     loadEl.innerHTML = '<div style="text-align:center;padding:20px;color:#FF8C00;">' +
       'מתחבר לשרת...<br><br>' +
-      '<div style="font-size:11px;color:#7a9ab5;">v20260522-1617</div><br>' +
+      '<div style="font-size:11px;color:#7a9ab5;">v20260522-1650</div><br>' +
       '<button onclick="location.reload(true)" style="padding:10px 20px;background:#FF8C00;color:#fff;border:none;border-radius:8px;font-family:inherit;cursor:pointer;font-weight:700;margin-top:10px;">🔄 רענן</button>' +
       '</div>';
     return;
@@ -1620,6 +1626,33 @@ function opSem(i){
   document.getElementById('tab-lib').className='scr on';
   shV('vpop');
 }
+// Map each existing cat to one of 3 main groups
+var CUSTOMS_GROUP_MAP = {
+  // Group 1: כללי כבוד בחברה הערבית
+  'תרבות והתנהגות': 'כללי כבוד בחברה הערבית',
+  'כללי כבוד בחברה הערבית': 'כללי כבוד בחברה הערבית',
+  'לבוש וכבוד': 'כללי כבוד בחברה הערבית',
+  // Group 2: אסלאם וחגים
+  'דת ואסלאם': 'אסלאם וחגים',
+  'לוח שנה ותרבות': 'אסלאם וחגים',
+  'אסלאם וחגים': 'אסלאם וחגים',
+  // Group 3: כבוד ומשפחה
+  'משפחה ונישואים': 'כבוד ומשפחה',
+  'אוכל ואירוח': 'כבוד ומשפחה',
+  'כבוד ומשפחה': 'כבוד ומשפחה'
+};
+
+// 3 main groups
+var CUSTOMS_MAIN_GROUPS = [
+  {name:'כללי כבוד בחברה הערבית', icon:'🤝',      color:'linear-gradient(135deg,#c0392b 0%,#922b21 100%)'},
+  {name:'אסלאם וחגים',            icon:'🕌',      color:'linear-gradient(135deg,#2980b9 0%,#1f5f8b 100%)'},
+  {name:'כבוד ומשפחה',            icon:'👨‍👩‍👧',  color:'linear-gradient(135deg,#8e44ad 0%,#6c3483 100%)'}
+];
+
+function getCustomsMainGroup(cat){
+  return CUSTOMS_GROUP_MAP[cat] || 'כללי כבוד';
+}
+
 function rCus(){
   var grid = document.getElementById('customs-grid');
   if (!grid) return;
@@ -1627,44 +1660,53 @@ function rCus(){
     grid.innerHTML = '<div class="empty" style="grid-column:1/-1;">אין מנהגים עדיין</div>';
     return;
   }
+  
+  // Group by main group (4 groups total)
   var groups = {};
   CUS.forEach(function(c){
     var cat = c.cat || 'תרבות והתנהגות';
-    if (!groups[cat]) groups[cat] = [];
-    groups[cat].push(c);
+    var mainGroup = getCustomsMainGroup(cat);
+    if (!groups[mainGroup]) groups[mainGroup] = [];
+    groups[mainGroup].push(c);
   });
-  var colors = [
-    'linear-gradient(135deg,#c0392b 0%,#922b21 100%)',
-    'linear-gradient(135deg,#1D9E75 0%,#147a59 100%)',
-    'linear-gradient(135deg,#2980b9 0%,#1f5f8b 100%)',
-    'linear-gradient(135deg,#8e44ad 0%,#6c3483 100%)',
-    'linear-gradient(135deg,#FF8C00 0%,#c66700 100%)',
-    'linear-gradient(135deg,#16a085 0%,#0e6655 100%)'
-  ];
-  var iconMap = {
-    'תרבות והתנהגות': '🤝',
-    'לוח שנה ותרבות': '📅',
-    'דת ואסלאם': '🕌',
-    'משפחה ונישואים': '👨‍👩‍👧',
-    'אוכל ואירוח': '🍽️',
-    'לבוש וכבוד': '👔'
-  };
+  
+  // Render exactly 4 main group cubes (in the predefined order)
   var html = '';
-  var i = 0;
-  for (var cat in groups) {
-    var icon = iconMap[cat] || '📜';
-    var color = colors[i % colors.length];
-    var safeCat = cat.replace(/'/g, "\\'");
-    html += '<div class="customs-cube" style="background:' + color + ';" onclick="openCustomsCat(\'' + safeCat + '\')">'
-      + '<div class="customs-cube-icon">' + icon + '</div>'
-      + '<div class="customs-cube-title">' + cat + '</div>'
-      + '<div class="customs-cube-count">' + groups[cat].length + ' פריטים</div>'
+  CUSTOMS_MAIN_GROUPS.forEach(function(group){
+    var items = groups[group.name] || [];
+    if (items.length === 0) return; // skip empty groups
+    var safeName = group.name.replace(/'/g, "\\'");
+    html += '<div class="customs-cube" style="background:' + group.color + ';" onclick="openCustomsGroup(\'' + safeName + '\')">'
+      + '<div class="customs-cube-icon">' + group.icon + '</div>'
+      + '<div class="customs-cube-title">' + group.name + '</div>'
+      + '<div class="customs-cube-count">' + items.length + ' פריטים</div>'
       + '</div>';
-    i++;
-  }
+  });
   grid.innerHTML = html;
 }
 
+function openCustomsGroup(groupName){
+  // Show all items that belong to this main group
+  var items = CUS.filter(function(c){
+    var cat = c.cat || 'תרבות והתנהגות';
+    return getCustomsMainGroup(cat) === groupName;
+  });
+  document.getElementById('customs-home').style.display = 'none';
+  document.getElementById('customs-list').style.display = 'block';
+  document.getElementById('customs-list-title').textContent = groupName;
+  var html = '';
+  items.forEach(function(c){
+    var txt = c.why || c.ar || '';
+    txt = txt.replace(/(המלצה ללוחם[:]?)/g, '<span style="color:#FF8C00;font-weight:700;font-size:14px;">$1</span>');
+    txt = txt.replace(/(ההקשר ללוחם[:]?)/g, '<span style="color:#FF8C00;font-weight:700;font-size:14px;">$1</span>');
+    txt = txt.replace(/(הקשר ללוחם[:]?)/g, '<span style="color:#FF8C00;font-weight:700;font-size:14px;">$1</span>');
+    txt = txt.replace(/(טיפ ללוחם[:]?)/g, '<span style="color:#FF8C00;font-weight:700;font-size:14px;">$1</span>');
+    html += '<div class="card"><div class="che">' + c.he + '</div><div style="color:#a0b8c8;font-size:13px;line-height:1.7;margin-top:6px;">' + txt + '</div></div>';
+  });
+  document.getElementById('cuslist').innerHTML = html;
+}
+
+// Keep old function for backward compat
 function openCustomsCat(cat){
   var items = CUS.filter(function(c){ return (c.cat || 'תרבות והתנהגות') === cat; });
   document.getElementById('customs-home').style.display = 'none';
@@ -2063,7 +2105,7 @@ function play(btn,speed){
       if(b.classList.contains('slow')) b.innerHTML = '🐢 צב';
       if(b.classList.contains('fast')) b.innerHTML = '🐇 ארנב';
     });
-    bars.forEach(b => { b.style.background = '#D2B48C'; });
+    bars.forEach(b => { b.style.background = '#E8D9B8'; });
     tEl.textContent = '0:00';
     return;
   }
@@ -2079,11 +2121,11 @@ function play(btn,speed){
     if(speed==='slow')audio.playbackRate=0.7;
     curAudio=audio;
     btn.innerHTML='⏸ עצור';
-    bars.forEach((b,i)=>{b.style.background=i<2?'#FF8C00':'#D2B48C';});
+    bars.forEach((b,i)=>{b.style.background=i<2?'#FF8C00':'#E8D9B8';});
     pt=setInterval(()=>{
       if(!audio.paused&&audio.duration){
         const pct=audio.currentTime/audio.duration;
-        bars.forEach((b,i)=>{b.style.background=i<Math.floor(pct*bars.length)?'#FF8C00':'#D2B48C';});
+        bars.forEach((b,i)=>{b.style.background=i<Math.floor(pct*bars.length)?'#FF8C00':'#E8D9B8';});
         const s=Math.floor(audio.currentTime);
         tEl.textContent='0:'+(s<10?'0':'')+s;
       }
@@ -2091,7 +2133,7 @@ function play(btn,speed){
     audio.onended=()=>{
       clearInterval(pt);
       btn.innerHTML=orig;
-      bars.forEach(b=>{b.style.background='#D2B48C';});
+      bars.forEach(b=>{b.style.background='#E8D9B8';});
       tEl.textContent='0:00';
       curAudio=null;
     };
@@ -2101,17 +2143,17 @@ function play(btn,speed){
     const dur=speed==='slow'?8:4;
     let el=0;
     btn.innerHTML='⏸ עצור';
-    bars.forEach((b,i)=>{b.style.background=i<2?'#FF8C00':'#D2B48C';});
+    bars.forEach((b,i)=>{b.style.background=i<2?'#FF8C00':'#E8D9B8';});
     pt=setInterval(()=>{
       el+=0.1;
       const pct=Math.min(el/dur,1);
-      bars.forEach((b,i)=>{b.style.background=i<Math.floor(pct*bars.length)?'#FF8C00':'#D2B48C';});
+      bars.forEach((b,i)=>{b.style.background=i<Math.floor(pct*bars.length)?'#FF8C00':'#E8D9B8';});
       const s=Math.floor(el);
       tEl.textContent='0:'+(s<10?'0':'')+s;
       if(el>=dur){
         clearInterval(pt);
         btn.innerHTML=orig;
-        bars.forEach(b=>{b.style.background='#D2B48C';});
+        bars.forEach(b=>{b.style.background='#E8D9B8';});
         tEl.textContent='0:00';
       }
     },100);
@@ -2289,12 +2331,12 @@ async function renderAdminList(){
     
     // Build search box + filter bar
     var filterBar = '<div style="margin-bottom:12px;">'
-      + '<input type="text" id="admin-search-box" placeholder="🔍 חיפוש בעברית / ערבית / תעתיק / קטגוריה" oninput="onAdminSearch(this.value)" value="'+(window._adminSearch||'').replace(/"/g,'&quot;')+'" style="width:100%;padding:12px 16px;background:#1c2e44;border:2px solid #FF8C00;border-radius:10px;color:#fff;font-size:14px;font-family:inherit;direction:rtl;margin-bottom:10px;">'
-      + '<div style="display:flex;gap:6px;flex-wrap:wrap;padding:10px;background:#1c2e44;border-radius:10px;">'
-      + '<button onclick="setAdminFilter(\'all\')" style="padding:6px 12px;border:none;border-radius:6px;font-size:11px;cursor:pointer;font-family:inherit;background:'+(filterMode==='all'?'#FF8C00':'#2e4558')+';color:#fff;font-weight:600;">הכל ('+totalCount+')</button>'
-      + '<button onclick="setAdminFilter(\'no-audio\')" style="padding:6px 12px;border:none;border-radius:6px;font-size:11px;cursor:pointer;font-family:inherit;background:'+(filterMode==='no-audio'?'#FF8C00':'#2e4558')+';color:#fff;font-weight:600;">🔇 צריך הקלטה ('+noAudioCount+')</button>'
-      + '<button onclick="setAdminFilter(\'no-responses\')" style="padding:6px 12px;border:none;border-radius:6px;font-size:11px;cursor:pointer;font-family:inherit;background:'+(filterMode==='no-responses'?'#FF8C00':'#2e4558')+';color:#fff;font-weight:600;">💬 בלי תשובות ('+(totalCount-hasRespCount)+')</button>'
-      + '<button onclick="setAdminFilter(\'has-responses\')" style="padding:6px 12px;border:none;border-radius:6px;font-size:11px;cursor:pointer;font-family:inherit;background:'+(filterMode==='has-responses'?'#FF8C00':'#2e4558')+';color:#fff;font-weight:600;">✓ עם תשובות ('+hasRespCount+')</button>'
+      + '<input type="text" id="admin-search-box" placeholder="🔍 חיפוש בעברית / ערבית / תעתיק / קטגוריה" oninput="onAdminSearch(this.value)" value="'+(window._adminSearch||'').replace(/"/g,'&quot;')+'" style="width:100%;padding:12px 16px;background:#18293E;border:2px solid #FF8C00;border-radius:10px;color:#fff;font-size:14px;font-family:inherit;direction:rtl;margin-bottom:10px;">'
+      + '<div style="display:flex;gap:6px;flex-wrap:wrap;padding:10px;background:#18293E;border-radius:10px;">'
+      + '<button onclick="setAdminFilter(\'all\')" style="padding:6px 12px;border:none;border-radius:6px;font-size:11px;cursor:pointer;font-family:inherit;background:'+(filterMode==='all'?'#FF8C00':'#2A3D52')+';color:#fff;font-weight:600;">הכל ('+totalCount+')</button>'
+      + '<button onclick="setAdminFilter(\'no-audio\')" style="padding:6px 12px;border:none;border-radius:6px;font-size:11px;cursor:pointer;font-family:inherit;background:'+(filterMode==='no-audio'?'#FF8C00':'#2A3D52')+';color:#fff;font-weight:600;">🔇 צריך הקלטה ('+noAudioCount+')</button>'
+      + '<button onclick="setAdminFilter(\'no-responses\')" style="padding:6px 12px;border:none;border-radius:6px;font-size:11px;cursor:pointer;font-family:inherit;background:'+(filterMode==='no-responses'?'#FF8C00':'#2A3D52')+';color:#fff;font-weight:600;">💬 בלי תשובות ('+(totalCount-hasRespCount)+')</button>'
+      + '<button onclick="setAdminFilter(\'has-responses\')" style="padding:6px 12px;border:none;border-radius:6px;font-size:11px;cursor:pointer;font-family:inherit;background:'+(filterMode==='has-responses'?'#FF8C00':'#2A3D52')+';color:#fff;font-weight:600;">✓ עם תשובות ('+hasRespCount+')</button>'
       + '</div>'
       + '<div style="text-align:center;color:#7a9ab5;font-size:11px;margin-top:6px;">מציג '+filteredItems.length+' מתוך '+totalCount+'</div>'
       + '</div>';
@@ -2332,7 +2374,7 @@ async function renderAdminList(){
         statusBadges += '<span style="font-size:11px;color:#FFD700;background:rgba(255,215,0,0.15);padding:2px 7px;border-radius:7px;">💬 '+respCount+' תשובות</span>';
       }
       
-      html+=`<div style="background:#1A2B3C;border:1px solid #2e4558;border-radius:10px;padding:12px;margin-bottom:8px;">
+      html+=`<div style="background:#0E1B2E;border:1px solid #2A3D52;border-radius:10px;padding:12px;margin-bottom:8px;">
         <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:6px;">
           <div style="flex:1;">
             <div style="color:#fff;font-size:14px;font-weight:500;">${p.he||''}</div>
@@ -2343,7 +2385,7 @@ async function renderAdminList(){
         <div style="display:flex;gap:6px;align-items:center;margin-top:6px;flex-wrap:wrap;">
           ${statusBadges}
           <div style="flex:1;"></div>
-          <button onclick="openEditIdx(${i})" style="padding:5px 10px;background:#2e4558;border:none;border-radius:6px;color:#D2B48C;font-size:12px;cursor:pointer;font-family:inherit;">✏️ ערוך</button>
+          <button onclick="openEditIdx(${i})" style="padding:5px 10px;background:#2A3D52;border:none;border-radius:6px;color:#E8D9B8;font-size:12px;cursor:pointer;font-family:inherit;">✏️ ערוך</button>
           <button onclick="delP('${p.id}')" style="padding:5px 10px;background:#3a1a1a;border:1px solid #5a2020;border-radius:6px;color:#ff8080;font-size:12px;cursor:pointer;font-family:inherit;">🗑</button>
         </div>
       </div>`;
@@ -2472,9 +2514,9 @@ function _renderResponseRow(idx, r){
         +'<button type="button" onclick="removeResponseRow('+idx+')" style="background:none;border:none;color:#e74c3c;font-size:16px;cursor:pointer;padding:0 4px;">🗑️</button>'
       +'</div>'
     +'</div>'
-    +'<input type="text" placeholder="עברית: למשל שמי אחמד" value="'+(r.he||'').replace(/"/g,'&quot;')+'" id="resp-he-'+idx+'" style="background:#1c2e44;border:1px solid #2e4558;border-radius:6px;padding:7px 10px;color:#fff;font-size:13px;font-family:inherit;">'
-    +'<input type="text" placeholder="תעתיק: למשל אסמי אחמד" value="'+(r.trans||'').replace(/"/g,'&quot;')+'" id="resp-trans-'+idx+'" style="background:#1c2e44;border:1px solid #2e4558;border-radius:6px;padding:7px 10px;color:#D2B48C;font-size:13px;font-family:inherit;">'
-    +'<input type="text" placeholder="ערבית: למשל اسمي أحمد" value="'+(r.ar||'').replace(/"/g,'&quot;')+'" id="resp-ar-'+idx+'" style="background:#1c2e44;border:1px solid #2e4558;border-radius:6px;padding:7px 10px;color:#FFD700;font-size:15px;font-family:Georgia,serif;direction:rtl;">'
+    +'<input type="text" placeholder="עברית: למשל שמי אחמד" value="'+(r.he||'').replace(/"/g,'&quot;')+'" id="resp-he-'+idx+'" style="background:#18293E;border:1px solid #2A3D52;border-radius:6px;padding:7px 10px;color:#fff;font-size:13px;font-family:inherit;">'
+    +'<input type="text" placeholder="תעתיק: למשל אסמי אחמד" value="'+(r.trans||'').replace(/"/g,'&quot;')+'" id="resp-trans-'+idx+'" style="background:#18293E;border:1px solid #2A3D52;border-radius:6px;padding:7px 10px;color:#E8D9B8;font-size:13px;font-family:inherit;">'
+    +'<input type="text" placeholder="ערבית: למשל اسمي أحمد" value="'+(r.ar||'').replace(/"/g,'&quot;')+'" id="resp-ar-'+idx+'" style="background:#18293E;border:1px solid #2A3D52;border-radius:6px;padding:7px 10px;color:#FFD700;font-size:15px;font-family:Georgia,serif;direction:rtl;">'
   +'</div>';
 }
 
@@ -2633,11 +2675,11 @@ async function delP(id){
 function renderCatList(){
   const ALLCATS=[...CATS.map(c=>({...c,builtin:true,section:'military'})),...DCATS.map(c=>({...c,builtin:true,section:'daily'}))];
   document.getElementById('cat-list').innerHTML=ALLCATS.map(c=>`
-    <div style="display:flex;align-items:center;gap:8px;padding:8px 0;border-bottom:1px solid #2e4558;">
+    <div style="display:flex;align-items:center;gap:8px;padding:8px 0;border-bottom:1px solid #2A3D52;">
       <span style="font-size:18px;">${c.icon}</span>
       <span style="color:#fff;font-size:13px;flex:1;">${c.id}</span>
       <span style="font-size:10px;color:#7a9ab5;">${c.section==='military'?'מבצעי':'יומיומי'}</span>
-      <span style="font-size:10px;color:#2e4558;">קבוע</span>
+      <span style="font-size:10px;color:#2A3D52;">קבוע</span>
     </div>`).join('');
 }
 async function addCat(){
@@ -3121,7 +3163,7 @@ function rFav(){
     var p=items[j];
     var sec=DB.includes(p)?"military":DAILY.includes(p)?"daily":HEART.includes(p)?"heart":"navy";
     var idx=sec==="military"?DB.indexOf(p):sec==="daily"?DAILY.indexOf(p):sec==="heart"?HEART.indexOf(p):NAVY.indexOf(p);
-    h+='<div style="background:#2a3d52;border:1px solid #2e4558;border-radius:10px;padding:12px 14px;margin-bottom:8px;cursor:pointer;border-right:4px solid #FF8C00;" onclick="opFavItem(\''+sec+'\','+idx+')">';
+    h+='<div style="background:#1F3147;border:1px solid #2A3D52;border-radius:10px;padding:12px 14px;margin-bottom:8px;cursor:pointer;border-right:4px solid #FF8C00;" onclick="opFavItem(\''+sec+'\','+idx+')">';
     h+='<div style="display:flex;justify-content:space-between;align-items:flex-start;">';
     h+='<div style="flex:1;"><div style="color:#fff;font-size:14px;margin-bottom:4px;">'+p.he+urgDot(p.urgency)+'</div>';
     h+='<div style="color:#fff;font-size:14px;font-family:Georgia,serif;">'+p.trans+'</div></div>';
@@ -3161,8 +3203,8 @@ function rRecent(){
     if(found)items.push(found);
   }
   // Always show header so users know the section exists
-  var h='<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;border-top:1px solid #2e4558;padding-top:14px;">';
-  h+='<div style="color:#D2B48C;font-size:13px;font-weight:600;">🕐 אחרונים שצפית בהם</div>';
+  var h='<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;border-top:1px solid #2A3D52;padding-top:14px;">';
+  h+='<div style="color:#E8D9B8;font-size:13px;font-weight:600;">🕐 אחרונים שצפית בהם</div>';
   if(items.length){
     h+='<div onclick="clearRecent()" style="color:#7a9ab5;font-size:11px;cursor:pointer;padding:4px 8px;">נקה הכל ✕</div>';
   }
@@ -3175,7 +3217,7 @@ function rRecent(){
     var p=items[j];
     var sec=DB.includes(p)?"military":DAILY.includes(p)?"daily":HEART.includes(p)?"heart":"navy";
     var idx=sec==="military"?DB.indexOf(p):sec==="daily"?DAILY.indexOf(p):sec==="heart"?HEART.indexOf(p):NAVY.indexOf(p);
-    h+='<div style="background:#1a2535;border:1px solid #2e4558;border-radius:8px;padding:10px 12px;margin-bottom:6px;display:flex;align-items:center;gap:8px;">';
+    h+='<div style="background:#1a2535;border:1px solid #2A3D52;border-radius:8px;padding:10px 12px;margin-bottom:6px;display:flex;align-items:center;gap:8px;">';
     h+='<div style="flex:1;cursor:pointer;" onclick="opPop('+idx+',\''+sec+'\')">';
     h+='<div style="color:#fff;font-size:13px;">'+p.he+urgDot(p.urgency)+'</div>';
     h+='<div style="color:#7a9ab5;font-size:12px;">'+p.trans+'</div></div>';
