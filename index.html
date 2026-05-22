@@ -781,7 +781,7 @@ body.day-mode .ct{border:none;border-bottom:1px solid #ebe0c5;border-left:1px so
     <button class="lb" id="lbar" onclick="setL('ar')">🔍 ערבית</button>
   </div>
   <div id="vcats" class="scr on">
-    <div class="loading" id="cats-loading"><div style="text-align:center;padding:20px;"><div style="font-size:16px;color:#FF8C00;margin-bottom:8px;">טוען...</div><div style="font-size:10px;color:#7a9ab5;opacity:0.6;">v20260520-1653</div></div></div>
+    <div class="loading" id="cats-loading"><div style="text-align:center;padding:20px;"><div style="font-size:16px;color:#FF8C00;margin-bottom:8px;">טוען...</div><div style="font-size:10px;color:#7a9ab5;opacity:0.6;">v20260522-1443</div></div></div>
     <div class="cgrid" id="cgrid" style="display:none;"></div>
   </div>
   <div id="vlist" class="scr">
@@ -1336,7 +1336,7 @@ function bldCats(){
   if (!DB || DB.length === 0) {
     loadEl.innerHTML = '<div style="text-align:center;padding:20px;color:#FF8C00;">' +
       'מתחבר לשרת...<br><br>' +
-      '<div style="font-size:11px;color:#7a9ab5;">v20260520-1653</div><br>' +
+      '<div style="font-size:11px;color:#7a9ab5;">v20260522-1443</div><br>' +
       '<button onclick="location.reload(true)" style="padding:10px 20px;background:#FF8C00;color:#fff;border:none;border-radius:8px;font-family:inherit;cursor:pointer;font-weight:700;margin-top:10px;">🔄 רענן</button>' +
       '</div>';
     return;
@@ -3073,10 +3073,11 @@ function setTheme(mode){
     document.body.classList.remove('day-mode');
   }
   localStorage.setItem('theme',mode);
-  var moon=document.getElementById('moonBtn');
-  var sun=document.getElementById('sunBtn');
-  if(moon)moon.classList.toggle('active',mode==='night');
-  if(sun)sun.classList.toggle('active',mode==='day');
+  var btn = document.getElementById('themeToggleBtn');
+  if (btn) {
+    btn.textContent = mode === 'day' ? '☀️' : '🌙';
+    btn.title = mode === 'day' ? 'מצב יום - לחצי למצב לילה' : 'מצב לילה - לחצי למצב יום';
+  }
 }
 function loadTheme(){
   var saved=localStorage.getItem('theme')||'night';
