@@ -958,7 +958,7 @@ body.day-mode .ct{border:none;border-bottom:1px solid #ebe0c5;border-left:1px so
     <button class="lb" id="lbar" onclick="setL('ar')">🔍 ערבית</button>
   </div>
   <div id="vcats" class="scr on">
-    <div class="loading" id="cats-loading"><div style="text-align:center;padding:20px;"><div style="font-size:16px;color:#FF8C00;margin-bottom:8px;">טוען...</div><div style="font-size:10px;color:#7a9ab5;opacity:0.6;">v20260523-1858</div></div></div>
+    <div class="loading" id="cats-loading"><div style="text-align:center;padding:20px;"><div style="font-size:16px;color:#FF8C00;margin-bottom:8px;">טוען...</div><div style="font-size:10px;color:#7a9ab5;opacity:0.6;">v20260523-1903</div></div></div>
     <div class="cgrid" id="cgrid" style="display:none;"></div>
   </div>
   <div id="vlist" class="scr">
@@ -1524,7 +1524,7 @@ function bldCats(){
   if (!DB || DB.length === 0) {
     loadEl.innerHTML = '<div style="text-align:center;padding:20px;color:#FF8C00;">' +
       'מתחבר לשרת...<br><br>' +
-      '<div style="font-size:11px;color:#7a9ab5;">v20260523-1858</div><br>' +
+      '<div style="font-size:11px;color:#7a9ab5;">v20260523-1903</div><br>' +
       '<button onclick="location.reload(true)" style="padding:10px 20px;background:#FF8C00;color:#fff;border:none;border-radius:8px;font-family:inherit;cursor:pointer;font-weight:700;margin-top:10px;">🔄 רענן</button>' +
       '</div>';
     return;
@@ -1844,18 +1844,34 @@ function opArt(i){
 function clsArt(){document.getElementById('artlv').style.display='block';document.getElementById('artfv').style.display='none';}
 
 function navigateTo(tabId, el){
-  // Debug log
+  // VISIBLE DEBUG - shows what happens
+  var dbg = 'KLIK: tabId="' + tabId + '"\n';
+  
   // Update bottom nav active state
   document.querySelectorAll('.bnav-item').forEach(function(x){x.classList.remove('active');});
   if (el) el.classList.add('active');
   
   // Hide ALL screens first
-  document.querySelectorAll('[id^="tab-"]').forEach(function(x){x.className='scr';});
+  var allScreens = document.querySelectorAll('[id^="tab-"]');
+  dbg += 'Found ' + allScreens.length + ' tabs\n';
+  allScreens.forEach(function(x){x.className='scr';});
   
   // Show the requested screen
   var target = document.getElementById('tab-' + tabId);
+  dbg += 'tab-' + tabId + ' exists: ' + (target ? 'YES' : 'NO') + '\n';
+  
   if (target) {
     target.className = 'scr on';
+    var cs = window.getComputedStyle(target);
+    dbg += 'display=' + cs.display + ' visibility=' + cs.visibility + '\n';
+    dbg += 'innerHTML length: ' + target.innerHTML.length + '\n';
+    // Show first 100 chars of innerHTML
+    dbg += 'first 100 chars: ' + target.innerHTML.substring(0, 100);
+  }
+  
+  // Show debug only for me/prog
+  if (tabId === 'me' || tabId === 'prog') {
+    alert(dbg);
   }
   
   // Special handling per tab
