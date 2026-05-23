@@ -38,6 +38,119 @@ body.day-mode body.day-mode .tb-brand{
   color:#c66700;
 }
 .tb-badges{display:flex;gap:5px;align-items:center;}
+
+/* ============ BOTTOM NAVIGATION ============ */
+.bottom-nav{
+  position:fixed;
+  bottom:0;
+  left:0;
+  right:0;
+  background:#0E1B2E;
+  border-top:1px solid #2A3D52;
+  display:flex;
+  justify-content:space-around;
+  padding:8px 4px 14px;
+  z-index:1000;
+  box-shadow:0 -2px 12px rgba(0,0,0,0.3);
+}
+.bnav-item{
+  flex:1;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  justify-content:center;
+  padding:6px 4px;
+  cursor:pointer;
+  transition:all 0.2s;
+  border-radius:10px;
+  user-select:none;
+}
+.bnav-item:hover{background:rgba(255,140,0,0.08);}
+.bnav-item.active{background:rgba(255,140,0,0.15);}
+.bnav-icon{
+  font-size:22px;
+  margin-bottom:2px;
+  opacity:0.65;
+  transition:all 0.2s;
+}
+.bnav-item.active .bnav-icon{
+  opacity:1;
+  transform:scale(1.1);
+}
+.bnav-label{
+  font-size:10px;
+  color:#7a9ab5;
+  font-weight:600;
+  transition:color 0.2s;
+}
+.bnav-item.active .bnav-label{
+  color:#FF8C00;
+}
+
+/* Day mode */
+body.day-mode .bottom-nav{
+  background:#f5f1e8;
+  border-top-color:#d4c8b0;
+  box-shadow:0 -2px 12px rgba(0,0,0,0.1);
+}
+body.day-mode .bnav-label{color:#5a6b80;}
+body.day-mode .bnav-item.active .bnav-label{color:#c66700;}
+
+/* Add bottom padding to body to prevent content cutoff */
+body{padding-bottom:75px;}
+
+/* "Me" tab content */
+#tab-me{display:none;}
+#tab-me.on{display:block;}
+
+/* "Progress" tab content */
+#tab-prog{display:none;}
+#tab-prog.on{display:block;}
+
+.profile-card{
+  background:#18293E;
+  border:1px solid #2A3D52;
+  border-radius:14px;
+  padding:18px;
+  margin-bottom:12px;
+}
+.profile-row{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  padding:14px 0;
+  border-bottom:1px solid rgba(255,255,255,0.05);
+  cursor:pointer;
+  transition:background 0.15s;
+}
+.profile-row:last-child{border-bottom:none;}
+.profile-row:hover{background:rgba(255,140,0,0.05);}
+.profile-row-left{display:flex;align-items:center;gap:12px;}
+.profile-row-icon{font-size:22px;}
+.profile-row-label{color:#E8D9B8;font-size:15px;font-weight:500;}
+.profile-row-arrow{color:#7a9ab5;font-size:18px;}
+body.day-mode .profile-card{background:#fff;border-color:#d4c8b0;}
+body.day-mode .profile-row-label{color:#1A2B3C;}
+body.day-mode .profile-row-arrow{color:#5a6b80;}
+
+.progress-coming-soon{
+  background:linear-gradient(135deg,rgba(255,140,0,0.1) 0%,rgba(212,162,78,0.1) 100%);
+  border:1.5px solid rgba(255,140,0,0.3);
+  border-radius:14px;
+  padding:32px 20px;
+  text-align:center;
+  margin-top:14px;
+}
+.progress-coming-soon h3{
+  color:#FF8C00;
+  font-size:20px;
+  margin-bottom:10px;
+}
+.progress-coming-soon p{
+  color:#a0b8c8;
+  font-size:14px;
+  line-height:1.7;
+}
 .tb-left-group{display:flex;gap:5px;align-items:center;}
 .bnew{background:#FF8C00;color:#fff;font-size:10px;padding:2px 8px;border-radius:10px;font-weight:600;display:none;}
 .bstatus{background:#1D9E75;color:#fff;font-size:10px;padding:2px 8px;border-radius:10px;}
@@ -802,10 +915,8 @@ body.day-mode .ct{border:none;border-bottom:1px solid #ebe0c5;border-left:1px so
       </div>
     </div>
   </div>
-  <div class="tb-tabs">
-    <div class="tb-tab" onclick="ST('qk',this)" style="color:#c0392b !important;font-weight:700;">🚨 חירום</div>
+  <div class="tb-tabs" id="topTabsRow">
     <div class="tb-tab active" onclick="ST('lib',this)">מבצעי</div>
-    <div class="tb-tab" onclick="ST('fav',this)">⭐ מועדפים</div>
     <div class="tb-tab" onclick="ST('cus',this)">מנהגים</div>
     <div class="tb-tab" onclick="ST('hrt',this)">פותחים לב</div>
     <div class="tb-tab" id="admin-tab" style="display:none;" onclick="ST('adm',this)">ניהול</div>
@@ -855,7 +966,7 @@ body.day-mode .ct{border:none;border-bottom:1px solid #ebe0c5;border-left:1px so
     <button class="lb" id="lbar" onclick="setL('ar')">🔍 ערבית</button>
   </div>
   <div id="vcats" class="scr on">
-    <div class="loading" id="cats-loading"><div style="text-align:center;padding:20px;"><div style="font-size:16px;color:#FF8C00;margin-bottom:8px;">טוען...</div><div style="font-size:10px;color:#7a9ab5;opacity:0.6;">v20260522-1753</div></div></div>
+    <div class="loading" id="cats-loading"><div style="text-align:center;padding:20px;"><div style="font-size:16px;color:#FF8C00;margin-bottom:8px;">טוען...</div><div style="font-size:10px;color:#7a9ab5;opacity:0.6;">v20260523-1811</div></div></div>
     <div class="cgrid" id="cgrid" style="display:none;"></div>
   </div>
   <div id="vlist" class="scr">
@@ -1421,7 +1532,7 @@ function bldCats(){
   if (!DB || DB.length === 0) {
     loadEl.innerHTML = '<div style="text-align:center;padding:20px;color:#FF8C00;">' +
       'מתחבר לשרת...<br><br>' +
-      '<div style="font-size:11px;color:#7a9ab5;">v20260522-1753</div><br>' +
+      '<div style="font-size:11px;color:#7a9ab5;">v20260523-1811</div><br>' +
       '<button onclick="location.reload(true)" style="padding:10px 20px;background:#FF8C00;color:#fff;border:none;border-radius:8px;font-family:inherit;cursor:pointer;font-weight:700;margin-top:10px;">🔄 רענן</button>' +
       '</div>';
     return;
@@ -1739,6 +1850,71 @@ function opArt(i){
   document.getElementById('artfv').style.display='block';
 }
 function clsArt(){document.getElementById('artlv').style.display='block';document.getElementById('artfv').style.display='none';}
+
+function navigateTo(tabId, el){
+  // Hide all main screens
+  document.querySelectorAll('[id^="tab-"]').forEach(function(x){x.className='scr';});
+  
+  // Update bottom nav active state
+  document.querySelectorAll('.bnav-item').forEach(function(x){x.classList.remove('active');});
+  if (el) el.classList.add('active');
+  
+  // Show the corresponding screen
+  var target = document.getElementById('tab-' + tabId);
+  if (target) target.className = 'scr on';
+  
+  // Special handling per tab
+  if (tabId === 'qk') {
+    if (typeof rQK === 'function') rQK();
+  }
+  else if (tabId === 'lib') {
+    // Show library/learning - default to main library tab
+    var libTab = document.getElementById('tab-lib');
+    if (libTab) libTab.className = 'scr on';
+    // Reset top tabs to first one (מבצעי)
+    document.querySelectorAll('.tb-tab').forEach(function(x){x.classList.remove('active');});
+    var firstTab = document.querySelector('.tb-tab[onclick*="lib"]');
+    if (firstTab) firstTab.classList.add('active');
+  }
+  else if (tabId === 'fav') {
+    if (typeof rFav === 'function') rFav();
+    if (typeof rRecent === 'function') rRecent();
+  }
+  else if (tabId === 'me') {
+    refreshProfileTab();
+  }
+  
+  curTab = tabId;
+  
+  // Auto-scroll to top
+  window.scrollTo(0, 0);
+}
+
+function refreshProfileTab(){
+  // Update profile info from current role
+  try {
+    var role = (typeof getCurrentRole === 'function') ? getCurrentRole() : 'idf';
+    var info = (typeof ROLE_INFO !== 'undefined') ? ROLE_INFO[role] : null;
+    if (info) {
+      var emojiEl = document.getElementById('profile-emoji');
+      var nameEl = document.getElementById('profile-name');
+      if (emojiEl) emojiEl.textContent = info.emoji;
+      if (nameEl) nameEl.textContent = info.name;
+    }
+    // Update theme row
+    var isDay = document.body.classList.contains('day-mode');
+    var icon = document.getElementById('theme-row-icon');
+    var label = document.getElementById('theme-row-label');
+    if (icon) icon.textContent = isDay ? '☀️' : '🌙';
+    if (label) label.textContent = isDay ? 'במצב יום (לחצי לשינוי)' : 'במצב לילה (לחצי לשינוי)';
+    // Show admin row if user is authenticated
+    var adminRow = document.getElementById('admin-row-me');
+    var adminTab = document.getElementById('admin-tab');
+    if (adminRow && adminTab && adminTab.style.display !== 'none') {
+      adminRow.style.display = 'flex';
+    }
+  } catch(e) { console.warn('profile refresh:', e); }
+}
 
 function ST(t,el){
   document.querySelectorAll('.tb-tab').forEach(function(x){x.classList.remove('active');});
@@ -3455,6 +3631,94 @@ try { bldCats(); } catch(_){}
     
     <button class="help-close-btn" onclick="hideHelp()">✓ הבנתי, סגור</button>
   </div>
+<!-- ME (PROFILE) TAB -->
+<div class="scr" id="tab-me">
+  <div class="sec">
+    <div class="stitle">👤 פרופיל</div>
+    <div class="profile-card" id="profile-info-card">
+      <div style="text-align:center;padding:14px 0;">
+        <div style="font-size:48px;margin-bottom:6px;" id="profile-emoji">👤</div>
+        <div style="color:#E8D9B8;font-size:18px;font-weight:700;" id="profile-name">בחר תפקיד</div>
+      </div>
+    </div>
+    
+    <div class="profile-card">
+      <div class="profile-row" onclick="showWelcome()">
+        <div class="profile-row-left">
+          <span class="profile-row-icon">🎯</span>
+          <span class="profile-row-label">החלף תפקיד</span>
+        </div>
+        <span class="profile-row-arrow">‹</span>
+      </div>
+      <div class="profile-row" onclick="openDictTab()">
+        <div class="profile-row-left">
+          <span class="profile-row-icon">📖</span>
+          <span class="profile-row-label">מילון</span>
+        </div>
+        <span class="profile-row-arrow">‹</span>
+      </div>
+      <div class="profile-row" onclick="showHelp()">
+        <div class="profile-row-left">
+          <span class="profile-row-icon">❓</span>
+          <span class="profile-row-label">עזרה ומקרא</span>
+        </div>
+        <span class="profile-row-arrow">‹</span>
+      </div>
+      <div class="profile-row" onclick="toggleTheme()">
+        <div class="profile-row-left">
+          <span class="profile-row-icon" id="theme-row-icon">🌙</span>
+          <span class="profile-row-label" id="theme-row-label">החלפת מצב יום/לילה</span>
+        </div>
+        <span class="profile-row-arrow">‹</span>
+      </div>
+      <div class="profile-row" id="admin-row-me" style="display:none;" onclick="ST('adm',null)">
+        <div class="profile-row-left">
+          <span class="profile-row-icon">⚙️</span>
+          <span class="profile-row-label">ניהול תוכן</span>
+        </div>
+        <span class="profile-row-arrow">‹</span>
+      </div>
+    </div>
+  </div>
 </div>
+
+<!-- PROGRESS TAB -->
+<div class="scr" id="tab-prog">
+  <div class="sec">
+    <div class="stitle">📊 ההתקדמות שלי</div>
+    <div class="progress-coming-soon">
+      <h3>בקרוב!</h3>
+      <p>כאן יוצג מעקב על המשפטים שלמדת, רצף ימים יומיים של למידה, והישגים שתשיגי.<br><br>
+      <strong style="color:#D4A24E;">בפיתוח</strong></p>
+    </div>
+  </div>
+</div>
+
+</div>
+
+<!-- BOTTOM NAVIGATION -->
+<div class="bottom-nav" id="bottomNav">
+  <div class="bnav-item active" data-tab="qk" onclick="navigateTo('qk', this)">
+    <div class="bnav-icon">🚨</div>
+    <div class="bnav-label">חירום</div>
+  </div>
+  <div class="bnav-item" data-tab="lib" onclick="navigateTo('lib', this)">
+    <div class="bnav-icon">📚</div>
+    <div class="bnav-label">למידה</div>
+  </div>
+  <div class="bnav-item" data-tab="fav" onclick="navigateTo('fav', this)">
+    <div class="bnav-icon">⭐</div>
+    <div class="bnav-label">שמורים</div>
+  </div>
+  <div class="bnav-item" data-tab="prog" onclick="navigateTo('prog', this)">
+    <div class="bnav-icon">📊</div>
+    <div class="bnav-label">התקדמות</div>
+  </div>
+  <div class="bnav-item" data-tab="me" onclick="navigateTo('me', this)">
+    <div class="bnav-icon">👤</div>
+    <div class="bnav-label">אני</div>
+  </div>
+</div>
+
 </body>
 </html>
