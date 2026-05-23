@@ -99,14 +99,6 @@ body.day-mode .bnav-item.active .bnav-label{color:#c66700;}
 /* Add bottom padding to body to prevent content cutoff */
 body{padding-bottom:75px;}
 
-/* "Me" tab content */
-#tab-me{display:none;}
-#tab-me.on{display:block;}
-
-/* "Progress" tab content */
-#tab-prog{display:none;}
-#tab-prog.on{display:block;}
-
 .profile-card{
   background:#18293E;
   border:1px solid #2A3D52;
@@ -966,7 +958,7 @@ body.day-mode .ct{border:none;border-bottom:1px solid #ebe0c5;border-left:1px so
     <button class="lb" id="lbar" onclick="setL('ar')">🔍 ערבית</button>
   </div>
   <div id="vcats" class="scr on">
-    <div class="loading" id="cats-loading"><div style="text-align:center;padding:20px;"><div style="font-size:16px;color:#FF8C00;margin-bottom:8px;">טוען...</div><div style="font-size:10px;color:#7a9ab5;opacity:0.6;">v20260523-1811</div></div></div>
+    <div class="loading" id="cats-loading"><div style="text-align:center;padding:20px;"><div style="font-size:16px;color:#FF8C00;margin-bottom:8px;">טוען...</div><div style="font-size:10px;color:#7a9ab5;opacity:0.6;">v20260523-1826</div></div></div>
     <div class="cgrid" id="cgrid" style="display:none;"></div>
   </div>
   <div id="vlist" class="scr">
@@ -1532,7 +1524,7 @@ function bldCats(){
   if (!DB || DB.length === 0) {
     loadEl.innerHTML = '<div style="text-align:center;padding:20px;color:#FF8C00;">' +
       'מתחבר לשרת...<br><br>' +
-      '<div style="font-size:11px;color:#7a9ab5;">v20260523-1811</div><br>' +
+      '<div style="font-size:11px;color:#7a9ab5;">v20260523-1826</div><br>' +
       '<button onclick="location.reload(true)" style="padding:10px 20px;background:#FF8C00;color:#fff;border:none;border-radius:8px;font-family:inherit;cursor:pointer;font-weight:700;margin-top:10px;">🔄 רענן</button>' +
       '</div>';
     return;
@@ -1852,29 +1844,22 @@ function opArt(i){
 function clsArt(){document.getElementById('artlv').style.display='block';document.getElementById('artfv').style.display='none';}
 
 function navigateTo(tabId, el){
-  // Hide all main screens
-  document.querySelectorAll('[id^="tab-"]').forEach(function(x){x.className='scr';});
-  
   // Update bottom nav active state
   document.querySelectorAll('.bnav-item').forEach(function(x){x.classList.remove('active');});
   if (el) el.classList.add('active');
   
-  // Show the corresponding screen
+  // Hide ALL screens first
+  document.querySelectorAll('[id^="tab-"]').forEach(function(x){x.className='scr';});
+  
+  // Show the requested screen
   var target = document.getElementById('tab-' + tabId);
-  if (target) target.className = 'scr on';
+  if (target) {
+    target.className = 'scr on';
+  }
   
   // Special handling per tab
   if (tabId === 'qk') {
     if (typeof rQK === 'function') rQK();
-  }
-  else if (tabId === 'lib') {
-    // Show library/learning - default to main library tab
-    var libTab = document.getElementById('tab-lib');
-    if (libTab) libTab.className = 'scr on';
-    // Reset top tabs to first one (מבצעי)
-    document.querySelectorAll('.tb-tab').forEach(function(x){x.classList.remove('active');});
-    var firstTab = document.querySelector('.tb-tab[onclick*="lib"]');
-    if (firstTab) firstTab.classList.add('active');
   }
   else if (tabId === 'fav') {
     if (typeof rFav === 'function') rFav();
@@ -1885,8 +1870,6 @@ function navigateTo(tabId, el){
   }
   
   curTab = tabId;
-  
-  // Auto-scroll to top
   window.scrollTo(0, 0);
 }
 
