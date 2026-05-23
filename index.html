@@ -634,7 +634,7 @@ body.day-mode .card:hover{
         <span>❓</span>
       </button>
       <div class="tb-badges">
-        <div class="bnew" id="new-badge" onclick="ST('nwf', document.querySelector('.tb-tab-sec[onclick*=nwf]'))" style="cursor:pointer;">חדש</div>
+        
         <div class="bstatus" id="status-badge">טוען...</div>
       </div>
     </div>
@@ -692,7 +692,7 @@ body.day-mode .card:hover{
     <button class="lb" id="lbar" onclick="setL('ar')">🔍 ערבית</button>
   </div>
   <div id="vcats" class="scr on">
-    <div class="loading" id="cats-loading"><div style="text-align:center;padding:20px;"><div style="font-size:16px;color:#FF8C00;margin-bottom:8px;">טוען...</div><div style="font-size:10px;color:#7a9ab5;opacity:0.6;">v20260523-1957</div></div></div>
+    <div class="loading" id="cats-loading"><div style="text-align:center;padding:20px;"><div style="font-size:16px;color:#FF8C00;margin-bottom:8px;">טוען...</div><div style="font-size:10px;color:#7a9ab5;opacity:0.6;">v20260523-2000</div></div></div>
     <div class="cgrid" id="cgrid" style="display:none;"></div>
   </div>
   <div id="vlist" class="scr">
@@ -1258,7 +1258,7 @@ function bldCats(){
   if (!DB || DB.length === 0) {
     loadEl.innerHTML = '<div style="text-align:center;padding:20px;color:#FF8C00;">' +
       'מתחבר לשרת...<br><br>' +
-      '<div style="font-size:11px;color:#7a9ab5;">v20260523-1957</div><br>' +
+      '<div style="font-size:11px;color:#7a9ab5;">v20260523-2000</div><br>' +
       '<button onclick="location.reload(true)" style="padding:10px 20px;background:#FF8C00;color:#fff;border:none;border-radius:8px;font-family:inherit;cursor:pointer;font-weight:700;margin-top:10px;">🔄 רענן</button>' +
       '</div>';
     return;
@@ -3142,12 +3142,24 @@ function setRole(role){
 function showWelcome(){document.getElementById('welcomePopup').style.display='flex';}
 function hideWelcome(){document.getElementById('welcomePopup').style.display='none';}
 function selectRole(r){
-  localStorage.setItem('role', r);
-  hideWelcome();
-  if (typeof loadRole === 'function') loadRole();
-  if (typeof renderAll === 'function') renderAll();
-  // Refresh display
-  location.reload();
+  try {
+    localStorage.setItem('role', r);
+    if (typeof loadRole === 'function') loadRole();
+    hideWelcome();
+    // Refresh the data display
+    if (typeof renderAll === 'function') renderAll();
+    if (typeof doS === 'function') doS();
+    // Update role circle button emoji
+    var info = (typeof ROLE_INFO !== 'undefined') ? ROLE_INFO[r] : null;
+    if (info) {
+      var em = document.getElementById('roleBtnEmoji');
+      if (em) em.textContent = info.emoji;
+    }
+  } catch(e) {
+    console.error('selectRole error:', e);
+    // Fallback: reload
+    location.reload();
+  }
 }
 
 function showHelp(){document.getElementById('helpPopup').style.display='flex';}
