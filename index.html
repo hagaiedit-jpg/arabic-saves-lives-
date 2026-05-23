@@ -38,6 +38,51 @@ body.day-mode body.day-mode .tb-brand{
   color:#c66700;
 }
 .tb-badges{display:flex;gap:5px;align-items:center;}
+.tb-left-group{display:flex;gap:6px;align-items:center;flex-shrink:0;}
+.bnew{
+  background:#1D9E75;
+  color:#fff;
+  font-size:10px;
+  font-weight:700;
+  padding:3px 7px;
+  border-radius:8px;
+  white-space:nowrap;
+  line-height:1.2;
+}
+.bstatus{
+  background:rgba(29,158,117,0.2);
+  color:#1D9E75;
+  font-size:10px;
+  font-weight:600;
+  padding:3px 7px;
+  border-radius:8px;
+  white-space:nowrap;
+  border:1px solid rgba(29,158,117,0.4);
+  line-height:1.2;
+}
+.role-circle{
+  width:32px;
+  height:32px;
+  border-radius:50%;
+  background:rgba(255,140,0,0.15);
+  border:1px solid rgba(255,140,0,0.4);
+  color:#fff;
+  font-size:15px;
+  cursor:pointer;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  font-family:inherit;
+  padding:0;
+  transition:all 0.2s;
+  flex-shrink:0;
+}
+.role-circle:hover{background:rgba(255,140,0,0.3);}
+.role-circle-divider{display:none;}
+body.day-mode .bnew{background:#1D9E75;}
+body.day-mode .bstatus{background:rgba(29,158,117,0.15);color:#147a59;border-color:rgba(29,158,117,0.5);}
+body.day-mode .role-circle{background:rgba(26,43,60,0.15);border-color:rgba(26,43,60,0.3);color:#1A2B3C;}
+.theme-toggle{display:flex;gap:6px;align-items:center;flex-shrink:0;}
 
 /* Premium gold accents */
 .gold-accent{color:#D4A24E;}
@@ -533,7 +578,7 @@ body.day-mode .ct{border:none;border-bottom:1px solid #ebe0c5;border-left:1px so
     <button class="lb" id="lbar" onclick="setL('ar')">🔍 ערבית</button>
   </div>
   <div id="vcats" class="scr on">
-    <div class="loading" id="cats-loading"><div style="text-align:center;padding:20px;"><div style="font-size:16px;color:#FF8C00;margin-bottom:8px;">טוען...</div><div style="font-size:10px;color:#7a9ab5;opacity:0.6;">v20260523-1926</div></div></div>
+    <div class="loading" id="cats-loading"><div style="text-align:center;padding:20px;"><div style="font-size:16px;color:#FF8C00;margin-bottom:8px;">טוען...</div><div style="font-size:10px;color:#7a9ab5;opacity:0.6;">v20260523-1929</div></div></div>
     <div class="cgrid" id="cgrid" style="display:none;"></div>
   </div>
   <div id="vlist" class="scr">
@@ -1099,7 +1144,7 @@ function bldCats(){
   if (!DB || DB.length === 0) {
     loadEl.innerHTML = '<div style="text-align:center;padding:20px;color:#FF8C00;">' +
       'מתחבר לשרת...<br><br>' +
-      '<div style="font-size:11px;color:#7a9ab5;">v20260523-1926</div><br>' +
+      '<div style="font-size:11px;color:#7a9ab5;">v20260523-1929</div><br>' +
       '<button onclick="location.reload(true)" style="padding:10px 20px;background:#FF8C00;color:#fff;border:none;border-radius:8px;font-family:inherit;cursor:pointer;font-weight:700;margin-top:10px;">🔄 רענן</button>' +
       '</div>';
     return;
