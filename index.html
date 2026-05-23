@@ -974,7 +974,7 @@ body.day-mode .ct{border:none;border-bottom:1px solid #ebe0c5;border-left:1px so
     <button class="lb" id="lbar" onclick="setL('ar')">🔍 ערבית</button>
   </div>
   <div id="vcats" class="scr on">
-    <div class="loading" id="cats-loading"><div style="text-align:center;padding:20px;"><div style="font-size:16px;color:#FF8C00;margin-bottom:8px;">טוען...</div><div style="font-size:10px;color:#7a9ab5;opacity:0.6;">v20260523-1910</div></div></div>
+    <div class="loading" id="cats-loading"><div style="text-align:center;padding:20px;"><div style="font-size:16px;color:#FF8C00;margin-bottom:8px;">טוען...</div><div style="font-size:10px;color:#7a9ab5;opacity:0.6;">v20260523-1918</div></div></div>
     <div class="cgrid" id="cgrid" style="display:none;"></div>
   </div>
   <div id="vlist" class="scr">
@@ -1540,7 +1540,7 @@ function bldCats(){
   if (!DB || DB.length === 0) {
     loadEl.innerHTML = '<div style="text-align:center;padding:20px;color:#FF8C00;">' +
       'מתחבר לשרת...<br><br>' +
-      '<div style="font-size:11px;color:#7a9ab5;">v20260523-1910</div><br>' +
+      '<div style="font-size:11px;color:#7a9ab5;">v20260523-1918</div><br>' +
       '<button onclick="location.reload(true)" style="padding:10px 20px;background:#FF8C00;color:#fff;border:none;border-radius:8px;font-family:inherit;cursor:pointer;font-weight:700;margin-top:10px;">🔄 רענן</button>' +
       '</div>';
     return;
@@ -3554,6 +3554,70 @@ try { bldCats(); } catch(_){}
   }
 })();
 </script>
+
+<!-- ME (PROFILE) TAB -->
+<div class="scr" id="tab-me">
+  <div class="sec">
+    <div class="stitle">👤 פרופיל</div>
+    <div class="profile-card" id="profile-info-card">
+      <div style="text-align:center;padding:14px 0;">
+        <div style="font-size:48px;margin-bottom:6px;" id="profile-emoji">👤</div>
+        <div style="color:#E8D9B8;font-size:18px;font-weight:700;" id="profile-name">בחר תפקיד</div>
+      </div>
+    </div>
+    
+    <div class="profile-card">
+      <div class="profile-row" onclick="showWelcome()">
+        <div class="profile-row-left">
+          <span class="profile-row-icon">🎯</span>
+          <span class="profile-row-label">החלף תפקיד</span>
+        </div>
+        <span class="profile-row-arrow">‹</span>
+      </div>
+      <div class="profile-row" onclick="openDictTab()">
+        <div class="profile-row-left">
+          <span class="profile-row-icon">📖</span>
+          <span class="profile-row-label">מילון</span>
+        </div>
+        <span class="profile-row-arrow">‹</span>
+      </div>
+      <div class="profile-row" onclick="showHelp()">
+        <div class="profile-row-left">
+          <span class="profile-row-icon">❓</span>
+          <span class="profile-row-label">עזרה ומקרא</span>
+        </div>
+        <span class="profile-row-arrow">‹</span>
+      </div>
+      <div class="profile-row" onclick="toggleTheme()">
+        <div class="profile-row-left">
+          <span class="profile-row-icon" id="theme-row-icon">🌙</span>
+          <span class="profile-row-label" id="theme-row-label">החלפת מצב יום/לילה</span>
+        </div>
+        <span class="profile-row-arrow">‹</span>
+      </div>
+      <div class="profile-row" id="admin-row-me" style="display:none;" onclick="ST('adm',null)">
+        <div class="profile-row-left">
+          <span class="profile-row-icon">⚙️</span>
+          <span class="profile-row-label">ניהול תוכן</span>
+        </div>
+        <span class="profile-row-arrow">‹</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- PROGRESS TAB -->
+<div class="scr" id="tab-prog">
+  <div class="sec">
+    <div class="stitle">📊 ההתקדמות שלי</div>
+    <div class="progress-coming-soon">
+      <h3>בקרוב!</h3>
+      <p>כאן יוצג מעקב על המשפטים שלמדת, רצף ימים יומיים של למידה, והישגים שתשיגי.<br><br>
+      <strong style="color:#D4A24E;">בפיתוח</strong></p>
+    </div>
+  </div>
+</div>
+
 <!-- Toast notification -->
 <div id="toast" class="toast" style="display:none;"></div>
 
@@ -3634,69 +3698,6 @@ try { bldCats(); } catch(_){}
     <button class="help-close-btn" onclick="hideHelp()">✓ הבנתי, סגור</button>
   </div>
 </div>
-<!-- ME (PROFILE) TAB -->
-<div class="scr" id="tab-me">
-  <div class="sec">
-    <div class="stitle">👤 פרופיל</div>
-    <div class="profile-card" id="profile-info-card">
-      <div style="text-align:center;padding:14px 0;">
-        <div style="font-size:48px;margin-bottom:6px;" id="profile-emoji">👤</div>
-        <div style="color:#E8D9B8;font-size:18px;font-weight:700;" id="profile-name">בחר תפקיד</div>
-      </div>
-    </div>
-    
-    <div class="profile-card">
-      <div class="profile-row" onclick="showWelcome()">
-        <div class="profile-row-left">
-          <span class="profile-row-icon">🎯</span>
-          <span class="profile-row-label">החלף תפקיד</span>
-        </div>
-        <span class="profile-row-arrow">‹</span>
-      </div>
-      <div class="profile-row" onclick="openDictTab()">
-        <div class="profile-row-left">
-          <span class="profile-row-icon">📖</span>
-          <span class="profile-row-label">מילון</span>
-        </div>
-        <span class="profile-row-arrow">‹</span>
-      </div>
-      <div class="profile-row" onclick="showHelp()">
-        <div class="profile-row-left">
-          <span class="profile-row-icon">❓</span>
-          <span class="profile-row-label">עזרה ומקרא</span>
-        </div>
-        <span class="profile-row-arrow">‹</span>
-      </div>
-      <div class="profile-row" onclick="toggleTheme()">
-        <div class="profile-row-left">
-          <span class="profile-row-icon" id="theme-row-icon">🌙</span>
-          <span class="profile-row-label" id="theme-row-label">החלפת מצב יום/לילה</span>
-        </div>
-        <span class="profile-row-arrow">‹</span>
-      </div>
-      <div class="profile-row" id="admin-row-me" style="display:none;" onclick="ST('adm',null)">
-        <div class="profile-row-left">
-          <span class="profile-row-icon">⚙️</span>
-          <span class="profile-row-label">ניהול תוכן</span>
-        </div>
-        <span class="profile-row-arrow">‹</span>
-      </div>
-    </div>
-  </div>
-</div>
-
-<!-- PROGRESS TAB -->
-<div class="scr" id="tab-prog">
-  <div class="sec">
-    <div class="stitle">📊 ההתקדמות שלי</div>
-    <div class="progress-coming-soon">
-      <h3>בקרוב!</h3>
-      <p>כאן יוצג מעקב על המשפטים שלמדת, רצף ימים יומיים של למידה, והישגים שתשיגי.<br><br>
-      <strong style="color:#D4A24E;">בפיתוח</strong></p>
-    </div>
-  </div>
-</div>
-
 <!-- BOTTOM NAVIGATION -->
 <div class="bottom-nav" id="bottomNav">
   <div class="bnav-item active" data-tab="qk" onclick="navigateTo('qk', this)">
