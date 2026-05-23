@@ -98,6 +98,66 @@ body.day-mode .role-circle{background:rgba(26,43,60,0.15);border-color:rgba(26,4
 .gold-bg{background:rgba(212,162,78,0.12);border-color:rgba(212,162,78,0.3);}
 .gold-border{border-color:rgba(212,162,78,0.4)!important;}
 
+
+/* Welcome & Help Popup styles */
+.welcome-bg{
+  position:fixed;
+  top:0;left:0;right:0;bottom:0;
+  background:rgba(0,0,0,0.7);
+  backdrop-filter:blur(8px);
+  -webkit-backdrop-filter:blur(8px);
+  z-index:9999;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  padding:20px;
+}
+.welcome-pop, .help-pop{
+  background:linear-gradient(135deg,#1F3147 0%,#18293E 100%);
+  border:1px solid rgba(255,140,0,0.3);
+  border-radius:20px;
+  padding:24px;
+  max-width:420px;
+  width:100%;
+  max-height:90vh;
+  overflow-y:auto;
+  box-shadow:0 20px 60px rgba(0,0,0,0.5);
+}
+.welcome-title{color:#FF8C00;font-size:24px;font-weight:700;text-align:center;margin-bottom:8px;}
+.welcome-sub{color:#E8D9B8;font-size:14px;text-align:center;margin-bottom:20px;}
+.welcome-roles{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
+.welcome-role-btn{
+  background:rgba(255,140,0,0.1);
+  border:1.5px solid rgba(255,140,0,0.3);
+  border-radius:14px;
+  padding:14px 8px;
+  color:#fff;
+  font-family:inherit;
+  font-size:14px;
+  font-weight:600;
+  cursor:pointer;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  gap:6px;
+  transition:all 0.2s;
+}
+.welcome-role-btn:hover{background:rgba(255,140,0,0.2);border-color:#FF8C00;transform:translateY(-2px);}
+.welcome-role-emoji{font-size:28px;}
+.help-header{text-align:center;margin-bottom:16px;padding-bottom:14px;border-bottom:1px solid rgba(255,140,0,0.2);}
+.help-h-title{color:#FF8C00;font-size:20px;font-weight:700;margin-bottom:4px;}
+.help-h-sub{color:#a0b8c8;font-size:12px;}
+.help-body{margin-bottom:16px;}
+.help-section{margin-bottom:16px;}
+.help-title{color:#D4A24E;font-size:13px;font-weight:700;margin-bottom:8px;text-transform:uppercase;letter-spacing:0.5px;}
+.help-row{display:flex;align-items:flex-start;gap:10px;padding:8px 0;}
+.help-icon{font-size:20px;width:32px;text-align:center;flex-shrink:0;}
+.help-txt{flex:1;display:flex;flex-direction:column;gap:2px;}
+.help-txt strong{color:#fff;font-size:14px;}
+.help-desc{color:#a0b8c8;font-size:12px;}
+.help-close-btn{width:100%;background:#FF8C00;color:#fff;border:none;border-radius:12px;padding:14px;font-size:15px;font-weight:700;cursor:pointer;font-family:inherit;transition:all 0.2s;}
+.help-close-btn:hover{background:#e57c00;}
+
 .popup-actions{
   display:flex;
   justify-content:center;
@@ -630,7 +690,7 @@ body.day-mode .card:hover{
     <button class="lb" id="lbar" onclick="setL('ar')">🔍 ערבית</button>
   </div>
   <div id="vcats" class="scr on">
-    <div class="loading" id="cats-loading"><div style="text-align:center;padding:20px;"><div style="font-size:16px;color:#FF8C00;margin-bottom:8px;">טוען...</div><div style="font-size:10px;color:#7a9ab5;opacity:0.6;">v20260523-1941</div></div></div>
+    <div class="loading" id="cats-loading"><div style="text-align:center;padding:20px;"><div style="font-size:16px;color:#FF8C00;margin-bottom:8px;">טוען...</div><div style="font-size:10px;color:#7a9ab5;opacity:0.6;">v20260523-1949</div></div></div>
     <div class="cgrid" id="cgrid" style="display:none;"></div>
   </div>
   <div id="vlist" class="scr">
@@ -1196,7 +1256,7 @@ function bldCats(){
   if (!DB || DB.length === 0) {
     loadEl.innerHTML = '<div style="text-align:center;padding:20px;color:#FF8C00;">' +
       'מתחבר לשרת...<br><br>' +
-      '<div style="font-size:11px;color:#7a9ab5;">v20260523-1941</div><br>' +
+      '<div style="font-size:11px;color:#7a9ab5;">v20260523-1949</div><br>' +
       '<button onclick="location.reload(true)" style="padding:10px 20px;background:#FF8C00;color:#fff;border:none;border-radius:8px;font-family:inherit;cursor:pointer;font-weight:700;margin-top:10px;">🔄 רענן</button>' +
       '</div>';
     return;
@@ -3078,6 +3138,15 @@ function setRole(role){
 }
 
 function showWelcome(){document.getElementById('welcomePopup').style.display='flex';}
+function hideWelcome(){document.getElementById('welcomePopup').style.display='none';}
+function selectRole(r){
+  localStorage.setItem('role', r);
+  hideWelcome();
+  if (typeof loadRole === 'function') loadRole();
+  if (typeof renderAll === 'function') renderAll();
+  // Refresh display
+  location.reload();
+}
 
 function showHelp(){document.getElementById('helpPopup').style.display='flex';}
 function hideHelp(){document.getElementById('helpPopup').style.display='none';}
@@ -3151,6 +3220,63 @@ try { bldCats(); } catch(_){}
   }
 })();
 </script>
+
+
+<!-- Welcome Popup -->
+<div id="welcomePopup" class="welcome-bg" style="display:none;" onclick="if(event.target===this)hideWelcome()">
+  <div class="welcome-pop">
+    <div class="welcome-title">ברוכים הבאים</div>
+    <div class="welcome-sub">בחר/י את התפקיד שלך:</div>
+    <div class="welcome-roles">
+      <button class="welcome-role-btn" onclick="selectRole('idf')">
+        <span class="welcome-role-emoji">🪖</span>
+        <span>צה"ל</span>
+      </button>
+      <button class="welcome-role-btn" onclick="selectRole('police')">
+        <span class="welcome-role-emoji">🚓</span>
+        <span>משטרה</span>
+      </button>
+      <button class="welcome-role-btn" onclick="selectRole('security')">
+        <span class="welcome-role-emoji">🛡️</span>
+        <span>ביטחון</span>
+      </button>
+      <button class="welcome-role-btn" onclick="selectRole('preidf')">
+        <span class="welcome-role-emoji">🎒</span>
+        <span>מלש"ב</span>
+      </button>
+      <button class="welcome-role-btn" onclick="selectRole('all')">
+        <span class="welcome-role-emoji">👁️</span>
+        <span>הכל</span>
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- Help Popup -->
+<div id="helpPopup" class="welcome-bg" style="display:none;" onclick="if(event.target===this)hideHelp()">
+  <div class="help-pop">
+    <div class="help-header">
+      <div class="help-h-title">❓ עזרה ומקרא איקונים</div>
+      <div class="help-h-sub">מדריך קצר לאיקונים באפליקציה</div>
+    </div>
+    <div class="help-body">
+      <div class="help-section">
+        <div class="help-title">איקונים ראשיים</div>
+        <div class="help-row"><span class="help-icon">📖</span><div class="help-txt"><strong>מילון</strong><span class="help-desc">חיפוש משפטים לפי מילה</span></div></div>
+        <div class="help-row"><span class="help-icon">🌙/☀️</span><div class="help-txt"><strong>מצב יום/לילה</strong><span class="help-desc">החלפת מצב תצוגה</span></div></div>
+        <div class="help-row"><span class="help-icon">👤</span><div class="help-txt"><strong>תפקיד</strong><span class="help-desc">החלף את התפקיד שלך</span></div></div>
+        <div class="help-row"><span class="help-icon">❓</span><div class="help-txt"><strong>עזרה</strong><span class="help-desc">המסך הזה</span></div></div>
+      </div>
+      <div class="help-section">
+        <div class="help-title">סטטוס משפטים</div>
+        <div class="help-row"><span class="help-icon">▶</span><div class="help-txt"><strong>השמעה</strong><span class="help-desc">לחיצה להשמעת ההקלטה</span></div></div>
+        <div class="help-row"><span class="help-icon">⭐</span><div class="help-txt"><strong>מועדפים</strong><span class="help-desc">משפטים ששמרת + 15 אחרונים</span></div></div>
+        <div class="help-row"><span class="help-icon">🚨</span><div class="help-txt"><strong>חירום</strong><span class="help-desc">4 קוביות סיטואציה למצבי שטח</span></div></div>
+      </div>
+    </div>
+    <button class="help-close-btn" onclick="hideHelp()">✓ הבנתי, סגור</button>
+  </div>
+</div>
 
 </body>
 </html>
