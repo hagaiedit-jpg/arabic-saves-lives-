@@ -99,6 +99,22 @@ body.day-mode .bnav-item.active .bnav-label{color:#c66700;}
 /* Add bottom padding to body to prevent content cutoff */
 body{padding-bottom:75px;}
 
+/* DEBUG VISIBILITY: Make tab-me and tab-prog stand out */
+#tab-me.on, #tab-prog.on{
+  background:#0E1B2E !important;
+  color:#E8D9B8 !important;
+  min-height:80vh;
+  padding:16px;
+  display:block !important;
+}
+#tab-me.on .stitle, #tab-prog.on .stitle{
+  color:#FF8C00 !important;
+  font-size:22px;
+  font-weight:700;
+  margin-bottom:16px;
+  text-align:center;
+}
+
 .profile-card{
   background:#18293E;
   border:1px solid #2A3D52;
@@ -958,7 +974,7 @@ body.day-mode .ct{border:none;border-bottom:1px solid #ebe0c5;border-left:1px so
     <button class="lb" id="lbar" onclick="setL('ar')">🔍 ערבית</button>
   </div>
   <div id="vcats" class="scr on">
-    <div class="loading" id="cats-loading"><div style="text-align:center;padding:20px;"><div style="font-size:16px;color:#FF8C00;margin-bottom:8px;">טוען...</div><div style="font-size:10px;color:#7a9ab5;opacity:0.6;">v20260523-1903</div></div></div>
+    <div class="loading" id="cats-loading"><div style="text-align:center;padding:20px;"><div style="font-size:16px;color:#FF8C00;margin-bottom:8px;">טוען...</div><div style="font-size:10px;color:#7a9ab5;opacity:0.6;">v20260523-1907</div></div></div>
     <div class="cgrid" id="cgrid" style="display:none;"></div>
   </div>
   <div id="vlist" class="scr">
@@ -1524,7 +1540,7 @@ function bldCats(){
   if (!DB || DB.length === 0) {
     loadEl.innerHTML = '<div style="text-align:center;padding:20px;color:#FF8C00;">' +
       'מתחבר לשרת...<br><br>' +
-      '<div style="font-size:11px;color:#7a9ab5;">v20260523-1903</div><br>' +
+      '<div style="font-size:11px;color:#7a9ab5;">v20260523-1907</div><br>' +
       '<button onclick="location.reload(true)" style="padding:10px 20px;background:#FF8C00;color:#fff;border:none;border-radius:8px;font-family:inherit;cursor:pointer;font-weight:700;margin-top:10px;">🔄 רענן</button>' +
       '</div>';
     return;
@@ -1887,7 +1903,10 @@ function navigateTo(tabId, el){
   }
   
   curTab = tabId;
-  window.scrollTo(0, 0);
+  // Force scroll to top to make sure user sees content
+  window.scrollTo({top: 0, behavior: 'instant'});
+  document.documentElement.scrollTop = 0;
+  document.body.scrollTop = 0;
 }
 
 function refreshProfileTab(){
