@@ -692,22 +692,23 @@ body.day-mode .card:hover{
     <button class="lb" id="lbar" onclick="setL('ar')">🔍 ערבית</button>
   </div>
   <div id="vcats" class="scr on">
-    <!-- Phrase of the Day Banner -->
-    <div id="potd-banner" style="display:none;background:linear-gradient(135deg,#FF8C00 0%,#c66700 100%);border-radius:18px;padding:18px 16px;margin-bottom:14px;box-shadow:0 6px 20px rgba(255,140,0,0.3);">
-      <div style="display:flex;align-items:center;gap:8px;margin-bottom:10px;">
-        <span style="font-size:22px;">🌟</span>
-        <span style="color:#fff;font-size:13px;font-weight:700;letter-spacing:0.5px;">משפט היום</span>
+    <!-- Phrase of the Day Banner - Minimalist with gold accent -->
+    <div id="potd-banner" style="display:none;position:relative;background:#18293E;border-radius:12px;padding:14px 16px;margin-bottom:14px;border:1px solid rgba(212,162,78,0.25);border-right:3px solid #D4A24E;">
+      <button onclick="potdDismiss()" title="הסתר" style="position:absolute;top:8px;left:8px;background:transparent;border:none;color:#7a9ab5;font-size:18px;cursor:pointer;padding:2px 8px;line-height:1;font-family:inherit;border-radius:6px;">×</button>
+      <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px;">
+        <span style="color:#D4A24E;font-size:14px;">✨</span>
+        <span style="color:#D4A24E;font-size:11px;font-weight:700;letter-spacing:1px;">משפט היום</span>
       </div>
-      <div id="potd-he" style="color:#fff;font-size:18px;font-weight:700;margin-bottom:4px;text-align:right;"></div>
-      <div id="potd-trans" style="color:rgba(255,255,255,0.85);font-size:13px;margin-bottom:4px;text-align:right;"></div>
-      <div id="potd-ar" style="color:#fff;font-size:17px;font-weight:600;font-family:Georgia,serif;text-align:right;margin-bottom:12px;"></div>
+      <div id="potd-he" style="color:#E8D9B8;font-size:15px;font-weight:600;margin-bottom:4px;text-align:right;"></div>
+      <div id="potd-trans" style="color:#a0b8c8;font-size:12px;margin-bottom:4px;text-align:right;"></div>
+      <div id="potd-ar" style="color:#E8D9B8;font-size:15px;font-weight:600;font-family:Georgia,serif;text-align:right;margin-bottom:10px;"></div>
       <div style="display:flex;gap:8px;justify-content:flex-end;">
-        <button id="potd-play-btn" onclick="potdPlayAudio()" style="background:rgba(255,255,255,0.2);border:1.5px solid rgba(255,255,255,0.4);color:#fff;border-radius:10px;padding:8px 14px;font-size:13px;font-weight:700;cursor:pointer;font-family:inherit;">▶ השמע</button>
-        <button id="potd-open-btn" onclick="potdOpen()" style="background:rgba(255,255,255,0.95);border:none;color:#c66700;border-radius:10px;padding:8px 14px;font-size:13px;font-weight:700;cursor:pointer;font-family:inherit;">פתח ‹</button>
+        <button id="potd-play-btn" onclick="potdPlayAudio()" style="background:transparent;border:1px solid #D4A24E;color:#D4A24E;border-radius:8px;padding:6px 12px;font-size:12px;font-weight:600;cursor:pointer;font-family:inherit;">▶ השמע</button>
+        <button id="potd-open-btn" onclick="potdOpen()" style="background:#D4A24E;border:none;color:#18293E;border-radius:8px;padding:6px 12px;font-size:12px;font-weight:700;cursor:pointer;font-family:inherit;">פתח</button>
       </div>
     </div>
     
-    <div class="loading" id="cats-loading"><div style="text-align:center;padding:20px;"><div style="font-size:16px;color:#FF8C00;margin-bottom:8px;">טוען...</div><div style="font-size:10px;color:#7a9ab5;opacity:0.6;">v20260524-1406</div></div></div>
+    <div class="loading" id="cats-loading"><div style="text-align:center;padding:20px;"><div style="font-size:16px;color:#FF8C00;margin-bottom:8px;">טוען...</div><div style="font-size:10px;color:#7a9ab5;opacity:0.6;">v20260524-1425</div></div></div>
     <div class="cgrid" id="cgrid" style="display:none;"></div>
   </div>
   <div id="vlist" class="scr">
@@ -1270,7 +1271,7 @@ function bldCats(){
   if (!DB || DB.length === 0) {
     loadEl.innerHTML = '<div style="text-align:center;padding:20px;color:#FF8C00;">' +
       'מתחבר לשרת...<br><br>' +
-      '<div style="font-size:11px;color:#7a9ab5;">v20260524-1406</div><br>' +
+      '<div style="font-size:11px;color:#7a9ab5;">v20260524-1425</div><br>' +
       '<button onclick="location.reload(true)" style="padding:10px 20px;background:#FF8C00;color:#fff;border:none;border-radius:8px;font-family:inherit;cursor:pointer;font-weight:700;margin-top:10px;">🔄 רענן</button>' +
       '</div>';
     return;
@@ -1413,18 +1414,32 @@ function renderPotd(){
       banner.style.display = 'none';
       return;
     }
+    // Check if user dismissed the banner today
+    var today = new Date().toDateString();
+    var dismissedDate = localStorage.getItem('potd_dismissed');
+    if (dismissedDate === today) {
+      banner.style.display = 'none';
+      return;
+    }
     document.getElementById('potd-he').textContent = p.he || '';
     document.getElementById('potd-trans').textContent = p.trans || '';
     document.getElementById('potd-ar').textContent = p.ar || '';
-    // Hide play button if no audio
     var playBtn = document.getElementById('potd-play-btn');
     if (playBtn) playBtn.style.display = p.audio ? 'inline-block' : 'none';
     banner.style.display = 'block';
-    // Store current potd id for the open button
     window._potdId = p.id;
   } catch(e) {
     console.warn('renderPotd error:', e);
   }
+}
+
+function potdDismiss(){
+  try {
+    var today = new Date().toDateString();
+    localStorage.setItem('potd_dismissed', today);
+    var banner = document.getElementById('potd-banner');
+    if (banner) banner.style.display = 'none';
+  } catch(e) { console.warn(e); }
 }
 
 function potdPlayAudio(){
