@@ -720,7 +720,7 @@ body.day-mode .card:hover{
       </div>
     </div>
     
-    <div class="loading" id="cats-loading"><div style="text-align:center;padding:20px;"><div style="font-size:16px;color:#FF8C00;margin-bottom:8px;">טוען...</div><div style="font-size:10px;color:#7a9ab5;opacity:0.6;">v20260524-1446</div></div></div>
+    <div class="loading" id="cats-loading"><div style="text-align:center;padding:20px;"><div style="font-size:16px;color:#FF8C00;margin-bottom:8px;">טוען...</div><div style="font-size:10px;color:#7a9ab5;opacity:0.6;">v20260524-1518</div></div></div>
     <div class="cgrid" id="cgrid" style="display:none;"></div>
   </div>
   <div id="vlist" class="scr">
@@ -758,6 +758,31 @@ body.day-mode .card:hover{
       <div class="responses-section" id="presponsesb" style="display:none;">
         <div class="responses-title">💬 תשובות אפשריות מהאזרח</div>
         <div class="responses-list" id="presponses"></div>
+      </div>
+      
+      <!-- Practice pronunciation section -->
+      <div id="practice-section" style="margin-top:14px;padding:14px;background:#0E1B2E;border:1px solid rgba(212,162,78,0.2);border-radius:12px;">
+        <div style="display:flex;align-items:center;gap:8px;margin-bottom:10px;">
+          <span style="color:#D4A24E;font-size:14px;">🎤</span>
+          <span style="color:#D4A24E;font-size:12px;font-weight:700;letter-spacing:0.5px;">תרגול הגייה</span>
+        </div>
+        <div id="practice-idle" style="text-align:center;">
+          <div style="color:#a0b8c8;font-size:12px;margin-bottom:10px;">הקליטי את עצמך והשווי למקור</div>
+          <button id="practice-start-btn" onclick="practiceStart()" style="background:#D4A24E;border:none;color:#18293E;border-radius:10px;padding:10px 20px;font-size:13px;font-weight:700;cursor:pointer;font-family:inherit;">🎤 התחל הקלטה</button>
+        </div>
+        <div id="practice-recording" style="display:none;text-align:center;">
+          <div style="color:#FF8C00;font-size:13px;font-weight:700;margin-bottom:10px;">● מקליט... <span id="practice-timer">0</span> שניות</div>
+          <button onclick="practiceStop()" style="background:#c0392b;border:none;color:#fff;border-radius:10px;padding:10px 20px;font-size:13px;font-weight:700;cursor:pointer;font-family:inherit;">⏹ עצור</button>
+        </div>
+        <div id="practice-compare" style="display:none;">
+          <div style="color:#a0b8c8;font-size:12px;margin-bottom:10px;text-align:center;">השווי בין השניים:</div>
+          <div style="display:flex;gap:8px;margin-bottom:10px;">
+            <button onclick="practicePlayMine()" style="flex:1;background:rgba(212,162,78,0.15);border:1px solid #D4A24E;color:#D4A24E;border-radius:10px;padding:10px;font-size:12px;font-weight:700;cursor:pointer;font-family:inherit;">▶ ההקלטה שלי</button>
+            <button onclick="practicePlayOriginal()" style="flex:1;background:rgba(29,158,117,0.15);border:1px solid #1D9E75;color:#1D9E75;border-radius:10px;padding:10px;font-size:12px;font-weight:700;cursor:pointer;font-family:inherit;">▶ ההקלטה הנכונה</button>
+          </div>
+          <button onclick="practiceReset()" style="width:100%;background:transparent;border:1px solid rgba(122,154,181,0.4);color:#a0b8c8;border-radius:10px;padding:8px;font-size:12px;cursor:pointer;font-family:inherit;">🔄 נסי שוב</button>
+        </div>
+        <div id="practice-error" style="display:none;text-align:center;color:#e74c3c;font-size:12px;padding:8px;"></div>
       </div>
       
     <div class="popup-actions"><button onclick="toggleFav()" id="fav-btn" class="popup-action-btn fav">☆ שמור למועדפים</button><button onclick="clsP()" class="popup-action-btn close">✕ סגור</button></div>
@@ -1283,7 +1308,7 @@ function bldCats(){
   if (!DB || DB.length === 0) {
     loadEl.innerHTML = '<div style="text-align:center;padding:20px;color:#FF8C00;">' +
       'מתחבר לשרת...<br><br>' +
-      '<div style="font-size:11px;color:#7a9ab5;">v20260524-1446</div><br>' +
+      '<div style="font-size:11px;color:#7a9ab5;">v20260524-1518</div><br>' +
       '<button onclick="location.reload(true)" style="padding:10px 20px;background:#FF8C00;color:#fff;border:none;border-radius:8px;font-family:inherit;cursor:pointer;font-weight:700;margin-top:10px;">🔄 רענן</button>' +
       '</div>';
     return;
@@ -1353,6 +1378,7 @@ function opNavyP(i){
   const p=NAVY[i];
   saveRecent(p.id);
   if (typeof trackLearned === 'function') trackLearned(p.id);
+  if (typeof practiceReset === 'function') practiceReset();
   setPopupLabel('navy');
   setPopupExtras(p);
   document.getElementById('phe').textContent=p.he;
@@ -1665,6 +1691,134 @@ function renderProgress(){
     
     box.style.display = 'block';
   } catch(e) { console.warn('renderProgress error:', e); }
+}
+
+// === Pronunciation practice ===
+var practiceRec = null;
+var practiceChunks = [];
+var practiceBlob = null;
+var practiceTimerInterval = null;
+var practiceCurrentAudio = null;
+
+function practiceReset(){
+  try {
+    document.getElementById('practice-idle').style.display = 'block';
+    document.getElementById('practice-recording').style.display = 'none';
+    document.getElementById('practice-compare').style.display = 'none';
+    document.getElementById('practice-error').style.display = 'none';
+    practiceBlob = null;
+    practiceChunks = [];
+    if (practiceCurrentAudio) {
+      practiceCurrentAudio.pause();
+      practiceCurrentAudio = null;
+    }
+  } catch(e) { console.warn(e); }
+}
+
+function practiceShowError(msg){
+  try {
+    document.getElementById('practice-idle').style.display = 'none';
+    document.getElementById('practice-recording').style.display = 'none';
+    document.getElementById('practice-compare').style.display = 'none';
+    var errEl = document.getElementById('practice-error');
+    errEl.textContent = msg;
+    errEl.style.display = 'block';
+    setTimeout(function(){
+      errEl.style.display = 'none';
+      document.getElementById('practice-idle').style.display = 'block';
+    }, 3000);
+  } catch(e) { console.warn(e); }
+}
+
+async function practiceStart(){
+  try {
+    // Check browser support
+    if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+      practiceShowError('הדפדפן שלך לא תומך בהקלטה');
+      return;
+    }
+    
+    var stream = await navigator.mediaDevices.getUserMedia({audio: true});
+    practiceChunks = [];
+    practiceRec = new MediaRecorder(stream);
+    
+    practiceRec.ondataavailable = function(e){
+      if (e.data.size > 0) practiceChunks.push(e.data);
+    };
+    
+    practiceRec.onstop = function(){
+      practiceBlob = new Blob(practiceChunks, {type: 'audio/webm'});
+      stream.getTracks().forEach(function(t){ t.stop(); });
+      // Show compare buttons
+      document.getElementById('practice-recording').style.display = 'none';
+      document.getElementById('practice-compare').style.display = 'block';
+      if (practiceTimerInterval) {
+        clearInterval(practiceTimerInterval);
+        practiceTimerInterval = null;
+      }
+    };
+    
+    practiceRec.start();
+    document.getElementById('practice-idle').style.display = 'none';
+    document.getElementById('practice-recording').style.display = 'block';
+    
+    // Timer
+    var seconds = 0;
+    var timerEl = document.getElementById('practice-timer');
+    if (timerEl) timerEl.textContent = '0';
+    practiceTimerInterval = setInterval(function(){
+      seconds++;
+      if (timerEl) timerEl.textContent = seconds;
+      // Auto-stop after 10 seconds
+      if (seconds >= 10) {
+        practiceStop();
+      }
+    }, 1000);
+  } catch(e) {
+    console.warn('practiceStart error:', e);
+    if (e.name === 'NotAllowedError') {
+      practiceShowError('יש לאשר גישה למיקרופון');
+    } else {
+      practiceShowError('שגיאה: ' + (e.message || 'לא יכול להקליט'));
+    }
+  }
+}
+
+function practiceStop(){
+  try {
+    if (practiceRec && practiceRec.state === 'recording') {
+      practiceRec.stop();
+    }
+  } catch(e) { console.warn(e); }
+}
+
+function practicePlayMine(){
+  try {
+    if (!practiceBlob) return;
+    if (practiceCurrentAudio) practiceCurrentAudio.pause();
+    var url = URL.createObjectURL(practiceBlob);
+    practiceCurrentAudio = new Audio(url);
+    practiceCurrentAudio.play();
+  } catch(e) { console.warn(e); }
+}
+
+function practicePlayOriginal(){
+  try {
+    // Get the audio URL from popup play button
+    var pbtns = document.querySelectorAll('.pbtn');
+    var audioUrl = '';
+    pbtns.forEach(function(b){
+      var a = b.getAttribute('data-audio');
+      if (a) audioUrl = a;
+    });
+    if (!audioUrl) {
+      practiceShowError('אין הקלטה למשפט הזה');
+      return;
+    }
+    if (practiceCurrentAudio) practiceCurrentAudio.pause();
+    practiceCurrentAudio = new Audio(audioUrl);
+    practiceCurrentAudio.play();
+  } catch(e) { console.warn(e); }
 }
 
 function potdDismiss(){
@@ -2106,6 +2260,7 @@ function opP(i){
   const p=DB[i];
   saveRecent(p.id);
   if (typeof trackLearned === 'function') trackLearned(p.id);
+  if (typeof practiceReset === 'function') practiceReset();
   setPopupLabel('military');
   setPopupExtras(p);
   document.getElementById('phe').textContent=p.he;document.getElementById('parsm').textContent=p.ar;
