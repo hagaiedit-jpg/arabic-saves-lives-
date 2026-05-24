@@ -720,7 +720,7 @@ body.day-mode .card:hover{
       </div>
     </div>
     
-    <div class="loading" id="cats-loading"><div style="text-align:center;padding:20px;"><div style="font-size:16px;color:#FF8C00;margin-bottom:8px;">טוען...</div><div style="font-size:10px;color:#7a9ab5;opacity:0.6;">v20260524-1518</div></div></div>
+    <div class="loading" id="cats-loading"><div style="text-align:center;padding:20px;"><div style="font-size:16px;color:#FF8C00;margin-bottom:8px;">טוען...</div><div style="font-size:10px;color:#7a9ab5;opacity:0.6;">v20260524-1531</div></div></div>
     <div class="cgrid" id="cgrid" style="display:none;"></div>
   </div>
   <div id="vlist" class="scr">
@@ -1308,7 +1308,7 @@ function bldCats(){
   if (!DB || DB.length === 0) {
     loadEl.innerHTML = '<div style="text-align:center;padding:20px;color:#FF8C00;">' +
       'מתחבר לשרת...<br><br>' +
-      '<div style="font-size:11px;color:#7a9ab5;">v20260524-1518</div><br>' +
+      '<div style="font-size:11px;color:#7a9ab5;">v20260524-1531</div><br>' +
       '<button onclick="location.reload(true)" style="padding:10px 20px;background:#FF8C00;color:#fff;border:none;border-radius:8px;font-family:inherit;cursor:pointer;font-weight:700;margin-top:10px;">🔄 רענן</button>' +
       '</div>';
     return;
@@ -1804,13 +1804,8 @@ function practicePlayMine(){
 
 function practicePlayOriginal(){
   try {
-    // Get the audio URL from popup play button
-    var pbtns = document.querySelectorAll('.pbtn');
-    var audioUrl = '';
-    pbtns.forEach(function(b){
-      var a = b.getAttribute('data-audio');
-      if (a) audioUrl = a;
-    });
+    // Use the popup audio URL that was set when popup opened
+    var audioUrl = window._popupAudio || '';
     if (!audioUrl) {
       practiceShowError('אין הקלטה למשפט הזה');
       return;
@@ -1818,7 +1813,10 @@ function practicePlayOriginal(){
     if (practiceCurrentAudio) practiceCurrentAudio.pause();
     practiceCurrentAudio = new Audio(audioUrl);
     practiceCurrentAudio.play();
-  } catch(e) { console.warn(e); }
+  } catch(e) { 
+    console.warn(e);
+    practiceShowError('שגיאה בנגינת ההקלטה');
+  }
 }
 
 function potdDismiss(){
