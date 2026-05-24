@@ -720,7 +720,7 @@ body.day-mode .card:hover{
       </div>
     </div>
     
-    <div class="loading" id="cats-loading"><div style="text-align:center;padding:20px;"><div style="font-size:16px;color:#FF8C00;margin-bottom:8px;">טוען...</div><div style="font-size:10px;color:#7a9ab5;opacity:0.6;">v20260524-1531</div></div></div>
+    <div class="loading" id="cats-loading"><div style="text-align:center;padding:20px;"><div style="font-size:16px;color:#FF8C00;margin-bottom:8px;">טוען...</div><div style="font-size:10px;color:#7a9ab5;opacity:0.6;">v20260524-1538</div></div></div>
     <div class="cgrid" id="cgrid" style="display:none;"></div>
   </div>
   <div id="vlist" class="scr">
@@ -780,7 +780,12 @@ body.day-mode .card:hover{
             <button onclick="practicePlayMine()" style="flex:1;background:rgba(212,162,78,0.15);border:1px solid #D4A24E;color:#D4A24E;border-radius:10px;padding:10px;font-size:12px;font-weight:700;cursor:pointer;font-family:inherit;">▶ ההקלטה שלי</button>
             <button onclick="practicePlayOriginal()" style="flex:1;background:rgba(29,158,117,0.15);border:1px solid #1D9E75;color:#1D9E75;border-radius:10px;padding:10px;font-size:12px;font-weight:700;cursor:pointer;font-family:inherit;">▶ ההקלטה הנכונה</button>
           </div>
+          <button id="practice-success-btn" onclick="practiceSuccess()" style="width:100%;background:linear-gradient(135deg,#1D9E75 0%,#147a59 100%);border:none;color:#fff;border-radius:10px;padding:12px;font-size:14px;font-weight:700;cursor:pointer;font-family:inherit;margin-bottom:8px;box-shadow:0 2px 8px rgba(29,158,117,0.3);">💪 הצלחתי!</button>
           <button onclick="practiceReset()" style="width:100%;background:transparent;border:1px solid rgba(122,154,181,0.4);color:#a0b8c8;border-radius:10px;padding:8px;font-size:12px;cursor:pointer;font-family:inherit;">🔄 נסי שוב</button>
+        </div>
+        <div id="practice-done" style="display:none;text-align:center;padding:8px;">
+          <div style="color:#1D9E75;font-size:14px;font-weight:700;margin-bottom:4px;">✓ תרגלת בהצלחה!</div>
+          <div id="practice-count-text" style="color:#a0b8c8;font-size:12px;"></div>
         </div>
         <div id="practice-error" style="display:none;text-align:center;color:#e74c3c;font-size:12px;padding:8px;"></div>
       </div>
@@ -1308,7 +1313,7 @@ function bldCats(){
   if (!DB || DB.length === 0) {
     loadEl.innerHTML = '<div style="text-align:center;padding:20px;color:#FF8C00;">' +
       'מתחבר לשרת...<br><br>' +
-      '<div style="font-size:11px;color:#7a9ab5;">v20260524-1531</div><br>' +
+      '<div style="font-size:11px;color:#7a9ab5;">v20260524-1538</div><br>' +
       '<button onclick="location.reload(true)" style="padding:10px 20px;background:#FF8C00;color:#fff;border:none;border-radius:8px;font-family:inherit;cursor:pointer;font-weight:700;margin-top:10px;">🔄 רענן</button>' +
       '</div>';
     return;
@@ -1706,6 +1711,8 @@ function practiceReset(){
     document.getElementById('practice-recording').style.display = 'none';
     document.getElementById('practice-compare').style.display = 'none';
     document.getElementById('practice-error').style.display = 'none';
+    var doneEl = document.getElementById('practice-done');
+    if (doneEl) doneEl.style.display = 'none';
     practiceBlob = null;
     practiceChunks = [];
     if (practiceCurrentAudio) {
@@ -1790,6 +1797,79 @@ function practiceStop(){
       practiceRec.stop();
     }
   } catch(e) { console.warn(e); }
+}
+
+function practiceSuccess(){
+  try {
+    // Save the current popup phrase as "practiced"
+    var pheEl = document.getElementById('phe');
+    if (!pheEl) return;
+    var heText = pheEl.textContent || '';
+    if (!heText) return;
+    
+    var practiced = JSON.parse(localStorage.getItem('practiced_phrases') || '{}');
+    var todayStr = new Date().toDateString();
+    practiced[heText] = todayStr;
+    localStorage.setItem('practiced_phrases', JSON.stringify(practiced));
+    
+    // Show success state
+    document.getElementById('practice-compare').style.display = 'none';
+    var doneBox = document.getElementById('practice-done');
+    
+    // Count practices this week
+    var totalCount = Object.keys(practiced).length;
+    var now = new Date();
+    var weekAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
+    var weekCount = 0;
+    for (var k in practiced) {
+      try {
+        var d = new Date(practiced[k]);
+        if (d >= weekAgo) weekCount++;
+      } catch(e) {}
+    }
+    
+    var text = '';
+    if (totalCount === 1) text = 'תרגול ראשון! 🎉';
+    else if (weekCount > 0) text = 'תרגלת ' + weekCount + ' משפטים השבוע';
+    else text = 'תרגלת ' + totalCount + ' משפטים';
+    document.getElementById('practice-count-text').textContent = text;
+    doneBox.style.display = 'block';
+    
+    // Check practice achievements
+    if (typeof checkPracticeAchievements === 'function') {
+      setTimeout(checkPracticeAchievements, 500);
+    }
+  } catch(e) { console.warn('practiceSuccess error:', e); }
+}
+
+function checkPracticeAchievements(){
+  try {
+    var practiced = JSON.parse(localStorage.getItem('practiced_phrases') || '{}');
+    var count = Object.keys(practiced).length;
+    var earned = JSON.parse(localStorage.getItem('earned_achievements') || '[]');
+    
+    var pracAchs = [
+      {id:'practice_1',   icon:'🎤', title:'תרגול ראשון!',      desc:'הקלטת את עצמך בפעם הראשונה - מצוין!', threshold:1},
+      {id:'practice_10',  icon:'💪', title:'10 תרגולים',         desc:'תרגלת הגייה ב-10 משפטים שונים', threshold:10},
+      {id:'practice_50',  icon:'🎯', title:'50 תרגולים',         desc:'מתאמן רציני - 50 תרגולי הגייה!', threshold:50},
+      {id:'practice_100', icon:'🏆', title:'100 תרגולים',        desc:'הגעת ל-100 תרגולי הגייה - דובר ערבית!', threshold:100}
+    ];
+    
+    var newlyEarned = [];
+    pracAchs.forEach(function(ach){
+      if (earned.indexOf(ach.id) !== -1) return;
+      if (count >= ach.threshold) newlyEarned.push(ach);
+    });
+    
+    if (newlyEarned.length > 0) {
+      newlyEarned.forEach(function(ach){ earned.push(ach.id); });
+      localStorage.setItem('earned_achievements', JSON.stringify(earned));
+      if (typeof showAchievement === 'function') {
+        showAchievement(newlyEarned[0]);
+        if (newlyEarned.length > 1) window._achQueue = newlyEarned.slice(1);
+      }
+    }
+  } catch(e) { console.warn('checkPracticeAchievements error:', e); }
 }
 
 function practicePlayMine(){
