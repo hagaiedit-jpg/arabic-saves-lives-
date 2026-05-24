@@ -720,7 +720,7 @@ body.day-mode .card:hover{
       </div>
     </div>
     
-    <div class="loading" id="cats-loading"><div style="text-align:center;padding:20px;"><div style="font-size:16px;color:#FF8C00;margin-bottom:8px;">טוען...</div><div style="font-size:10px;color:#7a9ab5;opacity:0.6;">v20260524-1441</div></div></div>
+    <div class="loading" id="cats-loading"><div style="text-align:center;padding:20px;"><div style="font-size:16px;color:#FF8C00;margin-bottom:8px;">טוען...</div><div style="font-size:10px;color:#7a9ab5;opacity:0.6;">v20260524-1446</div></div></div>
     <div class="cgrid" id="cgrid" style="display:none;"></div>
   </div>
   <div id="vlist" class="scr">
@@ -1186,7 +1186,7 @@ async function loadData(){
     ARTS=data.filter(p=>p.section==='article').map(mp);
     document.getElementById('status-badge').textContent='מחובר';
     document.getElementById('status-badge').style.background='#1D9E75';
-    bldCats();rDG();rHrt();rSem();rCus();rArts();renderDict();rQK();updateNewDot();renderPotd();renderStreak();renderProgress();
+    bldCats();rDG();rHrt();rSem();rCus();rArts();renderDict();rQK();updateNewDot();renderPotd();renderStreak();renderProgress();if(typeof checkAchievements==='function')setTimeout(checkAchievements,1500);
   }catch(e){
     console.error('loadData failed:', e);
     document.getElementById('status-badge').textContent='אופליין';
@@ -1283,7 +1283,7 @@ function bldCats(){
   if (!DB || DB.length === 0) {
     loadEl.innerHTML = '<div style="text-align:center;padding:20px;color:#FF8C00;">' +
       'מתחבר לשרת...<br><br>' +
-      '<div style="font-size:11px;color:#7a9ab5;">v20260524-1441</div><br>' +
+      '<div style="font-size:11px;color:#7a9ab5;">v20260524-1446</div><br>' +
       '<button onclick="location.reload(true)" style="padding:10px 20px;background:#FF8C00;color:#fff;border:none;border-radius:8px;font-family:inherit;cursor:pointer;font-weight:700;margin-top:10px;">🔄 רענן</button>' +
       '</div>';
     return;
@@ -1521,6 +1521,85 @@ function renderStreak(){
   }
 }
 
+// Achievement definitions
+var ACHIEVEMENTS = [
+  {id:'rookie',     icon:'🔰', title:'טירון!',            desc:'למדת את 10 המשפטים הראשונים שלך', threshold:10,  type:'count'},
+  {id:'soldier',    icon:'🪖', title:'חייל מנוסה',         desc:'למדת 25 משפטים - כל הכבוד!', threshold:25,  type:'count'},
+  {id:'hundred',    icon:'💯', title:'100 משפטים!',        desc:'הגעת ל-100 משפטים נלמדים', threshold:100, type:'count'},
+  {id:'expert',     icon:'🎯', title:'מומחה השטח',         desc:'למדת 200 משפטים - מרשים!', threshold:200, type:'count'},
+  {id:'streak_3',   icon:'🔥', title:'אש קלה',            desc:'3 ימים ברצף באפליקציה', threshold:3,   type:'streak'},
+  {id:'streak_7',   icon:'🔥', title:'שבוע אש',           desc:'7 ימים ברצף - מרהיב!', threshold:7,   type:'streak'},
+  {id:'streak_30',  icon:'⚡', title:'חודש לוהט',          desc:'30 ימים רצופים - אגדה!', threshold:30,  type:'streak'}
+];
+
+function getEarnedAchievements(){
+  try {
+    return JSON.parse(localStorage.getItem('earned_achievements') || '[]');
+  } catch(e) { return []; }
+}
+
+function saveEarnedAchievements(list){
+  try {
+    localStorage.setItem('earned_achievements', JSON.stringify(list));
+  } catch(e) {}
+}
+
+function checkAchievements(){
+  try {
+    var earned = getEarnedAchievements();
+    var learned = JSON.parse(localStorage.getItem('learned_phrases') || '{}');
+    var learnedCount = Object.keys(learned).length;
+    var streak = parseInt(localStorage.getItem('streak_count') || '0', 10);
+    
+    var newlyEarned = [];
+    
+    ACHIEVEMENTS.forEach(function(ach){
+      if (earned.indexOf(ach.id) !== -1) return; // already earned
+      
+      var currentValue = (ach.type === 'count') ? learnedCount : streak;
+      if (currentValue >= ach.threshold) {
+        newlyEarned.push(ach);
+      }
+    });
+    
+    if (newlyEarned.length > 0) {
+      // Mark as earned
+      newlyEarned.forEach(function(ach){ earned.push(ach.id); });
+      saveEarnedAchievements(earned);
+      // Show the first one (queue others if needed)
+      showAchievement(newlyEarned[0]);
+      // Queue remaining
+      if (newlyEarned.length > 1) {
+        window._achQueue = newlyEarned.slice(1);
+      }
+    }
+  } catch(e) { console.warn('checkAchievements error:', e); }
+}
+
+function showAchievement(ach){
+  try {
+    if (!ach) return;
+    var pop = document.getElementById('achPopup');
+    if (!pop) return;
+    document.getElementById('achIcon').textContent = ach.icon;
+    document.getElementById('achTitle').textContent = ach.title;
+    document.getElementById('achDesc').textContent = ach.desc;
+    pop.style.display = 'flex';
+  } catch(e) { console.warn(e); }
+}
+
+function closeAch(){
+  try {
+    var pop = document.getElementById('achPopup');
+    if (pop) pop.style.display = 'none';
+    // Show next in queue if exists
+    if (window._achQueue && window._achQueue.length > 0) {
+      var next = window._achQueue.shift();
+      setTimeout(function(){ showAchievement(next); }, 400);
+    }
+  } catch(e) { console.warn(e); }
+}
+
 function trackLearned(phraseId){
   try {
     if (!phraseId) return;
@@ -1531,6 +1610,10 @@ function trackLearned(phraseId){
     localStorage.setItem('learned_phrases', JSON.stringify(learned));
     // Refresh display
     if (typeof renderProgress === 'function') renderProgress();
+    // Check for new achievements
+    if (typeof checkAchievements === 'function') {
+      setTimeout(checkAchievements, 500); // small delay so user sees content first
+    }
   } catch(e) { console.warn('trackLearned error:', e); }
 }
 
@@ -3538,6 +3621,18 @@ try { bldCats(); } catch(_){}
 })();
 </script>
 
+
+<!-- Achievement Popup -->
+<div id="achPopup" style="display:none;position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.75);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);z-index:10000;align-items:center;justify-content:center;padding:20px;" onclick="if(event.target===this)closeAch()">
+  <div style="background:linear-gradient(135deg,#1F3147 0%,#18293E 100%);border:1.5px solid #D4A24E;border-radius:20px;padding:28px 24px;max-width:380px;width:100%;text-align:center;box-shadow:0 20px 60px rgba(0,0,0,0.5);position:relative;">
+    <div style="font-size:38px;margin-bottom:6px;">🎉</div>
+    <div style="color:#D4A24E;font-size:12px;font-weight:700;letter-spacing:2px;margin-bottom:14px;">הישג חדש</div>
+    <div id="achIcon" style="font-size:68px;margin-bottom:12px;line-height:1;">🏆</div>
+    <div id="achTitle" style="color:#FF8C00;font-size:20px;font-weight:700;margin-bottom:8px;"></div>
+    <div id="achDesc" style="color:#E8D9B8;font-size:14px;line-height:1.6;margin-bottom:22px;"></div>
+    <button onclick="closeAch()" style="background:#D4A24E;border:none;color:#18293E;border-radius:10px;padding:12px 28px;font-size:14px;font-weight:700;cursor:pointer;font-family:inherit;">המשך</button>
+  </div>
+</div>
 
 <!-- Welcome Popup -->
 <div id="welcomePopup" class="welcome-bg" style="display:none;" onclick="if(event.target===this)hideWelcome()">
