@@ -692,7 +692,7 @@ body.day-mode .card:hover{
     <button class="lb" id="lbar" onclick="setL('ar')">🔍 ערבית</button>
   </div>
   <div id="vcats" class="scr on">
-    <div class="loading" id="cats-loading"><div style="text-align:center;padding:20px;"><div style="font-size:16px;color:#FF8C00;margin-bottom:8px;">טוען...</div><div style="font-size:10px;color:#7a9ab5;opacity:0.6;">v20260524-1241</div></div></div>
+    <div class="loading" id="cats-loading"><div style="text-align:center;padding:20px;"><div style="font-size:16px;color:#FF8C00;margin-bottom:8px;">טוען...</div><div style="font-size:10px;color:#7a9ab5;opacity:0.6;">v20260524-1322</div></div></div>
     <div class="cgrid" id="cgrid" style="display:none;"></div>
   </div>
   <div id="vlist" class="scr">
@@ -1114,20 +1114,17 @@ let DB=[],DAILY=[],HEART=[],NAVY=[],ANNOUNCE=[],DICT=[],SEM=[],CUS=[],ARTS=[];
 let sL='he',curC=null,curTab='lib',curDailyCat=null;
 
 async function sbFetch(path,method='GET',body=null){
-  const ctrl = new AbortController();
-  const timer = setTimeout(function(){ ctrl.abort(); }, 8000); // 8-second timeout
-  const opts={method,signal:ctrl.signal,headers:{'apikey':SUPA_KEY,'Authorization':'Bearer '+SUPA_KEY,'Content-Type':'application/json','Prefer':method==='POST'?'return=representation':''}};
+  const opts={method,headers:{'apikey':SUPA_KEY,'Authorization':'Bearer '+SUPA_KEY,'Content-Type':'application/json','Prefer':method==='POST'?'return=representation':''}};
   if(body)opts.body=JSON.stringify(body);
-  try {
-    const res=await fetch(SUPA_URL+path,opts);
-    clearTimeout(timer);
-    if(!res.ok)throw new Error(await res.text());
-    const t=await res.text();return t?JSON.parse(t):null;
-  } catch(e) {
-    clearTimeout(timer);
-    if (e.name === 'AbortError') throw new Error('timeout - השרת לא מגיב');
-    throw e;
-  }
+  // Use Promise.race for timeout (avoids AbortSignal browser issues)
+  const fetchPromise = fetch(SUPA_URL+path,opts);
+  const timeoutPromise = new Promise(function(_, reject){
+    setTimeout(function(){ reject(new Error('timeout - השרת לא מגיב')); }, 10000);
+  });
+  const res = await Promise.race([fetchPromise, timeoutPromise]);
+  if(!res.ok)throw new Error(await res.text());
+  const t=await res.text();
+  return t?JSON.parse(t):null;
 }
 
 // Simple toast helper (non-blocking notifications)
@@ -1258,7 +1255,7 @@ function bldCats(){
   if (!DB || DB.length === 0) {
     loadEl.innerHTML = '<div style="text-align:center;padding:20px;color:#FF8C00;">' +
       'מתחבר לשרת...<br><br>' +
-      '<div style="font-size:11px;color:#7a9ab5;">v20260524-1241</div><br>' +
+      '<div style="font-size:11px;color:#7a9ab5;">v20260524-1322</div><br>' +
       '<button onclick="location.reload(true)" style="padding:10px 20px;background:#FF8C00;color:#fff;border:none;border-radius:8px;font-family:inherit;cursor:pointer;font-weight:700;margin-top:10px;">🔄 רענן</button>' +
       '</div>';
     return;
@@ -1338,6 +1335,35 @@ function opNavyP(i){
   document.getElementById('ptoneb').style.display=p.tone?'block':'none';
   document.querySelectorAll('.pbtn').forEach(b=>b.setAttribute('data-audio',p.audio||''));
   updateFavBtn(p.id);
+  
+  // Render responses if exists
+  var respBox = document.getElementById('presponsesb');
+  var respList = document.getElementById('presponses');
+  if (respBox && respList) {
+    if (p.responses && p.responses.length > 0) {
+      var html = '';
+      for (var ri = 0; ri < p.responses.length; ri++) {
+        var r = p.responses[ri];
+        html += '<div class="response-item">';
+        html += '<div class="response-content">';
+        if (r.he) html += '<div class="response-he">' + r.he + '</div>';
+        if (r.trans) html += '<div class="response-trans">' + r.trans + '</div>';
+        if (r.ar) html += '<div class="response-ar">' + r.ar + '</div>';
+        html += '</div>';
+        if (r.audio_url) {
+          html += '<button class="response-play-btn" onclick="playResponseAudio(\'' + r.audio_url.replace(/\'/g, "\\'") + '\', this)" title="השמע">▶</button>';
+        } else {
+          html += '<button class="response-play-btn no-audio" title="אין הקלטה">▶</button>';
+        }
+        html += '</div>';
+      }
+      respList.innerHTML = html;
+      respBox.style.display = 'block';
+    } else {
+      respBox.style.display = 'none';
+    }
+  }
+  
   bldW();document.getElementById('wtime').textContent='0:00';
   shV('vpop');
 }
@@ -2261,16 +2287,23 @@ function setAdminFilter(mode){
 
 function onAdminSearch(val){
   window._adminSearch = val;
-  // Debounce - rerender after 200ms of no typing
+  // Save cursor position
+  var inp = document.getElementById('admin-search-box');
+  var cursorPos = inp ? inp.selectionStart : val.length;
+  
+  // Debounce - 400ms (longer to allow typing)
   clearTimeout(window._adminSearchTimer);
   window._adminSearchTimer = setTimeout(function(){
     renderAdminList();
-    // Keep focus on search box
+    // Restore focus and cursor position
     setTimeout(function(){
       var el = document.getElementById('admin-search-box');
-      if (el) { el.focus(); el.setSelectionRange(el.value.length, el.value.length); }
-    }, 10);
-  }, 200);
+      if (el) {
+        el.focus();
+        try { el.setSelectionRange(cursorPos, cursorPos); } catch(e) {}
+      }
+    }, 30);
+  }, 400);
 }
 
 
