@@ -692,7 +692,7 @@ body.day-mode .card:hover{
     <button class="lb" id="lbar" onclick="setL('ar')">🔍 ערבית</button>
   </div>
   <div id="vcats" class="scr on">
-    <div class="loading" id="cats-loading"><div style="text-align:center;padding:20px;"><div style="font-size:16px;color:#FF8C00;margin-bottom:8px;">טוען...</div><div style="font-size:10px;color:#7a9ab5;opacity:0.6;">v20260523-2000</div></div></div>
+    <div class="loading" id="cats-loading"><div style="text-align:center;padding:20px;"><div style="font-size:16px;color:#FF8C00;margin-bottom:8px;">טוען...</div><div style="font-size:10px;color:#7a9ab5;opacity:0.6;">v20260524-1208</div></div></div>
     <div class="cgrid" id="cgrid" style="display:none;"></div>
   </div>
   <div id="vlist" class="scr">
@@ -1258,7 +1258,7 @@ function bldCats(){
   if (!DB || DB.length === 0) {
     loadEl.innerHTML = '<div style="text-align:center;padding:20px;color:#FF8C00;">' +
       'מתחבר לשרת...<br><br>' +
-      '<div style="font-size:11px;color:#7a9ab5;">v20260523-2000</div><br>' +
+      '<div style="font-size:11px;color:#7a9ab5;">v20260524-1208</div><br>' +
       '<button onclick="location.reload(true)" style="padding:10px 20px;background:#FF8C00;color:#fff;border:none;border-radius:8px;font-family:inherit;cursor:pointer;font-weight:700;margin-top:10px;">🔄 רענן</button>' +
       '</div>';
     return;
@@ -1698,7 +1698,13 @@ function rItems(items,el,q){
     filtered = sortPhrasesByScenario(filtered);
   }
   if(!filtered.length){el.innerHTML='<div class="empty">לא נמצאו תוצאות</div>';return;}
-  el.innerHTML=filtered.map(p=>{const i=DB.indexOf(p);var star=(typeof isGoldPhrase==='function'&&isGoldPhrase(p))?'<span class="gold-marker">⭐</span>':'';return`<div class="li" onclick="opP(${i})"><div class="lt">${star+hl(p.he,q)+(typeof urgDot==='function'?urgDot(p.urgency):'')}</div><div class="la">‹</div></div>`;}).join('');
+  el.innerHTML=filtered.map(p=>{
+    // Find by unique id, not indexOf (which fails for duplicate Hebrew texts)
+    var i = DB.findIndex(function(x){return x.id === p.id;});
+    if (i < 0) i = DB.indexOf(p); // fallback
+    var star=(typeof isGoldPhrase==='function'&&isGoldPhrase(p))?'<span class="gold-marker">⭐</span>':'';
+    return `<div class="li" onclick="opP(${i})"><div class="lt">${star+hl(p.he,q)+(typeof urgDot==='function'?urgDot(p.urgency):'')}</div><div class="la">‹</div></div>`;
+  }).join('');
 }
 function bldW(){const el=document.getElementById('wbars');el.innerHTML='';for(let i=0;i<32;i++){const b=document.createElement('div');b.className='wb';b.style.height=(4+Math.floor(Math.random()*14))+'px';el.appendChild(b);}}
 // Play audio for a response
@@ -2030,7 +2036,7 @@ function markAllSeen(){
 }
 
 function rNF(){
-  const all=[...DB.filter(p=>p.isNew).map(p=>({tp:'מבצעי',tx:p.he,cat:p.cat,dt:'חדש',idx:DB.indexOf(p),sec:'mil'})),...DAILY.filter(d=>d.isNew).map(d=>({tp:'יומיומי',tx:d.he,cat:d.cat,dt:'חדש',idx:DAILY.indexOf(d),sec:'day'})),...HEART.filter(h=>h.isNew).map(h=>({tp:'פותח לב',tx:h.he,cat:'פותחים לב',dt:'חדש',idx:HEART.indexOf(h),sec:'hrt'})),...NAVY.filter(n=>n.isNew).map(n=>({tp:'ימי',tx:n.he,cat:n.cat,dt:'חדש',idx:NAVY.indexOf(n),sec:'nvy'})),...ANNOUNCE.filter(a=>a.isNew).map(a=>({tp:'כריזה',tx:a.he,cat:a.cat,dt:'חדש',idx:ANNOUNCE.indexOf(a),sec:'ann'}))];
+  const all=[...DB.filter(p=>p.isNew).map(p=>({tp:'מבצעי',tx:p.he,cat:p.cat,dt:'חדש',idx:DB.findIndex(x=>x.id===p.id),sec:'mil'})),...DAILY.filter(d=>d.isNew).map(d=>({tp:'יומיומי',tx:d.he,cat:d.cat,dt:'חדש',idx:DAILY.indexOf(d),sec:'day'})),...HEART.filter(h=>h.isNew).map(h=>({tp:'פותח לב',tx:h.he,cat:'פותחים לב',dt:'חדש',idx:HEART.indexOf(h),sec:'hrt'})),...NAVY.filter(n=>n.isNew).map(n=>({tp:'ימי',tx:n.he,cat:n.cat,dt:'חדש',idx:NAVY.indexOf(n),sec:'nvy'})),...ANNOUNCE.filter(a=>a.isNew).map(a=>({tp:'כריזה',tx:a.he,cat:a.cat,dt:'חדש',idx:ANNOUNCE.indexOf(a),sec:'ann'}))];
   const el=document.getElementById('nflist');
   if(!all.length){el.innerHTML='<div class="empty">אין עדכונים חדשים</div>';return;}
   el.innerHTML=`<div style="text-align:center;margin-bottom:12px;"><button onclick="markAllSeen()" style="padding:8px 20px;background:#FF8C00;border:none;border-radius:8px;color:#fff;font-size:13px;cursor:pointer;font-family:inherit;">✓ סמן הכל כנראה</button></div>`+
@@ -2900,7 +2906,8 @@ function openEmergCat(key){
   
   var h='';
   for(var j=0;j<items.length;j++){
-    var p=items[j],idx=DB.indexOf(p);
+    var p=items[j],idx=DB.findIndex(function(x){return x.id===p.id;});
+    if(idx<0)idx=DB.indexOf(p);
     h+='<div class="emerg-card">';
     h+='<div class="emerg-card-content" onclick="opP('+idx+')">';
     h+='<div class="emerg-card-he">⭐ '+p.he+'</div>';
@@ -2997,7 +3004,7 @@ function rFav(){
   for(var j=0;j<items.length;j++){
     var p=items[j];
     var sec=DB.includes(p)?"military":DAILY.includes(p)?"daily":HEART.includes(p)?"heart":"navy";
-    var idx=sec==="military"?DB.indexOf(p):sec==="daily"?DAILY.indexOf(p):sec==="heart"?HEART.indexOf(p):NAVY.indexOf(p);
+    var idx=sec==="military"?DB.findIndex(function(x){return x.id===p.id;}):sec==="daily"?DAILY.findIndex(function(x){return x.id===p.id;}):sec==="heart"?HEART.indexOf(p):NAVY.indexOf(p);
     h+='<div style="background:#1F3147;border:1px solid #2A3D52;border-radius:10px;padding:12px 14px;margin-bottom:8px;cursor:pointer;border-right:4px solid #FF8C00;" onclick="opFavItem(\''+sec+'\','+idx+')">';
     h+='<div style="display:flex;justify-content:space-between;align-items:flex-start;">';
     h+='<div style="flex:1;"><div style="color:#fff;font-size:14px;margin-bottom:4px;">'+p.he+urgDot(p.urgency)+'</div>';
@@ -3051,7 +3058,7 @@ function rRecent(){
   for(var j=0;j<items.length;j++){
     var p=items[j];
     var sec=DB.includes(p)?"military":DAILY.includes(p)?"daily":HEART.includes(p)?"heart":"navy";
-    var idx=sec==="military"?DB.indexOf(p):sec==="daily"?DAILY.indexOf(p):sec==="heart"?HEART.indexOf(p):NAVY.indexOf(p);
+    var idx=sec==="military"?DB.findIndex(function(x){return x.id===p.id;}):sec==="daily"?DAILY.findIndex(function(x){return x.id===p.id;}):sec==="heart"?HEART.indexOf(p):NAVY.indexOf(p);
     h+='<div style="background:#1a2535;border:1px solid #2A3D52;border-radius:8px;padding:10px 12px;margin-bottom:6px;display:flex;align-items:center;gap:8px;">';
     h+='<div style="flex:1;cursor:pointer;" onclick="opPop('+idx+',\''+sec+'\')">';
     h+='<div style="color:#fff;font-size:13px;">'+p.he+urgDot(p.urgency)+'</div>';
