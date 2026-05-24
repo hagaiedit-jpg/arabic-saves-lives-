@@ -712,9 +712,15 @@ body.day-mode .card:hover{
         <button id="potd-play-btn" onclick="potdPlayAudio()" style="background:transparent;border:1px solid #D4A24E;color:#D4A24E;border-radius:8px;padding:6px 12px;font-size:12px;font-weight:600;cursor:pointer;font-family:inherit;">▶ השמע</button>
         <button id="potd-open-btn" onclick="potdOpen()" style="background:#D4A24E;border:none;color:#18293E;border-radius:8px;padding:6px 12px;font-size:12px;font-weight:700;cursor:pointer;font-family:inherit;">פתח</button>
       </div>
+      <div id="progress-display" style="display:none;margin-top:12px;padding-top:10px;border-top:1px solid rgba(212,162,78,0.15);">
+        <div style="display:flex;align-items:center;justify-content:space-between;font-size:11px;color:#a0b8c8;">
+          <span><span style="color:#D4A24E;font-weight:700;">📈</span> <span id="progress-text">למדת 0 משפטים</span></span>
+          <span id="progress-detail" style="color:#7a9ab5;"></span>
+        </div>
+      </div>
     </div>
     
-    <div class="loading" id="cats-loading"><div style="text-align:center;padding:20px;"><div style="font-size:16px;color:#FF8C00;margin-bottom:8px;">טוען...</div><div style="font-size:10px;color:#7a9ab5;opacity:0.6;">v20260524-1436</div></div></div>
+    <div class="loading" id="cats-loading"><div style="text-align:center;padding:20px;"><div style="font-size:16px;color:#FF8C00;margin-bottom:8px;">טוען...</div><div style="font-size:10px;color:#7a9ab5;opacity:0.6;">v20260524-1441</div></div></div>
     <div class="cgrid" id="cgrid" style="display:none;"></div>
   </div>
   <div id="vlist" class="scr">
@@ -1180,7 +1186,7 @@ async function loadData(){
     ARTS=data.filter(p=>p.section==='article').map(mp);
     document.getElementById('status-badge').textContent='מחובר';
     document.getElementById('status-badge').style.background='#1D9E75';
-    bldCats();rDG();rHrt();rSem();rCus();rArts();renderDict();rQK();updateNewDot();renderPotd();renderStreak();
+    bldCats();rDG();rHrt();rSem();rCus();rArts();renderDict();rQK();updateNewDot();renderPotd();renderStreak();renderProgress();
   }catch(e){
     console.error('loadData failed:', e);
     document.getElementById('status-badge').textContent='אופליין';
@@ -1277,7 +1283,7 @@ function bldCats(){
   if (!DB || DB.length === 0) {
     loadEl.innerHTML = '<div style="text-align:center;padding:20px;color:#FF8C00;">' +
       'מתחבר לשרת...<br><br>' +
-      '<div style="font-size:11px;color:#7a9ab5;">v20260524-1436</div><br>' +
+      '<div style="font-size:11px;color:#7a9ab5;">v20260524-1441</div><br>' +
       '<button onclick="location.reload(true)" style="padding:10px 20px;background:#FF8C00;color:#fff;border:none;border-radius:8px;font-family:inherit;cursor:pointer;font-weight:700;margin-top:10px;">🔄 רענן</button>' +
       '</div>';
     return;
@@ -1346,6 +1352,7 @@ function opAnnounce(i){
 function opNavyP(i){
   const p=NAVY[i];
   saveRecent(p.id);
+  if (typeof trackLearned === 'function') trackLearned(p.id);
   setPopupLabel('navy');
   setPopupExtras(p);
   document.getElementById('phe').textContent=p.he;
@@ -1512,6 +1519,69 @@ function renderStreak(){
   } catch(e) {
     console.warn('renderStreak error:', e);
   }
+}
+
+function trackLearned(phraseId){
+  try {
+    if (!phraseId) return;
+    var learned = JSON.parse(localStorage.getItem('learned_phrases') || '{}');
+    var todayStr = new Date().toDateString();
+    // Store as {phraseId: lastSeenDate}
+    learned[phraseId] = todayStr;
+    localStorage.setItem('learned_phrases', JSON.stringify(learned));
+    // Refresh display
+    if (typeof renderProgress === 'function') renderProgress();
+  } catch(e) { console.warn('trackLearned error:', e); }
+}
+
+function renderProgress(){
+  try {
+    var box = document.getElementById('progress-display');
+    var textEl = document.getElementById('progress-text');
+    var detailEl = document.getElementById('progress-detail');
+    if (!box || !textEl) return;
+    
+    var learned = JSON.parse(localStorage.getItem('learned_phrases') || '{}');
+    var phraseIds = Object.keys(learned);
+    
+    if (phraseIds.length === 0) {
+      box.style.display = 'none';
+      return;
+    }
+    
+    var total = phraseIds.length;
+    
+    // Count learned this week (last 7 days)
+    var now = new Date();
+    var weekAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
+    var thisWeek = 0;
+    phraseIds.forEach(function(id){
+      try {
+        var lastSeen = new Date(learned[id]);
+        if (lastSeen >= weekAgo) thisWeek++;
+      } catch(e) {}
+    });
+    
+    // Total available phrases for context
+    var totalAvailable = (typeof DB !== 'undefined' && DB) ? DB.length : 0;
+    
+    // Display
+    var text = '';
+    if (total === 1) text = 'למדת משפט אחד';
+    else text = 'למדת ' + total + ' משפטים';
+    textEl.textContent = text;
+    
+    var detail = '';
+    if (thisWeek > 0 && thisWeek !== total) {
+      detail = '🔥 ' + thisWeek + ' השבוע';
+    } else if (totalAvailable > 0) {
+      var percent = Math.round((total / totalAvailable) * 100);
+      if (percent > 0) detail = percent + '% מהתוכן';
+    }
+    if (detailEl) detailEl.textContent = detail;
+    
+    box.style.display = 'block';
+  } catch(e) { console.warn('renderProgress error:', e); }
 }
 
 function potdDismiss(){
@@ -1952,6 +2022,7 @@ window.playResponseAudio = playResponseAudio;
 function opP(i){
   const p=DB[i];
   saveRecent(p.id);
+  if (typeof trackLearned === 'function') trackLearned(p.id);
   setPopupLabel('military');
   setPopupExtras(p);
   document.getElementById('phe').textContent=p.he;document.getElementById('parsm').textContent=p.ar;
