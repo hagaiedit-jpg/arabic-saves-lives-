@@ -692,7 +692,7 @@ body.day-mode .card:hover{
     <button class="lb" id="lbar" onclick="setL('ar')">🔍 ערבית</button>
   </div>
   <div id="vcats" class="scr on">
-    <div class="loading" id="cats-loading"><div style="text-align:center;padding:20px;"><div style="font-size:16px;color:#FF8C00;margin-bottom:8px;">טוען...</div><div style="font-size:10px;color:#7a9ab5;opacity:0.6;">v20260524-1208</div></div></div>
+    <div class="loading" id="cats-loading"><div style="text-align:center;padding:20px;"><div style="font-size:16px;color:#FF8C00;margin-bottom:8px;">טוען...</div><div style="font-size:10px;color:#7a9ab5;opacity:0.6;">v20260524-1241</div></div></div>
     <div class="cgrid" id="cgrid" style="display:none;"></div>
   </div>
   <div id="vlist" class="scr">
@@ -1258,7 +1258,7 @@ function bldCats(){
   if (!DB || DB.length === 0) {
     loadEl.innerHTML = '<div style="text-align:center;padding:20px;color:#FF8C00;">' +
       'מתחבר לשרת...<br><br>' +
-      '<div style="font-size:11px;color:#7a9ab5;">v20260524-1208</div><br>' +
+      '<div style="font-size:11px;color:#7a9ab5;">v20260524-1241</div><br>' +
       '<button onclick="location.reload(true)" style="padding:10px 20px;background:#FF8C00;color:#fff;border:none;border-radius:8px;font-family:inherit;cursor:pointer;font-weight:700;margin-top:10px;">🔄 רענן</button>' +
       '</div>';
     return;
@@ -1692,19 +1692,38 @@ function doS(){
 }
 function hl(t,q){if(!q)return t;return t.replace(new RegExp('('+q.replace(/[.*+?^${}()|[\]\\]/g,'\\$&')+')','gi'),'<span class="hlm">$1</span>');}
 function rItems(items,el,q){
-  var filtered = items.filter(function(p){return typeof visibleToRole==='function'?visibleToRole(p):true;});
-  // Apply scenario-based sorting if all items share an emergency category
-  if (typeof sortPhrasesByScenario === 'function') {
-    filtered = sortPhrasesByScenario(filtered);
+  try {
+    var filtered = items.filter(function(p){return typeof visibleToRole==='function'?visibleToRole(p):true;});
+    if (typeof sortPhrasesByScenario === 'function') {
+      try {
+        filtered = sortPhrasesByScenario(filtered);
+      } catch(sortErr) {
+        console.warn('sort failed, using unsorted:', sortErr);
+      }
+    }
+    if(!filtered.length){el.innerHTML='<div class="empty">לא נמצאו תוצאות</div>';return;}
+    var html = '';
+    for (var k = 0; k < filtered.length; k++) {
+      var p = filtered[k];
+      if (!p || !p.he) continue;
+      var i = -1;
+      // Try by id first
+      if (p.id) {
+        i = DB.findIndex(function(x){return x.id === p.id;});
+      }
+      // Fallback to indexOf
+      if (i < 0) i = DB.indexOf(p);
+      if (i < 0) continue;
+      var star = (typeof isGoldPhrase === 'function' && isGoldPhrase(p)) ? '<span class="gold-marker">⭐</span>' : '';
+      var heText = (typeof hl === 'function') ? hl(p.he, q) : p.he;
+      var dot = (typeof urgDot === 'function') ? urgDot(p.urgency) : '';
+      html += '<div class="li" onclick="opP(' + i + ')"><div class="lt">' + star + heText + dot + '</div><div class="la">‹</div></div>';
+    }
+    el.innerHTML = html || '<div class="empty">לא נמצאו תוצאות</div>';
+  } catch(e) {
+    el.innerHTML = '<div class="empty">שגיאה: ' + e.message + '</div>';
+    console.error('rItems error:', e);
   }
-  if(!filtered.length){el.innerHTML='<div class="empty">לא נמצאו תוצאות</div>';return;}
-  el.innerHTML=filtered.map(p=>{
-    // Find by unique id, not indexOf (which fails for duplicate Hebrew texts)
-    var i = DB.findIndex(function(x){return x.id === p.id;});
-    if (i < 0) i = DB.indexOf(p); // fallback
-    var star=(typeof isGoldPhrase==='function'&&isGoldPhrase(p))?'<span class="gold-marker">⭐</span>':'';
-    return `<div class="li" onclick="opP(${i})"><div class="lt">${star+hl(p.he,q)+(typeof urgDot==='function'?urgDot(p.urgency):'')}</div><div class="la">‹</div></div>`;
-  }).join('');
 }
 function bldW(){const el=document.getElementById('wbars');el.innerHTML='';for(let i=0;i<32;i++){const b=document.createElement('div');b.className='wb';b.style.height=(4+Math.floor(Math.random()*14))+'px';el.appendChild(b);}}
 // Play audio for a response
