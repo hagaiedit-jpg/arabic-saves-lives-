@@ -518,6 +518,27 @@ body.day-mode .ct{border:none;border-bottom:1px solid #ebe0c5;border-left:1px so
 .la{color:#7a9ab5;font-size:14px;}
 .smeta{padding:7px 16px;color:#7a9ab5;font-size:12px;background:#0E1B2E;}
 .pbg{background:rgba(0,0,0,0.65);min-height:100vh;display:flex;align-items:flex-start;justify-content:center;padding:12px;padding-top:16px;}
+/* Popup animations - smooth iOS-like entry */
+@keyframes pbgFadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+@keyframes popSlideUp {
+  from { 
+    transform: translateY(40px);
+    opacity: 0;
+  }
+  to { 
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+.scr.on .pbg{
+  animation: pbgFadeIn 0.2s ease-out;
+}
+.scr.on .pop{
+  animation: popSlideUp 0.28s cubic-bezier(0.16, 1, 0.3, 1);
+}
 .pop{background:#fff;border-radius:18px;width:100%;max-width:440px;padding:18px 16px 14px;}
 .phe{color:#0E1B2E;font-size:16px;font-weight:400;text-align:center;margin-bottom:5px;line-height:1.4;}
 .parsm{color:#E8D9B8;font-size:18px;direction:rtl;font-family:Georgia,serif;text-align:center;margin-bottom:12px;font-weight:400;line-height:1.4;}
@@ -692,7 +713,7 @@ body.day-mode .card:hover{
     <button class="lb" id="lbar" onclick="setL('ar')">🔍 ערבית</button>
   </div>
   <div id="vcats" class="scr on">
-    <div class="loading" id="cats-loading"><div style="text-align:center;padding:20px;"><div style="font-size:16px;color:#FF8C00;margin-bottom:8px;">טוען...</div><div style="font-size:10px;color:#7a9ab5;opacity:0.6;">v20260524-1322</div></div></div>
+    <div class="loading" id="cats-loading"><div style="text-align:center;padding:20px;"><div style="font-size:16px;color:#FF8C00;margin-bottom:8px;">טוען...</div><div style="font-size:10px;color:#7a9ab5;opacity:0.6;">v20260524-1340</div></div></div>
     <div class="cgrid" id="cgrid" style="display:none;"></div>
   </div>
   <div id="vlist" class="scr">
@@ -1255,7 +1276,7 @@ function bldCats(){
   if (!DB || DB.length === 0) {
     loadEl.innerHTML = '<div style="text-align:center;padding:20px;color:#FF8C00;">' +
       'מתחבר לשרת...<br><br>' +
-      '<div style="font-size:11px;color:#7a9ab5;">v20260524-1322</div><br>' +
+      '<div style="font-size:11px;color:#7a9ab5;">v20260524-1340</div><br>' +
       '<button onclick="location.reload(true)" style="padding:10px 20px;background:#FF8C00;color:#fff;border:none;border-radius:8px;font-family:inherit;cursor:pointer;font-weight:700;margin-top:10px;">🔄 רענן</button>' +
       '</div>';
     return;
