@@ -722,7 +722,7 @@ body.day-mode .card:hover{
       </div>
     </div>
     
-    <div class="loading" id="cats-loading"><div style="text-align:center;padding:20px;"><div style="font-size:16px;color:#FF8C00;margin-bottom:8px;">טוען...</div><div style="font-size:10px;color:#7a9ab5;opacity:0.6;">v20260525-1031</div></div></div>
+    <div class="loading" id="cats-loading"><div style="text-align:center;padding:20px;"><div style="font-size:16px;color:#FF8C00;margin-bottom:8px;">טוען...</div><div style="font-size:10px;color:#7a9ab5;opacity:0.6;">v20260525-1348</div></div></div>
     <div class="cgrid" id="cgrid" style="display:none;"></div>
   </div>
   <div id="vlist" class="scr">
@@ -1364,7 +1364,7 @@ function bldCats(){
   if (!DB || DB.length === 0) {
     loadEl.innerHTML = '<div style="text-align:center;padding:20px;color:#FF8C00;">' +
       'מתחבר לשרת...<br><br>' +
-      '<div style="font-size:11px;color:#7a9ab5;">v20260525-1031</div><br>' +
+      '<div style="font-size:11px;color:#7a9ab5;">v20260525-1348</div><br>' +
       '<button onclick="location.reload(true)" style="padding:10px 20px;background:#FF8C00;color:#fff;border:none;border-radius:8px;font-family:inherit;cursor:pointer;font-weight:700;margin-top:10px;">🔄 רענן</button>' +
       '</div>';
     return;
@@ -1721,6 +1721,7 @@ var SCN_CATEGORIES = [
   {
     id:'cat4', icon:'🕊️', title:'משפטי הרגעה',
     scenarios:[
+      {id:'כריזה לקהל', icon:'📢', title:'כריזה לקהל'},
       {id:'משפטי שכנוע', icon:'💭', title:'משפטי שכנוע'},
       {id:'הרגעת אירוע', icon:'🌊', title:'הרגעת אירוע'},
       {id:'טיפול בפצועים', icon:'🩹', title:'טיפול בפצועים'},
@@ -1755,10 +1756,15 @@ function renderScnGrid(){
       var isExpanded = _scnExpandedCats[cat.id] !== false;
       
       // Count scenarios with content in this category
+      var ANNOUNCE_SCN_LIST = ['כריזה לבית','כריזה לרכב','כריזה לקהל'];
       var readyCount = 0;
       cat.scenarios.forEach(function(s){
-        var phrases = (typeof SCENARIO !== 'undefined' && SCENARIO) ?
-          SCENARIO.filter(function(p){return p.cat === s.id;}) : [];
+        var sourceList = SCENARIO;
+        if (ANNOUNCE_SCN_LIST.indexOf(s.id) !== -1 && typeof ANNOUNCE !== 'undefined' && ANNOUNCE) {
+          sourceList = ANNOUNCE;
+        }
+        var phrases = (typeof sourceList !== 'undefined' && sourceList) ?
+          sourceList.filter(function(p){return p.cat === s.id;}) : [];
         if (phrases.length > 0) readyCount++;
       });
       
@@ -1781,8 +1787,12 @@ function renderScnGrid(){
       if (isExpanded) {
         html += '<div style="padding:0 12px 14px;display:grid;grid-template-columns:1fr 1fr;gap:8px;">';
         cat.scenarios.forEach(function(s){
-          var phrases = (typeof SCENARIO !== 'undefined' && SCENARIO) ?
-            SCENARIO.filter(function(p){return p.cat === s.id;}) : [];
+          var sourceList = SCENARIO;
+          if (ANNOUNCE_SCN_LIST.indexOf(s.id) !== -1 && typeof ANNOUNCE !== 'undefined' && ANNOUNCE) {
+            sourceList = ANNOUNCE;
+          }
+          var phrases = (typeof sourceList !== 'undefined' && sourceList) ?
+            sourceList.filter(function(p){return p.cat === s.id;}) : [];
           var ready = phrases.length > 0;
           var bg = ready ? '#1F3147' : 'rgba(31,49,71,0.5)';
           var opacity = ready ? '1' : '0.6';
@@ -1828,8 +1838,14 @@ function scnOpen_old_helper(){}
 
 function scnOpen(scnId){
   try {
-    if (typeof SCENARIO === 'undefined' || !SCENARIO) return;
-    var steps = SCENARIO.filter(function(p){return p.cat === scnId;});
+    // Check if this is a broadcast scenario (announce section)
+    var ANNOUNCE_SCN = ['כריזה לבית','כריזה לרכב','כריזה לקהל'];
+    var sourceList = SCENARIO;
+    if (ANNOUNCE_SCN.indexOf(scnId) !== -1 && typeof ANNOUNCE !== 'undefined' && ANNOUNCE) {
+      sourceList = ANNOUNCE;
+    }
+    if (typeof sourceList === 'undefined' || !sourceList) return;
+    var steps = sourceList.filter(function(p){return p.cat === scnId;});
     
     steps.sort(function(a, b){
       var aMatch = (a.tags || '').match(/step(\d+)/);
