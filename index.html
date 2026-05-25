@@ -722,7 +722,7 @@ body.day-mode .card:hover{
       </div>
     </div>
     
-    <div class="loading" id="cats-loading"><div style="text-align:center;padding:20px;"><div style="font-size:16px;color:#FF8C00;margin-bottom:8px;">טוען...</div><div style="font-size:10px;color:#7a9ab5;opacity:0.6;">v20260525-1348</div></div></div>
+    <div class="loading" id="cats-loading"><div style="text-align:center;padding:20px;"><div style="font-size:16px;color:#FF8C00;margin-bottom:8px;">טוען...</div><div style="font-size:10px;color:#7a9ab5;opacity:0.6;">v20260525-1409</div></div></div>
     <div class="cgrid" id="cgrid" style="display:none;"></div>
   </div>
   <div id="vlist" class="scr">
@@ -1364,7 +1364,7 @@ function bldCats(){
   if (!DB || DB.length === 0) {
     loadEl.innerHTML = '<div style="text-align:center;padding:20px;color:#FF8C00;">' +
       'מתחבר לשרת...<br><br>' +
-      '<div style="font-size:11px;color:#7a9ab5;">v20260525-1348</div><br>' +
+      '<div style="font-size:11px;color:#7a9ab5;">v20260525-1409</div><br>' +
       '<button onclick="location.reload(true)" style="padding:10px 20px;background:#FF8C00;color:#fff;border:none;border-radius:8px;font-family:inherit;cursor:pointer;font-weight:700;margin-top:10px;">🔄 רענן</button>' +
       '</div>';
     return;
@@ -4359,6 +4359,119 @@ try { bldCats(); } catch(_){}
     <button class="help-close-btn" onclick="hideHelp()">✓ הבנתי, סגור</button>
   </div>
 </div>
+
+<!-- Bottom Nav (mobile-first navigation) -->
+<div id="bottom-nav" style="position:fixed;bottom:0;left:0;right:0;background:#0E1B2E;border-top:1px solid #2e4558;padding:8px 6px;display:flex;justify-content:space-around;align-items:center;z-index:100;direction:rtl;box-shadow:0 -4px 12px rgba(0,0,0,0.4);">
+  <div onclick="navToTab('qk')" class="bn-btn" data-tab="qk" style="flex:1;text-align:center;cursor:pointer;padding:6px 4px;border-radius:10px;transition:all 0.2s;">
+    <div style="font-size:24px;line-height:1;margin-bottom:4px;">🚨</div>
+    <div style="color:#c0392b;font-size:11px;font-weight:700;">חירום</div>
+  </div>
+  <div onclick="navToTab('scn')" class="bn-btn" data-tab="scn" style="flex:1;text-align:center;cursor:pointer;padding:6px 4px;border-radius:10px;transition:all 0.2s;">
+    <div style="font-size:24px;line-height:1;margin-bottom:4px;">🎭</div>
+    <div style="color:#D4A24E;font-size:11px;font-weight:700;">תרחישים</div>
+  </div>
+  <div onclick="navToTab('lib')" class="bn-btn" data-tab="lib" style="flex:1;text-align:center;cursor:pointer;padding:6px 4px;border-radius:10px;transition:all 0.2s;">
+    <div style="font-size:24px;line-height:1;margin-bottom:4px;">🎯</div>
+    <div style="color:#FF8C00;font-size:11px;font-weight:700;">מבצעי</div>
+  </div>
+  <div onclick="navToTab('fav')" class="bn-btn" data-tab="fav" style="flex:1;text-align:center;cursor:pointer;padding:6px 4px;border-radius:10px;transition:all 0.2s;">
+    <div style="font-size:24px;line-height:1;margin-bottom:4px;">⭐</div>
+    <div style="color:#FFD700;font-size:11px;font-weight:700;">שמורים</div>
+  </div>
+  <div onclick="toggleMoreMenu()" class="bn-btn" data-tab="more" style="flex:1;text-align:center;cursor:pointer;padding:6px 4px;border-radius:10px;transition:all 0.2s;">
+    <div style="font-size:24px;line-height:1;margin-bottom:4px;">☰</div>
+    <div style="color:#a0b8c8;font-size:11px;font-weight:700;">עוד</div>
+  </div>
+</div>
+
+<!-- More Menu (popup from bottom) -->
+<div id="more-menu" style="display:none;position:fixed;bottom:80px;left:8px;right:8px;background:#18293E;border:1px solid #2e4558;border-radius:14px;padding:12px;z-index:99;box-shadow:0 -4px 20px rgba(0,0,0,0.6);direction:rtl;">
+  <div style="text-align:center;color:#D4A24E;font-size:12px;font-weight:700;letter-spacing:1px;margin-bottom:10px;">תפריט נוסף</div>
+  <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;">
+    <div onclick="navToTab('sem')" style="background:#1F3147;border-radius:10px;padding:14px 6px;text-align:center;cursor:pointer;">
+      <div style="font-size:22px;margin-bottom:4px;">⚠️</div>
+      <div style="color:#E8D9B8;font-size:11px;font-weight:600;">סמנטי</div>
+    </div>
+    <div onclick="navToTab('day')" style="background:#1F3147;border-radius:10px;padding:14px 6px;text-align:center;cursor:pointer;">
+      <div style="font-size:22px;margin-bottom:4px;">🌅</div>
+      <div style="color:#E8D9B8;font-size:11px;font-weight:600;">יומיומי</div>
+    </div>
+    <div onclick="navToTab('art')" style="background:#1F3147;border-radius:10px;padding:14px 6px;text-align:center;cursor:pointer;">
+      <div style="font-size:22px;margin-bottom:4px;">📰</div>
+      <div style="color:#E8D9B8;font-size:11px;font-weight:600;">מאמרים</div>
+    </div>
+    <div onclick="navToTab('nwf')" style="background:#1F3147;border-radius:10px;padding:14px 6px;text-align:center;cursor:pointer;">
+      <div style="font-size:22px;margin-bottom:4px;">🆕</div>
+      <div style="color:#E8D9B8;font-size:11px;font-weight:600;">חדש</div>
+    </div>
+    <div onclick="navToTab('cus')" style="background:#1F3147;border-radius:10px;padding:14px 6px;text-align:center;cursor:pointer;">
+      <div style="font-size:22px;margin-bottom:4px;">🕌</div>
+      <div style="color:#E8D9B8;font-size:11px;font-weight:600;">מנהגים</div>
+    </div>
+    <div onclick="navToTab('hrt')" style="background:#1F3147;border-radius:10px;padding:14px 6px;text-align:center;cursor:pointer;">
+      <div style="font-size:22px;margin-bottom:4px;">💗</div>
+      <div style="color:#E8D9B8;font-size:11px;font-weight:600;">פותחים לב</div>
+    </div>
+  </div>
+</div>
+
+<script>
+// === Bottom Nav functions ===
+function navToTab(tabId){
+  try {
+    // Find the matching top tab and click it (uses existing ST function)
+    var found = false;
+    document.querySelectorAll('.tb-tab').forEach(function(el){
+      if (el.getAttribute('onclick') && el.getAttribute('onclick').indexOf("'"+tabId+"'") !== -1) {
+        el.click();
+        found = true;
+      }
+    });
+    if (!found) {
+      document.querySelectorAll('.tb-tab-sec').forEach(function(el){
+        if (el.getAttribute('onclick') && el.getAttribute('onclick').indexOf("'"+tabId+"'") !== -1) {
+          el.click();
+          found = true;
+        }
+      });
+    }
+    // Update bottom nav active state
+    document.querySelectorAll('.bn-btn').forEach(function(b){
+      b.style.background = 'transparent';
+    });
+    var activeBtn = document.querySelector('.bn-btn[data-tab="'+tabId+'"]');
+    if (activeBtn) activeBtn.style.background = 'rgba(212,162,78,0.15)';
+    // Hide more menu
+    var more = document.getElementById('more-menu');
+    if (more) more.style.display = 'none';
+    // Scroll to top
+    window.scrollTo({top:0, behavior:'smooth'});
+  } catch(e) { console.warn('navToTab error:', e); }
+}
+
+function toggleMoreMenu(){
+  try {
+    var more = document.getElementById('more-menu');
+    if (!more) return;
+    more.style.display = (more.style.display === 'none' || !more.style.display) ? 'block' : 'none';
+  } catch(e) { console.warn('toggleMoreMenu error:', e); }
+}
+
+// Close more menu when clicking outside
+document.addEventListener('click', function(e){
+  try {
+    var more = document.getElementById('more-menu');
+    var moreBtn = document.querySelector('.bn-btn[data-tab="more"]');
+    if (!more || !moreBtn) return;
+    if (more.style.display === 'block' && !more.contains(e.target) && !moreBtn.contains(e.target)) {
+      more.style.display = 'none';
+    }
+  } catch(e) {}
+});
+
+// Add bottom padding to body so content isn't hidden behind nav
+document.body.style.paddingBottom = '90px';
+</script>
 
 </body>
 </html>
