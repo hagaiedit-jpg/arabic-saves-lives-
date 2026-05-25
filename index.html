@@ -722,7 +722,7 @@ body.day-mode .card:hover{
       </div>
     </div>
     
-    <div class="loading" id="cats-loading"><div style="text-align:center;padding:20px;"><div style="font-size:16px;color:#FF8C00;margin-bottom:8px;">טוען...</div><div style="font-size:10px;color:#7a9ab5;opacity:0.6;">v20260524-1833</div></div></div>
+    <div class="loading" id="cats-loading"><div style="text-align:center;padding:20px;"><div style="font-size:16px;color:#FF8C00;margin-bottom:8px;">טוען...</div><div style="font-size:10px;color:#7a9ab5;opacity:0.6;">v20260525-0701</div></div></div>
     <div class="cgrid" id="cgrid" style="display:none;"></div>
   </div>
   <div id="vlist" class="scr">
@@ -900,48 +900,32 @@ body.day-mode .card:hover{
     <div id="scn-grid" style="display:grid;grid-template-columns:1fr 1fr;gap:12px;"></div>
   </div>
   
-  <!-- Dialogue view (hidden by default) -->
-  <div id="scn-dialogue-view" style="display:none;padding:20px 16px;">
-    <button onclick="scnBack()" style="background:transparent;border:1px solid #7a9ab5;color:#a0b8c8;border-radius:8px;padding:6px 14px;font-size:13px;cursor:pointer;font-family:inherit;margin-bottom:18px;">→ חזור לתרחישים</button>
+  <!-- Conversation view (WhatsApp-style chat) -->
+  <div id="scn-dialogue-view" style="display:none;padding:16px;">
+    <button onclick="scnBack()" style="background:transparent;border:1px solid #7a9ab5;color:#a0b8c8;border-radius:8px;padding:6px 14px;font-size:13px;cursor:pointer;font-family:inherit;margin-bottom:14px;">→ חזור לתרחישים</button>
     
-    <div style="text-align:center;margin-bottom:18px;">
-      <div id="scn-title" style="color:#D4A24E;font-size:18px;font-weight:700;margin-bottom:4px;"></div>
+    <!-- Header -->
+    <div style="text-align:center;margin-bottom:14px;">
+      <div id="scn-title" style="color:#D4A24E;font-size:20px;font-weight:700;margin-bottom:4px;"></div>
       <div id="scn-progress" style="color:#7a9ab5;font-size:12px;"></div>
     </div>
     
-    <!-- Progress bar -->
-    <div style="height:4px;background:#0E1B2E;border-radius:2px;margin-bottom:24px;overflow:hidden;">
-      <div id="scn-progress-bar" style="height:100%;background:#D4A24E;width:0%;transition:width 0.3s;"></div>
-    </div>
+    <!-- Play all button -->
+    <button id="scn-playall-btn" onclick="scnPlayAll()" style="width:100%;background:linear-gradient(135deg,#D4A24E 0%,#b8862e 100%);border:none;color:#18293E;border-radius:12px;padding:14px;font-size:14px;font-weight:700;cursor:pointer;font-family:inherit;margin-bottom:18px;box-shadow:0 2px 8px rgba(212,162,78,0.3);">▶ השמע את כל השיחה</button>
     
-    <!-- Speaker label -->
-    <div id="scn-speaker" style="text-align:center;color:#FF8C00;font-size:13px;font-weight:700;margin-bottom:14px;"></div>
+    <!-- Chat bubbles container -->
+    <div id="scn-chat" style="display:flex;flex-direction:column;gap:12px;"></div>
     
-    <!-- Phrase content -->
-    <div style="background:#1F3147;border:1px solid rgba(212,162,78,0.25);border-radius:14px;padding:20px 16px;margin-bottom:14px;">
-      <div id="scn-he" style="color:#E8D9B8;font-size:17px;font-weight:600;text-align:center;margin-bottom:8px;line-height:1.4;"></div>
-      <div id="scn-trans" style="color:#a0b8c8;font-size:14px;text-align:center;margin-bottom:8px;"></div>
-      <div id="scn-ar" style="color:#E8D9B8;font-size:18px;font-family:Georgia,serif;text-align:center;margin-bottom:16px;line-height:1.4;"></div>
-      
-      <div style="display:flex;gap:8px;justify-content:center;">
-        <button onclick="scnPlayAudio()" style="background:transparent;border:1px solid #D4A24E;color:#D4A24E;border-radius:10px;padding:10px 18px;font-size:13px;font-weight:600;cursor:pointer;font-family:inherit;">▶ השמע</button>
-      </div>
-    </div>
-    
-    <!-- Navigation -->
-    <div style="display:flex;gap:8px;">
-      <button id="scn-prev-btn" onclick="scnPrev()" style="flex:1;background:transparent;border:1px solid #7a9ab5;color:#a0b8c8;border-radius:10px;padding:12px;font-size:14px;font-weight:600;cursor:pointer;font-family:inherit;">← הקודם</button>
-      <button id="scn-next-btn" onclick="scnNext()" style="flex:1;background:#D4A24E;border:none;color:#18293E;border-radius:10px;padding:12px;font-size:14px;font-weight:700;cursor:pointer;font-family:inherit;">הבא →</button>
+    <!-- Done message at the end -->
+    <div id="scn-done-card" style="display:none;margin-top:20px;padding:20px 16px;background:linear-gradient(135deg,rgba(29,158,117,0.15) 0%,rgba(29,158,117,0.05) 100%);border:1px solid #1D9E75;border-radius:12px;text-align:center;">
+      <div style="font-size:36px;margin-bottom:8px;">🎉</div>
+      <div style="color:#1D9E75;font-size:16px;font-weight:700;margin-bottom:6px;">סיימת את התרחיש!</div>
+      <div id="scn-done-text" style="color:#a0b8c8;font-size:12px;"></div>
     </div>
   </div>
   
-  <!-- Done view (hidden by default) -->
-  <div id="scn-done-view" style="display:none;padding:40px 16px;text-align:center;">
-    <div style="font-size:60px;margin-bottom:14px;">🎉</div>
-    <div style="color:#D4A24E;font-size:22px;font-weight:700;margin-bottom:8px;">סיימת את התרחיש!</div>
-    <div id="scn-done-text" style="color:#a0b8c8;font-size:14px;margin-bottom:24px;"></div>
-    <button onclick="scnBack()" style="background:#D4A24E;border:none;color:#18293E;border-radius:10px;padding:14px 28px;font-size:14px;font-weight:700;cursor:pointer;font-family:inherit;">↻ עוד תרחיש</button>
-  </div>
+  <!-- Done view (kept for compatibility - not used in new flow) -->
+  <div id="scn-done-view" style="display:none;"></div>
 </div>
 
 <div class="scr" id="tab-adm">
@@ -1369,7 +1353,7 @@ function bldCats(){
   if (!DB || DB.length === 0) {
     loadEl.innerHTML = '<div style="text-align:center;padding:20px;color:#FF8C00;">' +
       'מתחבר לשרת...<br><br>' +
-      '<div style="font-size:11px;color:#7a9ab5;">v20260524-1833</div><br>' +
+      '<div style="font-size:11px;color:#7a9ab5;">v20260525-0701</div><br>' +
       '<button onclick="location.reload(true)" style="padding:10px 20px;background:#FF8C00;color:#fff;border:none;border-radius:8px;font-family:inherit;cursor:pointer;font-weight:700;margin-top:10px;">🔄 רענן</button>' +
       '</div>';
     return;
@@ -1748,76 +1732,120 @@ function scnOpen(scnId){
     var scn = SCN_LIST.find(function(s){return s.id === scnId;});
     document.getElementById('scn-title').textContent = (scn ? scn.icon + ' ' + scn.title : scnId);
     
-    renderScnStep();
+    renderScnChat();
   } catch(e) { console.warn('scnOpen error:', e); }
 }
 
-function renderScnStep(){
+function renderScnChat(){
   try {
     if (!_scnSteps || _scnSteps.length === 0) return;
-    var p = _scnSteps[_scnIdx];
-    if (!p) return;
+    var chatEl = document.getElementById('scn-chat');
+    if (!chatEl) return;
     
-    // Update progress
-    document.getElementById('scn-progress').textContent = 'שלב ' + (_scnIdx + 1) + ' מתוך ' + _scnSteps.length;
-    var pct = ((_scnIdx + 1) / _scnSteps.length) * 100;
-    document.getElementById('scn-progress-bar').style.width = pct + '%';
+    // Update header
+    document.getElementById('scn-progress').textContent = _scnSteps.length + ' שלבים בשיחה';
     
-    // Detect speaker from tags
-    var isCivilian = (p.tags || '').indexOf('civilian') !== -1;
-    document.getElementById('scn-speaker').textContent = isCivilian ? '👤 האזרח אומר:' : '👮 אתה אומר:';
-    document.getElementById('scn-speaker').style.color = isCivilian ? '#1D9E75' : '#FF8C00';
+    var html = '';
+    _scnSteps.forEach(function(p, idx){
+      var isCivilian = (p.tags || '').indexOf('civilian') !== -1;
+      var bgColor = isCivilian ? 'rgba(29,158,117,0.12)' : 'rgba(255,140,0,0.10)';
+      var borderColor = isCivilian ? 'rgba(29,158,117,0.4)' : 'rgba(255,140,0,0.3)';
+      var labelColor = isCivilian ? '#1D9E75' : '#FF8C00';
+      var labelText = isCivilian ? '👤 אזרח' : '👮 אתה';
+      var alignSide = isCivilian ? 'flex-start' : 'flex-end';
+      var bubbleMargin = isCivilian ? 'margin-right:auto;margin-left:30px;' : 'margin-left:auto;margin-right:30px;';
+      
+      html += '<div style="display:flex;flex-direction:column;align-items:' + alignSide + ';width:100%;">';
+      html += '<div style="font-size:11px;font-weight:700;color:' + labelColor + ';margin-bottom:4px;padding:0 4px;">' + labelText + '</div>';
+      html += '<div style="background:' + bgColor + ';border:1px solid ' + borderColor + ';border-radius:12px;padding:12px 14px;max-width:85%;' + bubbleMargin + '">';
+      html += '<div style="color:#E8D9B8;font-size:15px;font-weight:600;margin-bottom:4px;line-height:1.3;">' + (p.he || '') + '</div>';
+      if (p.trans) html += '<div style="color:#a0b8c8;font-size:12px;margin-bottom:4px;">' + p.trans + '</div>';
+      if (p.ar) html += '<div style="color:#E8D9B8;font-size:15px;font-family:Georgia,serif;line-height:1.3;margin-bottom:8px;">' + p.ar + '</div>';
+      html += '<button onclick="scnPlayBubble(' + idx + ')" style="background:transparent;border:1px solid ' + labelColor + ';color:' + labelColor + ';border-radius:8px;padding:4px 12px;font-size:12px;font-weight:600;cursor:pointer;font-family:inherit;">▶ השמע</button>';
+      html += '</div>';
+      html += '</div>';
+    });
     
-    // Show content
-    document.getElementById('scn-he').textContent = p.he || '';
-    document.getElementById('scn-trans').textContent = p.trans || '';
-    document.getElementById('scn-ar').textContent = p.ar || '';
+    chatEl.innerHTML = html;
     
-    // Store audio for play
-    window._scnAudio = p.audio || '';
-    
-    // Update buttons
-    var prevBtn = document.getElementById('scn-prev-btn');
-    if (prevBtn) prevBtn.style.visibility = (_scnIdx === 0) ? 'hidden' : 'visible';
-    var nextBtn = document.getElementById('scn-next-btn');
-    if (nextBtn) nextBtn.textContent = (_scnIdx === _scnSteps.length - 1) ? '✓ סיום' : 'הבא →';
-  } catch(e) { console.warn('renderScnStep error:', e); }
+    // Show done card
+    var doneCard = document.getElementById('scn-done-card');
+    if (doneCard) {
+      doneCard.style.display = 'block';
+      document.getElementById('scn-done-text').textContent = 'תרגלת ' + _scnSteps.length + ' משפטים בשיחה הזו';
+    }
+  } catch(e) { console.warn('renderScnChat error:', e); }
 }
 
-function scnPlayAudio(){
+function scnPlayBubble(idx){
   try {
-    if (!window._scnAudio) {
+    if (!_scnSteps || !_scnSteps[idx]) return;
+    var audioUrl = _scnSteps[idx].audio;
+    if (!audioUrl) {
       alert('אין הקלטה למשפט זה עדיין');
       return;
     }
-    var audio = new Audio(window._scnAudio);
-    audio.play();
+    if (window._scnCurrentAudio) {
+      window._scnCurrentAudio.pause();
+    }
+    window._scnCurrentAudio = new Audio(audioUrl);
+    window._scnCurrentAudio.play();
   } catch(e) { console.warn(e); }
 }
 
-function scnNext(){
-  if (_scnIdx < _scnSteps.length - 1) {
-    _scnIdx++;
-    renderScnStep();
-  } else {
-    // Show done view
-    document.getElementById('scn-dialogue-view').style.display = 'none';
-    document.getElementById('scn-done-view').style.display = 'block';
-    document.getElementById('scn-done-text').textContent = 'תרגלת ' + _scnSteps.length + ' משפטים';
-  }
-}
-
-function scnPrev(){
-  if (_scnIdx > 0) {
-    _scnIdx--;
-    renderScnStep();
-  }
+function scnPlayAll(){
+  try {
+    if (!_scnSteps || _scnSteps.length === 0) return;
+    // Stop any current audio
+    if (window._scnCurrentAudio) {
+      window._scnCurrentAudio.pause();
+      window._scnCurrentAudio = null;
+    }
+    var idx = 0;
+    var btn = document.getElementById('scn-playall-btn');
+    var originalText = btn ? btn.innerHTML : '';
+    
+    function playNext(){
+      if (idx >= _scnSteps.length) {
+        // Done
+        if (btn) btn.innerHTML = originalText;
+        window._scnCurrentAudio = null;
+        return;
+      }
+      var step = _scnSteps[idx];
+      idx++;
+      if (!step || !step.audio) {
+        // Skip this step
+        playNext();
+        return;
+      }
+      if (btn) btn.innerHTML = '⏸ משמיע ' + idx + '/' + _scnSteps.length;
+      window._scnCurrentAudio = new Audio(step.audio);
+      window._scnCurrentAudio.onended = function(){
+        // Small pause between phrases
+        setTimeout(playNext, 400);
+      };
+      window._scnCurrentAudio.onerror = function(){
+        setTimeout(playNext, 200);
+      };
+      window._scnCurrentAudio.play();
+    }
+    playNext();
+  } catch(e) { console.warn('scnPlayAll error:', e); }
 }
 
 function scnBack(){
   document.getElementById('scn-grid-view').style.display = 'block';
   document.getElementById('scn-dialogue-view').style.display = 'none';
   document.getElementById('scn-done-view').style.display = 'none';
+  // Stop any playing audio
+  if (window._scnCurrentAudio) {
+    window._scnCurrentAudio.pause();
+    window._scnCurrentAudio = null;
+  }
+  // Hide done card too
+  var doneCard = document.getElementById('scn-done-card');
+  if (doneCard) doneCard.style.display = 'none';
   _scnCurrent = null;
   _scnSteps = [];
   _scnIdx = 0;
