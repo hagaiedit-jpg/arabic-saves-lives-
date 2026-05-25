@@ -749,7 +749,7 @@ body.day-mode .card:hover{
       </div>
     </div>
     
-    <div class="loading" id="cats-loading"><div style="text-align:center;padding:20px;"><div style="font-size:16px;color:#FF8C00;margin-bottom:8px;">טוען...</div><div style="font-size:10px;color:#7a9ab5;opacity:0.6;">v20260525-1804</div></div></div>
+    <div class="loading" id="cats-loading"><div style="text-align:center;padding:20px;"><div style="font-size:16px;color:#FF8C00;margin-bottom:8px;">טוען...</div><div style="font-size:10px;color:#7a9ab5;opacity:0.6;">v20260525-1813</div></div></div>
     <div class="cgrid" id="cgrid" style="display:none;"></div>
   </div>
   <div id="vlist" class="scr">
@@ -1390,7 +1390,7 @@ function bldCats(){
   if (!DB || DB.length === 0) {
     loadEl.innerHTML = '<div style="text-align:center;padding:20px;color:#FF8C00;">' +
       'מתחבר לשרת...<br><br>' +
-      '<div style="font-size:11px;color:#7a9ab5;">v20260525-1804</div><br>' +
+      '<div style="font-size:11px;color:#7a9ab5;">v20260525-1813</div><br>' +
       '<button onclick="location.reload(true)" style="padding:10px 20px;background:#FF8C00;color:#fff;border:none;border-radius:8px;font-family:inherit;cursor:pointer;font-weight:700;margin-top:10px;">🔄 רענן</button>' +
       '</div>';
     return;
@@ -4270,6 +4270,10 @@ function visibleToRole(p){
   var tags=((p&&p.tags)||'').toLowerCase();
   var hasRoleTag=/@(idf|police|security|preidf)/.test(tags);
   if(!hasRoleTag)return true;
+  // "forces" = unified security forces (idf + police + security)
+  if(role==='forces'){
+    return tags.indexOf('@idf')!==-1 || tags.indexOf('@police')!==-1 || tags.indexOf('@security')!==-1;
+  }
   return tags.indexOf('@'+role)!==-1;
 }
 
@@ -4497,7 +4501,34 @@ function toggleMoreMenu(){
   try {
     var more = document.getElementById('more-menu');
     if (!more) return;
-    more.style.display = (more.style.display === 'none' || !more.style.display) ? 'block' : 'none';
+    var isOpening = (more.style.display === 'none' || !more.style.display);
+    more.style.display = isOpening ? 'block' : 'none';
+    
+    // When opening more menu, highlight the "more" button as active
+    if (isOpening) {
+      document.querySelectorAll('.bn-btn').forEach(function(b){
+        b.classList.remove('active');
+        b.style.background = 'transparent';
+      });
+      var moreBtn = document.querySelector('.bn-btn[data-tab="more"]');
+      if (moreBtn) {
+        moreBtn.classList.add('active');
+        moreBtn.style.background = 'rgba(212,162,78,0.15)';
+      }
+    } else {
+      // When closing, restore active to current tab
+      if (typeof curTab !== 'undefined') {
+        document.querySelectorAll('.bn-btn').forEach(function(b){
+          b.classList.remove('active');
+          b.style.background = 'transparent';
+        });
+        var activeBtn = document.querySelector('.bn-btn[data-tab="'+curTab+'"]');
+        if (activeBtn) {
+          activeBtn.classList.add('active');
+          activeBtn.style.background = 'rgba(212,162,78,0.15)';
+        }
+      }
+    }
   } catch(e) { console.warn('toggleMoreMenu error:', e); }
 }
 
