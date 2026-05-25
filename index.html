@@ -722,7 +722,7 @@ body.day-mode .card:hover{
       </div>
     </div>
     
-    <div class="loading" id="cats-loading"><div style="text-align:center;padding:20px;"><div style="font-size:16px;color:#FF8C00;margin-bottom:8px;">טוען...</div><div style="font-size:10px;color:#7a9ab5;opacity:0.6;">v20260525-0701</div></div></div>
+    <div class="loading" id="cats-loading"><div style="text-align:center;padding:20px;"><div style="font-size:16px;color:#FF8C00;margin-bottom:8px;">טוען...</div><div style="font-size:10px;color:#7a9ab5;opacity:0.6;">v20260525-0712</div></div></div>
     <div class="cgrid" id="cgrid" style="display:none;"></div>
   </div>
   <div id="vlist" class="scr">
@@ -894,10 +894,10 @@ body.day-mode .card:hover{
 <!-- Scenarios tab (guided dialogues - Babbel style) -->
 <div class="scr" id="tab-scn">
   <!-- Grid view -->
-  <div id="scn-grid-view" style="padding:20px 16px;">
-    <div style="text-align:center;color:#D4A24E;font-size:14px;font-weight:700;letter-spacing:1px;margin-bottom:6px;">🎭 תרחישים מודרכים</div>
-    <div style="text-align:center;color:#a0b8c8;font-size:12px;margin-bottom:24px;">תרגול שיחות אמיתיות שלב אחר שלב</div>
-    <div id="scn-grid" style="display:grid;grid-template-columns:1fr 1fr;gap:12px;"></div>
+  <div id="scn-grid-view" style="padding:16px;">
+    <div style="text-align:center;color:#D4A24E;font-size:16px;font-weight:700;letter-spacing:1px;margin-bottom:4px;">🎭 ספריית תרחישים</div>
+    <div style="text-align:center;color:#a0b8c8;font-size:12px;margin-bottom:18px;">תרגול שיחות אמיתיות מהשטח</div>
+    <div id="scn-grid"></div>
   </div>
   
   <!-- Conversation view (WhatsApp-style chat) -->
@@ -1353,7 +1353,7 @@ function bldCats(){
   if (!DB || DB.length === 0) {
     loadEl.innerHTML = '<div style="text-align:center;padding:20px;color:#FF8C00;">' +
       'מתחבר לשרת...<br><br>' +
-      '<div style="font-size:11px;color:#7a9ab5;">v20260525-0701</div><br>' +
+      '<div style="font-size:11px;color:#7a9ab5;">v20260525-0712</div><br>' +
       '<button onclick="location.reload(true)" style="padding:10px 20px;background:#FF8C00;color:#fff;border:none;border-radius:8px;font-family:inherit;cursor:pointer;font-weight:700;margin-top:10px;">🔄 רענן</button>' +
       '</div>';
     return;
@@ -1672,9 +1672,58 @@ function closeAch(){
 }
 
 // === Guided Scenarios ===
-var SCN_LIST = [
-  {id:'מגע ראשוני', icon:'🤝', title:'מגע ראשוני', desc:'שיחה עם אזרח'}
+// === Scenario Library - 5 Categories ===
+var SCN_CATEGORIES = [
+  {
+    id:'cat1', icon:'🎭', title:'מגע ראשוני וסריקות',
+    scenarios:[
+      {id:'כריזה לבית', icon:'📢', title:'כריזה לבית'},
+      {id:'פריצה לבית', icon:'⚡', title:'פריצה לבית'},
+      {id:'חיפוש בבית', icon:'🔍', title:'חיפוש בבית'},
+      {id:'זיכוי ובידוק', icon:'👋', title:'זיכוי ובידוק'},
+      {id:'זיכוי מרחוק', icon:'📏', title:'זיכוי מרחוק'}
+    ]
+  },
+  {
+    id:'cat2', icon:'💬', title:'תשאול וחקירת שטח',
+    scenarios:[
+      {id:'מגע ראשוני', icon:'🆔', title:'תשאול ראשוני'},
+      {id:'תשאול מבוקש', icon:'🎯', title:'תשאול מבוקש'},
+      {id:'זיהוי שקרים', icon:'🕵️', title:'זיהוי שקרים'},
+      {id:'איתור מבוקש', icon:'📍', title:'איתור מבוקש'}
+    ]
+  },
+  {
+    id:'cat3', icon:'🚗', title:'שליטה בצירים ומחסומים',
+    scenarios:[
+      {id:'חיפוש ברכב', icon:'🚗', title:'חיפוש ברכב'},
+      {id:'כריזה לרכב', icon:'📢', title:'כריזה לרכב'},
+      {id:'חיכוך במחסום', icon:'😤', title:'חיכוך במחסום'},
+      {id:'אישורי כניסה', icon:'📄', title:'אישורי כניסה'},
+      {id:'עוצר', icon:'🚫', title:'הטלת/הסרת עוצר'}
+    ]
+  },
+  {
+    id:'cat4', icon:'🕊️', title:'משפטי הרגעה',
+    scenarios:[
+      {id:'משפטי שכנוע', icon:'💭', title:'משפטי שכנוע'},
+      {id:'הרגעת אירוע', icon:'🌊', title:'הרגעת אירוע'},
+      {id:'טיפול בפצועים', icon:'🩹', title:'טיפול בפצועים'},
+      {id:'שיחה בין שכנים', icon:'🏘️', title:'שיחה בין שכנים'}
+    ]
+  },
+  {
+    id:'cat5', icon:'📅', title:'לוח שנה ותרבות',
+    scenarios:[
+      {id:'ברכות חג', icon:'🎉', title:'ברכות חג'},
+      {id:'בידוק בזמן חג', icon:'🕌', title:'בידוק בזמן חג'},
+      {id:'אירועי חיים', icon:'💔', title:'שמחות ואבל'}
+    ]
+  }
 ];
+
+// Track which categories are expanded
+var _scnExpandedCats = {cat1:true, cat2:true, cat3:true, cat4:true, cat5:true};
 
 var _scnCurrent = null;  // current scenario id
 var _scnSteps = [];      // current scenario steps array
@@ -1686,28 +1735,79 @@ function renderScnGrid(){
     if (!el) return;
     
     var html = '';
-    SCN_LIST.forEach(function(s){
-      // Count phrases for this scenario
-      var phrases = (typeof SCENARIO !== 'undefined' && SCENARIO) ? 
-        SCENARIO.filter(function(p){return p.cat === s.id;}) : [];
-      var count = phrases.length;
+    
+    SCN_CATEGORIES.forEach(function(cat){
+      var isExpanded = _scnExpandedCats[cat.id] !== false;
       
-      html += '<div style="background:#1F3147;border:1px solid rgba(212,162,78,0.25);border-radius:14px;padding:18px 12px;text-align:center;cursor:pointer;" onclick="scnOpen(\'' + s.id + '\')">';
-      html += '<div style="font-size:32px;margin-bottom:8px;">' + s.icon + '</div>';
-      html += '<div style="color:#E8D9B8;font-size:13px;font-weight:700;">' + s.title + '</div>';
-      html += '<div style="color:#7a9ab5;font-size:11px;margin-top:4px;">' + (count > 0 ? count + ' שלבים' : 'בקרוב') + '</div>';
+      // Count scenarios with content in this category
+      var readyCount = 0;
+      cat.scenarios.forEach(function(s){
+        var phrases = (typeof SCENARIO !== 'undefined' && SCENARIO) ?
+          SCENARIO.filter(function(p){return p.cat === s.id;}) : [];
+        if (phrases.length > 0) readyCount++;
+      });
+      
+      // Category header (clickable to expand/collapse)
+      html += '<div style="background:#18293E;border:1px solid rgba(212,162,78,0.15);border-radius:12px;margin-bottom:14px;overflow:hidden;">';
+      html += '<div onclick="scnToggleCat(\'' + cat.id + '\')" style="padding:14px 16px;cursor:pointer;display:flex;align-items:center;justify-content:space-between;">';
+      html += '<div style="display:flex;align-items:center;gap:10px;">';
+      html += '<span style="font-size:20px;">' + cat.icon + '</span>';
+      html += '<div>';
+      html += '<div style="color:#D4A24E;font-size:14px;font-weight:700;">' + cat.title + '</div>';
+      html += '<div style="color:#7a9ab5;font-size:11px;margin-top:2px;">' + cat.scenarios.length + ' תרחישים';
+      if (readyCount > 0) html += ' · <span style="color:#1D9E75;">✓ ' + readyCount + ' מוכנים</span>';
+      html += '</div>';
+      html += '</div>';
+      html += '</div>';
+      html += '<span style="color:#7a9ab5;font-size:14px;transform:rotate(' + (isExpanded ? '90deg' : '0deg') + ');transition:transform 0.2s;">▶</span>';
+      html += '</div>';
+      
+      // Scenarios grid (shown when expanded)
+      if (isExpanded) {
+        html += '<div style="padding:0 12px 14px;display:grid;grid-template-columns:1fr 1fr;gap:8px;">';
+        cat.scenarios.forEach(function(s){
+          var phrases = (typeof SCENARIO !== 'undefined' && SCENARIO) ?
+            SCENARIO.filter(function(p){return p.cat === s.id;}) : [];
+          var ready = phrases.length > 0;
+          var bg = ready ? '#1F3147' : 'rgba(31,49,71,0.5)';
+          var opacity = ready ? '1' : '0.6';
+          var border = ready ? 'rgba(29,158,117,0.4)' : 'rgba(212,162,78,0.15)';
+          var clickHandler = ready ? 'onclick="scnOpen(\'' + s.id + '\')"' : 'onclick="alert(\'תרחיש זה יוסף בקרוב\')"';
+          
+          html += '<div style="background:' + bg + ';border:1px solid ' + border + ';border-radius:10px;padding:14px 10px;text-align:center;cursor:pointer;opacity:' + opacity + ';" ' + clickHandler + '>';
+          html += '<div style="font-size:24px;margin-bottom:6px;">' + s.icon + '</div>';
+          html += '<div style="color:#E8D9B8;font-size:12px;font-weight:700;line-height:1.2;">' + s.title + '</div>';
+          if (ready) {
+            html += '<div style="color:#1D9E75;font-size:10px;margin-top:4px;">✓ ' + phrases.length + ' שלבים</div>';
+          } else {
+            html += '<div style="color:#7a9ab5;font-size:10px;margin-top:4px;">בקרוב</div>';
+          }
+          html += '</div>';
+        });
+        html += '</div>';
+      }
+      
       html += '</div>';
     });
+    
     el.innerHTML = html;
   } catch(e) { console.warn('renderScnGrid error:', e); }
 }
+
+function scnToggleCat(catId){
+  try {
+    _scnExpandedCats[catId] = !(_scnExpandedCats[catId] !== false);
+    renderScnGrid();
+  } catch(e) { console.warn(e); }
+}
+
+function scnOpen_old_helper(){}
 
 function scnOpen(scnId){
   try {
     if (typeof SCENARIO === 'undefined' || !SCENARIO) return;
     var steps = SCENARIO.filter(function(p){return p.cat === scnId;});
     
-    // Sort by step number from tags (step1, step2, ...)
     steps.sort(function(a, b){
       var aMatch = (a.tags || '').match(/step(\d+)/);
       var bMatch = (b.tags || '').match(/step(\d+)/);
@@ -1729,8 +1829,13 @@ function scnOpen(scnId){
     document.getElementById('scn-dialogue-view').style.display = 'block';
     document.getElementById('scn-done-view').style.display = 'none';
     
-    var scn = SCN_LIST.find(function(s){return s.id === scnId;});
-    document.getElementById('scn-title').textContent = (scn ? scn.icon + ' ' + scn.title : scnId);
+    // Find scenario in any category
+    var foundScn = null;
+    for (var i = 0; i < SCN_CATEGORIES.length; i++) {
+      var match = SCN_CATEGORIES[i].scenarios.find(function(s){return s.id === scnId;});
+      if (match) { foundScn = match; break; }
+    }
+    document.getElementById('scn-title').textContent = (foundScn ? foundScn.icon + ' ' + foundScn.title : scnId);
     
     renderScnChat();
   } catch(e) { console.warn('scnOpen error:', e); }
