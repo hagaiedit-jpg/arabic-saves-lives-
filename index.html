@@ -749,7 +749,7 @@ body.day-mode .card:hover{
       </div>
     </div>
     
-    <div class="loading" id="cats-loading"><div style="text-align:center;padding:20px;"><div style="font-size:16px;color:#FF8C00;margin-bottom:8px;">טוען...</div><div style="font-size:10px;color:#7a9ab5;opacity:0.6;">v20260525-1724</div></div></div>
+    <div class="loading" id="cats-loading"><div style="text-align:center;padding:20px;"><div style="font-size:16px;color:#FF8C00;margin-bottom:8px;">טוען...</div><div style="font-size:10px;color:#7a9ab5;opacity:0.6;">v20260525-1747</div></div></div>
     <div class="cgrid" id="cgrid" style="display:none;"></div>
   </div>
   <div id="vlist" class="scr">
@@ -1391,7 +1391,7 @@ function bldCats(){
   if (!DB || DB.length === 0) {
     loadEl.innerHTML = '<div style="text-align:center;padding:20px;color:#FF8C00;">' +
       'מתחבר לשרת...<br><br>' +
-      '<div style="font-size:11px;color:#7a9ab5;">v20260525-1724</div><br>' +
+      '<div style="font-size:11px;color:#7a9ab5;">v20260525-1747</div><br>' +
       '<button onclick="location.reload(true)" style="padding:10px 20px;background:#FF8C00;color:#fff;border:none;border-radius:8px;font-family:inherit;cursor:pointer;font-weight:700;margin-top:10px;">🔄 רענן</button>' +
       '</div>';
     return;
@@ -4194,11 +4194,16 @@ loadTheme();
 
 // === Role selection ===
 var ROLE_INFO = {
-  idf:      {emoji:'🪖', name:'צה"ל'},
-  police:   {emoji:'🚓', name:'משטרה'},
-  security: {emoji:'🛡️', name:'ביטחון'},
-  preidf:   {emoji:'🎒', name:'מלש"ב'},
-  all:      {emoji:'👁️', name:'הכל'}
+  // Unified security forces (legacy keys still mapped for backward compatibility)
+  idf:      {emoji:'🛡️', name:'צבא וכוחות ביטחון'},
+  police:   {emoji:'🛡️', name:'צבא וכוחות ביטחון'},
+  security: {emoji:'🛡️', name:'צבא וכוחות ביטחון'},
+  // New unified key
+  forces:   {emoji:'🛡️', name:'צבא וכוחות ביטחון'},
+  // Pre-enlistment
+  preidf:   {emoji:'🎯', name:'מתגייסים'},
+  // All users
+  all:      {emoji:'👥', name:'כולם'}
 };
 
 function getCurrentRole(){return localStorage.getItem('user_role')||'';}
@@ -4337,25 +4342,17 @@ try { bldCats(); } catch(_){}
     <div class="welcome-title">ברוכים הבאים</div>
     <div class="welcome-sub">בחר/י את התפקיד שלך:</div>
     <div class="welcome-roles">
-      <button class="welcome-role-btn" onclick="selectRole('idf')">
-        <span class="welcome-role-emoji">🪖</span>
-        <span>צה"ל</span>
-      </button>
-      <button class="welcome-role-btn" onclick="selectRole('police')">
-        <span class="welcome-role-emoji">🚓</span>
-        <span>משטרה</span>
-      </button>
-      <button class="welcome-role-btn" onclick="selectRole('security')">
+      <button class="welcome-role-btn" onclick="selectRole('forces')">
         <span class="welcome-role-emoji">🛡️</span>
-        <span>ביטחון</span>
+        <span>צבא וכוחות ביטחון</span>
       </button>
       <button class="welcome-role-btn" onclick="selectRole('preidf')">
-        <span class="welcome-role-emoji">🎒</span>
-        <span>מלש"ב</span>
+        <span class="welcome-role-emoji">🎯</span>
+        <span>מתגייסים</span>
       </button>
       <button class="welcome-role-btn" onclick="selectRole('all')">
-        <span class="welcome-role-emoji">👁️</span>
-        <span>הכל</span>
+        <span class="welcome-role-emoji">👥</span>
+        <span>כולם</span>
       </button>
     </div>
   </div>
