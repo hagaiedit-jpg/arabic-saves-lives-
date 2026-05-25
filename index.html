@@ -614,6 +614,11 @@ body.day-mode .card:hover{
 .dict-he{color:#fff;font-size:15px;font-weight:500;}
 .dict-trans{color:#FF8C00;font-size:14px;margin-top:3px;}
 .dict-ar{color:#E8D9B8;font-size:16px;font-family:Georgia,serif;margin-top:3px;}
+
+/* Bottom Nav styles */
+.bn-btn.active {background:rgba(212,162,78,0.15) !important;}
+.bn-btn:active {transform:scale(0.95);}
+
 </style>
 </head>
 <body>
@@ -639,7 +644,7 @@ body.day-mode .card:hover{
       </div>
     </div>
   </div>
-  <div class="tb-tabs">
+  <div class="tb-tabs" style="display:none;">
     <div class="tb-tab" onclick="ST('qk',this)" style="color:#c0392b !important;font-weight:700;">🚨 חירום</div>
     <div class="tb-tab active" onclick="ST('lib',this)">מבצעי</div>
     <div class="tb-tab" onclick="ST('fav',this)">⭐ מועדפים</div>
@@ -648,7 +653,7 @@ body.day-mode .card:hover{
     <div class="tb-tab" onclick="ST('scn',this)">🎭 תרחישים</div>
     <div class="tb-tab" id="admin-tab" style="display:none;" onclick="ST('adm',this)">ניהול</div>
   </div>
-  <div class="tb-tabs-sec">
+  <div class="tb-tabs-sec" style="display:none;">
     <div class="tb-tab-sec" onclick="ST('hrt',this)">💗 פותחים לב</div>
     <div class="tb-tab-sec" onclick="ST('sem',this)">⚠️ סמנטי</div>
     <div class="tb-tab-sec" onclick="ST('day',this)">🌅 יומיומי</div>
@@ -722,7 +727,7 @@ body.day-mode .card:hover{
       </div>
     </div>
     
-    <div class="loading" id="cats-loading"><div style="text-align:center;padding:20px;"><div style="font-size:16px;color:#FF8C00;margin-bottom:8px;">טוען...</div><div style="font-size:10px;color:#7a9ab5;opacity:0.6;">v20260525-1409</div></div></div>
+    <div class="loading" id="cats-loading"><div style="text-align:center;padding:20px;"><div style="font-size:16px;color:#FF8C00;margin-bottom:8px;">טוען...</div><div style="font-size:10px;color:#7a9ab5;opacity:0.6;">v20260525-1716</div></div></div>
     <div class="cgrid" id="cgrid" style="display:none;"></div>
   </div>
   <div id="vlist" class="scr">
@@ -1364,7 +1369,7 @@ function bldCats(){
   if (!DB || DB.length === 0) {
     loadEl.innerHTML = '<div style="text-align:center;padding:20px;color:#FF8C00;">' +
       'מתחבר לשרת...<br><br>' +
-      '<div style="font-size:11px;color:#7a9ab5;">v20260525-1409</div><br>' +
+      '<div style="font-size:11px;color:#7a9ab5;">v20260525-1716</div><br>' +
       '<button onclick="location.reload(true)" style="padding:10px 20px;background:#FF8C00;color:#fff;border:none;border-radius:8px;font-family:inherit;cursor:pointer;font-weight:700;margin-top:10px;">🔄 רענן</button>' +
       '</div>';
     return;
@@ -4437,10 +4442,11 @@ function navToTab(tabId){
     }
     // Update bottom nav active state
     document.querySelectorAll('.bn-btn').forEach(function(b){
+      b.classList.remove('active');
       b.style.background = 'transparent';
     });
     var activeBtn = document.querySelector('.bn-btn[data-tab="'+tabId+'"]');
-    if (activeBtn) activeBtn.style.background = 'rgba(212,162,78,0.15)';
+    if (activeBtn) { activeBtn.classList.add('active'); activeBtn.style.background = 'rgba(212,162,78,0.15)'; }
     // Hide more menu
     var more = document.getElementById('more-menu');
     if (more) more.style.display = 'none';
@@ -4471,6 +4477,17 @@ document.addEventListener('click', function(e){
 
 // Add bottom padding to body so content isn't hidden behind nav
 document.body.style.paddingBottom = '90px';
+
+// Set initial active state for default tab (lib = מבצעי)
+window.addEventListener('load', function(){
+  setTimeout(function(){
+    var defaultBtn = document.querySelector('.bn-btn[data-tab="lib"]');
+    if (defaultBtn) {
+      defaultBtn.classList.add('active');
+      defaultBtn.style.background = 'rgba(212,162,78,0.15)';
+    }
+  }, 500);
+});
 </script>
 
 </body>
