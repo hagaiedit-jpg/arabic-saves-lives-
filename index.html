@@ -625,24 +625,46 @@ body.day-mode .card:hover{
 
 <div class="W">
 <div class="topbar">
-  <div class="tb-top">
-    <div class="theme-toggle">
-      <button class="dict-icon-btn" id="dictIconBtn" onclick="openDictTab()" title="מילון">📖</button>
-      <button class="theme-toggle-single" id="themeToggleBtn" onclick="toggleTheme()" title="לחצי להחלפת מצב יום/לילה">🌙</button>
+  <div class="tb-top" style="display:flex;align-items:center;justify-content:space-between;padding:14px 14px 12px;direction:rtl;">
+    <!-- Right side: Role button -->
+    <button class="role-circle" id="roleBtn" onclick="showWelcome()" title="בחר את התפקיד שלי" style="background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.1);border-radius:50%;width:38px;height:38px;display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:18px;flex-shrink:0;">
+      <span id="roleBtnEmoji">👤</span>
+    </button>
+    
+    <!-- Center: Title -->
+    <div style="flex:1;text-align:center;padding:0 8px;">
+      <div class="tb-brand" id="brand-title" style="cursor:pointer;user-select:none;color:#FF8C00;font-size:17px;font-weight:800;line-height:1.1;">ערבית מצילה חיים</div>
+      <div id="connection-dot" style="display:none;color:#1D9E75;font-size:10px;margin-top:2px;">🟢 מחובר</div>
     </div>
-    <div class="tb-brand" id="brand-title" style="cursor:pointer;user-select:none;">ערבית מצילה חיים</div>
-    <div class="tb-left-group">
-      <button class="role-circle" id="roleBtn" onclick="showWelcome()" title="בחר את התפקיד שלי">
-        <span id="roleBtnEmoji">👤</span>
-      </button>
-      <button class="role-circle" id="helpBtn" onclick="showHelp()" title="עזרה ומקרא איקונים">
-        <span>❓</span>
-      </button>
-      <div class="tb-badges">
-        
-        <div class="bstatus" id="status-badge">טוען...</div>
-      </div>
+    
+    <!-- Left side: Menu button -->
+    <button onclick="toggleHeaderMenu()" id="headerMenuBtn" title="תפריט הגדרות" style="background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.1);border-radius:50%;width:38px;height:38px;display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:18px;color:#E8D9B8;flex-shrink:0;">
+      ⚙️
+    </button>
+    
+    <!-- Hidden legacy elements (kept for compatibility) -->
+    <div style="display:none;">
+      <button class="dict-icon-btn" id="dictIconBtn" onclick="openDictTab()">📖</button>
+      <button class="theme-toggle-single" id="themeToggleBtn" onclick="toggleTheme()">🌙</button>
+      <button class="role-circle" id="helpBtn" onclick="showHelp()"><span>❓</span></button>
+      <div class="bstatus" id="status-badge">טוען...</div>
     </div>
+  </div>
+  
+  <!-- Header Menu (popup) -->
+  <div id="header-menu" style="display:none;position:absolute;top:62px;left:10px;background:#18293E;border:1px solid #2e4558;border-radius:12px;padding:8px;z-index:50;box-shadow:0 4px 20px rgba(0,0,0,0.6);min-width:180px;direction:rtl;">
+    <button onclick="openDictTab();document.getElementById('header-menu').style.display='none';" style="display:flex;align-items:center;gap:10px;width:100%;background:transparent;border:none;color:#E8D9B8;padding:10px 12px;text-align:right;cursor:pointer;font-family:inherit;font-size:14px;border-radius:8px;">
+      <span style="font-size:18px;">📖</span>
+      <span>מילון</span>
+    </button>
+    <button onclick="toggleTheme();document.getElementById('header-menu').style.display='none';" style="display:flex;align-items:center;gap:10px;width:100%;background:transparent;border:none;color:#E8D9B8;padding:10px 12px;text-align:right;cursor:pointer;font-family:inherit;font-size:14px;border-radius:8px;">
+      <span style="font-size:18px;">🌙</span>
+      <span>מצב יום/לילה</span>
+    </button>
+    <button onclick="showHelp();document.getElementById('header-menu').style.display='none';" style="display:flex;align-items:center;gap:10px;width:100%;background:transparent;border:none;color:#E8D9B8;padding:10px 12px;text-align:right;cursor:pointer;font-family:inherit;font-size:14px;border-radius:8px;">
+      <span style="font-size:18px;">❓</span>
+      <span>עזרה ומקרא</span>
+    </button>
   </div>
   <div class="tb-tabs" style="display:none;">
     <div class="tb-tab" onclick="ST('qk',this)" style="color:#c0392b !important;font-weight:700;">🚨 חירום</div>
@@ -727,7 +749,7 @@ body.day-mode .card:hover{
       </div>
     </div>
     
-    <div class="loading" id="cats-loading"><div style="text-align:center;padding:20px;"><div style="font-size:16px;color:#FF8C00;margin-bottom:8px;">טוען...</div><div style="font-size:10px;color:#7a9ab5;opacity:0.6;">v20260525-1716</div></div></div>
+    <div class="loading" id="cats-loading"><div style="text-align:center;padding:20px;"><div style="font-size:16px;color:#FF8C00;margin-bottom:8px;">טוען...</div><div style="font-size:10px;color:#7a9ab5;opacity:0.6;">v20260525-1724</div></div></div>
     <div class="cgrid" id="cgrid" style="display:none;"></div>
   </div>
   <div id="vlist" class="scr">
@@ -1369,7 +1391,7 @@ function bldCats(){
   if (!DB || DB.length === 0) {
     loadEl.innerHTML = '<div style="text-align:center;padding:20px;color:#FF8C00;">' +
       'מתחבר לשרת...<br><br>' +
-      '<div style="font-size:11px;color:#7a9ab5;">v20260525-1716</div><br>' +
+      '<div style="font-size:11px;color:#7a9ab5;">v20260525-1724</div><br>' +
       '<button onclick="location.reload(true)" style="padding:10px 20px;background:#FF8C00;color:#fff;border:none;border-radius:8px;font-family:inherit;cursor:pointer;font-weight:700;margin-top:10px;">🔄 רענן</button>' +
       '</div>';
     return;
@@ -4422,6 +4444,26 @@ try { bldCats(); } catch(_){}
 
 <script>
 // === Bottom Nav functions ===
+function toggleHeaderMenu(){
+  try {
+    var menu = document.getElementById('header-menu');
+    if (!menu) return;
+    menu.style.display = (menu.style.display === 'none' || !menu.style.display) ? 'block' : 'none';
+  } catch(e) { console.warn('toggleHeaderMenu error:', e); }
+}
+
+// Close header menu when clicking outside
+document.addEventListener('click', function(e){
+  try {
+    var menu = document.getElementById('header-menu');
+    var btn = document.getElementById('headerMenuBtn');
+    if (!menu || !btn) return;
+    if (menu.style.display === 'block' && !menu.contains(e.target) && !btn.contains(e.target)) {
+      menu.style.display = 'none';
+    }
+  } catch(e) {}
+});
+
 function navToTab(tabId){
   try {
     // Find the matching top tab and click it (uses existing ST function)
