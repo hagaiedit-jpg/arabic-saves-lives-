@@ -749,7 +749,7 @@ body.day-mode .card:hover{
       </div>
     </div>
     
-    <div class="loading" id="cats-loading"><div style="text-align:center;padding:20px;"><div style="font-size:16px;color:#FF8C00;margin-bottom:8px;">טוען...</div><div style="font-size:10px;color:#7a9ab5;opacity:0.6;">v20260525-1813</div></div></div>
+    <div class="loading" id="cats-loading"><div style="text-align:center;padding:20px;"><div style="font-size:16px;color:#FF8C00;margin-bottom:8px;">טוען...</div><div style="font-size:10px;color:#7a9ab5;opacity:0.6;">v20260525-1829</div></div></div>
     <div class="cgrid" id="cgrid" style="display:none;"></div>
   </div>
   <div id="vlist" class="scr">
@@ -921,9 +921,12 @@ body.day-mode .card:hover{
 <!-- Scenarios tab (guided dialogues - Babbel style) -->
 <div class="scr" id="tab-scn">
   <!-- Grid view -->
-  <div id="scn-grid-view" style="padding:16px;">
-    <div style="text-align:center;color:#D4A24E;font-size:16px;font-weight:700;letter-spacing:1px;margin-bottom:4px;">🎭 ספריית תרחישים</div>
-    <div style="text-align:center;color:#a0b8c8;font-size:12px;margin-bottom:18px;">תרגול שיחות אמיתיות מהשטח</div>
+  <div id="scn-grid-view" style="padding:18px 16px 16px;">
+    <div style="text-align:center;margin-bottom:22px;">
+      <div style="font-size:28px;margin-bottom:6px;">🎭</div>
+      <div style="color:#E8D9B8;font-size:18px;font-weight:800;letter-spacing:0.5px;margin-bottom:4px;">ספריית תרחישים</div>
+      <div style="color:#7a9ab5;font-size:12px;">תרגול שיחות אמיתיות מהשטח</div>
+    </div>
     <div id="scn-grid"></div>
   </div>
   
@@ -1390,7 +1393,7 @@ function bldCats(){
   if (!DB || DB.length === 0) {
     loadEl.innerHTML = '<div style="text-align:center;padding:20px;color:#FF8C00;">' +
       'מתחבר לשרת...<br><br>' +
-      '<div style="font-size:11px;color:#7a9ab5;">v20260525-1813</div><br>' +
+      '<div style="font-size:11px;color:#7a9ab5;">v20260525-1829</div><br>' +
       '<button onclick="location.reload(true)" style="padding:10px 20px;background:#FF8C00;color:#fff;border:none;border-radius:8px;font-family:inherit;cursor:pointer;font-weight:700;margin-top:10px;">🔄 רענן</button>' +
       '</div>';
     return;
@@ -1794,19 +1797,19 @@ function renderScnGrid(){
         if (phrases.length > 0) readyCount++;
       });
       
-      // Category header (clickable to expand/collapse)
-      html += '<div style="background:#18293E;border:1px solid rgba(212,162,78,0.15);border-radius:12px;margin-bottom:14px;overflow:hidden;">';
-      html += '<div onclick="scnToggleCat(\'' + cat.id + '\')" style="padding:14px 16px;cursor:pointer;display:flex;align-items:center;justify-content:space-between;">';
-      html += '<div style="display:flex;align-items:center;gap:10px;">';
-      html += '<span style="font-size:20px;">' + cat.icon + '</span>';
+      // Category header (clickable to expand/collapse) - LOORA-style
+      html += '<div style="background:linear-gradient(135deg,#18293E 0%,#1F3147 100%);border:1px solid rgba(212,162,78,0.2);border-radius:16px;margin-bottom:16px;overflow:hidden;box-shadow:0 2px 8px rgba(0,0,0,0.2);">';
+      html += '<div onclick="scnToggleCat(\'' + cat.id + '\')" style="padding:16px 18px;cursor:pointer;display:flex;align-items:center;justify-content:space-between;">';
+      html += '<div style="display:flex;align-items:center;gap:14px;">';
+      html += '<div style="width:42px;height:42px;background:rgba(212,162,78,0.12);border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:22px;">' + cat.icon + '</div>';
       html += '<div>';
-      html += '<div style="color:#D4A24E;font-size:14px;font-weight:700;">' + cat.title + '</div>';
-      html += '<div style="color:#7a9ab5;font-size:11px;margin-top:2px;">' + cat.scenarios.length + ' תרחישים';
-      if (readyCount > 0) html += ' · <span style="color:#1D9E75;">✓ ' + readyCount + ' מוכנים</span>';
+      html += '<div style="color:#E8D9B8;font-size:15px;font-weight:700;letter-spacing:0.3px;">' + cat.title + '</div>';
+      html += '<div style="color:#7a9ab5;font-size:12px;margin-top:3px;">' + cat.scenarios.length + ' תרחישים';
+      if (readyCount > 0) html += ' · <span style="color:#1D9E75;font-weight:600;">' + readyCount + ' מוכנים</span>';
       html += '</div>';
       html += '</div>';
       html += '</div>';
-      html += '<span style="color:#7a9ab5;font-size:14px;transform:rotate(' + (isExpanded ? '90deg' : '0deg') + ');transition:transform 0.2s;">▶</span>';
+      html += '<span style="color:#7a9ab5;font-size:16px;transform:rotate(' + (isExpanded ? '90deg' : '0deg') + ');transition:transform 0.3s;display:inline-block;">›</span>';
       html += '</div>';
       
       // Scenarios grid (shown when expanded)
@@ -1830,16 +1833,33 @@ function renderScnGrid(){
           try { completed = JSON.parse(localStorage.getItem('completed_scenarios') || '{}'); } catch(e){}
           var isCompleted = !!completed[s.id];
           
-          html += '<div style="background:' + bg + ';border:1px solid ' + (isCompleted ? '#1D9E75' : border) + ';border-radius:10px;padding:14px 10px;text-align:center;cursor:pointer;opacity:' + opacity + ';position:relative;" ' + clickHandler + '>';
+          // LOORA-style card with gradient and better hierarchy
+          var cardBg = ready ? 'linear-gradient(160deg,#1F3147 0%,#243a55 100%)' : 'rgba(31,49,71,0.4)';
+          var cardBorder = isCompleted ? '#1D9E75' : (ready ? 'rgba(212,162,78,0.25)' : 'rgba(212,162,78,0.1)');
+          var cardOpacity = ready ? '1' : '0.55';
+          var cardShadow = ready ? 'box-shadow:0 2px 8px rgba(0,0,0,0.25);' : '';
+          
+          html += '<div style="background:' + cardBg + ';border:1px solid ' + cardBorder + ';border-radius:14px;padding:16px 10px 12px;text-align:center;cursor:pointer;opacity:' + cardOpacity + ';position:relative;' + cardShadow + 'transition:transform 0.15s,box-shadow 0.15s;" ' + clickHandler + ' onmousedown="this.style.transform=\'scale(0.97)\'" onmouseup="this.style.transform=\'scale(1)\'" onmouseleave="this.style.transform=\'scale(1)\'">';
+          
+          // Completion checkmark badge
           if (isCompleted) {
-            html += '<div style="position:absolute;top:6px;left:6px;background:#1D9E75;color:#fff;border-radius:50%;width:20px;height:20px;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;">✓</div>';
+            html += '<div style="position:absolute;top:8px;left:8px;background:#1D9E75;color:#fff;border-radius:50%;width:22px;height:22px;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;box-shadow:0 2px 4px rgba(29,158,117,0.4);">✓</div>';
           }
-          html += '<div style="font-size:24px;margin-bottom:6px;">' + s.icon + '</div>';
-          html += '<div style="color:#E8D9B8;font-size:12px;font-weight:700;line-height:1.2;">' + s.title + '</div>';
+          
+          // Icon - bigger with subtle background container
+          html += '<div style="font-size:28px;margin-bottom:10px;line-height:1;">' + s.icon + '</div>';
+          
+          // Title
+          html += '<div style="color:#E8D9B8;font-size:12.5px;font-weight:700;line-height:1.3;margin-bottom:6px;min-height:32px;display:flex;align-items:center;justify-content:center;">' + s.title + '</div>';
+          
+          // Status pill
           if (ready) {
-            html += '<div style="color:' + (isCompleted ? '#1D9E75' : '#7a9ab5') + ';font-size:10px;margin-top:4px;">' + (isCompleted ? '✓ הושלם' : phrases.length + ' שלבים') + '</div>';
+            var pillBg = isCompleted ? 'rgba(29,158,117,0.18)' : 'rgba(212,162,78,0.12)';
+            var pillColor = isCompleted ? '#1D9E75' : '#D4A24E';
+            var pillText = isCompleted ? '✓ הושלם' : phrases.length + ' שלבים';
+            html += '<div style="display:inline-block;background:' + pillBg + ';color:' + pillColor + ';font-size:10px;font-weight:700;padding:3px 10px;border-radius:10px;">' + pillText + '</div>';
           } else {
-            html += '<div style="color:#7a9ab5;font-size:10px;margin-top:4px;">בקרוב</div>';
+            html += '<div style="display:inline-block;background:rgba(122,154,181,0.1);color:#7a9ab5;font-size:10px;font-weight:600;padding:3px 10px;border-radius:10px;">בקרוב</div>';
           }
           html += '</div>';
         });
