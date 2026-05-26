@@ -1296,6 +1296,28 @@ body.day-mode .hlist-back{
   color:#a85200 !important;
 }
 
+
+/* === DAY MODE: Category cubes (.ct) === */
+body.day-mode .ct{
+  background:linear-gradient(160deg,#fff 0%,#faf3e3 100%) !important;
+  border:1px solid rgba(168,82,0,0.25) !important;
+  box-shadow:0 2px 8px rgba(0,0,0,0.06) !important;
+}
+body.day-mode .ct:active{
+  background:linear-gradient(160deg,#faf3e3 0%,#f5efe0 100%) !important;
+}
+body.day-mode .ct .ci{
+  background:rgba(168,82,0,0.12) !important;
+}
+body.day-mode .ct .cn{
+  color:#0e1b2e !important;
+  font-weight:700;
+}
+body.day-mode .ct .cc{
+  background:rgba(168,82,0,0.15) !important;
+  color:#a85200 !important;
+}
+
 </style>
 </head>
 <body>
@@ -1504,7 +1526,7 @@ body.day-mode .hlist-back{
       </div>
     </div>
     
-    <div class="loading" id="cats-loading"><div style="text-align:center;padding:20px;"><div style="font-size:16px;color:#D4862E;margin-bottom:8px;">טוען...</div><div style="font-size:10px;color:#7a9ab5;opacity:0.6;">v20260526-1409</div></div></div>
+    <div class="loading" id="cats-loading"><div style="text-align:center;padding:20px;"><div style="font-size:16px;color:#D4862E;margin-bottom:8px;">טוען...</div><div style="font-size:10px;color:#7a9ab5;opacity:0.6;">v20260526-1416</div></div></div>
     <div class="cgrid" id="cgrid" style="display:none;"></div>
   </div>
   <div id="vlist" class="scr">
@@ -2308,7 +2330,7 @@ function bldCats(){
   if (!DB || DB.length === 0) {
     loadEl.innerHTML = '<div style="text-align:center;padding:20px;color:#D4862E;">' +
       'מתחבר לשרת...<br><br>' +
-      '<div style="font-size:11px;color:#7a9ab5;">v20260526-1409</div><br>' +
+      '<div style="font-size:11px;color:#7a9ab5;">v20260526-1416</div><br>' +
       '<button onclick="location.reload(true)" style="padding:10px 20px;background:#D4862E;color:#fff;border:none;border-radius:8px;font-family:inherit;cursor:pointer;font-weight:700;margin-top:10px;">🔄 רענן</button>' +
       '</div>';
     return;
