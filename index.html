@@ -1152,6 +1152,88 @@ body.day-mode [style*="background:linear-gradient(135deg,#fff,#f5efe0)"]{
   border-color:rgba(168,82,0,0.25) !important;
 }
 
+
+/* === TARGETED FIX FOR DAY MODE ISSUES === */
+
+/* FIX 1: Phrase of the Day card on home (#home-potd-card) */
+body.day-mode #home-potd-card{
+  background:linear-gradient(135deg,#fff 0%,#faf3e3 100%) !important;
+  border-color:rgba(168,82,0,0.3) !important;
+  border-right-color:#8a6420 !important;
+}
+body.day-mode #home-potd-he{
+  color:#0e1b2e !important;
+}
+body.day-mode #home-potd-ar{
+  color:#0e1b2e !important;
+  font-weight:600;
+}
+body.day-mode #home-potd-trans{
+  color:#3a4a5c !important;
+}
+body.day-mode #home-potd-play{
+  background:#fff !important;
+  color:#8a6420 !important;
+  border-color:#8a6420 !important;
+}
+
+/* FIX 2: Customs cubes (מנהגים) - make text DARK on light background */
+body.day-mode .customs-cube{
+  border-color:rgba(168,82,0,0.3) !important;
+  box-shadow:0 2px 8px rgba(0,0,0,0.06) !important;
+}
+body.day-mode .customs-cube-title{
+  color:#0e1b2e !important;
+  font-weight:700;
+}
+body.day-mode .customs-cube-count{
+  color:#4a5a72 !important;
+}
+body.day-mode .customs-cube-icon{
+  filter:saturate(1.1);
+}
+
+/* FIX 3: Transliteration in popup - white text becomes dark */
+body.day-mode .ptrans{
+  color:#0e1b2e !important;
+  font-weight:600;
+}
+/* The dark box behind ptrans - lighten it */
+body.day-mode .ibox{
+  background:#f5efe0 !important;
+  border-color:#e0d4b5 !important;
+}
+body.day-mode .ibox.b{
+  background:#f5efe0 !important;
+}
+/* Hebrew (phe) and Arabic (parsm) in popup */
+body.day-mode .phe{
+  color:#0e1b2e !important;
+  font-weight:600;
+}
+body.day-mode .parsm{
+  color:#0e1b2e !important;
+  font-weight:600;
+}
+
+/* Popup main background and structure */
+body.day-mode .pop{
+  background:#fff !important;
+  border-color:#e0d4b5 !important;
+}
+body.day-mode .pbg{
+  background:rgba(0,0,0,0.4) !important;
+}
+
+/* Group rendering in popup */
+body.day-mode .pgrp{
+  background:#fff !important;
+  border-color:#e0d4b5 !important;
+}
+body.day-mode .pgrp-he{color:#0e1b2e !important; font-weight:600;}
+body.day-mode .pgrp-ar{color:#0e1b2e !important; font-weight:600;}
+body.day-mode .pgrp-trans{color:#3a4a5c !important;}
+
 </style>
 </head>
 <body>
@@ -1360,7 +1442,7 @@ body.day-mode [style*="background:linear-gradient(135deg,#fff,#f5efe0)"]{
       </div>
     </div>
     
-    <div class="loading" id="cats-loading"><div style="text-align:center;padding:20px;"><div style="font-size:16px;color:#D4862E;margin-bottom:8px;">טוען...</div><div style="font-size:10px;color:#7a9ab5;opacity:0.6;">v20260526-1351</div></div></div>
+    <div class="loading" id="cats-loading"><div style="text-align:center;padding:20px;"><div style="font-size:16px;color:#D4862E;margin-bottom:8px;">טוען...</div><div style="font-size:10px;color:#7a9ab5;opacity:0.6;">v20260526-1356</div></div></div>
     <div class="cgrid" id="cgrid" style="display:none;"></div>
   </div>
   <div id="vlist" class="scr">
@@ -2164,7 +2246,7 @@ function bldCats(){
   if (!DB || DB.length === 0) {
     loadEl.innerHTML = '<div style="text-align:center;padding:20px;color:#D4862E;">' +
       'מתחבר לשרת...<br><br>' +
-      '<div style="font-size:11px;color:#7a9ab5;">v20260526-1351</div><br>' +
+      '<div style="font-size:11px;color:#7a9ab5;">v20260526-1356</div><br>' +
       '<button onclick="location.reload(true)" style="padding:10px 20px;background:#D4862E;color:#fff;border:none;border-radius:8px;font-family:inherit;cursor:pointer;font-weight:700;margin-top:10px;">🔄 רענן</button>' +
       '</div>';
     return;
