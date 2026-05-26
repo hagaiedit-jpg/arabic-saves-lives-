@@ -1007,7 +1007,7 @@ body.day-mode .card:hover{
       </div>
     </div>
     
-    <div class="loading" id="cats-loading"><div style="text-align:center;padding:20px;"><div style="font-size:16px;color:#D4862E;margin-bottom:8px;">טוען...</div><div style="font-size:10px;color:#7a9ab5;opacity:0.6;">v20260526-1137</div></div></div>
+    <div class="loading" id="cats-loading"><div style="text-align:center;padding:20px;"><div style="font-size:16px;color:#D4862E;margin-bottom:8px;">טוען...</div><div style="font-size:10px;color:#7a9ab5;opacity:0.6;">v20260526-1143</div></div></div>
     <div class="cgrid" id="cgrid" style="display:none;"></div>
   </div>
   <div id="vlist" class="scr">
@@ -1711,7 +1711,7 @@ async function loadData(){
     ARTS=data.filter(p=>p.section==='article').map(mp);
     document.getElementById('status-badge').textContent='מחובר';
     document.getElementById('status-badge').style.background='#1D9E75';
-    bldCats();rDG();rHrt();rSem();rCus();rArts();renderDict();rQK();updateNewDot();renderPotd();renderStreak();renderProgress();renderScnGrid();if(typeof checkAchievements==='function')setTimeout(checkAchievements,1500);
+    bldCats();rDG();rHrt();rSem();rCus();rArts();renderDict();rQK();updateNewDot();renderPotd();renderStreak();renderProgress();renderScnGrid();renderHome();if(typeof checkAchievements==='function')setTimeout(checkAchievements,1500);
   }catch(e){
     console.error('loadData failed:', e);
     document.getElementById('status-badge').textContent='אופליין';
@@ -1808,7 +1808,7 @@ function bldCats(){
   if (!DB || DB.length === 0) {
     loadEl.innerHTML = '<div style="text-align:center;padding:20px;color:#D4862E;">' +
       'מתחבר לשרת...<br><br>' +
-      '<div style="font-size:11px;color:#7a9ab5;">v20260526-1137</div><br>' +
+      '<div style="font-size:11px;color:#7a9ab5;">v20260526-1143</div><br>' +
       '<button onclick="location.reload(true)" style="padding:10px 20px;background:#D4862E;color:#fff;border:none;border-radius:8px;font-family:inherit;cursor:pointer;font-weight:700;margin-top:10px;">🔄 רענן</button>' +
       '</div>';
     return;
@@ -1945,31 +1945,12 @@ function getPhraseOfTheDay(){
 }
 
 function renderPotd(){
+  // No-op: phrase of the day moved to home tab.
+  // Keep the banner hidden in case the function gets called.
   try {
-    var p = getPhraseOfTheDay();
     var banner = document.getElementById('potd-banner');
-    if (!banner) return;
-    if (!p) {
-      banner.style.display = 'none';
-      return;
-    }
-    // Check if user dismissed the banner today
-    var today = new Date().toDateString();
-    var dismissedDate = localStorage.getItem('potd_dismissed');
-    if (dismissedDate === today) {
-      banner.style.display = 'none';
-      return;
-    }
-    document.getElementById('potd-he').textContent = p.he || '';
-    document.getElementById('potd-trans').textContent = p.trans || '';
-    document.getElementById('potd-ar').textContent = p.ar || '';
-    var playBtn = document.getElementById('potd-play-btn');
-    if (playBtn) playBtn.style.display = p.audio ? 'inline-block' : 'none';
-    banner.style.display = 'block';
-    window._potdId = p.id;
-  } catch(e) {
-    console.warn('renderPotd error:', e);
-  }
+    if (banner) banner.style.display = 'none';
+  } catch(e) {}
 }
 
 function updateStreak(){
