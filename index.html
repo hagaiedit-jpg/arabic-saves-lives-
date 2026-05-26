@@ -798,6 +798,155 @@ body.day-mode .card:hover{
 }
 .scn-bubble-soldier .scn-step-num{color:rgba(255,255,255,0.85);}
 .scn-bubble-civilian .scn-step-num{color:#7a9ab5;}
+
+/* === DAY MODE CONTRAST FIXES === */
+/* Fix text contrast in day mode - dark text on light background */
+
+/* Card list items - Hebrew text */
+body.day-mode .ihe, 
+body.day-mode .he,
+body.day-mode .cn,
+body.day-mode .pgrp-he,
+body.day-mode .nrhe{
+  color:#0e1b2e !important;
+  font-weight:600;
+}
+
+/* Arabic text - darker for contrast */
+body.day-mode .iar,
+body.day-mode .ar,
+body.day-mode .parsm,
+body.day-mode .nra,
+body.day-mode .pgrp-ar{
+  color:#1A2B3C !important;
+  font-weight:500;
+}
+
+/* Transliteration */
+body.day-mode .itr,
+body.day-mode .trans,
+body.day-mode .ptrans,
+body.day-mode .pgrp-trans,
+body.day-mode .nrtr{
+  color:#2d4159 !important;
+}
+
+/* Section headers, titles, descriptions */
+body.day-mode .sec-h,
+body.day-mode .section-title,
+body.day-mode .ssub,
+body.day-mode .smeta{
+  color:#0e1b2e !important;
+}
+
+/* Sub-text, hints, meta */
+body.day-mode .why,
+body.day-mode .iwhy,
+body.day-mode .swhy,
+body.day-mode .sname{
+  color:#4a5a72 !important;
+}
+
+/* Counter / count text */
+body.day-mode .cc{
+  background:rgba(168,82,0,0.15);
+  color:#a85200 !important;
+}
+
+/* Customs - menahgim text */
+body.day-mode .customs-cube,
+body.day-mode .cust-card,
+body.day-mode .cust-q,
+body.day-mode .cust-a{
+  color:#0e1b2e !important;
+}
+body.day-mode .customs-cube *,
+body.day-mode .cust-card *{
+  color:#0e1b2e !important;
+}
+body.day-mode .customs-cube{
+  background:linear-gradient(135deg,#fff,#f5efe0) !important;
+  border-color:rgba(168,82,0,0.25) !important;
+}
+
+/* Hearts (פותחים לב) */
+body.day-mode .hrt-card,
+body.day-mode .hrt-q,
+body.day-mode .hrt-a,
+body.day-mode .hrt-cat{
+  color:#0e1b2e !important;
+}
+body.day-mode .hrt-card *{color:#0e1b2e !important;}
+body.day-mode .hrt-card{
+  background:linear-gradient(135deg,#fff,#f5efe0) !important;
+  border-color:rgba(168,82,0,0.25) !important;
+}
+
+/* Semantic warnings */
+body.day-mode .sem-card,
+body.day-mode .sem-card *,
+body.day-mode .swc-he,
+body.day-mode .swc-ar,
+body.day-mode .swc-warn{
+  color:#0e1b2e !important;
+}
+body.day-mode .sem-card{
+  background:linear-gradient(135deg,#fff,#fff8e7) !important;
+  border-color:rgba(192,57,43,0.3) !important;
+}
+
+/* Articles */
+body.day-mode .art-card,
+body.day-mode .art-card *,
+body.day-mode .art-title,
+body.day-mode .art-body{
+  color:#0e1b2e !important;
+}
+body.day-mode .art-card{
+  background:linear-gradient(135deg,#fff,#faf7ef) !important;
+}
+
+/* Scenario bubbles - civilian bubble in day mode */
+body.day-mode .scn-bubble-civilian{
+  background:linear-gradient(135deg,#fff,#f5efe0) !important;
+  color:#0e1b2e !important;
+  border-color:rgba(29,158,117,0.5) !important;
+}
+body.day-mode .scn-bubble-civilian .scn-bubble-he,
+body.day-mode .scn-bubble-civilian .scn-bubble-ar,
+body.day-mode .scn-bubble-civilian .scn-bubble-trans{
+  color:#0e1b2e !important;
+}
+
+/* General light text - make it darker */
+body.day-mode div[style*="color:#E8D9B8"]{color:#0e1b2e !important;}
+body.day-mode div[style*="color:#a0b8c8"]{color:#4a5a72 !important;}
+body.day-mode div[style*="color:#7a9ab5"]{color:#5a6b80 !important;}
+
+/* Home tab specific */
+body.day-mode #home-greeting{color:#0e1b2e !important;}
+body.day-mode #home-subtitle{color:#4a5a72 !important;}
+body.day-mode #home-progress-stats{color:#0e1b2e !important;}
+body.day-mode #home-potd-he{color:#0e1b2e !important;}
+body.day-mode #home-potd-ar{color:#0e1b2e !important;}
+body.day-mode #home-potd-trans{color:#4a5a72 !important;}
+
+/* Bottom nav text in day mode */
+body.day-mode .bn-btn div[style*="color:#E8D9B8"]{color:#0e1b2e !important;}
+
+/* Tab/Scenario headers */
+body.day-mode .scn-cat-title{color:#0e1b2e !important;}
+body.day-mode .scn-step-title{color:#0e1b2e !important;}
+
+/* Dictionary entries */
+body.day-mode .dict-card,
+body.day-mode .dict-card *{color:#0e1b2e !important;}
+body.day-mode .dict-card{background:#fff !important;}
+
+/* Achievements */
+body.day-mode .achv-card,
+body.day-mode .achv-card *{color:#0e1b2e !important;}
+
 </style>
 </head>
 <body>
@@ -1007,7 +1156,7 @@ body.day-mode .card:hover{
       </div>
     </div>
     
-    <div class="loading" id="cats-loading"><div style="text-align:center;padding:20px;"><div style="font-size:16px;color:#D4862E;margin-bottom:8px;">טוען...</div><div style="font-size:10px;color:#7a9ab5;opacity:0.6;">v20260526-1143</div></div></div>
+    <div class="loading" id="cats-loading"><div style="text-align:center;padding:20px;"><div style="font-size:16px;color:#D4862E;margin-bottom:8px;">טוען...</div><div style="font-size:10px;color:#7a9ab5;opacity:0.6;">v20260526-1245</div></div></div>
     <div class="cgrid" id="cgrid" style="display:none;"></div>
   </div>
   <div id="vlist" class="scr">
@@ -1808,7 +1957,7 @@ function bldCats(){
   if (!DB || DB.length === 0) {
     loadEl.innerHTML = '<div style="text-align:center;padding:20px;color:#D4862E;">' +
       'מתחבר לשרת...<br><br>' +
-      '<div style="font-size:11px;color:#7a9ab5;">v20260526-1143</div><br>' +
+      '<div style="font-size:11px;color:#7a9ab5;">v20260526-1245</div><br>' +
       '<button onclick="location.reload(true)" style="padding:10px 20px;background:#D4862E;color:#fff;border:none;border-radius:8px;font-family:inherit;cursor:pointer;font-weight:700;margin-top:10px;">🔄 רענן</button>' +
       '</div>';
     return;
