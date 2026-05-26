@@ -1234,6 +1234,30 @@ body.day-mode .pgrp-he{color:#0e1b2e !important; font-weight:600;}
 body.day-mode .pgrp-ar{color:#0e1b2e !important; font-weight:600;}
 body.day-mode .pgrp-trans{color:#3a4a5c !important;}
 
+
+/* === DAY MODE: pbox (transliteration container) === */
+body.day-mode .pbox{
+  background:#fff !important;
+  border:1px solid #e0d4b5 !important;
+}
+body.day-mode .ptrans{
+  color:#0e1b2e !important;
+  font-weight:600;
+}
+
+/* Practice section background in day mode */
+body.day-mode #practice-section{
+  background:#faf3e3 !important;
+  border-color:#e0d4b5 !important;
+}
+
+/* Wave/audio visualization area */
+body.day-mode .ww,
+body.day-mode .wave{
+  background:transparent !important;
+}
+body.day-mode .wt{color:#0e1b2e !important;}
+
 </style>
 </head>
 <body>
@@ -1442,7 +1466,7 @@ body.day-mode .pgrp-trans{color:#3a4a5c !important;}
       </div>
     </div>
     
-    <div class="loading" id="cats-loading"><div style="text-align:center;padding:20px;"><div style="font-size:16px;color:#D4862E;margin-bottom:8px;">טוען...</div><div style="font-size:10px;color:#7a9ab5;opacity:0.6;">v20260526-1356</div></div></div>
+    <div class="loading" id="cats-loading"><div style="text-align:center;padding:20px;"><div style="font-size:16px;color:#D4862E;margin-bottom:8px;">טוען...</div><div style="font-size:10px;color:#7a9ab5;opacity:0.6;">v20260526-1404</div></div></div>
     <div class="cgrid" id="cgrid" style="display:none;"></div>
   </div>
   <div id="vlist" class="scr">
@@ -2246,7 +2270,7 @@ function bldCats(){
   if (!DB || DB.length === 0) {
     loadEl.innerHTML = '<div style="text-align:center;padding:20px;color:#D4862E;">' +
       'מתחבר לשרת...<br><br>' +
-      '<div style="font-size:11px;color:#7a9ab5;">v20260526-1356</div><br>' +
+      '<div style="font-size:11px;color:#7a9ab5;">v20260526-1404</div><br>' +
       '<button onclick="location.reload(true)" style="padding:10px 20px;background:#D4862E;color:#fff;border:none;border-radius:8px;font-family:inherit;cursor:pointer;font-weight:700;margin-top:10px;">🔄 רענן</button>' +
       '</div>';
     return;
