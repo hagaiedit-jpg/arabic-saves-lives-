@@ -1258,6 +1258,44 @@ body.day-mode .wave{
 }
 body.day-mode .wt{color:#0e1b2e !important;}
 
+
+/* === DAY MODE: Card text (che, car, csub, tags) === */
+body.day-mode .che{
+  color:#0e1b2e !important;
+  font-weight:600;
+}
+body.day-mode .car{
+  color:#1A2B3C !important;
+  font-weight:600;
+}
+body.day-mode .csub{
+  color:#4a5a72 !important;
+}
+
+/* Tags inside cards */
+body.day-mode .tag{
+  background:rgba(168,82,0,0.15) !important;
+  color:#a85200 !important;
+  border:1px solid rgba(168,82,0,0.3) !important;
+}
+body.day-mode .tag.theart{
+  background:rgba(192,57,43,0.15) !important;
+  color:#922b21 !important;
+}
+
+/* Empty state */
+body.day-mode .empty{
+  color:#4a5a72 !important;
+}
+
+/* Heart category headers */
+body.day-mode #hltitle{
+  color:#0e1b2e !important;
+}
+body.day-mode .hlist-back{
+  color:#a85200 !important;
+}
+
 </style>
 </head>
 <body>
@@ -1466,7 +1504,7 @@ body.day-mode .wt{color:#0e1b2e !important;}
       </div>
     </div>
     
-    <div class="loading" id="cats-loading"><div style="text-align:center;padding:20px;"><div style="font-size:16px;color:#D4862E;margin-bottom:8px;">טוען...</div><div style="font-size:10px;color:#7a9ab5;opacity:0.6;">v20260526-1404</div></div></div>
+    <div class="loading" id="cats-loading"><div style="text-align:center;padding:20px;"><div style="font-size:16px;color:#D4862E;margin-bottom:8px;">טוען...</div><div style="font-size:10px;color:#7a9ab5;opacity:0.6;">v20260526-1409</div></div></div>
     <div class="cgrid" id="cgrid" style="display:none;"></div>
   </div>
   <div id="vlist" class="scr">
@@ -2270,7 +2308,7 @@ function bldCats(){
   if (!DB || DB.length === 0) {
     loadEl.innerHTML = '<div style="text-align:center;padding:20px;color:#D4862E;">' +
       'מתחבר לשרת...<br><br>' +
-      '<div style="font-size:11px;color:#7a9ab5;">v20260526-1404</div><br>' +
+      '<div style="font-size:11px;color:#7a9ab5;">v20260526-1409</div><br>' +
       '<button onclick="location.reload(true)" style="padding:10px 20px;background:#D4862E;color:#fff;border:none;border-radius:8px;font-family:inherit;cursor:pointer;font-weight:700;margin-top:10px;">🔄 רענן</button>' +
       '</div>';
     return;
