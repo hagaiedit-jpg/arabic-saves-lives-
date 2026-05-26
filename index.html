@@ -947,6 +947,110 @@ body.day-mode .dict-card{background:#fff !important;}
 body.day-mode .achv-card,
 body.day-mode .achv-card *{color:#0e1b2e !important;}
 
+
+/* === ADDITIONAL DAY MODE FIXES === */
+
+/* Bottom nav - "עוד" button text and icon visibility in day mode */
+body.day-mode #bottom-nav{
+  background:#fff !important;
+  border-top:1px solid #e0d4b5 !important;
+}
+body.day-mode .bn-btn div[style*="color:#E8D9B8"]{
+  color:#0e1b2e !important;
+}
+body.day-mode .bn-btn.active{
+  background:rgba(168,82,0,0.15) !important;
+}
+
+/* More menu in day mode */
+body.day-mode #more-menu{
+  background:#fff !important;
+  border-color:#e0d4b5 !important;
+}
+body.day-mode #more-menu > div > div{
+  background:#f5efe0 !important;
+}
+body.day-mode #more-menu div[style*="color:#E8D9B8"]{
+  color:#0e1b2e !important;
+}
+
+/* Lib cards - main phrase list (Hebrew and transliteration) */
+body.day-mode .lt{
+  color:#0e1b2e !important;
+  font-weight:600;
+}
+body.day-mode .la{
+  color:#2d4159 !important;
+  font-weight:500;
+}
+
+/* Lib list background */
+body.day-mode .litems{
+  background:#fff !important;
+}
+body.day-mode .li{
+  border-bottom-color:#e8dec9 !important;
+}
+body.day-mode .li:active{
+  background:#f5efe0 !important;
+}
+
+/* Title text in lists */
+body.day-mode .ltitle{
+  color:#0e1b2e !important;
+}
+body.day-mode .bbtn{
+  background:#fff !important;
+  border-color:#a85200 !important;
+  color:#a85200 !important;
+}
+
+/* Search box */
+body.day-mode .sinp,
+body.day-mode #sinp{
+  background:#fff !important;
+  border-color:#e0d4b5 !important;
+  color:#0e1b2e !important;
+}
+body.day-mode #sinp::placeholder{
+  color:#7a8aa0 !important;
+}
+
+/* Header (top bar) */
+body.day-mode .topbar{
+  background:#fff !important;
+}
+body.day-mode .tb-brand,
+body.day-mode #brand-title{
+  color:#a85200 !important;
+}
+body.day-mode #headerMenuBtn,
+body.day-mode #roleBtn{
+  background:rgba(0,0,0,0.05) !important;
+  border-color:rgba(0,0,0,0.15) !important;
+}
+body.day-mode #headerMenuBtn{
+  color:#0e1b2e !important;
+}
+
+/* Header dropdown menu */
+body.day-mode #header-menu{
+  background:#fff !important;
+  border-color:#e0d4b5 !important;
+}
+body.day-mode #header-menu button{
+  color:#0e1b2e !important;
+}
+body.day-mode #header-menu button:hover{
+  background:#f5efe0 !important;
+}
+
+/* Smeta (count text) */
+body.day-mode .smeta{
+  background:#fff !important;
+  color:#4a5a72 !important;
+}
+
 </style>
 </head>
 <body>
@@ -1156,7 +1260,7 @@ body.day-mode .achv-card *{color:#0e1b2e !important;}
       </div>
     </div>
     
-    <div class="loading" id="cats-loading"><div style="text-align:center;padding:20px;"><div style="font-size:16px;color:#D4862E;margin-bottom:8px;">טוען...</div><div style="font-size:10px;color:#7a9ab5;opacity:0.6;">v20260526-1245</div></div></div>
+    <div class="loading" id="cats-loading"><div style="text-align:center;padding:20px;"><div style="font-size:16px;color:#D4862E;margin-bottom:8px;">טוען...</div><div style="font-size:10px;color:#7a9ab5;opacity:0.6;">v20260526-1329</div></div></div>
     <div class="cgrid" id="cgrid" style="display:none;"></div>
   </div>
   <div id="vlist" class="scr">
@@ -1957,7 +2061,7 @@ function bldCats(){
   if (!DB || DB.length === 0) {
     loadEl.innerHTML = '<div style="text-align:center;padding:20px;color:#D4862E;">' +
       'מתחבר לשרת...<br><br>' +
-      '<div style="font-size:11px;color:#7a9ab5;">v20260526-1245</div><br>' +
+      '<div style="font-size:11px;color:#7a9ab5;">v20260526-1329</div><br>' +
       '<button onclick="location.reload(true)" style="padding:10px 20px;background:#D4862E;color:#fff;border:none;border-radius:8px;font-family:inherit;cursor:pointer;font-weight:700;margin-top:10px;">🔄 רענן</button>' +
       '</div>';
     return;
