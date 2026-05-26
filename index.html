@@ -1121,14 +1121,14 @@ body.day-mode .smeta{
   <div style="padding:20px 16px 16px;">
     
     <!-- Welcome + Streak -->
-    <div style="margin-bottom:20px;">
-      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px;">
-        <div id="home-greeting" style="color:#E8D9B8;font-size:22px;font-weight:800;letter-spacing:0.3px;">בוקר טוב 🎯</div>
-        <div id="home-streak-badge" style="display:none;align-items:center;gap:5px;background:rgba(212,134,46,0.15);border:1px solid rgba(212,134,46,0.4);border-radius:14px;padding:5px 12px;">
-          <span style="font-size:14px;">🔥</span>
-          <span id="home-streak-count" style="color:#D4862E;font-size:12px;font-weight:700;"></span>
-        </div>
+    <div style="margin-bottom:22px;">
+      <!-- Streak badge on its own line (above title) -->
+      <div id="home-streak-badge" style="display:none;align-items:center;gap:5px;background:rgba(212,134,46,0.15);border:1px solid rgba(212,134,46,0.4);border-radius:14px;padding:5px 12px;width:fit-content;margin-bottom:10px;">
+        <span style="font-size:14px;">🔥</span>
+        <span id="home-streak-count" style="color:#D4862E;font-size:12px;font-weight:700;"></span>
       </div>
+      <!-- Main greeting -->
+      <div id="home-greeting" style="color:#E8D9B8;font-size:24px;font-weight:800;letter-spacing:0.3px;margin-bottom:4px;">בוקר טוב</div>
       <div id="home-subtitle" style="color:#7a9ab5;font-size:13px;">בואו נמשיך לתרגל</div>
     </div>
     
@@ -1259,7 +1259,7 @@ body.day-mode .smeta{
       </div>
     </div>
     
-    <div class="loading" id="cats-loading"><div style="text-align:center;padding:20px;"><div style="font-size:16px;color:#D4862E;margin-bottom:8px;">טוען...</div><div style="font-size:10px;color:#7a9ab5;opacity:0.6;">v20260526-1339</div></div></div>
+    <div class="loading" id="cats-loading"><div style="text-align:center;padding:20px;"><div style="font-size:16px;color:#D4862E;margin-bottom:8px;">טוען...</div><div style="font-size:10px;color:#7a9ab5;opacity:0.6;">v20260526-1345</div></div></div>
     <div class="cgrid" id="cgrid" style="display:none;"></div>
   </div>
   <div id="vlist" class="scr">
@@ -1803,11 +1803,11 @@ function renderHome(){
     var greetingEl = document.getElementById('home-greeting');
     if (greetingEl) {
       var greeting = '';
-      if (hour >= 5 && hour < 12) greeting = 'בוקר טוב 🎯';
-      else if (hour >= 12 && hour < 15) greeting = 'צהריים טובים 🎯';
-      else if (hour >= 15 && hour < 18) greeting = 'אחר הצהריים טובים 🎯';
-      else if (hour >= 18 && hour < 22) greeting = 'ערב טוב 🎯';
-      else greeting = 'לילה טוב 🎯';
+      if (hour >= 5 && hour < 12) greeting = 'בוקר טוב';
+      else if (hour >= 12 && hour < 15) greeting = 'צהריים טובים';
+      else if (hour >= 15 && hour < 18) greeting = 'אחר הצהריים טובים';
+      else if (hour >= 18 && hour < 22) greeting = 'ערב טוב';
+      else greeting = 'לילה טוב';
       greetingEl.textContent = greeting;
     }
     
@@ -2063,7 +2063,7 @@ function bldCats(){
   if (!DB || DB.length === 0) {
     loadEl.innerHTML = '<div style="text-align:center;padding:20px;color:#D4862E;">' +
       'מתחבר לשרת...<br><br>' +
-      '<div style="font-size:11px;color:#7a9ab5;">v20260526-1339</div><br>' +
+      '<div style="font-size:11px;color:#7a9ab5;">v20260526-1345</div><br>' +
       '<button onclick="location.reload(true)" style="padding:10px 20px;background:#D4862E;color:#fff;border:none;border-radius:8px;font-family:inherit;cursor:pointer;font-weight:700;margin-top:10px;">🔄 רענן</button>' +
       '</div>';
     return;
