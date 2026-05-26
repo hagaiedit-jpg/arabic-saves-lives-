@@ -671,6 +671,132 @@ body.day-mode .card:hover{
 
 .ct:active{transform:scale(0.97);box-shadow:0 1px 4px rgba(0,0,0,0.15);}
 .ct:hover .ci{transform:scale(1.05);}
+
+/* WhatsApp-style scenario chat bubbles */
+.scn-bubble-row{display:flex;width:100%;margin-bottom:4px;}
+.scn-bubble-row.scn-soldier{justify-content:flex-end;}
+.scn-bubble-row.scn-civilian{justify-content:flex-start;}
+
+.scn-bubble{
+  max-width:82%;
+  padding:10px 14px 8px;
+  position:relative;
+  box-shadow:0 1px 2px rgba(0,0,0,0.3);
+  word-break:break-word;
+}
+
+/* Soldier bubble - WhatsApp outgoing orange/brown style */
+.scn-bubble-soldier{
+  background:linear-gradient(135deg,#FF8C00 0%,#e57c00 100%);
+  color:#fff;
+  border-radius:16px 16px 4px 16px;
+}
+.scn-bubble-soldier::after{
+  content:"";
+  position:absolute;
+  bottom:0;
+  right:-7px;
+  width:0;
+  height:0;
+  border-left:8px solid #e57c00;
+  border-bottom:10px solid transparent;
+}
+
+/* Civilian bubble - WhatsApp incoming dark/green style */
+.scn-bubble-civilian{
+  background:linear-gradient(135deg,#1F3147 0%,#243a55 100%);
+  color:#E8D9B8;
+  border-radius:16px 16px 16px 4px;
+  border:1px solid rgba(29,158,117,0.4);
+}
+.scn-bubble-civilian::after{
+  content:"";
+  position:absolute;
+  bottom:0;
+  left:-7px;
+  width:0;
+  height:0;
+  border-right:8px solid #1F3147;
+  border-bottom:10px solid transparent;
+}
+
+.scn-bubble-label{
+  font-size:10px;
+  font-weight:700;
+  opacity:0.85;
+  margin-bottom:6px;
+  letter-spacing:0.3px;
+}
+.scn-bubble-soldier .scn-bubble-label{color:rgba(255,255,255,0.95);}
+.scn-bubble-civilian .scn-bubble-label{color:#1D9E75;}
+
+.scn-bubble-he{
+  font-size:15px;
+  font-weight:600;
+  line-height:1.4;
+  margin-bottom:3px;
+}
+.scn-bubble-trans{
+  font-size:13px;
+  opacity:0.85;
+  line-height:1.4;
+  margin-bottom:3px;
+  font-style:italic;
+}
+.scn-bubble-soldier .scn-bubble-trans{color:rgba(255,255,255,0.9);}
+.scn-bubble-civilian .scn-bubble-trans{color:#a0b8c8;}
+.scn-bubble-ar{
+  font-size:17px;
+  font-family:Georgia,serif;
+  line-height:1.4;
+  margin-bottom:8px;
+  direction:rtl;
+}
+.scn-bubble-soldier .scn-bubble-ar{color:#fff;}
+.scn-bubble-civilian .scn-bubble-ar{color:#E8D9B8;}
+
+.scn-bubble-footer{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:8px;
+  margin-top:6px;
+  padding-top:6px;
+  border-top:1px solid rgba(255,255,255,0.15);
+}
+.scn-bubble-civilian .scn-bubble-footer{border-top-color:rgba(255,255,255,0.08);}
+
+.scn-play-btn{
+  background:rgba(255,255,255,0.15);
+  border:1px solid rgba(255,255,255,0.3);
+  color:#fff;
+  border-radius:14px;
+  padding:5px 14px;
+  font-size:12px;
+  font-weight:700;
+  cursor:pointer;
+  font-family:inherit;
+  transition:all 0.15s;
+}
+.scn-play-btn:active{transform:scale(0.95);}
+.scn-play-civilian{
+  background:rgba(29,158,117,0.2);
+  border-color:rgba(29,158,117,0.5);
+  color:#1D9E75;
+}
+.scn-play-civilian:hover{background:rgba(29,158,117,0.3);}
+.scn-play-btn.playing{
+  background:rgba(255,255,255,0.4);
+  animation:pulse 1.2s infinite;
+}
+
+.scn-step-num{
+  font-size:10px;
+  opacity:0.7;
+  font-weight:600;
+}
+.scn-bubble-soldier .scn-step-num{color:rgba(255,255,255,0.85);}
+.scn-bubble-civilian .scn-step-num{color:#7a9ab5;}
 </style>
 </head>
 <body>
@@ -801,7 +927,7 @@ body.day-mode .card:hover{
       </div>
     </div>
     
-    <div class="loading" id="cats-loading"><div style="text-align:center;padding:20px;"><div style="font-size:16px;color:#FF8C00;margin-bottom:8px;">טוען...</div><div style="font-size:10px;color:#7a9ab5;opacity:0.6;">v20260526-1027</div></div></div>
+    <div class="loading" id="cats-loading"><div style="text-align:center;padding:20px;"><div style="font-size:16px;color:#FF8C00;margin-bottom:8px;">טוען...</div><div style="font-size:10px;color:#7a9ab5;opacity:0.6;">v20260526-1031</div></div></div>
     <div class="cgrid" id="cgrid" style="display:none;"></div>
   </div>
   <div id="vlist" class="scr">
@@ -1451,7 +1577,7 @@ function bldCats(){
   if (!DB || DB.length === 0) {
     loadEl.innerHTML = '<div style="text-align:center;padding:20px;color:#FF8C00;">' +
       'מתחבר לשרת...<br><br>' +
-      '<div style="font-size:11px;color:#7a9ab5;">v20260526-1027</div><br>' +
+      '<div style="font-size:11px;color:#7a9ab5;">v20260526-1031</div><br>' +
       '<button onclick="location.reload(true)" style="padding:10px 20px;background:#FF8C00;color:#fff;border:none;border-radius:8px;font-family:inherit;cursor:pointer;font-weight:700;margin-top:10px;">🔄 רענן</button>' +
       '</div>';
     return;
@@ -1996,22 +2122,37 @@ function renderScnChat(){
     var html = '';
     _scnSteps.forEach(function(p, idx){
       var isCivilian = (p.tags || '').indexOf('civilian') !== -1;
-      var bgColor = isCivilian ? 'rgba(29,158,117,0.12)' : 'rgba(255,140,0,0.10)';
-      var borderColor = isCivilian ? 'rgba(29,158,117,0.4)' : 'rgba(255,140,0,0.3)';
-      var labelColor = isCivilian ? '#1D9E75' : '#FF8C00';
-      var labelText = isCivilian ? '👤 אזרח' : '👮 אתה';
-      var alignSide = isCivilian ? 'flex-start' : 'flex-end';
-      var bubbleMargin = isCivilian ? 'margin-right:auto;margin-left:30px;' : 'margin-left:auto;margin-right:30px;';
       
-      html += '<div style="display:flex;flex-direction:column;align-items:' + alignSide + ';width:100%;">';
-      html += '<div style="font-size:11px;font-weight:700;color:' + labelColor + ';margin-bottom:4px;padding:0 4px;">' + labelText + '</div>';
-      html += '<div style="background:' + bgColor + ';border:1px solid ' + borderColor + ';border-radius:12px;padding:12px 14px;max-width:85%;' + bubbleMargin + '">';
-      html += '<div style="color:#E8D9B8;font-size:15px;font-weight:600;margin-bottom:4px;line-height:1.3;">' + (p.he || '') + '</div>';
-      if (p.trans) html += '<div style="color:#a0b8c8;font-size:12px;margin-bottom:4px;">' + p.trans + '</div>';
-      if (p.ar) html += '<div style="color:#E8D9B8;font-size:15px;font-family:Georgia,serif;line-height:1.3;margin-bottom:8px;">' + p.ar + '</div>';
-      html += '<button onclick="scnPlayBubble(' + idx + ')" style="background:transparent;border:1px solid ' + labelColor + ';color:' + labelColor + ';border-radius:8px;padding:4px 12px;font-size:12px;font-weight:600;cursor:pointer;font-family:inherit;">▶ השמע</button>';
-      html += '</div>';
-      html += '</div>';
+      // WhatsApp-style: soldier (you) on right with orange, civilian on left with green
+      if (isCivilian) {
+        // Civilian bubble - left side, green like incoming WhatsApp
+        html += '<div class="scn-bubble-row scn-civilian">';
+        html += '<div class="scn-bubble scn-bubble-civilian">';
+        html += '<div class="scn-bubble-label">👤 אזרח</div>';
+        if (p.he) html += '<div class="scn-bubble-he">' + p.he + '</div>';
+        if (p.trans) html += '<div class="scn-bubble-trans">' + p.trans + '</div>';
+        if (p.ar) html += '<div class="scn-bubble-ar">' + p.ar + '</div>';
+        html += '<div class="scn-bubble-footer">';
+        html += '<button onclick="scnPlayBubble(' + idx + ',this)" class="scn-play-btn scn-play-civilian">▶ השמע</button>';
+        html += '<span class="scn-step-num">' + (idx + 1) + '/' + _scnSteps.length + '</span>';
+        html += '</div>';
+        html += '</div>';
+        html += '</div>';
+      } else {
+        // Soldier (you) bubble - right side, orange like outgoing WhatsApp
+        html += '<div class="scn-bubble-row scn-soldier">';
+        html += '<div class="scn-bubble scn-bubble-soldier">';
+        html += '<div class="scn-bubble-label">👮 אתה</div>';
+        if (p.he) html += '<div class="scn-bubble-he">' + p.he + '</div>';
+        if (p.trans) html += '<div class="scn-bubble-trans">' + p.trans + '</div>';
+        if (p.ar) html += '<div class="scn-bubble-ar">' + p.ar + '</div>';
+        html += '<div class="scn-bubble-footer">';
+        html += '<button onclick="scnPlayBubble(' + idx + ',this)" class="scn-play-btn scn-play-soldier">▶ השמע</button>';
+        html += '<span class="scn-step-num">' + (idx + 1) + '/' + _scnSteps.length + '</span>';
+        html += '</div>';
+        html += '</div>';
+        html += '</div>';
+      }
     });
     
     chatEl.innerHTML = html;
@@ -2025,7 +2166,7 @@ function renderScnChat(){
   } catch(e) { console.warn('renderScnChat error:', e); }
 }
 
-function scnPlayBubble(idx){
+function scnPlayBubble(idx, btn){
   try {
     if (!_scnSteps || !_scnSteps[idx]) return;
     var audioUrl = _scnSteps[idx].audio;
@@ -2033,10 +2174,27 @@ function scnPlayBubble(idx){
       alert('אין הקלטה למשפט זה עדיין');
       return;
     }
+    // Clear all playing states
+    document.querySelectorAll('.scn-play-btn.playing').forEach(function(b){
+      b.classList.remove('playing');
+      b.textContent = '▶ השמע';
+    });
     if (window._scnCurrentAudio) {
       window._scnCurrentAudio.pause();
     }
     window._scnCurrentAudio = new Audio(audioUrl);
+    if (btn) {
+      btn.classList.add('playing');
+      btn.textContent = '⏸ עוצר';
+      window._scnCurrentAudio.onended = function(){
+        btn.classList.remove('playing');
+        btn.textContent = '▶ השמע';
+      };
+      window._scnCurrentAudio.onerror = function(){
+        btn.classList.remove('playing');
+        btn.textContent = '▶ השמע';
+      };
+    }
     window._scnCurrentAudio.play();
   } catch(e) { console.warn(e); }
 }
