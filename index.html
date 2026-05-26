@@ -661,8 +661,8 @@ body.day-mode .card:hover{
       <span>מילון</span>
     </button>
     <button onclick="toggleTheme();document.getElementById('header-menu').style.display='none';" style="display:flex;align-items:center;gap:10px;width:100%;background:transparent;border:none;color:#E8D9B8;padding:10px 12px;text-align:right;cursor:pointer;font-family:inherit;font-size:14px;border-radius:8px;">
-      <span style="font-size:18px;">🌙</span>
-      <span>מצב יום/לילה</span>
+      <span id="themeMenuIcon" style="font-size:18px;">🌙</span>
+      <span id="themeMenuLabel">מצב יום</span>
     </button>
     <button onclick="showHelp();document.getElementById('header-menu').style.display='none';" style="display:flex;align-items:center;gap:10px;width:100%;background:transparent;border:none;color:#E8D9B8;padding:10px 12px;text-align:right;cursor:pointer;font-family:inherit;font-size:14px;border-radius:8px;">
       <span style="font-size:18px;">❓</span>
@@ -752,7 +752,7 @@ body.day-mode .card:hover{
       </div>
     </div>
     
-    <div class="loading" id="cats-loading"><div style="text-align:center;padding:20px;"><div style="font-size:16px;color:#FF8C00;margin-bottom:8px;">טוען...</div><div style="font-size:10px;color:#7a9ab5;opacity:0.6;">v20260526-1015</div></div></div>
+    <div class="loading" id="cats-loading"><div style="text-align:center;padding:20px;"><div style="font-size:16px;color:#FF8C00;margin-bottom:8px;">טוען...</div><div style="font-size:10px;color:#7a9ab5;opacity:0.6;">v20260526-1018</div></div></div>
     <div class="cgrid" id="cgrid" style="display:none;"></div>
   </div>
   <div id="vlist" class="scr">
@@ -1402,7 +1402,7 @@ function bldCats(){
   if (!DB || DB.length === 0) {
     loadEl.innerHTML = '<div style="text-align:center;padding:20px;color:#FF8C00;">' +
       'מתחבר לשרת...<br><br>' +
-      '<div style="font-size:11px;color:#7a9ab5;">v20260526-1015</div><br>' +
+      '<div style="font-size:11px;color:#7a9ab5;">v20260526-1018</div><br>' +
       '<button onclick="location.reload(true)" style="padding:10px 20px;background:#FF8C00;color:#fff;border:none;border-radius:8px;font-family:inherit;cursor:pointer;font-weight:700;margin-top:10px;">🔄 רענן</button>' +
       '</div>';
     return;
@@ -4224,11 +4224,17 @@ function setTheme(mode){
     document.body.classList.remove('day-mode');
   }
   localStorage.setItem('theme',mode);
+  // Update old hidden button (for compatibility)
   var btn = document.getElementById('themeToggleBtn');
   if (btn) {
     btn.textContent = mode === 'day' ? '☀️' : '🌙';
-    btn.title = mode === 'day' ? 'מצב יום - לחצי למצב לילה' : 'מצב לילה - לחצי למצב יום';
+    btn.title = mode === 'day' ? 'מצב יום - לחצו למצב לילה' : 'מצב לילה - לחצו למצב יום';
   }
+  // Update the new menu button icon and label
+  var menuIcon = document.getElementById('themeMenuIcon');
+  var menuLabel = document.getElementById('themeMenuLabel');
+  if (menuIcon) menuIcon.textContent = mode === 'day' ? '☀️' : '🌙';
+  if (menuLabel) menuLabel.textContent = mode === 'day' ? 'מצב יום' : 'מצב לילה';
 }
 function openDictTab(){
   // Find dict tab in any list and activate it
