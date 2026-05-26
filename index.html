@@ -752,7 +752,7 @@ body.day-mode .card:hover{
       </div>
     </div>
     
-    <div class="loading" id="cats-loading"><div style="text-align:center;padding:20px;"><div style="font-size:16px;color:#FF8C00;margin-bottom:8px;">טוען...</div><div style="font-size:10px;color:#7a9ab5;opacity:0.6;">v20260525-1853</div></div></div>
+    <div class="loading" id="cats-loading"><div style="text-align:center;padding:20px;"><div style="font-size:16px;color:#FF8C00;margin-bottom:8px;">טוען...</div><div style="font-size:10px;color:#7a9ab5;opacity:0.6;">v20260526-0956</div></div></div>
     <div class="cgrid" id="cgrid" style="display:none;"></div>
   </div>
   <div id="vlist" class="scr">
@@ -807,10 +807,16 @@ body.day-mode .card:hover{
           <button onclick="practiceStop()" style="background:#c0392b;border:none;color:#fff;border-radius:10px;padding:10px 20px;font-size:13px;font-weight:700;cursor:pointer;font-family:inherit;">⏹ עצור</button>
         </div>
         <div id="practice-compare" style="display:none;">
-          <div style="color:#a0b8c8;font-size:12px;margin-bottom:10px;text-align:center;">השווי בין השניים:</div>
-          <div style="display:flex;gap:8px;margin-bottom:10px;">
-            <button onclick="practicePlayMine()" style="flex:1;background:rgba(212,162,78,0.15);border:1px solid #D4A24E;color:#D4A24E;border-radius:10px;padding:10px;font-size:12px;font-weight:700;cursor:pointer;font-family:inherit;">▶ ההקלטה שלי</button>
-            <button onclick="practicePlayOriginal()" style="flex:1;background:rgba(29,158,117,0.15);border:1px solid #1D9E75;color:#1D9E75;border-radius:10px;padding:10px;font-size:12px;font-weight:700;cursor:pointer;font-family:inherit;">▶ ההקלטה הנכונה</button>
+          <div style="color:#E8D9B8;font-size:14px;font-weight:700;margin-bottom:14px;text-align:center;">השווי בין ההקלטות 🎯</div>
+          <div style="display:flex;gap:10px;margin-bottom:14px;">
+            <button onclick="practicePlayMine()" style="flex:1;background:linear-gradient(135deg,rgba(212,162,78,0.2),rgba(212,162,78,0.1));border:1.5px solid #D4A24E;color:#D4A24E;border-radius:12px;padding:18px 12px;font-size:14px;font-weight:700;cursor:pointer;font-family:inherit;box-shadow:0 2px 6px rgba(212,162,78,0.15);">
+              <div style="font-size:28px;line-height:1;margin-bottom:6px;">▶</div>
+              <div>ההקלטה שלי</div>
+            </button>
+            <button onclick="practicePlayOriginal()" style="flex:1;background:linear-gradient(135deg,rgba(29,158,117,0.2),rgba(29,158,117,0.1));border:1.5px solid #1D9E75;color:#1D9E75;border-radius:12px;padding:18px 12px;font-size:14px;font-weight:700;cursor:pointer;font-family:inherit;box-shadow:0 2px 6px rgba(29,158,117,0.15);">
+              <div style="font-size:28px;line-height:1;margin-bottom:6px;">▶</div>
+              <div>ההקלטה הנכונה</div>
+            </button>
           </div>
           <button id="practice-success-btn" onclick="practiceSuccess()" style="width:100%;background:linear-gradient(135deg,#1D9E75 0%,#147a59 100%);border:none;color:#fff;border-radius:10px;padding:12px;font-size:14px;font-weight:700;cursor:pointer;font-family:inherit;margin-bottom:8px;box-shadow:0 2px 8px rgba(29,158,117,0.3);">💪 הצלחתי!</button>
           <button onclick="practiceReset()" style="width:100%;background:transparent;border:1px solid rgba(122,154,181,0.4);color:#a0b8c8;border-radius:10px;padding:8px;font-size:12px;cursor:pointer;font-family:inherit;">🔄 נסי שוב</button>
@@ -1396,7 +1402,7 @@ function bldCats(){
   if (!DB || DB.length === 0) {
     loadEl.innerHTML = '<div style="text-align:center;padding:20px;color:#FF8C00;">' +
       'מתחבר לשרת...<br><br>' +
-      '<div style="font-size:11px;color:#7a9ab5;">v20260525-1853</div><br>' +
+      '<div style="font-size:11px;color:#7a9ab5;">v20260526-0956</div><br>' +
       '<button onclick="location.reload(true)" style="padding:10px 20px;background:#FF8C00;color:#fff;border:none;border-radius:8px;font-family:inherit;cursor:pointer;font-weight:700;margin-top:10px;">🔄 רענן</button>' +
       '</div>';
     return;
@@ -2359,28 +2365,55 @@ function checkPracticeAchievements(){
 
 function practicePlayMine(){
   try {
-    if (!practiceBlob) return;
-    if (practiceCurrentAudio) practiceCurrentAudio.pause();
+    if (!practiceBlob) {
+      practiceShowError('אין הקלטה - הקליטי קודם');
+      return;
+    }
+    if (practiceBlob.size === 0) {
+      practiceShowError('ההקלטה ריקה - נסי שוב');
+      return;
+    }
+    if (practiceCurrentAudio) {
+      practiceCurrentAudio.pause();
+      practiceCurrentAudio.currentTime = 0;
+    }
     var url = URL.createObjectURL(practiceBlob);
     practiceCurrentAudio = new Audio(url);
-    practiceCurrentAudio.play();
-  } catch(e) { console.warn(e); }
+    practiceCurrentAudio.onerror = function(){
+      practiceShowError('לא הצלחנו להשמיע - דפדפן לא תומך?');
+    };
+    practiceCurrentAudio.play().catch(function(err){
+      console.warn('Play failed:', err);
+      practiceShowError('שגיאה בהשמעה: ' + (err.message || 'לחצי שוב'));
+    });
+  } catch(e) {
+    console.warn('practicePlayMine error:', e);
+    practiceShowError('שגיאה: ' + (e.message || 'נסי שוב'));
+  }
 }
 
 function practicePlayOriginal(){
   try {
-    // Use the popup audio URL that was set when popup opened
     var audioUrl = window._popupAudio || '';
     if (!audioUrl) {
       practiceShowError('אין הקלטה למשפט הזה');
       return;
     }
-    if (practiceCurrentAudio) practiceCurrentAudio.pause();
+    if (practiceCurrentAudio) {
+      practiceCurrentAudio.pause();
+      practiceCurrentAudio.currentTime = 0;
+    }
     practiceCurrentAudio = new Audio(audioUrl);
-    practiceCurrentAudio.play();
+    practiceCurrentAudio.onerror = function(){
+      practiceShowError('לא הצלחנו להשמיע את ההקלטה הנכונה');
+    };
+    practiceCurrentAudio.play().catch(function(err){
+      console.warn('Play failed:', err);
+      practiceShowError('שגיאה: ' + (err.message || 'לחצי שוב'));
+    });
   } catch(e) { 
     console.warn(e);
-    practiceShowError('שגיאה בנגינת ההקלטה');
+    practiceShowError('שגיאה: ' + (e.message || 'נסי שוב'));
   }
 }
 
