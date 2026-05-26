@@ -863,6 +863,85 @@ body.day-mode .card:hover{
   </div>
 </div>
 
+<!-- HOME TAB -->
+<div class="scr on" id="tab-home">
+  <div style="padding:20px 16px 16px;">
+    
+    <!-- Welcome + Streak -->
+    <div style="margin-bottom:20px;">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px;">
+        <div style="color:#E8D9B8;font-size:22px;font-weight:800;letter-spacing:0.3px;">ברוך שובך 🎯</div>
+        <div id="home-streak-badge" style="display:none;align-items:center;gap:5px;background:rgba(212,134,46,0.15);border:1px solid rgba(212,134,46,0.4);border-radius:14px;padding:5px 12px;">
+          <span style="font-size:14px;">🔥</span>
+          <span id="home-streak-count" style="color:#D4862E;font-size:12px;font-weight:700;"></span>
+        </div>
+      </div>
+      <div id="home-subtitle" style="color:#7a9ab5;font-size:13px;">בואו נמשיך לתרגל</div>
+    </div>
+    
+    <!-- Continue where you left off (primary action) -->
+    <div id="home-continue-card" style="display:none;background:linear-gradient(135deg,#D4862E 0%,#b87325 100%);border:1px solid rgba(255,255,255,0.2);border-radius:16px;padding:16px 18px;margin-bottom:18px;cursor:pointer;box-shadow:0 4px 14px rgba(212,134,46,0.3);" onclick="homeContinue()">
+      <div style="display:flex;align-items:center;justify-content:space-between;">
+        <div style="flex:1;">
+          <div style="color:rgba(255,255,255,0.85);font-size:11px;font-weight:700;letter-spacing:1px;margin-bottom:4px;">המשך מאיפה שעצרת</div>
+          <div id="home-continue-title" style="color:#fff;font-size:16px;font-weight:700;margin-bottom:2px;"></div>
+          <div id="home-continue-sub" style="color:rgba(255,255,255,0.85);font-size:12px;"></div>
+        </div>
+        <div style="color:#fff;font-size:24px;margin-right:8px;">◀</div>
+      </div>
+    </div>
+    
+    <!-- Quick Access - 3 main actions -->
+    <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin-bottom:20px;">
+      <div onclick="navToTab('qk')" style="background:linear-gradient(160deg,#1F3147 0%,#243a55 100%);border:1px solid rgba(192,57,43,0.4);border-radius:14px;padding:18px 8px;text-align:center;cursor:pointer;box-shadow:0 2px 8px rgba(0,0,0,0.2);">
+        <div style="font-size:28px;margin-bottom:6px;">🚨</div>
+        <div style="color:#c0392b;font-size:12px;font-weight:700;">חירום</div>
+      </div>
+      <div onclick="navToTab('scn')" style="background:linear-gradient(160deg,#1F3147 0%,#243a55 100%);border:1px solid rgba(212,162,78,0.3);border-radius:14px;padding:18px 8px;text-align:center;cursor:pointer;box-shadow:0 2px 8px rgba(0,0,0,0.2);">
+        <div style="font-size:28px;margin-bottom:6px;">🎭</div>
+        <div style="color:#D4A24E;font-size:12px;font-weight:700;">תרחישים</div>
+      </div>
+      <div onclick="navToTab('lib')" style="background:linear-gradient(160deg,#1F3147 0%,#243a55 100%);border:1px solid rgba(212,134,46,0.3);border-radius:14px;padding:18px 8px;text-align:center;cursor:pointer;box-shadow:0 2px 8px rgba(0,0,0,0.2);">
+        <div style="font-size:28px;margin-bottom:6px;">🎯</div>
+        <div style="color:#D4862E;font-size:12px;font-weight:700;">מבצעי</div>
+      </div>
+    </div>
+    
+    <!-- Progress Section -->
+    <div id="home-progress-card" style="background:linear-gradient(135deg,#18293E 0%,#1F3147 100%);border:1px solid rgba(212,162,78,0.2);border-radius:14px;padding:16px;margin-bottom:18px;">
+      <div style="display:flex;align-items:center;gap:8px;margin-bottom:10px;">
+        <span style="font-size:16px;">📊</span>
+        <span style="color:#D4A24E;font-size:12px;font-weight:700;letter-spacing:0.5px;">ההתקדמות שלך</span>
+      </div>
+      <div id="home-progress-stats" style="color:#E8D9B8;font-size:14px;line-height:1.6;"></div>
+      <div style="height:6px;background:rgba(255,255,255,0.08);border-radius:3px;margin-top:10px;overflow:hidden;">
+        <div id="home-progress-bar" style="height:100%;background:linear-gradient(90deg,#D4A24E,#D4862E);border-radius:3px;width:0%;transition:width 0.5s;"></div>
+      </div>
+    </div>
+    
+    <!-- Phrase of the Day -->
+    <div id="home-potd-card" style="display:none;background:#18293E;border:1px solid rgba(212,162,78,0.25);border-right:3px solid #D4A24E;border-radius:14px;padding:16px;margin-bottom:18px;">
+      <div style="display:flex;align-items:center;gap:8px;margin-bottom:10px;">
+        <span style="color:#D4A24E;font-size:14px;">✨</span>
+        <span style="color:#D4A24E;font-size:11px;font-weight:700;letter-spacing:1px;">ביטוי היום</span>
+      </div>
+      <div id="home-potd-he" style="color:#E8D9B8;font-size:16px;font-weight:600;margin-bottom:4px;"></div>
+      <div id="home-potd-trans" style="color:#a0b8c8;font-size:13px;margin-bottom:4px;"></div>
+      <div id="home-potd-ar" style="color:#E8D9B8;font-size:17px;font-weight:600;font-family:Georgia,serif;margin-bottom:12px;"></div>
+      <div style="display:flex;gap:8px;justify-content:flex-end;">
+        <button id="home-potd-play" onclick="homePotdPlay()" style="background:transparent;border:1px solid #D4A24E;color:#D4A24E;border-radius:8px;padding:7px 14px;font-size:12px;font-weight:600;cursor:pointer;font-family:inherit;">▶ השמע</button>
+        <button onclick="homePotdOpen()" style="background:#D4A24E;border:none;color:#18293E;border-radius:8px;padding:7px 14px;font-size:12px;font-weight:700;cursor:pointer;font-family:inherit;">פתח ◀</button>
+      </div>
+    </div>
+    
+    <!-- Tip / hint -->
+    <div style="text-align:center;color:#7a9ab5;font-size:11px;margin-top:20px;">
+      💡 השתמשו בנאב התחתון כדי לעבור בין החלקים
+    </div>
+    
+  </div>
+</div>
+
 <div class="scr" id="tab-qk">
   <div class="sec">
     <div id="emerg-home">
@@ -887,7 +966,7 @@ body.day-mode .card:hover{
   <div class="sec"><div class="stitle">⭐ המועדפים שלי</div><div id="favlist"><div class="empty">אין מועדפים עדיין. לחצו ☆ שמור למועדפים ליד משפט.</div></div><div id="recentlist" style="margin-top:16px;"></div></div>
 </div>
 <!-- MILITARY TAB -->
-<div class="scr on" id="tab-lib">
+<div class="scr" id="tab-lib">
   <div class="sbar">
     <div class="si">
       <span style="color:#aaa;font-size:15px;">🔍</span>
@@ -928,7 +1007,7 @@ body.day-mode .card:hover{
       </div>
     </div>
     
-    <div class="loading" id="cats-loading"><div style="text-align:center;padding:20px;"><div style="font-size:16px;color:#D4862E;margin-bottom:8px;">טוען...</div><div style="font-size:10px;color:#7a9ab5;opacity:0.6;">v20260526-1056</div></div></div>
+    <div class="loading" id="cats-loading"><div style="text-align:center;padding:20px;"><div style="font-size:16px;color:#D4862E;margin-bottom:8px;">טוען...</div><div style="font-size:10px;color:#7a9ab5;opacity:0.6;">v20260526-1128</div></div></div>
     <div class="cgrid" id="cgrid" style="display:none;"></div>
   </div>
   <div id="vlist" class="scr">
@@ -1464,6 +1543,146 @@ function showToast(msg, type){
   window._toastTimer = setTimeout(function(){ el.style.display = 'none'; }, 3500);
 }
 
+function renderHome(){
+  try {
+    // 1. Streak badge
+    var streak = parseInt(localStorage.getItem('streak_count') || '0', 10);
+    var badge = document.getElementById('home-streak-badge');
+    var count = document.getElementById('home-streak-count');
+    if (badge && count && streak > 0) {
+      count.textContent = streak === 1 ? 'יום ראשון!' : streak + ' ימים';
+      badge.style.display = 'inline-flex';
+    } else if (badge) {
+      badge.style.display = 'none';
+    }
+    
+    // 2. Subtitle - dynamic based on time of day
+    var sub = document.getElementById('home-subtitle');
+    if (sub) {
+      var hour = new Date().getHours();
+      var greeting = '';
+      if (hour < 6) greeting = 'לילה טוב, ערבית לעולם זמינה';
+      else if (hour < 12) greeting = 'בוקר טוב! מוכן לתרגל?';
+      else if (hour < 17) greeting = 'אחר הצהריים! בואו נמשיך';
+      else if (hour < 21) greeting = 'ערב טוב! זמן לתרגול';
+      else greeting = 'לילה טוב! עוד תרגול ואז לישון';
+      sub.textContent = greeting;
+    }
+    
+    // 3. Continue card - last opened scenario
+    var continueCard = document.getElementById('home-continue-card');
+    if (continueCard) {
+      var lastScn = localStorage.getItem('last_scenario_id');
+      if (lastScn) {
+        // Find scenario info
+        var foundScn = null;
+        var foundCat = null;
+        if (typeof SCN_CATEGORIES !== 'undefined') {
+          for (var i = 0; i < SCN_CATEGORIES.length; i++) {
+            var match = SCN_CATEGORIES[i].scenarios.find(function(s){return s.id === lastScn;});
+            if (match) { foundScn = match; foundCat = SCN_CATEGORIES[i]; break; }
+          }
+        }
+        if (foundScn) {
+          document.getElementById('home-continue-title').textContent = foundScn.icon + ' ' + foundScn.title;
+          document.getElementById('home-continue-sub').textContent = foundCat ? foundCat.title : '';
+          continueCard.style.display = 'block';
+        } else {
+          continueCard.style.display = 'none';
+        }
+      } else {
+        continueCard.style.display = 'none';
+      }
+    }
+    
+    // 4. Progress
+    var progressStats = document.getElementById('home-progress-stats');
+    var progressBar = document.getElementById('home-progress-bar');
+    if (progressStats) {
+      var learned = JSON.parse(localStorage.getItem('learned_phrases') || '{}');
+      var practiced = JSON.parse(localStorage.getItem('practiced_phrases') || '{}');
+      var completed = JSON.parse(localStorage.getItem('completed_scenarios') || '{}');
+      
+      var learnedCount = Object.keys(learned).length;
+      var practicedCount = Object.keys(practiced).length;
+      var completedCount = Object.keys(completed).length;
+      
+      // This week
+      var now = new Date();
+      var weekAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
+      var thisWeek = 0;
+      for (var k in learned) {
+        try { if (new Date(learned[k]) >= weekAgo) thisWeek++; } catch(e) {}
+      }
+      
+      var html = '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px;">';
+      html += '<span>📚 ' + learnedCount + ' משפטים נלמדו</span>';
+      if (thisWeek > 0) html += '<span style="color:#D4862E;">🔥 ' + thisWeek + ' השבוע</span>';
+      html += '</div>';
+      if (practicedCount > 0) html += '<div style="font-size:12px;color:#a0b8c8;">🎤 ' + practicedCount + ' תרגולי הגייה</div>';
+      if (completedCount > 0) html += '<div style="font-size:12px;color:#a0b8c8;">🎭 ' + completedCount + ' תרחישים הושלמו</div>';
+      
+      progressStats.innerHTML = html;
+      
+      // Progress bar - based on % of total DB
+      if (progressBar) {
+        var totalAvailable = (typeof DB !== 'undefined' && DB) ? DB.length : 100;
+        var percent = totalAvailable > 0 ? Math.min(100, Math.round((learnedCount / totalAvailable) * 100)) : 0;
+        progressBar.style.width = percent + '%';
+      }
+    }
+    
+    // 5. Phrase of the day
+    if (typeof getPhraseOfTheDay === 'function') {
+      var p = getPhraseOfTheDay();
+      var potdCard = document.getElementById('home-potd-card');
+      if (p && potdCard) {
+        document.getElementById('home-potd-he').textContent = p.he || '';
+        document.getElementById('home-potd-trans').textContent = p.trans || '';
+        document.getElementById('home-potd-ar').textContent = p.ar || '';
+        var playBtn = document.getElementById('home-potd-play');
+        if (playBtn) playBtn.style.display = p.audio ? 'inline-block' : 'none';
+        window._homePotdId = p.id;
+        window._homePotdAudio = p.audio || '';
+        potdCard.style.display = 'block';
+      } else if (potdCard) {
+        potdCard.style.display = 'none';
+      }
+    }
+  } catch(e) { console.warn('renderHome error:', e); }
+}
+
+function homeContinue(){
+  try {
+    var lastScn = localStorage.getItem('last_scenario_id');
+    if (!lastScn) return;
+    navToTab('scn');
+    setTimeout(function(){
+      if (typeof scnOpen === 'function') scnOpen(lastScn);
+    }, 200);
+  } catch(e) { console.warn(e); }
+}
+
+function homePotdPlay(){
+  try {
+    if (!window._homePotdAudio) return;
+    var audio = new Audio(window._homePotdAudio);
+    audio.play();
+  } catch(e) { console.warn(e); }
+}
+
+function homePotdOpen(){
+  try {
+    if (!window._homePotdId) return;
+    if (typeof DB === 'undefined' || !DB) return;
+    var i = DB.findIndex(function(x){return x.id === window._homePotdId;});
+    if (i >= 0 && typeof opP === 'function') {
+      navToTab('lib');
+      setTimeout(function(){ opP(i); }, 200);
+    }
+  } catch(e) { console.warn(e); }
+}
+
 async function loadData(){
   try{
     const data=await sbFetch('/rest/v1/phrases?select=*&order=created_at.asc');
@@ -1582,7 +1801,7 @@ function bldCats(){
   if (!DB || DB.length === 0) {
     loadEl.innerHTML = '<div style="text-align:center;padding:20px;color:#D4862E;">' +
       'מתחבר לשרת...<br><br>' +
-      '<div style="font-size:11px;color:#7a9ab5;">v20260526-1056</div><br>' +
+      '<div style="font-size:11px;color:#7a9ab5;">v20260526-1128</div><br>' +
       '<button onclick="location.reload(true)" style="padding:10px 20px;background:#D4862E;color:#fff;border:none;border-radius:8px;font-family:inherit;cursor:pointer;font-weight:700;margin-top:10px;">🔄 רענן</button>' +
       '</div>';
     return;
@@ -2098,6 +2317,8 @@ function scnOpen(scnId){
     _scnCurrent = scnId;
     _scnSteps = steps;
     _scnIdx = 0;
+    // Track for "continue where you left off"
+    try { localStorage.setItem('last_scenario_id', scnId); } catch(e) {}
     
     document.getElementById('scn-grid-view').style.display = 'none';
     document.getElementById('scn-dialogue-view').style.display = 'block';
@@ -2897,6 +3118,7 @@ function ST(t,el){
   document.querySelectorAll('[id^="tab-"]').forEach(function(x){x.className='scr';});
   document.getElementById('tab-'+t).className='scr on';
   curTab=t;
+  if(t==='home')renderHome();
   if(t==='qk')rQK();
   if(t==='fav'){rFav();rRecent();}
   if(t==='dict')renderDict();
@@ -4576,6 +4798,7 @@ loadRole();
 // === Boot with optimistic UI ===
 // Step 1: Render UI immediately with empty data (so user sees the app)
 try { bldCats(); } catch(_){}
+try { renderHome(); } catch(_){}
 
 // Step 2: Try to load data. If success → re-render. If fail → show error inline.
 (async function bootApp(){
@@ -4675,6 +4898,10 @@ try { bldCats(); } catch(_){}
 
 <!-- Bottom Nav (mobile-first navigation) -->
 <div id="bottom-nav" style="position:fixed;bottom:0;left:0;right:0;background:#0E1B2E;border-top:1px solid #2e4558;padding:8px 6px;display:flex;justify-content:space-around;align-items:center;z-index:100;direction:rtl;box-shadow:0 -4px 12px rgba(0,0,0,0.4);">
+  <div onclick="navToTab('home')" class="bn-btn" data-tab="home" style="flex:1;text-align:center;cursor:pointer;padding:6px 4px;border-radius:10px;transition:all 0.2s;">
+    <div style="font-size:24px;line-height:1;margin-bottom:4px;">🏠</div>
+    <div style="color:#E8D9B8;font-size:11px;font-weight:700;">בית</div>
+  </div>
   <div onclick="navToTab('qk')" class="bn-btn" data-tab="qk" style="flex:1;text-align:center;cursor:pointer;padding:6px 4px;border-radius:10px;transition:all 0.2s;">
     <div style="font-size:24px;line-height:1;margin-bottom:4px;">🚨</div>
     <div style="color:#c0392b;font-size:11px;font-weight:700;">חירום</div>
@@ -4687,10 +4914,6 @@ try { bldCats(); } catch(_){}
     <div style="font-size:24px;line-height:1;margin-bottom:4px;">🎯</div>
     <div style="color:#D4862E;font-size:11px;font-weight:700;">מבצעי</div>
   </div>
-  <div onclick="navToTab('fav')" class="bn-btn" data-tab="fav" style="flex:1;text-align:center;cursor:pointer;padding:6px 4px;border-radius:10px;transition:all 0.2s;">
-    <div style="font-size:24px;line-height:1;margin-bottom:4px;">⭐</div>
-    <div style="color:#FFD700;font-size:11px;font-weight:700;">שמורים</div>
-  </div>
   <div onclick="toggleMoreMenu()" class="bn-btn" data-tab="more" style="flex:1;text-align:center;cursor:pointer;padding:6px 4px;border-radius:10px;transition:all 0.2s;">
     <div style="font-size:22px;line-height:1;margin-bottom:4px;color:#E8D9B8;">⋯</div>
     <div style="color:#E8D9B8;font-size:11px;font-weight:700;">עוד</div>
@@ -4701,6 +4924,10 @@ try { bldCats(); } catch(_){}
 <div id="more-menu" style="display:none;position:fixed;bottom:80px;left:8px;right:8px;background:#18293E;border:1px solid #2e4558;border-radius:14px;padding:12px;z-index:99;box-shadow:0 -4px 20px rgba(0,0,0,0.6);direction:rtl;">
   <div style="text-align:center;color:#D4A24E;font-size:12px;font-weight:700;letter-spacing:1px;margin-bottom:10px;">תפריט נוסף</div>
   <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;">
+    <div onclick="navToTab('fav')" style="background:#1F3147;border-radius:10px;padding:14px 6px;text-align:center;cursor:pointer;">
+      <div style="font-size:22px;margin-bottom:4px;">⭐</div>
+      <div style="color:#E8D9B8;font-size:11px;font-weight:600;">שמורים</div>
+    </div>
     <div onclick="navToTab('sem')" style="background:#1F3147;border-radius:10px;padding:14px 6px;text-align:center;cursor:pointer;">
       <div style="font-size:22px;margin-bottom:4px;">⚠️</div>
       <div style="color:#E8D9B8;font-size:11px;font-weight:600;">סמנטי</div>
@@ -4709,14 +4936,6 @@ try { bldCats(); } catch(_){}
       <div style="font-size:22px;margin-bottom:4px;">🌅</div>
       <div style="color:#E8D9B8;font-size:11px;font-weight:600;">יומיומי</div>
     </div>
-    <div onclick="navToTab('art')" style="background:#1F3147;border-radius:10px;padding:14px 6px;text-align:center;cursor:pointer;">
-      <div style="font-size:22px;margin-bottom:4px;">📰</div>
-      <div style="color:#E8D9B8;font-size:11px;font-weight:600;">מאמרים</div>
-    </div>
-    <div onclick="navToTab('nwf')" style="background:#1F3147;border-radius:10px;padding:14px 6px;text-align:center;cursor:pointer;">
-      <div style="font-size:22px;margin-bottom:4px;">🆕</div>
-      <div style="color:#E8D9B8;font-size:11px;font-weight:600;">חדש</div>
-    </div>
     <div onclick="navToTab('cus')" style="background:#1F3147;border-radius:10px;padding:14px 6px;text-align:center;cursor:pointer;">
       <div style="font-size:22px;margin-bottom:4px;">🕌</div>
       <div style="color:#E8D9B8;font-size:11px;font-weight:600;">מנהגים</div>
@@ -4724,6 +4943,14 @@ try { bldCats(); } catch(_){}
     <div onclick="navToTab('hrt')" style="background:#1F3147;border-radius:10px;padding:14px 6px;text-align:center;cursor:pointer;">
       <div style="font-size:22px;margin-bottom:4px;">💗</div>
       <div style="color:#E8D9B8;font-size:11px;font-weight:600;">פותחים לב</div>
+    </div>
+    <div onclick="navToTab('art')" style="background:#1F3147;border-radius:10px;padding:14px 6px;text-align:center;cursor:pointer;">
+      <div style="font-size:22px;margin-bottom:4px;">📰</div>
+      <div style="color:#E8D9B8;font-size:11px;font-weight:600;">מאמרים</div>
+    </div>
+    <div onclick="navToTab('nwf')" style="background:#1F3147;border-radius:10px;padding:14px 6px;text-align:center;cursor:pointer;">
+      <div style="font-size:22px;margin-bottom:4px;">🆕</div>
+      <div style="color:#E8D9B8;font-size:11px;font-weight:600;">חדש</div>
     </div>
   </div>
 </div>
@@ -4836,7 +5063,7 @@ document.body.style.paddingBottom = '90px';
 // Set initial active state for default tab (lib = מבצעי)
 window.addEventListener('load', function(){
   setTimeout(function(){
-    var defaultBtn = document.querySelector('.bn-btn[data-tab="lib"]');
+    var defaultBtn = document.querySelector('.bn-btn[data-tab="home"]');
     if (defaultBtn) {
       defaultBtn.classList.add('active');
       defaultBtn.style.background = 'rgba(212,162,78,0.15)';
