@@ -532,6 +532,55 @@ body.day-mode .ct{border:none;border-bottom:1px solid #ebe0c5;border-left:1px so
 .pbtn.slow{background:#E8D9B8;color:#412402;}
 .pbtn.fast{background:#FF8C00;color:#fff;}
 .pbtn:active{opacity:0.85;}
+
+/* New: Big play row + big buttons (popup audio controls - LOORA style) */
+.play-row{display:flex;gap:10px;margin-bottom:14px;}
+.big-pbtn{
+  flex:1;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  justify-content:center;
+  gap:6px;
+  padding:18px 8px;
+  border-radius:14px;
+  border:1.5px solid;
+  background:linear-gradient(135deg,rgba(255,140,0,0.18),rgba(255,140,0,0.08));
+  cursor:pointer;
+  font-family:inherit;
+  transition:transform 0.15s,box-shadow 0.15s;
+  box-shadow:0 2px 8px rgba(0,0,0,0.15);
+}
+.big-pbtn:active{transform:scale(0.96);}
+.big-icon{font-size:30px;line-height:1;}
+.big-lbl{font-size:13px;font-weight:700;letter-spacing:0.3px;}
+
+/* Color variants for the three buttons */
+.big-pbtn.play-normal{
+  background:linear-gradient(135deg,#FF8C00,#d97700);
+  border-color:#FF8C00;
+  color:#fff;
+  box-shadow:0 3px 12px rgba(255,140,0,0.35);
+}
+.big-pbtn.play-slow{
+  background:linear-gradient(135deg,rgba(212,162,78,0.2),rgba(212,162,78,0.1));
+  border-color:#D4A24E;
+  color:#D4A24E;
+}
+.big-pbtn.play-loop{
+  background:linear-gradient(135deg,rgba(29,158,117,0.2),rgba(29,158,117,0.1));
+  border-color:#1D9E75;
+  color:#1D9E75;
+}
+.big-pbtn.playing{
+  background:linear-gradient(135deg,#c0392b,#922b21) !important;
+  border-color:#c0392b !important;
+  color:#fff !important;
+  box-shadow:0 3px 12px rgba(192,57,43,0.4);
+}
+.big-pbtn.playing .big-icon{animation:pulse 1.2s infinite;}
+body.day-mode .big-pbtn.play-slow{color:#5a3a1a;}
+body.day-mode .big-pbtn.play-loop{color:#0e5a3f;}
 .ibox{border-radius:10px;padding:10px 14px;margin-bottom:8px;}
 .ibox.b{background:#eef6ff;border:1px solid #c0d8f0;}
 .ibox.o{background:#fff8ee;border:1px solid #ffe0a0;}
@@ -752,7 +801,7 @@ body.day-mode .card:hover{
       </div>
     </div>
     
-    <div class="loading" id="cats-loading"><div style="text-align:center;padding:20px;"><div style="font-size:16px;color:#FF8C00;margin-bottom:8px;">טוען...</div><div style="font-size:10px;color:#7a9ab5;opacity:0.6;">v20260526-1018</div></div></div>
+    <div class="loading" id="cats-loading"><div style="text-align:center;padding:20px;"><div style="font-size:16px;color:#FF8C00;margin-bottom:8px;">טוען...</div><div style="font-size:10px;color:#7a9ab5;opacity:0.6;">v20260526-1023</div></div></div>
     <div class="cgrid" id="cgrid" style="display:none;"></div>
   </div>
   <div id="vlist" class="scr">
@@ -1402,7 +1451,7 @@ function bldCats(){
   if (!DB || DB.length === 0) {
     loadEl.innerHTML = '<div style="text-align:center;padding:20px;color:#FF8C00;">' +
       'מתחבר לשרת...<br><br>' +
-      '<div style="font-size:11px;color:#7a9ab5;">v20260526-1018</div><br>' +
+      '<div style="font-size:11px;color:#7a9ab5;">v20260526-1023</div><br>' +
       '<button onclick="location.reload(true)" style="padding:10px 20px;background:#FF8C00;color:#fff;border:none;border-radius:8px;font-family:inherit;cursor:pointer;font-weight:700;margin-top:10px;">🔄 רענן</button>' +
       '</div>';
     return;
