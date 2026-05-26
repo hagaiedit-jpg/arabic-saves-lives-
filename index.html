@@ -752,7 +752,7 @@ body.day-mode .card:hover{
       </div>
     </div>
     
-    <div class="loading" id="cats-loading"><div style="text-align:center;padding:20px;"><div style="font-size:16px;color:#FF8C00;margin-bottom:8px;">טוען...</div><div style="font-size:10px;color:#7a9ab5;opacity:0.6;">v20260526-0956</div></div></div>
+    <div class="loading" id="cats-loading"><div style="text-align:center;padding:20px;"><div style="font-size:16px;color:#FF8C00;margin-bottom:8px;">טוען...</div><div style="font-size:10px;color:#7a9ab5;opacity:0.6;">v20260526-1015</div></div></div>
     <div class="cgrid" id="cgrid" style="display:none;"></div>
   </div>
   <div id="vlist" class="scr">
@@ -799,7 +799,7 @@ body.day-mode .card:hover{
           <span style="color:#D4A24E;font-size:12px;font-weight:700;letter-spacing:0.5px;">תרגול הגייה</span>
         </div>
         <div id="practice-idle" style="text-align:center;">
-          <div style="color:#a0b8c8;font-size:12px;margin-bottom:10px;">הקליטי את עצמך והשווי למקור</div>
+          <div style="color:#a0b8c8;font-size:12px;margin-bottom:10px;">הקליטו את עצמך והשווי למקור</div>
           <button id="practice-start-btn" onclick="practiceStart()" style="background:#D4A24E;border:none;color:#18293E;border-radius:10px;padding:10px 20px;font-size:13px;font-weight:700;cursor:pointer;font-family:inherit;">🎤 התחל הקלטה</button>
         </div>
         <div id="practice-recording" style="display:none;text-align:center;">
@@ -819,7 +819,7 @@ body.day-mode .card:hover{
             </button>
           </div>
           <button id="practice-success-btn" onclick="practiceSuccess()" style="width:100%;background:linear-gradient(135deg,#1D9E75 0%,#147a59 100%);border:none;color:#fff;border-radius:10px;padding:12px;font-size:14px;font-weight:700;cursor:pointer;font-family:inherit;margin-bottom:8px;box-shadow:0 2px 8px rgba(29,158,117,0.3);">💪 הצלחתי!</button>
-          <button onclick="practiceReset()" style="width:100%;background:transparent;border:1px solid rgba(122,154,181,0.4);color:#a0b8c8;border-radius:10px;padding:8px;font-size:12px;cursor:pointer;font-family:inherit;">🔄 נסי שוב</button>
+          <button onclick="practiceReset()" style="width:100%;background:transparent;border:1px solid rgba(122,154,181,0.4);color:#a0b8c8;border-radius:10px;padding:8px;font-size:12px;cursor:pointer;font-family:inherit;">🔄 נסו שוב</button>
         </div>
         <div id="practice-done" style="display:none;text-align:center;padding:8px;">
           <div style="color:#1D9E75;font-size:14px;font-weight:700;margin-bottom:4px;">✓ תרגלת בהצלחה!</div>
@@ -1402,7 +1402,7 @@ function bldCats(){
   if (!DB || DB.length === 0) {
     loadEl.innerHTML = '<div style="text-align:center;padding:20px;color:#FF8C00;">' +
       'מתחבר לשרת...<br><br>' +
-      '<div style="font-size:11px;color:#7a9ab5;">v20260526-0956</div><br>' +
+      '<div style="font-size:11px;color:#7a9ab5;">v20260526-1015</div><br>' +
       '<button onclick="location.reload(true)" style="padding:10px 20px;background:#FF8C00;color:#fff;border:none;border-radius:8px;font-family:inherit;cursor:pointer;font-weight:700;margin-top:10px;">🔄 רענן</button>' +
       '</div>';
     return;
@@ -2366,11 +2366,11 @@ function checkPracticeAchievements(){
 function practicePlayMine(){
   try {
     if (!practiceBlob) {
-      practiceShowError('אין הקלטה - הקליטי קודם');
+      practiceShowError('אין הקלטה - הקליטו קודם');
       return;
     }
     if (practiceBlob.size === 0) {
-      practiceShowError('ההקלטה ריקה - נסי שוב');
+      practiceShowError('ההקלטה ריקה - נסו שוב');
       return;
     }
     if (practiceCurrentAudio) {
@@ -2384,11 +2384,11 @@ function practicePlayMine(){
     };
     practiceCurrentAudio.play().catch(function(err){
       console.warn('Play failed:', err);
-      practiceShowError('שגיאה בהשמעה: ' + (err.message || 'לחצי שוב'));
+      practiceShowError('שגיאה בהשמעה: ' + (err.message || 'לחצו שוב'));
     });
   } catch(e) {
     console.warn('practicePlayMine error:', e);
-    practiceShowError('שגיאה: ' + (e.message || 'נסי שוב'));
+    practiceShowError('שגיאה: ' + (e.message || 'נסו שוב'));
   }
 }
 
@@ -2409,11 +2409,11 @@ function practicePlayOriginal(){
     };
     practiceCurrentAudio.play().catch(function(err){
       console.warn('Play failed:', err);
-      practiceShowError('שגיאה: ' + (err.message || 'לחצי שוב'));
+      practiceShowError('שגיאה: ' + (err.message || 'לחצו שוב'));
     });
   } catch(e) { 
     console.warn(e);
-    practiceShowError('שגיאה: ' + (e.message || 'נסי שוב'));
+    practiceShowError('שגיאה: ' + (e.message || 'נסו שוב'));
   }
 }
 
@@ -3528,7 +3528,7 @@ async function recordResponse(idx){
     var chunks = [];
     
     var statusEl = document.getElementById('resp-aud-status-'+idx);
-    statusEl.textContent = '🔴 מקליט... לחצי שוב לעצור';
+    statusEl.textContent = '🔴 מקליט... לחצו שוב לעצור';
     statusEl.style.color = '#e74c3c';
     
     mediaRecorder.ondataavailable = function(e){ chunks.push(e.data); };
