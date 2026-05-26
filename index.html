@@ -1051,6 +1051,107 @@ body.day-mode .smeta{
   color:#4a5a72 !important;
 }
 
+
+/* === COMPREHENSIVE DAY MODE OVERRIDE === */
+
+/* Body background should be light */
+body.day-mode{
+  background:#f5efe0 !important;
+}
+
+/* Catch ALL inline-style light colors and make them dark */
+body.day-mode [style*="color:#E8D9B8"],
+body.day-mode [style*="color: #E8D9B8"],
+body.day-mode [style*="color:#fff"],
+body.day-mode [style*="color: #fff"],
+body.day-mode [style*="color:#FFF"],
+body.day-mode [style*="color: #FFF"],
+body.day-mode [style*="color:#ffffff"]{
+  color:#0e1b2e !important;
+}
+
+body.day-mode [style*="color:#a0b8c8"],
+body.day-mode [style*="color: #a0b8c8"]{
+  color:#3a4a5c !important;
+}
+
+body.day-mode [style*="color:#7a9ab5"],
+body.day-mode [style*="color: #7a9ab5"]{
+  color:#4a5a72 !important;
+}
+
+body.day-mode [style*="color:#5a6b80"],
+body.day-mode [style*="color: #5a6b80"]{
+  color:#2d3e52 !important;
+}
+
+/* Gradients and dark cards - make them light */
+body.day-mode [style*="background:linear-gradient(160deg,#1F3147"],
+body.day-mode [style*="background:linear-gradient(160deg, #1F3147"],
+body.day-mode [style*="background:linear-gradient(135deg,#1F3147"],
+body.day-mode [style*="background:linear-gradient(135deg, #1F3147"]{
+  background:linear-gradient(160deg,#fff 0%,#faf3e3 100%) !important;
+}
+
+body.day-mode [style*="background:#1F3147"]{
+  background:#fff !important;
+}
+
+body.day-mode [style*="background:#18293E"],
+body.day-mode [style*="background: #18293E"]{
+  background:#fff !important;
+}
+
+body.day-mode [style*="background:linear-gradient(135deg,#18293E"]{
+  background:linear-gradient(135deg,#fff 0%,#faf3e3 100%) !important;
+}
+
+/* Keep brand orange visible but darker for day mode */
+body.day-mode [style*="color:#D4862E"]{
+  color:#a85200 !important;
+}
+body.day-mode [style*="color:#FF8C00"]{
+  color:#a85200 !important;
+}
+
+/* Keep gold visible but darker */
+body.day-mode [style*="color:#D4A24E"]{
+  color:#8a6420 !important;
+}
+
+/* Keep emergency red */
+body.day-mode [style*="color:#c0392b"]{
+  color:#922b21 !important;
+}
+
+/* Keep success green darker */
+body.day-mode [style*="color:#1D9E75"]{
+  color:#0e5a3f !important;
+}
+
+/* Borders */
+body.day-mode [style*="border:1px solid rgba(212,162,78"]{
+  border-color:rgba(168,82,0,0.3) !important;
+}
+body.day-mode [style*="border:1px solid rgba(212,134,46"]{
+  border-color:rgba(168,82,0,0.3) !important;
+}
+body.day-mode [style*="border:1px solid #2e4558"]{
+  border-color:#e0d4b5 !important;
+}
+
+/* Continue card stays orange but with white text - already good */
+
+/* Stats progress bar background */
+body.day-mode [style*="background:rgba(255,255,255,0.08)"]{
+  background:rgba(0,0,0,0.08) !important;
+}
+
+/* Cards background gradient white-cream */
+body.day-mode [style*="background:linear-gradient(135deg,#fff,#f5efe0)"]{
+  border-color:rgba(168,82,0,0.25) !important;
+}
+
 </style>
 </head>
 <body>
@@ -1259,7 +1360,7 @@ body.day-mode .smeta{
       </div>
     </div>
     
-    <div class="loading" id="cats-loading"><div style="text-align:center;padding:20px;"><div style="font-size:16px;color:#D4862E;margin-bottom:8px;">טוען...</div><div style="font-size:10px;color:#7a9ab5;opacity:0.6;">v20260526-1345</div></div></div>
+    <div class="loading" id="cats-loading"><div style="text-align:center;padding:20px;"><div style="font-size:16px;color:#D4862E;margin-bottom:8px;">טוען...</div><div style="font-size:10px;color:#7a9ab5;opacity:0.6;">v20260526-1351</div></div></div>
     <div class="cgrid" id="cgrid" style="display:none;"></div>
   </div>
   <div id="vlist" class="scr">
@@ -2063,7 +2164,7 @@ function bldCats(){
   if (!DB || DB.length === 0) {
     loadEl.innerHTML = '<div style="text-align:center;padding:20px;color:#D4862E;">' +
       'מתחבר לשרת...<br><br>' +
-      '<div style="font-size:11px;color:#7a9ab5;">v20260526-1345</div><br>' +
+      '<div style="font-size:11px;color:#7a9ab5;">v20260526-1351</div><br>' +
       '<button onclick="location.reload(true)" style="padding:10px 20px;background:#D4862E;color:#fff;border:none;border-radius:8px;font-family:inherit;cursor:pointer;font-weight:700;margin-top:10px;">🔄 רענן</button>' +
       '</div>';
     return;
