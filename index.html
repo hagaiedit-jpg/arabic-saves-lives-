@@ -870,7 +870,7 @@ body.day-mode .card:hover{
     <!-- Welcome + Streak -->
     <div style="margin-bottom:20px;">
       <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px;">
-        <div style="color:#E8D9B8;font-size:22px;font-weight:800;letter-spacing:0.3px;">ברוך שובך 🎯</div>
+        <div id="home-greeting" style="color:#E8D9B8;font-size:22px;font-weight:800;letter-spacing:0.3px;">בוקר טוב 🎯</div>
         <div id="home-streak-badge" style="display:none;align-items:center;gap:5px;background:rgba(212,134,46,0.15);border:1px solid rgba(212,134,46,0.4);border-radius:14px;padding:5px 12px;">
           <span style="font-size:14px;">🔥</span>
           <span id="home-streak-count" style="color:#D4862E;font-size:12px;font-weight:700;"></span>
@@ -1007,7 +1007,7 @@ body.day-mode .card:hover{
       </div>
     </div>
     
-    <div class="loading" id="cats-loading"><div style="text-align:center;padding:20px;"><div style="font-size:16px;color:#D4862E;margin-bottom:8px;">טוען...</div><div style="font-size:10px;color:#7a9ab5;opacity:0.6;">v20260526-1135</div></div></div>
+    <div class="loading" id="cats-loading"><div style="text-align:center;padding:20px;"><div style="font-size:16px;color:#D4862E;margin-bottom:8px;">טוען...</div><div style="font-size:10px;color:#7a9ab5;opacity:0.6;">v20260526-1137</div></div></div>
     <div class="cgrid" id="cgrid" style="display:none;"></div>
   </div>
   <div id="vlist" class="scr">
@@ -1545,28 +1545,35 @@ function showToast(msg, type){
 
 function renderHome(){
   try {
-    // 1. Streak badge
+    var hour = new Date().getHours();
+    
+    // 1. Main greeting - based on time of day
+    var greetingEl = document.getElementById('home-greeting');
+    if (greetingEl) {
+      var greeting = '';
+      if (hour >= 5 && hour < 12) greeting = 'בוקר טוב 🎯';
+      else if (hour >= 12 && hour < 15) greeting = 'צהריים טובים 🎯';
+      else if (hour >= 15 && hour < 18) greeting = 'אחר הצהריים טובים 🎯';
+      else if (hour >= 18 && hour < 22) greeting = 'ערב טוב 🎯';
+      else greeting = 'לילה טוב 🎯';
+      greetingEl.textContent = greeting;
+    }
+    
+    // 2. Streak badge
     var streak = parseInt(localStorage.getItem('streak_count') || '0', 10);
     var badge = document.getElementById('home-streak-badge');
     var count = document.getElementById('home-streak-count');
     if (badge && count && streak > 0) {
-      count.textContent = streak === 1 ? 'יום ראשון!' : streak + ' ימים';
+      count.textContent = streak === 1 ? 'יום 1' : streak + ' ימים';
       badge.style.display = 'inline-flex';
     } else if (badge) {
       badge.style.display = 'none';
     }
     
-    // 2. Subtitle - dynamic based on time of day
+    // 3. Subtitle - simpler now
     var sub = document.getElementById('home-subtitle');
     if (sub) {
-      var hour = new Date().getHours();
-      var greeting = '';
-      if (hour < 6) greeting = 'לילה טוב, ערבית לעולם זמינה';
-      else if (hour < 12) greeting = 'בוקר טוב! מוכן לתרגל?';
-      else if (hour < 17) greeting = 'אחר הצהריים! בואו נמשיך';
-      else if (hour < 21) greeting = 'ערב טוב! זמן לתרגול';
-      else greeting = 'לילה טוב! עוד תרגול ואז לישון';
-      sub.textContent = greeting;
+      sub.textContent = 'בואו נמשיך לתרגל';
     }
     
     // 3. Continue card - last opened scenario
@@ -1801,7 +1808,7 @@ function bldCats(){
   if (!DB || DB.length === 0) {
     loadEl.innerHTML = '<div style="text-align:center;padding:20px;color:#D4862E;">' +
       'מתחבר לשרת...<br><br>' +
-      '<div style="font-size:11px;color:#7a9ab5;">v20260526-1135</div><br>' +
+      '<div style="font-size:11px;color:#7a9ab5;">v20260526-1137</div><br>' +
       '<button onclick="location.reload(true)" style="padding:10px 20px;background:#D4862E;color:#fff;border:none;border-radius:8px;font-family:inherit;cursor:pointer;font-weight:700;margin-top:10px;">🔄 רענן</button>' +
       '</div>';
     return;
