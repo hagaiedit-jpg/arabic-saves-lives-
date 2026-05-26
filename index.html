@@ -353,18 +353,18 @@ body.day-mode .toast{background:#fff;color:#0e1b2e;}
 .emerg-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;padding:0;}
 .customs-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:6px;}
 .customs-cube{
-  border-radius:18px;
+  border-radius:16px;
   padding:22px 14px;
   text-align:center;
   cursor:pointer;
-  border:1px solid rgba(255,255,255,0.1);
-  transition:all 0.2s ease-out;
+  border:1px solid rgba(212,162,78,0.15);
+  transition:all 0.15s;
   display:flex;
   flex-direction:column;
   align-items:center;
   justify-content:center;
   min-height:100px;
-  box-shadow:0 3px 12px rgba(0,0,0,0.3), 0 1px 0 rgba(255,255,255,0.1) inset;
+  box-shadow:0 2px 8px rgba(0,0,0,0.2);
 }
 .customs-cube:hover{
   transform:translateY(-3px);
@@ -500,8 +500,8 @@ body.day-mode .cgrid{background:#fff;gap:0;}
 body.day-mode .ct{border:none;border-bottom:1px solid #ebe0c5;border-left:1px solid #ebe0c5;}
 .ct{background:linear-gradient(160deg,#1F3147 0%,#243a55 100%);padding:22px 12px 18px;display:flex;flex-direction:column;align-items:center;gap:10px;cursor:pointer;min-height:128px;justify-content:center;transition:transform 0.15s,box-shadow 0.15s;position:relative;border-radius:16px;box-shadow:0 2px 8px rgba(0,0,0,0.2);border:1px solid rgba(212,162,78,0.15);}
 .ct:active{background:#2a3f54;}
-.ct.daily{background:#1a3025;}.ct.daily:active{background:#22402f;}
-.ct.heart{background:#2a1828;}.ct.heart:active{background:#361e32;}
+.ct.daily{background:linear-gradient(160deg,#1F3147 0%,#243a55 100%);}.ct.daily:active{transform:scale(0.97);}
+.ct.heart{background:linear-gradient(160deg,#1F3147 0%,#243a55 100%);}.ct.heart:active{transform:scale(0.97);}
 .ct.navy{background:#1F3147;}.ct.navy:active{background:#2a3f54;}
 .ct.announce{background:#1F3147;}.ct.announce:active{background:#2a3f54;}
 .ci{width:48px;height:48px;border-radius:14px;background:rgba(212,162,78,0.12);display:flex;align-items:center;justify-content:center;font-size:24px;transition:transform 0.2s;}
@@ -690,6 +690,7 @@ body.day-mode .card:hover{
   background:linear-gradient(135deg,#D4862E 0%,#b87325 100%);
   color:#fff;
   border-radius:16px 16px 4px 16px;
+  border:1px solid rgba(255,255,255,0.25);
 }
 .scn-bubble-soldier::after{
   content:"";
@@ -927,7 +928,7 @@ body.day-mode .card:hover{
       </div>
     </div>
     
-    <div class="loading" id="cats-loading"><div style="text-align:center;padding:20px;"><div style="font-size:16px;color:#D4862E;margin-bottom:8px;">טוען...</div><div style="font-size:10px;color:#7a9ab5;opacity:0.6;">v20260526-1036</div></div></div>
+    <div class="loading" id="cats-loading"><div style="text-align:center;padding:20px;"><div style="font-size:16px;color:#D4862E;margin-bottom:8px;">טוען...</div><div style="font-size:10px;color:#7a9ab5;opacity:0.6;">v20260526-1050</div></div></div>
     <div class="cgrid" id="cgrid" style="display:none;"></div>
   </div>
   <div id="vlist" class="scr">
@@ -1577,7 +1578,7 @@ function bldCats(){
   if (!DB || DB.length === 0) {
     loadEl.innerHTML = '<div style="text-align:center;padding:20px;color:#D4862E;">' +
       'מתחבר לשרת...<br><br>' +
-      '<div style="font-size:11px;color:#7a9ab5;">v20260526-1036</div><br>' +
+      '<div style="font-size:11px;color:#7a9ab5;">v20260526-1050</div><br>' +
       '<button onclick="location.reload(true)" style="padding:10px 20px;background:#D4862E;color:#fff;border:none;border-radius:8px;font-family:inherit;cursor:pointer;font-weight:700;margin-top:10px;">🔄 רענן</button>' +
       '</div>';
     return;
@@ -2787,9 +2788,9 @@ var CUSTOMS_GROUP_MAP = {
 
 // 3 main groups
 var CUSTOMS_MAIN_GROUPS = [
-  {name:'כללי כבוד בחברה הערבית', icon:'🤝',      color:'linear-gradient(135deg,#c0392b 0%,#922b21 100%)'},
-  {name:'אסלאם וחגים',            icon:'🕌',      color:'linear-gradient(135deg,#2980b9 0%,#1f5f8b 100%)'},
-  {name:'כבוד ומשפחה',            icon:'👨‍👩‍👧',  color:'linear-gradient(135deg,#8e44ad 0%,#6c3483 100%)'}
+  {name:'כללי כבוד בחברה הערבית', icon:'🤝',      color:'linear-gradient(160deg,#1F3147 0%,#243a55 100%)'},
+  {name:'אסלאם וחגים',            icon:'🕌',      color:'linear-gradient(160deg,#1F3147 0%,#243a55 100%)'},
+  {name:'כבוד ומשפחה',            icon:'👨‍👩‍👧',  color:'linear-gradient(160deg,#1F3147 0%,#243a55 100%)'}
 ];
 
 function getCustomsMainGroup(cat){
