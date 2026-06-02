@@ -1651,7 +1651,7 @@ body.day-mode .emerg-grid{
       </div>
     </div>
     
-    <div class="loading" id="cats-loading"><div style="text-align:center;padding:20px;"><div style="font-size:16px;color:#D4862E;margin-bottom:8px;">טוען...</div><div style="font-size:10px;color:#7a9ab5;opacity:0.6;">v20260602-1818</div></div></div>
+    <div class="loading" id="cats-loading"><div style="text-align:center;padding:20px;"><div style="font-size:16px;color:#D4862E;margin-bottom:8px;">טוען...</div><div style="font-size:10px;color:#7a9ab5;opacity:0.6;">v20260602-1832</div></div></div>
     <div class="cgrid" id="cgrid" style="display:none;"></div>
   </div>
   <div id="vlist" class="scr">
@@ -2720,7 +2720,7 @@ function bldCats(){
   if (!DB || DB.length === 0) {
     loadEl.innerHTML = '<div style="text-align:center;padding:20px;color:#D4862E;">' +
       'מתחבר לשרת...<br><br>' +
-      '<div style="font-size:11px;color:#7a9ab5;">v20260602-1818</div><br>' +
+      '<div style="font-size:11px;color:#7a9ab5;">v20260602-1832</div><br>' +
       '<button onclick="location.reload(true)" style="padding:10px 20px;background:#D4862E;color:#fff;border:none;border-radius:8px;font-family:inherit;cursor:pointer;font-weight:700;margin-top:10px;">🔄 רענן</button>' +
       '</div>';
     return;
@@ -5889,33 +5889,24 @@ document.addEventListener('click', function(e){
 function navToTab(tabId){
   try {
     var found = false;
-    // For 'home' - call ST directly since there's no top tab for it
-    if (tabId === 'home') {
-      if (typeof ST === 'function') {
-        ST('home', null);
-        found = true;
-      }
-    } else {
-      // Find the matching top tab and click it (uses existing ST function)
+    // Call ST directly - the top tabs are hidden in the new UI
+    if (typeof ST === 'function') {
+      // Find matching top tab for the active state (but don't click it - it's hidden)
+      var matchingTab = null;
       document.querySelectorAll('.tb-tab').forEach(function(el){
         if (el.getAttribute('onclick') && el.getAttribute('onclick').indexOf("'"+tabId+"'") !== -1) {
-          el.click();
-          found = true;
+          matchingTab = el;
         }
       });
-      if (!found) {
+      if (!matchingTab) {
         document.querySelectorAll('.tb-tab-sec').forEach(function(el){
           if (el.getAttribute('onclick') && el.getAttribute('onclick').indexOf("'"+tabId+"'") !== -1) {
-            el.click();
-            found = true;
+            matchingTab = el;
           }
         });
       }
-      // Fallback: if no top tab found, call ST directly
-      if (!found && typeof ST === 'function') {
-        ST(tabId, null);
-        found = true;
-      }
+      ST(tabId, matchingTab);
+      found = true;
     }
     // Update bottom nav active state
     document.querySelectorAll('.bn-btn').forEach(function(b){
