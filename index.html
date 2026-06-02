@@ -1539,7 +1539,7 @@ body.day-mode .emerg-grid{
       </div>
     </div>
     
-    <div class="loading" id="cats-loading"><div style="text-align:center;padding:20px;"><div style="font-size:16px;color:#D4862E;margin-bottom:8px;">טוען...</div><div style="font-size:10px;color:#7a9ab5;opacity:0.6;">v20260526-1420</div></div></div>
+    <div class="loading" id="cats-loading"><div style="text-align:center;padding:20px;"><div style="font-size:16px;color:#D4862E;margin-bottom:8px;">טוען...</div><div style="font-size:10px;color:#7a9ab5;opacity:0.6;">v20260602-1111</div></div></div>
     <div class="cgrid" id="cgrid" style="display:none;"></div>
   </div>
   <div id="vlist" class="scr">
@@ -2343,7 +2343,7 @@ function bldCats(){
   if (!DB || DB.length === 0) {
     loadEl.innerHTML = '<div style="text-align:center;padding:20px;color:#D4862E;">' +
       'מתחבר לשרת...<br><br>' +
-      '<div style="font-size:11px;color:#7a9ab5;">v20260526-1420</div><br>' +
+      '<div style="font-size:11px;color:#7a9ab5;">v20260602-1111</div><br>' +
       '<button onclick="location.reload(true)" style="padding:10px 20px;background:#D4862E;color:#fff;border:none;border-radius:8px;font-family:inherit;cursor:pointer;font-weight:700;margin-top:10px;">🔄 רענן</button>' +
       '</div>';
     return;
@@ -5475,6 +5475,10 @@ try { renderHome(); } catch(_){}
       <div style="font-size:22px;margin-bottom:4px;">🆕</div>
       <div style="color:#E8D9B8;font-size:11px;font-weight:600;">חדש</div>
     </div>
+    <div onclick="openAdminFromMenu()" style="background:linear-gradient(135deg,rgba(212,162,78,0.15),rgba(212,162,78,0.05));border:1px solid rgba(212,162,78,0.4);border-radius:10px;padding:14px 6px;text-align:center;cursor:pointer;">
+      <div style="font-size:22px;margin-bottom:4px;">🔒</div>
+      <div style="color:#D4A24E;font-size:11px;font-weight:600;">ניהול</div>
+    </div>
   </div>
 </div>
 
@@ -5544,6 +5548,21 @@ function navToTab(tabId){
     // Scroll to top
     window.scrollTo({top:0, behavior:'smooth'});
   } catch(e) { console.warn('navToTab error:', e); }
+}
+
+function openAdminFromMenu(){
+  try {
+    // Close more menu
+    var more = document.getElementById('more-menu');
+    if (more) more.style.display = 'none';
+    
+    // Show admin tab and navigate to it
+    var adminTab = document.getElementById('admin-tab');
+    if (adminTab) adminTab.style.display = 'block';
+    
+    // Navigate to admin (will prompt for password)
+    navToTab('adm');
+  } catch(e) { console.warn('openAdminFromMenu error:', e); }
 }
 
 function toggleMoreMenu(){
