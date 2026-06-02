@@ -1651,7 +1651,7 @@ body.day-mode .emerg-grid{
       </div>
     </div>
     
-    <div class="loading" id="cats-loading"><div style="text-align:center;padding:20px;"><div style="font-size:16px;color:#D4862E;margin-bottom:8px;">טוען...</div><div style="font-size:10px;color:#7a9ab5;opacity:0.6;">v20260602-1832</div></div></div>
+    <div class="loading" id="cats-loading"><div style="text-align:center;padding:20px;"><div style="font-size:16px;color:#D4862E;margin-bottom:8px;">טוען...</div><div style="font-size:10px;color:#7a9ab5;opacity:0.6;">v20260602-1854</div></div></div>
     <div class="cgrid" id="cgrid" style="display:none;"></div>
   </div>
   <div id="vlist" class="scr">
@@ -2720,7 +2720,7 @@ function bldCats(){
   if (!DB || DB.length === 0) {
     loadEl.innerHTML = '<div style="text-align:center;padding:20px;color:#D4862E;">' +
       'מתחבר לשרת...<br><br>' +
-      '<div style="font-size:11px;color:#7a9ab5;">v20260602-1832</div><br>' +
+      '<div style="font-size:11px;color:#7a9ab5;">v20260602-1854</div><br>' +
       '<button onclick="location.reload(true)" style="padding:10px 20px;background:#D4862E;color:#fff;border:none;border-radius:8px;font-family:inherit;cursor:pointer;font-weight:700;margin-top:10px;">🔄 רענן</button>' +
       '</div>';
     return;
@@ -3472,55 +3472,8 @@ function trackLearned(phraseId){
   } catch(e) { console.warn('trackLearned error:', e); }
 }
 
-function renderProgress(){
-  try {
-    var box = document.getElementById('progress-display');
-    var textEl = document.getElementById('progress-text');
-    var detailEl = document.getElementById('progress-detail');
-    if (!box || !textEl) return;
-    
-    var learned = JSON.parse(localStorage.getItem('learned_phrases') || '{}');
-    var phraseIds = Object.keys(learned);
-    
-    if (phraseIds.length === 0) {
-      box.style.display = 'none';
-      return;
-    }
-    
-    var total = phraseIds.length;
-    
-    // Count learned this week (last 7 days)
-    var now = new Date();
-    var weekAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
-    var thisWeek = 0;
-    phraseIds.forEach(function(id){
-      try {
-        var lastSeen = new Date(learned[id]);
-        if (lastSeen >= weekAgo) thisWeek++;
-      } catch(e) {}
-    });
-    
-    // Total available phrases for context
-    var totalAvailable = (typeof DB !== 'undefined' && DB) ? DB.length : 0;
-    
-    // Display
-    var text = '';
-    if (total === 1) text = 'למדת משפט אחד';
-    else text = 'למדת ' + total + ' משפטים';
-    textEl.textContent = text;
-    
-    var detail = '';
-    if (thisWeek > 0 && thisWeek !== total) {
-      detail = '🔥 ' + thisWeek + ' השבוע';
-    } else if (totalAvailable > 0) {
-      var percent = Math.round((total / totalAvailable) * 100);
-      if (percent > 0) detail = percent + '% מהתוכן';
-    }
-    if (detailEl) detailEl.textContent = detail;
-    
-    box.style.display = 'block';
-  } catch(e) { console.warn('renderProgress error:', e); }
-}
+// OLD renderProgress removed - new version is at the top of the file
+function renderProgressOld(){ /* unused */ }
 
 // === Pronunciation practice ===
 var practiceRec = null;
