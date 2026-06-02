@@ -1439,49 +1439,51 @@ body.day-mode .emerg-grid{
       </div>
     </div>
     
-    <!-- 4 Stats Cubes (LOORA/Duolingo style) -->
-    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px;">
-      
-      <!-- Cube 1: Streak -->
-      <div onclick="navToTab('progress')" style="background:linear-gradient(135deg,#1F3147 0%,#243a55 100%);border:1px solid rgba(212,134,46,0.3);border-radius:14px;padding:16px 12px;text-align:center;cursor:pointer;box-shadow:0 2px 8px rgba(0,0,0,0.15);">
-        <div style="font-size:32px;line-height:1;margin-bottom:6px;">🔥</div>
-        <div id="home-cube-streak-num" style="color:#D4862E;font-size:26px;font-weight:900;line-height:1;margin-bottom:4px;">0</div>
-        <div style="color:#a0b8c8;font-size:11px;font-weight:600;">ימים רצופים</div>
+    <!-- 4 Stats Cubes (compact - LOORA style) -->
+    <div onclick="navToTab('progress')" style="background:linear-gradient(135deg,#18293E 0%,#1F3147 100%);border:1px solid rgba(212,162,78,0.2);border-radius:12px;padding:12px;margin-bottom:12px;cursor:pointer;">
+      <div style="display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:6px;">
+        
+        <!-- Cube 1: Streak -->
+        <div style="text-align:center;padding:4px 2px;border-left:1px solid rgba(255,255,255,0.08);">
+          <div style="font-size:20px;line-height:1;margin-bottom:3px;">🔥</div>
+          <div id="home-cube-streak-num" style="color:#D4862E;font-size:18px;font-weight:900;line-height:1;">0</div>
+          <div style="color:#a0b8c8;font-size:9px;font-weight:600;margin-top:2px;">רצף</div>
+        </div>
+        
+        <!-- Cube 2: Daily Goal -->
+        <div style="text-align:center;padding:4px 2px;border-left:1px solid rgba(255,255,255,0.08);">
+          <div style="font-size:20px;line-height:1;margin-bottom:3px;">🎯</div>
+          <div id="home-cube-goal-num" style="color:#1D9E75;font-size:16px;font-weight:900;line-height:1;">0/5</div>
+          <div style="color:#a0b8c8;font-size:9px;font-weight:600;margin-top:2px;">יעד היום</div>
+        </div>
+        
+        <!-- Cube 3: Daily Score -->
+        <div style="text-align:center;padding:4px 2px;border-left:1px solid rgba(255,255,255,0.08);">
+          <div style="font-size:20px;line-height:1;margin-bottom:3px;">⚡</div>
+          <div id="home-cube-score-num" style="color:#D4A24E;font-size:18px;font-weight:900;line-height:1;">—</div>
+          <div style="color:#a0b8c8;font-size:9px;font-weight:600;margin-top:2px;">ציון</div>
+        </div>
+        
+        <!-- Cube 4: Total Learned -->
+        <div style="text-align:center;padding:4px 2px;">
+          <div style="font-size:20px;line-height:1;margin-bottom:3px;">📚</div>
+          <div id="home-cube-total-num" style="color:#D4862E;font-size:18px;font-weight:900;line-height:1;">0</div>
+          <div style="color:#a0b8c8;font-size:9px;font-weight:600;margin-top:2px;">סה"כ</div>
+        </div>
+        
       </div>
-      
-      <!-- Cube 2: Daily Goal -->
-      <div onclick="navToTab('progress')" style="background:linear-gradient(135deg,#1F3147 0%,#243a55 100%);border:1px solid rgba(29,158,117,0.3);border-radius:14px;padding:16px 12px;text-align:center;cursor:pointer;box-shadow:0 2px 8px rgba(0,0,0,0.15);">
-        <div style="font-size:32px;line-height:1;margin-bottom:6px;">🎯</div>
-        <div id="home-cube-goal-num" style="color:#1D9E75;font-size:26px;font-weight:900;line-height:1;margin-bottom:4px;">0/5</div>
-        <div style="color:#a0b8c8;font-size:11px;font-weight:600;">יעד היום</div>
-      </div>
-      
-      <!-- Cube 3: Daily Score -->
-      <div onclick="navToTab('progress')" style="background:linear-gradient(135deg,#1F3147 0%,#243a55 100%);border:1px solid rgba(212,162,78,0.3);border-radius:14px;padding:16px 12px;text-align:center;cursor:pointer;box-shadow:0 2px 8px rgba(0,0,0,0.15);">
-        <div style="font-size:32px;line-height:1;margin-bottom:6px;">⚡</div>
-        <div id="home-cube-score-num" style="color:#D4A24E;font-size:26px;font-weight:900;line-height:1;margin-bottom:4px;">—</div>
-        <div style="color:#a0b8c8;font-size:11px;font-weight:600;">ציון היום</div>
-      </div>
-      
-      <!-- Cube 4: Total Learned -->
-      <div onclick="navToTab('progress')" style="background:linear-gradient(135deg,#1F3147 0%,#243a55 100%);border:1px solid rgba(212,134,46,0.3);border-radius:14px;padding:16px 12px;text-align:center;cursor:pointer;box-shadow:0 2px 8px rgba(0,0,0,0.15);">
-        <div style="font-size:32px;line-height:1;margin-bottom:6px;">📚</div>
-        <div id="home-cube-total-num" style="color:#D4862E;font-size:26px;font-weight:900;line-height:1;margin-bottom:4px;">0</div>
-        <div style="color:#a0b8c8;font-size:11px;font-weight:600;">משפטים נלמדו</div>
-      </div>
-      
     </div>
     
-    <!-- Weekly Heatmap (LOORA style) -->
-    <div onclick="navToTab('progress')" style="background:linear-gradient(135deg,#18293E 0%,#1F3147 100%);border:1px solid rgba(212,162,78,0.2);border-radius:14px;padding:14px 16px;margin-bottom:14px;cursor:pointer;">
-      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;">
-        <div style="display:flex;align-items:center;gap:8px;">
-          <span style="font-size:14px;">📅</span>
-          <span style="color:#D4A24E;font-size:12px;font-weight:700;letter-spacing:0.5px;">השבוע שלך</span>
+    <!-- Weekly Heatmap (compact - LOORA style) -->
+    <div onclick="navToTab('progress')" style="background:linear-gradient(135deg,#18293E 0%,#1F3147 100%);border:1px solid rgba(212,162,78,0.2);border-radius:12px;padding:10px 12px;margin-bottom:14px;cursor:pointer;">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;">
+        <div style="display:flex;align-items:center;gap:6px;">
+          <span style="font-size:12px;">📅</span>
+          <span style="color:#D4A24E;font-size:11px;font-weight:700;">השבוע</span>
         </div>
-        <div style="color:#7a9ab5;font-size:11px;">פרטים ◀</div>
+        <div style="color:#7a9ab5;font-size:10px;">פרטים ◀</div>
       </div>
-      <div id="home-heatmap" style="display:grid;grid-template-columns:repeat(7,1fr);gap:5px;">
+      <div id="home-heatmap" style="display:grid;grid-template-columns:repeat(7,1fr);gap:4px;">
         <!-- Heatmap days will be rendered here -->
       </div>
     </div>
@@ -1649,7 +1651,7 @@ body.day-mode .emerg-grid{
       </div>
     </div>
     
-    <div class="loading" id="cats-loading"><div style="text-align:center;padding:20px;"><div style="font-size:16px;color:#D4862E;margin-bottom:8px;">טוען...</div><div style="font-size:10px;color:#7a9ab5;opacity:0.6;">v20260602-1559</div></div></div>
+    <div class="loading" id="cats-loading"><div style="text-align:center;padding:20px;"><div style="font-size:16px;color:#D4862E;margin-bottom:8px;">טוען...</div><div style="font-size:10px;color:#7a9ab5;opacity:0.6;">v20260602-1818</div></div></div>
     <div class="cgrid" id="cgrid" style="display:none;"></div>
   </div>
   <div id="vlist" class="scr">
@@ -2353,10 +2355,10 @@ function renderHome(){
           borderColor = isToday ? '#D4A24E' : 'transparent';
         }
         
-        heatHtml += '<div style="background:' + bgColor + ';color:' + txtColor + ';border:2px solid ' + borderColor + ';border-radius:8px;padding:8px 4px;text-align:center;font-size:11px;font-weight:700;">';
+        heatHtml += '<div style="background:' + bgColor + ';color:' + txtColor + ';border:1.5px solid ' + borderColor + ';border-radius:6px;padding:5px 2px;text-align:center;font-size:10px;font-weight:700;">';
         heatHtml += '<div>' + dayName + '</div>';
         if (isToday) {
-          heatHtml += '<div style="font-size:9px;margin-top:2px;opacity:0.85;">היום</div>';
+          heatHtml += '<div style="font-size:8px;margin-top:1px;opacity:0.85;">היום</div>';
         }
         heatHtml += '</div>';
       }
@@ -2718,7 +2720,7 @@ function bldCats(){
   if (!DB || DB.length === 0) {
     loadEl.innerHTML = '<div style="text-align:center;padding:20px;color:#D4862E;">' +
       'מתחבר לשרת...<br><br>' +
-      '<div style="font-size:11px;color:#7a9ab5;">v20260602-1559</div><br>' +
+      '<div style="font-size:11px;color:#7a9ab5;">v20260602-1818</div><br>' +
       '<button onclick="location.reload(true)" style="padding:10px 20px;background:#D4862E;color:#fff;border:none;border-radius:8px;font-family:inherit;cursor:pointer;font-weight:700;margin-top:10px;">🔄 רענן</button>' +
       '</div>';
     return;
