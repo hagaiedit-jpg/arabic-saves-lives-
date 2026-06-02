@@ -1651,7 +1651,7 @@ body.day-mode .emerg-grid{
       </div>
     </div>
     
-    <div class="loading" id="cats-loading"><div style="text-align:center;padding:20px;"><div style="font-size:16px;color:#D4862E;margin-bottom:8px;">טוען...</div><div style="font-size:10px;color:#7a9ab5;opacity:0.6;">v20260602-1904</div></div></div>
+    <div class="loading" id="cats-loading"><div style="text-align:center;padding:20px;"><div style="font-size:16px;color:#D4862E;margin-bottom:8px;">טוען...</div><div style="font-size:10px;color:#7a9ab5;opacity:0.6;">v20260602-1911</div></div></div>
     <div class="cgrid" id="cgrid" style="display:none;"></div>
   </div>
   <div id="vlist" class="scr">
@@ -2720,7 +2720,7 @@ function bldCats(){
   if (!DB || DB.length === 0) {
     loadEl.innerHTML = '<div style="text-align:center;padding:20px;color:#D4862E;">' +
       'מתחבר לשרת...<br><br>' +
-      '<div style="font-size:11px;color:#7a9ab5;">v20260602-1904</div><br>' +
+      '<div style="font-size:11px;color:#7a9ab5;">v20260602-1911</div><br>' +
       '<button onclick="location.reload(true)" style="padding:10px 20px;background:#D4862E;color:#fff;border:none;border-radius:8px;font-family:inherit;cursor:pointer;font-weight:700;margin-top:10px;">🔄 רענן</button>' +
       '</div>';
     return;
@@ -5840,48 +5840,69 @@ document.addEventListener('click', function(e){
 });
 
 function navToTab(tabId){
+  // SIMPLE VERSION - minimal logic, maximum reliability
   try {
-    // FIRST: Close more-menu (so it doesn't block clicks if ST fails)
-    var more = document.getElementById('more-menu');
-    if (more) more.style.display = 'none';
+    // 1. Close more menu
+    var moreMenu = document.getElementById('more-menu');
+    if (moreMenu) moreMenu.style.display = 'none';
     
-    var found = false;
-    // Call ST directly - the top tabs are hidden in the new UI
-    if (typeof ST === 'function') {
-      // Find matching top tab for the active state (but don't click it - it's hidden)
-      var matchingTab = null;
-      try {
-        document.querySelectorAll('.tb-tab').forEach(function(el){
-          if (el.getAttribute('onclick') && el.getAttribute('onclick').indexOf("'"+tabId+"'") !== -1) {
-            matchingTab = el;
-          }
-        });
-        if (!matchingTab) {
-          document.querySelectorAll('.tb-tab-sec').forEach(function(el){
-            if (el.getAttribute('onclick') && el.getAttribute('onclick').indexOf("'"+tabId+"'") !== -1) {
-              matchingTab = el;
-            }
-          });
-        }
-      } catch(e) {}
-      try {
-        ST(tabId, matchingTab);
-      } catch(e) { console.warn('ST error:', e); }
-      found = true;
+    // 2. Hide all tabs
+    var allTabs = document.querySelectorAll('[id^="tab-"]');
+    for (var i = 0; i < allTabs.length; i++) {
+      allTabs[i].className = 'scr';
     }
-    // Update bottom nav active state
-    document.querySelectorAll('.bn-btn').forEach(function(b){
-      b.classList.remove('active');
-      b.style.background = 'transparent';
-    });
-    var activeBtn = document.querySelector('.bn-btn[data-tab="'+tabId+'"]');
-    if (activeBtn) { activeBtn.classList.add('active'); activeBtn.style.background = 'rgba(212,162,78,0.15)'; }
-    // Hide more menu
-    var more = document.getElementById('more-menu');
-    if (more) more.style.display = 'none';
-    // Scroll to top
-    window.scrollTo({top:0, behavior:'smooth'});
-  } catch(e) { console.warn('navToTab error:', e); }
+    
+    // 3. Show the target tab
+    var targetTab = document.getElementById('tab-' + tabId);
+    if (targetTab) {
+      targetTab.className = 'scr on';
+    }
+    
+    // 4. Update bottom nav active state
+    var navBtns = document.querySelectorAll('.bn-btn');
+    for (var i = 0; i < navBtns.length; i++) {
+      navBtns[i].classList.remove('active');
+      navBtns[i].style.background = 'transparent';
+    }
+    var activeBtn = document.querySelector('.bn-btn[data-tab="' + tabId + '"]');
+    if (activeBtn) {
+      activeBtn.classList.add('active');
+      activeBtn.style.background = 'rgba(212,162,78,0.15)';
+    }
+    
+    // 5. Update curTab
+    if (typeof curTab !== 'undefined') curTab = tabId;
+    
+    // 6. Call render functions (each in own try)
+    try { if (tabId === 'home' && typeof renderHome === 'function') renderHome(); } catch(e){}
+    try { if (tabId === 'progress' && typeof renderProgress === 'function') renderProgress(); } catch(e){}
+    try { if (tabId === 'qk' && typeof rQK === 'function') rQK(); } catch(e){}
+    try { if (tabId === 'fav') { if (typeof rFav === 'function') rFav(); if (typeof rRecent === 'function') rRecent(); } } catch(e){}
+    try { if (tabId === 'dict' && typeof renderDict === 'function') renderDict(); } catch(e){}
+    try { if (tabId === 'sem' && typeof rSem === 'function') rSem(); } catch(e){}
+    try { if (tabId === 'nwf' && typeof rNF === 'function') rNF(); } catch(e){}
+    try { if (tabId === 'scn') { if (typeof scnBack === 'function') scnBack(); if (typeof renderScnGrid === 'function') renderScnGrid(); } } catch(e){}
+    
+    // 7. Admin password check
+    if (tabId === 'adm' && !window._adminAuth) {
+      var pw = prompt('סיסמת ניהול:');
+      if (pw !== 'אני ואתה נשנה את העולם') {
+        alert('סיסמה שגויה');
+        // Go back to lib tab
+        var libTab = document.getElementById('tab-adm');
+        if (libTab) libTab.className = 'scr';
+        var libTarget = document.getElementById('tab-lib');
+        if (libTarget) libTarget.className = 'scr on';
+        return;
+      }
+      window._adminAuth = true;
+    }
+    
+    // 8. Scroll to top
+    try { window.scrollTo(0, 0); } catch(e){}
+  } catch(e) {
+    console.error('navToTab fatal error:', e);
+  }
 }
 
 function openAdminFromMenu(){
