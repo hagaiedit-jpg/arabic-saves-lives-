@@ -1439,8 +1439,8 @@ body.day-mode .emerg-grid{
       </div>
     </div>
     
-    <!-- 4 Stats Cubes (compact - LOORA style) -->
-    <div onclick="navToTab('progress')" style="background:linear-gradient(135deg,#18293E 0%,#1F3147 100%);border:1px solid rgba(212,162,78,0.2);border-radius:12px;padding:12px;margin-bottom:12px;cursor:pointer;">
+    <!-- 4 Stats Cubes (compact - LOORA style) - informational only -->
+    <div style="background:linear-gradient(135deg,#18293E 0%,#1F3147 100%);border:1px solid rgba(212,162,78,0.2);border-radius:12px;padding:12px;margin-bottom:12px;">
       <div style="display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:6px;">
         
         <!-- Cube 1: Streak -->
@@ -1651,7 +1651,7 @@ body.day-mode .emerg-grid{
       </div>
     </div>
     
-    <div class="loading" id="cats-loading"><div style="text-align:center;padding:20px;"><div style="font-size:16px;color:#D4862E;margin-bottom:8px;">טוען...</div><div style="font-size:10px;color:#7a9ab5;opacity:0.6;">v20260602-1911</div></div></div>
+    <div class="loading" id="cats-loading"><div style="text-align:center;padding:20px;"><div style="font-size:16px;color:#D4862E;margin-bottom:8px;">טוען...</div><div style="font-size:10px;color:#7a9ab5;opacity:0.6;">v20260602-1922</div></div></div>
     <div class="cgrid" id="cgrid" style="display:none;"></div>
   </div>
   <div id="vlist" class="scr">
@@ -2355,7 +2355,9 @@ function renderHome(){
           borderColor = isToday ? '#D4A24E' : 'transparent';
         }
         
-        heatHtml += '<div style="background:' + bgColor + ';color:' + txtColor + ';border:1.5px solid ' + borderColor + ';border-radius:6px;padding:5px 2px;text-align:center;font-size:10px;font-weight:700;">';
+        var clickHandler = isFuture ? '' : ' onclick="event.stopPropagation();showDayDetailsHome(\'' + dayDate.toISOString() + '\')"';
+        var cursorStyle = isFuture ? 'default' : 'pointer';
+        heatHtml += '<div' + clickHandler + ' style="background:' + bgColor + ';color:' + txtColor + ';border:1.5px solid ' + borderColor + ';border-radius:6px;padding:5px 2px;text-align:center;font-size:10px;font-weight:700;cursor:' + cursorStyle + ';">';
         heatHtml += '<div>' + dayName + '</div>';
         if (isToday) {
           heatHtml += '<div style="font-size:8px;margin-top:1px;opacity:0.85;">היום</div>';
@@ -2473,7 +2475,9 @@ function renderProgress(){
           borderColor = isToday ? '#D4A24E' : 'transparent';
         }
         
-        html += '<div style="background:' + bgColor + ';color:' + txtColor + ';border:2px solid ' + borderColor + ';border-radius:10px;padding:12px 4px;text-align:center;">';
+        var dayClickAttr = isFuture ? '' : ' onclick="showDayDetails(\'' + dayDate.toISOString() + '\',\'' + dayName + '\',' + dayCount + ')"';
+        var dayCursor = isFuture ? 'default' : 'pointer';
+        html += '<div' + dayClickAttr + ' style="background:' + bgColor + ';color:' + txtColor + ';border:2px solid ' + borderColor + ';border-radius:10px;padding:12px 4px;text-align:center;cursor:' + dayCursor + ';transition:transform 0.15s;" onmousedown="this.style.transform=\'scale(0.95)\'" onmouseup="this.style.transform=\'scale(1)\'" onmouseleave="this.style.transform=\'scale(1)\'">';
         html += '<div style="font-size:13px;font-weight:700;">' + dayName + '</div>';
         if (dayCount > 0) {
           html += '<div style="font-size:14px;font-weight:900;margin-top:4px;">' + dayCount + '</div>';
@@ -2552,6 +2556,70 @@ function renderProgress(){
     }
     
   } catch(e) { console.warn('renderProgress error:', e); }
+}
+
+function showDayDetailsHome(isoDate){
+  try {
+    var date = new Date(isoDate);
+    var learned = JSON.parse(localStorage.getItem('learned_phrases') || '{}');
+    var practiced = JSON.parse(localStorage.getItem('practiced_phrases') || '{}');
+    var dayStr = date.toDateString();
+    var count = 0;
+    for (var key in learned) {
+      try { if (new Date(learned[key]).toDateString() === dayStr) count++; } catch(e) {}
+    }
+    for (var key in practiced) {
+      try { if (new Date(practiced[key]).toDateString() === dayStr) count++; } catch(e) {}
+    }
+    var fullDay = ['ראשון','שני','שלישי','רביעי','חמישי','שישי','שבת'][date.getDay()];
+    var dateStr = date.toLocaleDateString('he-IL', { day: 'numeric', month: 'long' });
+    showDayDetails(isoDate, fullDay, count);
+  } catch(e) { console.warn(e); }
+}
+
+function showDayDetails(isoDate, dayName, count){
+  try {
+    var date = new Date(isoDate);
+    var dateStr = date.toLocaleDateString('he-IL', { day: 'numeric', month: 'long', year: 'numeric' });
+    var fullDay = ['ראשון','שני','שלישי','רביעי','חמישי','שישי','שבת'][date.getDay()];
+    
+    var learned = JSON.parse(localStorage.getItem('learned_phrases') || '{}');
+    var practiced = JSON.parse(localStorage.getItem('practiced_phrases') || '{}');
+    var dayStr = date.toDateString();
+    
+    // Find learned phrases that day
+    var learnedToday = [];
+    var practicedToday = 0;
+    for (var key in learned) {
+      try {
+        if (new Date(learned[key]).toDateString() === dayStr) {
+          learnedToday.push(key);
+        }
+      } catch(e) {}
+    }
+    for (var key in practiced) {
+      try {
+        if (new Date(practiced[key]).toDateString() === dayStr) {
+          practicedToday++;
+        }
+      } catch(e) {}
+    }
+    
+    var msg = '📅 יום ' + fullDay + ', ' + dateStr + '\n\n';
+    if (count === 0) {
+      msg += '😴 לא תרגלת ביום זה.\n\nכל יום הוא הזדמנות חדשה!';
+    } else {
+      msg += '✨ סה"כ ' + count + ' תרגולים\n';
+      if (learnedToday.length > 0) {
+        msg += '📚 ' + learnedToday.length + ' משפטים נלמדו\n';
+      }
+      if (practicedToday > 0) {
+        msg += '🎤 ' + practicedToday + ' תרגולי הגייה\n';
+      }
+      msg += '\n🔥 כל הכבוד!';
+    }
+    alert(msg);
+  } catch(e) { console.warn('showDayDetails error:', e); }
 }
 
 function changeDailyGoal(){
@@ -2720,7 +2788,7 @@ function bldCats(){
   if (!DB || DB.length === 0) {
     loadEl.innerHTML = '<div style="text-align:center;padding:20px;color:#D4862E;">' +
       'מתחבר לשרת...<br><br>' +
-      '<div style="font-size:11px;color:#7a9ab5;">v20260602-1911</div><br>' +
+      '<div style="font-size:11px;color:#7a9ab5;">v20260602-1922</div><br>' +
       '<button onclick="location.reload(true)" style="padding:10px 20px;background:#D4862E;color:#fff;border:none;border-radius:8px;font-family:inherit;cursor:pointer;font-weight:700;margin-top:10px;">🔄 רענן</button>' +
       '</div>';
     return;
