@@ -1439,15 +1439,50 @@ body.day-mode .emerg-grid{
       </div>
     </div>
     
-    <!-- Progress Section -->
-    <div id="home-progress-card" style="background:linear-gradient(135deg,#18293E 0%,#1F3147 100%);border:1px solid rgba(212,162,78,0.2);border-radius:14px;padding:16px;margin-bottom:18px;">
-      <div style="display:flex;align-items:center;gap:8px;margin-bottom:10px;">
-        <span style="font-size:16px;">📊</span>
-        <span style="color:#D4A24E;font-size:12px;font-weight:700;letter-spacing:0.5px;">ההתקדמות שלך</span>
+    <!-- 4 Stats Cubes (LOORA/Duolingo style) -->
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px;">
+      
+      <!-- Cube 1: Streak -->
+      <div onclick="navToTab('progress')" style="background:linear-gradient(135deg,#1F3147 0%,#243a55 100%);border:1px solid rgba(212,134,46,0.3);border-radius:14px;padding:16px 12px;text-align:center;cursor:pointer;box-shadow:0 2px 8px rgba(0,0,0,0.15);">
+        <div style="font-size:32px;line-height:1;margin-bottom:6px;">🔥</div>
+        <div id="home-cube-streak-num" style="color:#D4862E;font-size:26px;font-weight:900;line-height:1;margin-bottom:4px;">0</div>
+        <div style="color:#a0b8c8;font-size:11px;font-weight:600;">ימים רצופים</div>
       </div>
-      <div id="home-progress-stats" style="color:#E8D9B8;font-size:14px;line-height:1.6;"></div>
-      <div style="height:6px;background:rgba(255,255,255,0.08);border-radius:3px;margin-top:10px;overflow:hidden;">
-        <div id="home-progress-bar" style="height:100%;background:linear-gradient(90deg,#D4A24E,#D4862E);border-radius:3px;width:0%;transition:width 0.5s;"></div>
+      
+      <!-- Cube 2: Daily Goal -->
+      <div onclick="navToTab('progress')" style="background:linear-gradient(135deg,#1F3147 0%,#243a55 100%);border:1px solid rgba(29,158,117,0.3);border-radius:14px;padding:16px 12px;text-align:center;cursor:pointer;box-shadow:0 2px 8px rgba(0,0,0,0.15);">
+        <div style="font-size:32px;line-height:1;margin-bottom:6px;">🎯</div>
+        <div id="home-cube-goal-num" style="color:#1D9E75;font-size:26px;font-weight:900;line-height:1;margin-bottom:4px;">0/5</div>
+        <div style="color:#a0b8c8;font-size:11px;font-weight:600;">יעד היום</div>
+      </div>
+      
+      <!-- Cube 3: Daily Score -->
+      <div onclick="navToTab('progress')" style="background:linear-gradient(135deg,#1F3147 0%,#243a55 100%);border:1px solid rgba(212,162,78,0.3);border-radius:14px;padding:16px 12px;text-align:center;cursor:pointer;box-shadow:0 2px 8px rgba(0,0,0,0.15);">
+        <div style="font-size:32px;line-height:1;margin-bottom:6px;">⚡</div>
+        <div id="home-cube-score-num" style="color:#D4A24E;font-size:26px;font-weight:900;line-height:1;margin-bottom:4px;">—</div>
+        <div style="color:#a0b8c8;font-size:11px;font-weight:600;">ציון היום</div>
+      </div>
+      
+      <!-- Cube 4: Total Learned -->
+      <div onclick="navToTab('progress')" style="background:linear-gradient(135deg,#1F3147 0%,#243a55 100%);border:1px solid rgba(212,134,46,0.3);border-radius:14px;padding:16px 12px;text-align:center;cursor:pointer;box-shadow:0 2px 8px rgba(0,0,0,0.15);">
+        <div style="font-size:32px;line-height:1;margin-bottom:6px;">📚</div>
+        <div id="home-cube-total-num" style="color:#D4862E;font-size:26px;font-weight:900;line-height:1;margin-bottom:4px;">0</div>
+        <div style="color:#a0b8c8;font-size:11px;font-weight:600;">משפטים נלמדו</div>
+      </div>
+      
+    </div>
+    
+    <!-- Weekly Heatmap (LOORA style) -->
+    <div onclick="navToTab('progress')" style="background:linear-gradient(135deg,#18293E 0%,#1F3147 100%);border:1px solid rgba(212,162,78,0.2);border-radius:14px;padding:14px 16px;margin-bottom:14px;cursor:pointer;">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;">
+        <div style="display:flex;align-items:center;gap:8px;">
+          <span style="font-size:14px;">📅</span>
+          <span style="color:#D4A24E;font-size:12px;font-weight:700;letter-spacing:0.5px;">השבוע שלך</span>
+        </div>
+        <div style="color:#7a9ab5;font-size:11px;">פרטים ◀</div>
+      </div>
+      <div id="home-heatmap" style="display:grid;grid-template-columns:repeat(7,1fr);gap:5px;">
+        <!-- Heatmap days will be rendered here -->
       </div>
     </div>
     
@@ -1469,6 +1504,81 @@ body.day-mode .emerg-grid{
     <!-- Tip / hint -->
     <div style="text-align:center;color:#7a9ab5;font-size:11px;margin-top:20px;">
       💡 השתמשו בנאב התחתון כדי לעבור בין החלקים
+    </div>
+    
+  </div>
+</div>
+
+<!-- PROGRESS TAB - Detailed Stats -->
+<div class="scr" id="tab-progress">
+  <div style="padding:16px;">
+    
+    <!-- Header -->
+    <div style="margin-bottom:18px;">
+      <div style="color:#D4A24E;font-size:13px;font-weight:700;letter-spacing:1px;margin-bottom:4px;">📊 ההתקדמות שלך</div>
+      <div style="color:#E8D9B8;font-size:22px;font-weight:800;">סטטיסטיקות מלאות</div>
+    </div>
+    
+    <!-- Big Stats Row -->
+    <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:18px;">
+      <div style="background:linear-gradient(135deg,#1F3147 0%,#243a55 100%);border:1px solid rgba(212,134,46,0.3);border-radius:12px;padding:14px 8px;text-align:center;">
+        <div style="font-size:28px;line-height:1;margin-bottom:4px;">🔥</div>
+        <div id="prog-streak-big" style="color:#D4862E;font-size:24px;font-weight:900;line-height:1;">0</div>
+        <div style="color:#a0b8c8;font-size:10px;font-weight:600;margin-top:3px;">ימים רצופים</div>
+      </div>
+      <div style="background:linear-gradient(135deg,#1F3147 0%,#243a55 100%);border:1px solid rgba(212,134,46,0.3);border-radius:12px;padding:14px 8px;text-align:center;">
+        <div style="font-size:28px;line-height:1;margin-bottom:4px;">📚</div>
+        <div id="prog-total-big" style="color:#D4862E;font-size:24px;font-weight:900;line-height:1;">0</div>
+        <div style="color:#a0b8c8;font-size:10px;font-weight:600;margin-top:3px;">משפטים</div>
+      </div>
+      <div style="background:linear-gradient(135deg,#1F3147 0%,#243a55 100%);border:1px solid rgba(212,134,46,0.3);border-radius:12px;padding:14px 8px;text-align:center;">
+        <div style="font-size:28px;line-height:1;margin-bottom:4px;">🎭</div>
+        <div id="prog-scen-big" style="color:#D4862E;font-size:24px;font-weight:900;line-height:1;">0</div>
+        <div style="color:#a0b8c8;font-size:10px;font-weight:600;margin-top:3px;">תרחישים</div>
+      </div>
+    </div>
+    
+    <!-- Daily Goal Card -->
+    <div style="background:linear-gradient(135deg,#18293E 0%,#1F3147 100%);border:1px solid rgba(29,158,117,0.3);border-radius:14px;padding:16px;margin-bottom:14px;">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;">
+        <div style="display:flex;align-items:center;gap:8px;">
+          <span style="font-size:18px;">🎯</span>
+          <span style="color:#1D9E75;font-size:13px;font-weight:700;">יעד יומי</span>
+        </div>
+        <button onclick="changeDailyGoal()" style="background:transparent;border:1px solid rgba(255,255,255,0.2);color:#a0b8c8;border-radius:8px;padding:4px 10px;font-size:11px;cursor:pointer;font-family:inherit;">⚙️ שנה יעד</button>
+      </div>
+      <div id="prog-daily-goal" style="color:#E8D9B8;font-size:15px;margin-bottom:8px;"></div>
+      <div style="height:8px;background:rgba(255,255,255,0.08);border-radius:4px;overflow:hidden;">
+        <div id="prog-goal-bar" style="height:100%;background:linear-gradient(90deg,#1D9E75,#0e5a3f);border-radius:4px;width:0%;transition:width 0.5s;"></div>
+      </div>
+    </div>
+    
+    <!-- Weekly Heatmap Detailed -->
+    <div style="background:linear-gradient(135deg,#18293E 0%,#1F3147 100%);border:1px solid rgba(212,162,78,0.25);border-radius:14px;padding:16px;margin-bottom:14px;">
+      <div style="display:flex;align-items:center;gap:8px;margin-bottom:12px;">
+        <span style="font-size:16px;">📅</span>
+        <span style="color:#D4A24E;font-size:12px;font-weight:700;letter-spacing:0.5px;">השבוע שלך</span>
+      </div>
+      <div id="prog-heatmap-detail" style="display:grid;grid-template-columns:repeat(7,1fr);gap:6px;margin-bottom:10px;"></div>
+      <div id="prog-week-summary" style="color:#a0b8c8;font-size:12px;text-align:center;"></div>
+    </div>
+    
+    <!-- Category Breakdown -->
+    <div style="background:linear-gradient(135deg,#18293E 0%,#1F3147 100%);border:1px solid rgba(212,162,78,0.25);border-radius:14px;padding:16px;margin-bottom:14px;">
+      <div style="display:flex;align-items:center;gap:8px;margin-bottom:12px;">
+        <span style="font-size:16px;">📊</span>
+        <span style="color:#D4A24E;font-size:12px;font-weight:700;letter-spacing:0.5px;">פילוח לפי קטגוריה</span>
+      </div>
+      <div id="prog-categories"></div>
+    </div>
+    
+    <!-- Activity Summary -->
+    <div style="background:linear-gradient(135deg,#18293E 0%,#1F3147 100%);border:1px solid rgba(212,162,78,0.25);border-radius:14px;padding:16px;margin-bottom:14px;">
+      <div style="display:flex;align-items:center;gap:8px;margin-bottom:12px;">
+        <span style="font-size:16px;">⚡</span>
+        <span style="color:#D4A24E;font-size:12px;font-weight:700;letter-spacing:0.5px;">סיכום פעילות</span>
+      </div>
+      <div id="prog-activity" style="color:#E8D9B8;font-size:14px;line-height:1.8;"></div>
     </div>
     
   </div>
@@ -1539,7 +1649,7 @@ body.day-mode .emerg-grid{
       </div>
     </div>
     
-    <div class="loading" id="cats-loading"><div style="text-align:center;padding:20px;"><div style="font-size:16px;color:#D4862E;margin-bottom:8px;">טוען...</div><div style="font-size:10px;color:#7a9ab5;opacity:0.6;">v20260602-1111</div></div></div>
+    <div class="loading" id="cats-loading"><div style="text-align:center;padding:20px;"><div style="font-size:16px;color:#D4862E;margin-bottom:8px;">טוען...</div><div style="font-size:10px;color:#7a9ab5;opacity:0.6;">v20260602-1559</div></div></div>
     <div class="cgrid" id="cgrid" style="display:none;"></div>
   </div>
   <div id="vlist" class="scr">
@@ -2137,41 +2247,120 @@ function renderHome(){
       }
     }
     
-    // 4. Progress
-    var progressStats = document.getElementById('home-progress-stats');
-    var progressBar = document.getElementById('home-progress-bar');
-    if (progressStats) {
-      var learned = JSON.parse(localStorage.getItem('learned_phrases') || '{}');
-      var practiced = JSON.parse(localStorage.getItem('practiced_phrases') || '{}');
-      var completed = JSON.parse(localStorage.getItem('completed_scenarios') || '{}');
-      
-      var learnedCount = Object.keys(learned).length;
-      var practicedCount = Object.keys(practiced).length;
-      var completedCount = Object.keys(completed).length;
-      
-      // This week
-      var now = new Date();
-      var weekAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
-      var thisWeek = 0;
-      for (var k in learned) {
-        try { if (new Date(learned[k]) >= weekAgo) thisWeek++; } catch(e) {}
+    // 4. Update 4 stats cubes
+    var learned = JSON.parse(localStorage.getItem('learned_phrases') || '{}');
+    var practiced = JSON.parse(localStorage.getItem('practiced_phrases') || '{}');
+    var completed = JSON.parse(localStorage.getItem('completed_scenarios') || '{}');
+    
+    var totalLearned = Object.keys(learned).length;
+    var todayStr = new Date().toDateString();
+    
+    // Cube 1: Streak (already calculated above)
+    var streakNum = document.getElementById('home-cube-streak-num');
+    if (streakNum) streakNum.textContent = streak;
+    
+    // Cube 2: Daily Goal (count phrases learned today)
+    var dailyGoal = parseInt(localStorage.getItem('daily_goal') || '5', 10);
+    var todayCount = 0;
+    for (var key in learned) {
+      try {
+        var d = new Date(learned[key]);
+        if (d.toDateString() === todayStr) todayCount++;
+      } catch(e) {}
+    }
+    // Add practices today
+    for (var key in practiced) {
+      try {
+        var d = new Date(practiced[key]);
+        if (d.toDateString() === todayStr) todayCount++;
+      } catch(e) {}
+    }
+    var goalNum = document.getElementById('home-cube-goal-num');
+    if (goalNum) {
+      var displayCount = Math.min(todayCount, dailyGoal);
+      goalNum.textContent = displayCount + '/' + dailyGoal;
+      // Highlight when goal completed
+      if (todayCount >= dailyGoal) {
+        goalNum.style.color = '#1D9E75';
       }
-      
-      var html = '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px;">';
-      html += '<span>📚 ' + learnedCount + ' משפטים נלמדו</span>';
-      if (thisWeek > 0) html += '<span style="color:#D4862E;">🔥 ' + thisWeek + ' השבוע</span>';
-      html += '</div>';
-      if (practicedCount > 0) html += '<div style="font-size:12px;color:#a0b8c8;">🎤 ' + practicedCount + ' תרגולי הגייה</div>';
-      if (completedCount > 0) html += '<div style="font-size:12px;color:#a0b8c8;">🎭 ' + completedCount + ' תרחישים הושלמו</div>';
-      
-      progressStats.innerHTML = html;
-      
-      // Progress bar - based on % of total DB
-      if (progressBar) {
-        var totalAvailable = (typeof DB !== 'undefined' && DB) ? DB.length : 100;
-        var percent = totalAvailable > 0 ? Math.min(100, Math.round((learnedCount / totalAvailable) * 100)) : 0;
-        progressBar.style.width = percent + '%';
+    }
+    
+    // Cube 3: Daily Score (60-100 based on activity)
+    var scoreNum = document.getElementById('home-cube-score-num');
+    if (scoreNum) {
+      if (todayCount === 0) {
+        scoreNum.textContent = '—';
+        scoreNum.style.fontSize = '20px';
+      } else {
+        // Score formula: base 60 + bonus for activity
+        var score = Math.min(100, 60 + (todayCount * 8));
+        scoreNum.textContent = score;
+        scoreNum.style.fontSize = '26px';
       }
+    }
+    
+    // Cube 4: Total Learned
+    var totalNum = document.getElementById('home-cube-total-num');
+    if (totalNum) totalNum.textContent = totalLearned;
+    
+    // 5. Weekly Heatmap (7 days)
+    var heatmap = document.getElementById('home-heatmap');
+    if (heatmap) {
+      var dayNames = ['א\'','ב\'','ג\'','ד\'','ה\'','ו\'','ש\''];
+      var heatHtml = '';
+      var today = new Date();
+      var dayOfWeek = today.getDay(); // 0 = Sunday
+      
+      // Show last 7 days starting from Sunday of current week
+      for (var i = 0; i < 7; i++) {
+        var dayDate = new Date(today.getTime() - (dayOfWeek - i) * 24 * 60 * 60 * 1000);
+        var dayStr = dayDate.toDateString();
+        var dayName = dayNames[i];
+        var isToday = (dayStr === todayStr);
+        var isFuture = dayDate > today;
+        
+        // Check if practiced this day
+        var practicedDay = false;
+        for (var k in learned) {
+          try {
+            if (new Date(learned[k]).toDateString() === dayStr) {
+              practicedDay = true; break;
+            }
+          } catch(e) {}
+        }
+        if (!practicedDay) {
+          for (var k in practiced) {
+            try {
+              if (new Date(practiced[k]).toDateString() === dayStr) {
+                practicedDay = true; break;
+              }
+            } catch(e) {}
+          }
+        }
+        
+        var bgColor, txtColor, borderColor;
+        if (isFuture) {
+          bgColor = 'rgba(255,255,255,0.03)';
+          txtColor = '#5a6b80';
+          borderColor = 'transparent';
+        } else if (practicedDay) {
+          bgColor = 'linear-gradient(135deg,#D4862E,#b87325)';
+          txtColor = '#fff';
+          borderColor = isToday ? '#D4A24E' : 'transparent';
+        } else {
+          bgColor = 'rgba(255,255,255,0.08)';
+          txtColor = '#7a9ab5';
+          borderColor = isToday ? '#D4A24E' : 'transparent';
+        }
+        
+        heatHtml += '<div style="background:' + bgColor + ';color:' + txtColor + ';border:2px solid ' + borderColor + ';border-radius:8px;padding:8px 4px;text-align:center;font-size:11px;font-weight:700;">';
+        heatHtml += '<div>' + dayName + '</div>';
+        if (isToday) {
+          heatHtml += '<div style="font-size:9px;margin-top:2px;opacity:0.85;">היום</div>';
+        }
+        heatHtml += '</div>';
+      }
+      heatmap.innerHTML = heatHtml;
     }
     
     // 5. Phrase of the day
@@ -2192,6 +2381,192 @@ function renderHome(){
       }
     }
   } catch(e) { console.warn('renderHome error:', e); }
+}
+
+function renderProgress(){
+  try {
+    var learned = JSON.parse(localStorage.getItem('learned_phrases') || '{}');
+    var practiced = JSON.parse(localStorage.getItem('practiced_phrases') || '{}');
+    var completed = JSON.parse(localStorage.getItem('completed_scenarios') || '{}');
+    var streak = parseInt(localStorage.getItem('streak_count') || '0', 10);
+    
+    var totalLearned = Object.keys(learned).length;
+    var totalScn = Object.keys(completed).length;
+    var totalPracticed = Object.keys(practiced).length;
+    
+    // Big stats
+    var elS = document.getElementById('prog-streak-big');
+    if (elS) elS.textContent = streak;
+    var elT = document.getElementById('prog-total-big');
+    if (elT) elT.textContent = totalLearned;
+    var elScn = document.getElementById('prog-scen-big');
+    if (elScn) elScn.textContent = totalScn;
+    
+    // Daily Goal
+    var dailyGoal = parseInt(localStorage.getItem('daily_goal') || '5', 10);
+    var todayStr = new Date().toDateString();
+    var todayCount = 0;
+    for (var key in learned) {
+      try { if (new Date(learned[key]).toDateString() === todayStr) todayCount++; } catch(e) {}
+    }
+    for (var key in practiced) {
+      try { if (new Date(practiced[key]).toDateString() === todayStr) todayCount++; } catch(e) {}
+    }
+    var goalEl = document.getElementById('prog-daily-goal');
+    if (goalEl) {
+      var progress = Math.min(todayCount, dailyGoal);
+      var status = todayCount >= dailyGoal ? '✅ השלמת את היעד היומי!' : 'תרגלת ' + progress + ' מתוך ' + dailyGoal + ' היום';
+      goalEl.innerHTML = '<div style="font-weight:700;color:#1D9E75;font-size:17px;margin-bottom:2px;">' + progress + ' / ' + dailyGoal + '</div><div style="font-size:13px;color:#a0b8c8;">' + status + '</div>';
+    }
+    var goalBar = document.getElementById('prog-goal-bar');
+    if (goalBar) {
+      var percent = dailyGoal > 0 ? Math.min(100, Math.round((todayCount / dailyGoal) * 100)) : 0;
+      goalBar.style.width = percent + '%';
+    }
+    
+    // Weekly Heatmap detailed
+    var heatEl = document.getElementById('prog-heatmap-detail');
+    var summaryEl = document.getElementById('prog-week-summary');
+    if (heatEl) {
+      var dayNames = ['א\'','ב\'','ג\'','ד\'','ה\'','ו\'','ש\''];
+      var today = new Date();
+      var dayOfWeek = today.getDay();
+      var weekActiveDays = 0;
+      var weekTotal = 0;
+      var html = '';
+      
+      for (var i = 0; i < 7; i++) {
+        var dayDate = new Date(today.getTime() - (dayOfWeek - i) * 24 * 60 * 60 * 1000);
+        var dayStr = dayDate.toDateString();
+        var dayName = dayNames[i];
+        var isToday = (dayStr === todayStr);
+        var isFuture = dayDate > today;
+        
+        var dayCount = 0;
+        for (var k in learned) {
+          try { if (new Date(learned[k]).toDateString() === dayStr) dayCount++; } catch(e) {}
+        }
+        for (var k in practiced) {
+          try { if (new Date(practiced[k]).toDateString() === dayStr) dayCount++; } catch(e) {}
+        }
+        
+        if (!isFuture && dayCount > 0) {
+          weekActiveDays++;
+          weekTotal += dayCount;
+        }
+        
+        var bgColor, txtColor, borderColor;
+        if (isFuture) {
+          bgColor = 'rgba(255,255,255,0.03)';
+          txtColor = '#5a6b80';
+          borderColor = 'transparent';
+        } else if (dayCount > 0) {
+          var intensity = Math.min(1, dayCount / 5);
+          bgColor = 'linear-gradient(135deg,#D4862E,#b87325)';
+          txtColor = '#fff';
+          borderColor = isToday ? '#D4A24E' : 'transparent';
+        } else {
+          bgColor = 'rgba(255,255,255,0.08)';
+          txtColor = '#7a9ab5';
+          borderColor = isToday ? '#D4A24E' : 'transparent';
+        }
+        
+        html += '<div style="background:' + bgColor + ';color:' + txtColor + ';border:2px solid ' + borderColor + ';border-radius:10px;padding:12px 4px;text-align:center;">';
+        html += '<div style="font-size:13px;font-weight:700;">' + dayName + '</div>';
+        if (dayCount > 0) {
+          html += '<div style="font-size:14px;font-weight:900;margin-top:4px;">' + dayCount + '</div>';
+        } else {
+          html += '<div style="font-size:14px;margin-top:4px;opacity:0.4;">—</div>';
+        }
+        if (isToday) {
+          html += '<div style="font-size:9px;margin-top:2px;opacity:0.85;font-weight:600;">היום</div>';
+        }
+        html += '</div>';
+      }
+      heatEl.innerHTML = html;
+      
+      if (summaryEl) {
+        summaryEl.textContent = '✨ ' + weekActiveDays + '/7 ימי תרגול | סה"כ ' + weekTotal + ' תרגולים השבוע';
+      }
+    }
+    
+    // Category breakdown
+    var catsEl = document.getElementById('prog-categories');
+    if (catsEl && typeof DB !== 'undefined' && DB) {
+      var catStats = {};
+      var catTotal = {};
+      // Count total per category in DB
+      DB.forEach(function(p){
+        var c = p.cat || 'אחר';
+        catTotal[c] = (catTotal[c] || 0) + 1;
+      });
+      // Count learned per category
+      DB.forEach(function(p){
+        var c = p.cat || 'אחר';
+        if (learned[p.id]) {
+          catStats[c] = (catStats[c] || 0) + 1;
+        }
+      });
+      
+      // Sort by percentage learned
+      var cats = Object.keys(catTotal).filter(function(c){return catStats[c] > 0;});
+      cats.sort(function(a,b){
+        var pa = catStats[a]/catTotal[a];
+        var pb = catStats[b]/catTotal[b];
+        return pb - pa;
+      });
+      
+      if (cats.length === 0) {
+        catsEl.innerHTML = '<div style="color:#7a9ab5;text-align:center;font-size:13px;padding:10px;">התחל ללמוד משפטים כדי לראות פילוח</div>';
+      } else {
+        var catHtml = '';
+        cats.slice(0, 6).forEach(function(c){
+          var learnedC = catStats[c] || 0;
+          var totalC = catTotal[c] || 1;
+          var pct = Math.round((learnedC / totalC) * 100);
+          catHtml += '<div style="margin-bottom:10px;">';
+          catHtml += '<div style="display:flex;justify-content:space-between;font-size:13px;margin-bottom:4px;">';
+          catHtml += '<span style="color:#E8D9B8;">' + c + '</span>';
+          catHtml += '<span style="color:#D4A24E;font-weight:700;">' + learnedC + '/' + totalC + '</span>';
+          catHtml += '</div>';
+          catHtml += '<div style="height:6px;background:rgba(255,255,255,0.08);border-radius:3px;overflow:hidden;">';
+          catHtml += '<div style="height:100%;background:linear-gradient(90deg,#D4A24E,#D4862E);width:' + pct + '%;border-radius:3px;"></div>';
+          catHtml += '</div>';
+          catHtml += '</div>';
+        });
+        catsEl.innerHTML = catHtml;
+      }
+    }
+    
+    // Activity Summary
+    var actEl = document.getElementById('prog-activity');
+    if (actEl) {
+      var html = '';
+      html += '<div>📚 משפטים נלמדו: <strong style="color:#D4862E;">' + totalLearned + '</strong></div>';
+      html += '<div>🎤 תרגולי הגייה: <strong style="color:#D4862E;">' + totalPracticed + '</strong></div>';
+      html += '<div>🎭 תרחישים הושלמו: <strong style="color:#D4862E;">' + totalScn + '</strong></div>';
+      html += '<div>🔥 רצף הכי ארוך: <strong style="color:#D4862E;">' + (localStorage.getItem('max_streak') || streak) + '</strong> ימים</div>';
+      actEl.innerHTML = html;
+    }
+    
+  } catch(e) { console.warn('renderProgress error:', e); }
+}
+
+function changeDailyGoal(){
+  try {
+    var current = parseInt(localStorage.getItem('daily_goal') || '5', 10);
+    var newGoal = prompt('מהו יעד התרגול היומי שלך? (3-20)', current);
+    if (newGoal) {
+      newGoal = parseInt(newGoal, 10);
+      if (newGoal >= 3 && newGoal <= 20) {
+        localStorage.setItem('daily_goal', newGoal);
+        renderProgress();
+        renderHome();
+      } else {
+        alert('היעד חייב להיות בין 3 ל-20');
+      }
+    }
+  } catch(e) { console.warn(e); }
 }
 
 function homeContinue(){
@@ -2343,7 +2718,7 @@ function bldCats(){
   if (!DB || DB.length === 0) {
     loadEl.innerHTML = '<div style="text-align:center;padding:20px;color:#D4862E;">' +
       'מתחבר לשרת...<br><br>' +
-      '<div style="font-size:11px;color:#7a9ab5;">v20260602-1111</div><br>' +
+      '<div style="font-size:11px;color:#7a9ab5;">v20260602-1559</div><br>' +
       '<button onclick="location.reload(true)" style="padding:10px 20px;background:#D4862E;color:#fff;border:none;border-radius:8px;font-family:inherit;cursor:pointer;font-weight:700;margin-top:10px;">🔄 רענן</button>' +
       '</div>';
     return;
@@ -3642,6 +4017,7 @@ function ST(t,el){
   document.getElementById('tab-'+t).className='scr on';
   curTab=t;
   if(t==='home')renderHome();
+  if(t==='progress')renderProgress();
   if(t==='qk')rQK();
   if(t==='fav'){rFav();rRecent();}
   if(t==='dict')renderDict();
@@ -5474,6 +5850,10 @@ try { renderHome(); } catch(_){}
     <div onclick="navToTab('nwf')" style="background:#1F3147;border-radius:10px;padding:14px 6px;text-align:center;cursor:pointer;">
       <div style="font-size:22px;margin-bottom:4px;">🆕</div>
       <div style="color:#E8D9B8;font-size:11px;font-weight:600;">חדש</div>
+    </div>
+    <div onclick="navToTab('progress')" style="background:linear-gradient(135deg,rgba(29,158,117,0.15),rgba(29,158,117,0.05));border:1px solid rgba(29,158,117,0.4);border-radius:10px;padding:14px 6px;text-align:center;cursor:pointer;">
+      <div style="font-size:22px;margin-bottom:4px;">📊</div>
+      <div style="color:#1D9E75;font-size:11px;font-weight:600;">התקדמות</div>
     </div>
     <div onclick="openAdminFromMenu()" style="background:linear-gradient(135deg,rgba(212,162,78,0.15),rgba(212,162,78,0.05));border:1px solid rgba(212,162,78,0.4);border-radius:10px;padding:14px 6px;text-align:center;cursor:pointer;">
       <div style="font-size:22px;margin-bottom:4px;">🔒</div>
