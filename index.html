@@ -1651,7 +1651,7 @@ body.day-mode .emerg-grid{
       </div>
     </div>
     
-    <div class="loading" id="cats-loading"><div style="text-align:center;padding:20px;"><div style="font-size:16px;color:#D4862E;margin-bottom:8px;">טוען...</div><div style="font-size:10px;color:#7a9ab5;opacity:0.6;">v20260604-1049</div></div></div>
+    <div class="loading" id="cats-loading"><div style="text-align:center;padding:20px;"><div style="font-size:16px;color:#D4862E;margin-bottom:8px;">טוען...</div><div style="font-size:10px;color:#7a9ab5;opacity:0.6;">v20260604-1416</div></div></div>
     <div class="cgrid" id="cgrid" style="display:none;"></div>
   </div>
   <div id="vlist" class="scr">
@@ -2808,7 +2808,7 @@ function bldCats(){
   if (!DB || DB.length === 0) {
     loadEl.innerHTML = '<div style="text-align:center;padding:20px;color:#D4862E;">' +
       'מתחבר לשרת...<br><br>' +
-      '<div style="font-size:11px;color:#7a9ab5;">v20260604-1049</div><br>' +
+      '<div style="font-size:11px;color:#7a9ab5;">v20260604-1416</div><br>' +
       '<button onclick="location.reload(true)" style="padding:10px 20px;background:#D4862E;color:#fff;border:none;border-radius:8px;font-family:inherit;cursor:pointer;font-weight:700;margin-top:10px;">🔄 רענן</button>' +
       '</div>';
     return;
@@ -3435,11 +3435,16 @@ function scnRecCompare(idx){
   try {
     // Play professional, then user's recording, with a small pause between
     var p = _scnSteps[idx];
-    if (!p || !p.audio_url) {
+    var audioUrl = p && (p.audio || p.audio_url);
+    if (!audioUrl) {
       alert('אין הקלטה מקצועית למשפט הזה');
       return;
     }
-    var prof = new Audio(p.audio_url);
+    if (!_scnRecBlob) {
+      alert('הקלט את עצמך קודם');
+      return;
+    }
+    var prof = new Audio(audioUrl);
     prof.onended = function(){
       setTimeout(function(){
         if (_scnRecBlob) {
