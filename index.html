@@ -1651,7 +1651,7 @@ body.day-mode .emerg-grid{
       </div>
     </div>
     
-    <div class="loading" id="cats-loading"><div style="text-align:center;padding:20px;"><div style="font-size:16px;color:#D4862E;margin-bottom:8px;">טוען...</div><div style="font-size:10px;color:#7a9ab5;opacity:0.6;">v20260604-1041</div></div></div>
+    <div class="loading" id="cats-loading"><div style="text-align:center;padding:20px;"><div style="font-size:16px;color:#D4862E;margin-bottom:8px;">טוען...</div><div style="font-size:10px;color:#7a9ab5;opacity:0.6;">v20260604-1049</div></div></div>
     <div class="cgrid" id="cgrid" style="display:none;"></div>
   </div>
   <div id="vlist" class="scr">
@@ -2808,7 +2808,7 @@ function bldCats(){
   if (!DB || DB.length === 0) {
     loadEl.innerHTML = '<div style="text-align:center;padding:20px;color:#D4862E;">' +
       'מתחבר לשרת...<br><br>' +
-      '<div style="font-size:11px;color:#7a9ab5;">v20260604-1041</div><br>' +
+      '<div style="font-size:11px;color:#7a9ab5;">v20260604-1049</div><br>' +
       '<button onclick="location.reload(true)" style="padding:10px 20px;background:#D4862E;color:#fff;border:none;border-radius:8px;font-family:inherit;cursor:pointer;font-weight:700;margin-top:10px;">🔄 רענן</button>' +
       '</div>';
     return;
@@ -3331,6 +3331,136 @@ function scnOpen(scnId){
   } catch(e) { console.warn('scnOpen error:', e); }
 }
 
+// === Scenario Practice Recording ===
+var _scnRec = null;
+var _scnRecChunks = [];
+var _scnRecBlob = null;
+var _scnRecStream = null;
+
+function renderScnPractice(idx){
+  var html = '<div style="margin-top:10px;padding:12px;background:rgba(29,158,117,0.08);border:1px solid rgba(29,158,117,0.3);border-radius:10px;">';
+  html += '<div style="color:#1D9E75;font-size:12px;font-weight:700;margin-bottom:8px;text-align:center;">🎯 התרגול שלך</div>';
+  
+  // Recording state
+  var hasRec = !!_scnRecBlob;
+  
+  html += '<div id="scn-prac-idle" style="display:' + (hasRec ? 'none' : 'block') + ';text-align:center;">';
+  html += '<button onclick="scnRecStart()" style="background:linear-gradient(135deg,#1D9E75 0%,#0e5a3f 100%);border:none;color:#fff;border-radius:10px;padding:10px 18px;font-size:13px;font-weight:700;cursor:pointer;font-family:inherit;">🎤 הקלט את עצמך</button>';
+  html += '</div>';
+  
+  html += '<div id="scn-prac-recording" style="display:none;text-align:center;">';
+  html += '<div style="color:#e74c3c;font-size:14px;font-weight:700;margin-bottom:6px;">● מקליט... <span id="scn-rec-timer">0</span>"</div>';
+  html += '<button onclick="scnRecStop()" style="background:#e74c3c;border:none;color:#fff;border-radius:10px;padding:8px 16px;font-size:12px;font-weight:700;cursor:pointer;font-family:inherit;">⏹ עצור</button>';
+  html += '</div>';
+  
+  html += '<div id="scn-prac-compare" style="display:' + (hasRec ? 'flex' : 'none') + ';gap:6px;flex-wrap:wrap;justify-content:center;">';
+  html += '<button onclick="scnPlayBubble(' + idx + ',this)" style="background:#1F3147;border:1px solid #D4A24E;color:#D4A24E;border-radius:8px;padding:7px 12px;font-size:11px;font-weight:700;cursor:pointer;font-family:inherit;">▶ מקצועי</button>';
+  html += '<button onclick="scnRecPlay()" style="background:#1F3147;border:1px solid #1D9E75;color:#1D9E75;border-radius:8px;padding:7px 12px;font-size:11px;font-weight:700;cursor:pointer;font-family:inherit;">▶ שלי</button>';
+  html += '<button onclick="scnRecCompare(' + idx + ')" style="background:linear-gradient(135deg,#D4A24E 0%,#b8862e 100%);border:none;color:#18293E;border-radius:8px;padding:7px 12px;font-size:11px;font-weight:700;cursor:pointer;font-family:inherit;">🔁 השווה</button>';
+  html += '<button onclick="scnRecReset()" style="background:transparent;border:1px solid #7a9ab5;color:#a0b8c8;border-radius:8px;padding:7px 12px;font-size:11px;font-weight:700;cursor:pointer;font-family:inherit;">🔄 שוב</button>';
+  html += '</div>';
+  
+  html += '</div>';
+  return html;
+}
+
+async function scnRecStart(){
+  try {
+    if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+      alert('הדפדפן שלך לא תומך בהקלטה');
+      return;
+    }
+    _scnRecStream = await navigator.mediaDevices.getUserMedia({audio: true});
+    _scnRecChunks = [];
+    _scnRec = new MediaRecorder(_scnRecStream);
+    
+    _scnRec.ondataavailable = function(e){
+      if (e.data.size > 0) _scnRecChunks.push(e.data);
+    };
+    _scnRec.onstop = function(){
+      _scnRecBlob = new Blob(_scnRecChunks, {type: 'audio/webm'});
+      if (_scnRecStream) _scnRecStream.getTracks().forEach(function(t){ t.stop(); });
+      // Track practice
+      try {
+        var practiced = JSON.parse(localStorage.getItem('practiced_phrases') || '{}');
+        practiced['scn-' + _scnCurrent + '-' + (window._scnInteractiveIdx || 0)] = new Date().toISOString();
+        localStorage.setItem('practiced_phrases', JSON.stringify(practiced));
+      } catch(e) {}
+      renderScnChat();
+    };
+    _scnRec.start();
+    
+    document.getElementById('scn-prac-idle').style.display = 'none';
+    document.getElementById('scn-prac-recording').style.display = 'block';
+    
+    // Timer
+    var seconds = 0;
+    var timerEl = document.getElementById('scn-rec-timer');
+    if (timerEl) timerEl.textContent = '0';
+    window._scnTimerInt = setInterval(function(){
+      seconds++;
+      if (timerEl) timerEl.textContent = seconds;
+      if (seconds >= 30) {
+        scnRecStop();
+      }
+    }, 1000);
+  } catch(e) {
+    console.warn('scnRecStart error:', e);
+    alert('שגיאה בהקלטה. ייתכן שצריך לאשר גישה למיקרופון.');
+  }
+}
+
+function scnRecStop(){
+  try {
+    if (_scnRec && _scnRec.state === 'recording') {
+      _scnRec.stop();
+    }
+    if (window._scnTimerInt) {
+      clearInterval(window._scnTimerInt);
+      window._scnTimerInt = null;
+    }
+  } catch(e) { console.warn(e); }
+}
+
+function scnRecPlay(){
+  try {
+    if (!_scnRecBlob) return;
+    var url = URL.createObjectURL(_scnRecBlob);
+    var audio = new Audio(url);
+    audio.play();
+  } catch(e) { console.warn(e); }
+}
+
+function scnRecCompare(idx){
+  try {
+    // Play professional, then user's recording, with a small pause between
+    var p = _scnSteps[idx];
+    if (!p || !p.audio_url) {
+      alert('אין הקלטה מקצועית למשפט הזה');
+      return;
+    }
+    var prof = new Audio(p.audio_url);
+    prof.onended = function(){
+      setTimeout(function(){
+        if (_scnRecBlob) {
+          var url = URL.createObjectURL(_scnRecBlob);
+          var mine = new Audio(url);
+          mine.play();
+        }
+      }, 400);
+    };
+    prof.play();
+  } catch(e) { console.warn(e); }
+}
+
+function scnRecReset(){
+  try {
+    _scnRecBlob = null;
+    _scnRecChunks = [];
+    renderScnChat();
+  } catch(e) { console.warn(e); }
+}
+
 function scnSetMode(mode){
   try {
     window._scnMode = mode;
@@ -3356,8 +3486,10 @@ function scnSetMode(mode){
       if (nextRow) nextRow.style.display = 'block';
       if (progressEl) progressEl.style.display = 'block';
       
-      // Reset interactive index
+      // Reset interactive index and recording
       window._scnInteractiveIdx = 0;
+      _scnRecBlob = null;
+      _scnRecChunks = [];
     } else {
       // Continuous mode - default
       if (continuousBtn) {
@@ -3383,6 +3515,9 @@ function scnNextStep(){
   try {
     if (typeof window._scnInteractiveIdx === 'undefined') window._scnInteractiveIdx = 0;
     window._scnInteractiveIdx++;
+    // Reset recording for new step
+    _scnRecBlob = null;
+    _scnRecChunks = [];
     
     if (window._scnInteractiveIdx >= _scnSteps.length) {
       // Reached the end
@@ -3429,6 +3564,7 @@ function renderScnChat(){
       // In interactive mode, only show bubbles up to current index
       if (mode === 'interactive' && idx > maxIdx) return;
       var isCivilian = (p.tags || '').indexOf('civilian') !== -1;
+      var isCurrentInteractive = (mode === 'interactive' && idx === maxIdx);
       
       // WhatsApp-style: soldier (you) on right with orange, civilian on left with green
       if (isCivilian) {
@@ -3444,6 +3580,7 @@ function renderScnChat(){
         html += '<span class="scn-step-num">' + (idx + 1) + '/' + _scnSteps.length + '</span>';
         html += '</div>';
         html += '</div>';
+        if (isCurrentInteractive) html += renderScnPractice(idx);
         html += '</div>';
       } else {
         // Soldier (you) bubble - right side, orange like outgoing WhatsApp
@@ -3458,6 +3595,7 @@ function renderScnChat(){
         html += '<span class="scn-step-num">' + (idx + 1) + '/' + _scnSteps.length + '</span>';
         html += '</div>';
         html += '</div>';
+        if (isCurrentInteractive) html += renderScnPractice(idx);
         html += '</div>';
       }
     });
