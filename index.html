@@ -1651,7 +1651,7 @@ body.day-mode .emerg-grid{
       </div>
     </div>
     
-    <div class="loading" id="cats-loading"><div style="text-align:center;padding:20px;"><div style="font-size:16px;color:#D4862E;margin-bottom:8px;">טוען...</div><div style="font-size:10px;color:#7a9ab5;opacity:0.6;">v20260604-1028</div></div></div>
+    <div class="loading" id="cats-loading"><div style="text-align:center;padding:20px;"><div style="font-size:16px;color:#D4862E;margin-bottom:8px;">טוען...</div><div style="font-size:10px;color:#7a9ab5;opacity:0.6;">v20260604-1041</div></div></div>
     <div class="cgrid" id="cgrid" style="display:none;"></div>
   </div>
   <div id="vlist" class="scr">
@@ -1852,11 +1852,30 @@ body.day-mode .emerg-grid{
       <div id="scn-progress" style="color:#7a9ab5;font-size:12px;"></div>
     </div>
     
-    <!-- Play all button -->
+    <!-- Mode toggle -->
+    <div style="display:flex;gap:8px;margin-bottom:14px;">
+      <button id="scn-mode-continuous" onclick="scnSetMode('continuous')" style="flex:1;background:linear-gradient(135deg,#D4A24E 0%,#b8862e 100%);border:none;color:#18293E;border-radius:10px;padding:10px 8px;font-size:12px;font-weight:700;cursor:pointer;font-family:inherit;">📜 שיחה מלאה</button>
+      <button id="scn-mode-interactive" onclick="scnSetMode('interactive')" style="flex:1;background:transparent;border:1px solid rgba(29,158,117,0.4);color:#1D9E75;border-radius:10px;padding:10px 8px;font-size:12px;font-weight:700;cursor:pointer;font-family:inherit;">🎯 מצב למידה</button>
+    </div>
+    
+    <!-- Play all button - shown in continuous mode -->
     <button id="scn-playall-btn" onclick="scnPlayAll()" style="width:100%;background:linear-gradient(135deg,#D4A24E 0%,#b8862e 100%);border:none;color:#18293E;border-radius:12px;padding:14px;font-size:14px;font-weight:700;cursor:pointer;font-family:inherit;margin-bottom:18px;box-shadow:0 2px 8px rgba(212,162,78,0.3);">▶ השמע את כל השיחה</button>
+    
+    <!-- Interactive step indicator - shown in interactive mode -->
+    <div id="scn-interactive-progress" style="display:none;background:linear-gradient(135deg,#18293E 0%,#1F3147 100%);border:1px solid rgba(29,158,117,0.3);border-radius:12px;padding:12px;margin-bottom:14px;text-align:center;">
+      <div id="scn-step-counter" style="color:#1D9E75;font-size:13px;font-weight:700;margin-bottom:6px;">שלב 1 מתוך 1</div>
+      <div style="height:6px;background:rgba(255,255,255,0.08);border-radius:3px;overflow:hidden;">
+        <div id="scn-step-bar" style="height:100%;background:linear-gradient(90deg,#1D9E75,#0e5a3f);border-radius:3px;width:0%;transition:width 0.4s;"></div>
+      </div>
+    </div>
     
     <!-- Chat bubbles container -->
     <div id="scn-chat" style="display:flex;flex-direction:column;gap:12px;"></div>
+    
+    <!-- Interactive Next button - shown only in interactive mode -->
+    <div id="scn-next-row" style="display:none;margin-top:18px;text-align:center;">
+      <button id="scn-next-btn" onclick="scnNextStep()" style="background:linear-gradient(135deg,#1D9E75 0%,#0e5a3f 100%);border:none;color:#fff;border-radius:12px;padding:14px 32px;font-size:15px;font-weight:700;cursor:pointer;font-family:inherit;box-shadow:0 4px 12px rgba(29,158,117,0.4);">✅ הבא ◀</button>
+    </div>
     
     <!-- Done message at the end -->
     <div id="scn-done-card" style="display:none;margin-top:20px;padding:20px 16px;background:linear-gradient(135deg,rgba(29,158,117,0.15) 0%,rgba(29,158,117,0.05) 100%);border:1px solid #1D9E75;border-radius:12px;text-align:center;">
@@ -2789,7 +2808,7 @@ function bldCats(){
   if (!DB || DB.length === 0) {
     loadEl.innerHTML = '<div style="text-align:center;padding:20px;color:#D4862E;">' +
       'מתחבר לשרת...<br><br>' +
-      '<div style="font-size:11px;color:#7a9ab5;">v20260604-1028</div><br>' +
+      '<div style="font-size:11px;color:#7a9ab5;">v20260604-1041</div><br>' +
       '<button onclick="location.reload(true)" style="padding:10px 20px;background:#D4862E;color:#fff;border:none;border-radius:8px;font-family:inherit;cursor:pointer;font-weight:700;margin-top:10px;">🔄 רענן</button>' +
       '</div>';
     return;
@@ -3287,6 +3306,8 @@ function scnOpen(scnId){
     _scnCurrent = scnId;
     _scnSteps = steps;
     _scnIdx = 0;
+    window._scnMode = 'continuous';  // Default to continuous
+    window._scnInteractiveIdx = 0;
     // Track for "continue where you left off"
     try { localStorage.setItem('last_scenario_id', scnId); } catch(e) {}
     
@@ -3302,8 +3323,85 @@ function scnOpen(scnId){
     }
     document.getElementById('scn-title').textContent = (foundScn ? foundScn.icon + ' ' + foundScn.title : scnId);
     
-    renderScnChat();
+    // Reset next button state
+    var nextBtn = document.getElementById('scn-next-btn');
+    if (nextBtn) { nextBtn.textContent = '✅ הבא ◀'; nextBtn.disabled = false; nextBtn.style.background = 'linear-gradient(135deg,#1D9E75 0%,#0e5a3f 100%)'; }
+    
+    scnSetMode('continuous');
   } catch(e) { console.warn('scnOpen error:', e); }
+}
+
+function scnSetMode(mode){
+  try {
+    window._scnMode = mode;
+    var continuousBtn = document.getElementById('scn-mode-continuous');
+    var interactiveBtn = document.getElementById('scn-mode-interactive');
+    var playallBtn = document.getElementById('scn-playall-btn');
+    var nextRow = document.getElementById('scn-next-row');
+    var progressEl = document.getElementById('scn-interactive-progress');
+    
+    if (mode === 'interactive') {
+      // Highlight interactive button
+      if (interactiveBtn) {
+        interactiveBtn.style.background = 'linear-gradient(135deg,#1D9E75 0%,#0e5a3f 100%)';
+        interactiveBtn.style.color = '#fff';
+        interactiveBtn.style.border = 'none';
+      }
+      if (continuousBtn) {
+        continuousBtn.style.background = 'transparent';
+        continuousBtn.style.color = '#D4A24E';
+        continuousBtn.style.border = '1px solid rgba(212,162,78,0.4)';
+      }
+      if (playallBtn) playallBtn.style.display = 'none';
+      if (nextRow) nextRow.style.display = 'block';
+      if (progressEl) progressEl.style.display = 'block';
+      
+      // Reset interactive index
+      window._scnInteractiveIdx = 0;
+    } else {
+      // Continuous mode - default
+      if (continuousBtn) {
+        continuousBtn.style.background = 'linear-gradient(135deg,#D4A24E 0%,#b8862e 100%)';
+        continuousBtn.style.color = '#18293E';
+        continuousBtn.style.border = 'none';
+      }
+      if (interactiveBtn) {
+        interactiveBtn.style.background = 'transparent';
+        interactiveBtn.style.color = '#1D9E75';
+        interactiveBtn.style.border = '1px solid rgba(29,158,117,0.4)';
+      }
+      if (playallBtn) playallBtn.style.display = 'block';
+      if (nextRow) nextRow.style.display = 'none';
+      if (progressEl) progressEl.style.display = 'none';
+    }
+    
+    renderScnChat();
+  } catch(e) { console.warn('scnSetMode error:', e); }
+}
+
+function scnNextStep(){
+  try {
+    if (typeof window._scnInteractiveIdx === 'undefined') window._scnInteractiveIdx = 0;
+    window._scnInteractiveIdx++;
+    
+    if (window._scnInteractiveIdx >= _scnSteps.length) {
+      // Reached the end
+      window._scnInteractiveIdx = _scnSteps.length - 1;
+      var nextBtn = document.getElementById('scn-next-btn');
+      if (nextBtn) {
+        nextBtn.textContent = '🎉 סיימת!';
+        nextBtn.style.background = 'linear-gradient(135deg,#D4862E 0%,#b87325 100%)';
+        nextBtn.disabled = true;
+      }
+    }
+    renderScnChat();
+    
+    // Scroll to the latest bubble
+    setTimeout(function(){
+      var lastBubble = document.querySelector('.scn-bubble-row:last-of-type');
+      if (lastBubble) lastBubble.scrollIntoView({behavior: 'smooth', block: 'center'});
+    }, 100);
+  } catch(e) { console.warn('scnNextStep error:', e); }
 }
 
 function renderScnChat(){
@@ -3315,8 +3413,21 @@ function renderScnChat(){
     // Update header
     document.getElementById('scn-progress').textContent = _scnSteps.length + ' שלבים בשיחה';
     
+    var mode = window._scnMode || 'continuous';
+    var maxIdx = (mode === 'interactive') ? (window._scnInteractiveIdx || 0) : (_scnSteps.length - 1);
+    
+    // Update interactive progress bar
+    if (mode === 'interactive') {
+      var counter = document.getElementById('scn-step-counter');
+      var bar = document.getElementById('scn-step-bar');
+      if (counter) counter.textContent = 'שלב ' + (maxIdx + 1) + ' מתוך ' + _scnSteps.length;
+      if (bar) bar.style.width = (((maxIdx + 1) / _scnSteps.length) * 100) + '%';
+    }
+    
     var html = '';
     _scnSteps.forEach(function(p, idx){
+      // In interactive mode, only show bubbles up to current index
+      if (mode === 'interactive' && idx > maxIdx) return;
       var isCivilian = (p.tags || '').indexOf('civilian') !== -1;
       
       // WhatsApp-style: soldier (you) on right with orange, civilian on left with green
@@ -3353,10 +3464,11 @@ function renderScnChat(){
     
     chatEl.innerHTML = html;
     
-    // Show done card
+    // Show done card - in continuous mode always, in interactive only when reached last step
     var doneCard = document.getElementById('scn-done-card');
+    var showDone = (mode !== 'interactive') || (maxIdx >= _scnSteps.length - 1);
     if (doneCard) {
-      doneCard.style.display = 'block';
+      doneCard.style.display = showDone ? 'block' : 'none';
       document.getElementById('scn-done-text').textContent = 'תרגלת ' + _scnSteps.length + ' משפטים בשיחה הזו';
     }
   } catch(e) { console.warn('renderScnChat error:', e); }
