@@ -1711,7 +1711,7 @@ body.day-mode .emerg-grid{
       </div>
     </div>
     
-    <div class="loading" id="cats-loading"><div style="text-align:center;padding:20px;"><div style="font-size:16px;color:#D4862E;margin-bottom:8px;">טוען...</div><div style="font-size:10px;color:#7a9ab5;opacity:0.6;">v20260604-1552</div></div></div>
+    <div class="loading" id="cats-loading"><div style="text-align:center;padding:20px;"><div style="font-size:16px;color:#D4862E;margin-bottom:8px;">טוען...</div><div style="font-size:10px;color:#7a9ab5;opacity:0.6;">v20260604-1613</div></div></div>
     <div class="cgrid" id="cgrid" style="display:none;"></div>
   </div>
   <div id="vlist" class="scr">
@@ -2898,7 +2898,7 @@ function bldCats(){
   if (!DB || DB.length === 0) {
     loadEl.innerHTML = '<div style="text-align:center;padding:20px;color:#D4862E;">' +
       'מתחבר לשרת...<br><br>' +
-      '<div style="font-size:11px;color:#7a9ab5;">v20260604-1552</div><br>' +
+      '<div style="font-size:11px;color:#7a9ab5;">v20260604-1613</div><br>' +
       '<button onclick="location.reload(true)" style="padding:10px 20px;background:#D4862E;color:#fff;border:none;border-radius:8px;font-family:inherit;cursor:pointer;font-weight:700;margin-top:10px;">🔄 רענן</button>' +
       '</div>';
     return;
@@ -2930,9 +2930,109 @@ function opC(cat,special){
     document.getElementById('litems').innerHTML=cats.map(c=>`
       <div class="li" onclick="opNavyList('${c}')"><div class="lt">⚓ ${c}</div><div class="la">‹</div></div>`).join('') || '<div class="empty">אין עדיין</div>';
   } else {
-    rItems(DB.filter(p=>p.cat===cat),document.getElementById('litems'),'');
+    // Regular category - add Learning Mode button at top
+    const catPhrases = DB.filter(p=>p.cat===cat);
+    const learned = JSON.parse(localStorage.getItem('learned_phrases') || '{}');
+    const learnedInCat = catPhrases.filter(p=>learned[p.id]).length;
+    const totalInCat = catPhrases.length;
+    const pct = totalInCat > 0 ? Math.round((learnedInCat/totalInCat)*100) : 0;
+    
+    // Build the Learning Mode card
+    let learnCard = '';
+    if (totalInCat > 0) {
+      learnCard = `
+        <div onclick="startCatLearn('${cat.replace(/'/g,"\\'")}')" style="background:linear-gradient(135deg,#1D9E75 0%,#0e5a3f 100%);border-radius:14px;padding:14px;margin-bottom:14px;cursor:pointer;box-shadow:0 4px 12px rgba(29,158,117,0.3);">
+          <div style="display:flex;align-items:center;gap:10px;margin-bottom:8px;">
+            <div style="font-size:24px;">🎯</div>
+            <div>
+              <div style="color:#fff;font-size:15px;font-weight:700;">התחל מצב למידה</div>
+              <div style="color:rgba(255,255,255,0.85);font-size:12px;">תרגל את כל הקטגוריה שלב-שלב</div>
+            </div>
+          </div>
+          <div style="height:6px;background:rgba(255,255,255,0.2);border-radius:3px;overflow:hidden;margin-top:8px;">
+            <div style="height:100%;background:#fff;width:${pct}%;border-radius:3px;"></div>
+          </div>
+          <div style="color:rgba(255,255,255,0.95);font-size:11px;margin-top:6px;text-align:left;">${learnedInCat}/${totalInCat} משפטים נלמדו</div>
+        </div>
+      `;
+    }
+    
+    // Render category items
+    const target = document.getElementById('litems');
+    target.innerHTML = '';
+    // Insert learning card first
+    if (learnCard) {
+      const wrapper = document.createElement('div');
+      wrapper.innerHTML = learnCard;
+      target.appendChild(wrapper.firstElementChild);
+    }
+    // Then add the items
+    const itemsContainer = document.createElement('div');
+    rItems(catPhrases, itemsContainer, '');
+    Array.from(itemsContainer.children).forEach(child => target.appendChild(child));
   }
   shV('vlist');
+}
+
+function startCatLearn(cat){
+  try {
+    if (!DB) return;
+    // Get all phrases in the category
+    var catPhrases = DB.filter(function(p){ return p.cat === cat; });
+    if (catPhrases.length === 0) {
+      alert('אין משפטים בקטגוריה זו');
+      return;
+    }
+    
+    // Setup as if it's a scenario
+    _scnSteps = catPhrases.map(function(p){
+      return {
+        id: p.id,
+        he: p.he,
+        trans: p.trans,
+        ar: p.ar,
+        audio: p.audio_url || p.audio,  // Map audio_url to audio for scn compatibility
+        tags: 'soldier'  // All military phrases - soldier color
+      };
+    });
+    _scnCurrent = '🎯 ' + cat;
+    _scnIdx = 0;
+    window._scnMode = 'interactive';  // Auto-start interactive mode
+    window._scnInteractiveIdx = 0;
+    
+    // Navigate to scenarios tab and show the dialogue
+    if (typeof navToTab === 'function') {
+      navToTab('scn');
+    }
+    
+    // After tab switch, show dialogue view
+    setTimeout(function(){
+      // Hide the grid, show dialogue
+      var gridView = document.getElementById('scn-grid-view');
+      var dialogueView = document.getElementById('scn-dialogue-view');
+      if (gridView) gridView.style.display = 'none';
+      if (dialogueView) dialogueView.style.display = 'block';
+      
+      // Set title
+      var titleEl = document.getElementById('scn-title');
+      if (titleEl) titleEl.textContent = '🎯 ' + cat;
+      
+      // Reset next button
+      var nextBtn = document.getElementById('scn-next-btn');
+      if (nextBtn) { 
+        nextBtn.textContent = '✅ הבא ◀'; 
+        nextBtn.disabled = false; 
+        nextBtn.style.background = 'linear-gradient(135deg,#1D9E75 0%,#0e5a3f 100%)'; 
+      }
+      
+      // Set to interactive mode and render
+      if (typeof scnSetMode === 'function') {
+        scnSetMode('interactive');
+      } else if (typeof renderScnChat === 'function') {
+        renderScnChat();
+      }
+    }, 100);
+  } catch(e) { console.warn('startCatLearn error:', e); alert('שגיאה בהפעלת מצב למידה'); }
 }
 
 function opAnnounceList(cat){
