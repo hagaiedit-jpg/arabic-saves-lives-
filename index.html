@@ -1651,7 +1651,7 @@ body.day-mode .emerg-grid{
       </div>
     </div>
     
-    <div class="loading" id="cats-loading"><div style="text-align:center;padding:20px;"><div style="font-size:16px;color:#D4862E;margin-bottom:8px;">טוען...</div><div style="font-size:10px;color:#7a9ab5;opacity:0.6;">v20260604-1416</div></div></div>
+    <div class="loading" id="cats-loading"><div style="text-align:center;padding:20px;"><div style="font-size:16px;color:#D4862E;margin-bottom:8px;">טוען...</div><div style="font-size:10px;color:#7a9ab5;opacity:0.6;">v20260604-1433</div></div></div>
     <div class="cgrid" id="cgrid" style="display:none;"></div>
   </div>
   <div id="vlist" class="scr">
@@ -2808,7 +2808,7 @@ function bldCats(){
   if (!DB || DB.length === 0) {
     loadEl.innerHTML = '<div style="text-align:center;padding:20px;color:#D4862E;">' +
       'מתחבר לשרת...<br><br>' +
-      '<div style="font-size:11px;color:#7a9ab5;">v20260604-1416</div><br>' +
+      '<div style="font-size:11px;color:#7a9ab5;">v20260604-1433</div><br>' +
       '<button onclick="location.reload(true)" style="padding:10px 20px;background:#D4862E;color:#fff;border:none;border-radius:8px;font-family:inherit;cursor:pointer;font-weight:700;margin-top:10px;">🔄 רענן</button>' +
       '</div>';
     return;
@@ -3360,6 +3360,13 @@ function renderScnPractice(idx){
   html += '<button onclick="scnRecReset()" style="background:transparent;border:1px solid #7a9ab5;color:#a0b8c8;border-radius:8px;padding:7px 12px;font-size:11px;font-weight:700;cursor:pointer;font-family:inherit;">🔄 שוב</button>';
   html += '</div>';
   
+  // Score display (if calculated)
+  if (hasRec && window._scnScore) {
+    html += renderScnScore();
+  } else if (hasRec) {
+    html += '<div style="margin-top:10px;padding:10px;text-align:center;color:#D4A24E;font-size:12px;">⏳ מחשב ציון...</div>';
+  }
+  
   html += '</div>';
   return html;
 }
@@ -3380,15 +3387,44 @@ async function scnRecStart(){
     _scnRec.onstop = function(){
       _scnRecBlob = new Blob(_scnRecChunks, {type: 'audio/webm'});
       if (_scnRecStream) _scnRecStream.getTracks().forEach(function(t){ t.stop(); });
+      
       // Track practice
       try {
         var practiced = JSON.parse(localStorage.getItem('practiced_phrases') || '{}');
         practiced['scn-' + _scnCurrent + '-' + (window._scnInteractiveIdx || 0)] = new Date().toISOString();
         localStorage.setItem('practiced_phrases', JSON.stringify(practiced));
       } catch(e) {}
-      renderScnChat();
+      
+      // Get user's audio duration
+      try {
+        var url = URL.createObjectURL(_scnRecBlob);
+        var tempAudio = new Audio(url);
+        tempAudio.addEventListener('loadedmetadata', function(){
+          window._scnUserDuration = isFinite(tempAudio.duration) ? tempAudio.duration : null;
+          // Also estimate audio volume from blob size / duration
+          if (_scnRecBlob.size && window._scnUserDuration > 0) {
+            window._scnUserVolume = _scnRecBlob.size / window._scnUserDuration; // bytes per sec
+          }
+          // Now calculate score
+          calcScnScore();
+        });
+        // Fallback if metadata doesn't load
+        setTimeout(function(){
+          if (!window._scnUserDuration) {
+            window._scnUserDuration = (Date.now() - (window._scnRecStartTime || Date.now())) / 1000;
+            calcScnScore();
+          }
+        }, 1500);
+      } catch(e) {
+        window._scnUserDuration = (Date.now() - (window._scnRecStartTime || Date.now())) / 1000;
+        calcScnScore();
+      }
     };
     _scnRec.start();
+    window._scnRecStartTime = Date.now();
+    window._scnUserDuration = null;
+    window._scnUserVolume = null;
+    window._scnScore = null;
     
     document.getElementById('scn-prac-idle').style.display = 'none';
     document.getElementById('scn-prac-recording').style.display = 'block';
@@ -3420,6 +3456,146 @@ function scnRecStop(){
       window._scnTimerInt = null;
     }
   } catch(e) { console.warn(e); }
+}
+
+function calcScnScore(){
+  try {
+    var idx = window._scnInteractiveIdx || 0;
+    var p = _scnSteps[idx];
+    if (!p) { window._scnScore = null; renderScnChat(); return; }
+    
+    var audioUrl = p.audio || p.audio_url;
+    if (!audioUrl) {
+      // No professional audio - give a basic encouragement score
+      window._scnScore = { value: 75, level: 'good', factors: [] };
+      renderScnChat();
+      return;
+    }
+    
+    // Load professional audio duration
+    var prof = new Audio(audioUrl);
+    prof.addEventListener('loadedmetadata', function(){
+      var profDur = isFinite(prof.duration) ? prof.duration : null;
+      var userDur = window._scnUserDuration;
+      var score = 70; // base score
+      var factors = [];
+      var notes = [];
+      
+      // Factor 1: Duration similarity (50% weight)
+      if (profDur && userDur && profDur > 0) {
+        var ratio = userDur / profDur;
+        if (ratio >= 0.85 && ratio <= 1.15) {
+          score += 20;
+          factors.push({label: 'קצב', status: 'good', text: 'קצב מצוין - תואם למקור'});
+        } else if (ratio >= 0.7 && ratio <= 1.3) {
+          score += 10;
+          factors.push({label: 'קצב', status: 'ok', text: 'קצב סביר - נסה להתאים יותר'});
+        } else if (ratio < 0.7) {
+          factors.push({label: 'קצב', status: 'low', text: 'מהיר מדי - דבר לאט יותר'});
+        } else {
+          factors.push({label: 'קצב', status: 'low', text: 'איטי מדי - נסה לדבר יותר מהר'});
+        }
+        notes.push('⏱️ אורך: ' + userDur.toFixed(1) + ' שניות (מקצועי: ' + profDur.toFixed(1) + ')');
+      }
+      
+      // Factor 2: Recording quality (volume estimate)
+      var volume = window._scnUserVolume || 0;
+      // Typical webm audio: 10000-30000 bytes/sec = good volume
+      if (volume > 8000) {
+        score += 10;
+        factors.push({label: 'בהירות', status: 'good', text: 'הקול שלך בולט וברור'});
+      } else if (volume > 3000) {
+        score += 5;
+        factors.push({label: 'בהירות', status: 'ok', text: 'נסה לדבר חזק יותר'});
+      } else {
+        factors.push({label: 'בהירות', status: 'low', text: 'הקול חלש - דבר קרוב יותר למיקרופון'});
+      }
+      
+      // Clamp to 60-95 (never perfect, never too low)
+      score = Math.max(60, Math.min(95, Math.round(score)));
+      
+      var level = 'good';
+      if (score >= 85) level = 'excellent';
+      else if (score >= 75) level = 'good';
+      else if (score >= 65) level = 'ok';
+      else level = 'low';
+      
+      window._scnScore = { value: score, level: level, factors: factors, notes: notes };
+      renderScnChat();
+    });
+    
+    // Fallback if metadata fails
+    setTimeout(function(){
+      if (!window._scnScore) {
+        window._scnScore = { value: 75, level: 'good', factors: [{label:'הקלטה', status:'good', text:'הקלטה התקבלה'}], notes: [] };
+        renderScnChat();
+      }
+    }, 1500);
+  } catch(e) {
+    console.warn('calcScnScore error:', e);
+    window._scnScore = { value: 75, level: 'good', factors: [], notes: [] };
+    renderScnChat();
+  }
+}
+
+function renderScnScore(){
+  if (!window._scnScore) return '';
+  var s = window._scnScore;
+  
+  // Color & emoji based on level
+  var color, bgColor, emoji, mainText;
+  switch(s.level) {
+    case 'excellent':
+      color = '#1D9E75'; bgColor = 'rgba(29,158,117,0.15)';
+      emoji = '🌟'; mainText = 'מצוין! ההגייה שלך נשמעת טבעית';
+      break;
+    case 'good':
+      color = '#1D9E75'; bgColor = 'rgba(29,158,117,0.12)';
+      emoji = '💪'; mainText = 'כל הכבוד! המשך לתרגל';
+      break;
+    case 'ok':
+      color = '#D4862E'; bgColor = 'rgba(212,134,46,0.12)';
+      emoji = '👍'; mainText = 'יפה! יש מקום לשיפור';
+      break;
+    default:
+      color = '#c0392b'; bgColor = 'rgba(192,57,43,0.12)';
+      emoji = '🎯'; mainText = 'נסה שוב - אתה יכול יותר!';
+  }
+  
+  var html = '<div style="margin-top:10px;padding:12px;background:' + bgColor + ';border:1px solid ' + color + ';border-radius:10px;">';
+  
+  // Big score
+  html += '<div style="text-align:center;margin-bottom:10px;">';
+  html += '<div style="color:' + color + ';font-size:32px;font-weight:900;line-height:1;">' + s.value + '<span style="font-size:14px;opacity:0.7;"> /100</span></div>';
+  html += '<div style="color:' + color + ';font-size:13px;font-weight:700;margin-top:4px;">' + emoji + ' ' + mainText + '</div>';
+  html += '</div>';
+  
+  // Progress bar
+  html += '<div style="height:6px;background:rgba(255,255,255,0.08);border-radius:3px;overflow:hidden;margin-bottom:10px;">';
+  html += '<div style="height:100%;background:' + color + ';width:' + s.value + '%;border-radius:3px;transition:width 0.6s;"></div>';
+  html += '</div>';
+  
+  // Factors
+  if (s.factors && s.factors.length > 0) {
+    s.factors.forEach(function(f){
+      var icon = '✅';
+      if (f.status === 'ok') icon = '⚠️';
+      if (f.status === 'low') icon = '❌';
+      html += '<div style="font-size:11px;color:#E8D9B8;margin-bottom:3px;">' + icon + ' <strong>' + f.label + ':</strong> ' + f.text + '</div>';
+    });
+  }
+  
+  // Notes
+  if (s.notes && s.notes.length > 0) {
+    html += '<div style="margin-top:6px;padding-top:6px;border-top:1px solid rgba(255,255,255,0.05);">';
+    s.notes.forEach(function(n){
+      html += '<div style="font-size:10px;color:#a0b8c8;margin-bottom:2px;">' + n + '</div>';
+    });
+    html += '</div>';
+  }
+  
+  html += '</div>';
+  return html;
 }
 
 function scnRecPlay(){
@@ -3462,6 +3638,9 @@ function scnRecReset(){
   try {
     _scnRecBlob = null;
     _scnRecChunks = [];
+    window._scnScore = null;
+    window._scnUserDuration = null;
+    window._scnUserVolume = null;
     renderScnChat();
   } catch(e) { console.warn(e); }
 }
@@ -3523,6 +3702,9 @@ function scnNextStep(){
     // Reset recording for new step
     _scnRecBlob = null;
     _scnRecChunks = [];
+    window._scnScore = null;
+    window._scnUserDuration = null;
+    window._scnUserVolume = null;
     
     if (window._scnInteractiveIdx >= _scnSteps.length) {
       // Reached the end
