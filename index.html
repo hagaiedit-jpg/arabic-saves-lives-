@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="he" dir="rtl">
 <head>
@@ -731,6 +730,54 @@ body.day-mode .card:hover{
 }
 .scn-bubble-soldier .scn-bubble-label{color:rgba(255,255,255,0.95);}
 .scn-bubble-civilian .scn-bubble-label{color:#1D9E75;}
+
+/* Female-soldier bubble - HOT PINK distinct color */
+.scn-bubble-fsoldier{
+  background:linear-gradient(135deg,#E91E63 0%,#AD1457 100%);
+  color:#fff;
+  border-radius:16px 16px 4px 16px;
+  border:1px solid rgba(255,255,255,0.25);
+}
+.scn-bubble-fsoldier::after{
+  content:"";
+  position:absolute;
+  bottom:0;
+  right:-7px;
+  width:0;
+  height:0;
+  border-left:8px solid #AD1457;
+  border-bottom:10px solid transparent;
+}
+.scn-bubble-fsoldier .scn-bubble-label{color:rgba(255,255,255,0.95);}
+.scn-bubble-fsoldier .scn-bubble-trans{color:rgba(255,255,255,0.9);}
+.scn-bubble-fsoldier .scn-bubble-ar{color:#fff;}
+.scn-bubble-fsoldier .scn-step-num{color:rgba(255,255,255,0.85);}
+.scn-play-fsoldier{
+  background:rgba(255,255,255,0.2) !important;
+  color:#fff !important;
+  border:1px solid rgba(255,255,255,0.3) !important;
+}
+.scn-play-fsoldier:hover{
+  background:rgba(255,255,255,0.3) !important;
+}
+
+/* Smooth bubble fade-in animation */
+@keyframes bubbleFadeIn {
+  from { opacity: 0; transform: translateY(10px) scale(0.95); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
+}
+.scn-bubble-row { animation: bubbleFadeIn 0.4s ease-out; }
+
+/* Confetti */
+.confetti-container {
+  position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+  pointer-events: none; z-index: 9999;
+}
+.confetti-piece { position: absolute; width: 10px; height: 10px; top: -20px; opacity: 1; }
+@keyframes confettiFall {
+  0% { transform: translateY(0) rotate(0deg); opacity: 1; }
+  100% { transform: translateY(110vh) rotate(720deg); opacity: 0; }
+}
 
 .scn-bubble-he{
   font-size:15px;
@@ -1652,7 +1699,7 @@ body.day-mode .emerg-grid{
       </div>
     </div>
     
-    <div class="loading" id="cats-loading"><div style="text-align:center;padding:20px;"><div style="font-size:16px;color:#D4862E;margin-bottom:8px;">טוען...</div><div style="font-size:10px;color:#7a9ab5;opacity:0.6;">v20260604-1456</div></div></div>
+    <div class="loading" id="cats-loading"><div style="text-align:center;padding:20px;"><div style="font-size:16px;color:#D4862E;margin-bottom:8px;">טוען...</div><div style="font-size:10px;color:#7a9ab5;opacity:0.6;">v20260604-1529</div></div></div>
     <div class="cgrid" id="cgrid" style="display:none;"></div>
   </div>
   <div id="vlist" class="scr">
@@ -2809,7 +2856,7 @@ function bldCats(){
   if (!DB || DB.length === 0) {
     loadEl.innerHTML = '<div style="text-align:center;padding:20px;color:#D4862E;">' +
       'מתחבר לשרת...<br><br>' +
-      '<div style="font-size:11px;color:#7a9ab5;">v20260604-1456</div><br>' +
+      '<div style="font-size:11px;color:#7a9ab5;">v20260604-1529</div><br>' +
       '<button onclick="location.reload(true)" style="padding:10px 20px;background:#D4862E;color:#fff;border:none;border-radius:8px;font-family:inherit;cursor:pointer;font-weight:700;margin-top:10px;">🔄 רענן</button>' +
       '</div>';
     return;
@@ -3751,7 +3798,9 @@ function renderScnChat(){
     _scnSteps.forEach(function(p, idx){
       // In interactive mode, only show bubbles up to current index
       if (mode === 'interactive' && idx > maxIdx) return;
-      var isCivilian = (p.tags || '').indexOf('civilian') !== -1;
+      var tags = (p.tags || '').toLowerCase();
+      var isCivilian = tags.indexOf('civilian') !== -1;
+      var isFSoldier = tags.indexOf('fsoldier') !== -1 || tags.indexOf('female') !== -1;
       var isCurrentInteractive = (mode === 'interactive' && idx === maxIdx);
       
       // WhatsApp-style: soldier (you) on right with orange, civilian on left with green
@@ -3765,6 +3814,21 @@ function renderScnChat(){
         if (p.ar) html += '<div class="scn-bubble-ar">' + p.ar + '</div>';
         html += '<div class="scn-bubble-footer">';
         html += '<button onclick="scnPlayBubble(' + idx + ',this)" class="scn-play-btn scn-play-civilian">▶ השמע</button>';
+        html += '<span class="scn-step-num">' + (idx + 1) + '/' + _scnSteps.length + '</span>';
+        html += '</div>';
+        html += '</div>';
+        if (isCurrentInteractive) html += renderScnPractice(idx);
+        html += '</div>';
+      } else if (isFSoldier) {
+        // Female soldier - right side, hot pink
+        html += '<div class="scn-bubble-row scn-soldier">';
+        html += '<div class="scn-bubble scn-bubble-fsoldier">';
+        html += '<div class="scn-bubble-label">👩‍✈️ חיילת</div>';
+        if (p.he) html += '<div class="scn-bubble-he">' + p.he + '</div>';
+        if (p.trans) html += '<div class="scn-bubble-trans">' + p.trans + '</div>';
+        if (p.ar) html += '<div class="scn-bubble-ar">' + p.ar + '</div>';
+        html += '<div class="scn-bubble-footer">';
+        html += '<button onclick="scnPlayBubble(' + idx + ',this)" class="scn-play-btn scn-play-fsoldier">▶ השמע</button>';
         html += '<span class="scn-step-num">' + (idx + 1) + '/' + _scnSteps.length + '</span>';
         html += '</div>';
         html += '</div>';
@@ -3807,6 +3871,10 @@ function scnPlayBubble(idx, btn){
     if (!audioUrl) {
       alert('אין הקלטה למשפט זה עדיין');
       return;
+    }
+    // Track this phrase as learned
+    if (_scnSteps[idx].id && typeof trackLearned === 'function') {
+      trackLearned(_scnSteps[idx].id);
     }
     // Clear all playing states
     document.querySelectorAll('.scn-play-btn.playing').forEach(function(b){
@@ -3866,6 +3934,7 @@ function scnPlayAll(){
         return;
       }
       if (btn) btn.innerHTML = '⏸ משמיע ' + idx + '/' + _scnSteps.length;
+      if (step.id && typeof trackLearned === 'function') trackLearned(step.id);
       window._scnCurrentAudio = new Audio(step.audio);
       window._scnCurrentAudio.onended = function(){
         // Small pause between phrases
