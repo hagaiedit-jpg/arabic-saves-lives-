@@ -1723,7 +1723,7 @@ body.day-mode .emerg-grid{
       </div>
     </div>
     
-    <div class="loading" id="cats-loading"><div style="text-align:center;padding:20px;"><div style="font-size:16px;color:#D4862E;margin-bottom:8px;">טוען...</div><div style="font-size:10px;color:#7a9ab5;opacity:0.6;">v20260604-1701</div></div></div>
+    <div class="loading" id="cats-loading"><div style="text-align:center;padding:20px;"><div style="font-size:16px;color:#D4862E;margin-bottom:8px;">טוען...</div><div style="font-size:10px;color:#7a9ab5;opacity:0.6;">v20260604-1704</div></div></div>
     <div class="cgrid" id="cgrid" style="display:none;"></div>
   </div>
   <div id="vlist" class="scr">
@@ -2806,7 +2806,20 @@ async function enableReminders(){
     }
     
     if (permission !== 'granted') {
-      alert('כדי לקבל תזכורות, צריך לאפשר התראות בדפדפן');
+      // Detect if user explicitly denied vs default
+      var isDenied = Notification.permission === 'denied';
+      var msg = '';
+      if (isDenied) {
+        msg = '🔔 כדי לקבל תזכורות, צריך לאפשר התראות:\n\n';
+        msg += '1. לחץ/י על הסמל 🔒 או ⓘ בכתובת האתר\n';
+        msg += '2. חפש "Notifications" או "התראות"\n';
+        msg += '3. שנה ל-"אפשר" / "Allow"\n';
+        msg += '4. רענן את העמוד ונסה שוב\n\n';
+        msg += '💡 באייפון - יש להוסיף את האפליקציה למסך הבית קודם';
+      } else {
+        msg = '🔔 התראות לא הופעלו.\n\nכשהדפדפן ישאל אותך, יש ללחוץ "Allow" / "אפשר"';
+      }
+      alert(msg);
       return;
     }
     
@@ -3114,7 +3127,7 @@ function bldCats(){
   if (!DB || DB.length === 0) {
     loadEl.innerHTML = '<div style="text-align:center;padding:20px;color:#D4862E;">' +
       'מתחבר לשרת...<br><br>' +
-      '<div style="font-size:11px;color:#7a9ab5;">v20260604-1701</div><br>' +
+      '<div style="font-size:11px;color:#7a9ab5;">v20260604-1704</div><br>' +
       '<button onclick="location.reload(true)" style="padding:10px 20px;background:#D4862E;color:#fff;border:none;border-radius:8px;font-family:inherit;cursor:pointer;font-weight:700;margin-top:10px;">🔄 רענן</button>' +
       '</div>';
     return;
