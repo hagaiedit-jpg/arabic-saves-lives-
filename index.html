@@ -1634,6 +1634,18 @@ body.day-mode .emerg-grid{
       <div id="prog-achievements" style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;"></div>
     </div>
     
+    <!-- Daily Reminders -->
+    <div style="background:linear-gradient(135deg,#18293E 0%,#1F3147 100%);border:1px solid rgba(212,162,78,0.25);border-radius:14px;padding:16px;margin-bottom:14px;">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;">
+        <div style="display:flex;align-items:center;gap:8px;">
+          <span style="font-size:16px;">🔔</span>
+          <span style="color:#D4A24E;font-size:12px;font-weight:700;letter-spacing:0.5px;">תזכורת יומית</span>
+        </div>
+        <div id="reminder-status" style="color:#7a9ab5;font-size:11px;font-weight:600;">כבוי</div>
+      </div>
+      <div id="reminder-card" style="color:#E8D9B8;font-size:13px;line-height:1.5;"></div>
+    </div>
+    
     <!-- Activity Summary -->
     <div style="background:linear-gradient(135deg,#18293E 0%,#1F3147 100%);border:1px solid rgba(212,162,78,0.25);border-radius:14px;padding:16px;margin-bottom:14px;">
       <div style="display:flex;align-items:center;gap:8px;margin-bottom:12px;">
@@ -1711,7 +1723,7 @@ body.day-mode .emerg-grid{
       </div>
     </div>
     
-    <div class="loading" id="cats-loading"><div style="text-align:center;padding:20px;"><div style="font-size:16px;color:#D4862E;margin-bottom:8px;">טוען...</div><div style="font-size:10px;color:#7a9ab5;opacity:0.6;">v20260604-1639</div></div></div>
+    <div class="loading" id="cats-loading"><div style="text-align:center;padding:20px;"><div style="font-size:16px;color:#D4862E;margin-bottom:8px;">טוען...</div><div style="font-size:10px;color:#7a9ab5;opacity:0.6;">v20260604-1701</div></div></div>
     <div class="cgrid" id="cgrid" style="display:none;"></div>
   </div>
   <div id="vlist" class="scr">
@@ -2656,6 +2668,9 @@ function renderProgress(){
       achEl.innerHTML = achHtml;
     }
     
+    // Reminders
+    if (typeof renderReminderCard === 'function') renderReminderCard();
+    
     // Activity Summary
     var actEl = document.getElementById('prog-activity');
     if (actEl) {
@@ -2732,6 +2747,206 @@ function showDayDetails(isoDate, count){
     alert(msg);
   } catch(e) { console.warn('showDayDetails error:', e); }
 }
+
+// === Daily Reminders Management ===
+function renderReminderCard(){
+  try {
+    var card = document.getElementById('reminder-card');
+    var statusEl = document.getElementById('reminder-status');
+    if (!card) return;
+    
+    var enabled = localStorage.getItem('reminder_enabled') === 'true';
+    var time = localStorage.getItem('reminder_time') || '19:00';
+    
+    if (statusEl) {
+      statusEl.textContent = enabled ? '✅ פעיל' : 'כבוי';
+      statusEl.style.color = enabled ? '#1D9E75' : '#7a9ab5';
+    }
+    
+    var html = '';
+    if (!enabled) {
+      // Not yet enabled
+      html += '<div style="margin-bottom:12px;color:#a0b8c8;font-size:12px;">';
+      html += 'קבל תזכורת יומית בשעה קבועה לתרגל - שמור על הרצף שלך!';
+      html += '</div>';
+      html += '<button onclick="enableReminders()" style="width:100%;background:linear-gradient(135deg,#1D9E75 0%,#0e5a3f 100%);border:none;color:#fff;border-radius:10px;padding:12px;font-size:13px;font-weight:700;cursor:pointer;font-family:inherit;">🔔 הפעל תזכורות</button>';
+    } else {
+      // Enabled
+      html += '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;">';
+      html += '<div style="color:#E8D9B8;font-size:13px;">⏰ זמן תזכורת:</div>';
+      html += '<div style="color:#D4A24E;font-size:16px;font-weight:700;">' + time + '</div>';
+      html += '</div>';
+      html += '<div style="display:flex;gap:8px;">';
+      html += '<button onclick="changeReminderTime()" style="flex:1;background:transparent;border:1px solid #D4A24E;color:#D4A24E;border-radius:8px;padding:9px;font-size:12px;font-weight:700;cursor:pointer;font-family:inherit;">⚙️ שנה שעה</button>';
+      html += '<button onclick="disableReminders()" style="flex:1;background:transparent;border:1px solid #7a9ab5;color:#a0b8c8;border-radius:8px;padding:9px;font-size:12px;font-weight:700;cursor:pointer;font-family:inherit;">🔕 כבה</button>';
+      html += '</div>';
+      // Status info
+      html += '<div style="margin-top:10px;padding-top:10px;border-top:1px solid rgba(255,255,255,0.05);font-size:11px;color:#7a9ab5;">';
+      if (Notification && Notification.permission === 'granted') {
+        html += '✅ הרשאת התראות פעילה';
+      } else {
+        html += '⚠️ צריך לאשר התראות בדפדפן';
+      }
+      html += '</div>';
+    }
+    card.innerHTML = html;
+  } catch(e) { console.warn('renderReminderCard error:', e); }
+}
+
+async function enableReminders(){
+  try {
+    if (!('Notification' in window)) {
+      alert('הדפדפן שלך לא תומך בהתראות');
+      return;
+    }
+    
+    var permission = Notification.permission;
+    if (permission !== 'granted') {
+      permission = await Notification.requestPermission();
+    }
+    
+    if (permission !== 'granted') {
+      alert('כדי לקבל תזכורות, צריך לאפשר התראות בדפדפן');
+      return;
+    }
+    
+    // Save settings
+    localStorage.setItem('reminder_enabled', 'true');
+    if (!localStorage.getItem('reminder_time')) {
+      localStorage.setItem('reminder_time', '19:00');
+    }
+    
+    // Schedule next check
+    scheduleReminder();
+    
+    // Show confirmation notification
+    new Notification('🎉 תזכורות הופעלו!', {
+      body: 'תקבלי תזכורת יומית לתרגל',
+      icon: '/favicon.ico'
+    });
+    
+    renderReminderCard();
+  } catch(e) { 
+    console.warn('enableReminders error:', e);
+    alert('שגיאה בהפעלת תזכורות');
+  }
+}
+
+function disableReminders(){
+  try {
+    localStorage.setItem('reminder_enabled', 'false');
+    if (window._reminderTimeout) {
+      clearTimeout(window._reminderTimeout);
+      window._reminderTimeout = null;
+    }
+    renderReminderCard();
+  } catch(e) { console.warn(e); }
+}
+
+function changeReminderTime(){
+  try {
+    var current = localStorage.getItem('reminder_time') || '19:00';
+    var newTime = prompt('הקליד שעה ביום בפורמט HH:MM (לדוגמה 19:00)', current);
+    if (!newTime) return;
+    // Validate
+    if (!/^\d{1,2}:\d{2}$/.test(newTime)) {
+      alert('פורמט לא תקין. דוגמה: 19:00');
+      return;
+    }
+    var parts = newTime.split(':');
+    var hours = parseInt(parts[0], 10);
+    var minutes = parseInt(parts[1], 10);
+    if (hours < 0 || hours > 23 || minutes < 0 || minutes > 59) {
+      alert('שעה לא תקינה');
+      return;
+    }
+    // Pad
+    var formatted = (hours < 10 ? '0' : '') + hours + ':' + (minutes < 10 ? '0' : '') + minutes;
+    localStorage.setItem('reminder_time', formatted);
+    scheduleReminder();
+    renderReminderCard();
+  } catch(e) { console.warn(e); }
+}
+
+function scheduleReminder(){
+  try {
+    // Clear previous
+    if (window._reminderTimeout) {
+      clearTimeout(window._reminderTimeout);
+      window._reminderTimeout = null;
+    }
+    
+    if (localStorage.getItem('reminder_enabled') !== 'true') return;
+    if (!('Notification' in window) || Notification.permission !== 'granted') return;
+    
+    var time = localStorage.getItem('reminder_time') || '19:00';
+    var parts = time.split(':');
+    var targetHour = parseInt(parts[0], 10);
+    var targetMin = parseInt(parts[1], 10);
+    
+    // Calculate ms until next occurrence
+    var now = new Date();
+    var target = new Date();
+    target.setHours(targetHour, targetMin, 0, 0);
+    if (target <= now) {
+      // Already passed today - schedule for tomorrow
+      target.setDate(target.getDate() + 1);
+    }
+    var msUntil = target.getTime() - now.getTime();
+    
+    window._reminderTimeout = setTimeout(function(){
+      sendReminderNotification();
+      // Schedule next day
+      scheduleReminder();
+    }, msUntil);
+  } catch(e) { console.warn('scheduleReminder error:', e); }
+}
+
+function sendReminderNotification(){
+  try {
+    if (!('Notification' in window) || Notification.permission !== 'granted') return;
+    
+    // Check if already practiced today
+    var learned = JSON.parse(localStorage.getItem('learned_phrases') || '{}');
+    var practiced = JSON.parse(localStorage.getItem('practiced_phrases') || '{}');
+    var todayStr = new Date().toDateString();
+    var practicedToday = false;
+    for (var k in learned) {
+      try { if (new Date(learned[k]).toDateString() === todayStr) { practicedToday = true; break; } } catch(e) {}
+    }
+    if (!practicedToday) {
+      for (var k in practiced) {
+        try { if (new Date(practiced[k]).toDateString() === todayStr) { practicedToday = true; break; } } catch(e) {}
+      }
+    }
+    
+    if (practicedToday) return; // Already practiced - don't disturb
+    
+    // Get streak for personalized message
+    var streak = parseInt(localStorage.getItem('streak_count') || '0', 10);
+    var title, body;
+    if (streak >= 7) {
+      title = '🔥 רצף ' + streak + ' ימים!';
+      body = 'אל תשבר את הרצף - תרגל היום';
+    } else if (streak >= 3) {
+      title = '🔥 רצף של ' + streak + ' ימים';
+      body = 'המשך לתרגל - אתה בדרך הנכונה!';
+    } else {
+      title = '🎯 זמן לתרגל';
+      body = 'כמה דקות תרגול היום ישפרו אותך';
+    }
+    
+    new Notification(title, {
+      body: body,
+      icon: '/favicon.ico'
+    });
+  } catch(e) { console.warn(e); }
+}
+
+// Start reminder scheduler on page load
+window.addEventListener('load', function(){
+  setTimeout(scheduleReminder, 2000);
+});
 
 function changeDailyGoal(){
   try {
@@ -2899,7 +3114,7 @@ function bldCats(){
   if (!DB || DB.length === 0) {
     loadEl.innerHTML = '<div style="text-align:center;padding:20px;color:#D4862E;">' +
       'מתחבר לשרת...<br><br>' +
-      '<div style="font-size:11px;color:#7a9ab5;">v20260604-1639</div><br>' +
+      '<div style="font-size:11px;color:#7a9ab5;">v20260604-1701</div><br>' +
       '<button onclick="location.reload(true)" style="padding:10px 20px;background:#D4862E;color:#fff;border:none;border-radius:8px;font-family:inherit;cursor:pointer;font-weight:700;margin-top:10px;">🔄 רענן</button>' +
       '</div>';
     return;
