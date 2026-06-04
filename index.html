@@ -518,7 +518,7 @@ body.day-mode .ct{border:none;border-bottom:1px solid #ebe0c5;border-left:1px so
 .la{color:#7a9ab5;font-size:14px;}
 .smeta{padding:7px 16px;color:#7a9ab5;font-size:12px;background:#0E1B2E;}
 .pbg{background:rgba(0,0,0,0.65);min-height:100vh;display:flex;align-items:flex-start;justify-content:center;padding:12px;padding-top:16px;}
-.pop{background:#fff;border-radius:18px;width:100%;max-width:440px;padding:18px 16px 14px;}
+.pop{position:relative;background:#fff;border-radius:18px;width:100%;max-width:440px;padding:18px 16px 14px;}
 .phe{color:#0E1B2E;font-size:18px;font-weight:500;text-align:center;margin-bottom:6px;line-height:1.4;}
 .parsm{color:#E8D9B8;font-size:22px;direction:rtl;font-family:Georgia,serif;text-align:center;margin-bottom:12px;font-weight:500;line-height:1.5;}
 .pbox{background:#0E1B2E;border-radius:12px;padding:16px 14px;margin-bottom:12px;text-align:center;}
@@ -1711,7 +1711,7 @@ body.day-mode .emerg-grid{
       </div>
     </div>
     
-    <div class="loading" id="cats-loading"><div style="text-align:center;padding:20px;"><div style="font-size:16px;color:#D4862E;margin-bottom:8px;">טוען...</div><div style="font-size:10px;color:#7a9ab5;opacity:0.6;">v20260604-1613</div></div></div>
+    <div class="loading" id="cats-loading"><div style="text-align:center;padding:20px;"><div style="font-size:16px;color:#D4862E;margin-bottom:8px;">טוען...</div><div style="font-size:10px;color:#7a9ab5;opacity:0.6;">v20260604-1626</div></div></div>
     <div class="cgrid" id="cgrid" style="display:none;"></div>
   </div>
   <div id="vlist" class="scr">
@@ -1728,6 +1728,7 @@ body.day-mode .emerg-grid{
   </div>
   <div id="vpop" class="scr">
     <div class="pbg"><div class="pop">
+      <button onclick="closePopup()" style="position:absolute;top:10px;left:10px;background:rgba(255,255,255,0.1);border:1px solid rgba(255,255,255,0.2);color:#E8D9B8;border-radius:50%;width:34px;height:34px;font-size:18px;font-weight:700;cursor:pointer;font-family:inherit;display:flex;align-items:center;justify-content:center;z-index:10;">✕</button>
       <div id="pcatbadge" class="pcat-badge" style="display:none;"></div>
       <div class="phe" id="phe"></div>
       <div class="parsm" id="parsm"></div>
@@ -2898,7 +2899,7 @@ function bldCats(){
   if (!DB || DB.length === 0) {
     loadEl.innerHTML = '<div style="text-align:center;padding:20px;color:#D4862E;">' +
       'מתחבר לשרת...<br><br>' +
-      '<div style="font-size:11px;color:#7a9ab5;">v20260604-1613</div><br>' +
+      '<div style="font-size:11px;color:#7a9ab5;">v20260604-1626</div><br>' +
       '<button onclick="location.reload(true)" style="padding:10px 20px;background:#D4862E;color:#fff;border:none;border-radius:8px;font-family:inherit;cursor:pointer;font-weight:700;margin-top:10px;">🔄 רענן</button>' +
       '</div>';
     return;
@@ -2976,7 +2977,10 @@ function opC(cat,special){
 
 function startCatLearn(cat){
   try {
-    if (!DB) return;
+    if (!DB) {
+      alert('הנתונים עוד לא נטענו');
+      return;
+    }
     // Get all phrases in the category
     var catPhrases = DB.filter(function(p){ return p.cat === cat; });
     if (catPhrases.length === 0) {
@@ -2991,48 +2995,63 @@ function startCatLearn(cat){
         he: p.he,
         trans: p.trans,
         ar: p.ar,
-        audio: p.audio_url || p.audio,  // Map audio_url to audio for scn compatibility
+        audio: p.audio_url || p.audio || '',
         tags: 'soldier'  // All military phrases - soldier color
       };
     });
     _scnCurrent = '🎯 ' + cat;
     _scnIdx = 0;
-    window._scnMode = 'interactive';  // Auto-start interactive mode
+    window._scnMode = 'interactive';
     window._scnInteractiveIdx = 0;
     
-    // Navigate to scenarios tab and show the dialogue
-    if (typeof navToTab === 'function') {
-      navToTab('scn');
+    // Switch to scenario tab directly via DOM (skip navToTab to avoid race conditions)
+    var allTabs = document.querySelectorAll('[id^="tab-"]');
+    for (var i = 0; i < allTabs.length; i++) allTabs[i].className = 'scr';
+    var scnTab = document.getElementById('tab-scn');
+    if (scnTab) scnTab.className = 'scr on';
+    
+    // Update bottom nav active
+    var navBtns = document.querySelectorAll('.bn-btn');
+    for (var i = 0; i < navBtns.length; i++) {
+      navBtns[i].classList.remove('active');
+      navBtns[i].style.background = 'transparent';
+    }
+    var scnBtn = document.querySelector('.bn-btn[data-tab="scn"]');
+    if (scnBtn) {
+      scnBtn.classList.add('active');
+      scnBtn.style.background = 'rgba(212,162,78,0.15)';
     }
     
-    // After tab switch, show dialogue view
-    setTimeout(function(){
-      // Hide the grid, show dialogue
-      var gridView = document.getElementById('scn-grid-view');
-      var dialogueView = document.getElementById('scn-dialogue-view');
-      if (gridView) gridView.style.display = 'none';
-      if (dialogueView) dialogueView.style.display = 'block';
-      
-      // Set title
-      var titleEl = document.getElementById('scn-title');
-      if (titleEl) titleEl.textContent = '🎯 ' + cat;
-      
-      // Reset next button
-      var nextBtn = document.getElementById('scn-next-btn');
-      if (nextBtn) { 
-        nextBtn.textContent = '✅ הבא ◀'; 
-        nextBtn.disabled = false; 
-        nextBtn.style.background = 'linear-gradient(135deg,#1D9E75 0%,#0e5a3f 100%)'; 
-      }
-      
-      // Set to interactive mode and render
-      if (typeof scnSetMode === 'function') {
-        scnSetMode('interactive');
-      } else if (typeof renderScnChat === 'function') {
-        renderScnChat();
-      }
-    }, 100);
-  } catch(e) { console.warn('startCatLearn error:', e); alert('שגיאה בהפעלת מצב למידה'); }
+    if (typeof curTab !== 'undefined') curTab = 'scn';
+    
+    // Hide grid, show dialogue
+    var gridView = document.getElementById('scn-grid-view');
+    var dialogueView = document.getElementById('scn-dialogue-view');
+    if (gridView) gridView.style.display = 'none';
+    if (dialogueView) dialogueView.style.display = 'block';
+    
+    // Set title
+    var titleEl = document.getElementById('scn-title');
+    if (titleEl) titleEl.textContent = '🎯 ' + cat;
+    
+    // Reset next button
+    var nextBtn = document.getElementById('scn-next-btn');
+    if (nextBtn) { 
+      nextBtn.textContent = '✅ הבא ◀'; 
+      nextBtn.disabled = false; 
+      nextBtn.style.background = 'linear-gradient(135deg,#1D9E75 0%,#0e5a3f 100%)'; 
+    }
+    
+    // Set to interactive mode
+    if (typeof scnSetMode === 'function') {
+      scnSetMode('interactive');
+    } else if (typeof renderScnChat === 'function') {
+      renderScnChat();
+    }
+    
+    // Scroll to top
+    window.scrollTo(0, 0);
+  } catch(e) { console.warn('startCatLearn error:', e); alert('שגיאה: ' + e.message); }
 }
 
 function opAnnounceList(cat){
@@ -4764,6 +4783,17 @@ function setPopupLabel(section){
   else if(section==='semantic'||section==='sem')lbl.textContent='משמעות בשטח';
   else if(section==='dict')lbl.textContent='דוגמה';
   else lbl.textContent='למה זה חשוב';
+}
+
+function closePopup(){
+  try {
+    // Go back to category list if we have a current category, otherwise to categories grid
+    if (typeof curC !== 'undefined' && curC) {
+      shV('vlist');
+    } else {
+      shV('vcats');
+    }
+  } catch(e) { console.warn(e); shV('vcats'); }
 }
 
 function shV(id){['vcats','vlist','vsrch','vpop'].forEach(v=>{document.getElementById(v).className='scr'+(v===id?' on':'');});}
