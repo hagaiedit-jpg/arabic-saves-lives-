@@ -1651,7 +1651,7 @@ body.day-mode .emerg-grid{
       </div>
     </div>
     
-    <div class="loading" id="cats-loading"><div style="text-align:center;padding:20px;"><div style="font-size:16px;color:#D4862E;margin-bottom:8px;">טוען...</div><div style="font-size:10px;color:#7a9ab5;opacity:0.6;">v20260604-0720</div></div></div>
+    <div class="loading" id="cats-loading"><div style="text-align:center;padding:20px;"><div style="font-size:16px;color:#D4862E;margin-bottom:8px;">טוען...</div><div style="font-size:10px;color:#7a9ab5;opacity:0.6;">v20260604-1028</div></div></div>
     <div class="cgrid" id="cgrid" style="display:none;"></div>
   </div>
   <div id="vlist" class="scr">
@@ -2789,7 +2789,7 @@ function bldCats(){
   if (!DB || DB.length === 0) {
     loadEl.innerHTML = '<div style="text-align:center;padding:20px;color:#D4862E;">' +
       'מתחבר לשרת...<br><br>' +
-      '<div style="font-size:11px;color:#7a9ab5;">v20260604-0720</div><br>' +
+      '<div style="font-size:11px;color:#7a9ab5;">v20260604-1028</div><br>' +
       '<button onclick="location.reload(true)" style="padding:10px 20px;background:#D4862E;color:#fff;border:none;border-radius:8px;font-family:inherit;cursor:pointer;font-weight:700;margin-top:10px;">🔄 רענן</button>' +
       '</div>';
     return;
@@ -4041,14 +4041,20 @@ function ST(t,el){
   document.querySelectorAll('[id^="tab-"]').forEach(function(x){x.className='scr';});
   document.getElementById('tab-'+t).className='scr on';
   curTab=t;
-  if(t==='home')renderHome();
-  if(t==='progress')renderProgress();
-  if(t==='qk')rQK();
-  if(t==='fav'){rFav();rRecent();}
-  if(t==='dict')renderDict();
-  if(t==='sem')rSem();
-  if(t==='nwf')rNF();
-  if(t==='scn'){scnBack();renderScnGrid();}
+  // Render the tab content - each in own try
+  try { if(t==='home' && typeof renderHome==='function') renderHome(); } catch(e){console.warn(e);}
+  try { if(t==='progress' && typeof renderProgress==='function') renderProgress(); } catch(e){console.warn(e);}
+  try { if(t==='qk' && typeof rQK==='function') rQK(); } catch(e){console.warn(e);}
+  try { if(t==='fav'){ if(typeof rFav==='function')rFav(); if(typeof rRecent==='function')rRecent();} } catch(e){console.warn(e);}
+  try { if(t==='dict' && typeof renderDict==='function') renderDict(); } catch(e){console.warn(e);}
+  try { if(t==='sem' && typeof rSem==='function') rSem(); } catch(e){console.warn(e);}
+  try { if(t==='nwf' && typeof rNF==='function') rNF(); } catch(e){console.warn(e);}
+  try { if(t==='scn'){ if(typeof scnBack==='function')scnBack(); if(typeof renderScnGrid==='function')renderScnGrid();} } catch(e){console.warn(e);}
+  try { if(t==='day' && typeof rDG==='function') rDG(); } catch(e){console.warn(e);}
+  try { if(t==='hrt' && typeof rHrt==='function') rHrt(); } catch(e){console.warn(e);}
+  try { if(t==='cus' && typeof rCus==='function') rCus(); } catch(e){console.warn(e);}
+  try { if(t==='art' && typeof rArts==='function') rArts(); } catch(e){console.warn(e);}
+  try { if(t==='lib' && typeof bldCats==='function') bldCats(); } catch(e){console.warn(e);}
   if(t==='adm'){
     if(!window._adminAuth){
       const pw=prompt('סיסמת ניהול:');
