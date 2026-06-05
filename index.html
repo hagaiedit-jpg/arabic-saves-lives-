@@ -1027,6 +1027,38 @@ body.day-mode .lt{
   color:#0e1b2e !important;
   font-weight:600;
 }
+
+/* Favorites cards - both themes */
+.fav-card{
+  background:#1F3147;
+  border:1px solid #2A3D52;
+  border-radius:10px;
+  padding:12px 14px;
+  margin-bottom:8px;
+  cursor:pointer;
+  border-right:4px solid #D4862E;
+}
+.fav-card .fav-he{
+  color:#fff;
+  font-size:14px;
+  margin-bottom:4px;
+}
+.fav-card .fav-trans{
+  color:#fff;
+  font-size:14px;
+  font-family:Georgia,serif;
+}
+/* Day mode override */
+body.day-mode .fav-card{
+  background:#fff !important;
+  border-color:#e0d4b5 !important;
+  box-shadow:0 1px 3px rgba(0,0,0,0.1);
+}
+body.day-mode .fav-card .fav-he,
+body.day-mode .fav-card .fav-trans{
+  color:#0e1b2e !important;
+  font-weight:600;
+}
 body.day-mode .la{
   color:#2d4159 !important;
   font-weight:500;
@@ -1722,7 +1754,7 @@ body.day-mode .emerg-grid{
       </div>
     </div>
     
-    <div class="loading" id="cats-loading"><div style="text-align:center;padding:20px;"><div style="font-size:16px;color:#D4862E;margin-bottom:8px;">טוען...</div><div style="font-size:10px;color:#7a9ab5;opacity:0.6;">v20260604-1718</div></div></div>
+    <div class="loading" id="cats-loading"><div style="text-align:center;padding:20px;"><div style="font-size:16px;color:#D4862E;margin-bottom:8px;">טוען...</div><div style="font-size:10px;color:#7a9ab5;opacity:0.6;">v20260605-1456</div></div></div>
     <div class="cgrid" id="cgrid" style="display:none;"></div>
   </div>
   <div id="vlist" class="scr">
@@ -2416,7 +2448,7 @@ function renderHome(){
         var practicedDay = false;
         for (var k in learned) {
           try {
-            if (new Date(learned[k]).toDateString() === dayStr) {
+            if (_sameDayMatch(learned[k], dayStr)) {
               practicedDay = true; break;
             }
           } catch(e) {}
@@ -2424,7 +2456,7 @@ function renderHome(){
         if (!practicedDay) {
           for (var k in practiced) {
             try {
-              if (new Date(practiced[k]).toDateString() === dayStr) {
+              if (_sameDayMatch(practiced[k], dayStr)) {
                 practicedDay = true; break;
               }
             } catch(e) {}
@@ -2503,10 +2535,10 @@ function renderProgress(){
     var todayStr = new Date().toDateString();
     var todayCount = 0;
     for (var key in learned) {
-      try { if (new Date(learned[key]).toDateString() === todayStr) todayCount++; } catch(e) {}
+      try { if (_sameDayMatch(learned[key], todayStr)) todayCount++; } catch(e) {}
     }
     for (var key in practiced) {
-      try { if (new Date(practiced[key]).toDateString() === todayStr) todayCount++; } catch(e) {}
+      try { if (_sameDayMatch(practiced[key], todayStr)) todayCount++; } catch(e) {}
     }
     var goalEl = document.getElementById('prog-daily-goal');
     if (goalEl) {
@@ -2540,10 +2572,10 @@ function renderProgress(){
         
         var dayCount = 0;
         for (var k in learned) {
-          try { if (new Date(learned[k]).toDateString() === dayStr) dayCount++; } catch(e) {}
+          try { if (_sameDayMatch(learned[k], dayStr)) dayCount++; } catch(e) {}
         }
         for (var k in practiced) {
-          try { if (new Date(practiced[k]).toDateString() === dayStr) dayCount++; } catch(e) {}
+          try { if (_sameDayMatch(practiced[k], dayStr)) dayCount++; } catch(e) {}
         }
         
         if (!isFuture && dayCount > 0) {
@@ -2689,10 +2721,10 @@ function showDayDetailsHome(isoDate){
     var dayStr = date.toDateString();
     var count = 0;
     for (var key in learned) {
-      try { if (new Date(learned[key]).toDateString() === dayStr) count++; } catch(e) {}
+      try { if (_sameDayMatch(learned[key], dayStr)) count++; } catch(e) {}
     }
     for (var key in practiced) {
-      try { if (new Date(practiced[key]).toDateString() === dayStr) count++; } catch(e) {}
+      try { if (_sameDayMatch(practiced[key], dayStr)) count++; } catch(e) {}
     }
     showDayDetails(isoDate, count);
   } catch(e) { console.warn(e); }
@@ -2714,14 +2746,14 @@ function showDayDetails(isoDate, count){
     var practicedToday = 0;
     for (var key in learned) {
       try {
-        if (new Date(learned[key]).toDateString() === dayStr) {
+        if (_sameDayMatch(learned[key], dayStr)) {
           learnedToday.push(key);
         }
       } catch(e) {}
     }
     for (var key in practiced) {
       try {
-        if (new Date(practiced[key]).toDateString() === dayStr) {
+        if (_sameDayMatch(practiced[key], dayStr)) {
           practicedToday++;
         }
       } catch(e) {}
@@ -2754,11 +2786,11 @@ function checkInAppReminder(){
     var practicedToday = false;
     
     for (var k in learned) {
-      try { if (new Date(learned[k]).toDateString() === todayStr) { practicedToday = true; break; } } catch(e) {}
+      try { if (_sameDayMatch(learned[k], todayStr)) { practicedToday = true; break; } } catch(e) {}
     }
     if (!practicedToday) {
       for (var k in practiced) {
-        try { if (new Date(practiced[k]).toDateString() === todayStr) { practicedToday = true; break; } } catch(e) {}
+        try { if (_sameDayMatch(practiced[k], todayStr)) { practicedToday = true; break; } } catch(e) {}
       }
     }
     
@@ -2984,7 +3016,7 @@ function bldCats(){
   if (!DB || DB.length === 0) {
     loadEl.innerHTML = '<div style="text-align:center;padding:20px;color:#D4862E;">' +
       'מתחבר לשרת...<br><br>' +
-      '<div style="font-size:11px;color:#7a9ab5;">v20260604-1718</div><br>' +
+      '<div style="font-size:11px;color:#7a9ab5;">v20260605-1456</div><br>' +
       '<button onclick="location.reload(true)" style="padding:10px 20px;background:#D4862E;color:#fff;border:none;border-radius:8px;font-family:inherit;cursor:pointer;font-weight:700;margin-top:10px;">🔄 רענן</button>' +
       '</div>';
     return;
@@ -3344,6 +3376,18 @@ var ACHIEVEMENTS = [
   {id:'practice_50', icon:'🎙️', title:'דובר מקצועי',    desc:'50 תרגולי הגייה', threshold:50,  type:'practice'},
   {id:'practice_100', icon:'⭐', title:'אלוף ההגייה',    desc:'100 תרגולי הגייה!', threshold:100, type:'practice'}
 ];
+
+// Safe date comparison - handles both toDateString and ISO formats
+function _sameDayMatch(stored, targetDayStr){
+  try {
+    if (!stored) return false;
+    // Direct string match (when stored as toDateString)
+    if (stored === targetDayStr) return true;
+    // Parse as Date and compare
+    var d = new Date(stored);
+    return !isNaN(d.getTime()) && d.toDateString() === targetDayStr;
+  } catch(e) { return false; }
+}
 
 function getEarnedAchievements(){
   try {
@@ -6299,10 +6343,10 @@ function rFav(){
     var p=items[j];
     var sec=DB.includes(p)?"military":DAILY.includes(p)?"daily":HEART.includes(p)?"heart":"navy";
     var idx=sec==="military"?DB.findIndex(function(x){return x.id===p.id;}):sec==="daily"?DAILY.findIndex(function(x){return x.id===p.id;}):sec==="heart"?HEART.indexOf(p):NAVY.indexOf(p);
-    h+='<div style="background:#1F3147;border:1px solid #2A3D52;border-radius:10px;padding:12px 14px;margin-bottom:8px;cursor:pointer;border-right:4px solid #D4862E;" onclick="opFavItem(\''+sec+'\','+idx+')">';
+    h+='<div class="fav-card" onclick="opFavItem(\''+sec+'\','+idx+')">';
     h+='<div style="display:flex;justify-content:space-between;align-items:flex-start;">';
-    h+='<div style="flex:1;"><div style="color:#fff;font-size:14px;margin-bottom:4px;">'+p.he+urgDot(p.urgency)+'</div>';
-    h+='<div style="color:#fff;font-size:14px;font-family:Georgia,serif;">'+p.trans+'</div></div>';
+    h+='<div style="flex:1;"><div class="fav-he">'+p.he+urgDot(p.urgency)+'</div>';
+    h+='<div class="fav-trans">'+p.trans+'</div></div>';
     h+='<span onclick="event.stopPropagation();removeFav(\''+p.id+'\')" style="cursor:pointer;font-size:16px;">⭐</span>';
     h+='</div></div>';
   }
