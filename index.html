@@ -1822,7 +1822,7 @@ body.day-mode .emerg-grid{
       </div>
     </div>
     
-    <div class="loading" id="cats-loading"><div style="text-align:center;padding:20px;"><div style="font-size:16px;color:#D4862E;margin-bottom:8px;">טוען...</div><div style="font-size:10px;color:#7a9ab5;opacity:0.6;">v20260606-1718</div></div></div>
+    <div class="loading" id="cats-loading"><div style="text-align:center;padding:20px;"><div style="font-size:16px;color:#D4862E;margin-bottom:8px;">טוען...</div><div style="font-size:10px;color:#7a9ab5;opacity:0.6;">v20260606-1722</div></div></div>
     <div class="cgrid" id="cgrid" style="display:none;"></div>
   </div>
   <div id="vlist" class="scr">
@@ -3034,8 +3034,8 @@ function renderFlashQuestion(){
     }
     // Show Hebrew options
     if (optionsEl) {
-      optionsEl.innerHTML = q.options.map(function(opt){
-        return '<div onclick="flashAnswer(' + opt.id + ')" class="flash-opt" data-opt-id="' + opt.id + '" style="background:#1F3147;border:1px solid #2A3D52;color:#fff;border-radius:10px;padding:14px 12px;font-size:14px;font-weight:600;cursor:pointer;text-align:right;font-family:inherit;direction:rtl;user-select:none;-webkit-tap-highlight-color:rgba(212,162,78,0.3);">' + opt.he + '</div>';
+      optionsEl.innerHTML = q.options.map(function(opt, optIdx){
+        return '<div onclick="flashAnswerByIdx(' + optIdx + ')" class="flash-opt" data-opt-idx="' + optIdx + '" style="background:#1F3147;border:1px solid #2A3D52;color:#fff;border-radius:10px;padding:14px 12px;font-size:14px;font-weight:600;cursor:pointer;text-align:right;font-family:inherit;direction:rtl;user-select:none;-webkit-tap-highlight-color:rgba(212,162,78,0.3);">' + opt.he + '</div>';
       }).join('');
     }
   } else {
@@ -3046,8 +3046,8 @@ function renderFlashQuestion(){
     }
     // Show Arabic+trans options
     if (optionsEl) {
-      optionsEl.innerHTML = q.options.map(function(opt){
-        return '<div onclick="flashAnswer(' + opt.id + ')" class="flash-opt" data-opt-id="' + opt.id + '" style="background:#1F3147;border:1px solid #2A3D52;color:#fff;border-radius:10px;padding:14px 12px;font-size:14px;font-weight:600;cursor:pointer;text-align:right;font-family:inherit;direction:rtl;line-height:1.5;user-select:none;-webkit-tap-highlight-color:rgba(212,162,78,0.3);">' +
+      optionsEl.innerHTML = q.options.map(function(opt, optIdx){
+        return '<div onclick="flashAnswerByIdx(' + optIdx + ')" class="flash-opt" data-opt-idx="' + optIdx + '" style="background:#1F3147;border:1px solid #2A3D52;color:#fff;border-radius:10px;padding:14px 12px;font-size:14px;font-weight:600;cursor:pointer;text-align:right;font-family:inherit;direction:rtl;line-height:1.5;user-select:none;-webkit-tap-highlight-color:rgba(212,162,78,0.3);">' +
           '<div style="font-family:Georgia,serif;color:#E8D9B8;font-size:13px;margin-bottom:3px;pointer-events:none;">' + (opt.trans || '') + '</div>' +
           '<div style="font-size:15px;pointer-events:none;">' + opt.ar + '</div>' +
           '</div>';
@@ -3066,26 +3066,44 @@ function flashPlayAudio(url){
   } catch(e) { console.warn(e); }
 }
 
-function flashAnswer(selectedId){
+function flashAnswerByIdx(selectedIdx){
+  try {
+    var q = _flashState.questions[_flashState.current];
+    if (!q || !q.options[selectedIdx]) return;
+    flashAnswer(q.options[selectedIdx].id, selectedIdx);
+  } catch(e) { console.warn('flashAnswerByIdx error:', e); }
+}
+
+function flashAnswer(selectedId, selectedIdx){
   if (_flashState.answered) return;
   _flashState.answered = true;
   
   var q = _flashState.questions[_flashState.current];
-  var isCorrect = (selectedId === q.correctId);
+  // Compare as strings to handle any ID type (number or UUID)
+  var isCorrect = (String(selectedId) === String(q.correctId));
   
   if (isCorrect) _flashState.correct++;
+  
+  // Find correct index
+  var correctIdx = -1;
+  for (var i = 0; i < q.options.length; i++) {
+    if (String(q.options[i].id) === String(q.correctId)) {
+      correctIdx = i;
+      break;
+    }
+  }
   
   // Disable and color all options
   var buttons = document.querySelectorAll('.flash-opt');
   buttons.forEach(function(btn){
     btn.style.cursor = 'default';
     btn.onclick = null; // Disable further clicks
-    var btnId = parseInt(btn.getAttribute('data-opt-id'), 10);
-    if (btnId === q.correctId) {
+    var btnIdx = parseInt(btn.getAttribute('data-opt-idx'), 10);
+    if (btnIdx === correctIdx) {
       // Correct answer - green
       btn.style.background = 'linear-gradient(135deg,#1D9E75 0%,#0e5a3f 100%)';
       btn.style.borderColor = '#1D9E75';
-    } else if (btnId === selectedId && !isCorrect) {
+    } else if (btnIdx === selectedIdx && !isCorrect) {
       // Wrong selected - red
       btn.style.background = 'linear-gradient(135deg,#c0392b 0%,#922d22 100%)';
       btn.style.borderColor = '#c0392b';
@@ -3345,7 +3363,7 @@ function bldCats(){
   if (!DB || DB.length === 0) {
     loadEl.innerHTML = '<div style="text-align:center;padding:20px;color:#D4862E;">' +
       'מתחבר לשרת...<br><br>' +
-      '<div style="font-size:11px;color:#7a9ab5;">v20260606-1718</div><br>' +
+      '<div style="font-size:11px;color:#7a9ab5;">v20260606-1722</div><br>' +
       '<button onclick="location.reload(true)" style="padding:10px 20px;background:#D4862E;color:#fff;border:none;border-radius:8px;font-family:inherit;cursor:pointer;font-weight:700;margin-top:10px;">🔄 רענן</button>' +
       '</div>';
     return;
