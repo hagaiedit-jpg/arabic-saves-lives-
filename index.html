@@ -1754,7 +1754,7 @@ body.day-mode .emerg-grid{
       </div>
     </div>
     
-    <div class="loading" id="cats-loading"><div style="text-align:center;padding:20px;"><div style="font-size:16px;color:#D4862E;margin-bottom:8px;">טוען...</div><div style="font-size:10px;color:#7a9ab5;opacity:0.6;">v20260605-1456</div></div></div>
+    <div class="loading" id="cats-loading"><div style="text-align:center;padding:20px;"><div style="font-size:16px;color:#D4862E;margin-bottom:8px;">טוען...</div><div style="font-size:10px;color:#7a9ab5;opacity:0.6;">v20260606-1623</div></div></div>
     <div class="cgrid" id="cgrid" style="display:none;"></div>
   </div>
   <div id="vlist" class="scr">
@@ -3016,7 +3016,7 @@ function bldCats(){
   if (!DB || DB.length === 0) {
     loadEl.innerHTML = '<div style="text-align:center;padding:20px;color:#D4862E;">' +
       'מתחבר לשרת...<br><br>' +
-      '<div style="font-size:11px;color:#7a9ab5;">v20260605-1456</div><br>' +
+      '<div style="font-size:11px;color:#7a9ab5;">v20260606-1623</div><br>' +
       '<button onclick="location.reload(true)" style="padding:10px 20px;background:#D4862E;color:#fff;border:none;border-radius:8px;font-family:inherit;cursor:pointer;font-weight:700;margin-top:10px;">🔄 רענן</button>' +
       '</div>';
     return;
@@ -3780,6 +3780,43 @@ async function scnRecStart(){
     window._scnUserDuration = null;
     window._scnUserVolume = null;
     window._scnScore = null;
+    window._scnRecognizedText = null;
+    
+    // Start Speech Recognition in parallel (if supported)
+    try {
+      var SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+      if (SpeechRecognition) {
+        var rec = new SpeechRecognition();
+        rec.lang = 'ar-SA'; // Arabic
+        rec.continuous = false;
+        rec.interimResults = false;
+        rec.maxAlternatives = 3;
+        
+        rec.onresult = function(event){
+          try {
+            // Get the best result
+            if (event.results && event.results[0] && event.results[0][0]) {
+              window._scnRecognizedText = event.results[0][0].transcript;
+              console.log('Recognized:', window._scnRecognizedText);
+            }
+          } catch(e) { console.warn('Recognition result error:', e); }
+        };
+        rec.onerror = function(e){
+          console.warn('Speech Recognition error:', e.error);
+          // If "not-allowed" or "service-not-allowed", browser doesnt support Arabic
+          window._scnRecognizedText = null;
+        };
+        rec.onend = function(){
+          // Recognition ended - score will be calculated when MediaRecorder stops
+        };
+        
+        rec.start();
+        window._scnSpeechRec = rec;
+      } else {
+        // Browser doesnt support Speech Recognition (e.g., Safari iOS)
+        console.log('Speech Recognition not supported - skipping scoring');
+      }
+    } catch(e) { console.warn('SR init error:', e); }
     
     document.getElementById('scn-prac-idle').style.display = 'none';
     document.getElementById('scn-prac-recording').style.display = 'block';
@@ -3806,6 +3843,11 @@ function scnRecStop(){
     if (_scnRec && _scnRec.state === 'recording') {
       _scnRec.stop();
     }
+    // Also stop Speech Recognition
+    if (window._scnSpeechRec) {
+      try { window._scnSpeechRec.stop(); } catch(e) {}
+      window._scnSpeechRec = null;
+    }
     if (window._scnTimerInt) {
       clearInterval(window._scnTimerInt);
       window._scnTimerInt = null;
@@ -3814,99 +3856,125 @@ function scnRecStop(){
 }
 
 function calcScnScore(){
+  // Try Speech Recognition for real pronunciation scoring
   try {
     var idx = window._scnInteractiveIdx || 0;
     var p = _scnSteps[idx];
     if (!p) { window._scnScore = null; renderScnChat(); return; }
     
-    var audioUrl = p.audio || p.audio_url;
-    if (!audioUrl) {
-      // No professional audio - give a basic encouragement score
-      window._scnScore = { value: 75, level: 'good', factors: [] };
+    // Check browser support for Speech Recognition
+    var SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+    if (!SpeechRecognition || !_scnRecBlob) {
+      // No support OR no recording yet - don't show a score
+      window._scnScore = null;
       renderScnChat();
       return;
     }
     
-    // Load professional audio duration
-    var prof = new Audio(audioUrl);
-    prof.addEventListener('loadedmetadata', function(){
-      var profDur = isFinite(prof.duration) ? prof.duration : null;
-      var userDur = window._scnUserDuration;
-      var score = 70; // base score
-      var factors = [];
-      var notes = [];
-      
-      // Factor 1: Duration similarity (50% weight)
-      if (profDur && userDur && profDur > 0) {
-        var ratio = userDur / profDur;
-        if (ratio >= 0.85 && ratio <= 1.15) {
-          score += 20;
-          factors.push({label: 'קצב', status: 'good', text: 'קצב מצוין - תואם למקור'});
-        } else if (ratio >= 0.7 && ratio <= 1.3) {
-          score += 10;
-          factors.push({label: 'קצב', status: 'ok', text: 'קצב סביר - נסה להתאים יותר'});
-        } else if (ratio < 0.7) {
-          factors.push({label: 'קצב', status: 'low', text: 'מהיר מדי - דבר לאט יותר'});
-        } else {
-          factors.push({label: 'קצב', status: 'low', text: 'איטי מדי - נסה לדבר יותר מהר'});
-        }
-        notes.push('⏱️ אורך: ' + userDur.toFixed(1) + ' שניות (מקצועי: ' + profDur.toFixed(1) + ')');
-      }
-      
-      // Factor 2: Recording quality (volume estimate)
-      var volume = window._scnUserVolume || 0;
-      // Typical webm audio: 10000-30000 bytes/sec = good volume
-      if (volume > 8000) {
-        score += 10;
-        factors.push({label: 'בהירות', status: 'good', text: 'הקול שלך בולט וברור'});
-      } else if (volume > 3000) {
-        score += 5;
-        factors.push({label: 'בהירות', status: 'ok', text: 'נסה לדבר חזק יותר'});
-      } else {
-        factors.push({label: 'בהירות', status: 'low', text: 'הקול חלש - דבר קרוב יותר למיקרופון'});
-      }
-      
-      // Clamp to 60-95 (never perfect, never too low)
-      score = Math.max(60, Math.min(95, Math.round(score)));
-      
-      var level = 'good';
-      if (score >= 85) level = 'excellent';
-      else if (score >= 75) level = 'good';
-      else if (score >= 65) level = 'ok';
-      else level = 'low';
-      
-      window._scnScore = { value: score, level: level, factors: factors, notes: notes };
-      renderScnChat();
-    });
+    // Use Speech Recognition by re-recording (limited browser support without re-record)
+    // Show "processing" state
+    window._scnScore = { processing: true };
+    renderScnChat();
     
-    // Fallback if metadata fails
-    setTimeout(function(){
-      if (!window._scnScore) {
-        window._scnScore = { value: 75, level: 'good', factors: [{label:'הקלטה', status:'good', text:'הקלטה התקבלה'}], notes: [] };
-        renderScnChat();
-      }
-    }, 1500);
-  } catch(e) {
-    console.warn('calcScnScore error:', e);
-    window._scnScore = { value: 75, level: 'good', factors: [], notes: [] };
+    // Try to recognize the user's recording
+    // Note: Web Speech API doesn't accept Blob directly, it needs live audio
+    // We'll do live recognition as user speaks - this is set during recording
+    // For now, just mark as "not supported" if we don't have a recognition result
+    if (!window._scnRecognizedText) {
+      // No recognition was done - hide the score
+      window._scnScore = null;
+      renderScnChat();
+      return;
+    }
+    
+    var recognized = (window._scnRecognizedText || '').trim();
+    var target = (p.ar || '').trim();
+    
+    if (!recognized || !target) {
+      window._scnScore = null;
+      renderScnChat();
+      return;
+    }
+    
+    // Calculate similarity between recognized and target
+    var similarity = _calcStringSimilarity(recognized, target);
+    var score = Math.round(similarity * 100);
+    
+    var level = 'low';
+    if (score >= 85) level = 'excellent';
+    else if (score >= 65) level = 'good';
+    else if (score >= 40) level = 'ok';
+    
+    window._scnScore = { 
+      value: score, 
+      level: level, 
+      recognized: recognized,
+      target: target
+    };
+    renderScnChat();
+  } catch(e) { 
+    console.warn('calcScnScore error:', e); 
+    window._scnScore = null;
     renderScnChat();
   }
+}
+
+// String similarity using Levenshtein distance (normalized 0-1)
+function _calcStringSimilarity(a, b){
+  try {
+    // Normalize: lowercase, remove diacritics, remove spaces
+    function norm(s){
+      return s.toLowerCase()
+        .replace(/[\u064B-\u065F\u0670]/g, '') // Arabic diacritics
+        .replace(/[\u0591-\u05C7]/g, '') // Hebrew diacritics
+        .replace(/[.,!?؟،]/g, '')
+        .replace(/\s+/g, ' ')
+        .trim();
+    }
+    a = norm(a);
+    b = norm(b);
+    if (a === b) return 1;
+    if (!a || !b) return 0;
+    
+    var maxLen = Math.max(a.length, b.length);
+    // Levenshtein distance
+    var dist = [];
+    for (var i = 0; i <= a.length; i++) { dist[i] = [i]; }
+    for (var j = 0; j <= b.length; j++) { dist[0][j] = j; }
+    for (var i = 1; i <= a.length; i++) {
+      for (var j = 1; j <= b.length; j++) {
+        var cost = a[i-1] === b[j-1] ? 0 : 1;
+        dist[i][j] = Math.min(
+          dist[i-1][j] + 1,
+          dist[i][j-1] + 1,
+          dist[i-1][j-1] + cost
+        );
+      }
+    }
+    var d = dist[a.length][b.length];
+    return Math.max(0, 1 - d / maxLen);
+  } catch(e) { return 0; }
 }
 
 function renderScnScore(){
   if (!window._scnScore) return '';
   var s = window._scnScore;
   
+  // Processing state
+  if (s.processing) {
+    return '<div style="margin-top:10px;padding:10px;text-align:center;color:#D4A24E;font-size:12px;background:rgba(212,162,78,0.1);border:1px solid rgba(212,162,78,0.3);border-radius:10px;">⏳ מנתח הקלטה...</div>';
+  }
+  
   // Color & emoji based on level
   var color, bgColor, emoji, mainText;
   switch(s.level) {
     case 'excellent':
       color = '#1D9E75'; bgColor = 'rgba(29,158,117,0.15)';
-      emoji = '🌟'; mainText = 'מצוין! ההגייה שלך נשמעת טבעית';
+      emoji = '🌟'; mainText = 'מצוין! ההגייה שלך מדויקת';
       break;
     case 'good':
       color = '#1D9E75'; bgColor = 'rgba(29,158,117,0.12)';
-      emoji = '💪'; mainText = 'כל הכבוד! המשך לתרגל';
+      emoji = '💪'; mainText = 'כל הכבוד! קרוב מאוד למקור';
       break;
     case 'ok':
       color = '#D4862E'; bgColor = 'rgba(212,134,46,0.12)';
@@ -3914,7 +3982,7 @@ function renderScnScore(){
       break;
     default:
       color = '#c0392b'; bgColor = 'rgba(192,57,43,0.12)';
-      emoji = '🎯'; mainText = 'נסה שוב - אתה יכול יותר!';
+      emoji = '🎯'; mainText = 'נסי שוב - לא זוהה כראוי';
   }
   
   var html = '<div style="margin-top:10px;padding:12px;background:' + bgColor + ';border:1px solid ' + color + ';border-radius:10px;">';
@@ -3930,22 +3998,11 @@ function renderScnScore(){
   html += '<div style="height:100%;background:' + color + ';width:' + s.value + '%;border-radius:3px;transition:width 0.6s;"></div>';
   html += '</div>';
   
-  // Factors
-  if (s.factors && s.factors.length > 0) {
-    s.factors.forEach(function(f){
-      var icon = '✅';
-      if (f.status === 'ok') icon = '⚠️';
-      if (f.status === 'low') icon = '❌';
-      html += '<div style="font-size:11px;color:#E8D9B8;margin-bottom:3px;">' + icon + ' <strong>' + f.label + ':</strong> ' + f.text + '</div>';
-    });
-  }
-  
-  // Notes
-  if (s.notes && s.notes.length > 0) {
-    html += '<div style="margin-top:6px;padding-top:6px;border-top:1px solid rgba(255,255,255,0.05);">';
-    s.notes.forEach(function(n){
-      html += '<div style="font-size:10px;color:#a0b8c8;margin-bottom:2px;">' + n + '</div>';
-    });
+  // Show what was recognized vs target
+  if (s.recognized) {
+    html += '<div style="font-size:11px;color:#a0b8c8;margin-top:8px;">';
+    html += '<div style="margin-bottom:4px;">🎤 <strong style="color:#E8D9B8;">אמרת:</strong> ' + s.recognized + '</div>';
+    html += '<div>🎯 <strong style="color:#E8D9B8;">המקור:</strong> ' + s.target + '</div>';
     html += '</div>';
   }
   
@@ -3996,6 +4053,7 @@ function scnRecReset(){
     window._scnScore = null;
     window._scnUserDuration = null;
     window._scnUserVolume = null;
+    window._scnRecognizedText = null;
     renderScnChat();
   } catch(e) { console.warn(e); }
 }
