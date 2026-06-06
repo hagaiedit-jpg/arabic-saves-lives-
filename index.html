@@ -1464,7 +1464,7 @@ body.day-mode .emerg-grid{
     <div class="tb-tab" onclick="ST('fav',this)">⭐ מועדפים</div>
     <div class="tb-tab" onclick="ST('cus',this)">מנהגים</div>
     
-    <div class="tb-tab" onclick="ST('scn',this)">🎭 תרחישים</div>
+    <div class="tb-tab" onclick="ST('scn',this)">💬 תרחישים</div>
     <div class="tb-tab" id="admin-tab" style="display:none;" onclick="ST('adm',this)">ניהול</div>
   </div>
   <div class="tb-tabs-sec" style="display:none;">
@@ -1510,7 +1510,7 @@ body.day-mode .emerg-grid{
         <div style="color:#c0392b;font-size:12px;font-weight:700;">חירום</div>
       </div>
       <div onclick="navToTab('scn')" style="background:linear-gradient(160deg,#1F3147 0%,#243a55 100%);border:1px solid rgba(212,162,78,0.3);border-radius:14px;padding:18px 8px;text-align:center;cursor:pointer;box-shadow:0 2px 8px rgba(0,0,0,0.2);">
-        <div style="font-size:28px;margin-bottom:6px;">🎭</div>
+        <div style="font-size:28px;margin-bottom:6px;">💬</div>
         <div style="color:#D4A24E;font-size:12px;font-weight:700;">תרחישים</div>
       </div>
       <div onclick="navToTab('lib')" style="background:linear-gradient(160deg,#1F3147 0%,#243a55 100%);border:1px solid rgba(212,134,46,0.3);border-radius:14px;padding:18px 8px;text-align:center;cursor:pointer;box-shadow:0 2px 8px rgba(0,0,0,0.2);">
@@ -1624,7 +1624,7 @@ body.day-mode .emerg-grid{
         <div style="color:#a0b8c8;font-size:10px;font-weight:600;margin-top:3px;">משפטים</div>
       </div>
       <div style="background:linear-gradient(135deg,#1F3147 0%,#243a55 100%);border:1px solid rgba(212,134,46,0.3);border-radius:12px;padding:14px 8px;text-align:center;">
-        <div style="font-size:28px;line-height:1;margin-bottom:4px;">🎭</div>
+        <div style="font-size:28px;line-height:1;margin-bottom:4px;">💬</div>
         <div id="prog-scen-big" style="color:#D4862E;font-size:24px;font-weight:900;line-height:1;">0</div>
         <div style="color:#a0b8c8;font-size:10px;font-weight:600;margin-top:3px;">תרחישים</div>
       </div>
@@ -1754,7 +1754,7 @@ body.day-mode .emerg-grid{
       </div>
     </div>
     
-    <div class="loading" id="cats-loading"><div style="text-align:center;padding:20px;"><div style="font-size:16px;color:#D4862E;margin-bottom:8px;">טוען...</div><div style="font-size:10px;color:#7a9ab5;opacity:0.6;">v20260606-1654</div></div></div>
+    <div class="loading" id="cats-loading"><div style="text-align:center;padding:20px;"><div style="font-size:16px;color:#D4862E;margin-bottom:8px;">טוען...</div><div style="font-size:10px;color:#7a9ab5;opacity:0.6;">v20260606-1658</div></div></div>
     <div class="cgrid" id="cgrid" style="display:none;"></div>
   </div>
   <div id="vlist" class="scr">
@@ -1939,7 +1939,7 @@ body.day-mode .emerg-grid{
   <!-- Grid view -->
   <div id="scn-grid-view" style="padding:18px 16px 16px;">
     <div style="text-align:center;margin-bottom:22px;">
-      <div style="font-size:28px;margin-bottom:6px;">🎭</div>
+      <div style="font-size:28px;margin-bottom:6px;">💬</div>
       <div style="color:#E8D9B8;font-size:18px;font-weight:800;letter-spacing:0.5px;margin-bottom:4px;">ספריית תרחישים</div>
       <div style="color:#7a9ab5;font-size:12px;">תרגול שיחות אמיתיות מהשטח</div>
     </div>
@@ -2705,7 +2705,7 @@ function renderProgress(){
       var html = '';
       html += '<div>📚 משפטים נלמדו: <strong style="color:#D4862E;">' + totalLearned + '</strong></div>';
       html += '<div>🎤 תרגולי הגייה: <strong style="color:#D4862E;">' + totalPracticed + '</strong></div>';
-      html += '<div>🎭 תרחישים הושלמו: <strong style="color:#D4862E;">' + totalScn + '</strong></div>';
+      html += '<div>💬 תרחישים הושלמו: <strong style="color:#D4862E;">' + totalScn + '</strong></div>';
       html += '<div>🔥 רצף הכי ארוך: <strong style="color:#D4862E;">' + (localStorage.getItem('max_streak') || streak) + '</strong> ימים</div>';
       actEl.innerHTML = html;
     }
@@ -3016,7 +3016,7 @@ function bldCats(){
   if (!DB || DB.length === 0) {
     loadEl.innerHTML = '<div style="text-align:center;padding:20px;color:#D4862E;">' +
       'מתחבר לשרת...<br><br>' +
-      '<div style="font-size:11px;color:#7a9ab5;">v20260606-1654</div><br>' +
+      '<div style="font-size:11px;color:#7a9ab5;">v20260606-1658</div><br>' +
       '<button onclick="location.reload(true)" style="padding:10px 20px;background:#D4862E;color:#fff;border:none;border-radius:8px;font-family:inherit;cursor:pointer;font-weight:700;margin-top:10px;">🔄 רענן</button>' +
       '</div>';
     return;
@@ -3368,7 +3368,7 @@ var ACHIEVEMENTS = [
   {id:'streak_30',   icon:'⚡', title:'חודש לוהט',       desc:'30 ימים ברצף', threshold:30,  type:'streak'},
   // תרחישים
   {id:'scenario_1',  icon:'🎬', title:'תרחיש ראשון',     desc:'השלמת תרחיש 1', threshold:1,   type:'scenario'},
-  {id:'scenario_5',  icon:'🎭', title:'חובב תרחישים',    desc:'5 תרחישים הושלמו', threshold:5,   type:'scenario'},
+  {id:'scenario_5',  icon:'💬', title:'חובב תרחישים',    desc:'5 תרחישים הושלמו', threshold:5,   type:'scenario'},
   {id:'scenario_10', icon:'🏆', title:'מומחה תרחישים',   desc:'10 תרחישים הושלמו', threshold:10,  type:'scenario'},
   // תרגולי הגייה
   {id:'practice_1',  icon:'🎤', title:'קול ראשון',       desc:'תרגול הגייה 1', threshold:1,   type:'practice'},
@@ -3466,7 +3466,7 @@ function closeAch(){
 // === Scenario Library - 5 Categories ===
 var SCN_CATEGORIES = [
   {
-    id:'cat1', icon:'🎭', title:'מגע ראשוני וסריקות',
+    id:'cat1', icon:'💬', title:'מגע ראשוני וסריקות',
     scenarios:[
       {id:'כריזה לבית', icon:'📢', title:'כריזה לבית'},
       {id:'פריצה לבית', icon:'⚡', title:'פריצה לבית'},
@@ -4382,7 +4382,7 @@ function checkScenarioAchievements(){
     
     var scnAchs = [
       {id:'scenario_1',  icon:'🎬', title:'תרחיש ראשון!',     desc:'סיימת את התרחיש הראשון שלך - כל הכבוד!', threshold:1},
-      {id:'scenario_5',  icon:'🎭', title:'חובב תרחישים',     desc:'סיימת 5 תרחישים שונים', threshold:5},
+      {id:'scenario_5',  icon:'💬', title:'חובב תרחישים',     desc:'סיימת 5 תרחישים שונים', threshold:5},
       {id:'scenario_10', icon:'🏆', title:'מומחה תרחישים',    desc:'סיימת 10 תרחישים - מקצוען!', threshold:10}
     ];
     
@@ -6749,7 +6749,7 @@ try { renderHome(); } catch(_){}
     <div style="color:#c0392b;font-size:11px;font-weight:700;">חירום</div>
   </div>
   <div onclick="navToTab('scn')" class="bn-btn" data-tab="scn" style="flex:1;text-align:center;cursor:pointer;padding:6px 4px;border-radius:10px;transition:all 0.2s;">
-    <div style="font-size:24px;line-height:1;margin-bottom:4px;">🎭</div>
+    <div style="font-size:24px;line-height:1;margin-bottom:4px;">💬</div>
     <div style="color:#D4A24E;font-size:11px;font-weight:700;">תרחישים</div>
   </div>
   <div onclick="navToTab('lib')" class="bn-btn" data-tab="lib" style="flex:1;text-align:center;cursor:pointer;padding:6px 4px;border-radius:10px;transition:all 0.2s;">
