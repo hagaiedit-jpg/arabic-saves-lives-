@@ -1822,7 +1822,7 @@ body.day-mode .emerg-grid{
       </div>
     </div>
     
-    <div class="loading" id="cats-loading"><div style="text-align:center;padding:20px;"><div style="font-size:16px;color:#D4862E;margin-bottom:8px;">טוען...</div><div style="font-size:10px;color:#7a9ab5;opacity:0.6;">v20260606-1712</div></div></div>
+    <div class="loading" id="cats-loading"><div style="text-align:center;padding:20px;"><div style="font-size:16px;color:#D4862E;margin-bottom:8px;">טוען...</div><div style="font-size:10px;color:#7a9ab5;opacity:0.6;">v20260606-1718</div></div></div>
     <div class="cgrid" id="cgrid" style="display:none;"></div>
   </div>
   <div id="vlist" class="scr">
@@ -3035,7 +3035,7 @@ function renderFlashQuestion(){
     // Show Hebrew options
     if (optionsEl) {
       optionsEl.innerHTML = q.options.map(function(opt){
-        return '<button onclick="flashAnswer(' + opt.id + ')" class="flash-opt" style="background:#1F3147;border:1px solid #2A3D52;color:#fff;border-radius:10px;padding:14px 12px;font-size:14px;font-weight:600;cursor:pointer;text-align:right;font-family:inherit;direction:rtl;">' + opt.he + '</button>';
+        return '<div onclick="flashAnswer(' + opt.id + ')" class="flash-opt" data-opt-id="' + opt.id + '" style="background:#1F3147;border:1px solid #2A3D52;color:#fff;border-radius:10px;padding:14px 12px;font-size:14px;font-weight:600;cursor:pointer;text-align:right;font-family:inherit;direction:rtl;user-select:none;-webkit-tap-highlight-color:rgba(212,162,78,0.3);">' + opt.he + '</div>';
       }).join('');
     }
   } else {
@@ -3047,10 +3047,10 @@ function renderFlashQuestion(){
     // Show Arabic+trans options
     if (optionsEl) {
       optionsEl.innerHTML = q.options.map(function(opt){
-        return '<button onclick="flashAnswer(' + opt.id + ')" class="flash-opt" style="background:#1F3147;border:1px solid #2A3D52;color:#fff;border-radius:10px;padding:14px 12px;font-size:14px;font-weight:600;cursor:pointer;text-align:right;font-family:inherit;direction:rtl;line-height:1.5;">' +
-          '<div style="font-family:Georgia,serif;color:#E8D9B8;font-size:13px;margin-bottom:3px;">' + (opt.trans || '') + '</div>' +
-          '<div style="font-size:15px;">' + opt.ar + '</div>' +
-          '</button>';
+        return '<div onclick="flashAnswer(' + opt.id + ')" class="flash-opt" data-opt-id="' + opt.id + '" style="background:#1F3147;border:1px solid #2A3D52;color:#fff;border-radius:10px;padding:14px 12px;font-size:14px;font-weight:600;cursor:pointer;text-align:right;font-family:inherit;direction:rtl;line-height:1.5;user-select:none;-webkit-tap-highlight-color:rgba(212,162,78,0.3);">' +
+          '<div style="font-family:Georgia,serif;color:#E8D9B8;font-size:13px;margin-bottom:3px;pointer-events:none;">' + (opt.trans || '') + '</div>' +
+          '<div style="font-size:15px;pointer-events:none;">' + opt.ar + '</div>' +
+          '</div>';
       }).join('');
     }
   }
@@ -3075,16 +3075,17 @@ function flashAnswer(selectedId){
   
   if (isCorrect) _flashState.correct++;
   
-  // Disable and color all buttons
+  // Disable and color all options
   var buttons = document.querySelectorAll('.flash-opt');
   buttons.forEach(function(btn){
-    btn.disabled = true;
     btn.style.cursor = 'default';
-    if (btn.getAttribute('onclick').indexOf(q.correctId) !== -1) {
+    btn.onclick = null; // Disable further clicks
+    var btnId = parseInt(btn.getAttribute('data-opt-id'), 10);
+    if (btnId === q.correctId) {
       // Correct answer - green
       btn.style.background = 'linear-gradient(135deg,#1D9E75 0%,#0e5a3f 100%)';
       btn.style.borderColor = '#1D9E75';
-    } else if (btn.getAttribute('onclick').indexOf(selectedId) !== -1 && !isCorrect) {
+    } else if (btnId === selectedId && !isCorrect) {
       // Wrong selected - red
       btn.style.background = 'linear-gradient(135deg,#c0392b 0%,#922d22 100%)';
       btn.style.borderColor = '#c0392b';
@@ -3344,7 +3345,7 @@ function bldCats(){
   if (!DB || DB.length === 0) {
     loadEl.innerHTML = '<div style="text-align:center;padding:20px;color:#D4862E;">' +
       'מתחבר לשרת...<br><br>' +
-      '<div style="font-size:11px;color:#7a9ab5;">v20260606-1712</div><br>' +
+      '<div style="font-size:11px;color:#7a9ab5;">v20260606-1718</div><br>' +
       '<button onclick="location.reload(true)" style="padding:10px 20px;background:#D4862E;color:#fff;border:none;border-radius:8px;font-family:inherit;cursor:pointer;font-weight:700;margin-top:10px;">🔄 רענן</button>' +
       '</div>';
     return;
