@@ -1504,7 +1504,7 @@ body.day-mode .emerg-grid{
     </div>
     
     <!-- Quick Access - 3 main actions -->
-    <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin-bottom:20px;">
+    <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin-bottom:10px;">
       <div onclick="navToTab('qk')" style="background:linear-gradient(160deg,#1F3147 0%,#243a55 100%);border:1px solid rgba(192,57,43,0.4);border-radius:14px;padding:18px 8px;text-align:center;cursor:pointer;box-shadow:0 2px 8px rgba(0,0,0,0.2);">
         <div style="font-size:28px;margin-bottom:6px;">🚨</div>
         <div style="color:#c0392b;font-size:12px;font-weight:700;">חירום</div>
@@ -1517,6 +1517,15 @@ body.day-mode .emerg-grid{
         <div style="font-size:28px;margin-bottom:6px;">📚</div>
         <div style="color:#D4862E;font-size:12px;font-weight:700;">מבצעי</div>
       </div>
+    </div>
+    
+    <!-- Flashcards - quick learning card -->
+    <div onclick="startFlashcards()" style="background:linear-gradient(135deg,#1D9E75 0%,#0e5a3f 100%);border-radius:14px;padding:14px 16px;margin-bottom:20px;cursor:pointer;box-shadow:0 4px 12px rgba(29,158,117,0.3);display:flex;align-items:center;justify-content:space-between;">
+      <div>
+        <div style="color:#fff;font-size:15px;font-weight:800;margin-bottom:3px;">🎴 כרטיסיות לימוד</div>
+        <div style="color:rgba(255,255,255,0.85);font-size:12px;">10 שאלות לתרגול מהיר</div>
+      </div>
+      <div style="background:rgba(255,255,255,0.2);border-radius:10px;padding:8px 14px;color:#fff;font-size:13px;font-weight:700;">התחל ◀</div>
     </div>
     
     <!-- Daily Reminder Banner -->
@@ -1598,6 +1607,65 @@ body.day-mode .emerg-grid{
       💡 השתמשו בנאב התחתון כדי לעבור בין החלקים
     </div>
     
+  </div>
+</div>
+
+<!-- FLASHCARDS TAB -->
+<div class="scr" id="tab-flash">
+  <div class="sec">
+    <div class="lhdr">
+      <button class="bbtn" onclick="navToTab('home')">→ חזור</button>
+      <div class="ltitle">🎴 כרטיסיות לימוד</div>
+    </div>
+    
+    <!-- Welcome / settings view (shown first) -->
+    <div id="flash-welcome" style="text-align:center;padding:30px 16px;">
+      <div style="font-size:48px;margin-bottom:14px;">🎴</div>
+      <div style="color:#D4A24E;font-size:18px;font-weight:700;margin-bottom:10px;">תרגול קצר ומהיר</div>
+      <div style="color:#E8D9B8;font-size:13px;line-height:1.6;margin-bottom:24px;">10 שאלות מערבית לעברית<br>תוכל לתרגל בכל מקום וזמן</div>
+      
+      <button onclick="flashStart()" style="background:linear-gradient(135deg,#1D9E75 0%,#0e5a3f 100%);border:none;color:#fff;border-radius:12px;padding:14px 32px;font-size:15px;font-weight:700;cursor:pointer;font-family:inherit;box-shadow:0 4px 12px rgba(29,158,117,0.3);">🎯 התחל תרגול</button>
+      
+      <div id="flash-stats" style="margin-top:24px;padding:14px;background:rgba(255,255,255,0.04);border-radius:10px;color:#E8D9B8;font-size:12px;line-height:1.8;"></div>
+    </div>
+    
+    <!-- Active question view -->
+    <div id="flash-question" style="display:none;">
+      <!-- Progress -->
+      <div style="background:linear-gradient(135deg,#18293E 0%,#1F3147 100%);border:1px solid rgba(29,158,117,0.3);border-radius:12px;padding:12px;margin-bottom:16px;text-align:center;">
+        <div id="flash-counter" style="color:#1D9E75;font-size:13px;font-weight:700;margin-bottom:6px;">שאלה 1 מתוך 10</div>
+        <div style="height:6px;background:rgba(255,255,255,0.08);border-radius:3px;overflow:hidden;">
+          <div id="flash-bar" style="height:100%;background:linear-gradient(90deg,#1D9E75,#0e5a3f);border-radius:3px;width:10%;transition:width 0.4s;"></div>
+        </div>
+        <div id="flash-score" style="color:#7a9ab5;font-size:11px;margin-top:6px;">ציון: 0/0</div>
+      </div>
+      
+      <!-- Question type label -->
+      <div id="flash-qtype" style="text-align:center;color:#D4A24E;font-size:13px;font-weight:700;margin-bottom:14px;letter-spacing:0.5px;"></div>
+      
+      <!-- Question content -->
+      <div id="flash-content" style="background:linear-gradient(135deg,#1F3147 0%,#243a55 100%);border:1px solid rgba(212,162,78,0.25);border-radius:14px;padding:24px 18px;margin-bottom:18px;text-align:center;">
+      </div>
+      
+      <!-- Answer options -->
+      <div id="flash-options" style="display:grid;gap:10px;"></div>
+      
+      <!-- Result feedback -->
+      <div id="flash-feedback" style="display:none;margin-top:16px;"></div>
+    </div>
+    
+    <!-- Results view -->
+    <div id="flash-results" style="display:none;text-align:center;padding:30px 16px;">
+      <div id="flash-result-emoji" style="font-size:60px;margin-bottom:14px;">🎉</div>
+      <div id="flash-result-title" style="color:#1D9E75;font-size:24px;font-weight:800;margin-bottom:8px;">סיימת!</div>
+      <div id="flash-result-score" style="color:#D4A24E;font-size:42px;font-weight:900;margin-bottom:6px;"></div>
+      <div id="flash-result-pct" style="color:#7a9ab5;font-size:14px;margin-bottom:6px;"></div>
+      <div id="flash-result-message" style="color:#E8D9B8;font-size:14px;margin-bottom:24px;line-height:1.6;"></div>
+      <div style="display:flex;gap:10px;justify-content:center;">
+        <button onclick="flashStart()" style="background:linear-gradient(135deg,#1D9E75 0%,#0e5a3f 100%);border:none;color:#fff;border-radius:10px;padding:12px 22px;font-size:13px;font-weight:700;cursor:pointer;font-family:inherit;">🔄 נסי שוב</button>
+        <button onclick="flashEnd()" style="background:transparent;border:1px solid #7a9ab5;color:#a0b8c8;border-radius:10px;padding:12px 22px;font-size:13px;font-weight:700;cursor:pointer;font-family:inherit;">סיום</button>
+      </div>
+    </div>
   </div>
 </div>
 
@@ -1754,7 +1822,7 @@ body.day-mode .emerg-grid{
       </div>
     </div>
     
-    <div class="loading" id="cats-loading"><div style="text-align:center;padding:20px;"><div style="font-size:16px;color:#D4862E;margin-bottom:8px;">טוען...</div><div style="font-size:10px;color:#7a9ab5;opacity:0.6;">v20260606-1704</div></div></div>
+    <div class="loading" id="cats-loading"><div style="text-align:center;padding:20px;"><div style="font-size:16px;color:#D4862E;margin-bottom:8px;">טוען...</div><div style="font-size:10px;color:#7a9ab5;opacity:0.6;">v20260606-1712</div></div></div>
     <div class="cgrid" id="cgrid" style="display:none;"></div>
   </div>
   <div id="vlist" class="scr">
@@ -2850,6 +2918,266 @@ window.addEventListener('load', function(){
   setTimeout(checkInAppReminder, 1500);
 });
 
+// === Flashcards System ===
+var _flashState = {
+  questions: [],
+  current: 0,
+  correct: 0,
+  total: 10,
+  answered: false
+};
+
+function startFlashcards(){
+  navToTab('flash');
+  showFlashWelcome();
+}
+
+function showFlashWelcome(){
+  document.getElementById('flash-welcome').style.display = 'block';
+  document.getElementById('flash-question').style.display = 'none';
+  document.getElementById('flash-results').style.display = 'none';
+  
+  // Show stats from last sessions
+  var stats = JSON.parse(localStorage.getItem('flash_stats') || '{"total":0,"correct":0,"sessions":0}');
+  var statsEl = document.getElementById('flash-stats');
+  if (statsEl) {
+    if (stats.sessions > 0) {
+      var avgPct = stats.total > 0 ? Math.round((stats.correct / stats.total) * 100) : 0;
+      statsEl.innerHTML = '📊 הסטטיסטיקה שלי:<br>' +
+        '🎯 סשנים: <strong style="color:#D4862E;">' + stats.sessions + '</strong><br>' +
+        '✅ ממוצע דיוק: <strong style="color:#1D9E75;">' + avgPct + '%</strong>';
+    } else {
+      statsEl.innerHTML = '🆕 זה התרגול הראשון שלך - בהצלחה!';
+    }
+  }
+}
+
+function flashStart(){
+  // Need at least 4 phrases with audio for multiple choice
+  if (!DB || DB.length < 4) {
+    alert('צריך לפחות 4 משפטים במאגר. נסה לטעון את הנתונים שוב.');
+    return;
+  }
+  
+  // Get phrases with all needed fields (he, ar, audio)
+  var available = DB.filter(function(p){ 
+    return p.he && p.ar && (p.audio_url || p.audio); 
+  });
+  
+  if (available.length < 4) {
+    alert('צריך לפחות 4 משפטים עם הקלטות');
+    return;
+  }
+  
+  // Pick 10 random questions (or all if less)
+  var qCount = Math.min(10, available.length);
+  var shuffled = available.slice().sort(function(){ return Math.random() - 0.5; });
+  var selected = shuffled.slice(0, qCount);
+  
+  // Generate questions with type
+  _flashState.questions = selected.map(function(p, i){
+    // Alternate question types
+    var qType = (i % 2 === 0) ? 'audio' : 'hebrew';
+    // Generate 3 wrong answers + 1 correct
+    var others = available.filter(function(x){ return x.id !== p.id; })
+      .sort(function(){ return Math.random() - 0.5; })
+      .slice(0, 3);
+    var options = others.concat([p]).sort(function(){ return Math.random() - 0.5; });
+    return {
+      phrase: p,
+      type: qType,
+      options: options,
+      correctId: p.id
+    };
+  });
+  
+  _flashState.current = 0;
+  _flashState.correct = 0;
+  _flashState.total = qCount;
+  _flashState.answered = false;
+  
+  // Show question view
+  document.getElementById('flash-welcome').style.display = 'none';
+  document.getElementById('flash-question').style.display = 'block';
+  document.getElementById('flash-results').style.display = 'none';
+  
+  renderFlashQuestion();
+}
+
+function renderFlashQuestion(){
+  var q = _flashState.questions[_flashState.current];
+  if (!q) { flashFinish(); return; }
+  
+  // Update progress
+  var counterEl = document.getElementById('flash-counter');
+  var barEl = document.getElementById('flash-bar');
+  var scoreEl = document.getElementById('flash-score');
+  if (counterEl) counterEl.textContent = 'שאלה ' + (_flashState.current + 1) + ' מתוך ' + _flashState.total;
+  if (barEl) barEl.style.width = ((_flashState.current / _flashState.total) * 100) + '%';
+  if (scoreEl) scoreEl.textContent = 'ציון: ' + _flashState.correct + '/' + _flashState.current;
+  
+  var qtypeEl = document.getElementById('flash-qtype');
+  var contentEl = document.getElementById('flash-content');
+  var optionsEl = document.getElementById('flash-options');
+  var feedbackEl = document.getElementById('flash-feedback');
+  
+  if (feedbackEl) { feedbackEl.style.display = 'none'; feedbackEl.innerHTML = ''; }
+  _flashState.answered = false;
+  
+  if (q.type === 'audio') {
+    // Audio → Hebrew translation
+    if (qtypeEl) qtypeEl.textContent = '🎤 שמע ובחר את התרגום הנכון';
+    if (contentEl) {
+      var audioUrl = q.phrase.audio_url || q.phrase.audio;
+      contentEl.innerHTML = '<button onclick="flashPlayAudio(\'' + audioUrl + '\')" style="background:linear-gradient(135deg,#D4A24E 0%,#b8862e 100%);border:none;color:#18293E;border-radius:50%;width:80px;height:80px;font-size:32px;cursor:pointer;font-family:inherit;box-shadow:0 4px 12px rgba(212,162,78,0.4);">▶</button>' +
+        '<div style="color:#a0b8c8;font-size:11px;margin-top:10px;">לחץ להאזנה (אפשר שוב)</div>';
+    }
+    // Show Hebrew options
+    if (optionsEl) {
+      optionsEl.innerHTML = q.options.map(function(opt){
+        return '<button onclick="flashAnswer(' + opt.id + ')" class="flash-opt" style="background:#1F3147;border:1px solid #2A3D52;color:#fff;border-radius:10px;padding:14px 12px;font-size:14px;font-weight:600;cursor:pointer;text-align:right;font-family:inherit;direction:rtl;">' + opt.he + '</button>';
+      }).join('');
+    }
+  } else {
+    // Hebrew → Arabic translation
+    if (qtypeEl) qtypeEl.textContent = '📝 בחר את התרגום בערבית';
+    if (contentEl) {
+      contentEl.innerHTML = '<div style="color:#D4A24E;font-size:22px;font-weight:700;line-height:1.4;">' + q.phrase.he + '</div>';
+    }
+    // Show Arabic+trans options
+    if (optionsEl) {
+      optionsEl.innerHTML = q.options.map(function(opt){
+        return '<button onclick="flashAnswer(' + opt.id + ')" class="flash-opt" style="background:#1F3147;border:1px solid #2A3D52;color:#fff;border-radius:10px;padding:14px 12px;font-size:14px;font-weight:600;cursor:pointer;text-align:right;font-family:inherit;direction:rtl;line-height:1.5;">' +
+          '<div style="font-family:Georgia,serif;color:#E8D9B8;font-size:13px;margin-bottom:3px;">' + (opt.trans || '') + '</div>' +
+          '<div style="font-size:15px;">' + opt.ar + '</div>' +
+          '</button>';
+      }).join('');
+    }
+  }
+}
+
+function flashPlayAudio(url){
+  try {
+    if (window._flashAudio) {
+      window._flashAudio.pause();
+    }
+    window._flashAudio = new Audio(url);
+    window._flashAudio.play();
+  } catch(e) { console.warn(e); }
+}
+
+function flashAnswer(selectedId){
+  if (_flashState.answered) return;
+  _flashState.answered = true;
+  
+  var q = _flashState.questions[_flashState.current];
+  var isCorrect = (selectedId === q.correctId);
+  
+  if (isCorrect) _flashState.correct++;
+  
+  // Disable and color all buttons
+  var buttons = document.querySelectorAll('.flash-opt');
+  buttons.forEach(function(btn){
+    btn.disabled = true;
+    btn.style.cursor = 'default';
+    if (btn.getAttribute('onclick').indexOf(q.correctId) !== -1) {
+      // Correct answer - green
+      btn.style.background = 'linear-gradient(135deg,#1D9E75 0%,#0e5a3f 100%)';
+      btn.style.borderColor = '#1D9E75';
+    } else if (btn.getAttribute('onclick').indexOf(selectedId) !== -1 && !isCorrect) {
+      // Wrong selected - red
+      btn.style.background = 'linear-gradient(135deg,#c0392b 0%,#922d22 100%)';
+      btn.style.borderColor = '#c0392b';
+    } else {
+      btn.style.opacity = '0.4';
+    }
+  });
+  
+  // Show feedback
+  var feedbackEl = document.getElementById('flash-feedback');
+  if (feedbackEl) {
+    var msg, color, emoji;
+    if (isCorrect) {
+      msg = 'נכון! ' + (q.phrase.he || '');
+      color = '#1D9E75';
+      emoji = '✅';
+    } else {
+      msg = 'התשובה הנכונה: ' + (q.phrase.he || '');
+      color = '#c0392b';
+      emoji = '❌';
+    }
+    feedbackEl.style.display = 'block';
+    feedbackEl.innerHTML = '<div style="background:rgba(' + (isCorrect ? '29,158,117' : '192,57,43') + ',0.15);border:1px solid ' + color + ';border-radius:10px;padding:12px;text-align:center;">' +
+      '<div style="color:' + color + ';font-size:16px;font-weight:700;margin-bottom:6px;">' + emoji + ' ' + (isCorrect ? 'תשובה נכונה!' : 'לא נכון') + '</div>' +
+      '<div style="color:#E8D9B8;font-size:13px;line-height:1.5;">' + msg + '</div>' +
+      (q.phrase.trans ? '<div style="color:#a0b8c8;font-size:12px;font-family:Georgia,serif;margin-top:3px;">' + q.phrase.trans + '</div>' : '') +
+      '<button onclick="flashNext()" style="background:#1D9E75;border:none;color:#fff;border-radius:8px;padding:8px 20px;font-size:13px;font-weight:700;cursor:pointer;font-family:inherit;margin-top:10px;">' + (_flashState.current + 1 >= _flashState.total ? '🎉 סיום' : 'הבא ◀') + '</button>' +
+      '</div>';
+  }
+  
+  // Update score display
+  var scoreEl = document.getElementById('flash-score');
+  if (scoreEl) scoreEl.textContent = 'ציון: ' + _flashState.correct + '/' + (_flashState.current + 1);
+}
+
+function flashNext(){
+  _flashState.current++;
+  if (_flashState.current >= _flashState.total) {
+    flashFinish();
+  } else {
+    renderFlashQuestion();
+  }
+}
+
+function flashFinish(){
+  // Show results
+  document.getElementById('flash-question').style.display = 'none';
+  document.getElementById('flash-results').style.display = 'block';
+  
+  var correct = _flashState.correct;
+  var total = _flashState.total;
+  var pct = Math.round((correct / total) * 100);
+  
+  var emoji, title, color, msg;
+  if (pct >= 90) { emoji = '🏆'; title = 'מצוין!'; color = '#1D9E75'; msg = 'אלוף ההגייה! המשיכי כך!'; }
+  else if (pct >= 70) { emoji = '🌟'; title = 'כל הכבוד!'; color = '#1D9E75'; msg = 'תוצאה מצוינת. עוד קצת ותגיעי לפסגה!'; }
+  else if (pct >= 50) { emoji = '👍'; title = 'יפה!'; color = '#D4A24E'; msg = 'יש לך בסיס טוב. תרגלי קצת יותר.'; }
+  else { emoji = '💪'; title = 'התחלה טובה'; color = '#D4862E'; msg = 'אל תתייאשי - כל תרגול מקרב אותך לפסגה!'; }
+  
+  document.getElementById('flash-result-emoji').textContent = emoji;
+  document.getElementById('flash-result-title').textContent = title;
+  document.getElementById('flash-result-title').style.color = color;
+  document.getElementById('flash-result-score').textContent = correct + '/' + total;
+  document.getElementById('flash-result-score').style.color = color;
+  document.getElementById('flash-result-pct').textContent = pct + '% דיוק';
+  document.getElementById('flash-result-message').textContent = msg;
+  
+  // Save stats
+  try {
+    var stats = JSON.parse(localStorage.getItem('flash_stats') || '{"total":0,"correct":0,"sessions":0}');
+    stats.sessions++;
+    stats.total += total;
+    stats.correct += correct;
+    localStorage.setItem('flash_stats', JSON.stringify(stats));
+    
+    // Track learned phrases (correct answers count)
+    _flashState.questions.forEach(function(q, i){
+      if (q.phrase && q.phrase.id && typeof trackLearned === 'function') {
+        trackLearned(q.phrase.id);
+      }
+    });
+    
+    if (typeof checkAchievements === 'function') checkAchievements();
+  } catch(e) {}
+  
+  // Confetti for great score
+  if (pct >= 80 && typeof launchConfetti === 'function') launchConfetti();
+}
+
+function flashEnd(){
+  navToTab('home');
+}
+
 function changeDailyGoal(){
   try {
     var current = parseInt(localStorage.getItem('daily_goal') || '5', 10);
@@ -3016,7 +3344,7 @@ function bldCats(){
   if (!DB || DB.length === 0) {
     loadEl.innerHTML = '<div style="text-align:center;padding:20px;color:#D4862E;">' +
       'מתחבר לשרת...<br><br>' +
-      '<div style="font-size:11px;color:#7a9ab5;">v20260606-1704</div><br>' +
+      '<div style="font-size:11px;color:#7a9ab5;">v20260606-1712</div><br>' +
       '<button onclick="location.reload(true)" style="padding:10px 20px;background:#D4862E;color:#fff;border:none;border-radius:8px;font-family:inherit;cursor:pointer;font-weight:700;margin-top:10px;">🔄 רענן</button>' +
       '</div>';
     return;
@@ -6870,6 +7198,7 @@ function navToTab(tabId){
     try { if (tabId === 'sem' && typeof rSem === 'function') rSem(); } catch(e){}
     try { if (tabId === 'nwf' && typeof rNF === 'function') rNF(); } catch(e){}
     try { if (tabId === 'scn') { if (typeof scnBack === 'function') scnBack(); if (typeof renderScnGrid === 'function') renderScnGrid(); } } catch(e){}
+    try { if (tabId === 'flash' && typeof showFlashWelcome === 'function') showFlashWelcome(); } catch(e){}
     
     // 7. Admin password check
     if (tabId === 'adm' && !window._adminAuth) {
