@@ -1419,7 +1419,7 @@ body.day-mode .emerg-grid{
 <div class="topbar">
   <div class="tb-top" style="display:flex;align-items:center;justify-content:space-between;padding:14px 14px 12px;direction:rtl;">
     <!-- Right side: Role button -->
-    <button class="role-circle" id="roleBtn" onclick="showWelcome()" title="בחר את התפקיד שלי" style="background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.1);border-radius:50%;width:38px;height:38px;display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:18px;flex-shrink:0;">
+    <button class="role-circle" id="roleBtn" onclick="showWelcome()" title="בחירת תפקיד" style="background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.1);border-radius:50%;width:38px;height:38px;display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:18px;flex-shrink:0;">
       <span id="roleBtnEmoji">👤</span>
     </button>
     
@@ -1496,7 +1496,7 @@ body.day-mode .emerg-grid{
     <div id="home-continue-card" style="display:none;background:linear-gradient(135deg,#D4862E 0%,#b87325 100%);border:1px solid rgba(255,255,255,0.2);border-radius:12px;padding:10px 14px;margin-bottom:14px;cursor:pointer;box-shadow:0 2px 8px rgba(212,134,46,0.25);" onclick="homeContinue()">
       <div style="display:flex;align-items:center;justify-content:space-between;gap:10px;">
         <div style="flex:1;min-width:0;">
-          <div style="color:rgba(255,255,255,0.9);font-size:10px;font-weight:700;letter-spacing:0.5px;margin-bottom:2px;">🔄 המשך תרחיש</div>
+          <div style="color:rgba(255,255,255,0.9);font-size:10px;font-weight:700;letter-spacing:0.5px;margin-bottom:2px;">🔄 תרחיש פעיל</div>
           <div id="home-continue-title" style="color:#fff;font-size:14px;font-weight:700;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;"></div>
         </div>
         <div style="color:#fff;font-size:18px;">◀</div>
@@ -1519,11 +1519,11 @@ body.day-mode .emerg-grid{
       </div>
     </div>
     
-    <!-- Flashcards - quick learning card -->
+    <!-- Flashcards - smart learning card -->
     <div onclick="startFlashcards()" style="background:linear-gradient(135deg,#1D9E75 0%,#0e5a3f 100%);border-radius:14px;padding:14px 16px;margin-bottom:20px;cursor:pointer;box-shadow:0 4px 12px rgba(29,158,117,0.3);display:flex;align-items:center;justify-content:space-between;">
-      <div>
-        <div style="color:#fff;font-size:15px;font-weight:800;margin-bottom:3px;">🎴 כרטיסיות לימוד</div>
-        <div style="color:rgba(255,255,255,0.85);font-size:12px;">10 שאלות לתרגול מהיר</div>
+      <div style="flex:1;">
+        <div style="color:#fff;font-size:15px;font-weight:800;margin-bottom:3px;">🎴 כרטיסיות חכמות</div>
+        <div style="color:rgba(255,255,255,0.85);font-size:12px;line-height:1.4;">מערכת זיכרון אישית - תרגול ללא הגבלה</div>
       </div>
       <div style="background:rgba(255,255,255,0.2);border-radius:10px;padding:8px 14px;color:#fff;font-size:13px;font-weight:700;">התחל ◀</div>
     </div>
@@ -1622,7 +1622,7 @@ body.day-mode .emerg-grid{
     <div id="flash-welcome" style="text-align:center;padding:30px 16px;">
       <div style="font-size:48px;margin-bottom:14px;">🎴</div>
       <div style="color:#D4A24E;font-size:18px;font-weight:700;margin-bottom:10px;">תרגול קצר ומהיר</div>
-      <div style="color:#E8D9B8;font-size:13px;line-height:1.6;margin-bottom:24px;">10 שאלות מערבית לעברית<br>תוכל לתרגל בכל מקום וזמן</div>
+      <div style="color:#E8D9B8;font-size:13px;line-height:1.6;margin-bottom:24px;">10 שאלות מערבית לעברית<br>אפשר לתרגל בכל מקום וזמן</div>
       
       <button onclick="flashStart()" style="background:linear-gradient(135deg,#1D9E75 0%,#0e5a3f 100%);border:none;color:#fff;border-radius:12px;padding:14px 32px;font-size:15px;font-weight:700;cursor:pointer;font-family:inherit;box-shadow:0 4px 12px rgba(29,158,117,0.3);">🎯 התחל תרגול</button>
       
@@ -1662,7 +1662,7 @@ body.day-mode .emerg-grid{
       <div id="flash-result-pct" style="color:#7a9ab5;font-size:14px;margin-bottom:6px;"></div>
       <div id="flash-result-message" style="color:#E8D9B8;font-size:14px;margin-bottom:24px;line-height:1.6;"></div>
       <div style="display:flex;gap:10px;justify-content:center;">
-        <button onclick="flashStart()" style="background:linear-gradient(135deg,#1D9E75 0%,#0e5a3f 100%);border:none;color:#fff;border-radius:10px;padding:12px 22px;font-size:13px;font-weight:700;cursor:pointer;font-family:inherit;">🔄 נסי שוב</button>
+        <button onclick="flashStart()" style="background:linear-gradient(135deg,#1D9E75 0%,#0e5a3f 100%);border:none;color:#fff;border-radius:10px;padding:12px 22px;font-size:13px;font-weight:700;cursor:pointer;font-family:inherit;">🔄 לתרגל שוב</button>
         <button onclick="flashEnd()" style="background:transparent;border:1px solid #7a9ab5;color:#a0b8c8;border-radius:10px;padding:12px 22px;font-size:13px;font-weight:700;cursor:pointer;font-family:inherit;">סיום</button>
       </div>
     </div>
@@ -1761,7 +1761,7 @@ body.day-mode .emerg-grid{
   <div class="sec">
     <div id="emerg-home">
       <div class="stitle">🚨 חירום</div>
-      <div style="color:#7a9ab5;font-size:12px;margin-bottom:14px;">בחר את הסיטואציה</div>
+      <div style="color:#7a9ab5;font-size:12px;margin-bottom:14px;">בחירת סיטואציה</div>
       <div class="emerg-grid" id="emerg-grid"></div>
     </div>
     <div id="emerg-list" style="display:none;">
@@ -1822,7 +1822,7 @@ body.day-mode .emerg-grid{
       </div>
     </div>
     
-    <div class="loading" id="cats-loading"><div style="text-align:center;padding:20px;"><div style="font-size:16px;color:#D4862E;margin-bottom:8px;">טוען...</div><div style="font-size:10px;color:#7a9ab5;opacity:0.6;">v20260606-1722</div></div></div>
+    <div class="loading" id="cats-loading"><div style="text-align:center;padding:20px;"><div style="font-size:16px;color:#D4862E;margin-bottom:8px;">טוען...</div><div style="font-size:10px;color:#7a9ab5;opacity:0.6;">v20260607-0900</div></div></div>
     <div class="cgrid" id="cgrid" style="display:none;"></div>
   </div>
   <div id="vlist" class="scr">
@@ -2339,7 +2339,7 @@ function showDebugErrors(){
     html += (e.msg || 'unknown') + (e.line ? ' (line ' + e.line + ')' : '');
     html += '</div>';
   }
-  html += '<button onclick="location.reload(true)" style="padding:10px 20px;background:#D4862E;color:#fff;border:none;border-radius:8px;font-family:inherit;cursor:pointer;font-weight:700;margin-top:10px;">🔄 נסה שוב</button>';
+  html += '<button onclick="location.reload(true)" style="padding:10px 20px;background:#D4862E;color:#fff;border:none;border-radius:8px;font-family:inherit;cursor:pointer;font-weight:700;margin-top:10px;">🔄 לנסות שוב</button>';
   html += '</div>';
   el.innerHTML = html;
   el.style.display = 'block';
@@ -2881,16 +2881,16 @@ function checkInAppReminder(){
     var title, body;
     if (streak >= 7) {
       title = '🔥 רצף ' + streak + ' ימים!';
-      body = 'אל תיתן לרצף האדיר להישבר - תרגול קצר היום';
+      body = 'אל לאבד את הרצף האדיר - תרגול קצר היום';
     } else if (streak >= 3) {
       title = '🔥 רצף של ' + streak + ' ימים';
-      body = 'המשך כך - תרגול קצר ישמור על הקצב';
+      body = 'תרגול קצר ישמור על הקצב';
     } else if (streak >= 1) {
       title = '🎯 לא תרגלת היום';
       body = 'כמה דקות תרגול ישפרו אותך משמעותית';
     } else {
       title = '🎯 בוא נתחיל!';
-      body = 'תרגול קצר היום, ותתחיל בנייה של רצף';
+      body = 'תרגול קצר היום - והרצף מתחיל';
     }
     
     document.getElementById('reminder-title').textContent = title;
@@ -2937,29 +2937,207 @@ function showFlashWelcome(){
   document.getElementById('flash-question').style.display = 'none';
   document.getElementById('flash-results').style.display = 'none';
   
-  // Show stats from last sessions
-  var stats = JSON.parse(localStorage.getItem('flash_stats') || '{"total":0,"correct":0,"sessions":0}');
-  var statsEl = document.getElementById('flash-stats');
-  if (statsEl) {
-    if (stats.sessions > 0) {
-      var avgPct = stats.total > 0 ? Math.round((stats.correct / stats.total) * 100) : 0;
-      statsEl.innerHTML = '📊 הסטטיסטיקה שלי:<br>' +
-        '🎯 סשנים: <strong style="color:#D4862E;">' + stats.sessions + '</strong><br>' +
-        '✅ ממוצע דיוק: <strong style="color:#1D9E75;">' + avgPct + '%</strong>';
-    } else {
-      statsEl.innerHTML = '🆕 זה התרגול הראשון שלך - בהצלחה!';
-    }
+  // Update welcome with smart stats + multiple practice modes
+  var welcomeEl = document.getElementById('flash-welcome');
+  if (!welcomeEl) return;
+  
+  var available = (DB || []).filter(function(p){ return p.he && p.ar && (p.audio_url || p.audio); });
+  var fStats = getFlashStats(available);
+  var sessionStats = JSON.parse(localStorage.getItem('flash_stats') || '{"total":0,"correct":0,"sessions":0}');
+  var avgPct = sessionStats.total > 0 ? Math.round((sessionStats.correct / sessionStats.total) * 100) : 0;
+  
+  var html = '<div style="text-align:center;padding:0 16px;">';
+  html += '<div style="font-size:48px;margin-bottom:14px;">🎴</div>';
+  html += '<div style="color:#D4A24E;font-size:18px;font-weight:700;margin-bottom:6px;">כרטיסיות לימוד חכמות</div>';
+  html += '<div style="color:#E8D9B8;font-size:12px;line-height:1.6;margin-bottom:20px;opacity:0.85;">מערכת זיכרון אישית - המשפטים שטעיתם בהם יחזרו</div>';
+  
+  // Smart stats grid
+  html += '<div style="background:linear-gradient(135deg,#18293E 0%,#1F3147 100%);border:1px solid rgba(212,162,78,0.25);border-radius:14px;padding:14px;margin-bottom:18px;">';
+  html += '<div style="color:#D4A24E;font-size:11px;font-weight:700;letter-spacing:0.5px;margin-bottom:10px;">📊 ההתקדמות שלי</div>';
+  html += '<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">';
+  
+  // New
+  html += '<div style="background:rgba(212,162,78,0.08);border:1px solid rgba(212,162,78,0.2);border-radius:10px;padding:10px;text-align:right;">';
+  html += '<div style="color:#D4A24E;font-size:20px;font-weight:800;line-height:1;">' + fStats.new + '</div>';
+  html += '<div style="color:#a0b8c8;font-size:10px;margin-top:3px;">⭐ חדשים</div>';
+  html += '</div>';
+  
+  // Learning
+  html += '<div style="background:rgba(29,158,117,0.08);border:1px solid rgba(29,158,117,0.2);border-radius:10px;padding:10px;text-align:right;">';
+  html += '<div style="color:#1D9E75;font-size:20px;font-weight:800;line-height:1;">' + fStats.learning + '</div>';
+  html += '<div style="color:#a0b8c8;font-size:10px;margin-top:3px;">🌱 בלמידה</div>';
+  html += '</div>';
+  
+  // Attention
+  html += '<div style="background:rgba(192,57,43,0.08);border:1px solid rgba(192,57,43,0.2);border-radius:10px;padding:10px;text-align:right;">';
+  html += '<div style="color:#c0392b;font-size:20px;font-weight:800;line-height:1;">' + fStats.attention + '</div>';
+  html += '<div style="color:#a0b8c8;font-size:10px;margin-top:3px;">🎯 דורש תשומת לב</div>';
+  html += '</div>';
+  
+  // Mastered
+  html += '<div style="background:rgba(155,89,182,0.08);border:1px solid rgba(155,89,182,0.2);border-radius:10px;padding:10px;text-align:right;">';
+  html += '<div style="color:#a569bd;font-size:20px;font-weight:800;line-height:1;">' + fStats.mastered + '</div>';
+  html += '<div style="color:#a0b8c8;font-size:10px;margin-top:3px;">🌳 נשלטים</div>';
+  html += '</div>';
+  
+  html += '</div>';  // grid
+  
+  // Progress bar
+  if (fStats.total > 0) {
+    var progressedCount = fStats.learning + fStats.attention + fStats.mastered;
+    var pct = Math.round((progressedCount / fStats.total) * 100);
+    html += '<div style="margin-top:12px;">';
+    html += '<div style="display:flex;justify-content:space-between;color:#a0b8c8;font-size:11px;margin-bottom:4px;">';
+    html += '<span>' + progressedCount + ' מתוך ' + fStats.total + ' משפטים נלמדו</span>';
+    html += '<span>' + pct + '%</span>';
+    html += '</div>';
+    html += '<div style="height:6px;background:rgba(255,255,255,0.08);border-radius:3px;overflow:hidden;">';
+    html += '<div style="height:100%;background:linear-gradient(90deg,#D4A24E,#D4862E);width:' + pct + '%;border-radius:3px;"></div>';
+    html += '</div>';
+    html += '</div>';
   }
+  
+  html += '</div>'; // stats card
+  
+  // Smart Practice Button (primary)
+  html += '<button onclick="flashStart(\'smart\')" style="width:100%;background:linear-gradient(135deg,#1D9E75 0%,#0e5a3f 100%);border:none;color:#fff;border-radius:12px;padding:14px;font-size:15px;font-weight:700;cursor:pointer;font-family:inherit;box-shadow:0 4px 12px rgba(29,158,117,0.3);margin-bottom:10px;">';
+  html += '🎯 תרגול חכם';
+  if (fStats.attention > 0) {
+    html += ' <span style="background:rgba(192,57,43,0.9);color:#fff;border-radius:10px;padding:2px 8px;font-size:11px;margin-right:6px;">' + fStats.attention + ' דורשים תשומת לב</span>';
+  }
+  html += '</button>';
+  
+  // Challenge mode
+  html += '<button onclick="flashStart(\'challenge\')" style="width:100%;background:linear-gradient(135deg,#D4862E 0%,#b87325 100%);border:none;color:#fff;border-radius:12px;padding:12px;font-size:13px;font-weight:700;cursor:pointer;font-family:inherit;margin-bottom:18px;">';
+  html += '🔥 אתגר אקראי - כל המשפטים';
+  html += '</button>';
+  
+  // Session history
+  if (sessionStats.sessions > 0) {
+    html += '<div style="padding:10px;background:rgba(255,255,255,0.03);border-radius:10px;color:#a0b8c8;font-size:11px;line-height:1.7;">';
+    html += '📈 <strong style="color:#E8D9B8;">היסטוריה:</strong> ' + sessionStats.sessions + ' סשנים | ';
+    html += 'דיוק ממוצע: <strong style="color:#1D9E75;">' + avgPct + '%</strong>';
+    html += '</div>';
+  } else {
+    html += '<div style="padding:10px;background:rgba(255,255,255,0.03);border-radius:10px;color:#a0b8c8;font-size:11px;">🆕 התרגול הראשון - בהצלחה!</div>';
+  }
+  
+  html += '</div>';
+  welcomeEl.innerHTML = html;
 }
 
-function flashStart(){
-  // Need at least 4 phrases with audio for multiple choice
+// === Smart Flashcards Memory System ===
+// Each phrase has a "memory state": new, learning, attention, mastered
+// State stored in 'flash_memory' localStorage as { phraseId: { state, lastSeen, correctCount, mistakes } }
+
+function getFlashMemory(){
+  try { return JSON.parse(localStorage.getItem('flash_memory') || '{}'); }
+  catch(e) { return {}; }
+}
+
+function saveFlashMemory(mem){
+  try { localStorage.setItem('flash_memory', JSON.stringify(mem)); }
+  catch(e) {}
+}
+
+function getFlashStats(available){
+  var mem = getFlashMemory();
+  var stats = { new: 0, learning: 0, attention: 0, mastered: 0, total: available.length };
+  available.forEach(function(p){
+    var key = String(p.id);
+    var m = mem[key];
+    if (!m || !m.state) { stats.new++; }
+    else if (m.state === 'mastered') { stats.mastered++; }
+    else if (m.state === 'attention') { stats.attention++; }
+    else { stats.learning++; }
+  });
+  return stats;
+}
+
+function pickFlashQuestions(available, count, mode){
+  // mode: 'smart' (default), 'challenge' (random), 'category'
+  var mem = getFlashMemory();
+  var now = Date.now();
+  
+  // Categorize phrases
+  var attention = []; // Need attention (recent mistakes)
+  var newPhrases = []; // Never seen
+  var dueForReview = []; // Time to review
+  var learning = []; // In progress
+  var mastered = []; // Mastered (rarely shown)
+  
+  available.forEach(function(p){
+    var key = String(p.id);
+    var m = mem[key];
+    if (!m || !m.state) {
+      newPhrases.push(p);
+    } else if (m.state === 'attention') {
+      attention.push(p);
+    } else if (m.state === 'mastered') {
+      // Show mastered phrases occasionally (10% chance per session)
+      if (Math.random() < 0.1) mastered.push(p);
+    } else if (m.state === 'learning') {
+      // Check if due for review (4 hours minimum gap)
+      var hoursSince = (now - (m.lastSeen || 0)) / (1000 * 60 * 60);
+      if (hoursSince > 4) {
+        dueForReview.push(p);
+      } else {
+        learning.push(p);
+      }
+    }
+  });
+  
+  // Smart pick algorithm:
+  // 1. Attention phrases first (up to 30%)
+  // 2. Due for review (up to 30%)
+  // 3. New phrases (up to 40%)
+  // 4. Fill remaining with anything available
+  
+  function shuffle(arr){ return arr.slice().sort(function(){ return Math.random() - 0.5; }); }
+  
+  attention = shuffle(attention);
+  newPhrases = shuffle(newPhrases);
+  dueForReview = shuffle(dueForReview);
+  learning = shuffle(learning);
+  mastered = shuffle(mastered);
+  
+  if (mode === 'challenge') {
+    // Pure random
+    return shuffle(available).slice(0, count);
+  }
+  
+  // Smart mode
+  var selected = [];
+  var attentionCount = Math.min(Math.ceil(count * 0.3), attention.length);
+  var reviewCount = Math.min(Math.ceil(count * 0.3), dueForReview.length);
+  var newCount = Math.min(Math.ceil(count * 0.4), newPhrases.length);
+  
+  selected = selected.concat(attention.slice(0, attentionCount));
+  selected = selected.concat(dueForReview.slice(0, reviewCount));
+  selected = selected.concat(newPhrases.slice(0, newCount));
+  
+  // Fill remaining slots
+  var pool = [].concat(learning, dueForReview.slice(reviewCount), newPhrases.slice(newCount), attention.slice(attentionCount), mastered);
+  pool = shuffle(pool);
+  for (var i = 0; selected.length < count && i < pool.length; i++) {
+    if (selected.indexOf(pool[i]) === -1) {
+      selected.push(pool[i]);
+    }
+  }
+  
+  // Final shuffle
+  return shuffle(selected);
+}
+
+function flashStart(mode){
+  mode = mode || 'smart';
+  _flashState.mode = mode;
+  
   if (!DB || DB.length < 4) {
-    alert('צריך לפחות 4 משפטים במאגר. נסה לטעון את הנתונים שוב.');
+    alert('צריך לפחות 4 משפטים במאגר. אפשר לטעון את הנתונים שוב.');
     return;
   }
   
-  // Get phrases with all needed fields (he, ar, audio)
   var available = DB.filter(function(p){ 
     return p.he && p.ar && (p.audio_url || p.audio); 
   });
@@ -2969,17 +3147,14 @@ function flashStart(){
     return;
   }
   
-  // Pick 10 random questions (or all if less)
+  // Determine how many questions (no daily limit!)
   var qCount = Math.min(10, available.length);
-  var shuffled = available.slice().sort(function(){ return Math.random() - 0.5; });
-  var selected = shuffled.slice(0, qCount);
+  var selected = pickFlashQuestions(available, qCount, mode);
   
   // Generate questions with type
   _flashState.questions = selected.map(function(p, i){
-    // Alternate question types
     var qType = (i % 2 === 0) ? 'audio' : 'hebrew';
-    // Generate 3 wrong answers + 1 correct
-    var others = available.filter(function(x){ return x.id !== p.id; })
+    var others = available.filter(function(x){ return String(x.id) !== String(p.id); })
       .sort(function(){ return Math.random() - 0.5; })
       .slice(0, 3);
     var options = others.concat([p]).sort(function(){ return Math.random() - 0.5; });
@@ -2995,8 +3170,8 @@ function flashStart(){
   _flashState.correct = 0;
   _flashState.total = qCount;
   _flashState.answered = false;
+  _flashState.changes = { promoted: 0, demoted: 0, mastered: 0 };
   
-  // Show question view
   document.getElementById('flash-welcome').style.display = 'none';
   document.getElementById('flash-question').style.display = 'block';
   document.getElementById('flash-results').style.display = 'none';
@@ -3084,6 +3259,47 @@ function flashAnswer(selectedId, selectedIdx){
   
   if (isCorrect) _flashState.correct++;
   
+  // === Update Memory State ===
+  try {
+    var mem = getFlashMemory();
+    var pid = String(q.correctId);
+    var pm = mem[pid] || { state: 'new', correctCount: 0, mistakes: 0, lastSeen: 0 };
+    
+    pm.lastSeen = Date.now();
+    
+    if (isCorrect) {
+      pm.correctCount = (pm.correctCount || 0) + 1;
+      pm.mistakes = 0; // Reset consecutive mistakes
+      
+      // State transition logic
+      if (pm.state === 'attention') {
+        // Was struggling, now correct → back to learning
+        pm.state = 'learning';
+        _flashState.changes.promoted++;
+      } else if (pm.state === 'new') {
+        pm.state = 'learning';
+      } else if (pm.state === 'learning' && pm.correctCount >= 3) {
+        // 3 correct in a row → mastered!
+        pm.state = 'mastered';
+        _flashState.changes.mastered++;
+      }
+    } else {
+      pm.mistakes = (pm.mistakes || 0) + 1;
+      pm.correctCount = 0; // Reset streak
+      
+      // Any mistake → attention state
+      if (pm.state === 'mastered') {
+        pm.state = 'learning'; // Was mastered, now needs work again
+        _flashState.changes.demoted++;
+      } else {
+        pm.state = 'attention';
+      }
+    }
+    
+    mem[pid] = pm;
+    saveFlashMemory(mem);
+  } catch(e) { console.warn('Memory update error:', e); }
+  
   // Find correct index
   var correctIdx = -1;
   for (var i = 0; i < q.options.length; i++) {
@@ -3156,12 +3372,13 @@ function flashFinish(){
   var correct = _flashState.correct;
   var total = _flashState.total;
   var pct = Math.round((correct / total) * 100);
+  var changes = _flashState.changes || {};
   
   var emoji, title, color, msg;
-  if (pct >= 90) { emoji = '🏆'; title = 'מצוין!'; color = '#1D9E75'; msg = 'אלוף ההגייה! המשיכי כך!'; }
-  else if (pct >= 70) { emoji = '🌟'; title = 'כל הכבוד!'; color = '#1D9E75'; msg = 'תוצאה מצוינת. עוד קצת ותגיעי לפסגה!'; }
-  else if (pct >= 50) { emoji = '👍'; title = 'יפה!'; color = '#D4A24E'; msg = 'יש לך בסיס טוב. תרגלי קצת יותר.'; }
-  else { emoji = '💪'; title = 'התחלה טובה'; color = '#D4862E'; msg = 'אל תתייאשי - כל תרגול מקרב אותך לפסגה!'; }
+  if (pct >= 90) { emoji = '🏆'; title = 'מצוין!'; color = '#1D9E75'; msg = 'תוצאה מעולה - כל הכבוד!'; }
+  else if (pct >= 70) { emoji = '🌟'; title = 'כל הכבוד!'; color = '#1D9E75'; msg = 'תוצאה מצוינת - עוד תרגול וההגייה תהיה מושלמת'; }
+  else if (pct >= 50) { emoji = '👍'; title = 'יפה!'; color = '#D4A24E'; msg = 'יש בסיס טוב - תרגול נוסף יקפיץ את הציון'; }
+  else { emoji = '💪'; title = 'התחלה טובה'; color = '#D4862E'; msg = 'כל תרגול מקרב לפסגה - להמשיך!'; }
   
   document.getElementById('flash-result-emoji').textContent = emoji;
   document.getElementById('flash-result-title').textContent = title;
@@ -3169,7 +3386,30 @@ function flashFinish(){
   document.getElementById('flash-result-score').textContent = correct + '/' + total;
   document.getElementById('flash-result-score').style.color = color;
   document.getElementById('flash-result-pct').textContent = pct + '% דיוק';
-  document.getElementById('flash-result-message').textContent = msg;
+  
+  // Build message with memory changes
+  var msgEl = document.getElementById('flash-result-message');
+  if (msgEl) {
+    var html = '<div style="margin-bottom:12px;">' + msg + '</div>';
+    
+    // Show memory changes
+    if (changes.mastered > 0 || changes.promoted > 0 || changes.demoted > 0) {
+      html += '<div style="background:rgba(255,255,255,0.04);border-radius:10px;padding:10px;text-align:right;font-size:12px;line-height:1.7;">';
+      html += '<div style="color:#D4A24E;font-size:11px;font-weight:700;margin-bottom:6px;">🧠 שינויים בזיכרון:</div>';
+      if (changes.mastered > 0) {
+        html += '<div style="color:#a569bd;">🌳 ' + changes.mastered + ' משפטים עברו לסטטוס "נשלט"!</div>';
+      }
+      if (changes.promoted > 0) {
+        html += '<div style="color:#1D9E75;">📈 ' + changes.promoted + ' משפטים יצאו מ"דורש תשומת לב"</div>';
+      }
+      if (changes.demoted > 0) {
+        html += '<div style="color:#D4862E;">⚠️ ' + changes.demoted + ' משפטים חזרו לתרגול</div>';
+      }
+      html += '</div>';
+    }
+    
+    msgEl.innerHTML = html;
+  }
   
   // Save stats
   try {
@@ -3363,7 +3603,7 @@ function bldCats(){
   if (!DB || DB.length === 0) {
     loadEl.innerHTML = '<div style="text-align:center;padding:20px;color:#D4862E;">' +
       'מתחבר לשרת...<br><br>' +
-      '<div style="font-size:11px;color:#7a9ab5;">v20260606-1722</div><br>' +
+      '<div style="font-size:11px;color:#7a9ab5;">v20260607-0900</div><br>' +
       '<button onclick="location.reload(true)" style="padding:10px 20px;background:#D4862E;color:#fff;border:none;border-radius:8px;font-family:inherit;cursor:pointer;font-weight:700;margin-top:10px;">🔄 רענן</button>' +
       '</div>';
     return;
@@ -4351,7 +4591,7 @@ function renderScnScore(){
       break;
     default:
       color = '#c0392b'; bgColor = 'rgba(192,57,43,0.12)';
-      emoji = '🎯'; mainText = 'נסי שוב - לא זוהה כראוי';
+      emoji = '🎯'; mainText = 'לתרגל שוב - לא זוהה כראוי';
   }
   
   var html = '<div style="margin-top:10px;padding:12px;background:' + bgColor + ';border:1px solid ' + color + ';border-radius:10px;">';
@@ -4370,7 +4610,7 @@ function renderScnScore(){
   // Show what was recognized vs target
   if (s.recognized) {
     html += '<div style="font-size:11px;color:#a0b8c8;margin-top:8px;">';
-    html += '<div style="margin-bottom:4px;">🎤 <strong style="color:#E8D9B8;">אמרת:</strong> ' + s.recognized + '</div>';
+    html += '<div style="margin-bottom:4px;">🎤 <strong style="color:#E8D9B8;">ההקלטה שלך:</strong> ' + s.recognized + '</div>';
     html += '<div>🎯 <strong style="color:#E8D9B8;">המקור:</strong> ' + s.target + '</div>';
     html += '</div>';
   }
@@ -6320,7 +6560,7 @@ async function startVoice() {
   const status = document.getElementById('voice-status');
   
   if (!('webkitSpeechRecognition' in window) && !('SpeechRecognition' in window)) {
-    alert('הדפדפן שלך לא תומך בזיהוי קול. נסי ב-Chrome.');
+    alert('הדפדפן שלך לא תומך בזיהוי קול. אפשר לנסות ב-Chrome.');
     return;
   }
   
@@ -7013,7 +7253,7 @@ try { renderHome(); } catch(_){}
       el.innerHTML = '<div style="text-align:right;color:#fff;padding:20px;background:#a82318;border-radius:10px;margin:10px;direction:rtl;">' +
         '<div style="font-size:16px;font-weight:700;margin-bottom:10px;">⚠️ שגיאה בחיבור לשרת</div>' +
         '<div style="font-size:11px;margin-bottom:12px;direction:ltr;text-align:left;font-family:monospace;background:rgba(0,0,0,0.3);padding:8px;border-radius:4px;color:#fff;">' + errText + '</div>' +
-        '<button onclick="location.reload(true)" style="padding:10px 20px;background:#D4862E;color:#fff;border:none;border-radius:8px;font-family:inherit;cursor:pointer;font-weight:700;">🔄 נסה שוב</button>' +
+        '<button onclick="location.reload(true)" style="padding:10px 20px;background:#D4862E;color:#fff;border:none;border-radius:8px;font-family:inherit;cursor:pointer;font-weight:700;">🔄 לנסות שוב</button>' +
         '</div>';
     }
     try {
