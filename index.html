@@ -1831,7 +1831,7 @@ body.day-mode .emerg-grid{
       </div>
     </div>
     
-    <div class="loading" id="cats-loading"><div style="text-align:center;padding:20px;"><div style="font-size:16px;color:#D4862E;margin-bottom:8px;">טוען...</div><div style="font-size:10px;color:#7a9ab5;opacity:0.6;">v20260607-1134</div></div></div>
+    <div class="loading" id="cats-loading"><div style="text-align:center;padding:20px;"><div style="font-size:16px;color:#D4862E;margin-bottom:8px;">טוען...</div><div style="font-size:10px;color:#7a9ab5;opacity:0.6;">v20260607-1302</div></div></div>
     <div class="cgrid" id="cgrid" style="display:none;"></div>
   </div>
   <div id="vlist" class="scr">
@@ -3617,7 +3617,7 @@ function bldCats(){
   if (!DB || DB.length === 0) {
     loadEl.innerHTML = '<div style="text-align:center;padding:20px;color:#D4862E;">' +
       'מתחבר לשרת...<br><br>' +
-      '<div style="font-size:11px;color:#7a9ab5;">v20260607-1134</div><br>' +
+      '<div style="font-size:11px;color:#7a9ab5;">v20260607-1302</div><br>' +
       '<button onclick="location.reload(true)" style="padding:10px 20px;background:#D4862E;color:#fff;border:none;border-radius:8px;font-family:inherit;cursor:pointer;font-weight:700;margin-top:10px;">🔄 רענן</button>' +
       '</div>';
     return;
@@ -5610,11 +5610,27 @@ function goB(tab){
 }
 
 function setL(l){sL=l;document.getElementById('lbhe').className='lb'+(l==='he'?' active':'');document.getElementById('lbar').className='lb'+(l==='ar'?' active':'');doS();}
+// Smart search - works in any language, ignores diacritics
+function _normalizeForSearch(s){
+  if (!s) return '';
+  return s.toString()
+    .toLowerCase()
+    // Remove Hebrew diacritics (nikud)
+    .replace(/[\u0591-\u05C7]/g, '')
+    // Remove Arabic diacritics (tashkil)
+    .replace(/[\u064B-\u065F\u0670\u06D6-\u06ED]/g, '')
+    // Remove special punctuation
+    .replace(/[?״"׳'.,!؟،;:]/g, '')
+    // Normalize spaces
+    .replace(/\s+/g, ' ')
+    .trim();
+}
+
 function doS(){
   let q=document.getElementById('sinp').value.trim();
   if(!q){if(curC)shV('vlist');else shV('vcats');return;}
   
-  // Remove common question prefixes
+  // Remove common question prefixes (Hebrew)
   const prefixes = [
     'איך אומרים ', 'איך אומר ', 'איך אומרת ',
     'מה זה ', 'מה הפירוש של ', 'תרגם לי את ',
@@ -5628,34 +5644,60 @@ function doS(){
       break;
     }
   }
-  // Remove trailing question mark and quotes
   cleaned = cleaned.replace(/[?״"׳']/g, '').trim();
   
-  // Try exact match first, then partial match
-  let r = DB.filter(p=>sL==='he'?
-    p.he.includes(cleaned)||p.trans.includes(cleaned)||(p.tags&&p.tags.includes(cleaned)):
-    p.ar.includes(cleaned)||p.he.includes(cleaned)
-  );
-  
-  // If no results with cleaned, try original
-  if (r.length === 0 && cleaned !== q) {
-    r = DB.filter(p=>sL==='he'?
-      p.he.includes(q)||p.trans.includes(q):
-      p.ar.includes(q)||p.he.includes(q)
-    );
+  // Normalize search term (remove diacritics, lowercase)
+  const normQ = _normalizeForSearch(cleaned);
+  if (!normQ) {
+    if(curC)shV('vlist');else shV('vcats');
+    return;
   }
   
-  // Also search in DAILY, NAVY, DICT
-  if (r.length === 0) {
-    const allItems = [...DAILY, ...NAVY, ...DICT];
-    const found = allItems.filter(p=>
-      p.he && (p.he.includes(cleaned)||p.trans.includes(cleaned))
-    );
-    if (found.length > 0) r = found;
+  // Smart match function - checks ALL fields (he, trans, ar, tags) regardless of input language
+  function matches(p){
+    if (!p) return false;
+    return _normalizeForSearch(p.he).includes(normQ) ||
+           _normalizeForSearch(p.trans).includes(normQ) ||
+           _normalizeForSearch(p.ar).includes(normQ) ||
+           (p.tags && _normalizeForSearch(p.tags).includes(normQ));
   }
   
-  document.getElementById('smeta').textContent=r.length+' תוצאות עבור "'+cleaned+'"';
-  rItems(r,document.getElementById('sres'),cleaned);shV('vsrch');
+  // Search in ALL sources at once
+  const allSources = [
+    ...(DB || []),
+    ...(DAILY || []),
+    ...(HEART || []),
+    ...(NAVY || []),
+    ...(DICT || []),
+    ...(SEM || []),
+    ...(CUS || []),
+    ...(ARTS || [])
+  ];
+  
+  // Deduplicate by id
+  const seen = new Set();
+  let r = [];
+  for (const p of allSources) {
+    if (!p || !p.id) continue;
+    if (seen.has(p.id)) continue;
+    if (matches(p)) {
+      seen.add(p.id);
+      r.push(p);
+    }
+  }
+  
+  // Sort: exact matches first, then partial
+  r.sort(function(a, b){
+    const aExact = _normalizeForSearch(a.he) === normQ ? 0 : 
+                   (_normalizeForSearch(a.he).startsWith(normQ) ? 1 : 2);
+    const bExact = _normalizeForSearch(b.he) === normQ ? 0 :
+                   (_normalizeForSearch(b.he).startsWith(normQ) ? 1 : 2);
+    return aExact - bExact;
+  });
+  
+  document.getElementById('smeta').textContent = r.length + ' תוצאות עבור "' + cleaned + '"';
+  rItems(r, document.getElementById('sres'), cleaned);
+  shV('vsrch');
 }
 function hl(t,q){if(!q)return t;return t.replace(new RegExp('('+q.replace(/[.*+?^${}()|[\]\\]/g,'\\$&')+')','gi'),'<span class="hlm">$1</span>');}
 function rItems(items,el,q){
