@@ -1142,13 +1142,22 @@ body.day-mode{
 /* Catch ALL inline-style light colors and make them dark */
 body.day-mode [style*="color:#E8D9B8"],
 body.day-mode [style*="color: #E8D9B8"],
-body.day-mode [style*="color:#fff"],
-body.day-mode [style*="color: #fff"],
-body.day-mode [style*="color:#FFF"],
-body.day-mode [style*="color: #FFF"],
-body.day-mode [style*="color:#ffffff"]{
+body.day-mode [style*="color:#fff"]:not(.keep-white):not(.fav-card):not(.fav-card *),
+body.day-mode [style*="color: #fff"]:not(.keep-white):not(.fav-card):not(.fav-card *),
+body.day-mode [style*="color:#FFF"]:not(.keep-white):not(.fav-card):not(.fav-card *),
+body.day-mode [style*="color: #FFF"]:not(.keep-white):not(.fav-card):not(.fav-card *),
+body.day-mode [style*="color:#ffffff"]:not(.keep-white):not(.fav-card):not(.fav-card *){
   color:#0e1b2e !important;
 }
+/* Elements on colored backgrounds keep white text */
+.keep-white, .keep-white * { color:#fff !important; }
+body.day-mode .keep-white, body.day-mode .keep-white * { color:#fff !important; }
+
+/* Recent items - readable in both themes */
+.rec-card .rec-he { color:#fff; }
+.rec-card .rec-trans { color:#a0b8c8; }
+body.day-mode .rec-card .rec-he { color:#0e1b2e !important; font-weight:600; }
+body.day-mode .rec-card .rec-trans { color:#374a60 !important; }
 
 body.day-mode [style*="color:#a0b8c8"],
 body.day-mode [style*="color: #a0b8c8"]{
@@ -1497,9 +1506,9 @@ body.day-mode .emerg-grid{
       <div style="display:flex;align-items:center;justify-content:space-between;gap:10px;">
         <div style="flex:1;min-width:0;">
           <div style="color:rgba(255,255,255,0.9);font-size:10px;font-weight:700;letter-spacing:0.5px;margin-bottom:2px;">🔄 תרחיש פעיל</div>
-          <div id="home-continue-title" style="color:#fff;font-size:14px;font-weight:700;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;"></div>
+          <div id="home-continue-title" class="keep-white" style="color:#fff;font-size:14px;font-weight:700;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;"></div>
         </div>
-        <div style="color:#fff;font-size:18px;">◀</div>
+        <div class="keep-white" style="color:#fff;font-size:18px;">◀</div>
       </div>
     </div>
     
@@ -1522,17 +1531,17 @@ body.day-mode .emerg-grid{
     <!-- Flashcards - smart learning card -->
     <div onclick="startFlashcards()" style="background:linear-gradient(135deg,#1D9E75 0%,#0e5a3f 100%);border-radius:14px;padding:14px 16px;margin-bottom:20px;cursor:pointer;box-shadow:0 4px 12px rgba(29,158,117,0.3);display:flex;align-items:center;justify-content:space-between;">
       <div style="flex:1;">
-        <div style="color:#fff;font-size:15px;font-weight:800;margin-bottom:3px;">🎯 חזרה ובחינה</div>
+        <div class="keep-white" style="color:#fff;font-size:15px;font-weight:800;margin-bottom:3px;">🎯 חזרה ובחינה</div>
         <div style="color:rgba(255,255,255,0.85);font-size:12px;line-height:1.4;">חזרה ובחינה על המשפטים שלמדתם</div>
       </div>
-      <div style="background:rgba(255,255,255,0.2);border-radius:10px;padding:8px 14px;color:#fff;font-size:13px;font-weight:700;">התחל ◀</div>
+      <div class="keep-white" style="background:rgba(255,255,255,0.2);border-radius:10px;padding:8px 14px;color:#fff;font-size:13px;font-weight:700;">התחל ◀</div>
     </div>
     
     <!-- Daily Reminder Banner -->
     <div id="reminder-banner" style="display:none;background:linear-gradient(135deg,#D4862E 0%,#b87325 100%);border-radius:14px;padding:14px 16px;margin-bottom:12px;box-shadow:0 4px 12px rgba(212,134,46,0.3);position:relative;">
       <button onclick="dismissReminder()" style="position:absolute;top:8px;left:8px;background:rgba(255,255,255,0.15);border:1px solid rgba(255,255,255,0.2);color:#fff;border-radius:50%;width:24px;height:24px;font-size:12px;font-weight:700;cursor:pointer;font-family:inherit;display:flex;align-items:center;justify-content:center;padding:0;">✕</button>
       <div style="margin-right:24px;">
-        <div id="reminder-title" style="color:#fff;font-size:15px;font-weight:800;margin-bottom:4px;"></div>
+        <div id="reminder-title" class="keep-white" style="color:#fff;font-size:15px;font-weight:800;margin-bottom:4px;"></div>
         <div id="reminder-body" style="color:rgba(255,255,255,0.92);font-size:12px;line-height:1.4;margin-bottom:10px;"></div>
         <button onclick="reminderGoToScenarios()" style="background:#fff;border:none;color:#b87325;border-radius:8px;padding:8px 16px;font-size:12px;font-weight:700;cursor:pointer;font-family:inherit;">✅ בוא נתרגל</button>
       </div>
@@ -1822,7 +1831,7 @@ body.day-mode .emerg-grid{
       </div>
     </div>
     
-    <div class="loading" id="cats-loading"><div style="text-align:center;padding:20px;"><div style="font-size:16px;color:#D4862E;margin-bottom:8px;">טוען...</div><div style="font-size:10px;color:#7a9ab5;opacity:0.6;">v20260607-1123</div></div></div>
+    <div class="loading" id="cats-loading"><div style="text-align:center;padding:20px;"><div style="font-size:16px;color:#D4862E;margin-bottom:8px;">טוען...</div><div style="font-size:10px;color:#7a9ab5;opacity:0.6;">v20260607-1134</div></div></div>
     <div class="cgrid" id="cgrid" style="display:none;"></div>
   </div>
   <div id="vlist" class="scr">
@@ -1991,7 +2000,7 @@ body.day-mode .emerg-grid{
   <div id="artfv" style="display:none;">
     <div style="padding:16px;">
       <button class="bbtn" onclick="clsArt()" style="margin-bottom:14px;">→ חזור</button>
-      <div style="color:#fff;font-size:16px;font-weight:600;margin-bottom:10px;line-height:1.4;" id="art-title"></div>
+      <div style="color:#0e1b2e;font-size:16px;font-weight:600;margin-bottom:10px;line-height:1.4;" id="art-title"></div>
       <div style="color:#a0b8c8;font-size:14px;line-height:1.9;" id="art-body"></div>
     </div>
   </div>
@@ -3608,7 +3617,7 @@ function bldCats(){
   if (!DB || DB.length === 0) {
     loadEl.innerHTML = '<div style="text-align:center;padding:20px;color:#D4862E;">' +
       'מתחבר לשרת...<br><br>' +
-      '<div style="font-size:11px;color:#7a9ab5;">v20260607-1123</div><br>' +
+      '<div style="font-size:11px;color:#7a9ab5;">v20260607-1134</div><br>' +
       '<button onclick="location.reload(true)" style="padding:10px 20px;background:#D4862E;color:#fff;border:none;border-radius:8px;font-family:inherit;cursor:pointer;font-weight:700;margin-top:10px;">🔄 רענן</button>' +
       '</div>';
     return;
@@ -3655,7 +3664,7 @@ function opC(cat,special){
           <div style="display:flex;align-items:center;gap:10px;margin-bottom:8px;">
             <div style="font-size:24px;">🎯</div>
             <div>
-              <div style="color:#fff;font-size:15px;font-weight:700;">התחל מצב למידה</div>
+              <div class="keep-white" style="color:#fff;font-size:15px;font-weight:700;">התחל מצב למידה</div>
               <div style="color:rgba(255,255,255,0.85);font-size:12px;">תרגל את כל הקטגוריה שלב-שלב</div>
             </div>
           </div>
@@ -6641,7 +6650,7 @@ function translateWithGoogle(text) {
   aiResult.innerHTML = `
     <div style="text-align:center;padding:14px;">
       <div style="color:#D4862E;font-size:14px;margin-bottom:8px;">⚠️ לא נמצא במאגר</div>
-      <div style="color:#fff;font-size:13px;margin-bottom:10px;">"${text}"</div>
+      <div class="ai-result-text" style="color:#fff;font-size:13px;margin-bottom:10px;">"${text}"</div>
       <a href="https://wa.me/972529247768?text=שלום, אני מבקש להוסיף את המילה: ${encodeURIComponent(text)}" target="_blank" style="display:inline-block;padding:8px 16px;background:#25D366;color:#fff;text-decoration:none;border-radius:6px;font-size:13px;font-weight:600;">💬 בקש להוסיף</a>
     </div>
   `;
@@ -7058,9 +7067,9 @@ function rRecent(){
     var sec=DB.includes(p)?"military":DAILY.includes(p)?"daily":HEART.includes(p)?"heart":"navy";
     var idx=sec==="military"?DB.findIndex(function(x){return x.id===p.id;}):sec==="daily"?DAILY.findIndex(function(x){return x.id===p.id;}):sec==="heart"?HEART.indexOf(p):NAVY.indexOf(p);
     h+='<div style="background:#1a2535;border:1px solid #2A3D52;border-radius:8px;padding:10px 12px;margin-bottom:6px;display:flex;align-items:center;gap:8px;">';
-    h+='<div style="flex:1;cursor:pointer;" onclick="opPop('+idx+',\''+sec+'\')">';
-    h+='<div style="color:#fff;font-size:13px;">'+p.he+urgDot(p.urgency)+'</div>';
-    h+='<div style="color:#7a9ab5;font-size:12px;">'+p.trans+'</div></div>';
+    h+='<div class="rec-card" style="flex:1;cursor:pointer;" onclick="opPop('+idx+',\''+sec+'\')">';
+    h+='<div class="rec-he" style="color:#fff;font-size:13px;">'+p.he+urgDot(p.urgency)+'</div>';
+    h+='<div class="rec-trans" style="color:#7a9ab5;font-size:12px;">'+p.trans+'</div></div>';
     h+='<div onclick="removeRecent(\''+p.id+'\')" style="color:#7a9ab5;font-size:18px;padding:6px 10px;cursor:pointer;">✕</div>';
     h+='</div>';
   }
