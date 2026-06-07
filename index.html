@@ -1739,7 +1739,7 @@ body.day-mode .emerg-grid{
           <span style="font-size:16px;">🏆</span>
           <span style="color:#D4A24E;font-size:12px;font-weight:700;letter-spacing:0.5px;">הישגים</span>
         </div>
-        <span id="prog-ach-count" style="color:#7a9ab5;font-size:11px;font-weight:600;">0/15</span>
+        <span id="prog-ach-count" style="color:#7a9ab5;font-size:11px;font-weight:600;">0/6</span>
       </div>
       <div id="prog-achievements" style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;"></div>
     </div>
@@ -1822,7 +1822,7 @@ body.day-mode .emerg-grid{
       </div>
     </div>
     
-    <div class="loading" id="cats-loading"><div style="text-align:center;padding:20px;"><div style="font-size:16px;color:#D4862E;margin-bottom:8px;">טוען...</div><div style="font-size:10px;color:#7a9ab5;opacity:0.6;">v20260607-1120</div></div></div>
+    <div class="loading" id="cats-loading"><div style="text-align:center;padding:20px;"><div style="font-size:16px;color:#D4862E;margin-bottom:8px;">טוען...</div><div style="font-size:10px;color:#7a9ab5;opacity:0.6;">v20260607-1123</div></div></div>
     <div class="cgrid" id="cgrid" style="display:none;"></div>
   </div>
   <div id="vlist" class="scr">
@@ -3608,7 +3608,7 @@ function bldCats(){
   if (!DB || DB.length === 0) {
     loadEl.innerHTML = '<div style="text-align:center;padding:20px;color:#D4862E;">' +
       'מתחבר לשרת...<br><br>' +
-      '<div style="font-size:11px;color:#7a9ab5;">v20260607-1120</div><br>' +
+      '<div style="font-size:11px;color:#7a9ab5;">v20260607-1123</div><br>' +
       '<button onclick="location.reload(true)" style="padding:10px 20px;background:#D4862E;color:#fff;border:none;border-radius:8px;font-family:inherit;cursor:pointer;font-weight:700;margin-top:10px;">🔄 רענן</button>' +
       '</div>';
     return;
@@ -3948,25 +3948,13 @@ function renderStreak(){
 
 // Achievement definitions
 var ACHIEVEMENTS = [
-  // משפטים נלמדו
+  // הישגים בעלי משמעות אמיתית
   {id:'rookie',      icon:'🔰', title:'טירון',           desc:'10 משפטים נלמדו', threshold:10,  type:'count'},
-  {id:'soldier',     icon:'🪖', title:'חייל מנוסה',      desc:'25 משפטים נלמדו', threshold:25,  type:'count'},
-  {id:'fifty',       icon:'⭐', title:'חצי המאה',        desc:'50 משפטים נלמדו', threshold:50,  type:'count'},
   {id:'hundred',     icon:'💯', title:'מאה משפטים',      desc:'100 משפטים נלמדו', threshold:100, type:'count'},
   {id:'expert',      icon:'🎯', title:'מומחה השטח',      desc:'200 משפטים נלמדו', threshold:200, type:'count'},
-  // רצף
-  {id:'streak_3',    icon:'🔥', title:'אש קלה',          desc:'3 ימים ברצף', threshold:3,   type:'streak'},
   {id:'streak_7',    icon:'🔥', title:'שבוע אש',         desc:'7 ימים ברצף', threshold:7,   type:'streak'},
   {id:'streak_30',   icon:'⚡', title:'חודש לוהט',       desc:'30 ימים ברצף', threshold:30,  type:'streak'},
-  // תרחישים
-  {id:'scenario_1',  icon:'🎬', title:'תרחיש ראשון',     desc:'השלמת תרחיש 1', threshold:1,   type:'scenario'},
-  {id:'scenario_5',  icon:'💬', title:'חובב תרחישים',    desc:'5 תרחישים הושלמו', threshold:5,   type:'scenario'},
-  {id:'scenario_10', icon:'🏆', title:'מומחה תרחישים',   desc:'10 תרחישים הושלמו', threshold:10,  type:'scenario'},
-  // תרגולי הגייה
-  {id:'practice_1',  icon:'🎤', title:'קול ראשון',       desc:'תרגול הגייה 1', threshold:1,   type:'practice'},
-  {id:'practice_10', icon:'🎵', title:'בעל ניסיון',      desc:'10 תרגולי הגייה', threshold:10,  type:'practice'},
-  {id:'practice_50', icon:'🎙️', title:'דובר מקצועי',    desc:'50 תרגולי הגייה', threshold:50,  type:'practice'},
-  {id:'practice_100', icon:'⭐', title:'אלוף ההגייה',    desc:'100 תרגולי הגייה!', threshold:100, type:'practice'}
+  {id:'scenario_10', icon:'🏆', title:'מומחה תרחישים',   desc:'10 תרחישים הושלמו', threshold:10,  type:'scenario'}
 ];
 
 // Safe date comparison - handles both toDateString and ISO formats
