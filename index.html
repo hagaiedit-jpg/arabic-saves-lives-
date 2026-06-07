@@ -1556,11 +1556,11 @@ body.day-mode .emerg-grid{
           <div style="color:#a0b8c8;font-size:9px;font-weight:600;margin-top:2px;">יעד היום</div>
         </div>
         
-        <!-- Cube 3: Daily Score -->
+        <!-- Cube 3: Accuracy -->
         <div style="text-align:center;padding:4px 2px;border-left:1px solid rgba(255,255,255,0.08);">
           <div style="font-size:20px;line-height:1;margin-bottom:3px;">⚡</div>
           <div id="home-cube-score-num" style="color:#D4A24E;font-size:18px;font-weight:900;line-height:1;">—</div>
-          <div style="color:#a0b8c8;font-size:9px;font-weight:600;margin-top:2px;">ציון</div>
+          <div style="color:#a0b8c8;font-size:9px;font-weight:600;margin-top:2px;">דיוק</div>
         </div>
         
         <!-- Cube 4: Total Learned -->
@@ -1822,7 +1822,7 @@ body.day-mode .emerg-grid{
       </div>
     </div>
     
-    <div class="loading" id="cats-loading"><div style="text-align:center;padding:20px;"><div style="font-size:16px;color:#D4862E;margin-bottom:8px;">טוען...</div><div style="font-size:10px;color:#7a9ab5;opacity:0.6;">v20260607-1056</div></div></div>
+    <div class="loading" id="cats-loading"><div style="text-align:center;padding:20px;"><div style="font-size:16px;color:#D4862E;margin-bottom:8px;">טוען...</div><div style="font-size:10px;color:#7a9ab5;opacity:0.6;">v20260607-1120</div></div></div>
     <div class="cgrid" id="cgrid" style="display:none;"></div>
   </div>
   <div id="vlist" class="scr">
@@ -2478,17 +2478,22 @@ function renderHome(){
       }
     }
     
-    // Cube 3: Daily Score (60-100 based on activity)
+    // Cube 3: Accuracy from Flashcards tests
     var scoreNum = document.getElementById('home-cube-score-num');
     if (scoreNum) {
-      if (todayCount === 0) {
+      var flashStats = JSON.parse(localStorage.getItem('flash_stats') || '{"total":0,"correct":0,"sessions":0}');
+      if (!flashStats.total || flashStats.total === 0) {
         scoreNum.textContent = '—';
         scoreNum.style.fontSize = '20px';
+        scoreNum.style.color = '#D4A24E';
       } else {
-        // Score formula: base 60 + bonus for activity
-        var score = Math.min(100, 60 + (todayCount * 8));
-        scoreNum.textContent = score;
-        scoreNum.style.fontSize = '26px';
+        var accuracy = Math.round((flashStats.correct / flashStats.total) * 100);
+        scoreNum.textContent = accuracy + '%';
+        scoreNum.style.fontSize = '20px';
+        // Color based on accuracy
+        if (accuracy >= 80) scoreNum.style.color = '#1D9E75';
+        else if (accuracy >= 60) scoreNum.style.color = '#D4A24E';
+        else scoreNum.style.color = '#D4862E';
       }
     }
     
@@ -3603,7 +3608,7 @@ function bldCats(){
   if (!DB || DB.length === 0) {
     loadEl.innerHTML = '<div style="text-align:center;padding:20px;color:#D4862E;">' +
       'מתחבר לשרת...<br><br>' +
-      '<div style="font-size:11px;color:#7a9ab5;">v20260607-1056</div><br>' +
+      '<div style="font-size:11px;color:#7a9ab5;">v20260607-1120</div><br>' +
       '<button onclick="location.reload(true)" style="padding:10px 20px;background:#D4862E;color:#fff;border:none;border-radius:8px;font-family:inherit;cursor:pointer;font-weight:700;margin-top:10px;">🔄 רענן</button>' +
       '</div>';
     return;
