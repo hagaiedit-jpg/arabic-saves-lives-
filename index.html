@@ -1831,7 +1831,7 @@ body.day-mode .emerg-grid{
       </div>
     </div>
     
-    <div class="loading" id="cats-loading"><div style="text-align:center;padding:20px;"><div style="font-size:16px;color:#D4862E;margin-bottom:8px;">טוען...</div><div style="font-size:10px;color:#7a9ab5;opacity:0.6;">v20260608-0550</div></div></div>
+    <div class="loading" id="cats-loading"><div style="text-align:center;padding:20px;"><div style="font-size:16px;color:#D4862E;margin-bottom:8px;">טוען...</div><div style="font-size:10px;color:#7a9ab5;opacity:0.6;">v20260608-1707</div></div></div>
     <div class="cgrid" id="cgrid" style="display:none;"></div>
   </div>
   <div id="vlist" class="scr">
@@ -3617,7 +3617,7 @@ function bldCats(){
   if (!DB || DB.length === 0) {
     loadEl.innerHTML = '<div style="text-align:center;padding:20px;color:#D4862E;">' +
       'מתחבר לשרת...<br><br>' +
-      '<div style="font-size:11px;color:#7a9ab5;">v20260608-0550</div><br>' +
+      '<div style="font-size:11px;color:#7a9ab5;">v20260608-1707</div><br>' +
       '<button onclick="location.reload(true)" style="padding:10px 20px;background:#D4862E;color:#fff;border:none;border-radius:8px;font-family:inherit;cursor:pointer;font-weight:700;margin-top:10px;">🔄 רענן</button>' +
       '</div>';
     return;
@@ -3851,29 +3851,53 @@ function opNavyP(i){
 }
 
 function getPhraseOfTheDay(){
-  // Pick phrase based on date - same phrase all day, changes each day
+  // Pick phrase based on date - SAME phrase all day, changes only at midnight
   try {
     if (!DB || DB.length === 0) return null;
     
-    // Combine date with year for full diversity (changes every day, no repeats in a year)
     var now = new Date();
     var year = now.getFullYear();
     var month = now.getMonth() + 1;
     var day = now.getDate();
+    var todayKey = year + '-' + month + '-' + day;
     
-    // Create a unique seed from year+month+day (different every day)
-    var seed = year * 10000 + month * 100 + day;
+    // Check if we already picked a phrase today - return THE SAME ONE
+    try {
+      var savedKey = localStorage.getItem('potd_date');
+      var savedId = localStorage.getItem('potd_id');
+      if (savedKey === todayKey && savedId) {
+        var existing = DB.find(function(p){ return String(p.id) === String(savedId); });
+        if (existing) return existing;
+      }
+    } catch(e) {}
     
-    // Prefer phrases with audio, but use all if not enough
+    // Prefer phrases with audio, fallback to all
     var withAudio = DB.filter(function(p){ return p.audio && p.he; });
     var pool = withAudio.length > 5 ? withAudio : DB.filter(function(p){return p.he;});
     if (pool.length === 0) return null;
     
-    // Use seed to pick deterministic but different phrase per day
-    // Multiplier ensures wider distribution
+    // Sort pool by ID for stable order (CRITICAL!)
+    pool.sort(function(a, b){
+      var aId = String(a.id);
+      var bId = String(b.id);
+      return aId < bId ? -1 : (aId > bId ? 1 : 0);
+    });
+    
+    // Create a unique seed from year+month+day
+    var seed = year * 10000 + month * 100 + day;
+    
+    // Pick deterministic phrase
     var idx = (seed * 7919) % pool.length;
     if (idx < 0) idx += pool.length;
-    return pool[idx];
+    var chosen = pool[idx];
+    
+    // Save today's pick to localStorage
+    try {
+      localStorage.setItem('potd_date', todayKey);
+      localStorage.setItem('potd_id', String(chosen.id));
+    } catch(e) {}
+    
+    return chosen;
   } catch(e) {
     console.warn('potd error:', e);
     return null;
