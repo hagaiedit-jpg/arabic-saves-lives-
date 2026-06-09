@@ -1768,6 +1768,22 @@ body.day-mode .emerg-grid{
   </div>
 </div>
 
+<!-- FIELD MODE TAB -->
+<div class="scr" id="tab-field">
+  <div style="padding:20px 16px 80px;">
+    <!-- Header with exit -->
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;">
+      <button onclick="exitFieldMode()" style="background:transparent;border:none;color:#a0b8c8;font-size:18px;cursor:pointer;font-family:inherit;padding:4px 8px;">◀</button>
+      <div style="color:#c0392b;font-size:14px;font-weight:800;letter-spacing:1px;">🎯 מצב שטח</div>
+      <div style="width:30px;"></div>
+    </div>
+    
+    <!-- Question container - filled by JS -->
+    <div id="field-question-container"></div>
+  </div>
+</div>
+
+
 <!-- FLASHCARDS TAB -->
 <div class="scr" id="tab-flash">
   <div class="sec">
@@ -1980,7 +1996,7 @@ body.day-mode .emerg-grid{
       </div>
     </div>
     
-    <div class="loading" id="cats-loading"><div style="text-align:center;padding:20px;"><div style="font-size:16px;color:#D4862E;margin-bottom:8px;">טוען...</div><div style="font-size:10px;color:#7a9ab5;opacity:0.6;">v20260609-1030</div></div></div>
+    <div class="loading" id="cats-loading"><div style="text-align:center;padding:20px;"><div style="font-size:16px;color:#D4862E;margin-bottom:8px;">טוען...</div><div style="font-size:10px;color:#7a9ab5;opacity:0.6;">v20260609-1040</div></div></div>
     <div class="cgrid" id="cgrid" style="display:none;"></div>
   </div>
   <div id="vlist" class="scr">
@@ -3295,9 +3311,358 @@ function pickFlashQuestions(available, count, mode){
 
 
 // === Field Mode (Combat Readiness Test) ===
+var _fieldState = {
+  questions: [],
+  current: 0,
+  correct: 0,
+  total: 7,
+  timer: null,
+  timeLeft: 15,
+  startTime: null,
+  endTime: null,
+  answered: false
+};
+
 function startFieldMode() {
-  // For now, alert - we'll build the real screen in the next step
-  alert('🎯 מצב שטח\n\nתכף נבנה את המסך המלא:\n• 7 שאלות\n• 15 שניות כל אחת\n• בלחץ - כמו בשטח\n• בסוף: רמת מוכנות');
+  if (!DB || DB.length < 8) {
+    alert('צריך לפחות 8 משפטים במאגר.');
+    return;
+  }
+  
+  // Pick phrases that have a "why" (situation context)
+  var withSituation = DB.filter(function(p){
+    return p.he && p.ar && p.why && p.why.length > 8;
+  });
+  
+  if (withSituation.length < 8) {
+    // Fallback to phrases without why
+    withSituation = DB.filter(function(p){ return p.he && p.ar; });
+  }
+  
+  if (withSituation.length < 8) {
+    alert('צריך יותר משפטים במאגר עם תיאור סיטואציה.');
+    return;
+  }
+  
+  // Pick 7 random questions
+  var shuffled = withSituation.slice().sort(function(){ return Math.random() - 0.5; });
+  var selected = shuffled.slice(0, 7);
+  
+  // Generate question with 4 options (correct + 3 distractors from same category if possible)
+  _fieldState.questions = selected.map(function(p){
+    var sameCat = DB.filter(function(x){ 
+      return x.cat === p.cat && String(x.id) !== String(p.id) && x.he; 
+    });
+    var others = sameCat.length >= 3 ? sameCat : DB.filter(function(x){ 
+      return String(x.id) !== String(p.id) && x.he; 
+    });
+    others = others.sort(function(){ return Math.random() - 0.5; }).slice(0, 3);
+    var options = others.concat([p]).sort(function(){ return Math.random() - 0.5; });
+    return {
+      phrase: p,
+      options: options,
+      correctId: p.id
+    };
+  });
+  
+  _fieldState.current = 0;
+  _fieldState.correct = 0;
+  _fieldState.total = 7;
+  _fieldState.startTime = Date.now();
+  _fieldState.endTime = null;
+  
+  // Show field mode tab
+  showFieldModeScreen();
+  renderFieldQuestion();
+}
+
+function showFieldModeScreen(){
+  // Hide all tabs
+  var allTabs = document.querySelectorAll('[id^="tab-"]');
+  for (var i = 0; i < allTabs.length; i++) allTabs[i].className = 'scr';
+  
+  // Show field tab
+  var fieldTab = document.getElementById('tab-field');
+  if (fieldTab) {
+    fieldTab.className = 'scr on';
+  }
+}
+
+function renderFieldQuestion(){
+  var q = _fieldState.questions[_fieldState.current];
+  if (!q) { finishFieldMode(); return; }
+  
+  _fieldState.answered = false;
+  _fieldState.timeLeft = 15;
+  
+  // Clear any existing timer
+  if (_fieldState.timer) {
+    clearInterval(_fieldState.timer);
+    _fieldState.timer = null;
+  }
+  
+  var container = document.getElementById('field-question-container');
+  if (!container) return;
+  
+  var situation = q.phrase.why || 'מה תאמר במצב הזה?';
+  
+  var html = '';
+  // Progress bar
+  html += '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;">';
+  html += '<div style="color:#7a9ab5;font-size:11px;font-weight:700;">שאלה ' + (_fieldState.current + 1) + ' מתוך ' + _fieldState.total + '</div>';
+  html += '<div style="color:#1D9E75;font-size:11px;font-weight:700;">✅ ' + _fieldState.correct + ' נכון</div>';
+  html += '</div>';
+  html += '<div style="height:4px;background:rgba(255,255,255,0.08);border-radius:2px;margin-bottom:18px;overflow:hidden;">';
+  html += '<div style="height:100%;background:linear-gradient(90deg,#c0392b,#e74c3c);width:' + ((_fieldState.current / _fieldState.total) * 100) + '%;border-radius:2px;transition:width 0.4s;"></div>';
+  html += '</div>';
+  
+  // Timer (BIG and prominent)
+  html += '<div id="field-timer" style="text-align:center;margin-bottom:18px;">';
+  html += '<div style="display:inline-flex;align-items:center;justify-content:center;width:80px;height:80px;border-radius:50%;background:radial-gradient(circle,#c0392b 0%,#922d22 100%);border:3px solid #e74c3c;box-shadow:0 0 20px rgba(231,76,60,0.4);">';
+  html += '<span id="field-timer-text" style="color:#fff;font-size:36px;font-weight:900;">15</span>';
+  html += '</div>';
+  html += '<div style="color:#a0b8c8;font-size:10px;margin-top:4px;font-weight:700;letter-spacing:1px;">שניות</div>';
+  html += '</div>';
+  
+  // Situation
+  html += '<div style="background:linear-gradient(135deg,rgba(192,57,43,0.15) 0%,rgba(146,45,34,0.1) 100%);border:1px solid rgba(192,57,43,0.4);border-radius:14px;padding:14px;margin-bottom:18px;">';
+  html += '<div style="color:#e74c3c;font-size:11px;font-weight:800;letter-spacing:1px;margin-bottom:6px;">📍 הסיטואציה</div>';
+  html += '<div style="color:#E8D9B8;font-size:14px;line-height:1.6;">' + situation + '</div>';
+  html += '</div>';
+  
+  // Question
+  html += '<div style="color:#D4A24E;font-size:13px;font-weight:700;margin-bottom:10px;text-align:center;">🎯 מה תאמר?</div>';
+  
+  // 4 Options
+  html += '<div id="field-options" style="display:grid;gap:8px;">';
+  q.options.forEach(function(opt, idx){
+    html += '<div onclick="fieldAnswer(' + idx + ')" class="field-opt" data-opt-idx="' + idx + '" style="background:#1F3147;border:1px solid #2A3D52;color:#fff;border-radius:10px;padding:12px 14px;font-size:14px;font-weight:600;cursor:pointer;text-align:right;line-height:1.4;transition:all 0.2s;">';
+    html += opt.he;
+    html += '</div>';
+  });
+  html += '</div>';
+  
+  html += '<div id="field-feedback" style="display:none;margin-top:14px;"></div>';
+  
+  container.innerHTML = html;
+  
+  // Start timer
+  _fieldState.timer = setInterval(function(){
+    _fieldState.timeLeft--;
+    var timerText = document.getElementById('field-timer-text');
+    var timerCircle = document.getElementById('field-timer');
+    
+    if (timerText) {
+      timerText.textContent = _fieldState.timeLeft;
+      // Color change as time runs out
+      if (_fieldState.timeLeft <= 5) {
+        timerText.style.color = '#fff';
+        if (timerCircle) timerCircle.querySelector('div').style.animation = 'recDotPulse 0.4s ease-in-out infinite';
+      }
+    }
+    
+    if (_fieldState.timeLeft <= 0) {
+      clearInterval(_fieldState.timer);
+      _fieldState.timer = null;
+      // Time's up - auto wrong
+      if (!_fieldState.answered) {
+        fieldAnswer(-1); // -1 = time out
+      }
+    }
+  }, 1000);
+}
+
+function fieldAnswer(selectedIdx){
+  if (_fieldState.answered) return;
+  _fieldState.answered = true;
+  
+  // Stop timer
+  if (_fieldState.timer) {
+    clearInterval(_fieldState.timer);
+    _fieldState.timer = null;
+  }
+  
+  var q = _fieldState.questions[_fieldState.current];
+  var isCorrect = false;
+  var isTimeout = (selectedIdx === -1);
+  
+  if (!isTimeout) {
+    var selectedOpt = q.options[selectedIdx];
+    isCorrect = (String(selectedOpt.id) === String(q.correctId));
+  }
+  
+  if (isCorrect) _fieldState.correct++;
+  
+  // Find correct index
+  var correctIdx = -1;
+  for (var i = 0; i < q.options.length; i++) {
+    if (String(q.options[i].id) === String(q.correctId)) {
+      correctIdx = i;
+      break;
+    }
+  }
+  
+  // Color options
+  var buttons = document.querySelectorAll('.field-opt');
+  buttons.forEach(function(btn){
+    btn.style.cursor = 'default';
+    btn.onclick = null;
+    var btnIdx = parseInt(btn.getAttribute('data-opt-idx'), 10);
+    if (btnIdx === correctIdx) {
+      btn.style.background = 'linear-gradient(135deg,#1D9E75 0%,#0e5a3f 100%)';
+      btn.style.borderColor = '#1D9E75';
+      btn.classList.add('flash-glow-correct');
+    } else if (btnIdx === selectedIdx && !isCorrect) {
+      btn.style.background = 'linear-gradient(135deg,#c0392b 0%,#922d22 100%)';
+      btn.style.borderColor = '#c0392b';
+      btn.classList.add('flash-shake');
+    } else {
+      btn.style.opacity = '0.4';
+    }
+  });
+  
+  // Floating emoji
+  try {
+    var overlay = document.createElement('div');
+    overlay.className = 'flash-overlay';
+    overlay.textContent = isCorrect ? '✅' : (isTimeout ? '⏰' : '❌');
+    document.body.appendChild(overlay);
+    setTimeout(function(){ if (overlay.parentNode) overlay.parentNode.removeChild(overlay); }, 1300);
+  } catch(e) {}
+  
+  // Feedback
+  var feedbackEl = document.getElementById('field-feedback');
+  if (feedbackEl) {
+    var msg, color;
+    if (isCorrect) {
+      msg = 'מצוין! תגובה אינסטינקטיבית נכונה';
+      color = '#1D9E75';
+    } else if (isTimeout) {
+      msg = 'הזמן נגמר! התשובה הייתה: ' + q.phrase.he;
+      color = '#D4862E';
+    } else {
+      msg = 'התשובה הנכונה: ' + q.phrase.he;
+      color = '#c0392b';
+    }
+    
+    feedbackEl.style.display = 'block';
+    var html = '<div style="background:rgba(' + (isCorrect ? '29,158,117' : (isTimeout ? '212,134,46' : '192,57,43')) + ',0.15);border:1px solid ' + color + ';border-radius:10px;padding:12px;">';
+    html += '<div style="color:' + color + ';font-size:13px;font-weight:700;margin-bottom:6px;text-align:center;">' + msg + '</div>';
+    if (q.phrase.trans) {
+      html += '<div style="color:#a0b8c8;font-size:12px;font-family:Georgia,serif;text-align:center;">' + q.phrase.trans + '</div>';
+    }
+    html += '<button onclick="fieldNext()" style="background:#c0392b;border:none;color:#fff;border-radius:8px;padding:10px 22px;font-size:13px;font-weight:700;cursor:pointer;font-family:inherit;margin-top:10px;display:block;width:100%;">' + (_fieldState.current + 1 >= _fieldState.total ? '🏁 סיים' : 'הבא ◀') + '</button>';
+    html += '</div>';
+    feedbackEl.innerHTML = html;
+  }
+}
+
+function fieldNext(){
+  _fieldState.current++;
+  if (_fieldState.current >= _fieldState.total) {
+    finishFieldMode();
+  } else {
+    renderFieldQuestion();
+  }
+}
+
+function finishFieldMode(){
+  _fieldState.endTime = Date.now();
+  
+  var correct = _fieldState.correct;
+  var total = _fieldState.total;
+  var pct = Math.round((correct / total) * 100);
+  var elapsed = Math.round((_fieldState.endTime - _fieldState.startTime) / 1000);
+  var minutes = Math.floor(elapsed / 60);
+  var seconds = elapsed % 60;
+  var timeStr = (minutes > 0 ? minutes + ' דק׳ ' : '') + seconds + ' שנ׳';
+  
+  // Determine readiness level
+  var level, levelEmoji, levelColor, msg;
+  if (pct >= 90) {
+    level = 'שולט בשטח'; levelEmoji = '🌟'; levelColor = '#1D9E75';
+    msg = 'אתה מוכן לרגע האמת!';
+  } else if (pct >= 75) {
+    level = 'מוכן לשטח'; levelEmoji = '🎯'; levelColor = '#1D9E75';
+    msg = 'רמת מוכנות מצוינת!';
+  } else if (pct >= 60) {
+    level = 'מתחזק'; levelEmoji = '💪'; levelColor = '#D4A24E';
+    msg = 'אתה בדרך הנכונה - להמשיך לתרגל';
+  } else if (pct >= 40) {
+    level = 'בדרך'; levelEmoji = '🌱'; levelColor = '#D4862E';
+    msg = 'בסיס טוב - יש מקום לצמיחה';
+  } else {
+    level = 'דורש תרגול'; levelEmoji = '🔄'; levelColor = '#c0392b';
+    msg = 'תרגול ידחוף אותך קדימה';
+  }
+  
+  // Save best score
+  try {
+    var best = parseInt(localStorage.getItem('field_best') || '0', 10);
+    if (pct > best) {
+      localStorage.setItem('field_best', String(pct));
+      best = pct;
+    }
+    var total_count = parseInt(localStorage.getItem('field_count') || '0', 10) + 1;
+    localStorage.setItem('field_count', String(total_count));
+  } catch(e) { var best = pct; var total_count = 1; }
+  
+  var container = document.getElementById('field-question-container');
+  if (!container) return;
+  
+  var html = '<div style="text-align:center;padding:20px 10px;">';
+  
+  // Big emoji
+  html += '<div class="result-emoji-anim" style="font-size:64px;margin-bottom:8px;">' + levelEmoji + '</div>';
+  
+  // Level title
+  html += '<div class="result-title-anim" style="color:' + levelColor + ';font-size:24px;font-weight:900;margin-bottom:4px;">' + level + '</div>';
+  
+  // Percentage HUGE
+  html += '<div class="result-score-anim" style="color:' + levelColor + ';font-size:64px;font-weight:900;line-height:1;margin:14px 0;">' + pct + '<span style="font-size:24px;">%</span></div>';
+  
+  // Readiness bar
+  html += '<div style="background:rgba(255,255,255,0.08);height:8px;border-radius:4px;overflow:hidden;margin:14px 0;">';
+  html += '<div style="background:linear-gradient(90deg,' + levelColor + '88,' + levelColor + ');height:100%;width:' + pct + '%;border-radius:4px;transition:width 1.2s ease-out;"></div>';
+  html += '</div>';
+  
+  // Message
+  html += '<div class="result-msg-anim" style="color:#E8D9B8;font-size:14px;margin-bottom:20px;">' + msg + '</div>';
+  
+  // Stats grid
+  html += '<div class="result-msg-anim" style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:24px;">';
+  html += '<div style="background:rgba(29,158,117,0.1);border:1px solid rgba(29,158,117,0.3);border-radius:10px;padding:10px;">';
+  html += '<div style="color:#1D9E75;font-size:20px;font-weight:800;">' + correct + '/' + total + '</div>';
+  html += '<div style="color:#7a9ab5;font-size:10px;margin-top:2px;">תשובות נכונות</div></div>';
+  html += '<div style="background:rgba(212,162,78,0.1);border:1px solid rgba(212,162,78,0.3);border-radius:10px;padding:10px;">';
+  html += '<div style="color:#D4A24E;font-size:20px;font-weight:800;">' + timeStr + '</div>';
+  html += '<div style="color:#7a9ab5;font-size:10px;margin-top:2px;">זמן כולל</div></div>';
+  html += '<div style="background:rgba(192,57,43,0.1);border:1px solid rgba(192,57,43,0.3);border-radius:10px;padding:10px;">';
+  html += '<div style="color:#c0392b;font-size:20px;font-weight:800;">' + best + '%</div>';
+  html += '<div style="color:#7a9ab5;font-size:10px;margin-top:2px;">שיא אישי</div></div>';
+  html += '</div>';
+  
+  // Buttons
+  html += '<div class="result-buttons-anim" style="display:flex;gap:10px;justify-content:center;">';
+  html += '<button onclick="startFieldMode()" style="background:linear-gradient(135deg,#c0392b 0%,#922d22 100%);border:none;color:#fff;border-radius:10px;padding:12px 22px;font-size:13px;font-weight:700;cursor:pointer;font-family:inherit;">🔄 שוב</button>';
+  html += '<button onclick="exitFieldMode()" style="background:transparent;border:1px solid #7a9ab5;color:#a0b8c8;border-radius:10px;padding:12px 22px;font-size:13px;font-weight:700;cursor:pointer;font-family:inherit;">סיום</button>';
+  html += '</div>';
+  
+  html += '</div>';
+  container.innerHTML = html;
+  
+  // Confetti for 70%+
+  if (pct >= 70 && typeof launchConfetti === 'function') {
+    setTimeout(launchConfetti, 300);
+  }
+}
+
+function exitFieldMode(){
+  if (_fieldState.timer) {
+    clearInterval(_fieldState.timer);
+    _fieldState.timer = null;
+  }
+  navToTab('home');
 }
 
 function flashStart(mode){
@@ -3847,7 +4212,7 @@ function bldCats(){
   if (!DB || DB.length === 0) {
     loadEl.innerHTML = '<div style="text-align:center;padding:20px;color:#D4862E;">' +
       'מתחבר לשרת...<br><br>' +
-      '<div style="font-size:11px;color:#7a9ab5;">v20260609-1030</div><br>' +
+      '<div style="font-size:11px;color:#7a9ab5;">v20260609-1040</div><br>' +
       '<button onclick="location.reload(true)" style="padding:10px 20px;background:#D4862E;color:#fff;border:none;border-radius:8px;font-family:inherit;cursor:pointer;font-weight:700;margin-top:10px;">🔄 רענן</button>' +
       '</div>';
     return;
