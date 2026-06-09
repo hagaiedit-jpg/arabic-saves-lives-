@@ -1457,6 +1457,63 @@ body.day-mode .emerg-grid{
   text-shadow: 0 4px 12px rgba(0,0,0,0.5);
 }
 
+
+/* === Results Screen Animations === */
+@keyframes resultBounceIn {
+  0% { transform: scale(0); opacity: 0; }
+  50% { transform: scale(1.15); opacity: 1; }
+  70% { transform: scale(0.95); }
+  100% { transform: scale(1); opacity: 1; }
+}
+@keyframes resultSlideUp {
+  0% { transform: translateY(30px); opacity: 0; }
+  100% { transform: translateY(0); opacity: 1; }
+}
+@keyframes resultFadeIn {
+  0% { opacity: 0; transform: translateY(10px); }
+  100% { opacity: 1; transform: translateY(0); }
+}
+@keyframes scoreCountUp {
+  0% { transform: scale(0.5); opacity: 0; }
+  50% { transform: scale(1.2); opacity: 1; }
+  100% { transform: scale(1); opacity: 1; }
+}
+@keyframes emojiWiggle {
+  0%, 100% { transform: rotate(0deg) scale(1); }
+  25% { transform: rotate(-10deg) scale(1.1); }
+  75% { transform: rotate(10deg) scale(1.1); }
+}
+@keyframes confettiFall {
+  0% { transform: translateY(-100vh) rotate(0deg); opacity: 1; }
+  100% { transform: translateY(100vh) rotate(720deg); opacity: 0; }
+}
+@keyframes starTwinkle {
+  0%, 100% { opacity: 0.3; transform: scale(0.8); }
+  50% { opacity: 1; transform: scale(1.2); }
+}
+
+.result-emoji-anim { animation: emojiWiggle 0.8s ease-out, resultBounceIn 0.6s ease-out; }
+.result-title-anim { animation: resultBounceIn 0.6s ease-out 0.2s both; }
+.result-score-anim { animation: scoreCountUp 0.8s ease-out 0.4s both; }
+.result-msg-anim { animation: resultFadeIn 0.5s ease-out 0.7s both; }
+.result-buttons-anim { animation: resultSlideUp 0.5s ease-out 1s both; }
+
+.confetti-piece {
+  position: fixed;
+  top: -20px;
+  width: 12px;
+  height: 12px;
+  z-index: 9998;
+  pointer-events: none;
+  animation: confettiFall linear forwards;
+}
+
+.result-star {
+  display: inline-block;
+  font-size: 24px;
+  animation: starTwinkle 1s ease-in-out infinite;
+}
+
 </style>
 </head>
 <body>
@@ -1868,7 +1925,7 @@ body.day-mode .emerg-grid{
       </div>
     </div>
     
-    <div class="loading" id="cats-loading"><div style="text-align:center;padding:20px;"><div style="font-size:16px;color:#D4862E;margin-bottom:8px;">טוען...</div><div style="font-size:10px;color:#7a9ab5;opacity:0.6;">v20260609-0942</div></div></div>
+    <div class="loading" id="cats-loading"><div style="text-align:center;padding:20px;"><div style="font-size:16px;color:#D4862E;margin-bottom:8px;">טוען...</div><div style="font-size:10px;color:#7a9ab5;opacity:0.6;">v20260609-1002</div></div></div>
     <div class="cgrid" id="cgrid" style="display:none;"></div>
   </div>
   <div id="vlist" class="scr">
@@ -3426,6 +3483,30 @@ function flashNext(){
   }
 }
 
+function launchConfetti(){
+  try {
+    var colors = ['#D4A24E', '#1D9E75', '#c0392b', '#3498db', '#9b59b6', '#f39c12', '#e74c3c'];
+    var shapes = ['circle', 'square'];
+    var count = 80;
+    for (var i = 0; i < count; i++) {
+      var piece = document.createElement('div');
+      piece.className = 'confetti-piece';
+      var color = colors[Math.floor(Math.random() * colors.length)];
+      var shape = shapes[Math.floor(Math.random() * shapes.length)];
+      var size = 8 + Math.random() * 8;
+      piece.style.background = color;
+      piece.style.width = size + 'px';
+      piece.style.height = size + 'px';
+      piece.style.left = Math.random() * 100 + 'vw';
+      piece.style.borderRadius = shape === 'circle' ? '50%' : '2px';
+      piece.style.animationDuration = (2 + Math.random() * 2) + 's';
+      piece.style.animationDelay = (Math.random() * 0.5) + 's';
+      document.body.appendChild(piece);
+      setTimeout(function(p){ if (p.parentNode) p.parentNode.removeChild(p); }.bind(null, piece), 5000);
+    }
+  } catch(e) { console.warn('confetti error:', e); }
+}
+
 function flashFinish(){
   // Show results
   document.getElementById('flash-question').style.display = 'none';
@@ -3436,18 +3517,46 @@ function flashFinish(){
   var pct = Math.round((correct / total) * 100);
   var changes = _flashState.changes || {};
   
-  var emoji, title, color, msg;
-  if (pct >= 90) { emoji = '🏆'; title = 'מצוין!'; color = '#1D9E75'; msg = 'תוצאה מעולה - כל הכבוד!'; }
-  else if (pct >= 70) { emoji = '🌟'; title = 'כל הכבוד!'; color = '#1D9E75'; msg = 'תוצאה מצוינת - עוד תרגול וההגייה תהיה מושלמת'; }
-  else if (pct >= 50) { emoji = '👍'; title = 'יפה!'; color = '#D4A24E'; msg = 'יש בסיס טוב - תרגול נוסף יקפיץ את הציון'; }
-  else { emoji = '💪'; title = 'התחלה טובה'; color = '#D4862E'; msg = 'כל תרגול מקרב לפסגה - להמשיך!'; }
+  var emoji, title, color, msg, stars;
+  if (pct === 100) {
+    emoji = '🏆'; title = 'מושלם!'; color = '#FFD700';
+    msg = 'תוצאה מושלמת! כל התשובות נכונות!'; stars = '⭐⭐⭐⭐⭐';
+  } else if (pct >= 90) {
+    emoji = '🏆'; title = 'מצוין!'; color = '#1D9E75';
+    msg = 'תוצאה מעולה - כל הכבוד!'; stars = '⭐⭐⭐⭐';
+  } else if (pct >= 75) {
+    emoji = '🌟'; title = 'כל הכבוד!'; color = '#1D9E75';
+    msg = 'תוצאה מצוינת - ההגייה משתפרת!'; stars = '⭐⭐⭐';
+  } else if (pct >= 60) {
+    emoji = '👍'; title = 'יפה מאוד!'; color = '#D4A24E';
+    msg = 'יש בסיס טוב - תרגול נוסף יקפיץ את הציון'; stars = '⭐⭐';
+  } else if (pct >= 40) {
+    emoji = '💪'; title = 'התחלה טובה'; color = '#D4862E';
+    msg = 'כל תרגול מקרב לפסגה - להמשיך!'; stars = '⭐';
+  } else {
+    emoji = '🎯'; title = 'אל תוותרי'; color = '#c0392b';
+    msg = 'התרגול הוא המפתח - כל ניסיון מקרב!'; stars = '';
+  }
   
-  document.getElementById('flash-result-emoji').textContent = emoji;
-  document.getElementById('flash-result-title').textContent = title;
-  document.getElementById('flash-result-title').style.color = color;
-  document.getElementById('flash-result-score').textContent = correct + '/' + total;
-  document.getElementById('flash-result-score').style.color = color;
-  document.getElementById('flash-result-pct').textContent = pct + '% דיוק';
+  // Render with stars on top
+  var emojiEl = document.getElementById('flash-result-emoji');
+  emojiEl.innerHTML = '<div style="font-size:60px;">' + emoji + '</div>' +
+    (stars ? '<div style="margin-top:6px;font-size:20px;letter-spacing:4px;">' + stars.split('').map(function(s){ return '<span class="result-star">' + s + '</span>'; }).join('') + '</div>' : '');
+  emojiEl.className = 'result-emoji-anim';
+  
+  var titleEl = document.getElementById('flash-result-title');
+  titleEl.textContent = title;
+  titleEl.style.color = color;
+  titleEl.className = 'result-title-anim';
+  
+  var scoreEl = document.getElementById('flash-result-score');
+  scoreEl.textContent = correct + '/' + total;
+  scoreEl.style.color = color;
+  scoreEl.className = 'result-score-anim';
+  
+  var pctEl = document.getElementById('flash-result-pct');
+  pctEl.textContent = pct + '% דיוק';
+  pctEl.className = 'result-msg-anim';
   
   // Build message with memory changes
   var msgEl = document.getElementById('flash-result-message');
@@ -3471,6 +3580,14 @@ function flashFinish(){
     }
     
     msgEl.innerHTML = html;
+    msgEl.className = 'result-msg-anim';
+  }
+  
+  // Add animation class to buttons container
+  var resultsEl = document.getElementById('flash-results');
+  if (resultsEl) {
+    var btnContainer = resultsEl.querySelector('div[style*="display:flex;gap:10px"]');
+    if (btnContainer) btnContainer.className = 'result-buttons-anim';
   }
   
   // Save stats
@@ -3492,7 +3609,9 @@ function flashFinish(){
   } catch(e) {}
   
   // Confetti for great score
-  if (pct >= 80 && typeof launchConfetti === 'function') launchConfetti();
+  if (pct >= 70 && typeof launchConfetti === 'function') {
+    setTimeout(launchConfetti, 300);
+  }
 }
 
 function flashEnd(){
@@ -3665,7 +3784,7 @@ function bldCats(){
   if (!DB || DB.length === 0) {
     loadEl.innerHTML = '<div style="text-align:center;padding:20px;color:#D4862E;">' +
       'מתחבר לשרת...<br><br>' +
-      '<div style="font-size:11px;color:#7a9ab5;">v20260609-0942</div><br>' +
+      '<div style="font-size:11px;color:#7a9ab5;">v20260609-1002</div><br>' +
       '<button onclick="location.reload(true)" style="padding:10px 20px;background:#D4862E;color:#fff;border:none;border-radius:8px;font-family:inherit;cursor:pointer;font-weight:700;margin-top:10px;">🔄 רענן</button>' +
       '</div>';
     return;
