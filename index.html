@@ -1831,7 +1831,7 @@ body.day-mode #prog-achievements div[style*="color:#D4A24E"] {
     </div>
     
     <!-- Flashcards - smart learning card -->
-    <div onclick="startFlashcards()" style="background:linear-gradient(135deg,#1D9E75 0%,#0e5a3f 100%);border-radius:14px;padding:14px 16px;margin-bottom:20px;cursor:pointer;box-shadow:0 4px 12px rgba(29,158,117,0.3);display:flex;align-items:center;justify-content:space-between;">
+    <div onclick="startFlashcards()" style="background:linear-gradient(135deg,#1D9E75 0%,#0e5a3f 100%);border-radius:14px;padding:14px 16px;margin-bottom:20px;cursor:pointer;box-shadow:0 4px 12px rgba(29,158,117,0.25);display:flex;align-items:center;justify-content:space-between;">
       <div style="flex:1;">
         <div class="keep-white" style="color:#fff;font-size:15px;font-weight:800;margin-bottom:3px;">🎯 חזרה ובחינה</div>
         <div style="color:rgba(255,255,255,0.85);font-size:12px;line-height:1.4;">חזרה ובחינה על המשפטים שלמדתם</div>
@@ -1839,19 +1839,18 @@ body.day-mode #prog-achievements div[style*="color:#D4A24E"] {
       <div class="keep-white" style="background:rgba(255,255,255,0.2);border-radius:10px;padding:8px 14px;color:#fff;font-size:13px;font-weight:700;">התחל ◀</div>
     </div>
     
-    <!-- Prep Path 30 Days - Combat Readiness Track -->
-    <div onclick="startPrepPath()" id="home-prep-card" style="background:linear-gradient(135deg,#1D9E75 0%,#0e5a3f 100%);border-radius:14px;padding:14px 16px;margin-bottom:14px;cursor:pointer;box-shadow:0 4px 12px rgba(29,158,117,0.25);position:relative;overflow:hidden;">
+    <!-- Prep Path - Combat Readiness Track (NEW! - leads the list) -->
+    <div onclick="startPrepPath()" id="home-prep-card" style="background:linear-gradient(135deg,#D4862E 0%,#a85200 100%);border-radius:14px;padding:14px 16px;margin-bottom:14px;cursor:pointer;box-shadow:0 4px 12px rgba(212,134,46,0.25);position:relative;overflow:hidden;">
       <!-- Content set by JS -->
     </div>
     
     <!-- Field Mode - Combat Readiness Test -->
     <div onclick="startFieldMode()" style="background:linear-gradient(135deg,#c0392b 0%,#922d22 100%);border-radius:14px;padding:14px 16px;margin-bottom:14px;cursor:pointer;box-shadow:0 4px 12px rgba(192,57,43,0.25);position:relative;overflow:hidden;">
-      <div style="position:absolute;top:6px;left:8px;background:rgba(255,255,255,0.15);color:#fff;font-size:9px;font-weight:800;padding:3px 8px;border-radius:6px;letter-spacing:0.5px;">חדש!</div>
       <div style="display:flex;align-items:center;gap:14px;">
         <div style="font-size:32px;flex-shrink:0;">🎯</div>
-        <div style="flex:1;">
+        <div style="flex:1;min-width:0;">
           <div class="keep-white" style="color:#fff;font-size:14px;font-weight:800;margin-bottom:2px;">מצב שטח</div>
-          <div class="keep-white" style="color:rgba(255,255,255,0.85);font-size:11px;line-height:1.4;">7 שאלות. 15 שניות. בלחץ.</div>
+          <div class="keep-white" style="color:rgba(255,255,255,0.9);font-size:11px;line-height:1.4;">7 שאלות. 15 שניות. בלחץ.</div>
         </div>
         <div class="keep-white" style="color:#fff;font-size:22px;flex-shrink:0;">◀</div>
       </div>
@@ -2209,7 +2208,7 @@ body.day-mode #prog-achievements div[style*="color:#D4A24E"] {
       </div>
     </div>
     
-    <div class="loading" id="cats-loading"><div style="text-align:center;padding:20px;"><div style="font-size:16px;color:#D4862E;margin-bottom:8px;">טוען...</div><div style="font-size:10px;color:#7a9ab5;opacity:0.6;">v20260609-1722</div></div></div>
+    <div class="loading" id="cats-loading"><div style="text-align:center;padding:20px;"><div style="font-size:16px;color:#D4862E;margin-bottom:8px;">טוען...</div><div style="font-size:10px;color:#7a9ab5;opacity:0.6;">v20260609-1848</div></div></div>
     <div class="cgrid" id="cgrid" style="display:none;"></div>
   </div>
   <div id="vlist" class="scr">
@@ -3977,21 +3976,62 @@ function startPrepDay(day) {
   document.body.appendChild(overlay);
 }
 
+// === Prep Path Flashcards Helper ===
+function startFlashcardsForPrepDay(day) {
+  var path = getActivePath();
+  var dayData = path.filter(function(d){ return d.day === day; })[0];
+  if (!dayData || dayData.type !== 'category') return false;
+  
+  // Filter phrases from this category
+  var pool = DB.filter(function(p){ return p.cat === dayData.cat && p.he; });
+  if (pool.length === 0) return false;
+  
+  // Pick up to N random ones
+  var shuffled = pool.slice().sort(function(){ return Math.random() - 0.5; });
+  var selected = shuffled.slice(0, dayData.count);
+  
+  // Set as flashcard pool
+  window._prepPathActive = true;
+  window._prepPathDay = day;
+  window._prepPathCategory = dayData.cat;
+  
+  // Override the normal flashcard start with our specific pool
+  if (typeof startFlashcardsWithPool === 'function') {
+    startFlashcardsWithPool(selected, 'מסלול הכנה: ' + dayData.cat);
+  } else {
+    // Fallback - mark phrases for learning and navigate
+    navToTab('lib');
+  }
+  return true;
+}
+
 function executePrepDay(day) {
   var path = getActivePath();
   var dayData = path.filter(function(d){ return d.day === day; })[0];
   if (!dayData) return;
   
-  // Store current prep day - we'll check on return if completed
+  // Mark as active for return handling
   window._activePrepDay = day;
+  window._prepPathActive = true;
   
   if (dayData.type === 'category') {
-    navToTab('lib');
-    setTimeout(function(){
-      var catCards = document.querySelectorAll('[onclick*="' + dayData.cat + '"]');
-      if (catCards.length > 0) catCards[0].click();
-    }, 200);
-    // DO NOT auto-mark complete - we check progress instead
+    // Use flashcards with specific category phrases (limit to dayData.count)
+    var pool = DB.filter(function(p){ return p.cat === dayData.cat && p.he; });
+    if (pool.length === 0) {
+      alert('הקטגוריה ריקה - דלגו ליום הבא');
+      return;
+    }
+    
+    var shuffled = pool.slice().sort(function(){ return Math.random() - 0.5; });
+    var selected = shuffled.slice(0, dayData.count);
+    
+    // Start flashcards with our custom pool
+    if (typeof startFlashcardsWithPool === 'function') {
+      startFlashcardsWithPool(selected, 'יום ' + day + ': ' + dayData.cat);
+    } else if (typeof startFlashcards === 'function') {
+      // Fallback - start regular flashcards
+      startFlashcards();
+    }
   } else if (dayData.type === 'practice') {
     if (typeof startFlashcards === 'function') startFlashcards();
   } else if (dayData.type === 'field' || dayData.type === 'final') {
@@ -4095,8 +4135,8 @@ function renderPrepPathHomeCard() {
         '<div style="display:flex;align-items:center;gap:14px;">' +
         '<div style="font-size:32px;flex-shrink:0;">🪖</div>' +
         '<div style="flex:1;min-width:0;">' +
-        '<div style="color:#fff;font-size:14px;font-weight:800;margin-bottom:2px;" class="keep-white">הכנה לקראת שירות קרבי</div>' +
-        '<div style="color:rgba(255,255,255,0.85);font-size:11px;line-height:1.4;" class="keep-white">מסלול 30 ימים מובנה. התחילו עכשיו!</div>' +
+        '<div style="color:#fff;font-size:14px;font-weight:800;margin-bottom:2px;" class="keep-white">הכנה לשירות קרבי</div>' +
+        '<div style="color:rgba(255,255,255,0.9);font-size:11px;line-height:1.4;" class="keep-white">מסלול 30 יום מובנה. התחילו עכשיו!</div>' +
         '</div>' +
         '<div style="color:#fff;font-size:22px;flex-shrink:0;" class="keep-white">◀</div>' +
         '</div>';
@@ -4126,19 +4166,26 @@ function renderPrepPathHomeCard() {
 // One-time fix: Reset prep path completions that were marked incorrectly
 function fixPrepPathProgress() {
   try {
-    if (localStorage.getItem('prep_path_fix_v2') === 'done') return;
-    var progress = getPrepPathProgress();
-    if (progress.startedAt) {
-      // Reset to current day = 1 if completions are suspicious
-      // Only reset if we have completions but very few learned phrases
-      var learned = JSON.parse(localStorage.getItem('learned_phrases') || '{}');
-      if (progress.completed.length > 0 && Object.keys(learned).length < 5) {
-        progress.completed = [];
-        progress.currentDay = 1;
-        savePrepPathProgress(progress);
+    if (localStorage.getItem('prep_path_fix_v3') === 'done') return;
+    // RESET ALL prep path progress (because of the auto-mark bug)
+    var paths = ['30', '60', '90'];
+    paths.forEach(function(pt){
+      var raw = localStorage.getItem('prep_path_progress_' + pt);
+      if (raw) {
+        try {
+          var p = JSON.parse(raw);
+          // If they have ANY completions, reset to clean state
+          if (p.startedAt) {
+            p.completed = [];
+            p.currentDay = 1;
+            localStorage.setItem('prep_path_progress_' + pt, JSON.stringify(p));
+          }
+        } catch(e) {}
       }
-    }
-    localStorage.setItem('prep_path_fix_v2', 'done');
+    });
+    // Also clear old non-pathed storage
+    localStorage.removeItem('prep_path_progress');
+    localStorage.setItem('prep_path_fix_v3', 'done');
   } catch(e) {}
 }
 
@@ -4959,6 +5006,43 @@ var _flashState = {
   answered: false
 };
 
+// Start flashcards with a specific pool (for prep path)
+function startFlashcardsWithPool(pool, title) {
+  try {
+    if (!pool || pool.length === 0) return;
+    
+    // Initialize flash state with our pool
+    _flashState = {
+      questions: pool.slice(),  // Use our pool
+      current: 0,
+      correct: 0,
+      total: pool.length,
+      changes: {},
+      customTitle: title || null,
+      isPrepPath: true
+    };
+    
+    // Navigate to flashcards tab
+    var allTabs = document.querySelectorAll('[id^="tab-"]');
+    for (var i = 0; i < allTabs.length; i++) allTabs[i].className = 'scr';
+    var flashTab = document.getElementById('tab-flash');
+    if (flashTab) flashTab.className = 'scr on';
+    
+    // Hide welcome, show question
+    var welcome = document.getElementById('flash-welcome');
+    var question = document.getElementById('flash-question');
+    var results = document.getElementById('flash-results');
+    if (welcome) welcome.style.display = 'none';
+    if (question) question.style.display = 'block';
+    if (results) results.style.display = 'none';
+    
+    // Render first question
+    if (typeof renderFlashQuestion === 'function') {
+      renderFlashQuestion();
+    }
+  } catch(e) { console.warn('startFlashcardsWithPool error:', e); }
+}
+
 function startFlashcards(){
   navToTab('flash');
   showFlashWelcome();
@@ -5528,6 +5612,21 @@ function finishFieldMode(){
   if (pct >= 70 && typeof launchConfetti === 'function') {
     setTimeout(launchConfetti, 300);
   }
+  
+  // If we are in prep path - mark day complete and offer return
+  if (window._prepPathActive && window._activePrepDay) {
+    try {
+      markPrepDayComplete(window._activePrepDay);
+      // Modify the buttons
+      setTimeout(function(){
+        var btnContainer = document.querySelector('#field-question-container div[style*="display:flex;gap:10px;justify-content:center;"]');
+        if (btnContainer) {
+          btnContainer.innerHTML = 
+            '<button onclick="window._prepPathActive=false;window._activePrepDay=null;showPrepPathScreen();" style="background:linear-gradient(135deg,#1D9E75 0%,#0e5a3f 100%);border:none;color:#fff;border-radius:10px;padding:12px 22px;font-size:13px;font-weight:700;cursor:pointer;font-family:inherit;">חזרה למסלול ◀</button>';
+        }
+      }, 100);
+    } catch(e) {}
+  }
 }
 
 function exitFieldMode(){
@@ -5921,6 +6020,22 @@ function flashFinish(){
   if (pct >= 70 && typeof launchConfetti === 'function') {
     setTimeout(launchConfetti, 300);
   }
+  
+  // If we are in prep path - mark day complete and return to prep
+  if (window._prepPathActive && window._activePrepDay) {
+    try {
+      markPrepDayComplete(window._activePrepDay);
+      // Modify done button to return to prep path
+      setTimeout(function(){
+        var doneBtn = document.querySelector('#flash-results button[onclick*="navToTab"]');
+        var buttonsContainer = document.querySelector('#flash-results div[style*="display:flex;gap:10px"]');
+        if (buttonsContainer) {
+          buttonsContainer.innerHTML = 
+            '<button onclick="window._prepPathActive=false;window._activePrepDay=null;showPrepPathScreen();" style="background:linear-gradient(135deg,#1D9E75 0%,#0e5a3f 100%);border:none;color:#fff;border-radius:10px;padding:12px 22px;font-size:13px;font-weight:700;cursor:pointer;font-family:inherit;">חזרה למסלול ◀</button>';
+        }
+      }, 100);
+    } catch(e) {}
+  }
 }
 
 function flashEnd(){
@@ -6093,7 +6208,7 @@ function bldCats(){
   if (!DB || DB.length === 0) {
     loadEl.innerHTML = '<div style="text-align:center;padding:20px;color:#D4862E;">' +
       'מתחבר לשרת...<br><br>' +
-      '<div style="font-size:11px;color:#7a9ab5;">v20260609-1722</div><br>' +
+      '<div style="font-size:11px;color:#7a9ab5;">v20260609-1848</div><br>' +
       '<button onclick="location.reload(true)" style="padding:10px 20px;background:#D4862E;color:#fff;border:none;border-radius:8px;font-family:inherit;cursor:pointer;font-weight:700;margin-top:10px;">🔄 רענן</button>' +
       '</div>';
     return;
