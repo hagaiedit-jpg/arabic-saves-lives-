@@ -1583,6 +1583,37 @@ body.day-mode .emerg-grid{
 .streak-celebrate { animation: streakCelebrate 0.6s ease-in-out infinite; display: inline-block; }
 .streak-bounce-in { animation: streakBigBounce 0.6s ease-out; }
 
+
+/* === Milestone Celebration Animations === */
+@keyframes milestoneRotate {
+  0% { transform: rotate(0deg) scale(0); opacity: 0; }
+  20% { transform: rotate(45deg) scale(1.2); opacity: 1; }
+  60% { transform: rotate(360deg) scale(1); opacity: 1; }
+  100% { transform: rotate(360deg) scale(1); opacity: 1; }
+}
+@keyframes milestoneSlideUp {
+  0% { transform: translateY(40px); opacity: 0; }
+  100% { transform: translateY(0); opacity: 1; }
+}
+@keyframes milestoneGlow {
+  0%, 100% { box-shadow: 0 0 30px rgba(255,215,0,0.4); }
+  50% { box-shadow: 0 0 60px rgba(255,215,0,0.8); }
+}
+@keyframes milestoneSparkle {
+  0%, 100% { opacity: 0; transform: scale(0.5); }
+  50% { opacity: 1; transform: scale(1.2); }
+}
+.milestone-bg-glow { animation: milestoneGlow 2s ease-in-out infinite; }
+.milestone-icon-anim { animation: milestoneRotate 1.2s ease-out; }
+.milestone-text-anim { animation: milestoneSlideUp 0.6s ease-out 0.4s both; }
+.milestone-rewards-anim { animation: milestoneSlideUp 0.6s ease-out 0.7s both; }
+.milestone-button-anim { animation: milestoneSlideUp 0.6s ease-out 1s both; }
+.milestone-sparkle {
+  position: absolute;
+  font-size: 24px;
+  animation: milestoneSparkle 1.5s ease-in-out infinite;
+}
+
 </style>
 </head>
 <body>
@@ -2053,7 +2084,7 @@ body.day-mode .emerg-grid{
       </div>
     </div>
     
-    <div class="loading" id="cats-loading"><div style="text-align:center;padding:20px;"><div style="font-size:16px;color:#D4862E;margin-bottom:8px;">טוען...</div><div style="font-size:10px;color:#7a9ab5;opacity:0.6;">v20260609-1605</div></div></div>
+    <div class="loading" id="cats-loading"><div style="text-align:center;padding:20px;"><div style="font-size:16px;color:#D4862E;margin-bottom:8px;">טוען...</div><div style="font-size:10px;color:#7a9ab5;opacity:0.6;">v20260609-1614</div></div></div>
     <div class="cgrid" id="cgrid" style="display:none;"></div>
   </div>
   <div id="vlist" class="scr">
@@ -2701,6 +2732,119 @@ function tryUseStreakFreeze(){
   } catch(e) { return false; }
 }
 
+
+// === Milestone Celebration ===
+function getMilestoneData(streak) {
+  var milestones = {
+    3: { icon: '🌱', title: 'הצעד הראשון', subtitle: '3 ימים ברצף!', msg: 'ההרגל מתחיל. אתם בדרך הנכונה!', color: '#1D9E75', bgGrad: 'linear-gradient(135deg,#0e5a3f 0%,#1D9E75 100%)', rewards: [] },
+    7: { icon: '⚡', title: 'שבוע מלא!', subtitle: '7 ימים ברצף', msg: 'שבוע שלם של תרגול. אתם רציניים!', color: '#D4A24E', bgGrad: 'linear-gradient(135deg,#b88a3d 0%,#D4A24E 100%)', rewards: ['🛡️ +1 כרטיס הגנה'] },
+    14: { icon: '💪', title: 'שבועיים מאסטר', subtitle: '14 ימים ברצף', msg: 'יוצא מן הכלל! אתם בנייתם הרגל אמיתי', color: '#D4A24E', bgGrad: 'linear-gradient(135deg,#b88a3d 0%,#FFD700 100%)', rewards: ['🛡️ +1 כרטיס הגנה'] },
+    30: { icon: '🏆', title: 'חודש מלא!', subtitle: '30 ימים ברצף', msg: 'זה כבר לא הרגל - זה אורח חיים!', color: '#FFD700', bgGrad: 'linear-gradient(135deg,#D4A24E 0%,#FFD700 100%)', rewards: ['🛡️ +2 כרטיסי הגנה', '🏆 הישג: חודש מלא'] },
+    50: { icon: '🌟', title: 'חמישים יום!', subtitle: '50 ימים ברצף', msg: 'אתם בקטגוריה של מעטים. הכבוד!', color: '#FFD700', bgGrad: 'linear-gradient(135deg,#FFD700 0%,#FFA500 100%)', rewards: ['🌟 תג חמישים'] },
+    100: { icon: '💎', title: 'מאה ימים!', subtitle: '100 ימים ברצף', msg: 'סטטוס יהלום! אתם בעלת אופי מיוחד', color: '#9b59b6', bgGrad: 'linear-gradient(135deg,#8e44ad 0%,#3498db 100%)', rewards: ['💎 סטטוס יהלום', '🏆 הישג: מאה ימים'] },
+    365: { icon: '👑', title: 'שנה מלאה!', subtitle: '365 ימים ברצף', msg: 'אגדה! 3 מיליון בעולם הגיעו לזה. אתם ביניהם!', color: '#FFD700', bgGrad: 'linear-gradient(135deg,#8e44ad 0%,#FFD700 100%)', rewards: ['👑 כתר אגדה', '🏆 חבר Society'] }
+  };
+  return milestones[streak] || null;
+}
+
+function showMilestoneCelebration(streak) {
+  try {
+    var data = getMilestoneData(streak);
+    if (!data) return;
+    
+    // Check if already celebrated
+    var celebrated = localStorage.getItem('streak_milestone_celebrated_' + streak);
+    if (celebrated === '1') return;
+    
+    // Mark as celebrated
+    try { localStorage.setItem('streak_milestone_celebrated_' + streak, '1'); } catch(e) {}
+    
+    // Create full-screen overlay
+    var overlay = document.createElement('div');
+    overlay.style.cssText = 'position:fixed;top:0;left:0;right:0;bottom:0;background:' + data.bgGrad + ';z-index:99999;display:flex;align-items:center;justify-content:center;padding:20px;overflow:hidden;animation:resultFadeIn 0.5s ease-out;';
+    
+    // Sparkles in corners
+    var sparkleHtml = '';
+    var positions = [
+      'top:10%;left:10%;', 'top:15%;right:15%;', 'top:30%;left:20%;',
+      'bottom:20%;right:10%;', 'bottom:30%;left:15%;', 'bottom:15%;right:25%;'
+    ];
+    positions.forEach(function(pos, idx){
+      sparkleHtml += '<div class="milestone-sparkle" style="' + pos + 'animation-delay:' + (idx * 0.3) + 's;">✨</div>';
+    });
+    
+    // Content
+    var contentHtml = '<div style="text-align:center;max-width:380px;position:relative;z-index:2;">';
+    
+    // Big icon
+    contentHtml += '<div class="milestone-icon-anim" style="font-size:120px;line-height:1;margin-bottom:10px;filter:drop-shadow(0 4px 20px rgba(0,0,0,0.3));">' + data.icon + '</div>';
+    
+    // Title and subtitle
+    contentHtml += '<div class="milestone-text-anim">';
+    contentHtml += '<div style="color:#fff;font-size:32px;font-weight:900;line-height:1.1;margin-bottom:8px;text-shadow:0 2px 8px rgba(0,0,0,0.3);">' + data.title + '</div>';
+    contentHtml += '<div style="color:rgba(255,255,255,0.9);font-size:18px;font-weight:700;margin-bottom:16px;">' + data.subtitle + '</div>';
+    contentHtml += '<div style="color:rgba(255,255,255,0.85);font-size:14px;line-height:1.6;margin-bottom:20px;padding:0 20px;">' + data.msg + '</div>';
+    contentHtml += '</div>';
+    
+    // Rewards
+    if (data.rewards.length > 0) {
+      contentHtml += '<div class="milestone-rewards-anim" style="background:rgba(0,0,0,0.2);backdrop-filter:blur(10px);border:1px solid rgba(255,255,255,0.3);border-radius:14px;padding:14px;margin-bottom:20px;">';
+      contentHtml += '<div style="color:rgba(255,255,255,0.8);font-size:11px;font-weight:800;letter-spacing:1px;margin-bottom:10px;">🎁 הפרסים שלכם</div>';
+      data.rewards.forEach(function(reward){
+        contentHtml += '<div style="color:#fff;font-size:14px;font-weight:700;padding:6px 0;">' + reward + '</div>';
+      });
+      contentHtml += '</div>';
+    }
+    
+    // Buttons
+    contentHtml += '<div class="milestone-button-anim" style="display:flex;gap:10px;justify-content:center;">';
+    contentHtml += '<button onclick="shareMilestone(' + streak + ')" style="background:rgba(255,255,255,0.2);backdrop-filter:blur(10px);border:1px solid rgba(255,255,255,0.4);color:#fff;border-radius:12px;padding:12px 22px;font-size:13px;font-weight:700;cursor:pointer;font-family:inherit;">📤 שתף</button>';
+    contentHtml += '<button onclick="closeMilestoneCelebration()" style="background:#fff;border:none;color:' + data.color + ';border-radius:12px;padding:12px 28px;font-size:13px;font-weight:700;cursor:pointer;font-family:inherit;box-shadow:0 4px 14px rgba(0,0,0,0.2);">המשך ◀</button>';
+    contentHtml += '</div>';
+    
+    contentHtml += '</div>';
+    
+    overlay.innerHTML = sparkleHtml + contentHtml;
+    overlay.id = 'milestone-overlay';
+    document.body.appendChild(overlay);
+    
+    // Launch confetti immediately
+    if (typeof launchConfetti === 'function') {
+      launchConfetti();
+      // Multiple bursts for bigger milestones!
+      if (streak >= 30) setTimeout(launchConfetti, 600);
+      if (streak >= 100) setTimeout(launchConfetti, 1200);
+      if (streak >= 365) setTimeout(launchConfetti, 1800);
+    }
+  } catch(e) { console.warn('milestone error:', e); }
+}
+
+function closeMilestoneCelebration() {
+  var overlay = document.getElementById('milestone-overlay');
+  if (overlay) {
+    overlay.style.transition = 'opacity 0.4s ease-out';
+    overlay.style.opacity = '0';
+    setTimeout(function(){ if (overlay.parentNode) overlay.remove(); }, 400);
+  }
+}
+
+function shareMilestone(streak) {
+  try {
+    var data = getMilestoneData(streak);
+    var shareText = '🎉 הגעתי ל-' + streak + ' ימים ברצף ב"ערבית מצילה חיים"!\n' + data.title + ' ' + data.icon + '\nמכינה את עצמי לרגע האמת.';
+    
+    if (navigator.share) {
+      navigator.share({ text: shareText }).catch(function(){});
+    } else if (navigator.clipboard) {
+      navigator.clipboard.writeText(shareText).then(function(){
+        alert('✓ הועתק! אפשר להדביק ברשתות חברתיות');
+      }).catch(function(){});
+    } else {
+      alert(shareText);
+    }
+  } catch(e) {}
+}
+
 // Show notification if freeze was just used
 function showStreakFreezeNotification(){
   try {
@@ -2833,7 +2977,15 @@ function renderStreakCard() {
         '<div class="keep-white" style="color:#fff;font-size:13px;font-weight:700;">' + milestone.msg + '</div>' +
         '</div>';
       
-      // Launch confetti for milestones!
+      // Full-screen milestone celebration!
+      var milestoneList = [3, 7, 14, 30, 50, 100, 365];
+      if (milestoneList.indexOf(streak) !== -1) {
+        var celebrated = localStorage.getItem('streak_milestone_celebrated_' + streak);
+        if (celebrated !== '1') {
+          setTimeout(function(){ showMilestoneCelebration(streak); }, 600);
+        }
+      }
+      // Also keep regular confetti
       var lastCelebrated = parseInt(localStorage.getItem('streak_last_celebrated') || '0', 10);
       if (lastCelebrated !== streak && typeof launchConfetti === 'function') {
         setTimeout(launchConfetti, 500);
@@ -4961,7 +5113,7 @@ function bldCats(){
   if (!DB || DB.length === 0) {
     loadEl.innerHTML = '<div style="text-align:center;padding:20px;color:#D4862E;">' +
       'מתחבר לשרת...<br><br>' +
-      '<div style="font-size:11px;color:#7a9ab5;">v20260609-1605</div><br>' +
+      '<div style="font-size:11px;color:#7a9ab5;">v20260609-1614</div><br>' +
       '<button onclick="location.reload(true)" style="padding:10px 20px;background:#D4862E;color:#fff;border:none;border-radius:8px;font-family:inherit;cursor:pointer;font-weight:700;margin-top:10px;">🔄 רענן</button>' +
       '</div>';
     return;
