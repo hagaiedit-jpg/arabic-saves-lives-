@@ -2042,7 +2042,7 @@ body.day-mode .emerg-grid{
       </div>
     </div>
     
-    <div class="loading" id="cats-loading"><div style="text-align:center;padding:20px;"><div style="font-size:16px;color:#D4862E;margin-bottom:8px;">טוען...</div><div style="font-size:10px;color:#7a9ab5;opacity:0.6;">v20260609-1329</div></div></div>
+    <div class="loading" id="cats-loading"><div style="text-align:center;padding:20px;"><div style="font-size:16px;color:#D4862E;margin-bottom:8px;">טוען...</div><div style="font-size:10px;color:#7a9ab5;opacity:0.6;">v20260609-1349</div></div></div>
     <div class="cgrid" id="cgrid" style="display:none;"></div>
   </div>
   <div id="vlist" class="scr">
@@ -3197,7 +3197,7 @@ function renderInsights() {
           icon: '📚', color: '#D4862E',
           title: 'קטגוריה לתרגול: ' + weakest.name,
           body: 'למדת ' + weakest.learned + '/' + weakest.total + ' (' + weakest.pct + '%). עוד תרגול וזה ינוצח!',
-          action: { label: 'פתח קטגוריה', fn: "navToTab('lib')" }
+          action: { label: 'פתח קטגוריה', fn: 'navToLib' }
         });
       }
     }
@@ -4715,7 +4715,7 @@ function bldCats(){
   if (!DB || DB.length === 0) {
     loadEl.innerHTML = '<div style="text-align:center;padding:20px;color:#D4862E;">' +
       'מתחבר לשרת...<br><br>' +
-      '<div style="font-size:11px;color:#7a9ab5;">v20260609-1329</div><br>' +
+      '<div style="font-size:11px;color:#7a9ab5;">v20260609-1349</div><br>' +
       '<button onclick="location.reload(true)" style="padding:10px 20px;background:#D4862E;color:#fff;border:none;border-radius:8px;font-family:inherit;cursor:pointer;font-weight:700;margin-top:10px;">🔄 רענן</button>' +
       '</div>';
     return;
@@ -8725,6 +8725,9 @@ function navToTab(tabId){
     console.error('navToTab fatal error:', e);
   }
 }
+
+function navToLib(){ navToTab('lib'); }
+
 
 function openAdminFromMenu(){
   try {
