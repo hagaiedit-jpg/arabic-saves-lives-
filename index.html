@@ -2209,7 +2209,7 @@ body.day-mode #prog-achievements div[style*="color:#D4A24E"] {
       </div>
     </div>
     
-    <div class="loading" id="cats-loading"><div style="text-align:center;padding:20px;"><div style="font-size:16px;color:#D4862E;margin-bottom:8px;">טוען...</div><div style="font-size:10px;color:#7a9ab5;opacity:0.6;">v20260609-1653</div></div></div>
+    <div class="loading" id="cats-loading"><div style="text-align:center;padding:20px;"><div style="font-size:16px;color:#D4862E;margin-bottom:8px;">טוען...</div><div style="font-size:10px;color:#7a9ab5;opacity:0.6;">v20260609-1722</div></div></div>
     <div class="cgrid" id="cgrid" style="display:none;"></div>
   </div>
   <div id="vlist" class="scr">
@@ -3363,38 +3363,424 @@ var PREP_WEEK_TITLES = {
   4: 'שליטה מלאה'
 };
 
-// === Path Functions ===
-function getPrepPathProgress() {
+var PREP_PATH_60 = [
+  // === שבוע 1-4: יסודות (זהה ל-30 יום) ===
+  { day: 1,  week: 1, type: 'category', cat: 'מגע ראשוני',           count: 5,  title: 'מגע ראשוני' },
+  { day: 2,  week: 1, type: 'category', cat: 'ניהול מרחב',           count: 5,  title: 'ניהול מרחב' },
+  { day: 3,  week: 1, type: 'practice', count: 8,                              title: 'חזרה על מה שלמדתם' },
+  { day: 4,  week: 1, type: 'category', cat: 'בידוק וזיהוי',         count: 5,  title: 'בידוק וזיהוי' },
+  { day: 5,  week: 1, type: 'category', cat: 'עצירת תנועה',          count: 5,  title: 'עצירת תנועה' },
+  { day: 6,  week: 1, type: 'practice', count: 10,                             title: 'חזרה ובחינה' },
+  { day: 7,  week: 1, type: 'field',    count: 5,                              title: 'מבחן שבועי - מצב שטח' },
+  
+  { day: 8,  week: 2, type: 'category', cat: 'שליטה בבית',           count: 5,  title: 'שליטה בבית' },
+  { day: 9,  week: 2, type: 'category', cat: 'הרגעה ושכנוע',         count: 5,  title: 'הרגעה ושכנוע' },
+  { day: 10, week: 2, type: 'practice', count: 10,                             title: 'חזרה ובחינה' },
+  { day: 11, week: 2, type: 'category', cat: 'קהל ואזרחים',          count: 5,  title: 'קהל ואזרחים' },
+  { day: 12, week: 2, type: 'category', cat: 'עזרה ראשונה',          count: 5,  title: 'עזרה ראשונה' },
+  { day: 13, week: 2, type: 'practice', count: 12,                             title: 'חזרה ובחינה' },
+  { day: 14, week: 2, type: 'field',    count: 5,                              title: 'מבחן שבועי - מצב שטח' },
+  
+  { day: 15, week: 3, type: 'category', cat: 'ילדים ואוכלוסיות רגישות', count: 5, title: 'ילדים ואוכלוסיות רגישות' },
+  { day: 16, week: 3, type: 'category', cat: 'לוח שנה ותרבות',       count: 4,  title: 'לוח שנה ותרבות' },
+  { day: 17, week: 3, type: 'practice', count: 12,                             title: 'חזרה ובחינה' },
+  { day: 18, week: 3, type: 'category', cat: 'כריזה',                count: 4,  title: 'כריזה' },
+  { day: 19, week: 3, type: 'category', cat: 'תשאול ימי',            count: 4,  title: 'תשאול ימי' },
+  { day: 20, week: 3, type: 'practice', count: 15,                             title: 'חזרה ובחינה' },
+  { day: 21, week: 3, type: 'field',    count: 6,                              title: 'מבחן שבועי - מצב שטח' },
+  
+  { day: 22, week: 4, type: 'practice', count: 15, focus: 'attention',         title: 'חיזוק נקודות חלשות' },
+  { day: 23, week: 4, type: 'practice', count: 15,                             title: 'חזרה ובחינה' },
+  { day: 24, week: 4, type: 'field',    count: 5,                              title: 'מצב שטח אמצע' },
+  { day: 25, week: 4, type: 'practice', count: 15, focus: 'mastered',          title: 'שינון הנשלטים' },
+  { day: 26, week: 4, type: 'practice', count: 20,                             title: 'חזרה רחבה' },
+  { day: 27, week: 4, type: 'scenarios',count: 2,                              title: 'תרחישים מעמיקים' },
+  { day: 28, week: 4, type: 'field',    count: 7,                              title: 'מצב שטח מתקדם' },
+  { day: 29, week: 4, type: 'practice', count: 20,                             title: 'חזרה מקיפה' },
+  { day: 30, week: 4, type: 'practice', count: 20,                             title: 'סיכום שלב 1' },
+  
+  // === שבוע 5-6: העמקה ===
+  { day: 31, week: 5, type: 'scenarios',count: 2,                              title: 'תרחישים: מבוקש מתכחש' },
+  { day: 32, week: 5, type: 'category', cat: 'מגע ראשוני',           count: 7,  title: 'מגע ראשוני - מעמיק' },
+  { day: 33, week: 5, type: 'category', cat: 'בידוק וזיהוי',         count: 7,  title: 'בידוק מעמיק' },
+  { day: 34, week: 5, type: 'practice', count: 18,                             title: 'חזרה ובחינה מעמיקה' },
+  { day: 35, week: 5, type: 'category', cat: 'ניהול מרחב',           count: 7,  title: 'ניהול מרחב - מעמיק' },
+  { day: 36, week: 5, type: 'scenarios',count: 2,                              title: 'תרחישי מחסום' },
+  { day: 37, week: 5, type: 'field',    count: 7,                              title: 'מצב שטח שבועי' },
+  
+  { day: 38, week: 6, type: 'category', cat: 'הרגעה ושכנוע',         count: 7,  title: 'הרגעה - מעמיק' },
+  { day: 39, week: 6, type: 'category', cat: 'שליטה בבית',           count: 7,  title: 'שליטה בבית - מעמיק' },
+  { day: 40, week: 6, type: 'practice', count: 20,                             title: 'חזרה ובחינה' },
+  { day: 41, week: 6, type: 'scenarios',count: 2,                              title: 'תרחישי בית' },
+  { day: 42, week: 6, type: 'category', cat: 'קהל ואזרחים',          count: 7,  title: 'קהל ואזרחים - מעמיק' },
+  { day: 43, week: 6, type: 'practice', count: 22,                             title: 'חזרה רחבה' },
+  { day: 44, week: 6, type: 'field',    count: 8,                              title: 'מצב שטח שבועי' },
+  
+  // === שבוע 7-8: מתמחים ===
+  { day: 45, week: 7, type: 'category', cat: 'עזרה ראשונה',          count: 7,  title: 'עזרה ראשונה - מעמיק' },
+  { day: 46, week: 7, type: 'scenarios',count: 2,                              title: 'תרחישי חירום' },
+  { day: 47, week: 7, type: 'practice', count: 22,                             title: 'חזרה מקיפה' },
+  { day: 48, week: 7, type: 'category', cat: 'ילדים ואוכלוסיות רגישות', count: 7, title: 'ילדים ואוכלוסיות - מעמיק' },
+  { day: 49, week: 7, type: 'category', cat: 'לוח שנה ותרבות',       count: 6,  title: 'לוח שנה - מעמיק' },
+  { day: 50, week: 7, type: 'practice', count: 25,                             title: 'חזרה ובחינה' },
+  { day: 51, week: 7, type: 'field',    count: 8,                              title: 'מצב שטח שבועי' },
+  
+  // === שבוע 8: שליטה מלאה ===
+  { day: 52, week: 8, type: 'category', cat: 'כריזה',                count: 6,  title: 'כריזה - מעמיק' },
+  { day: 53, week: 8, type: 'category', cat: 'תשאול ימי',            count: 6,  title: 'תשאול ימי - מעמיק' },
+  { day: 54, week: 8, type: 'scenarios',count: 3,                              title: 'תרחישים מתקדמים' },
+  { day: 55, week: 8, type: 'practice', count: 25, focus: 'attention',         title: 'חיזוק חלשות' },
+  { day: 56, week: 8, type: 'practice', count: 25,                             title: 'חזרה רחבה' },
+  { day: 57, week: 8, type: 'field',    count: 10,                             title: 'מצב שטח אינטנסיבי' },
+  { day: 58, week: 8, type: 'scenarios',count: 3,                              title: 'תרחישים מורכבים' },
+  { day: 59, week: 8, type: 'practice', count: 30,                             title: 'חזרה לפני המבחן' },
+  { day: 60, week: 8, type: 'final',    count: 12,                             title: 'מבחן סיכום - מוכן/ה לטירונות מתקדמת!' }
+];
+
+var PREP_WEEK_TITLES_60 = {
+  1: 'יסודות',
+  2: 'התקדמות',
+  3: 'מתקדמים',
+  4: 'שליטה ראשונית',
+  5: 'העמקה',
+  6: 'מתמחים',
+  7: 'מומחיות',
+  8: 'שיא - מוכן!'
+};
+
+var PREP_PATH_90 = [
+  // === Days 1-30: זהה למסלול 30 יום ===
+  { day: 1,  week: 1, type: 'category', cat: 'מגע ראשוני',           count: 5,  title: 'מגע ראשוני' },
+  { day: 2,  week: 1, type: 'category', cat: 'ניהול מרחב',           count: 5,  title: 'ניהול מרחב' },
+  { day: 3,  week: 1, type: 'practice', count: 8,                              title: 'חזרה על מה שלמדתם' },
+  { day: 4,  week: 1, type: 'category', cat: 'בידוק וזיהוי',         count: 5,  title: 'בידוק וזיהוי' },
+  { day: 5,  week: 1, type: 'category', cat: 'עצירת תנועה',          count: 5,  title: 'עצירת תנועה' },
+  { day: 6,  week: 1, type: 'practice', count: 10,                             title: 'חזרה ובחינה' },
+  { day: 7,  week: 1, type: 'field',    count: 5,                              title: 'מבחן שבועי' },
+  { day: 8,  week: 2, type: 'category', cat: 'שליטה בבית',           count: 5,  title: 'שליטה בבית' },
+  { day: 9,  week: 2, type: 'category', cat: 'הרגעה ושכנוע',         count: 5,  title: 'הרגעה ושכנוע' },
+  { day: 10, week: 2, type: 'practice', count: 10,                             title: 'חזרה ובחינה' },
+  { day: 11, week: 2, type: 'category', cat: 'קהל ואזרחים',          count: 5,  title: 'קהל ואזרחים' },
+  { day: 12, week: 2, type: 'category', cat: 'עזרה ראשונה',          count: 5,  title: 'עזרה ראשונה' },
+  { day: 13, week: 2, type: 'practice', count: 12,                             title: 'חזרה ובחינה' },
+  { day: 14, week: 2, type: 'field',    count: 5,                              title: 'מבחן שבועי' },
+  { day: 15, week: 3, type: 'category', cat: 'ילדים ואוכלוסיות רגישות', count: 5, title: 'ילדים ואוכלוסיות רגישות' },
+  { day: 16, week: 3, type: 'category', cat: 'לוח שנה ותרבות',       count: 4,  title: 'לוח שנה ותרבות' },
+  { day: 17, week: 3, type: 'practice', count: 12,                             title: 'חזרה ובחינה' },
+  { day: 18, week: 3, type: 'category', cat: 'כריזה',                count: 4,  title: 'כריזה' },
+  { day: 19, week: 3, type: 'category', cat: 'תשאול ימי',            count: 4,  title: 'תשאול ימי' },
+  { day: 20, week: 3, type: 'practice', count: 15,                             title: 'חזרה ובחינה' },
+  { day: 21, week: 3, type: 'field',    count: 6,                              title: 'מבחן שבועי' },
+  { day: 22, week: 4, type: 'practice', count: 15, focus: 'attention',         title: 'חיזוק חלשות' },
+  { day: 23, week: 4, type: 'practice', count: 15,                             title: 'חזרה ובחינה' },
+  { day: 24, week: 4, type: 'field',    count: 5,                              title: 'מצב שטח' },
+  { day: 25, week: 4, type: 'practice', count: 15, focus: 'mastered',          title: 'שינון הנשלטים' },
+  { day: 26, week: 4, type: 'practice', count: 20,                             title: 'חזרה רחבה' },
+  { day: 27, week: 4, type: 'scenarios',count: 2,                              title: 'תרחישים' },
+  { day: 28, week: 4, type: 'field',    count: 7,                              title: 'מצב שטח מתקדם' },
+  { day: 29, week: 4, type: 'practice', count: 20,                             title: 'חזרה מקיפה' },
+  { day: 30, week: 4, type: 'practice', count: 20,                             title: 'סיכום שלב 1' },
+  // === שבוע 5-8: כמו מסלול 60 יום ===
+  { day: 31, week: 5, type: 'scenarios',count: 2,                              title: 'תרחישי מבוקש מתכחש' },
+  { day: 32, week: 5, type: 'category', cat: 'מגע ראשוני',           count: 8,  title: 'מגע ראשוני - מעמיק' },
+  { day: 33, week: 5, type: 'category', cat: 'בידוק וזיהוי',         count: 8,  title: 'בידוק מעמיק' },
+  { day: 34, week: 5, type: 'practice', count: 20,                             title: 'חזרה מעמיקה' },
+  { day: 35, week: 5, type: 'category', cat: 'ניהול מרחב',           count: 8,  title: 'ניהול מרחב מעמיק' },
+  { day: 36, week: 5, type: 'scenarios',count: 2,                              title: 'תרחישי מחסום' },
+  { day: 37, week: 5, type: 'field',    count: 7,                              title: 'מצב שטח' },
+  { day: 38, week: 6, type: 'category', cat: 'הרגעה ושכנוע',         count: 8,  title: 'הרגעה מעמיק' },
+  { day: 39, week: 6, type: 'category', cat: 'שליטה בבית',           count: 8,  title: 'שליטה בבית מעמיק' },
+  { day: 40, week: 6, type: 'practice', count: 20,                             title: 'חזרה ובחינה' },
+  { day: 41, week: 6, type: 'scenarios',count: 2,                              title: 'תרחישי בית' },
+  { day: 42, week: 6, type: 'category', cat: 'קהל ואזרחים',          count: 8,  title: 'קהל ואזרחים מעמיק' },
+  { day: 43, week: 6, type: 'practice', count: 25,                             title: 'חזרה רחבה' },
+  { day: 44, week: 6, type: 'field',    count: 8,                              title: 'מצב שטח' },
+  { day: 45, week: 7, type: 'category', cat: 'עזרה ראשונה',          count: 8,  title: 'עזרה ראשונה מעמיק' },
+  { day: 46, week: 7, type: 'scenarios',count: 2,                              title: 'תרחישי חירום' },
+  { day: 47, week: 7, type: 'practice', count: 25,                             title: 'חזרה מקיפה' },
+  { day: 48, week: 7, type: 'category', cat: 'ילדים ואוכלוסיות רגישות', count: 8, title: 'ילדים מעמיק' },
+  { day: 49, week: 7, type: 'category', cat: 'לוח שנה ותרבות',       count: 6,  title: 'לוח שנה מעמיק' },
+  { day: 50, week: 7, type: 'practice', count: 25,                             title: 'חזרה ובחינה' },
+  { day: 51, week: 7, type: 'field',    count: 8,                              title: 'מצב שטח' },
+  { day: 52, week: 8, type: 'category', cat: 'כריזה',                count: 6,  title: 'כריזה מעמיק' },
+  { day: 53, week: 8, type: 'category', cat: 'תשאול ימי',            count: 6,  title: 'תשאול ימי מעמיק' },
+  { day: 54, week: 8, type: 'scenarios',count: 3,                              title: 'תרחישים מתקדמים' },
+  { day: 55, week: 8, type: 'practice', count: 30, focus: 'attention',         title: 'חיזוק חלשות' },
+  { day: 56, week: 8, type: 'practice', count: 30,                             title: 'חזרה רחבה' },
+  { day: 57, week: 8, type: 'field',    count: 10,                             title: 'מצב שטח אינטנסיבי' },
+  { day: 58, week: 8, type: 'practice', count: 30,                             title: 'חזרה מקיפה' },
+  // === שבוע 9-12: ייחודי ל-90 ===
+  { day: 59, week: 9, type: 'scenarios',count: 3,                              title: 'תרחישים מורכבים' },
+  { day: 60, week: 9, type: 'practice', count: 30, focus: 'attention',         title: 'חיזוק חלשות' },
+  { day: 61, week: 9, type: 'field',    count: 10,                             title: 'מצב שטח אינטנסיבי' },
+  { day: 62, week: 9, type: 'practice', count: 30,                             title: 'חזרה ובחינה' },
+  { day: 63, week: 9, type: 'scenarios',count: 3,                              title: 'תרחישים מרובי שלבים' },
+  { day: 64, week: 9, type: 'practice', count: 35,                             title: 'חזרה רחבה' },
+  { day: 65, week: 9, type: 'field',    count: 10,                             title: 'מצב שטח שבועי' },
+  { day: 66, week: 10, type: 'practice', count: 35, focus: 'mastered',         title: 'שינון נשלטים' },
+  { day: 67, week: 10, type: 'scenarios',count: 3,                             title: 'תרחישי שטח' },
+  { day: 68, week: 10, type: 'practice', count: 35,                            title: 'חזרה מקיפה' },
+  { day: 69, week: 10, type: 'field',    count: 10,                            title: 'מצב שטח אמצע' },
+  { day: 70, week: 10, type: 'practice', count: 35,                            title: 'חזרה ובחינה' },
+  { day: 71, week: 10, type: 'scenarios',count: 3,                             title: 'תרחישים מתקדמים' },
+  { day: 72, week: 10, type: 'field',    count: 10,                            title: 'מצב שטח' },
+  { day: 73, week: 11, type: 'practice', count: 40,                            title: 'חזרה אינטנסיבית' },
+  { day: 74, week: 11, type: 'scenarios',count: 3,                             title: 'תרחישים מורכבים' },
+  { day: 75, week: 11, type: 'practice', count: 40, focus: 'attention',        title: 'חיזוק חלשות' },
+  { day: 76, week: 11, type: 'field',    count: 10,                            title: 'מצב שטח אינטנסיבי' },
+  { day: 77, week: 11, type: 'practice', count: 40,                            title: 'חזרה ובחינה' },
+  { day: 78, week: 11, type: 'scenarios',count: 4,                             title: 'מרתון תרחישים' },
+  { day: 79, week: 11, type: 'field',    count: 10,                            title: 'מצב שטח שבועי' },
+  { day: 80, week: 12, type: 'practice', count: 40, focus: 'mastered',         title: 'אימון נשלטים' },
+  { day: 81, week: 12, type: 'scenarios',count: 4,                             title: 'תרחישי שיא' },
+  { day: 82, week: 12, type: 'practice', count: 40,                            title: 'חזרה מקיפה' },
+  { day: 83, week: 12, type: 'field',    count: 10,                            title: 'מצב שטח טרום-מבחן' },
+  { day: 84, week: 12, type: 'practice', count: 45,                            title: 'חזרה אחרונה' },
+  { day: 85, week: 12, type: 'scenarios',count: 4,                             title: 'תרחישים אחרונים' },
+  { day: 86, week: 12, type: 'practice', count: 45, focus: 'attention',        title: 'חיזוק אחרון' },
+  { day: 87, week: 12, type: 'field',    count: 10,                            title: 'מצב שטח טרום-מבחן' },
+  { day: 88, week: 12, type: 'practice', count: 50,                            title: 'מבחן ביניים' },
+  { day: 89, week: 12, type: 'scenarios',count: 5,                             title: 'מבחן תרחישים' },
+  { day: 90, week: 12, type: 'final',    count: 15,                            title: 'מבחן סיכום - מומחה קרבי!' }
+];
+
+var PREP_WEEK_TITLES_90 = {
+  1: 'יסודות', 2: 'התקדמות', 3: 'מתקדמים', 4: 'שליטה',
+  5: 'העמקה', 6: 'מתמחים', 7: 'מומחיות', 8: 'מאסטרי',
+  9: 'אינטנסיבי', 10: 'מתקדם מאוד', 11: 'מרתון', 12: 'שיא - מומחה!'
+};
+
+// === Helpers for all 3 paths ===
+function getActivePath() {
   try {
-    var raw = localStorage.getItem('prep_path_progress');
-    if (!raw) return { completed: [], currentDay: 1, startedAt: null };
-    return JSON.parse(raw);
-  } catch(e) { return { completed: [], currentDay: 1, startedAt: null }; }
+    var pathType = localStorage.getItem('prep_active_path') || '30';
+    if (pathType === '90') return PREP_PATH_90;
+    if (pathType === '60') return PREP_PATH_60;
+    return PREP_PATH_30;
+  } catch(e) { return PREP_PATH_30; }
 }
 
-function savePrepPathProgress(progress) {
-  try { localStorage.setItem('prep_path_progress', JSON.stringify(progress)); } catch(e) {}
+function getActivePathType() {
+  try { return localStorage.getItem('prep_active_path') || '30'; }
+  catch(e) { return '30'; }
 }
 
-function startPrepPath() {
-  var progress = getPrepPathProgress();
+function setActivePathType(type) {
+  try { localStorage.setItem('prep_active_path', type); } catch(e) {}
+}
+
+function isPath60Unlocked() {
+  try {
+    var raw = localStorage.getItem('prep_path_progress_30');
+    if (!raw) return false;
+    var p = JSON.parse(raw);
+    return p.completed && p.completed.length >= 30;
+  } catch(e) { return false; }
+}
+
+function isPath90Unlocked() {
+  try {
+    var raw = localStorage.getItem('prep_path_progress_60');
+    if (!raw) return false;
+    var p = JSON.parse(raw);
+    return p.completed && p.completed.length >= 60;
+  } catch(e) { return false; }
+}
+
+function showPrepPathSelection() {
+  var allTabs = document.querySelectorAll('[id^="tab-"]');
+  for (var i = 0; i < allTabs.length; i++) allTabs[i].className = 'scr';
+  var prepTab = document.getElementById('tab-prep');
+  if (prepTab) {
+    prepTab.className = 'scr on';
+    renderPathSelection();
+  }
+}
+
+function renderPathSelection() {
+  var container = document.getElementById('prep-container');
+  if (!container) return;
+  
+  var path30Progress = getPrepPathProgress('30');
+  var path30Started = path30Progress.startedAt !== null;
+  var path30Completed = path30Progress.completed.length >= 30;
+  var path30Count = path30Progress.completed.length;
+  
+  var path60Unlocked = isPath60Unlocked();
+  var path60Progress = getPrepPathProgress('60');
+  var path60Started = path60Progress.startedAt !== null;
+  var path60Completed = path60Progress.completed.length >= 60;
+  var path60Count = path60Progress.completed.length;
+  
+  var path90Unlocked = isPath90Unlocked();
+  var path90Progress = getPrepPathProgress('90');
+  var path90Started = path90Progress.startedAt !== null;
+  var path90Count = path90Progress.completed.length;
+  
+  var html = '';
+  
+  html += '<div style="text-align:center;margin-bottom:20px;">';
+  html += '<div style="font-size:42px;margin-bottom:8px;">🪖</div>';
+  html += '<div style="color:#E8D9B8;font-size:18px;font-weight:800;margin-bottom:6px;">בחרו מסלול הכנה</div>';
+  html += '<div style="color:#a0b8c8;font-size:12px;line-height:1.5;">המסלולים נפתחים בהדרגה - השלימו אחד כדי לפתוח את הבא</div>';
+  html += '</div>';
+  
+  // === 30-day path - always open ===
+  html += '<div onclick="selectPath(\'30\')" style="background:linear-gradient(135deg,#1D9E75 0%,#0e5a3f 100%);border-radius:14px;padding:16px;margin-bottom:12px;cursor:pointer;box-shadow:0 4px 12px rgba(29,158,117,0.25);position:relative;">';
+  if (path30Started) {
+    html += '<div style="position:absolute;top:8px;left:8px;background:rgba(255,255,255,0.2);color:#fff;font-size:9px;font-weight:800;padding:3px 8px;border-radius:6px;">' + (path30Completed ? 'הושלם ✓' : 'פעיל') + '</div>';
+  }
+  html += '<div style="display:flex;align-items:center;gap:14px;margin-bottom:8px;">';
+  html += '<div style="font-size:36px;flex-shrink:0;">🟢</div>';
+  html += '<div style="flex:1;min-width:0;">';
+  html += '<div class="keep-white" style="color:#fff;font-size:16px;font-weight:800;margin-bottom:2px;">מסלול מהיר</div>';
+  html += '<div class="keep-white" style="color:rgba(255,255,255,0.9);font-size:12px;font-weight:700;">30 יום · מוכנות בסיסית</div>';
+  html += '</div>';
+  html += '<div class="keep-white" style="color:#fff;font-size:22px;">◀</div>';
+  html += '</div>';
+  html += '<div class="keep-white" style="color:rgba(255,255,255,0.85);font-size:11px;line-height:1.5;margin-bottom:8px;">~40% מהמאגר. הכנה ראשונית לפני גיוס.</div>';
+  if (path30Started) {
+    html += '<div style="height:5px;background:rgba(255,255,255,0.2);border-radius:3px;overflow:hidden;">';
+    html += '<div style="height:100%;background:#fff;width:' + (path30Count / 30 * 100) + '%;border-radius:3px;"></div>';
+    html += '</div>';
+    html += '<div class="keep-white" style="color:rgba(255,255,255,0.9);font-size:10px;margin-top:4px;text-align:center;">' + path30Count + '/30 ימים</div>';
+  }
+  html += '</div>';
+  
+  // === 60-day path - unlocked after 30 ===
+  if (path60Unlocked) {
+    html += '<div onclick="selectPath(\'60\')" style="background:linear-gradient(135deg,#D4862E 0%,#a85200 100%);border-radius:14px;padding:16px;margin-bottom:12px;cursor:pointer;box-shadow:0 4px 12px rgba(212,134,46,0.25);position:relative;">';
+    if (path60Started) {
+      html += '<div style="position:absolute;top:8px;left:8px;background:rgba(255,255,255,0.2);color:#fff;font-size:9px;font-weight:800;padding:3px 8px;border-radius:6px;">' + (path60Completed ? 'הושלם ✓' : 'פעיל') + '</div>';
+    } else {
+      html += '<div style="position:absolute;top:8px;left:8px;background:rgba(255,255,255,0.25);color:#fff;font-size:9px;font-weight:800;padding:3px 8px;border-radius:6px;">פתוח! 🎉</div>';
+    }
+    html += '<div style="display:flex;align-items:center;gap:14px;margin-bottom:8px;">';
+    html += '<div style="font-size:36px;flex-shrink:0;">🟡</div>';
+    html += '<div style="flex:1;min-width:0;">';
+    html += '<div class="keep-white" style="color:#fff;font-size:16px;font-weight:800;margin-bottom:2px;">מסלול מעמיק</div>';
+    html += '<div class="keep-white" style="color:rgba(255,255,255,0.9);font-size:12px;font-weight:700;">60 יום · מוכנות טובה</div>';
+    html += '</div>';
+    html += '<div class="keep-white" style="color:#fff;font-size:22px;">◀</div>';
+    html += '</div>';
+    html += '<div class="keep-white" style="color:rgba(255,255,255,0.85);font-size:11px;line-height:1.5;margin-bottom:8px;">~55% מהמאגר. תרחישים נוספים והעמקה.</div>';
+    if (path60Started) {
+      html += '<div style="height:5px;background:rgba(255,255,255,0.2);border-radius:3px;overflow:hidden;">';
+      html += '<div style="height:100%;background:#fff;width:' + (path60Count / 60 * 100) + '%;border-radius:3px;"></div>';
+      html += '</div>';
+      html += '<div class="keep-white" style="color:rgba(255,255,255,0.9);font-size:10px;margin-top:4px;text-align:center;">' + path60Count + '/60 ימים</div>';
+    }
+    html += '</div>';
+  } else {
+    html += '<div style="background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.08);border-radius:14px;padding:16px;margin-bottom:12px;opacity:0.6;position:relative;">';
+    html += '<div style="position:absolute;top:10px;left:10px;font-size:18px;">🔒</div>';
+    html += '<div style="display:flex;align-items:center;gap:14px;margin-bottom:8px;">';
+    html += '<div style="font-size:36px;flex-shrink:0;filter:grayscale(0.8);">🟡</div>';
+    html += '<div style="flex:1;min-width:0;">';
+    html += '<div style="color:#7a9ab5;font-size:16px;font-weight:800;margin-bottom:2px;">מסלול מעמיק</div>';
+    html += '<div style="color:#7a9ab5;font-size:12px;font-weight:700;">60 יום · מוכנות טובה</div>';
+    html += '</div></div>';
+    html += '<div style="color:#7a9ab5;font-size:11px;line-height:1.5;">🔒 ייפתח אחרי השלמת מסלול 30 יום</div>';
+    html += '</div>';
+  }
+  
+  // === 90-day path - unlocked after 60 ===
+  if (path90Unlocked) {
+    html += '<div onclick="selectPath(\'90\')" style="background:linear-gradient(135deg,#c0392b 0%,#922d22 100%);border-radius:14px;padding:16px;margin-bottom:12px;cursor:pointer;box-shadow:0 4px 12px rgba(192,57,43,0.25);position:relative;">';
+    if (path90Started) {
+      html += '<div style="position:absolute;top:8px;left:8px;background:rgba(255,255,255,0.2);color:#fff;font-size:9px;font-weight:800;padding:3px 8px;border-radius:6px;">פעיל</div>';
+    } else {
+      html += '<div style="position:absolute;top:8px;left:8px;background:rgba(255,255,255,0.25);color:#fff;font-size:9px;font-weight:800;padding:3px 8px;border-radius:6px;">פתוח! 🎉</div>';
+    }
+    html += '<div style="display:flex;align-items:center;gap:14px;margin-bottom:8px;">';
+    html += '<div style="font-size:36px;flex-shrink:0;">🔴</div>';
+    html += '<div style="flex:1;min-width:0;">';
+    html += '<div class="keep-white" style="color:#fff;font-size:16px;font-weight:800;margin-bottom:2px;">מסלול מומחה</div>';
+    html += '<div class="keep-white" style="color:rgba(255,255,255,0.9);font-size:12px;font-weight:700;">90 יום · שליטה מלאה</div>';
+    html += '</div>';
+    html += '<div class="keep-white" style="color:#fff;font-size:22px;">◀</div>';
+    html += '</div>';
+    html += '<div class="keep-white" style="color:rgba(255,255,255,0.85);font-size:11px;line-height:1.5;margin-bottom:8px;">~70% מהמאגר. תרחישים מורכבים והכנה לקרבי מצוין.</div>';
+    if (path90Started) {
+      html += '<div style="height:5px;background:rgba(255,255,255,0.2);border-radius:3px;overflow:hidden;">';
+      html += '<div style="height:100%;background:#fff;width:' + (path90Count / 90 * 100) + '%;border-radius:3px;"></div>';
+      html += '</div>';
+      html += '<div class="keep-white" style="color:rgba(255,255,255,0.9);font-size:10px;margin-top:4px;text-align:center;">' + path90Count + '/90 ימים</div>';
+    }
+    html += '</div>';
+  } else {
+    html += '<div style="background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.08);border-radius:14px;padding:16px;margin-bottom:12px;opacity:0.6;position:relative;">';
+    html += '<div style="position:absolute;top:10px;left:10px;font-size:18px;">🔒</div>';
+    html += '<div style="display:flex;align-items:center;gap:14px;margin-bottom:8px;">';
+    html += '<div style="font-size:36px;flex-shrink:0;filter:grayscale(0.8);">🔴</div>';
+    html += '<div style="flex:1;min-width:0;">';
+    html += '<div style="color:#7a9ab5;font-size:16px;font-weight:800;margin-bottom:2px;">מסלול מומחה</div>';
+    html += '<div style="color:#7a9ab5;font-size:12px;font-weight:700;">90 יום · שליטה מלאה</div>';
+    html += '</div></div>';
+    html += '<div style="color:#7a9ab5;font-size:11px;line-height:1.5;">🔒 ייפתח אחרי השלמת מסלול 60 יום</div>';
+    html += '</div>';
+  }
+  
+  container.innerHTML = html;
+}
+
+function selectPath(pathType) {
+  setActivePathType(pathType);
+  var progress = getPrepPathProgress(pathType);
   if (!progress.startedAt) {
     progress.startedAt = new Date().toISOString();
     progress.currentDay = 1;
     progress.completed = [];
-    savePrepPathProgress(progress);
+    savePrepPathProgress(progress, pathType);
+  }
+  renderPrepPathScreen();
+}
+
+
+
+
+// === Path Functions ===
+function getPrepPathProgress(pathType) {
+  pathType = pathType || getActivePathType();
+  try {
+    var raw = localStorage.getItem('prep_path_progress_' + pathType);
+    if (!raw) {
+      var oldRaw = localStorage.getItem('prep_path_progress');
+      if (oldRaw && pathType === '30') {
+        localStorage.setItem('prep_path_progress_30', oldRaw);
+        return JSON.parse(oldRaw);
+      }
+      return { completed: [], currentDay: 1, startedAt: null };
+    }
+    return JSON.parse(raw);
+  } catch(e) { return { completed: [], currentDay: 1, startedAt: null }; }
+}
+
+function savePrepPathProgress(progress, pathType) {
+  pathType = pathType || getActivePathType();
+  try { localStorage.setItem('prep_path_progress_' + pathType, JSON.stringify(progress)); } catch(e) {}
+}
+
+function startPrepPath() {
+  var pathType = getActivePathType();
+  var progress = getPrepPathProgress(pathType);
+  if (!progress.startedAt) {
+    showPrepPathSelection();
+    return;
   }
   showPrepPathScreen();
 }
 
 function markPrepDayComplete(day) {
-  var progress = getPrepPathProgress();
+  var pathType = getActivePathType();
+  var path = getActivePath();
+  var progress = getPrepPathProgress(pathType);
   if (progress.completed.indexOf(day) === -1) {
     progress.completed.push(day);
-    if (day === progress.currentDay && progress.currentDay < 30) {
+    if (day === progress.currentDay && progress.currentDay < path.length) {
       progress.currentDay = day + 1;
     }
-    savePrepPathProgress(progress);
+    savePrepPathProgress(progress, pathType);
   }
 }
 
@@ -3418,18 +3804,42 @@ function renderPrepPathScreen() {
   var container = document.getElementById('prep-container');
   if (!container) return;
   
-  var progress = getPrepPathProgress();
+  var pathType = getActivePathType();
+  var path = getActivePath();
+  var totalDays = path.length;
+  var weekTitles;
+  if (pathType === '90') weekTitles = PREP_WEEK_TITLES_90;
+  else if (pathType === '60') weekTitles = PREP_WEEK_TITLES_60;
+  else weekTitles = PREP_WEEK_TITLES;
+  
+  var progress = getPrepPathProgress(pathType);
   var completedCount = progress.completed.length;
   var currentDay = progress.currentDay;
-  var pct = Math.round((completedCount / 30) * 100);
+  var pct = Math.round((completedCount / totalDays) * 100);
   
   var html = '';
+  
+  // Switch path button (if more than one available)
+  if (isPath60Unlocked()) {
+    html += '<div style="text-align:center;margin-bottom:14px;">';
+    html += '<button onclick="showPrepPathSelection()" style="background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.15);color:#a0b8c8;border-radius:8px;padding:6px 14px;font-size:11px;font-weight:700;cursor:pointer;font-family:inherit;">🔄 החלף מסלול</button>';
+    html += '</div>';
+  }
+  
+  // Title with path name
+  var titleColor, titleText;
+  if (pathType === '90') { titleColor = '#c0392b'; titleText = '🔴 מסלול מומחה - 90 יום'; }
+  else if (pathType === '60') { titleColor = '#D4862E'; titleText = '🟡 מסלול מעמיק - 60 יום'; }
+  else { titleColor = '#1D9E75'; titleText = '🟢 מסלול מהיר - 30 יום'; }
+  html += '<div style="text-align:center;margin-bottom:14px;">';
+  html += '<div style="color:' + titleColor + ';font-size:13px;font-weight:800;letter-spacing:0.5px;">' + titleText + '</div>';
+  html += '</div>';
   
   // Progress header
   html += '<div style="background:linear-gradient(135deg,#1F3147 0%,#243a55 100%);border:1px solid rgba(212,162,78,0.3);border-radius:14px;padding:16px;margin-bottom:14px;">';
   html += '<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;">';
   html += '<div style="color:#D4A24E;font-size:11px;font-weight:800;letter-spacing:0.5px;">📊 ההתקדמות שלכם</div>';
-  html += '<div style="color:#E8D9B8;font-size:14px;font-weight:800;">' + completedCount + '/30 ימים</div>';
+  html += '<div style="color:#E8D9B8;font-size:14px;font-weight:800;">' + completedCount + '/' + totalDays + ' ימים</div>';
   html += '</div>';
   html += '<div style="height:8px;background:rgba(255,255,255,0.08);border-radius:4px;overflow:hidden;margin-bottom:8px;">';
   html += '<div style="height:100%;background:linear-gradient(90deg,#1D9E75,#D4A24E);width:' + pct + '%;border-radius:4px;transition:width 0.8s;"></div>';
@@ -3437,20 +3847,28 @@ function renderPrepPathScreen() {
   html += '<div style="color:#a0b8c8;font-size:11px;text-align:center;">' + pct + '% הושלם</div>';
   html += '</div>';
   
-  // Group by week
+  // Group by week using active path
   var byWeek = {};
-  PREP_PATH_30.forEach(function(d){
+  path.forEach(function(d){
     if (!byWeek[d.week]) byWeek[d.week] = [];
     byWeek[d.week].push(d);
   });
   
   // Render each week
-  [1, 2, 3, 4].forEach(function(weekNum){
+  var weekNums = Object.keys(byWeek).map(function(n){ return parseInt(n,10); }).sort(function(a,b){ return a-b; });
+  weekNums.forEach(function(weekNum){
     var days = byWeek[weekNum] || [];
-    var weekTitle = PREP_WEEK_TITLES[weekNum];
+    var weekTitle = weekTitles[weekNum] || ('שבוע ' + weekNum);
     var completedInWeek = days.filter(function(d){ return progress.completed.indexOf(d.day) !== -1; }).length;
     
-    var weekColors = { 1: '#1D9E75', 2: '#D4A24E', 3: '#D4862E', 4: '#c0392b' };
+    var weekColors;
+    if (pathType === '90') {
+      weekColors = { 1: '#1D9E75', 2: '#1D9E75', 3: '#D4A24E', 4: '#D4A24E', 5: '#D4862E', 6: '#D4862E', 7: '#c0392b', 8: '#c0392b', 9: '#8e0e0e', 10: '#8e0e0e', 11: '#6a1010', 12: '#6a1010' };
+    } else if (pathType === '60') {
+      weekColors = { 1: '#1D9E75', 2: '#1D9E75', 3: '#D4A24E', 4: '#D4A24E', 5: '#D4862E', 6: '#D4862E', 7: '#c0392b', 8: '#c0392b' };
+    } else {
+      weekColors = { 1: '#1D9E75', 2: '#D4A24E', 3: '#D4862E', 4: '#c0392b' };
+    }
     var weekColor = weekColors[weekNum];
     
     html += '<div style="margin-bottom:16px;">';
@@ -3472,11 +3890,17 @@ function renderPrepPathScreen() {
         icon = '✅';
         statusText = '<span style="color:#1D9E75;font-size:10px;font-weight:700;">הושלם</span>';
       } else if (isCurrent) {
+        // Show real progress for current day
+        var dayStatus = checkPrepDayProgress(dayData.day);
         bg = 'linear-gradient(135deg,rgba(212,162,78,0.2) 0%,rgba(184,138,61,0.1) 100%)';
         border = '2px solid #D4A24E';
         opacity = '1';
         icon = '🎯';
-        statusText = '<span style="color:#D4A24E;font-size:10px;font-weight:800;">היום ◀</span>';
+        if (dayStatus.target > 1) {
+          statusText = '<span style="color:#D4A24E;font-size:10px;font-weight:800;">' + dayStatus.current + '/' + dayStatus.target + ' ◀</span>';
+        } else {
+          statusText = '<span style="color:#D4A24E;font-size:10px;font-weight:800;">היום ◀</span>';
+        }
       } else if (isLocked) {
         bg = 'rgba(255,255,255,0.03)';
         border = '1px solid rgba(255,255,255,0.05)';
@@ -3517,7 +3941,8 @@ function renderPrepPathScreen() {
 }
 
 function startPrepDay(day) {
-  var dayData = PREP_PATH_30.filter(function(d){ return d.day === day; })[0];
+  var path = getActivePath();
+  var dayData = path.filter(function(d){ return d.day === day; })[0];
   if (!dayData) return;
   
   var progress = getPrepPathProgress();
@@ -3553,32 +3978,102 @@ function startPrepDay(day) {
 }
 
 function executePrepDay(day) {
-  var dayData = PREP_PATH_30.filter(function(d){ return d.day === day; })[0];
+  var path = getActivePath();
+  var dayData = path.filter(function(d){ return d.day === day; })[0];
   if (!dayData) return;
   
-  // Store current prep day so we know to mark complete after
+  // Store current prep day - we'll check on return if completed
   window._activePrepDay = day;
   
   if (dayData.type === 'category') {
-    // Navigate to library and open category
     navToTab('lib');
     setTimeout(function(){
-      // Find and click the category
       var catCards = document.querySelectorAll('[onclick*="' + dayData.cat + '"]');
       if (catCards.length > 0) catCards[0].click();
     }, 200);
-    // Mark complete after delay
-    setTimeout(function(){ markPrepDayComplete(day); }, 1000);
+    // DO NOT auto-mark complete - we check progress instead
   } else if (dayData.type === 'practice') {
-    markPrepDayComplete(day);
     if (typeof startFlashcards === 'function') startFlashcards();
   } else if (dayData.type === 'field' || dayData.type === 'final') {
-    markPrepDayComplete(day);
     if (typeof startFieldMode === 'function') startFieldMode();
   } else if (dayData.type === 'scenarios') {
     navToTab('scn');
-    markPrepDayComplete(day);
   }
+}
+
+// Check if a prep day's goal has been achieved (called when returning to home)
+function checkPrepDayProgress(day) {
+  try {
+    var path = getActivePath();
+    var dayData = path.filter(function(d){ return d.day === day; })[0];
+    if (!dayData) return { current: 0, target: 0, done: false };
+    
+    var todayStr = new Date().toDateString();
+    
+    if (dayData.type === 'category') {
+      // Count phrases from this category learned TODAY
+      var learned = {};
+      try { learned = JSON.parse(localStorage.getItem('learned_phrases') || '{}'); } catch(e) {}
+      
+      var count = 0;
+      if (typeof DB !== 'undefined' && DB) {
+        DB.forEach(function(p){
+          if (p.cat === dayData.cat && learned[p.id]) {
+            try {
+              if (new Date(learned[p.id]).toDateString() === todayStr) count++;
+            } catch(e) {}
+          }
+        });
+      }
+      
+      return { current: Math.min(count, dayData.count), target: dayData.count, done: count >= dayData.count };
+    }
+    else if (dayData.type === 'practice') {
+      // Check flashcard sessions today
+      var sessionsKey = 'flash_sessions_' + todayStr.replace(/\s/g, '_');
+      var sessions = parseInt(localStorage.getItem(sessionsKey) || '0', 10);
+      return { current: Math.min(sessions, 1), target: 1, done: sessions >= 1 };
+    }
+    else if (dayData.type === 'field' || dayData.type === 'final') {
+      // Check field mode sessions today
+      var fieldKey = 'field_sessions_' + todayStr.replace(/\s/g, '_');
+      var fieldSessions = parseInt(localStorage.getItem(fieldKey) || '0', 10);
+      return { current: Math.min(fieldSessions, 1), target: 1, done: fieldSessions >= 1 };
+    }
+    else if (dayData.type === 'scenarios') {
+      // Check completed scenarios today
+      var scnCount = 0;
+      var completed = {};
+      try { completed = JSON.parse(localStorage.getItem('completed_scenarios') || '{}'); } catch(e) {}
+      for (var key in completed) {
+        try {
+          if (new Date(completed[key]).toDateString() === todayStr) scnCount++;
+        } catch(e) {}
+      }
+      return { current: Math.min(scnCount, dayData.count), target: dayData.count, done: scnCount >= dayData.count };
+    }
+    
+    return { current: 0, target: dayData.count || 1, done: false };
+  } catch(e) { return { current: 0, target: 1, done: false }; }
+}
+
+// Auto-check and mark current day complete if goal achieved
+function autoCheckPrepDayCompletion() {
+  try {
+    var pathType = getActivePathType();
+    var path = getActivePath();
+    var progress = getPrepPathProgress(pathType);
+    if (!progress.startedAt) return;
+    if (progress.currentDay > path.length) return;
+    
+    // Check if already completed
+    if (progress.completed.indexOf(progress.currentDay) !== -1) return;
+    
+    var status = checkPrepDayProgress(progress.currentDay);
+    if (status.done) {
+      markPrepDayComplete(progress.currentDay);
+    }
+  } catch(e) {}
 }
 
 function renderPrepPathHomeCard() {
@@ -3586,10 +4081,13 @@ function renderPrepPathHomeCard() {
     var card = document.getElementById('home-prep-card');
     if (!card) return;
     
-    var progress = getPrepPathProgress();
+    var pathType = getActivePathType();
+    var path = getActivePath();
+    var totalDays = path.length;
+    var progress = getPrepPathProgress(pathType);
     var completed = progress.completed.length;
     var currentDay = progress.currentDay;
-    var pct = Math.round((completed / 30) * 100);
+    var pct = Math.round((completed / totalDays) * 100);
     
     if (!progress.startedAt) {
       // Not started yet - show invite
@@ -3603,16 +4101,17 @@ function renderPrepPathHomeCard() {
         '<div style="color:#fff;font-size:22px;flex-shrink:0;" class="keep-white">◀</div>' +
         '</div>';
     } else {
-      // In progress - show day
-      var currentDayData = PREP_PATH_30.filter(function(d){ return d.day === currentDay; })[0];
+      // In progress - show day with path name
+      var currentDayData = path.filter(function(d){ return d.day === currentDay; })[0];
       var todayTitle = currentDayData ? currentDayData.title : 'הסתיים!';
+      var pathLabel = pathType === '90' ? 'מסלול מומחה' : (pathType === '60' ? 'מסלול מעמיק' : 'מסלול מהיר');
       
       card.innerHTML = 
         '<div style="display:flex;align-items:center;gap:14px;margin-bottom:8px;">' +
         '<div style="font-size:32px;flex-shrink:0;">🪖</div>' +
         '<div style="flex:1;min-width:0;">' +
-        '<div style="color:#fff;font-size:14px;font-weight:800;margin-bottom:2px;" class="keep-white">הכנה לקראת שירות קרבי</div>' +
-        '<div style="color:rgba(255,255,255,0.9);font-size:11px;" class="keep-white">יום ' + currentDay + ' מתוך 30: ' + todayTitle + '</div>' +
+        '<div style="color:#fff;font-size:14px;font-weight:800;margin-bottom:2px;" class="keep-white">' + pathLabel + '</div>' +
+        '<div style="color:rgba(255,255,255,0.9);font-size:11px;" class="keep-white">יום ' + currentDay + ' מתוך ' + totalDays + ': ' + todayTitle + '</div>' +
         '</div>' +
         '<div style="color:#fff;font-size:22px;flex-shrink:0;" class="keep-white">◀</div>' +
         '</div>' +
@@ -3623,10 +4122,36 @@ function renderPrepPathHomeCard() {
   } catch(e) { console.warn('renderPrepPathHomeCard error:', e); }
 }
 
+
+// One-time fix: Reset prep path completions that were marked incorrectly
+function fixPrepPathProgress() {
+  try {
+    if (localStorage.getItem('prep_path_fix_v2') === 'done') return;
+    var progress = getPrepPathProgress();
+    if (progress.startedAt) {
+      // Reset to current day = 1 if completions are suspicious
+      // Only reset if we have completions but very few learned phrases
+      var learned = JSON.parse(localStorage.getItem('learned_phrases') || '{}');
+      if (progress.completed.length > 0 && Object.keys(learned).length < 5) {
+        progress.completed = [];
+        progress.currentDay = 1;
+        savePrepPathProgress(progress);
+      }
+    }
+    localStorage.setItem('prep_path_fix_v2', 'done');
+  } catch(e) {}
+}
+
 function renderHome(){
   // Check if we need to use a freeze (and show notification)
   try { tryUseStreakFreeze(); } catch(e) {}
   try { showStreakFreezeNotification(); } catch(e) {}
+  
+  // One-time fix for old incorrect completions
+  try { fixPrepPathProgress(); } catch(e) {}
+  
+  // Auto-check prep path day completion
+  try { autoCheckPrepDayCompletion(); } catch(e) {}
 
   try {
     var hour = new Date().getHours();
@@ -4936,6 +5461,14 @@ function finishFieldMode(){
     msg = 'תרגול ידחוף אותך קדימה';
   }
   
+  // Save field mode session for prep path tracking
+  try {
+    var todayStr = new Date().toDateString();
+    var fieldKey = 'field_sessions_' + todayStr.replace(/\s/g, '_');
+    var fieldCurrent = parseInt(localStorage.getItem(fieldKey) || '0', 10);
+    localStorage.setItem(fieldKey, String(fieldCurrent + 1));
+  } catch(e) {}
+  
   // Save best score
   try {
     var best = parseInt(localStorage.getItem('field_best') || '0', 10);
@@ -5358,6 +5891,14 @@ function flashFinish(){
     if (btnContainer) btnContainer.className = 'result-buttons-anim';
   }
   
+  // Save flashcard session for prep path tracking
+  try {
+    var todayStr = new Date().toDateString();
+    var sessionsKey = 'flash_sessions_' + todayStr.replace(/\s/g, '_');
+    var current = parseInt(localStorage.getItem(sessionsKey) || '0', 10);
+    localStorage.setItem(sessionsKey, String(current + 1));
+  } catch(e) {}
+  
   // Save stats
   try {
     var stats = JSON.parse(localStorage.getItem('flash_stats') || '{"total":0,"correct":0,"sessions":0}');
@@ -5552,7 +6093,7 @@ function bldCats(){
   if (!DB || DB.length === 0) {
     loadEl.innerHTML = '<div style="text-align:center;padding:20px;color:#D4862E;">' +
       'מתחבר לשרת...<br><br>' +
-      '<div style="font-size:11px;color:#7a9ab5;">v20260609-1653</div><br>' +
+      '<div style="font-size:11px;color:#7a9ab5;">v20260609-1722</div><br>' +
       '<button onclick="location.reload(true)" style="padding:10px 20px;background:#D4862E;color:#fff;border:none;border-radius:8px;font-family:inherit;cursor:pointer;font-weight:700;margin-top:10px;">🔄 רענן</button>' +
       '</div>';
     return;
