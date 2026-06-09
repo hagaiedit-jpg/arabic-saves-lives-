@@ -1717,18 +1717,35 @@ body.day-mode .emerg-grid{
       </div>
     </div>
     
-    <!-- Daily Reminder Banner -->
-    <div id="reminder-banner" style="display:none;background:linear-gradient(135deg,#D4862E 0%,#b87325 100%);border-radius:14px;padding:14px 16px;margin-bottom:12px;box-shadow:0 4px 12px rgba(212,134,46,0.3);position:relative;">
-      <button onclick="dismissReminder()" style="position:absolute;top:8px;left:8px;background:rgba(255,255,255,0.15);border:1px solid rgba(255,255,255,0.2);color:#fff;border-radius:50%;width:24px;height:24px;font-size:12px;font-weight:700;cursor:pointer;font-family:inherit;display:flex;align-items:center;justify-content:center;padding:0;">✕</button>
-      <div style="margin-right:24px;">
-        <div id="reminder-title" class="keep-white" style="color:#fff;font-size:15px;font-weight:800;margin-bottom:4px;"></div>
-        <div id="reminder-body" style="color:rgba(255,255,255,0.92);font-size:12px;line-height:1.4;margin-bottom:10px;"></div>
-        <button onclick="reminderGoToScenarios()" style="background:#fff;border:none;color:#b87325;border-radius:8px;padding:8px 16px;font-size:12px;font-weight:700;cursor:pointer;font-family:inherit;">✅ בוא נתרגל</button>
+    <!-- Daily Reminder - Compact (like field mode + flashcards style) -->
+    <div id="reminder-banner" onclick="reminderGoToScenarios()" style="display:none;background:linear-gradient(135deg,#D4862E 0%,#b87325 100%);border-radius:14px;padding:14px 16px;margin-bottom:14px;cursor:pointer;box-shadow:0 4px 12px rgba(212,134,46,0.25);position:relative;overflow:hidden;">
+      <button onclick="event.stopPropagation();dismissReminder();" style="position:absolute;top:6px;left:6px;background:rgba(255,255,255,0.15);border:none;color:#fff;border-radius:50%;width:22px;height:22px;font-size:11px;font-weight:700;cursor:pointer;font-family:inherit;display:flex;align-items:center;justify-content:center;padding:0;z-index:2;">✕</button>
+      <div style="display:flex;align-items:center;gap:14px;">
+        <div style="font-size:32px;flex-shrink:0;">⏰</div>
+        <div style="flex:1;min-width:0;">
+          <div id="reminder-title" class="keep-white" style="color:#fff;font-size:14px;font-weight:800;margin-bottom:2px;"></div>
+          <div id="reminder-body" class="keep-white" style="color:rgba(255,255,255,0.9);font-size:11px;line-height:1.4;"></div>
+        </div>
+        <div class="keep-white" style="color:#fff;font-size:22px;flex-shrink:0;">◀</div>
       </div>
     </div>
     
-    <!-- 4 Stats Cubes (compact - LOORA style) - informational only -->
-    <div style="background:linear-gradient(135deg,#18293E 0%,#1F3147 100%);border:1px solid rgba(212,162,78,0.2);border-radius:12px;padding:12px;margin-bottom:12px;">
+    <!-- Weekly Summary - Compact card (shown only when streak is active) -->
+    <div id="home-weekly-summary" style="display:none;background:linear-gradient(135deg,#18293E 0%,#1F3147 100%);border:1px solid rgba(212,162,78,0.2);border-radius:12px;padding:12px 14px;margin-bottom:12px;">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;">
+        <div style="color:#D4A24E;font-size:11px;font-weight:800;letter-spacing:0.5px;">📊 הסיכום השבועי שלכם</div>
+        <div id="home-weekly-status" style="color:#1D9E75;font-size:10px;font-weight:700;"></div>
+      </div>
+      <div id="home-weekly-bars" style="display:flex;align-items:flex-end;justify-content:space-between;gap:4px;height:50px;margin-bottom:8px;">
+        <!-- 7 day bars filled by JS -->
+      </div>
+      <div id="home-weekly-stats" style="display:flex;justify-content:space-between;align-items:center;padding-top:8px;border-top:1px solid rgba(255,255,255,0.08);">
+        <!-- Mini stats filled by JS -->
+      </div>
+    </div>
+    
+    <!-- 4 Stats Cubes - shown only when NO streak (helps new users) -->
+    <div id="home-stats-cubes" style="display:none;background:linear-gradient(135deg,#18293E 0%,#1F3147 100%);border:1px solid rgba(212,162,78,0.2);border-radius:12px;padding:12px;margin-bottom:12px;">
       <div style="display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:6px;">
         
         <!-- Cube 1: Streak -->
@@ -1758,7 +1775,6 @@ body.day-mode .emerg-grid{
           <div id="home-cube-total-num" style="color:#D4862E;font-size:18px;font-weight:900;line-height:1;">0</div>
           <div style="color:#a0b8c8;font-size:9px;font-weight:600;margin-top:2px;">סה"כ</div>
         </div>
-        
       </div>
     </div>
     
@@ -2027,7 +2043,7 @@ body.day-mode .emerg-grid{
       </div>
     </div>
     
-    <div class="loading" id="cats-loading"><div style="text-align:center;padding:20px;"><div style="font-size:16px;color:#D4862E;margin-bottom:8px;">טוען...</div><div style="font-size:10px;color:#7a9ab5;opacity:0.6;">v20260609-1304</div></div></div>
+    <div class="loading" id="cats-loading"><div style="text-align:center;padding:20px;"><div style="font-size:16px;color:#D4862E;margin-bottom:8px;">טוען...</div><div style="font-size:10px;color:#7a9ab5;opacity:0.6;">v20260609-1314</div></div></div>
     <div class="cgrid" id="cgrid" style="display:none;"></div>
   </div>
   <div id="vlist" class="scr">
@@ -2725,6 +2741,140 @@ function showStreakInfo() {
   alert(msg);
 }
 
+
+// === Weekly Summary Rendering ===
+function renderWeeklySummary() {
+  try {
+    var streak = parseInt(localStorage.getItem('streak_count') || '0', 10);
+    var summaryEl = document.getElementById('home-weekly-summary');
+    var cubesEl = document.getElementById('home-stats-cubes');
+    
+    if (!summaryEl || !cubesEl) return;
+    
+    // If no streak - show classic cubes (helps new users get started)
+    if (streak === 0) {
+      summaryEl.style.display = 'none';
+      cubesEl.style.display = 'block';
+      return;
+    }
+    
+    // Active streak - show weekly summary
+    cubesEl.style.display = 'none';
+    summaryEl.style.display = 'block';
+    
+    // Build 7 days history (Sunday-Saturday or last 7 days)
+    var today = new Date();
+    var todayStr = today.toDateString();
+    var learned = {};
+    var practiced = {};
+    try { learned = JSON.parse(localStorage.getItem('learned_phrases') || '{}'); } catch(e) {}
+    try { practiced = JSON.parse(localStorage.getItem('practiced_phrases') || '{}'); } catch(e) {}
+    
+    // Count activity per day for last 7 days
+    var days = [];
+    var dayNames = ['א\'','ב\'','ג\'','ד\'','ה\'','ו\'','ש\''];
+    var totalThisWeek = 0;
+    var activeDays = 0;
+    
+    for (var i = 6; i >= 0; i--) {
+      var d = new Date(today);
+      d.setDate(d.getDate() - i);
+      var dStr = d.toDateString();
+      var count = 0;
+      
+      for (var key in learned) {
+        try {
+          if (new Date(learned[key]).toDateString() === dStr) count++;
+        } catch(e) {}
+      }
+      for (var key in practiced) {
+        try {
+          if (new Date(practiced[key]).toDateString() === dStr) count++;
+        } catch(e) {}
+      }
+      
+      var isToday = (dStr === todayStr);
+      days.push({
+        name: dayNames[d.getDay()],
+        count: count,
+        isToday: isToday
+      });
+      
+      if (count > 0) {
+        totalThisWeek += count;
+        activeDays++;
+      }
+    }
+    
+    // Find max for scaling
+    var maxCount = Math.max.apply(null, days.map(function(d){ return d.count; }));
+    if (maxCount === 0) maxCount = 1;
+    
+    // Render bars
+    var barsHtml = '';
+    days.forEach(function(d){
+      var height = Math.max(8, Math.round((d.count / maxCount) * 38));
+      var bgColor, opacity;
+      if (d.count === 0) {
+        bgColor = 'rgba(255,255,255,0.08)';
+        opacity = '0.5';
+      } else if (d.isToday) {
+        bgColor = '#D4A24E';
+        opacity = '1';
+      } else {
+        bgColor = '#1D9E75';
+        opacity = '0.9';
+      }
+      
+      barsHtml += '<div style="flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;opacity:' + opacity + ';">';
+      barsHtml += '<div style="font-size:9px;color:' + (d.isToday ? '#D4A24E' : '#7a9ab5') + ';font-weight:' + (d.isToday ? '800' : '600') + ';">' + d.count + '</div>';
+      barsHtml += '<div style="width:100%;height:' + height + 'px;background:' + bgColor + ';border-radius:3px;' + (d.isToday ? 'border:1px solid rgba(212,162,78,0.6);' : '') + '"></div>';
+      barsHtml += '<div style="font-size:9px;color:' + (d.isToday ? '#D4A24E' : '#7a9ab5') + ';font-weight:' + (d.isToday ? '800' : '600') + ';">' + d.name + '</div>';
+      barsHtml += '</div>';
+    });
+    
+    var barsContainer = document.getElementById('home-weekly-bars');
+    if (barsContainer) barsContainer.innerHTML = barsHtml;
+    
+    // Status badge
+    var statusEl = document.getElementById('home-weekly-status');
+    if (statusEl) {
+      if (activeDays >= 6) {
+        statusEl.textContent = '🌟 שבוע מצוין!';
+        statusEl.style.color = '#1D9E75';
+      } else if (activeDays >= 4) {
+        statusEl.textContent = '💪 שבוע טוב';
+        statusEl.style.color = '#1D9E75';
+      } else if (activeDays >= 2) {
+        statusEl.textContent = '📈 ממשיכים!';
+        statusEl.style.color = '#D4A24E';
+      } else {
+        statusEl.textContent = '🎯 השבוע מתחיל';
+        statusEl.style.color = '#D4862E';
+      }
+    }
+    
+    // Mini stats
+    var statsEl = document.getElementById('home-weekly-stats');
+    if (statsEl) {
+      var html = '';
+      html += '<div style="text-align:center;flex:1;">';
+      html += '<div style="color:#1D9E75;font-size:14px;font-weight:800;">' + totalThisWeek + '</div>';
+      html += '<div style="color:#7a9ab5;font-size:9px;">תרגולים</div>';
+      html += '</div>';
+      html += '<div style="text-align:center;flex:1;border-right:1px solid rgba(255,255,255,0.08);border-left:1px solid rgba(255,255,255,0.08);">';
+      html += '<div style="color:#D4A24E;font-size:14px;font-weight:800;">' + activeDays + '/7</div>';
+      html += '<div style="color:#7a9ab5;font-size:9px;">ימים פעילים</div>';
+      html += '</div>';
+      html += '<div style="text-align:center;flex:1;">';
+      html += '<div style="color:#D4862E;font-size:14px;font-weight:800;">' + streak + '</div>';
+      html += '<div style="color:#7a9ab5;font-size:9px;">רצף</div>';
+      html += '</div>';
+      statsEl.innerHTML = html;
+    }
+  } catch(e) { console.warn('renderWeeklySummary error:', e); }
+}
+
 function renderHome(){
   try {
     var hour = new Date().getHours();
@@ -2743,6 +2893,9 @@ function renderHome(){
     
     // 2. Render new streak card (big and prominent)
     renderStreakCard();
+    
+    // 2b. Render weekly summary (only when there's an active streak)
+    renderWeeklySummary();
     
     // 3. Subtitle - simpler now
     var sub = document.getElementById('home-subtitle');
@@ -4389,7 +4542,7 @@ function bldCats(){
   if (!DB || DB.length === 0) {
     loadEl.innerHTML = '<div style="text-align:center;padding:20px;color:#D4862E;">' +
       'מתחבר לשרת...<br><br>' +
-      '<div style="font-size:11px;color:#7a9ab5;">v20260609-1304</div><br>' +
+      '<div style="font-size:11px;color:#7a9ab5;">v20260609-1314</div><br>' +
       '<button onclick="location.reload(true)" style="padding:10px 20px;background:#D4862E;color:#fff;border:none;border-radius:8px;font-family:inherit;cursor:pointer;font-weight:700;margin-top:10px;">🔄 רענן</button>' +
       '</div>';
     return;
