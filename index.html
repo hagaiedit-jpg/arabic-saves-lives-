@@ -1614,6 +1614,110 @@ body.day-mode .emerg-grid{
   animation: milestoneSparkle 1.5s ease-in-out infinite;
 }
 
+
+/* === Day Mode Overrides for New Components === */
+body.day-mode #home-streak-card,
+body.day-mode #home-weekly-summary,
+body.day-mode #home-stats-cubes {
+  background: linear-gradient(135deg, #fff8e7 0%, #f5e6c8 100%) !important;
+  border-color: rgba(212,134,46,0.4) !important;
+}
+
+/* Streak card text in day mode */
+body.day-mode #home-streak-card div {
+  color: #4a2c10 !important;
+}
+body.day-mode #home-streak-card .streak-flame {
+  color: inherit !important;
+}
+
+/* Override specific gold/orange tones to be darker for day mode visibility */
+body.day-mode #home-streak-card div[style*="color:#D4862E"],
+body.day-mode #home-streak-card div[style*="color:#a0b8c8"],
+body.day-mode #home-weekly-summary div[style*="color:#a0b8c8"],
+body.day-mode #home-weekly-summary div[style*="color:#7a9ab5"] {
+  color: #8B6F2B !important;
+}
+
+body.day-mode #home-streak-card div[style*="color:#E8D9B8"],
+body.day-mode #home-weekly-summary div[style*="color:#E8D9B8"] {
+  color: #2c1810 !important;
+}
+
+body.day-mode #home-streak-card div[style*="color:#D4A24E"],
+body.day-mode #home-weekly-summary div[style*="color:#D4A24E"] {
+  color: #a85200 !important;
+}
+
+body.day-mode #home-weekly-summary div[style*="color:#1D9E75"] {
+  color: #0e5a3f !important;
+}
+
+body.day-mode #home-weekly-summary div[style*="color:#D4862E"] {
+  color: #a85200 !important;
+}
+
+/* Stats cubes in day mode */
+body.day-mode #home-stats-cubes div[style*="color:#D4862E"] {
+  color: #a85200 !important;
+}
+body.day-mode #home-stats-cubes div[style*="color:#1D9E75"] {
+  color: #0e5a3f !important;
+}
+body.day-mode #home-stats-cubes div[style*="color:#D4A24E"] {
+  color: #a85200 !important;
+}
+body.day-mode #home-stats-cubes div[style*="color:#a0b8c8"] {
+  color: #6b4a1f !important;
+}
+
+/* Weekly summary bars in day mode */
+body.day-mode #home-weekly-bars div[style*="background:rgba(255,255,255,0.08)"] {
+  background: rgba(0,0,0,0.1) !important;
+}
+
+/* AT RISK state - keep red but adjust */
+body.day-mode #home-streak-card[style*="c0392b"] div,
+body.day-mode #home-streak-card[style*="922d22"] div {
+  color: #fff !important;
+}
+
+/* MILESTONE state - keep gold colors visible */
+body.day-mode #home-streak-card[style*="D4A24E"] div.keep-white {
+  color: #fff !important;
+}
+
+/* Insights section in progress tab - day mode */
+body.day-mode #prog-insights {
+  color: #2c1810;
+}
+body.day-mode #prog-insights div[style*="color:#a0b8c8"] {
+  color: #6b4a1f !important;
+}
+body.day-mode #prog-insights div[style*="color:#1D9E75"] {
+  color: #0e5a3f !important;
+}
+body.day-mode #prog-insights div[style*="color:#c0392b"] {
+  color: #8e0e0e !important;
+}
+body.day-mode #prog-insights div[style*="color:#D4862E"] {
+  color: #a85200 !important;
+}
+body.day-mode #prog-insights div[style*="color:#D4A24E"] {
+  color: #a85200 !important;
+}
+
+/* Achievements panel in progress tab - day mode */
+body.day-mode #prog-achievements div[style*="color:#E8D9B8"] {
+  color: #2c1810 !important;
+}
+body.day-mode #prog-achievements div[style*="color:#7a9ab5"] {
+  color: #6b4a1f !important;
+}
+body.day-mode #prog-achievements div[style*="color:#D4A24E"] {
+  color: #a85200 !important;
+}
+
 </style>
 </head>
 <body>
@@ -2084,7 +2188,7 @@ body.day-mode .emerg-grid{
       </div>
     </div>
     
-    <div class="loading" id="cats-loading"><div style="text-align:center;padding:20px;"><div style="font-size:16px;color:#D4862E;margin-bottom:8px;">טוען...</div><div style="font-size:10px;color:#7a9ab5;opacity:0.6;">v20260609-1614</div></div></div>
+    <div class="loading" id="cats-loading"><div style="text-align:center;padding:20px;"><div style="font-size:16px;color:#D4862E;margin-bottom:8px;">טוען...</div><div style="font-size:10px;color:#7a9ab5;opacity:0.6;">v20260609-1638</div></div></div>
     <div class="cgrid" id="cgrid" style="display:none;"></div>
   </div>
   <div id="vlist" class="scr">
@@ -5113,7 +5217,7 @@ function bldCats(){
   if (!DB || DB.length === 0) {
     loadEl.innerHTML = '<div style="text-align:center;padding:20px;color:#D4862E;">' +
       'מתחבר לשרת...<br><br>' +
-      '<div style="font-size:11px;color:#7a9ab5;">v20260609-1614</div><br>' +
+      '<div style="font-size:11px;color:#7a9ab5;">v20260609-1638</div><br>' +
       '<button onclick="location.reload(true)" style="padding:10px 20px;background:#D4862E;color:#fff;border:none;border-radius:8px;font-family:inherit;cursor:pointer;font-weight:700;margin-top:10px;">🔄 רענן</button>' +
       '</div>';
     return;
