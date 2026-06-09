@@ -1556,6 +1556,33 @@ body.day-mode .emerg-grid{
   animation: recDotPulse 0.8s ease-in-out infinite;
 }
 
+
+/* === Streak Card Animations === */
+@keyframes streakFlamePulse {
+  0%, 100% { transform: scale(1) rotate(-2deg); }
+  25% { transform: scale(1.08) rotate(2deg); }
+  50% { transform: scale(1.04) rotate(-1deg); }
+  75% { transform: scale(1.08) rotate(1deg); }
+}
+@keyframes streakWarningPulse {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(192,57,43,0.6); }
+  50% { box-shadow: 0 0 0 12px rgba(192,57,43,0); }
+}
+@keyframes streakBigBounce {
+  0% { transform: scale(0); opacity: 0; }
+  50% { transform: scale(1.2); opacity: 1; }
+  100% { transform: scale(1); opacity: 1; }
+}
+@keyframes streakCelebrate {
+  0%, 100% { transform: rotate(0deg) scale(1); }
+  25% { transform: rotate(-8deg) scale(1.1); }
+  75% { transform: rotate(8deg) scale(1.1); }
+}
+.streak-flame { animation: streakFlamePulse 2s ease-in-out infinite; display: inline-block; }
+.streak-warning { animation: streakWarningPulse 1.5s ease-in-out infinite; }
+.streak-celebrate { animation: streakCelebrate 0.6s ease-in-out infinite; display: inline-block; }
+.streak-bounce-in { animation: streakBigBounce 0.6s ease-out; }
+
 </style>
 </head>
 <body>
@@ -1625,16 +1652,20 @@ body.day-mode .emerg-grid{
 <div class="scr on" id="tab-home">
   <div style="padding:20px 16px 16px;">
     
-    <!-- Welcome + Streak -->
-    <div style="margin-bottom:22px;">
-      <!-- Streak badge on its own line (above title) -->
-      <div id="home-streak-badge" style="display:none;align-items:center;gap:5px;background:rgba(212,134,46,0.15);border:1px solid rgba(212,134,46,0.4);border-radius:14px;padding:5px 12px;width:fit-content;margin-bottom:10px;">
-        <span style="font-size:14px;">🔥</span>
-        <span id="home-streak-count" style="color:#D4862E;font-size:12px;font-weight:700;"></span>
-      </div>
-      <!-- Main greeting -->
+    <!-- Welcome -->
+    <div style="margin-bottom:18px;">
+      <!-- Main greeting (no more badge here - moved to big card) -->
       <div id="home-greeting" style="color:#E8D9B8;font-size:24px;font-weight:800;letter-spacing:0.3px;margin-bottom:4px;">בוקר טוב</div>
       <div id="home-subtitle" style="color:#7a9ab5;font-size:13px;">בואו נמשיך לתרגל</div>
+      <!-- Keep old hidden badge for compatibility -->
+      <div id="home-streak-badge" style="display:none;">
+        <span id="home-streak-count"></span>
+      </div>
+    </div>
+    
+    <!-- 🔥 BIG STREAK CARD (NEW!) -->
+    <div id="home-streak-card" style="display:none;margin-bottom:18px;border-radius:18px;padding:18px 16px;cursor:pointer;position:relative;overflow:hidden;" onclick="showStreakInfo()">
+      <!-- Content set by JS -->
     </div>
     
     <!-- Continue where you left off (small & compact) -->
@@ -1996,7 +2027,7 @@ body.day-mode .emerg-grid{
       </div>
     </div>
     
-    <div class="loading" id="cats-loading"><div style="text-align:center;padding:20px;"><div style="font-size:16px;color:#D4862E;margin-bottom:8px;">טוען...</div><div style="font-size:10px;color:#7a9ab5;opacity:0.6;">v20260609-1156</div></div></div>
+    <div class="loading" id="cats-loading"><div style="text-align:center;padding:20px;"><div style="font-size:16px;color:#D4862E;margin-bottom:8px;">טוען...</div><div style="font-size:10px;color:#7a9ab5;opacity:0.6;">v20260609-1304</div></div></div>
     <div class="cgrid" id="cgrid" style="display:none;"></div>
   </div>
   <div id="vlist" class="scr">
@@ -2553,6 +2584,147 @@ function showToast(msg, type){
   window._toastTimer = setTimeout(function(){ el.style.display = 'none'; }, 3500);
 }
 
+
+// === Streak Card Rendering ===
+function getStreakEmoji(streak) {
+  if (streak >= 365) return '👑'; // Crown for year+
+  if (streak >= 100) return '💎'; // Diamond for 100+
+  if (streak >= 30) return '🔥'; // Big flame for 30+
+  if (streak >= 7) return '🔥'; // Flame for week+
+  return '🔥'; // Small flame
+}
+
+function getStreakSize(streak) {
+  if (streak >= 100) return 64;
+  if (streak >= 30) return 56;
+  if (streak >= 7) return 48;
+  return 40;
+}
+
+function isStreakAtRisk() {
+  // Check if user already practiced today
+  var today = new Date().toDateString();
+  var lastVisit = localStorage.getItem('streak_last_visit');
+  if (lastVisit === today) return false; // Already practiced today
+  
+  // Check if there's a streak to lose
+  var streak = parseInt(localStorage.getItem('streak_count') || '0', 10);
+  if (streak === 0) return false;
+  
+  // Check the time - warn after 14:00
+  var hour = new Date().getHours();
+  return hour >= 14;
+}
+
+function getMilestoneMessage(streak) {
+  if (streak === 3) return { emoji: '🎉', msg: '3 ימים ברצף! ההרגל מתחיל!' };
+  if (streak === 7) return { emoji: '⭐', msg: 'שבוע מלא! אתם בדרך הנכונה' };
+  if (streak === 14) return { emoji: '💪', msg: 'שבועיים! מומחי שטח בהכשרה' };
+  if (streak === 30) return { emoji: '🏆', msg: 'חודש מלא! זה הרגל לחיים' };
+  if (streak === 100) return { emoji: '💎', msg: '100 ימים! אגדה!' };
+  if (streak === 365) return { emoji: '👑', msg: 'שנה מלאה! מלך/מלכת הרצף!' };
+  return null;
+}
+
+function renderStreakCard() {
+  try {
+    var streak = parseInt(localStorage.getItem('streak_count') || '0', 10);
+    var card = document.getElementById('home-streak-card');
+    if (!card) return;
+    
+    if (streak === 0) {
+      // Show "start your streak" card
+      card.style.display = 'block';
+      card.style.background = 'linear-gradient(135deg,#1F3147 0%,#243a55 100%)';
+      card.style.border = '1px solid rgba(212,162,78,0.3)';
+      card.innerHTML = 
+        '<div style="display:flex;align-items:center;gap:14px;">' +
+        '<div style="font-size:42px;">🌱</div>' +
+        '<div style="flex:1;">' +
+        '<div style="color:#D4A24E;font-size:14px;font-weight:800;margin-bottom:2px;">התחילו את הרצף שלכם!</div>' +
+        '<div style="color:#a0b8c8;font-size:11px;">תרגול יומי בונה אינסטינקט. תרגלו היום וצרו רצף.</div>' +
+        '</div></div>';
+      return;
+    }
+    
+    var atRisk = isStreakAtRisk();
+    var milestone = getMilestoneMessage(streak);
+    var emoji = getStreakEmoji(streak);
+    var emojiSize = getStreakSize(streak);
+    
+    card.style.display = 'block';
+    
+    if (milestone) {
+      // MILESTONE - celebrate!
+      card.style.background = 'linear-gradient(135deg,#D4A24E 0%,#b88a3d 100%)';
+      card.style.border = '2px solid #FFD700';
+      card.style.boxShadow = '0 4px 20px rgba(212,162,78,0.4)';
+      card.classList.add('streak-bounce-in');
+      card.innerHTML = 
+        '<div style="text-align:center;">' +
+        '<div class="streak-celebrate" style="font-size:' + (emojiSize + 16) + 'px;line-height:1;margin-bottom:6px;">' + milestone.emoji + '</div>' +
+        '<div class="keep-white" style="color:#fff;font-size:28px;font-weight:900;line-height:1;margin-bottom:4px;">' + streak + ' ימים!</div>' +
+        '<div class="keep-white" style="color:#fff;font-size:13px;font-weight:700;">' + milestone.msg + '</div>' +
+        '</div>';
+      
+      // Launch confetti for milestones!
+      var lastCelebrated = parseInt(localStorage.getItem('streak_last_celebrated') || '0', 10);
+      if (lastCelebrated !== streak && typeof launchConfetti === 'function') {
+        setTimeout(launchConfetti, 500);
+        localStorage.setItem('streak_last_celebrated', String(streak));
+      }
+    } else if (atRisk) {
+      // AT RISK - warning!
+      card.style.background = 'linear-gradient(135deg,#c0392b 0%,#922d22 100%)';
+      card.style.border = '2px solid #e74c3c';
+      card.classList.add('streak-warning');
+      card.innerHTML = 
+        '<div style="display:flex;align-items:center;gap:14px;">' +
+        '<div class="streak-flame" style="font-size:' + emojiSize + 'px;line-height:1;">' + emoji + '</div>' +
+        '<div style="flex:1;">' +
+        '<div class="keep-white" style="color:#fff;font-size:11px;font-weight:800;letter-spacing:0.5px;margin-bottom:2px;">⚠️ הרצף שלכם בסכנה!</div>' +
+        '<div class="keep-white" style="color:#fff;font-size:22px;font-weight:900;line-height:1;margin-bottom:3px;">' + streak + ' ' + (streak === 1 ? 'יום' : 'ימים') + '</div>' +
+        '<div class="keep-white" style="color:#fff;font-size:11px;">תרגלו עכשיו - אל תאבדו את ההרגל!</div>' +
+        '</div></div>';
+    } else {
+      // NORMAL - regular display
+      card.style.background = 'linear-gradient(135deg,#1F3147 0%,#243a55 100%)';
+      card.style.border = '1px solid rgba(212,134,46,0.4)';
+      card.classList.remove('streak-warning');
+      card.innerHTML = 
+        '<div style="display:flex;align-items:center;gap:14px;">' +
+        '<div class="streak-flame" style="font-size:' + emojiSize + 'px;line-height:1;">' + emoji + '</div>' +
+        '<div style="flex:1;">' +
+        '<div style="color:#D4862E;font-size:11px;font-weight:800;letter-spacing:0.5px;margin-bottom:2px;">רצף פעיל</div>' +
+        '<div style="color:#E8D9B8;font-size:24px;font-weight:900;line-height:1;margin-bottom:3px;">' + streak + ' ' + (streak === 1 ? 'יום' : 'ימים') + '</div>' +
+        '<div style="color:#a0b8c8;font-size:11px;">המשיכו לתרגל יומיומית כדי לשמור על הרצף</div>' +
+        '</div></div>';
+    }
+  } catch(e) { console.warn('renderStreakCard error:', e); }
+}
+
+function showStreakInfo() {
+  var streak = parseInt(localStorage.getItem('streak_count') || '0', 10);
+  var nextMilestone, daysToNext;
+  if (streak < 3) { nextMilestone = 3; }
+  else if (streak < 7) { nextMilestone = 7; }
+  else if (streak < 14) { nextMilestone = 14; }
+  else if (streak < 30) { nextMilestone = 30; }
+  else if (streak < 100) { nextMilestone = 100; }
+  else if (streak < 365) { nextMilestone = 365; }
+  else { nextMilestone = streak + 100; }
+  daysToNext = nextMilestone - streak;
+  
+  var msg = '🔥 רצף נוכחי: ' + streak + ' ' + (streak === 1 ? 'יום' : 'ימים') + '\n\n';
+  msg += '🎯 היעד הבא: ' + nextMilestone + ' ימים\n';
+  msg += '⏰ נשארו: ' + daysToNext + ' ' + (daysToNext === 1 ? 'יום' : 'ימים') + '\n\n';
+  msg += '💡 איך לשמור על הרצף?\n';
+  msg += '✅ תרגלו לפחות פעם ביום\n';
+  msg += '✅ אפילו 2 דקות מספיקות\n';
+  msg += '✅ מצב שטח / חזרה ובחינה - כל אחד נחשב';
+  alert(msg);
+}
+
 function renderHome(){
   try {
     var hour = new Date().getHours();
@@ -2569,16 +2741,8 @@ function renderHome(){
       greetingEl.textContent = greeting;
     }
     
-    // 2. Streak badge
-    var streak = parseInt(localStorage.getItem('streak_count') || '0', 10);
-    var badge = document.getElementById('home-streak-badge');
-    var count = document.getElementById('home-streak-count');
-    if (badge && count && streak > 0) {
-      count.textContent = streak === 1 ? 'יום 1' : streak + ' ימים';
-      badge.style.display = 'inline-flex';
-    } else if (badge) {
-      badge.style.display = 'none';
-    }
+    // 2. Render new streak card (big and prominent)
+    renderStreakCard();
     
     // 3. Subtitle - simpler now
     var sub = document.getElementById('home-subtitle');
@@ -4225,7 +4389,7 @@ function bldCats(){
   if (!DB || DB.length === 0) {
     loadEl.innerHTML = '<div style="text-align:center;padding:20px;color:#D4862E;">' +
       'מתחבר לשרת...<br><br>' +
-      '<div style="font-size:11px;color:#7a9ab5;">v20260609-1156</div><br>' +
+      '<div style="font-size:11px;color:#7a9ab5;">v20260609-1304</div><br>' +
       '<button onclick="location.reload(true)" style="padding:10px 20px;background:#D4862E;color:#fff;border:none;border-radius:8px;font-family:inherit;cursor:pointer;font-weight:700;margin-top:10px;">🔄 רענן</button>' +
       '</div>';
     return;
