@@ -1831,12 +1831,12 @@ body.day-mode #prog-achievements div[style*="color:#D4A24E"] {
     </div>
     
     <!-- Prep Path - Combat Readiness Track (NEW! - leads the list) -->
-    <div onclick="startPrepPath()" id="home-prep-card" style="background:linear-gradient(135deg,#D4862E 0%,#a85200 100%);border-radius:14px;padding:14px 16px;margin-bottom:14px;cursor:pointer;box-shadow:0 4px 12px rgba(212,134,46,0.25);position:relative;overflow:hidden;">
+    <div onclick="startPrepPath()" id="home-prep-card" style="background:linear-gradient(135deg,#D4862E 0%,#a85200 100%);border-radius:14px;padding:14px 16px;margin-bottom:14px;cursor:pointer;box-shadow:0 4px 12px rgba(212,134,46,0.25);position:relative;overflow:hidden;min-height:60px;">
       <!-- Content set by JS -->
     </div>
     
     <!-- Field Mode - Combat Readiness Test -->
-    <div onclick="startFieldMode()" style="background:linear-gradient(135deg,#c0392b 0%,#922d22 100%);border-radius:14px;padding:14px 16px;margin-bottom:14px;cursor:pointer;box-shadow:0 4px 12px rgba(192,57,43,0.25);position:relative;overflow:hidden;">
+    <div onclick="startFieldMode()" style="background:linear-gradient(135deg,#c0392b 0%,#922d22 100%);border-radius:14px;padding:14px 16px;margin-bottom:14px;cursor:pointer;box-shadow:0 4px 12px rgba(192,57,43,0.25);position:relative;overflow:hidden;min-height:60px;">
       <div style="display:flex;align-items:center;gap:14px;">
         <div style="font-size:32px;flex-shrink:0;">🎯</div>
         <div style="flex:1;min-width:0;">
@@ -1848,7 +1848,7 @@ body.day-mode #prog-achievements div[style*="color:#D4A24E"] {
     </div>
     
     <!-- Flashcards - smart learning card -->
-    <div onclick="startFlashcards()" style="background:linear-gradient(135deg,#1D9E75 0%,#0e5a3f 100%);border-radius:14px;padding:14px 16px;margin-bottom:14px;cursor:pointer;box-shadow:0 4px 12px rgba(29,158,117,0.25);position:relative;overflow:hidden;">
+    <div onclick="startFlashcards()" style="background:linear-gradient(135deg,#1D9E75 0%,#0e5a3f 100%);border-radius:14px;padding:14px 16px;margin-bottom:14px;cursor:pointer;box-shadow:0 4px 12px rgba(29,158,117,0.25);position:relative;overflow:hidden;min-height:60px;">
       <div style="display:flex;align-items:center;gap:14px;">
         <div style="font-size:32px;flex-shrink:0;">🎓</div>
         <div style="flex:1;min-width:0;">
@@ -2215,7 +2215,7 @@ body.day-mode #prog-achievements div[style*="color:#D4A24E"] {
       </div>
     </div>
     
-    <div class="loading" id="cats-loading"><div style="text-align:center;padding:20px;"><div style="font-size:16px;color:#D4862E;margin-bottom:8px;">טוען...</div><div style="font-size:10px;color:#7a9ab5;opacity:0.6;">v20260609-1924</div></div></div>
+    <div class="loading" id="cats-loading"><div style="text-align:center;padding:20px;"><div style="font-size:16px;color:#D4862E;margin-bottom:8px;">טוען...</div><div style="font-size:10px;color:#7a9ab5;opacity:0.6;">v20260609-1933</div></div></div>
     <div class="cgrid" id="cgrid" style="display:none;"></div>
   </div>
   <div id="vlist" class="scr">
@@ -4137,7 +4137,7 @@ function renderPrepPathHomeCard() {
     var pct = Math.round((completed / totalDays) * 100);
     
     if (!progress.startedAt) {
-      // Not started yet - show invite
+      // Not started yet - identical structure to field/flash cards
       card.innerHTML = 
         '<div style="display:flex;align-items:center;gap:14px;">' +
         '<div style="font-size:32px;flex-shrink:0;">🪖</div>' +
@@ -4148,29 +4148,27 @@ function renderPrepPathHomeCard() {
         '<div style="color:#fff;font-size:22px;flex-shrink:0;" class="keep-white">◀</div>' +
         '</div>';
     } else {
-      // In progress - show day with path name
+      // In progress - put day info in subtitle, progress as a thin colored strip on left edge
       var currentDayData = path.filter(function(d){ return d.day === currentDay; })[0];
       var todayTitle = currentDayData ? currentDayData.title : 'הסתיים!';
       var pathLabel = pathType === '90' ? 'מסלול מומחה' : (pathType === '60' ? 'מסלול מעמיק' : 'מסלול מהיר');
       
+      // Same structure as field/flash - progress shown as percentage badge
       card.innerHTML = 
-        '<div style="display:flex;align-items:center;gap:14px;margin-bottom:8px;">' +
-        '<div style="font-size:32px;flex-shrink:0;">🪖</div>' +
+        '<div style="display:flex;align-items:center;gap:14px;">' +
+        '<div style="font-size:32px;flex-shrink:0;position:relative;">🪖' +
+        '<div style="position:absolute;bottom:-4px;right:-4px;background:#fff;color:#a85200;font-size:9px;font-weight:900;border-radius:8px;padding:1px 5px;border:1px solid #a85200;">' + pct + '%</div>' +
+        '</div>' +
         '<div style="flex:1;min-width:0;">' +
         '<div style="color:#fff;font-size:14px;font-weight:800;margin-bottom:2px;" class="keep-white">' + pathLabel + '</div>' +
-        '<div style="color:rgba(255,255,255,0.9);font-size:11px;" class="keep-white">יום ' + currentDay + ' מתוך ' + totalDays + ': ' + todayTitle + '</div>' +
+        '<div style="color:rgba(255,255,255,0.9);font-size:11px;line-height:1.4;" class="keep-white">יום ' + currentDay + '/' + totalDays + ': ' + todayTitle + '</div>' +
         '</div>' +
         '<div style="color:#fff;font-size:22px;flex-shrink:0;" class="keep-white">◀</div>' +
-        '</div>' +
-        '<div style="height:5px;background:rgba(255,255,255,0.2);border-radius:3px;overflow:hidden;">' +
-        '<div style="height:100%;background:#fff;width:' + pct + '%;border-radius:3px;"></div>' +
         '</div>';
     }
   } catch(e) { console.warn('renderPrepPathHomeCard error:', e); }
 }
 
-
-// One-time fix: Reset prep path completions that were marked incorrectly
 function fixPrepPathProgress() {
   try {
     if (localStorage.getItem('prep_path_fix_v3') === 'done') return;
@@ -5428,11 +5426,11 @@ function renderFieldQuestion(){
   html += '<div id="field-options" style="display:grid;gap:8px;">';
   q.options.forEach(function(opt, idx){
     html += '<div onclick="fieldAnswer(' + idx + ')" class="field-opt" data-opt-idx="' + idx + '" style="background:#1F3147;border:1px solid #2A3D52;color:#fff;border-radius:10px;padding:12px 14px;cursor:pointer;text-align:right;line-height:1.5;transition:all 0.2s;">';
-    // Transliteration (main) - in Hebrew letters so user can read
-    html += '<div style="color:#fff;font-size:15px;font-weight:700;margin-bottom:3px;">' + (opt.trans || opt.ar || '') + '</div>';
-    // Arabic script (smaller, for visual recognition)
+    // Transliteration (BIG - main reading) - this is what soldiers read
+    html += '<div style="color:#fff;font-size:17px;font-weight:700;margin-bottom:4px;line-height:1.4;">' + (opt.trans || opt.ar || '') + '</div>';
+    // Arabic script (small - for visual recognition only)
     if (opt.ar) {
-      html += '<div style="color:#E8D9B8;font-size:12px;">' + opt.ar + '</div>';
+      html += '<div style="color:#E8D9B8;font-size:12px;font-family:Georgia,serif;">' + opt.ar + '</div>';
     }
     html += '</div>';
   });
@@ -5544,12 +5542,12 @@ function fieldAnswer(selectedIdx){
     feedbackEl.style.display = 'block';
     var html = '<div style="background:rgba(' + (isCorrect ? '29,158,117' : (isTimeout ? '212,134,46' : '192,57,43')) + ',0.15);border:1px solid ' + color + ';border-radius:10px;padding:12px;">';
     html += '<div style="color:' + color + ';font-size:13px;font-weight:700;margin-bottom:8px;text-align:center;">' + msg + '</div>';
-    // Show transliteration (main) + Arabic script + Hebrew meaning
+    // Show transliteration (BIG - main reading) + Arabic script (small)
     if (q.phrase.trans) {
-      html += '<div style="color:#fff;font-size:15px;font-weight:700;text-align:center;margin-bottom:4px;">' + q.phrase.trans + '</div>';
+      html += '<div style="color:#fff;font-size:18px;font-weight:800;text-align:center;margin-bottom:4px;line-height:1.4;">' + q.phrase.trans + '</div>';
     }
     if (q.phrase.ar) {
-      html += '<div style="color:#E8D9B8;font-size:13px;text-align:center;margin-bottom:6px;">' + q.phrase.ar + '</div>';
+      html += '<div style="color:#E8D9B8;font-size:12px;text-align:center;margin-bottom:6px;font-family:Georgia,serif;">' + q.phrase.ar + '</div>';
     }
     if (q.phrase.he) {
       html += '<div style="color:#a0b8c8;font-size:11px;text-align:center;font-style:italic;">(' + q.phrase.he + ')</div>';
@@ -5785,8 +5783,8 @@ function renderFlashQuestion(){
     if (optionsEl) {
       optionsEl.innerHTML = q.options.map(function(opt, optIdx){
         return '<div onclick="flashAnswerByIdx(' + optIdx + ')" class="flash-opt" data-opt-idx="' + optIdx + '" style="background:#1F3147;border:1px solid #2A3D52;color:#fff;border-radius:10px;padding:14px 12px;font-size:14px;font-weight:600;cursor:pointer;text-align:right;font-family:inherit;direction:rtl;line-height:1.5;user-select:none;-webkit-tap-highlight-color:rgba(212,162,78,0.3);">' +
-          '<div style="font-family:Georgia,serif;color:#E8D9B8;font-size:13px;margin-bottom:3px;pointer-events:none;">' + (opt.trans || '') + '</div>' +
-          '<div style="font-size:15px;pointer-events:none;">' + opt.ar + '</div>' +
+          '<div style="color:#fff;font-size:16px;font-weight:700;margin-bottom:4px;pointer-events:none;line-height:1.4;">' + (opt.trans || '') + '</div>' +
+          '<div style="color:#E8D9B8;font-size:13px;pointer-events:none;font-family:Georgia,serif;">' + opt.ar + '</div>' +
           '</div>';
       }).join('');
     }
@@ -6262,7 +6260,7 @@ function bldCats(){
   if (!DB || DB.length === 0) {
     loadEl.innerHTML = '<div style="text-align:center;padding:20px;color:#D4862E;">' +
       'מתחבר לשרת...<br><br>' +
-      '<div style="font-size:11px;color:#7a9ab5;">v20260609-1924</div><br>' +
+      '<div style="font-size:11px;color:#7a9ab5;">v20260609-1933</div><br>' +
       '<button onclick="location.reload(true)" style="padding:10px 20px;background:#D4862E;color:#fff;border:none;border-radius:8px;font-family:inherit;cursor:pointer;font-weight:700;margin-top:10px;">🔄 רענן</button>' +
       '</div>';
     return;
