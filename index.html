@@ -1932,7 +1932,7 @@ body.day-mode .emerg-grid{
       </div>
     </div>
     
-    <!-- Smart Insights & Suggestions (NEW!) -->
+    <!-- Smart Insights & Suggestions -->
     <div style="background:linear-gradient(135deg,#1F3147 0%,#18293E 100%);border:1px solid rgba(29,158,117,0.35);border-radius:14px;padding:16px;margin-bottom:14px;">
       <div style="display:flex;align-items:center;gap:8px;margin-bottom:14px;">
         <span style="font-size:18px;">💡</span>
@@ -1940,6 +1940,17 @@ body.day-mode .emerg-grid{
       </div>
       <div id="prog-insights" style="display:flex;flex-direction:column;gap:8px;">
         <!-- Insights filled by JS -->
+      </div>
+    </div>
+    
+    <!-- Achievements Panel (NEW!) -->
+    <div style="background:linear-gradient(135deg,#1F3147 0%,#18293E 100%);border:1px solid rgba(212,162,78,0.35);border-radius:14px;padding:16px;margin-bottom:14px;">
+      <div style="display:flex;align-items:center;gap:8px;margin-bottom:14px;">
+        <span style="font-size:18px;">🏆</span>
+        <span style="color:#D4A24E;font-size:12px;font-weight:800;letter-spacing:0.5px;">הישגים</span>
+      </div>
+      <div id="prog-achievements">
+        <!-- Filled by JS -->
       </div>
     </div>
     
@@ -2042,7 +2053,7 @@ body.day-mode .emerg-grid{
       </div>
     </div>
     
-    <div class="loading" id="cats-loading"><div style="text-align:center;padding:20px;"><div style="font-size:16px;color:#D4862E;margin-bottom:8px;">טוען...</div><div style="font-size:10px;color:#7a9ab5;opacity:0.6;">v20260609-1349</div></div></div>
+    <div class="loading" id="cats-loading"><div style="text-align:center;padding:20px;"><div style="font-size:16px;color:#D4862E;margin-bottom:8px;">טוען...</div><div style="font-size:10px;color:#7a9ab5;opacity:0.6;">v20260609-1516</div></div></div>
     <div class="cgrid" id="cgrid" style="display:none;"></div>
   </div>
   <div id="vlist" class="scr">
@@ -3076,6 +3087,86 @@ function renderHome(){
 }
 
 
+
+// === Achievements Panel Rendering ===
+function renderAchievementsPanel(){
+  try {
+    var container = document.getElementById('prog-achievements');
+    if (!container) return;
+    
+    var earned = getEarnedAchievements();
+    
+    // Group by tier
+    var tiers = {
+      beginner: { name: 'מתחילים', color: '#1D9E75', items: [] },
+      advanced: { name: 'מתקדמים', color: '#D4A24E', items: [] },
+      expert: { name: 'מומחים', color: '#c0392b', items: [] }
+    };
+    
+    ACHIEVEMENTS.forEach(function(ach){
+      var tier = ach.tier || 'beginner';
+      if (tiers[tier]) {
+        tiers[tier].items.push({
+          ach: ach,
+          earned: earned.indexOf(ach.id) !== -1
+        });
+      }
+    });
+    
+    var totalEarned = earned.length;
+    var totalAch = ACHIEVEMENTS.length;
+    
+    var html = '';
+    
+    // Header with progress
+    html += '<div style="text-align:center;margin-bottom:14px;">';
+    html += '<div style="color:#D4A24E;font-size:24px;font-weight:900;">' + totalEarned + '<span style="color:#7a9ab5;font-size:14px;font-weight:600;"> / ' + totalAch + '</span></div>';
+    html += '<div style="color:#a0b8c8;font-size:11px;">הישגים שהשגת</div>';
+    // Progress bar
+    var pct = totalAch > 0 ? Math.round((totalEarned / totalAch) * 100) : 0;
+    html += '<div style="margin-top:8px;height:6px;background:rgba(255,255,255,0.08);border-radius:3px;overflow:hidden;">';
+    html += '<div style="height:100%;background:linear-gradient(90deg,#1D9E75,#D4A24E);width:' + pct + '%;border-radius:3px;transition:width 0.8s;"></div>';
+    html += '</div>';
+    html += '</div>';
+    
+    // Render each tier
+    ['beginner', 'advanced', 'expert'].forEach(function(tierKey){
+      var tier = tiers[tierKey];
+      var earnedInTier = tier.items.filter(function(i){ return i.earned; }).length;
+      
+      html += '<div style="margin-bottom:14px;">';
+      html += '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;padding-bottom:5px;border-bottom:1px solid rgba(255,255,255,0.08);">';
+      html += '<div style="color:' + tier.color + ';font-size:11px;font-weight:800;letter-spacing:0.5px;">' + tier.name + '</div>';
+      html += '<div style="color:#7a9ab5;font-size:10px;">' + earnedInTier + '/' + tier.items.length + '</div>';
+      html += '</div>';
+      
+      html += '<div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;">';
+      tier.items.forEach(function(item){
+        var ach = item.ach;
+        var isEarned = item.earned;
+        var opacity = isEarned ? '1' : '0.4';
+        var filter = isEarned ? 'none' : 'grayscale(0.7)';
+        var bg = isEarned ? 
+          'linear-gradient(135deg,rgba(' + (tier.color === '#1D9E75' ? '29,158,117' : tier.color === '#D4A24E' ? '212,162,78' : '192,57,43') + ',0.15) 0%,rgba(' + (tier.color === '#1D9E75' ? '29,158,117' : tier.color === '#D4A24E' ? '212,162,78' : '192,57,43') + ',0.05) 100%)' : 
+          'rgba(255,255,255,0.03)';
+        var border = isEarned ? tier.color : 'rgba(255,255,255,0.08)';
+        
+        html += '<div style="background:' + bg + ';border:1px solid ' + border + ';border-radius:10px;padding:10px 8px;text-align:center;opacity:' + opacity + ';">';
+        html += '<div style="font-size:28px;line-height:1;margin-bottom:4px;filter:' + filter + ';">' + ach.icon + '</div>';
+        html += '<div style="color:' + (isEarned ? '#E8D9B8' : '#7a9ab5') + ';font-size:11px;font-weight:700;line-height:1.2;margin-bottom:2px;">' + ach.title + '</div>';
+        html += '<div style="color:#7a9ab5;font-size:9px;line-height:1.3;">' + ach.desc + '</div>';
+        if (isEarned) {
+          html += '<div style="color:' + tier.color + ';font-size:9px;margin-top:4px;font-weight:700;">✓ הושג</div>';
+        }
+        html += '</div>';
+      });
+      html += '</div></div>';
+    });
+    
+    container.innerHTML = html;
+  } catch(e) { console.warn('renderAchievementsPanel error:', e); }
+}
+
 // === Smart Insights Engine ===
 function renderInsights() {
   try {
@@ -3249,6 +3340,7 @@ function renderInsights() {
 
 function renderProgress(){
   try { renderInsights(); } catch(e) {}
+  try { renderAchievementsPanel(); } catch(e) {}
   
   try {
     var learned = JSON.parse(localStorage.getItem('learned_phrases') || '{}');
@@ -4715,7 +4807,7 @@ function bldCats(){
   if (!DB || DB.length === 0) {
     loadEl.innerHTML = '<div style="text-align:center;padding:20px;color:#D4862E;">' +
       'מתחבר לשרת...<br><br>' +
-      '<div style="font-size:11px;color:#7a9ab5;">v20260609-1349</div><br>' +
+      '<div style="font-size:11px;color:#7a9ab5;">v20260609-1516</div><br>' +
       '<button onclick="location.reload(true)" style="padding:10px 20px;background:#D4862E;color:#fff;border:none;border-radius:8px;font-family:inherit;cursor:pointer;font-weight:700;margin-top:10px;">🔄 רענן</button>' +
       '</div>';
     return;
@@ -5088,13 +5180,23 @@ function renderStreak(){
 
 // Achievement definitions
 var ACHIEVEMENTS = [
-  // הישגים בעלי משמעות אמיתית
-  {id:'rookie',      icon:'🔰', title:'טירון',           desc:'10 משפטים נלמדו', threshold:10,  type:'count'},
-  {id:'hundred',     icon:'💯', title:'מאה משפטים',      desc:'100 משפטים נלמדו', threshold:100, type:'count'},
-  {id:'expert',      icon:'🎯', title:'מומחה השטח',      desc:'200 משפטים נלמדו', threshold:200, type:'count'},
-  {id:'streak_7',    icon:'🔥', title:'שבוע אש',         desc:'7 ימים ברצף', threshold:7,   type:'streak'},
-  {id:'streak_30',   icon:'⚡', title:'חודש לוהט',       desc:'30 ימים ברצף', threshold:30,  type:'streak'},
-  {id:'scenario_10', icon:'🏆', title:'מומחה תרחישים',   desc:'10 תרחישים הושלמו', threshold:10,  type:'scenario'}
+  // === 🌱 רמת מתחיל ===
+  {id:'first_step',     icon:'🌱', title:'הצעד הראשון',     desc:'תרגלת בפעם הראשונה',    threshold:1,   type:'practice', tier:'beginner'},
+  {id:'field_first',    icon:'🎯', title:'לוחם מתחיל',      desc:'סיימת מצב שטח ראשון',    threshold:1,   type:'field_count', tier:'beginner'},
+  {id:'streak_3',       icon:'🔥', title:'3 ימים ברצף',     desc:'רצף של 3 ימים',          threshold:3,   type:'streak', tier:'beginner'},
+  {id:'phrases_10',     icon:'📚', title:'עשרה משפטים',     desc:'10 משפטים נלמדו',        threshold:10,  type:'count', tier:'beginner'},
+  
+  // === 💪 רמת מתקדמים ===
+  {id:'streak_7',       icon:'⚡', title:'שבוע מלא',        desc:'7 ימים ברצף',            threshold:7,   type:'streak', tier:'advanced'},
+  {id:'field_75',       icon:'🎖️', title:'מוכן לשטח',       desc:'הגעת ל-75% במצב שטח',    threshold:75,  type:'field_best', tier:'advanced'},
+  {id:'mastered_50',    icon:'💎', title:'50 נשלטים',       desc:'50 משפטים במצב נשלט',    threshold:50,  type:'mastered', tier:'advanced'},
+  {id:'category_1',     icon:'🌟', title:'קטגוריה הושלמה',  desc:'קטגוריה אחת ב-80%+',     threshold:1,   type:'category_complete', tier:'advanced'},
+  
+  // === 🏆 רמת מומחים ===
+  {id:'streak_30',      icon:'👑', title:'חודש מלא',        desc:'30 ימים ברצף',           threshold:30,  type:'streak', tier:'expert'},
+  {id:'field_100',      icon:'🌠', title:'שלמות בשטח',      desc:'הגעת ל-100% במצב שטח',   threshold:100, type:'field_best', tier:'expert'},
+  {id:'mastered_100',   icon:'🪖', title:'שולט בשטח',       desc:'100 משפטים נשלטים',      threshold:100, type:'mastered', tier:'expert'},
+  {id:'scenarios_5',    icon:'🎬', title:'תרחישן',          desc:'5 תרחישים הושלמו',       threshold:5,   type:'scenario', tier:'expert'}
 ];
 
 // Safe date comparison - handles both toDateString and ISO formats
@@ -5138,6 +5240,36 @@ function checkAchievements(){
       else if (ach.type === 'streak') currentValue = streak;
       else if (ach.type === 'scenario') currentValue = Object.keys(JSON.parse(localStorage.getItem('completed_scenarios') || '{}')).length;
       else if (ach.type === 'practice') currentValue = Object.keys(JSON.parse(localStorage.getItem('practiced_phrases') || '{}')).length;
+      else if (ach.type === 'field_count') currentValue = parseInt(localStorage.getItem('field_count') || '0', 10);
+      else if (ach.type === 'field_best') currentValue = parseInt(localStorage.getItem('field_best') || '0', 10);
+      else if (ach.type === 'mastered') {
+        try {
+          var mem = JSON.parse(localStorage.getItem('flash_memory') || '{}');
+          var count = 0;
+          for (var k in mem) { if (mem[k] && mem[k].state === 'mastered') count++; }
+          currentValue = count;
+        } catch(e) { currentValue = 0; }
+      }
+      else if (ach.type === 'category_complete') {
+        // Check if any category is 80%+ complete
+        try {
+          var catCount = 0;
+          var catLearned = {};
+          if (typeof DB !== 'undefined' && DB) {
+            DB.forEach(function(p){
+              if (!p.cat) return;
+              if (!catLearned[p.cat]) catLearned[p.cat] = { total: 0, learned: 0 };
+              catLearned[p.cat].total++;
+              if (learned[p.id]) catLearned[p.cat].learned++;
+            });
+          }
+          for (var c in catLearned) {
+            var s = catLearned[c];
+            if (s.total >= 5 && (s.learned / s.total) >= 0.8) catCount++;
+          }
+          currentValue = catCount;
+        } catch(e) { currentValue = 0; }
+      }
       else currentValue = 0;
       if (currentValue >= ach.threshold) {
         newlyEarned.push(ach);
