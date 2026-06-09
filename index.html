@@ -1830,15 +1830,6 @@ body.day-mode #prog-achievements div[style*="color:#D4A24E"] {
       </div>
     </div>
     
-    <!-- Flashcards - smart learning card -->
-    <div onclick="startFlashcards()" style="background:linear-gradient(135deg,#1D9E75 0%,#0e5a3f 100%);border-radius:14px;padding:14px 16px;margin-bottom:20px;cursor:pointer;box-shadow:0 4px 12px rgba(29,158,117,0.25);display:flex;align-items:center;justify-content:space-between;">
-      <div style="flex:1;">
-        <div class="keep-white" style="color:#fff;font-size:15px;font-weight:800;margin-bottom:3px;">🎯 חזרה ובחינה</div>
-        <div style="color:rgba(255,255,255,0.85);font-size:12px;line-height:1.4;">חזרה ובחינה על המשפטים שלמדתם</div>
-      </div>
-      <div class="keep-white" style="background:rgba(255,255,255,0.2);border-radius:10px;padding:8px 14px;color:#fff;font-size:13px;font-weight:700;">התחל ◀</div>
-    </div>
-    
     <!-- Prep Path - Combat Readiness Track (NEW! - leads the list) -->
     <div onclick="startPrepPath()" id="home-prep-card" style="background:linear-gradient(135deg,#D4862E 0%,#a85200 100%);border-radius:14px;padding:14px 16px;margin-bottom:14px;cursor:pointer;box-shadow:0 4px 12px rgba(212,134,46,0.25);position:relative;overflow:hidden;">
       <!-- Content set by JS -->
@@ -1855,6 +1846,22 @@ body.day-mode #prog-achievements div[style*="color:#D4A24E"] {
         <div class="keep-white" style="color:#fff;font-size:22px;flex-shrink:0;">◀</div>
       </div>
     </div>
+    
+    <!-- Flashcards - smart learning card -->
+    <div onclick="startFlashcards()" style="background:linear-gradient(135deg,#1D9E75 0%,#0e5a3f 100%);border-radius:14px;padding:14px 16px;margin-bottom:14px;cursor:pointer;box-shadow:0 4px 12px rgba(29,158,117,0.25);position:relative;overflow:hidden;">
+      <div style="display:flex;align-items:center;gap:14px;">
+        <div style="font-size:32px;flex-shrink:0;">🎓</div>
+        <div style="flex:1;min-width:0;">
+          <div class="keep-white" style="color:#fff;font-size:14px;font-weight:800;margin-bottom:2px;">חזרה ובחינה</div>
+          <div class="keep-white" style="color:rgba(255,255,255,0.9);font-size:11px;line-height:1.4;">חזרה חכמה על המשפטים שלמדתם</div>
+        </div>
+        <div class="keep-white" style="color:#fff;font-size:22px;flex-shrink:0;">◀</div>
+      </div>
+    </div>
+    
+    
+    
+    
     
     <!-- Daily Reminder - Compact (like field mode + flashcards style) -->
     <div id="reminder-banner" onclick="reminderGoToScenarios()" style="display:none;background:linear-gradient(135deg,#D4862E 0%,#b87325 100%);border-radius:14px;padding:14px 16px;margin-bottom:14px;cursor:pointer;box-shadow:0 4px 12px rgba(212,134,46,0.25);position:relative;overflow:hidden;">
@@ -2208,7 +2215,7 @@ body.day-mode #prog-achievements div[style*="color:#D4A24E"] {
       </div>
     </div>
     
-    <div class="loading" id="cats-loading"><div style="text-align:center;padding:20px;"><div style="font-size:16px;color:#D4862E;margin-bottom:8px;">טוען...</div><div style="font-size:10px;color:#7a9ab5;opacity:0.6;">v20260609-1848</div></div></div>
+    <div class="loading" id="cats-loading"><div style="text-align:center;padding:20px;"><div style="font-size:16px;color:#D4862E;margin-bottom:8px;">טוען...</div><div style="font-size:10px;color:#7a9ab5;opacity:0.6;">v20260609-1924</div></div></div>
     <div class="cgrid" id="cgrid" style="display:none;"></div>
   </div>
   <div id="vlist" class="scr">
@@ -5009,17 +5016,61 @@ var _flashState = {
 // Start flashcards with a specific pool (for prep path)
 function startFlashcardsWithPool(pool, title) {
   try {
-    if (!pool || pool.length === 0) return;
+    if (!pool || pool.length === 0) {
+      alert('אין משפטים זמינים לתרגול');
+      return;
+    }
     
-    // Initialize flash state with our pool
+    // Get pool for distractors (other phrases that aren't in our pool)
+    var allAvailable = (DB || []).filter(function(p){ return p.he && p.ar; });
+    if (allAvailable.length < 4) {
+      alert('צריך לפחות 4 משפטים במאגר');
+      return;
+    }
+    
+    // Build proper questions with type + options
+    var questions = pool.map(function(p, i){
+      // Check if phrase has audio
+      var hasAudio = !!(p.audio_url || p.audio);
+      // Alternate between audio (if available) and hebrew translation
+      var qType;
+      if (hasAudio && (i % 2 === 0)) {
+        qType = 'audio';
+      } else {
+        qType = 'hebrew';
+      }
+      
+      // Get 3 random distractors from all available phrases (not from pool only)
+      var others = allAvailable.filter(function(x){ 
+        return String(x.id) !== String(p.id); 
+      }).sort(function(){ 
+        return Math.random() - 0.5; 
+      }).slice(0, 3);
+      
+      // Combine with correct answer and shuffle
+      var options = others.concat([p]).sort(function(){ 
+        return Math.random() - 0.5; 
+      });
+      
+      return {
+        phrase: p,
+        type: qType,
+        options: options,
+        correctId: p.id
+      };
+    });
+    
+    // Initialize flash state with proper questions
     _flashState = {
-      questions: pool.slice(),  // Use our pool
+      questions: questions,
       current: 0,
       correct: 0,
-      total: pool.length,
-      changes: {},
+      total: questions.length,
+      answered: false,
+      changes: { promoted: 0, demoted: 0, mastered: 0 },
       customTitle: title || null,
-      isPrepPath: true
+      isPrepPath: true,
+      mode: 'prep'
     };
     
     // Navigate to flashcards tab
@@ -5040,7 +5091,10 @@ function startFlashcardsWithPool(pool, title) {
     if (typeof renderFlashQuestion === 'function') {
       renderFlashQuestion();
     }
-  } catch(e) { console.warn('startFlashcardsWithPool error:', e); }
+  } catch(e) { 
+    console.warn('startFlashcardsWithPool error:', e);
+    alert('שגיאה: ' + e.message);
+  }
 }
 
 function startFlashcards(){
@@ -6208,7 +6262,7 @@ function bldCats(){
   if (!DB || DB.length === 0) {
     loadEl.innerHTML = '<div style="text-align:center;padding:20px;color:#D4862E;">' +
       'מתחבר לשרת...<br><br>' +
-      '<div style="font-size:11px;color:#7a9ab5;">v20260609-1848</div><br>' +
+      '<div style="font-size:11px;color:#7a9ab5;">v20260609-1924</div><br>' +
       '<button onclick="location.reload(true)" style="padding:10px 20px;background:#D4862E;color:#fff;border:none;border-radius:8px;font-family:inherit;cursor:pointer;font-weight:700;margin-top:10px;">🔄 רענן</button>' +
       '</div>';
     return;
