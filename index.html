@@ -1673,6 +1673,19 @@ body.day-mode .emerg-grid{
       <div class="keep-white" style="background:rgba(255,255,255,0.2);border-radius:10px;padding:8px 14px;color:#fff;font-size:13px;font-weight:700;">התחל ◀</div>
     </div>
     
+    <!-- Field Mode - Combat Readiness Test (NEW) -->
+    <div onclick="startFieldMode()" style="background:linear-gradient(135deg,#c0392b 0%,#922d22 100%);border-radius:14px;padding:14px 16px;margin-bottom:14px;cursor:pointer;box-shadow:0 4px 12px rgba(192,57,43,0.35);position:relative;overflow:hidden;">
+      <div style="position:absolute;top:6px;left:8px;background:rgba(255,255,255,0.15);color:#fff;font-size:9px;font-weight:800;padding:3px 8px;border-radius:6px;letter-spacing:0.5px;">חדש!</div>
+      <div style="display:flex;align-items:center;gap:14px;">
+        <div style="font-size:36px;flex-shrink:0;">🎯</div>
+        <div style="flex:1;">
+          <div class="keep-white" style="color:#fff;font-size:15px;font-weight:800;margin-bottom:3px;">מצב שטח</div>
+          <div class="keep-white" style="color:rgba(255,255,255,0.85);font-size:11px;line-height:1.4;">7 שאלות. 15 שניות כל אחת. בלחץ.<br>בדיקת רמת מוכנות אמיתית.</div>
+        </div>
+        <div class="keep-white" style="color:#fff;font-size:22px;flex-shrink:0;">◀</div>
+      </div>
+    </div>
+    
     <!-- Daily Reminder Banner -->
     <div id="reminder-banner" style="display:none;background:linear-gradient(135deg,#D4862E 0%,#b87325 100%);border-radius:14px;padding:14px 16px;margin-bottom:12px;box-shadow:0 4px 12px rgba(212,134,46,0.3);position:relative;">
       <button onclick="dismissReminder()" style="position:absolute;top:8px;left:8px;background:rgba(255,255,255,0.15);border:1px solid rgba(255,255,255,0.2);color:#fff;border-radius:50%;width:24px;height:24px;font-size:12px;font-weight:700;cursor:pointer;font-family:inherit;display:flex;align-items:center;justify-content:center;padding:0;">✕</button>
@@ -1967,7 +1980,7 @@ body.day-mode .emerg-grid{
       </div>
     </div>
     
-    <div class="loading" id="cats-loading"><div style="text-align:center;padding:20px;"><div style="font-size:16px;color:#D4862E;margin-bottom:8px;">טוען...</div><div style="font-size:10px;color:#7a9ab5;opacity:0.6;">v20260609-1011</div></div></div>
+    <div class="loading" id="cats-loading"><div style="text-align:center;padding:20px;"><div style="font-size:16px;color:#D4862E;margin-bottom:8px;">טוען...</div><div style="font-size:10px;color:#7a9ab5;opacity:0.6;">v20260609-1030</div></div></div>
     <div class="cgrid" id="cgrid" style="display:none;"></div>
   </div>
   <div id="vlist" class="scr">
@@ -3280,6 +3293,13 @@ function pickFlashQuestions(available, count, mode){
   return shuffle(selected);
 }
 
+
+// === Field Mode (Combat Readiness Test) ===
+function startFieldMode() {
+  // For now, alert - we'll build the real screen in the next step
+  alert('🎯 מצב שטח\n\nתכף נבנה את המסך המלא:\n• 7 שאלות\n• 15 שניות כל אחת\n• בלחץ - כמו בשטח\n• בסוף: רמת מוכנות');
+}
+
 function flashStart(mode){
   mode = mode || 'smart';
   _flashState.mode = mode;
@@ -3827,7 +3847,7 @@ function bldCats(){
   if (!DB || DB.length === 0) {
     loadEl.innerHTML = '<div style="text-align:center;padding:20px;color:#D4862E;">' +
       'מתחבר לשרת...<br><br>' +
-      '<div style="font-size:11px;color:#7a9ab5;">v20260609-1011</div><br>' +
+      '<div style="font-size:11px;color:#7a9ab5;">v20260609-1030</div><br>' +
       '<button onclick="location.reload(true)" style="padding:10px 20px;background:#D4862E;color:#fff;border:none;border-radius:8px;font-family:inherit;cursor:pointer;font-weight:700;margin-top:10px;">🔄 רענן</button>' +
       '</div>';
     return;
