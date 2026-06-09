@@ -1996,7 +1996,7 @@ body.day-mode .emerg-grid{
       </div>
     </div>
     
-    <div class="loading" id="cats-loading"><div style="text-align:center;padding:20px;"><div style="font-size:16px;color:#D4862E;margin-bottom:8px;">טוען...</div><div style="font-size:10px;color:#7a9ab5;opacity:0.6;">v20260609-1040</div></div></div>
+    <div class="loading" id="cats-loading"><div style="text-align:center;padding:20px;"><div style="font-size:16px;color:#D4862E;margin-bottom:8px;">טוען...</div><div style="font-size:10px;color:#7a9ab5;opacity:0.6;">v20260609-1156</div></div></div>
     <div class="cgrid" id="cgrid" style="display:none;"></div>
   </div>
   <div id="vlist" class="scr">
@@ -3433,11 +3433,17 @@ function renderFieldQuestion(){
   // Question
   html += '<div style="color:#D4A24E;font-size:13px;font-weight:700;margin-bottom:10px;text-align:center;">🎯 מה תאמר?</div>';
   
-  // 4 Options
+  // 4 Options - show ARABIC + TRANSLITERATION (not Hebrew!)
+  // The training is for Arabic, so options must be in Arabic
   html += '<div id="field-options" style="display:grid;gap:8px;">';
   q.options.forEach(function(opt, idx){
-    html += '<div onclick="fieldAnswer(' + idx + ')" class="field-opt" data-opt-idx="' + idx + '" style="background:#1F3147;border:1px solid #2A3D52;color:#fff;border-radius:10px;padding:12px 14px;font-size:14px;font-weight:600;cursor:pointer;text-align:right;line-height:1.4;transition:all 0.2s;">';
-    html += opt.he;
+    html += '<div onclick="fieldAnswer(' + idx + ')" class="field-opt" data-opt-idx="' + idx + '" style="background:#1F3147;border:1px solid #2A3D52;color:#fff;border-radius:10px;padding:12px 14px;cursor:pointer;text-align:right;line-height:1.5;transition:all 0.2s;">';
+    // Transliteration (main) - in Hebrew letters so user can read
+    html += '<div style="color:#fff;font-size:15px;font-weight:700;margin-bottom:3px;">' + (opt.trans || opt.ar || '') + '</div>';
+    // Arabic script (smaller, for visual recognition)
+    if (opt.ar) {
+      html += '<div style="color:#E8D9B8;font-size:12px;">' + opt.ar + '</div>';
+    }
     html += '</div>';
   });
   html += '</div>';
@@ -3538,20 +3544,27 @@ function fieldAnswer(selectedIdx){
       msg = 'מצוין! תגובה אינסטינקטיבית נכונה';
       color = '#1D9E75';
     } else if (isTimeout) {
-      msg = 'הזמן נגמר! התשובה הייתה: ' + q.phrase.he;
+      msg = 'הזמן נגמר!';
       color = '#D4862E';
     } else {
-      msg = 'התשובה הנכונה: ' + q.phrase.he;
+      msg = 'התשובה הנכונה:';
       color = '#c0392b';
     }
     
     feedbackEl.style.display = 'block';
     var html = '<div style="background:rgba(' + (isCorrect ? '29,158,117' : (isTimeout ? '212,134,46' : '192,57,43')) + ',0.15);border:1px solid ' + color + ';border-radius:10px;padding:12px;">';
-    html += '<div style="color:' + color + ';font-size:13px;font-weight:700;margin-bottom:6px;text-align:center;">' + msg + '</div>';
+    html += '<div style="color:' + color + ';font-size:13px;font-weight:700;margin-bottom:8px;text-align:center;">' + msg + '</div>';
+    // Show transliteration (main) + Arabic script + Hebrew meaning
     if (q.phrase.trans) {
-      html += '<div style="color:#a0b8c8;font-size:12px;font-family:Georgia,serif;text-align:center;">' + q.phrase.trans + '</div>';
+      html += '<div style="color:#fff;font-size:15px;font-weight:700;text-align:center;margin-bottom:4px;">' + q.phrase.trans + '</div>';
     }
-    html += '<button onclick="fieldNext()" style="background:#c0392b;border:none;color:#fff;border-radius:8px;padding:10px 22px;font-size:13px;font-weight:700;cursor:pointer;font-family:inherit;margin-top:10px;display:block;width:100%;">' + (_fieldState.current + 1 >= _fieldState.total ? '🏁 סיים' : 'הבא ◀') + '</button>';
+    if (q.phrase.ar) {
+      html += '<div style="color:#E8D9B8;font-size:13px;text-align:center;margin-bottom:6px;">' + q.phrase.ar + '</div>';
+    }
+    if (q.phrase.he) {
+      html += '<div style="color:#a0b8c8;font-size:11px;text-align:center;font-style:italic;">(' + q.phrase.he + ')</div>';
+    }
+    html += '<button onclick="fieldNext()" style="background:#c0392b;border:none;color:#fff;border-radius:8px;padding:10px 22px;font-size:13px;font-weight:700;cursor:pointer;font-family:inherit;margin-top:12px;display:block;width:100%;">' + (_fieldState.current + 1 >= _fieldState.total ? '🏁 סיים' : 'הבא ◀') + '</button>';
     html += '</div>';
     feedbackEl.innerHTML = html;
   }
@@ -4212,7 +4225,7 @@ function bldCats(){
   if (!DB || DB.length === 0) {
     loadEl.innerHTML = '<div style="text-align:center;padding:20px;color:#D4862E;">' +
       'מתחבר לשרת...<br><br>' +
-      '<div style="font-size:11px;color:#7a9ab5;">v20260609-1040</div><br>' +
+      '<div style="font-size:11px;color:#7a9ab5;">v20260609-1156</div><br>' +
       '<button onclick="location.reload(true)" style="padding:10px 20px;background:#D4862E;color:#fff;border:none;border-radius:8px;font-family:inherit;cursor:pointer;font-weight:700;margin-top:10px;">🔄 רענן</button>' +
       '</div>';
     return;
