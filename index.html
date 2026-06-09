@@ -1704,14 +1704,14 @@ body.day-mode .emerg-grid{
       <div class="keep-white" style="background:rgba(255,255,255,0.2);border-radius:10px;padding:8px 14px;color:#fff;font-size:13px;font-weight:700;">התחל ◀</div>
     </div>
     
-    <!-- Field Mode - Combat Readiness Test (NEW) -->
-    <div onclick="startFieldMode()" style="background:linear-gradient(135deg,#c0392b 0%,#922d22 100%);border-radius:14px;padding:14px 16px;margin-bottom:14px;cursor:pointer;box-shadow:0 4px 12px rgba(192,57,43,0.35);position:relative;overflow:hidden;">
+    <!-- Field Mode - Combat Readiness Test -->
+    <div onclick="startFieldMode()" style="background:linear-gradient(135deg,#c0392b 0%,#922d22 100%);border-radius:14px;padding:14px 16px;margin-bottom:14px;cursor:pointer;box-shadow:0 4px 12px rgba(192,57,43,0.25);position:relative;overflow:hidden;">
       <div style="position:absolute;top:6px;left:8px;background:rgba(255,255,255,0.15);color:#fff;font-size:9px;font-weight:800;padding:3px 8px;border-radius:6px;letter-spacing:0.5px;">חדש!</div>
       <div style="display:flex;align-items:center;gap:14px;">
-        <div style="font-size:36px;flex-shrink:0;">🎯</div>
+        <div style="font-size:32px;flex-shrink:0;">🎯</div>
         <div style="flex:1;">
-          <div class="keep-white" style="color:#fff;font-size:15px;font-weight:800;margin-bottom:3px;">מצב שטח</div>
-          <div class="keep-white" style="color:rgba(255,255,255,0.85);font-size:11px;line-height:1.4;">7 שאלות. 15 שניות כל אחת. בלחץ.<br>בדיקת רמת מוכנות אמיתית.</div>
+          <div class="keep-white" style="color:#fff;font-size:14px;font-weight:800;margin-bottom:2px;">מצב שטח</div>
+          <div class="keep-white" style="color:rgba(255,255,255,0.85);font-size:11px;line-height:1.4;">7 שאלות. 15 שניות. בלחץ.</div>
         </div>
         <div class="keep-white" style="color:#fff;font-size:22px;flex-shrink:0;">◀</div>
       </div>
@@ -2053,7 +2053,7 @@ body.day-mode .emerg-grid{
       </div>
     </div>
     
-    <div class="loading" id="cats-loading"><div style="text-align:center;padding:20px;"><div style="font-size:16px;color:#D4862E;margin-bottom:8px;">טוען...</div><div style="font-size:10px;color:#7a9ab5;opacity:0.6;">v20260609-1516</div></div></div>
+    <div class="loading" id="cats-loading"><div style="text-align:center;padding:20px;"><div style="font-size:16px;color:#D4862E;margin-bottom:8px;">טוען...</div><div style="font-size:10px;color:#7a9ab5;opacity:0.6;">v20260609-1605</div></div></div>
     <div class="cgrid" id="cgrid" style="display:none;"></div>
   </div>
   <div id="vlist" class="scr">
@@ -2611,6 +2611,146 @@ function showToast(msg, type){
 }
 
 
+
+// === Streak Freeze System Constants ===
+var STREAK_FREEZE_EARN_INTERVAL = 7; // Earn freeze every 7 days
+var STREAK_FREEZE_MAX = 2; // Maximum freezes you can hold
+
+// Get current freeze count
+function getStreakFreezeCount(){
+  try { return parseInt(localStorage.getItem('streak_freeze_count') || '0', 10); }
+  catch(e) { return 0; }
+}
+
+// Save freeze count
+function setStreakFreezeCount(n){
+  try { localStorage.setItem('streak_freeze_count', String(Math.min(STREAK_FREEZE_MAX, Math.max(0, n)))); }
+  catch(e) {}
+}
+
+// Check if user earned a new freeze (called when streak updates)
+function checkStreakFreezeEarned(newStreak, oldStreak){
+  try {
+    // If streak crossed a multiple of 7 (e.g., went from 6 to 7, or 13 to 14)
+    var oldMilestones = Math.floor(oldStreak / STREAK_FREEZE_EARN_INTERVAL);
+    var newMilestones = Math.floor(newStreak / STREAK_FREEZE_EARN_INTERVAL);
+    
+    if (newMilestones > oldMilestones) {
+      var current = getStreakFreezeCount();
+      if (current < STREAK_FREEZE_MAX) {
+        setStreakFreezeCount(current + 1);
+        // Mark to show notification
+        localStorage.setItem('streak_freeze_just_earned', '1');
+        return true;
+      }
+    }
+    return false;
+  } catch(e) { return false; }
+}
+
+// Use a freeze if missed a day (called on app open)
+// Returns true if freeze was used to save the streak
+function tryUseStreakFreeze(){
+  try {
+    var today = new Date();
+    var todayStr = today.toDateString();
+    var lastVisit = localStorage.getItem('streak_last_visit');
+    
+    if (!lastVisit) return false;
+    if (lastVisit === todayStr) return false; // Already visited today
+    
+    // Calculate days since last visit
+    var lastDate = new Date(lastVisit);
+    var yesterday = new Date(today);
+    yesterday.setDate(yesterday.getDate() - 1);
+    var yesterdayStr = yesterday.toDateString();
+    
+    // If last visit was yesterday - all good, no freeze needed yet
+    if (lastVisit === yesterdayStr) return false;
+    
+    // Last visit was more than 1 day ago - need freeze!
+    var msPerDay = 24 * 60 * 60 * 1000;
+    var daysSinceLastVisit = Math.floor((today.getTime() - lastDate.getTime()) / msPerDay);
+    var daysMissed = daysSinceLastVisit - 1; // -1 because if last visit was yesterday, 0 days missed
+    
+    if (daysMissed <= 0) return false;
+    
+    var freezeCount = getStreakFreezeCount();
+    var streak = parseInt(localStorage.getItem('streak_count') || '0', 10);
+    
+    if (freezeCount >= daysMissed && streak > 0) {
+      // We have enough freezes to save the streak!
+      setStreakFreezeCount(freezeCount - daysMissed);
+      
+      // Update last visit to yesterday (so streak continues)
+      localStorage.setItem('streak_last_visit', yesterdayStr);
+      
+      // Mark that we used freeze (to show notification)
+      try {
+        localStorage.setItem('streak_freeze_just_used', JSON.stringify({
+          count: daysMissed,
+          savedStreak: streak,
+          remaining: freezeCount - daysMissed
+        }));
+      } catch(e) {}
+      
+      return true;
+    }
+    
+    return false;
+  } catch(e) { return false; }
+}
+
+// Show notification if freeze was just used
+function showStreakFreezeNotification(){
+  try {
+    var usedData = localStorage.getItem('streak_freeze_just_used');
+    if (usedData) {
+      var data = JSON.parse(usedData);
+      localStorage.removeItem('streak_freeze_just_used');
+      
+      // Create overlay
+      var overlay = document.createElement('div');
+      overlay.style.cssText = 'position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.7);z-index:9999;display:flex;align-items:center;justify-content:center;padding:20px;animation:resultFadeIn 0.3s ease-out;';
+      
+      var card = document.createElement('div');
+      card.style.cssText = 'background:linear-gradient(135deg,#1F3147 0%,#243a55 100%);border:2px solid #1D9E75;border-radius:18px;padding:24px 20px;max-width:340px;text-align:center;box-shadow:0 8px 30px rgba(29,158,117,0.4);animation:resultBounceIn 0.5s ease-out;';
+      
+      var html = '';
+      html += '<div style="font-size:72px;line-height:1;margin-bottom:8px;">🛡️</div>';
+      html += '<div style="color:#1D9E75;font-size:20px;font-weight:900;margin-bottom:8px;">הצלת את הרצף שלך!</div>';
+      html += '<div style="color:#E8D9B8;font-size:13px;line-height:1.6;margin-bottom:16px;">פספסת ' + (data.count === 1 ? 'יום' : data.count + ' ימים') + ' - אבל היה לך כרטיס הגנה! הרצף שלך נשמר על ' + data.savedStreak + ' ימים.</div>';
+      html += '<div style="background:rgba(29,158,117,0.1);border:1px solid rgba(29,158,117,0.3);border-radius:10px;padding:10px;margin-bottom:16px;">';
+      html += '<div style="color:#a0b8c8;font-size:11px;margin-bottom:4px;">נשארו כרטיסי הגנה</div>';
+      html += '<div style="color:#1D9E75;font-size:24px;font-weight:900;">🛡️ x' + data.remaining + '</div>';
+      html += '</div>';
+      html += '<button onclick="this.closest(\'div[style*=fixed]\').remove();" style="background:#1D9E75;border:none;color:#fff;border-radius:10px;padding:12px 28px;font-size:13px;font-weight:700;cursor:pointer;font-family:inherit;">המשך לתרגל ◀</button>';
+      
+      card.innerHTML = html;
+      overlay.appendChild(card);
+      overlay.onclick = function(e) {
+        if (e.target === overlay) overlay.remove();
+      };
+      document.body.appendChild(overlay);
+    }
+    
+    // Also check if just earned
+    if (localStorage.getItem('streak_freeze_just_earned') === '1') {
+      localStorage.removeItem('streak_freeze_just_earned');
+      
+      var earnedOverlay = document.createElement('div');
+      earnedOverlay.style.cssText = 'position:fixed;top:60px;left:50%;transform:translateX(-50%);background:linear-gradient(135deg,#D4A24E 0%,#b88a3d 100%);color:#fff;padding:14px 22px;border-radius:14px;font-size:14px;font-weight:700;z-index:9998;box-shadow:0 4px 20px rgba(212,162,78,0.4);animation:resultBounceIn 0.5s ease-out;';
+      earnedOverlay.innerHTML = '🎁 קיבלת כרטיס הגנה חדש! 🛡️';
+      document.body.appendChild(earnedOverlay);
+      setTimeout(function(){
+        earnedOverlay.style.transition = 'opacity 0.4s';
+        earnedOverlay.style.opacity = '0';
+        setTimeout(function(){ if (earnedOverlay.parentNode) earnedOverlay.remove(); }, 400);
+      }, 3500);
+    }
+  } catch(e) { console.warn('showStreakFreezeNotification error:', e); }
+}
+
 // === Streak Card Rendering ===
 function getStreakEmoji(streak) {
   if (streak >= 365) return '👑'; // Crown for year+
@@ -2717,14 +2857,24 @@ function renderStreakCard() {
       card.style.background = 'linear-gradient(135deg,#1F3147 0%,#243a55 100%)';
       card.style.border = '1px solid rgba(212,134,46,0.4)';
       card.classList.remove('streak-warning');
+      
+      var freezeCount = getStreakFreezeCount();
+      var freezeHtml = '';
+      if (freezeCount > 0) {
+        freezeHtml = '<div style="margin-top:8px;padding-top:8px;border-top:1px solid rgba(255,255,255,0.08);display:flex;align-items:center;justify-content:space-between;">' +
+          '<div style="color:#a0b8c8;font-size:10px;">כרטיסי הגנה זמינים</div>' +
+          '<div style="color:#1D9E75;font-size:13px;font-weight:800;">🛡️ x' + freezeCount + '</div>' +
+          '</div>';
+      }
+      
       card.innerHTML = 
         '<div style="display:flex;align-items:center;gap:14px;">' +
         '<div class="streak-flame" style="font-size:' + emojiSize + 'px;line-height:1;">' + emoji + '</div>' +
         '<div style="flex:1;">' +
         '<div style="color:#D4862E;font-size:11px;font-weight:800;letter-spacing:0.5px;margin-bottom:2px;">רצף פעיל</div>' +
         '<div style="color:#E8D9B8;font-size:24px;font-weight:900;line-height:1;margin-bottom:3px;">' + streak + ' ' + (streak === 1 ? 'יום' : 'ימים') + '</div>' +
-        '<div style="color:#a0b8c8;font-size:11px;">המשיכו לתרגל יומיומית כדי לשמור על הרצף</div>' +
-        '</div></div>';
+        '<div style="color:#a0b8c8;font-size:11px;">המשיכו לתרגל כדי לשמור על הרצף</div>' +
+        '</div></div>' + freezeHtml;
     }
   } catch(e) { console.warn('renderStreakCard error:', e); }
 }
@@ -2886,6 +3036,10 @@ function renderWeeklySummary() {
 }
 
 function renderHome(){
+  // Check if we need to use a freeze (and show notification)
+  try { tryUseStreakFreeze(); } catch(e) {}
+  try { showStreakFreezeNotification(); } catch(e) {}
+
   try {
     var hour = new Date().getHours();
     
@@ -4807,7 +4961,7 @@ function bldCats(){
   if (!DB || DB.length === 0) {
     loadEl.innerHTML = '<div style="text-align:center;padding:20px;color:#D4862E;">' +
       'מתחבר לשרת...<br><br>' +
-      '<div style="font-size:11px;color:#7a9ab5;">v20260609-1516</div><br>' +
+      '<div style="font-size:11px;color:#7a9ab5;">v20260609-1605</div><br>' +
       '<button onclick="location.reload(true)" style="padding:10px 20px;background:#D4862E;color:#fff;border:none;border-radius:8px;font-family:inherit;cursor:pointer;font-weight:700;margin-top:10px;">🔄 רענן</button>' +
       '</div>';
     return;
