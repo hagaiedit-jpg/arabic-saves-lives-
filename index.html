@@ -1778,17 +1778,15 @@ body.day-mode .emerg-grid{
       </div>
     </div>
     
-    <!-- Weekly Heatmap (compact - LOORA style) -->
-    <div onclick="navToTab('progress')" style="background:linear-gradient(135deg,#18293E 0%,#1F3147 100%);border:1px solid rgba(212,162,78,0.2);border-radius:12px;padding:10px 12px;margin-bottom:14px;cursor:pointer;">
-      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;">
-        <div style="display:flex;align-items:center;gap:6px;">
-          <span style="font-size:12px;">📅</span>
-          <span style="color:#D4A24E;font-size:11px;font-weight:700;">השבוע</span>
+    <!-- Full History Card - compact like field mode -->
+    <div onclick="navToTab('progress')" style="background:linear-gradient(135deg,#18293E 0%,#1F3147 100%);border:1px solid rgba(212,162,78,0.3);border-radius:14px;padding:14px 16px;margin-bottom:14px;cursor:pointer;">
+      <div style="display:flex;align-items:center;gap:14px;">
+        <div style="font-size:32px;flex-shrink:0;">📅</div>
+        <div style="flex:1;min-width:0;">
+          <div style="color:#D4A24E;font-size:14px;font-weight:800;margin-bottom:2px;">היסטוריה מלאה</div>
+          <div style="color:#7a9ab5;font-size:11px;line-height:1.4;">פילוח מפורט של הפעילות, תובנות וצעדים הבאים</div>
         </div>
-        <div style="color:#7a9ab5;font-size:10px;">פרטים ◀</div>
-      </div>
-      <div id="home-heatmap" style="display:grid;grid-template-columns:repeat(7,1fr);gap:4px;">
-        <!-- Heatmap days will be rendered here -->
+        <div style="color:#D4A24E;font-size:22px;flex-shrink:0;">◀</div>
       </div>
     </div>
     
@@ -1934,14 +1932,15 @@ body.day-mode .emerg-grid{
       </div>
     </div>
     
-    <!-- Weekly Heatmap Detailed -->
-    <div style="background:linear-gradient(135deg,#18293E 0%,#1F3147 100%);border:1px solid rgba(212,162,78,0.25);border-radius:14px;padding:16px;margin-bottom:14px;">
-      <div style="display:flex;align-items:center;gap:8px;margin-bottom:12px;">
-        <span style="font-size:16px;">📅</span>
-        <span style="color:#D4A24E;font-size:12px;font-weight:700;letter-spacing:0.5px;">השבוע שלך</span>
+    <!-- Smart Insights & Suggestions (NEW!) -->
+    <div style="background:linear-gradient(135deg,#1F3147 0%,#18293E 100%);border:1px solid rgba(29,158,117,0.35);border-radius:14px;padding:16px;margin-bottom:14px;">
+      <div style="display:flex;align-items:center;gap:8px;margin-bottom:14px;">
+        <span style="font-size:18px;">💡</span>
+        <span style="color:#1D9E75;font-size:12px;font-weight:800;letter-spacing:0.5px;">תובנות והמלצות</span>
       </div>
-      <div id="prog-heatmap-detail" style="display:grid;grid-template-columns:repeat(7,1fr);gap:6px;margin-bottom:10px;"></div>
-      <div id="prog-week-summary" style="color:#a0b8c8;font-size:12px;text-align:center;"></div>
+      <div id="prog-insights" style="display:flex;flex-direction:column;gap:8px;">
+        <!-- Insights filled by JS -->
+      </div>
     </div>
     
     <!-- Category Breakdown -->
@@ -2043,7 +2042,7 @@ body.day-mode .emerg-grid{
       </div>
     </div>
     
-    <div class="loading" id="cats-loading"><div style="text-align:center;padding:20px;"><div style="font-size:16px;color:#D4862E;margin-bottom:8px;">טוען...</div><div style="font-size:10px;color:#7a9ab5;opacity:0.6;">v20260609-1314</div></div></div>
+    <div class="loading" id="cats-loading"><div style="text-align:center;padding:20px;"><div style="font-size:16px;color:#D4862E;margin-bottom:8px;">טוען...</div><div style="font-size:10px;color:#7a9ab5;opacity:0.6;">v20260609-1329</div></div></div>
     <div class="cgrid" id="cgrid" style="display:none;"></div>
   </div>
   <div id="vlist" class="scr">
@@ -3076,7 +3075,181 @@ function renderHome(){
   } catch(e) { console.warn('renderHome error:', e); }
 }
 
+
+// === Smart Insights Engine ===
+function renderInsights() {
+  try {
+    var container = document.getElementById('prog-insights');
+    if (!container) return;
+    
+    var insights = [];
+    
+    // Get data
+    var streak = parseInt(localStorage.getItem('streak_count') || '0', 10);
+    var maxStreak = parseInt(localStorage.getItem('max_streak') || '0', 10);
+    var dailyGoal = parseInt(localStorage.getItem('daily_goal') || '5', 10);
+    var learned = {};
+    var practiced = {};
+    var memory = {};
+    try { learned = JSON.parse(localStorage.getItem('learned_phrases') || '{}'); } catch(e) {}
+    try { practiced = JSON.parse(localStorage.getItem('practiced_phrases') || '{}'); } catch(e) {}
+    try { memory = JSON.parse(localStorage.getItem('flash_memory') || '{}'); } catch(e) {}
+    
+    var todayStr = new Date().toDateString();
+    var todayCount = 0;
+    for (var key in learned) {
+      try { if (new Date(learned[key]).toDateString() === todayStr) todayCount++; } catch(e) {}
+    }
+    
+    var totalLearned = Object.keys(learned).length;
+    var totalPracticed = Object.keys(practiced).length;
+    
+    // Count memory states
+    var attentionCount = 0, learningCount = 0, masteredCount = 0;
+    for (var key in memory) {
+      var m = memory[key];
+      if (m && m.state === 'attention') attentionCount++;
+      else if (m && m.state === 'learning') learningCount++;
+      else if (m && m.state === 'mastered') masteredCount++;
+    }
+    
+    // Category analysis - find strongest and weakest categories
+    var catStats = {};
+    if (typeof DB !== 'undefined' && DB) {
+      DB.forEach(function(p){
+        if (!p.cat) return;
+        if (!catStats[p.cat]) catStats[p.cat] = { total: 0, learned: 0 };
+        catStats[p.cat].total++;
+        if (learned[p.id]) catStats[p.cat].learned++;
+      });
+    }
+    
+    var catList = Object.keys(catStats).map(function(c){
+      return {
+        name: c,
+        learned: catStats[c].learned,
+        total: catStats[c].total,
+        pct: catStats[c].total > 0 ? Math.round((catStats[c].learned / catStats[c].total) * 100) : 0
+      };
+    }).filter(function(c){ return c.total > 0; });
+    
+    // === Generate insights ===
+    
+    // 1. Today's goal status
+    if (todayCount >= dailyGoal) {
+      insights.push({
+        icon: '🎯', color: '#1D9E75',
+        title: 'יעד היום הושג!',
+        body: 'תרגלת ' + todayCount + ' משפטים. כל הכבוד! היום שלך נקצר רצף.',
+        action: null
+      });
+    } else if (todayCount > 0) {
+      var remaining = dailyGoal - todayCount;
+      insights.push({
+        icon: '📈', color: '#D4A24E',
+        title: 'עוד ' + remaining + ' לסיום היעד היומי',
+        body: 'תרגלת ' + todayCount + '/' + dailyGoal + ' היום. עוד קצת ותסיים את היעד!',
+        action: { label: 'תרגול מהיר', fn: 'startFlashcards' }
+      });
+    } else {
+      insights.push({
+        icon: '🌅', color: '#D4862E',
+        title: 'התחל את היום',
+        body: 'עוד לא תרגלת היום. אפילו 5 דקות יעשו הבדל ויקדמו אותך!',
+        action: { label: 'התחל עכשיו', fn: 'startFlashcards' }
+      });
+    }
+    
+    // 2. Streak insight
+    if (streak >= 7) {
+      insights.push({
+        icon: '🔥', color: '#1D9E75',
+        title: 'רצף מרשים של ' + streak + ' ימים!',
+        body: 'אתה עקבי - וזה הסוד להצלחה. השיא האישי שלך: ' + maxStreak + ' ימים.',
+        action: null
+      });
+    } else if (streak > 0 && streak < 7) {
+      insights.push({
+        icon: '⚡', color: '#D4A24E',
+        title: 'בדרך ל-7 ימים ברצף',
+        body: 'יש לך ' + streak + ' ימים. עוד ' + (7 - streak) + ' ימים ותגיע למייל-סטון הראשון!',
+        action: null
+      });
+    }
+    
+    // 3. Phrases that need attention
+    if (attentionCount > 0) {
+      insights.push({
+        icon: '⚠️', color: '#c0392b',
+        title: attentionCount + ' משפטים זקוקים לחיזוק',
+        body: 'יש משפטים שטעית בהם לאחרונה. כדאי לחזור עליהם כדי שלא תשכח.',
+        action: { label: 'חזור עליהם', fn: 'startFlashcards' }
+      });
+    }
+    
+    // 4. Category recommendation
+    if (catList.length > 0) {
+      // Sort by completion percentage
+      catList.sort(function(a, b){ return a.pct - b.pct; });
+      var weakest = catList[0];
+      if (weakest.pct < 50 && weakest.learned < weakest.total) {
+        insights.push({
+          icon: '📚', color: '#D4862E',
+          title: 'קטגוריה לתרגול: ' + weakest.name,
+          body: 'למדת ' + weakest.learned + '/' + weakest.total + ' (' + weakest.pct + '%). עוד תרגול וזה ינוצח!',
+          action: { label: 'פתח קטגוריה', fn: "navToTab('lib')" }
+        });
+      }
+    }
+    
+    // 5. Mastered milestone
+    if (masteredCount >= 10) {
+      insights.push({
+        icon: '🏆', color: '#1D9E75',
+        title: masteredCount + ' משפטים נשלטים!',
+        body: 'מצוין! אלו משפטים שאתה שולט בהם בביטחון.',
+        action: null
+      });
+    }
+    
+    // 6. Best category
+    if (catList.length > 0) {
+      var strongest = catList[catList.length - 1];
+      if (strongest.pct >= 80) {
+        insights.push({
+          icon: '⭐', color: '#1D9E75',
+          title: 'הקטגוריה הכי חזקה: ' + strongest.name,
+          body: 'אתה שולט ב-' + strongest.pct + '% מהקטגוריה הזו. כל הכבוד!',
+          action: null
+        });
+      }
+    }
+    
+    // Render
+    var html = '';
+    insights.forEach(function(ins){
+      html += '<div style="display:flex;align-items:flex-start;gap:10px;padding:10px;background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.05);border-radius:10px;">';
+      html += '<div style="font-size:22px;flex-shrink:0;line-height:1;">' + ins.icon + '</div>';
+      html += '<div style="flex:1;min-width:0;">';
+      html += '<div style="color:' + ins.color + ';font-size:12px;font-weight:700;margin-bottom:3px;">' + ins.title + '</div>';
+      html += '<div style="color:#a0b8c8;font-size:11px;line-height:1.5;">' + ins.body + '</div>';
+      if (ins.action) {
+        html += '<button onclick="' + ins.action.fn + '()" style="margin-top:6px;background:rgba(' + (ins.color === '#1D9E75' ? '29,158,117' : (ins.color === '#c0392b' ? '192,57,43' : (ins.color === '#D4A24E' ? '212,162,78' : '212,134,46'))) + ',0.15);border:1px solid ' + ins.color + ';color:' + ins.color + ';border-radius:6px;padding:5px 12px;font-size:11px;font-weight:700;cursor:pointer;font-family:inherit;">' + ins.action.label + ' ◀</button>';
+      }
+      html += '</div></div>';
+    });
+    
+    if (insights.length === 0) {
+      html = '<div style="text-align:center;color:#7a9ab5;padding:20px;font-size:12px;">טרם נאספו נתונים. תרגלו קצת ותקבלו תובנות!</div>';
+    }
+    
+    container.innerHTML = html;
+  } catch(e) { console.warn('renderInsights error:', e); }
+}
+
 function renderProgress(){
+  try { renderInsights(); } catch(e) {}
+  
   try {
     var learned = JSON.parse(localStorage.getItem('learned_phrases') || '{}');
     var practiced = JSON.parse(localStorage.getItem('practiced_phrases') || '{}');
@@ -4542,7 +4715,7 @@ function bldCats(){
   if (!DB || DB.length === 0) {
     loadEl.innerHTML = '<div style="text-align:center;padding:20px;color:#D4862E;">' +
       'מתחבר לשרת...<br><br>' +
-      '<div style="font-size:11px;color:#7a9ab5;">v20260609-1314</div><br>' +
+      '<div style="font-size:11px;color:#7a9ab5;">v20260609-1329</div><br>' +
       '<button onclick="location.reload(true)" style="padding:10px 20px;background:#D4862E;color:#fff;border:none;border-radius:8px;font-family:inherit;cursor:pointer;font-weight:700;margin-top:10px;">🔄 רענן</button>' +
       '</div>';
     return;
