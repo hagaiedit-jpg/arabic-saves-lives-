@@ -2242,7 +2242,7 @@ body.day-mode #prog-achievements div[style*="color:#D4A24E"] {
       </div>
     </div>
     
-    <div class="loading" id="cats-loading"><div style="text-align:center;padding:20px;"><div style="font-size:16px;color:#D4862E;margin-bottom:8px;">טוען...</div><div style="font-size:10px;color:#7a9ab5;opacity:0.6;">v20260610-1637</div></div></div>
+    <div class="loading" id="cats-loading"><div style="text-align:center;padding:20px;"><div style="font-size:16px;color:#D4862E;margin-bottom:8px;">טוען...</div><div style="font-size:10px;color:#7a9ab5;opacity:0.6;">v20260610-1642</div></div></div>
     <div class="cgrid" id="cgrid" style="display:none;"></div>
   </div>
   <div id="vlist" class="scr">
@@ -6534,7 +6534,7 @@ function bldCats(){
   if (!DB || DB.length === 0) {
     loadEl.innerHTML = '<div style="text-align:center;padding:20px;color:#D4862E;">' +
       'מתחבר לשרת...<br><br>' +
-      '<div style="font-size:11px;color:#7a9ab5;">v20260610-1637</div><br>' +
+      '<div style="font-size:11px;color:#7a9ab5;">v20260610-1642</div><br>' +
       '<button onclick="location.reload(true)" style="padding:10px 20px;background:#D4862E;color:#fff;border:none;border-radius:8px;font-family:inherit;cursor:pointer;font-weight:700;margin-top:10px;">🔄 רענן</button>' +
       '</div>';
     return;
@@ -7078,7 +7078,6 @@ var SCN_CATEGORIES = [
       {id:'שיחת היכרות', icon:'🆔', title:'שיחת היכרות'},
       {id:'תשאול מבוקש', icon:'🎯', title:'תשאול מבוקש'},
       {id:'מבוקש מתכחש', icon:'👤', title:'מבוקש המתכחש לזהותו'},
-      {id:'תפיסת מחבל ללא מתשאל', icon:'🆘', title:'תפיסת מחבל ללא מתשאל'},
       {id:'זיהוי שקרים', icon:'🕵️', title:'זיהוי שקרים'},
       {id:'איתור מבוקש', icon:'📍', title:'איתור מבוקש'}
     ]
@@ -7172,13 +7171,6 @@ function renderScnGrid(){
           var phrases = (typeof sourceList !== 'undefined' && sourceList) ?
             sourceList.filter(function(p){return p.cat === s.id;}) : [];
           var ready = phrases.length > 0;
-          // Special case: "תפיסת מחבל" - check by Hebrew text
-          if (!ready && s.id === 'תפיסת מחבל ללא מתשאל' && typeof SCENARIO !== 'undefined') {
-            var capturedPhrases = ['תשתוק! אל תזוז!', 'מה שמך?', 'אני מפחד! בבקשה!'];
-            ready = capturedPhrases.some(function(h){
-              return SCENARIO.find(function(p){ return p.he && p.he.trim() === h.trim(); });
-            });
-          }
           var bg = ready ? '#1F3147' : 'rgba(31,49,71,0.5)';
           var opacity = ready ? '1' : '0.6';
           var border = ready ? 'rgba(29,158,117,0.4)' : 'rgba(212,162,78,0.15)';
@@ -7248,39 +7240,6 @@ function scnOpen(scnId){
     }
     if (typeof sourceList === 'undefined' || !sourceList) return;
     var steps = sourceList.filter(function(p){return p.cat === scnId;});
-    
-    // SPECIAL CASE: "תפיסת מחבל ללא מתשאל" - find by Hebrew text
-    // because phrases might be in "מבצעי" category
-    if (scnId === 'תפיסת מחבל ללא מתשאל' && steps.length === 0) {
-      var SCENARIO_DIALOGUE = [
-        { he: 'תשתוק! אל תזוז!', step: 1, civilian: false },
-        { he: 'אני לא עשיתי כלום!', step: 2, civilian: true },
-        { he: 'אל תפחד. אנחנו לא נזיק לך.', step: 3, civilian: false },
-        { he: 'אני מפחד! בבקשה!', step: 4, civilian: true },
-        { he: 'מה שמך?', step: 5, civilian: false },
-        { he: 'שמי אחמד', step: 6, civilian: true },
-        { he: 'מאיפה אתה? תעודת הזהות!', step: 7, civilian: false },
-        { he: 'אני מעזה. אין לי תעודת זהות.', step: 8, civilian: true },
-        { he: 'ספר את האמת! ראיתי מה עשית.', step: 9, civilian: false },
-        { he: 'אני אומר לך את האמת! צריך עזרה!', step: 10, civilian: true },
-        { he: 'פעם אחרונה! מה אתה עושה כאן?', step: 11, civilian: false },
-        { he: 'אני עובד אדמה. רק חיפשתי לחם.', step: 12, civilian: true }
-      ];
-      
-      // Search for each by Hebrew text
-      steps = [];
-      SCENARIO_DIALOGUE.forEach(function(item){
-        var found = sourceList.find(function(p){
-          return p.he && p.he.trim() === item.he.trim();
-        });
-        if (found) {
-          // Clone with proper tags for dialogue display
-          var cloned = Object.assign({}, found);
-          cloned.tags = 'step' + item.step + (item.civilian ? ',civilian' : '');
-          steps.push(cloned);
-        }
-      });
-    }
     
     steps.sort(function(a, b){
       var aMatch = (a.tags || '').match(/step(\d+)/);
