@@ -1718,6 +1718,13 @@ body.day-mode #prog-achievements div[style*="color:#D4A24E"] {
   color: #a85200 !important;
 }
 
+
+/* === Badge Pulse Animation === */
+@keyframes badgePulse {
+  0%, 100% { transform: scale(1); box-shadow: 0 2px 6px rgba(231,76,60,0.5); }
+  50% { transform: scale(1.12); box-shadow: 0 2px 12px rgba(231,76,60,0.8); }
+}
+
 </style>
 </head>
 <body>
@@ -1816,7 +1823,9 @@ body.day-mode #prog-achievements div[style*="color:#D4A24E"] {
     
     <!-- Quick Access - 3 main actions -->
     <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin-bottom:10px;">
-      <div onclick="navToTab('qk')" style="background:linear-gradient(160deg,#1F3147 0%,#243a55 100%);border:1px solid rgba(192,57,43,0.4);border-radius:14px;padding:18px 8px;text-align:center;cursor:pointer;box-shadow:0 2px 8px rgba(0,0,0,0.2);">
+      <div onclick="navToTab('qk')" style="background:linear-gradient(160deg,#1F3147 0%,#243a55 100%);border:1px solid rgba(192,57,43,0.4);border-radius:14px;padding:18px 8px;text-align:center;cursor:pointer;box-shadow:0 2px 8px rgba(0,0,0,0.2);position:relative;">
+        <!-- Red badge for daily challenge -->
+        <div id="home-emerg-badge" style="display:none;position:absolute;top:6px;right:6px;background:#e74c3c;color:#fff;font-size:11px;font-weight:900;border-radius:50%;width:22px;height:22px;line-height:22px;text-align:center;box-shadow:0 2px 6px rgba(231,76,60,0.5);animation:badgePulse 2s ease-in-out infinite;">1</div>
         <div style="font-size:28px;margin-bottom:6px;">🚨</div>
         <div style="color:#c0392b;font-size:12px;font-weight:700;">חירום</div>
       </div>
@@ -2155,6 +2164,24 @@ body.day-mode #prog-achievements div[style*="color:#D4A24E"] {
     <div id="emerg-home">
       <div class="stitle">🚨 חירום</div>
       <div style="color:#7a9ab5;font-size:12px;margin-bottom:14px;">בחירת סיטואציה</div>
+      
+      <!-- Daily Emergency Challenge Card -->
+      <div id="emerg-challenge-card" style="display:none;background:linear-gradient(135deg,#c0392b 0%,#922d22 100%);border-radius:14px;padding:14px 16px;margin-bottom:14px;cursor:pointer;box-shadow:0 4px 14px rgba(192,57,43,0.35);position:relative;overflow:hidden;" onclick="startEmergencyChallenge()">
+        <div style="position:absolute;top:6px;left:8px;background:#fff;color:#c0392b;font-size:9px;font-weight:900;padding:3px 8px;border-radius:6px;letter-spacing:0.5px;">חדש!</div>
+        <div style="display:flex;align-items:center;gap:14px;">
+          <div style="font-size:32px;flex-shrink:0;">⚡</div>
+          <div style="flex:1;min-width:0;">
+            <div class="keep-white" style="color:#fff;font-size:14px;font-weight:800;margin-bottom:2px;">אתגר חירום היום</div>
+            <div class="keep-white" style="color:rgba(255,255,255,0.9);font-size:11px;line-height:1.4;">10 שניות. סיטואציה אקראית. בחן אינסטינקט.</div>
+          </div>
+          <div class="keep-white" style="color:#fff;font-size:22px;flex-shrink:0;">◀</div>
+        </div>
+      </div>
+      <div id="emerg-challenge-done" style="display:none;background:rgba(29,158,117,0.1);border:1px solid rgba(29,158,117,0.3);border-radius:14px;padding:14px 16px;margin-bottom:14px;text-align:center;">
+        <div style="color:#1D9E75;font-size:13px;font-weight:700;">✅ אתגר החירום של היום הושלם!</div>
+        <div style="color:#a0b8c8;font-size:11px;margin-top:4px;">חזרו מחר לאתגר חדש 🎯</div>
+      </div>
+      
       <div class="emerg-grid" id="emerg-grid"></div>
     </div>
     <div id="emerg-list" style="display:none;">
@@ -2215,7 +2242,7 @@ body.day-mode #prog-achievements div[style*="color:#D4A24E"] {
       </div>
     </div>
     
-    <div class="loading" id="cats-loading"><div style="text-align:center;padding:20px;"><div style="font-size:16px;color:#D4862E;margin-bottom:8px;">טוען...</div><div style="font-size:10px;color:#7a9ab5;opacity:0.6;">v20260609-1933</div></div></div>
+    <div class="loading" id="cats-loading"><div style="text-align:center;padding:20px;"><div style="font-size:16px;color:#D4862E;margin-bottom:8px;">טוען...</div><div style="font-size:10px;color:#7a9ab5;opacity:0.6;">v20260610-0736</div></div></div>
     <div class="cgrid" id="cgrid" style="display:none;"></div>
   </div>
   <div id="vlist" class="scr">
@@ -4194,6 +4221,247 @@ function fixPrepPathProgress() {
   } catch(e) {}
 }
 
+
+// === Daily Emergency Challenge System ===
+function getEmergencyChallengeStatus() {
+  try {
+    var today = new Date().toDateString();
+    var lastDone = localStorage.getItem('emerg_challenge_done_date');
+    return {
+      hasChallenge: lastDone !== today,
+      doneToday: lastDone === today
+    };
+  } catch(e) { return { hasChallenge: true, doneToday: false }; }
+}
+
+function updateEmergencyChallengeBadge() {
+  try {
+    var status = getEmergencyChallengeStatus();
+    var badge = document.getElementById('home-emerg-badge');
+    if (badge) {
+      badge.style.display = status.hasChallenge ? 'block' : 'none';
+    }
+    
+    var card = document.getElementById('emerg-challenge-card');
+    var doneCard = document.getElementById('emerg-challenge-done');
+    if (card) card.style.display = status.hasChallenge ? 'block' : 'none';
+    if (doneCard) doneCard.style.display = status.doneToday ? 'block' : 'none';
+  } catch(e) {}
+}
+
+function pickEmergencyChallengeQuestion() {
+  // Pick a random phrase with 'why' (situation) - emergency-focused
+  if (!DB || DB.length === 0) return null;
+  
+  // Prefer phrases from emergency-related categories
+  var emergencyCats = ['עצירת תנועה', 'בידוק וזיהוי', 'מגע ראשוני', 'קהל ואזרחים', 'שליטה בבית'];
+  var pool = DB.filter(function(p){
+    return p.he && p.ar && p.why && p.why.length > 8 && 
+           emergencyCats.indexOf(p.cat) !== -1;
+  });
+  
+  if (pool.length < 4) {
+    // Fallback to any with why
+    pool = DB.filter(function(p){ return p.he && p.ar && p.why && p.why.length > 8; });
+  }
+  if (pool.length < 4) return null;
+  
+  var shuffled = pool.slice().sort(function(){ return Math.random() - 0.5; });
+  var correct = shuffled[0];
+  var distractors = shuffled.slice(1, 4);
+  var options = distractors.concat([correct]).sort(function(){ return Math.random() - 0.5; });
+  
+  return {
+    phrase: correct,
+    options: options,
+    correctId: correct.id
+  };
+}
+
+function startEmergencyChallenge() {
+  var question = pickEmergencyChallengeQuestion();
+  if (!question) {
+    alert('צריך יותר משפטים במאגר עם תיאור סיטואציה');
+    return;
+  }
+  
+  window._emergChallenge = {
+    question: question,
+    timeLeft: 10,
+    timer: null,
+    answered: false
+  };
+  
+  showEmergencyChallengeModal();
+}
+
+function showEmergencyChallengeModal() {
+  var q = window._emergChallenge.question;
+  
+  var overlay = document.createElement('div');
+  overlay.id = 'emerg-challenge-overlay';
+  overlay.style.cssText = 'position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.85);z-index:99999;display:flex;align-items:center;justify-content:center;padding:20px;overflow-y:auto;';
+  
+  var card = document.createElement('div');
+  card.style.cssText = 'background:linear-gradient(135deg,#1A2B3C 0%,#0E1B2E 100%);border:2px solid #e74c3c;border-radius:18px;padding:20px;max-width:380px;width:100%;box-shadow:0 8px 30px rgba(231,76,60,0.4);';
+  
+  var html = '';
+  
+  // Header with timer
+  html += '<div style="text-align:center;margin-bottom:14px;">';
+  html += '<div style="color:#e74c3c;font-size:11px;font-weight:800;letter-spacing:1px;margin-bottom:6px;">⚡ אתגר חירום</div>';
+  html += '<div id="emerg-timer-circle" style="display:inline-flex;align-items:center;justify-content:center;width:60px;height:60px;border-radius:50%;background:radial-gradient(circle,#c0392b 0%,#922d22 100%);border:3px solid #e74c3c;box-shadow:0 0 20px rgba(231,76,60,0.4);">';
+  html += '<span id="emerg-timer-text" style="color:#fff;font-size:28px;font-weight:900;">10</span>';
+  html += '</div>';
+  html += '<div style="color:#a0b8c8;font-size:10px;margin-top:4px;font-weight:700;letter-spacing:1px;">שניות</div>';
+  html += '</div>';
+  
+  // Situation
+  html += '<div style="background:linear-gradient(135deg,rgba(231,76,60,0.15) 0%,rgba(192,57,43,0.1) 100%);border:1px solid rgba(231,76,60,0.4);border-radius:12px;padding:12px;margin-bottom:14px;">';
+  html += '<div style="color:#e74c3c;font-size:10px;font-weight:800;letter-spacing:1px;margin-bottom:6px;">📍 הסיטואציה</div>';
+  html += '<div style="color:#E8D9B8;font-size:13px;line-height:1.5;">' + (q.phrase.why || 'מה תאמר?') + '</div>';
+  html += '</div>';
+  
+  // Question prompt
+  html += '<div style="color:#D4A24E;font-size:12px;font-weight:700;margin-bottom:8px;text-align:center;">🎯 מה תאמר?</div>';
+  
+  // Options
+  html += '<div id="emerg-options" style="display:grid;gap:6px;">';
+  q.options.forEach(function(opt, idx){
+    html += '<div onclick="emergChallengeAnswer(' + idx + ')" class="emerg-opt" data-opt-idx="' + idx + '" style="background:#1F3147;border:1px solid #2A3D52;color:#fff;border-radius:10px;padding:10px 12px;cursor:pointer;text-align:right;line-height:1.4;transition:all 0.2s;">';
+    html += '<div style="color:#fff;font-size:15px;font-weight:700;margin-bottom:2px;">' + (opt.trans || opt.ar || '') + '</div>';
+    if (opt.ar) {
+      html += '<div style="color:#E8D9B8;font-size:11px;font-family:Georgia,serif;">' + opt.ar + '</div>';
+    }
+    html += '</div>';
+  });
+  html += '</div>';
+  
+  html += '<div id="emerg-feedback" style="display:none;margin-top:12px;"></div>';
+  
+  // Close button (small, in corner)
+  html += '<button onclick="closeEmergChallenge()" style="position:absolute;top:10px;left:10px;background:transparent;border:none;color:#7a9ab5;font-size:20px;cursor:pointer;font-family:inherit;padding:4px 8px;">✕</button>';
+  
+  card.style.position = 'relative';
+  card.innerHTML = html;
+  overlay.appendChild(card);
+  document.body.appendChild(overlay);
+  
+  // Start timer
+  window._emergChallenge.timer = setInterval(function(){
+    window._emergChallenge.timeLeft--;
+    var t = document.getElementById('emerg-timer-text');
+    if (t) t.textContent = window._emergChallenge.timeLeft;
+    
+    if (window._emergChallenge.timeLeft <= 0) {
+      clearInterval(window._emergChallenge.timer);
+      if (!window._emergChallenge.answered) {
+        emergChallengeAnswer(-1); // timeout
+      }
+    }
+  }, 1000);
+}
+
+function emergChallengeAnswer(selectedIdx) {
+  if (window._emergChallenge.answered) return;
+  window._emergChallenge.answered = true;
+  
+  if (window._emergChallenge.timer) {
+    clearInterval(window._emergChallenge.timer);
+  }
+  
+  var q = window._emergChallenge.question;
+  var isCorrect = false;
+  var isTimeout = (selectedIdx === -1);
+  
+  if (!isTimeout) {
+    var selectedOpt = q.options[selectedIdx];
+    isCorrect = (String(selectedOpt.id) === String(q.correctId));
+  }
+  
+  // Find correct index
+  var correctIdx = -1;
+  for (var i = 0; i < q.options.length; i++) {
+    if (String(q.options[i].id) === String(q.correctId)) {
+      correctIdx = i;
+      break;
+    }
+  }
+  
+  // Color options
+  var buttons = document.querySelectorAll('.emerg-opt');
+  buttons.forEach(function(btn){
+    btn.style.cursor = 'default';
+    btn.onclick = null;
+    var btnIdx = parseInt(btn.getAttribute('data-opt-idx'), 10);
+    if (btnIdx === correctIdx) {
+      btn.style.background = 'linear-gradient(135deg,#1D9E75 0%,#0e5a3f 100%)';
+      btn.style.borderColor = '#1D9E75';
+    } else if (btnIdx === selectedIdx && !isCorrect) {
+      btn.style.background = 'linear-gradient(135deg,#c0392b 0%,#922d22 100%)';
+      btn.style.borderColor = '#c0392b';
+    } else {
+      btn.style.opacity = '0.4';
+    }
+  });
+  
+  // Mark today as done
+  try {
+    localStorage.setItem('emerg_challenge_done_date', new Date().toDateString());
+    var count = parseInt(localStorage.getItem('emerg_challenge_count') || '0', 10);
+    localStorage.setItem('emerg_challenge_count', String(count + 1));
+    if (isCorrect) {
+      var correct = parseInt(localStorage.getItem('emerg_challenge_correct') || '0', 10);
+      localStorage.setItem('emerg_challenge_correct', String(correct + 1));
+    }
+  } catch(e) {}
+  
+  // Show feedback
+  var feedbackEl = document.getElementById('emerg-feedback');
+  if (feedbackEl) {
+    var msg, color, bgColor;
+    if (isCorrect) {
+      msg = '🌟 אינסטינקט חד! תגובה מצוינת';
+      color = '#1D9E75';
+      bgColor = 'rgba(29,158,117,0.15)';
+    } else if (isTimeout) {
+      msg = '⏰ הזמן נגמר!';
+      color = '#D4862E';
+      bgColor = 'rgba(212,134,46,0.15)';
+    } else {
+      msg = '🎯 בפעם הבאה!';
+      color = '#c0392b';
+      bgColor = 'rgba(192,57,43,0.15)';
+    }
+    
+    var html = '<div style="background:' + bgColor + ';border:1px solid ' + color + ';border-radius:10px;padding:12px;">';
+    html += '<div style="color:' + color + ';font-size:13px;font-weight:700;text-align:center;margin-bottom:8px;">' + msg + '</div>';
+    html += '<div style="border-top:1px solid rgba(255,255,255,0.05);padding-top:8px;">';
+    html += '<div style="color:#a0b8c8;font-size:10px;margin-bottom:3px;text-align:center;">התשובה הנכונה:</div>';
+    html += '<div style="color:#fff;font-size:16px;font-weight:700;text-align:center;line-height:1.4;">' + (q.phrase.trans || '') + '</div>';
+    html += '<div style="color:#E8D9B8;font-size:12px;text-align:center;font-family:Georgia,serif;margin-top:2px;">' + (q.phrase.ar || '') + '</div>';
+    html += '<div style="color:#a0b8c8;font-size:10px;text-align:center;font-style:italic;margin-top:4px;">(' + (q.phrase.he || '') + ')</div>';
+    html += '</div>';
+    html += '<button onclick="closeEmergChallenge()" style="background:#c0392b;border:none;color:#fff;border-radius:8px;padding:10px 22px;font-size:13px;font-weight:700;cursor:pointer;font-family:inherit;margin-top:12px;display:block;width:100%;">סגור ◀</button>';
+    html += '</div>';
+    feedbackEl.style.display = 'block';
+    feedbackEl.innerHTML = html;
+  }
+  
+  // Update badge
+  updateEmergencyChallengeBadge();
+}
+
+function closeEmergChallenge() {
+  var overlay = document.getElementById('emerg-challenge-overlay');
+  if (overlay) overlay.remove();
+  if (window._emergChallenge && window._emergChallenge.timer) {
+    clearInterval(window._emergChallenge.timer);
+  }
+  window._emergChallenge = null;
+  updateEmergencyChallengeBadge();
+}
+
 function renderHome(){
   // Check if we need to use a freeze (and show notification)
   try { tryUseStreakFreeze(); } catch(e) {}
@@ -4204,6 +4472,9 @@ function renderHome(){
   
   // Auto-check prep path day completion
   try { autoCheckPrepDayCompletion(); } catch(e) {}
+  
+  // Update emergency challenge badge
+  try { updateEmergencyChallengeBadge(); } catch(e) {}
 
   try {
     var hour = new Date().getHours();
@@ -6260,7 +6531,7 @@ function bldCats(){
   if (!DB || DB.length === 0) {
     loadEl.innerHTML = '<div style="text-align:center;padding:20px;color:#D4862E;">' +
       'מתחבר לשרת...<br><br>' +
-      '<div style="font-size:11px;color:#7a9ab5;">v20260609-1933</div><br>' +
+      '<div style="font-size:11px;color:#7a9ab5;">v20260610-0736</div><br>' +
       '<button onclick="location.reload(true)" style="padding:10px 20px;background:#D4862E;color:#fff;border:none;border-radius:8px;font-family:inherit;cursor:pointer;font-weight:700;margin-top:10px;">🔄 רענן</button>' +
       '</div>';
     return;
@@ -10245,6 +10516,11 @@ document.addEventListener('click', function(e){
 });
 
 function navToTab(tabId){
+  // Update emergency challenge state when entering qk tab
+  if (typeof tab === 'string' && tab === 'qk') {
+    try { setTimeout(function(){ updateEmergencyChallengeBadge(); }, 50); } catch(e) {}
+  }
+  
   // SIMPLE VERSION - minimal logic, maximum reliability
   try {
     // 1. Close more menu
