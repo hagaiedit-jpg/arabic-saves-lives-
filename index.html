@@ -2242,7 +2242,7 @@ body.day-mode #prog-achievements div[style*="color:#D4A24E"] {
       </div>
     </div>
     
-    <div class="loading" id="cats-loading"><div style="text-align:center;padding:20px;"><div style="font-size:16px;color:#D4862E;margin-bottom:8px;">טוען...</div><div style="font-size:10px;color:#7a9ab5;opacity:0.6;">v20260611-1644</div></div></div>
+    <div class="loading" id="cats-loading"><div style="text-align:center;padding:20px;"><div style="font-size:16px;color:#D4862E;margin-bottom:8px;">טוען...</div><div style="font-size:10px;color:#7a9ab5;opacity:0.6;">v20260611-1731</div></div></div>
     <div class="cgrid" id="cgrid" style="display:none;"></div>
   </div>
   <div id="vlist" class="scr">
@@ -6534,7 +6534,7 @@ function bldCats(){
   if (!DB || DB.length === 0) {
     loadEl.innerHTML = '<div style="text-align:center;padding:20px;color:#D4862E;">' +
       'מתחבר לשרת...<br><br>' +
-      '<div style="font-size:11px;color:#7a9ab5;">v20260611-1644</div><br>' +
+      '<div style="font-size:11px;color:#7a9ab5;">v20260611-1731</div><br>' +
       '<button onclick="location.reload(true)" style="padding:10px 20px;background:#D4862E;color:#fff;border:none;border-radius:8px;font-family:inherit;cursor:pointer;font-weight:700;margin-top:10px;">🔄 רענן</button>' +
       '</div>';
     return;
@@ -7069,6 +7069,7 @@ var SCN_CATEGORIES = [
       {id:'דיאלוג חיפוש בבית', icon:'🔎', title:'דיאלוג חיפוש בבית'},
       {id:'הרגעת ילדים בבית', icon:'👶', title:'הרגעת ילדים בבית'},
       {id:'אישה צועקת', icon:'😱', title:'אישה צועקת מהחדר'},
+      {id:'כניסה למבנה', icon:'🌅', title:'כניסה למבנה - חשד בטון'},
       {id:'זיכוי ובידוק', icon:'👋', title:'זיכוי ובידוק'},
       {id:'זיכוי מרחוק', icon:'📏', title:'זיכוי מרחוק'},
       {id:'בידוק אישה', icon:'👩', title:'בידוק אישה'}
@@ -7082,6 +7083,10 @@ var SCN_CATEGORIES = [
       {id:'תשאול מבוקש', icon:'🎯', title:'תשאול מבוקש'},
       {id:'מבוקש מתכחש', icon:'👤', title:'מבוקש המתכחש לזהותו'},
       {id:'שייח ברכב', icon:'🕵️', title:'שייח/חשוד מדבר ברכב'},
+      {id:'שמיעת מחבלים', icon:'📡', title:'שמיעת מחבלים מתכננים'},
+      {id:'דייר מציע מידע', icon:'🏠', title:'דייר מציע עזרה - מידע מהשטח'},
+      {id:'מבוקש מבקש לדבר', icon:'🎯', title:'מבוקש מבקש לדבר'},
+      {id:'חיכוך בכפר', icon:'🏪', title:'חיכוך עם תושבים בכפר'},
       {id:'זיהוי שקרים', icon:'🕵️', title:'זיהוי שקרים'},
       {id:'איתור מבוקש', icon:'📍', title:'איתור מבוקש'}
     ]
@@ -7092,6 +7097,8 @@ var SCN_CATEGORIES = [
       {id:'כריזה לרכב', icon:'📢', title:'כריזה לרכב'},
       {id:'דיאלוג במחסום', icon:'💬', title:'דיאלוג במחסום'},
       {id:'רועה צאן', icon:'🚜', title:'רועה צאן בציר'},
+      {id:'עצירת רכב מחסום', icon:'🚗', title:'עצירת רכב במחסום'},
+      {id:'טלפון אבוד', icon:'📞', title:'חיפוש טלפון אבוד בכפר'},
       {id:'הוצאת נהג מהרכב', icon:'🚪', title:'הוצאת נהג מהרכב'},
       {id:'בדיקה גופנית והליכה', icon:'🔍', title:'בדיקה גופנית והליכה'},
       {id:'חיפוש פנימי ברכב', icon:'🚗', title:'חיפוש פנימי ברכב'},
