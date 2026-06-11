@@ -2242,7 +2242,7 @@ body.day-mode #prog-achievements div[style*="color:#D4A24E"] {
       </div>
     </div>
     
-    <div class="loading" id="cats-loading"><div style="text-align:center;padding:20px;"><div style="font-size:16px;color:#D4862E;margin-bottom:8px;">טוען...</div><div style="font-size:10px;color:#7a9ab5;opacity:0.6;">v20260611-1731</div></div></div>
+    <div class="loading" id="cats-loading"><div style="text-align:center;padding:20px;"><div style="font-size:16px;color:#D4862E;margin-bottom:8px;">טוען...</div><div style="font-size:10px;color:#7a9ab5;opacity:0.6;">v20260611-2024</div></div></div>
     <div class="cgrid" id="cgrid" style="display:none;"></div>
   </div>
   <div id="vlist" class="scr">
@@ -6444,6 +6444,8 @@ async function loadData(){
     document.getElementById('status-badge').style.background='#7a9ab5';
     bldCats();
   }
+  try { refreshDictIndex(); } catch(e) {}
+
 }
 
 function mp(p){
@@ -6534,7 +6536,7 @@ function bldCats(){
   if (!DB || DB.length === 0) {
     loadEl.innerHTML = '<div style="text-align:center;padding:20px;color:#D4862E;">' +
       'מתחבר לשרת...<br><br>' +
-      '<div style="font-size:11px;color:#7a9ab5;">v20260611-1731</div><br>' +
+      '<div style="font-size:11px;color:#7a9ab5;">v20260611-2024</div><br>' +
       '<button onclick="location.reload(true)" style="padding:10px 20px;background:#D4862E;color:#fff;border:none;border-radius:8px;font-family:inherit;cursor:pointer;font-weight:700;margin-top:10px;">🔄 רענן</button>' +
       '</div>';
     return;
@@ -8614,23 +8616,294 @@ function opHC(cat){
 
 // DICTIONARY
 let DICT_DATA=[];
+// === SMART AUTOMATIC DICTIONARY ===
+// Builds a word index from ALL phrases in the database
+// Each word links to phrases that contain it
+var SMART_DICT_INDEX = null;  // {word: [phrase_refs]}
+
+// Common words to skip (too common, not useful in dictionary)
+var DICT_STOPWORDS_HE = ['את','של','על','לא','אני','אתה','אתם','אנחנו','הוא','היא','הם','הן','זה','זאת','עם','כי','גם','אם','או','כן','לי','לך','לו','לה'];
+var DICT_STOPWORDS_AR = ['ال','و','في','من','على','إلى','عن','هو','هي','هم','هن','أنا','أنت','أنتم','نحن','هذا','هذه','مع','إذا','أو','نعم','لي','لك','له','لها'];
+
+function buildSmartDictIndex() {
+  // Build index from ALL phrase sources
+  var allPhrases = [];
+  
+  // Collect from all data sources
+  try {
+    if (typeof DB !== 'undefined' && DB) DB.forEach(p => allPhrases.push({...p, _source: 'DB', _sectionName: 'מבצעי'}));
+    if (typeof DAILY !== 'undefined' && DAILY) DAILY.forEach(p => allPhrases.push({...p, _source: 'DAILY', _sectionName: 'יומיומי'}));
+    if (typeof HRT !== 'undefined' && HRT) HRT.forEach(p => allPhrases.push({...p, _source: 'HRT', _sectionName: 'פותחים לב'}));
+    if (typeof SEM !== 'undefined' && SEM) SEM.forEach(p => allPhrases.push({...p, _source: 'SEM', _sectionName: 'סמנטי'}));
+    if (typeof CUS !== 'undefined' && CUS) CUS.forEach(p => allPhrases.push({...p, _source: 'CUS', _sectionName: 'מנהגים'}));
+    if (typeof ARTS !== 'undefined' && ARTS) ARTS.forEach(p => allPhrases.push({...p, _source: 'ARTS', _sectionName: 'מאמרים'}));
+    if (typeof SCENARIO !== 'undefined' && SCENARIO) SCENARIO.forEach(p => allPhrases.push({...p, _source: 'SCN', _sectionName: 'תרחיש'}));
+    if (typeof ANNOUNCE !== 'undefined' && ANNOUNCE) ANNOUNCE.forEach(p => allPhrases.push({...p, _source: 'ANN', _sectionName: 'כריזה'}));
+    if (typeof DICT !== 'undefined' && DICT) DICT.forEach(p => allPhrases.push({...p, _source: 'DICT', _sectionName: 'מילון'}));
+    if (typeof NAVY !== 'undefined' && NAVY) NAVY.forEach(p => allPhrases.push({...p, _source: 'NAVY', _sectionName: 'ימי'}));
+  } catch(e) { console.warn('Building dict index:', e); }
+  
+  // Build index: word → list of phrases
+  var index = {};
+  
+  allPhrases.forEach(function(phrase, idx) {
+    var phraseRef = {
+      he: phrase.he || '',
+      ar: phrase.ar || '',
+      trans: phrase.trans || '',
+      cat: phrase.cat || '',
+      audio: phrase.audio_url || phrase.audio || '',
+      section: phrase._source,
+      sectionName: phrase._sectionName,
+      origIdx: idx,
+      origPhrase: phrase
+    };
+    
+    // Extract words from Hebrew, Arabic, and Transliteration
+    var allText = [(phrase.he || ''), (phrase.ar || ''), (phrase.trans || '')];
+    
+    allText.forEach(function(text) {
+      // Split by whitespace and punctuation
+      var words = text.split(/[\s.,!?;:()\[\]'"\u05F4\u05F3،؟،"'`،]+/);
+      
+      words.forEach(function(rawWord) {
+        if (!rawWord) return;
+        // Clean word - remove punctuation/marks
+        var cleanWord = rawWord.replace(/[.,!?;:()\[\]'"\u05F4\u05F3،؟"'`]/g, '').trim();
+        if (!cleanWord) return;
+        if (cleanWord.length < 2) return;
+        
+        // Skip stopwords
+        if (DICT_STOPWORDS_HE.indexOf(cleanWord) !== -1) return;
+        if (DICT_STOPWORDS_AR.indexOf(cleanWord) !== -1) return;
+        
+        // Normalize: remove Hebrew niqqud for indexing (search ignores niqqud)
+        var normalizedWord = cleanWord.replace(/[\u0591-\u05C7]/g, '').replace(/[\u064B-\u0652\u0670\u0671]/g, '');
+        if (!normalizedWord || normalizedWord.length < 2) return;
+        
+        var key = normalizedWord.toLowerCase();
+        
+        if (!index[key]) {
+          index[key] = { 
+            displayWords: new Set(),  // All forms of this word with niqqud
+            phrases: []
+          };
+        }
+        index[key].displayWords.add(cleanWord);
+        
+        // Avoid duplicate phrases (same he+ar)
+        var phraseKey = phraseRef.he + '||' + phraseRef.ar;
+        var alreadyAdded = index[key].phrases.some(function(p){
+          return (p.he + '||' + p.ar) === phraseKey;
+        });
+        if (!alreadyAdded) {
+          index[key].phrases.push(phraseRef);
+        }
+      });
+    });
+  });
+  
+  // Convert displayWords Set to Array
+  Object.keys(index).forEach(function(key){
+    index[key].displayWords = Array.from(index[key].displayWords);
+  });
+  
+  SMART_DICT_INDEX = index;
+  console.log('Smart dictionary built:', Object.keys(index).length, 'unique words');
+  return index;
+}
+
 function renderDict(){
-  DICT_DATA=DICT;
+  // Build index if not built yet
+  if (!SMART_DICT_INDEX) {
+    buildSmartDictIndex();
+  }
   searchDict();
 }
+
 function searchDict(){
-  const q=document.getElementById('dict-search').value.trim().toLowerCase();
-  const filtered=q?DICT_DATA.filter(d=>
-    d.he.toLowerCase().includes(q)||
-    d.trans.toLowerCase().includes(q)||
-    (d.ar&&d.ar.includes(q))
-  ):DICT_DATA;
-  document.getElementById('dict-results').innerHTML=filtered.length?filtered.map((d,i)=>`
-    <div class="dict-item" onclick="opDictWord(${DICT.indexOf(d)})">
-      <div class="dict-he">${d.he}</div>
-      <div class="dict-trans">${d.trans}</div>
-      <div class="dict-ar">${d.ar}</div>
-    </div>`).join(''):'<div class="empty">'+(q?'לא נמצא':'הזיני מילים דרך ניהול')+'</div>';
+  if (!SMART_DICT_INDEX) buildSmartDictIndex();
+  
+  var q = (document.getElementById('dict-search').value || '').trim().toLowerCase();
+  // Normalize search - remove niqqud
+  var normalizedQ = q.replace(/[\u0591-\u05C7]/g, '').replace(/[\u064B-\u0652\u0670\u0671]/g, '');
+  
+  var resultsEl = document.getElementById('dict-results');
+  if (!resultsEl) return;
+  
+  if (!normalizedQ) {
+    // Show empty state with stats
+    var totalWords = Object.keys(SMART_DICT_INDEX).length;
+    var totalPhrases = 0;
+    Object.values(SMART_DICT_INDEX).forEach(function(v){ totalPhrases += v.phrases.length; });
+    
+    resultsEl.innerHTML = '<div style="text-align:center;padding:30px 20px;color:#a0b8c8;">' +
+      '<div style="font-size:48px;margin-bottom:12px;">📖</div>' +
+      '<div style="font-size:16px;color:#D4A24E;font-weight:700;margin-bottom:8px;">המילון החכם שלנו</div>' +
+      '<div style="font-size:13px;margin-bottom:16px;">' + totalWords + ' מילים ייחודיות · עם הקלטות בהקשר אמיתי</div>' +
+      '<div style="background:rgba(212,162,78,0.1);border:1px solid rgba(212,162,78,0.3);border-radius:10px;padding:12px;margin-top:8px;font-size:12px;line-height:1.7;color:#D4A24E;">' +
+      '🔍 חפשי בעברית, ערבית, או תעתיק<br>' +
+      '🎤 כל מילה - לחיצה תפתח את המשפט המלא עם ההקלטה<br>' +
+      '✨ מתעדכן אוטומטית עם כל משפט חדש' +
+      '</div></div>';
+    return;
+  }
+  
+  // Find matching words
+  var matches = [];
+  Object.keys(SMART_DICT_INDEX).forEach(function(key) {
+    if (key.indexOf(normalizedQ) !== -1) {
+      matches.push({
+        key: key,
+        ...SMART_DICT_INDEX[key]
+      });
+    }
+  });
+  
+  // Sort: exact match first, then by phrase count
+  matches.sort(function(a, b) {
+    var aExact = a.key === normalizedQ ? 1 : 0;
+    var bExact = b.key === normalizedQ ? 1 : 0;
+    if (aExact !== bExact) return bExact - aExact;
+    return b.phrases.length - a.phrases.length;
+  });
+  
+  if (matches.length === 0) {
+    resultsEl.innerHTML = '<div style="text-align:center;padding:30px;color:#a0b8c8;">' +
+      '<div style="font-size:36px;margin-bottom:8px;">🔍</div>' +
+      'לא נמצאו מילים ל-"' + escapeHtmlDict(q) + '"</div>';
+    return;
+  }
+  
+  // Render matches
+  var html = '<div style="font-size:11px;color:#7a9ab5;text-align:center;margin-bottom:10px;">נמצאו ' + matches.length + ' מילים תואמות</div>';
+  
+  matches.slice(0, 30).forEach(function(match) {
+    var displayWord = match.displayWords[0];
+    var altForms = match.displayWords.slice(1);
+    
+    html += '<div style="background:#0E1B2E;border:1px solid #2A3D52;border-radius:10px;padding:12px;margin-bottom:10px;">';
+    
+    // Word header
+    html += '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;padding-bottom:8px;border-bottom:1px solid #2A3D52;">';
+    html += '<div style="font-size:18px;font-weight:700;color:#D4A24E;">' + escapeHtmlDict(displayWord) + '</div>';
+    html += '<div style="font-size:11px;color:#7a9ab5;background:rgba(255,255,255,0.05);padding:3px 8px;border-radius:6px;">' + match.phrases.length + ' משפטים</div>';
+    html += '</div>';
+    
+    if (altForms.length > 0) {
+      html += '<div style="font-size:11px;color:#7a9ab5;margin-bottom:8px;">צורות נוספות: ' + altForms.map(escapeHtmlDict).join(', ') + '</div>';
+    }
+    
+    // Phrases that contain this word
+    match.phrases.slice(0, 5).forEach(function(p) {
+      var audioIcon = p.audio ? '🎤' : '🔇';
+      html += '<div onclick="opDictPhrase(\'' + escapeJsDict(p.he) + '\', \'' + escapeJsDict(p.ar) + '\')" style="background:rgba(255,255,255,0.03);border-right:3px solid #D4A24E;padding:8px 10px;margin-bottom:6px;border-radius:6px;cursor:pointer;transition:background 0.2s;" onmouseover="this.style.background=\'rgba(212,162,78,0.1)\'" onmouseout="this.style.background=\'rgba(255,255,255,0.03)\'">';
+      html += '<div style="display:flex;justify-content:space-between;align-items:start;gap:8px;">';
+      html += '<div style="flex:1;min-width:0;">';
+      html += '<div style="color:#fff;font-size:13px;font-weight:600;margin-bottom:3px;">' + escapeHtmlDict(p.he) + '</div>';
+      if (p.trans) html += '<div style="color:#D4A24E;font-size:13px;margin-bottom:2px;">' + escapeHtmlDict(p.trans) + '</div>';
+      html += '<div style="color:#7a9ab5;font-size:12px;direction:rtl;">' + escapeHtmlDict(p.ar) + '</div>';
+      if (p.cat) html += '<div style="color:#7a9ab5;font-size:10px;margin-top:4px;">📂 ' + escapeHtmlDict(p.sectionName || p.section) + ' / ' + escapeHtmlDict(p.cat) + '</div>';
+      html += '</div>';
+      html += '<div style="font-size:18px;flex-shrink:0;">' + audioIcon + '</div>';
+      html += '</div>';
+      html += '</div>';
+    });
+    
+    if (match.phrases.length > 5) {
+      html += '<div style="text-align:center;color:#7a9ab5;font-size:11px;margin-top:6px;">ועוד ' + (match.phrases.length - 5) + ' משפטים...</div>';
+    }
+    
+    html += '</div>';
+  });
+  
+  if (matches.length > 30) {
+    html += '<div style="text-align:center;color:#7a9ab5;font-size:12px;padding:10px;">מציג 30 מתוך ' + matches.length + ' תוצאות - חדדי את החיפוש</div>';
+  }
+  
+  resultsEl.innerHTML = html;
+}
+
+function escapeHtmlDict(str) {
+  return String(str || '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+}
+function escapeJsDict(str) {
+  return String(str || '').replace(/\\/g, '\\\\').replace(/'/g, "\\'").replace(/\n/g, '\\n');
+}
+
+// Open a phrase from dictionary search (find it in all sources)
+function opDictPhrase(he, ar) {
+  // Search all sources for this phrase
+  var allSources = [
+    { data: typeof DB !== 'undefined' ? DB : [], func: 'opP' },
+    { data: typeof DAILY !== 'undefined' ? DAILY : [], func: 'opD' },
+    { data: typeof HRT !== 'undefined' ? HRT : [], func: 'opH' },
+    { data: typeof SEM !== 'undefined' ? SEM : [], func: 'opSem' },
+    { data: typeof CUS !== 'undefined' ? CUS : [], func: 'opCus' },
+    { data: typeof ARTS !== 'undefined' ? ARTS : [], func: 'opArt' },
+    { data: typeof SCENARIO !== 'undefined' ? SCENARIO : [], func: 'opScn' },
+    { data: typeof DICT !== 'undefined' ? DICT : [], func: 'opDictWord' }
+  ];
+  
+  for (var i = 0; i < allSources.length; i++) {
+    var src = allSources[i];
+    var idx = src.data.findIndex(function(p) {
+      return (p.he || '') === he && (p.ar || '') === ar;
+    });
+    if (idx >= 0) {
+      // Try to open it
+      try {
+        if (typeof window[src.func] === 'function') {
+          window[src.func](idx);
+          return;
+        }
+      } catch(e) { console.warn(e); }
+    }
+  }
+  
+  // Fallback: show popup directly
+  showDictPopupFallback(he, ar);
+}
+
+function showDictPopupFallback(he, ar) {
+  // Find phrase to get details
+  if (!SMART_DICT_INDEX) return;
+  
+  var phraseRef = null;
+  Object.values(SMART_DICT_INDEX).some(function(entry){
+    return entry.phrases.some(function(p){
+      if (p.he === he && p.ar === ar) {
+        phraseRef = p;
+        return true;
+      }
+      return false;
+    });
+  });
+  
+  if (!phraseRef) return;
+  
+  try {
+    document.getElementById('phe').textContent = phraseRef.he;
+    document.getElementById('parsm').textContent = phraseRef.ar;
+    document.getElementById('ptrans').textContent = phraseRef.trans || '';
+    document.getElementById('pwhy').textContent = '';
+    document.getElementById('pwhyb').style.display = 'none';
+    document.getElementById('ptone').textContent = '';
+    document.getElementById('ptoneb').style.display = 'none';
+    document.querySelectorAll('.pbtn').forEach(function(b){ 
+      b.setAttribute('data-audio', phraseRef.audio || ''); 
+    });
+    window._popupAudio = phraseRef.audio || '';
+    shV('vpop');
+  } catch(e) { console.warn(e); }
+}
+
+// Rebuild index when data is reloaded
+function refreshDictIndex() {
+  SMART_DICT_INDEX = null;
+  if (document.getElementById('tab-dict') && document.getElementById('tab-dict').className.indexOf('on') !== -1) {
+    renderDict();
+  }
 }
 function opDictWord(i){
   const d=DICT[i];
