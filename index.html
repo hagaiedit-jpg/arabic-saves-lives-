@@ -2242,7 +2242,7 @@ body.day-mode #prog-achievements div[style*="color:#D4A24E"] {
       </div>
     </div>
     
-    <div class="loading" id="cats-loading"><div style="text-align:center;padding:20px;"><div style="font-size:16px;color:#D4862E;margin-bottom:8px;">טוען...</div><div style="font-size:10px;color:#7a9ab5;opacity:0.6;">v20260611-2031</div></div></div>
+    <div class="loading" id="cats-loading"><div style="text-align:center;padding:20px;"><div style="font-size:16px;color:#D4862E;margin-bottom:8px;">טוען...</div><div style="font-size:10px;color:#7a9ab5;opacity:0.6;">v20260611-2037</div></div></div>
     <div class="cgrid" id="cgrid" style="display:none;"></div>
   </div>
   <div id="vlist" class="scr">
@@ -2375,12 +2375,12 @@ body.day-mode #prog-achievements div[style*="color:#D4A24E"] {
 
 <!-- DICTIONARY TAB -->
 <div class="scr" id="tab-dict">
-  <div class="sbar"><div class="si">
-    <span style="color:#aaa;font-size:15px;">🔍</span>
-    <input id="dict-search" placeholder="חפש בעברית, ערבית או תעתיק..." oninput="searchDict()"/>
-    <button class="sx" onclick="document.getElementById('dict-search').value='';searchDict()">×</button>
-  </div></div>
-  <div class="sec" style="padding-top:10px;">
+  <div style="padding:14px 12px 100px 12px;min-height:100vh;">
+    <div style="background:#1F3147;border:1px solid #2A3D52;border-radius:12px;padding:10px;margin-bottom:14px;display:flex;align-items:center;gap:8px;">
+      <span style="color:#D4A24E;font-size:18px;">🔍</span>
+      <input id="dict-search" placeholder="חפש מילה בעברית, ערבית או תעתיק..." oninput="searchDict()" style="flex:1;background:transparent;border:none;color:#E8D9B8;font-size:15px;font-family:inherit;outline:none;direction:rtl;text-align:right;"/>
+      <button onclick="document.getElementById('dict-search').value='';searchDict()" style="background:rgba(255,255,255,0.1);border:none;color:#E8D9B8;width:28px;height:28px;border-radius:50%;cursor:pointer;font-size:16px;">×</button>
+    </div>
     <div id="dict-results"></div>
   </div>
 </div>
@@ -6536,7 +6536,7 @@ function bldCats(){
   if (!DB || DB.length === 0) {
     loadEl.innerHTML = '<div style="text-align:center;padding:20px;color:#D4862E;">' +
       'מתחבר לשרת...<br><br>' +
-      '<div style="font-size:11px;color:#7a9ab5;">v20260611-2031</div><br>' +
+      '<div style="font-size:11px;color:#7a9ab5;">v20260611-2037</div><br>' +
       '<button onclick="location.reload(true)" style="padding:10px 20px;background:#D4862E;color:#fff;border:none;border-radius:8px;font-family:inherit;cursor:pointer;font-weight:700;margin-top:10px;">🔄 רענן</button>' +
       '</div>';
     return;
@@ -11056,6 +11056,15 @@ function navToTab(tabId){
     var targetTab = document.getElementById('tab-' + tabId);
     if (targetTab) {
       targetTab.className = 'scr on';
+    }
+    
+    // Trigger render functions for specific tabs
+    if (tabId === 'dict') {
+      setTimeout(function(){ 
+        try { 
+          if (typeof renderDict === 'function') renderDict(); 
+        } catch(e) { console.warn('renderDict error:', e); }
+      }, 50);
     }
     
     // 4. Update bottom nav active state
