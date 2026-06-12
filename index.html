@@ -2242,7 +2242,7 @@ body.day-mode #prog-achievements div[style*="color:#D4A24E"] {
       </div>
     </div>
     
-    <div class="loading" id="cats-loading"><div style="text-align:center;padding:20px;"><div style="font-size:16px;color:#D4862E;margin-bottom:8px;">טוען...</div><div style="font-size:10px;color:#7a9ab5;opacity:0.6;">v20260612-0532</div></div></div>
+    <div class="loading" id="cats-loading"><div style="text-align:center;padding:20px;"><div style="font-size:16px;color:#D4862E;margin-bottom:8px;">טוען...</div><div style="font-size:10px;color:#7a9ab5;opacity:0.6;">v20260612-1157</div></div></div>
     <div class="cgrid" id="cgrid" style="display:none;"></div>
   </div>
   <div id="vlist" class="scr">
@@ -2408,7 +2408,29 @@ body.day-mode #prog-achievements div[style*="color:#D4A24E"] {
 
 <!-- ARTICLES TAB -->
 <div class="scr" id="tab-art">
-  <div id="artlv"><div class="sec"><div class="stitle">מאמרים מהשטח</div><div id="artlist"></div></div></div>
+  <div id="artlv"><div style="background:linear-gradient(135deg,rgba(231,76,60,0.15),rgba(231,76,60,0.05));border:1px solid rgba(231,76,60,0.4);border-radius:14px;padding:18px;margin:14px 12px 8px 12px;">
+    <div style="display:flex;align-items:center;gap:12px;margin-bottom:12px;">
+      <div style="font-size:32px;">🕵️</div>
+      <div>
+        <div style="color:#e74c3c;font-size:17px;font-weight:800;">מודיעין שטח</div>
+        <div style="color:#a0b8c8;font-size:11px;">המילים שאתה רואה בעבודה</div>
+      </div>
+    </div>
+    <div style="color:#E8D9B8;font-size:13px;line-height:1.7;background:rgba(0,0,0,0.2);padding:12px;border-radius:10px;">
+      <div style="color:#e74c3c;font-weight:700;margin-bottom:6px;">📌 מה תמצא כאן:</div>
+      <div style="font-size:12px;color:#c0d0e0;">
+        📰 כותרות בעיתונות הערבית<br>
+        🏛️ מינוחים פוליטיים ושלטוניים<br>
+        🚨 דיווחי שטח (עוצר, מעצר, מחסום)<br>
+        📱 שפת הרשתות החברתיות<br>
+        🔢 דיווחי נפגעים ומספרים
+      </div>
+    </div>
+    <div style="color:#D4A24E;font-size:11px;text-align:center;margin-top:10px;font-style:italic;">
+      💡 הבנת מה הצד השני אומר = יתרון מבצעי
+    </div>
+  </div>
+  <div class="sec"><div class="stitle">מאמרים מהשטח</div><div id="artlist"></div></div></div>
   <div id="artfv" style="display:none;">
     <div style="padding:16px;">
       <button class="bbtn" onclick="clsArt()" style="margin-bottom:14px;">→ חזור</button>
@@ -6536,7 +6558,7 @@ function bldCats(){
   if (!DB || DB.length === 0) {
     loadEl.innerHTML = '<div style="text-align:center;padding:20px;color:#D4862E;">' +
       'מתחבר לשרת...<br><br>' +
-      '<div style="font-size:11px;color:#7a9ab5;">v20260612-0532</div><br>' +
+      '<div style="font-size:11px;color:#7a9ab5;">v20260612-1157</div><br>' +
       '<button onclick="location.reload(true)" style="padding:10px 20px;background:#D4862E;color:#fff;border:none;border-radius:8px;font-family:inherit;cursor:pointer;font-weight:700;margin-top:10px;">🔄 רענן</button>' +
       '</div>';
     return;
@@ -10993,9 +11015,9 @@ try { renderHome(); } catch(_){}
       <div style="font-size:22px;margin-bottom:4px;">🤝</div>
       <div style="color:#E8D9B8;font-size:11px;font-weight:600;">פותחים לב</div>
     </div>
-    <div onclick="navToTab('art')" style="background:#1F3147;border-radius:10px;padding:14px 6px;text-align:center;cursor:pointer;">
-      <div style="font-size:22px;margin-bottom:4px;">📰</div>
-      <div style="color:#E8D9B8;font-size:11px;font-weight:600;">מאמרים</div>
+    <div onclick="document.getElementById('more-menu').style.display='none';navToTab('art')" style="background:linear-gradient(135deg,rgba(231,76,60,0.2),rgba(231,76,60,0.05));border:1px solid rgba(231,76,60,0.4);border-radius:10px;padding:14px 6px;text-align:center;cursor:pointer;">
+      <div style="font-size:22px;margin-bottom:4px;">🕵️</div>
+      <div style="color:#E8D9B8;font-size:11px;font-weight:600;">מודיעין שטח</div>
     </div>
     <div onclick="navToTab('nwf')" style="background:#1F3147;border-radius:10px;padding:14px 6px;text-align:center;cursor:pointer;">
       <div style="font-size:22px;margin-bottom:4px;">🆕</div>
