@@ -2267,7 +2267,7 @@ body.day-mode #prog-achievements div[style*="color:#D4A24E"] {
       </div>
     </div>
     
-    <div class="loading" id="cats-loading"><div style="text-align:center;padding:20px;"><div style="font-size:16px;color:#D4862E;margin-bottom:8px;">טוען...</div><div style="font-size:10px;color:#7a9ab5;opacity:0.6;">v20260612-1326</div></div></div>
+    <div class="loading" id="cats-loading"><div style="text-align:center;padding:20px;"><div style="font-size:16px;color:#D4862E;margin-bottom:8px;">טוען...</div><div style="font-size:10px;color:#7a9ab5;opacity:0.6;">v20260612-1358</div></div></div>
     <div class="cgrid" id="cgrid" style="display:none;"></div>
   </div>
   <div id="vlist" class="scr">
@@ -2303,6 +2303,11 @@ body.day-mode #prog-achievements div[style*="color:#D4A24E"] {
           <span class="big-icon">🔁</span>
           <span class="big-lbl">לולאה</span>
         </button>
+      </div>
+      
+      <!-- Go-to-category button (shown only when opened from dictionary) -->
+      <div id="dict-go-to-category" style="display:none;margin-top:12px;padding:12px;background:rgba(29,158,117,0.1);border:1px solid #1D9E75;border-radius:10px;text-align:center;cursor:pointer;" onclick="goToDictCategory()">
+        <div id="dict-go-to-category-text" style="color:#1D9E75;font-size:13px;font-weight:700;">🔗 פתח בקטגוריה</div>
       </div>
       <div class="ibox b" id="pwhyb"><div class="ilbl b" id="pwhylbl">למה זה חשוב</div><div class="itxt b" id="pwhy"></div></div>
       <div class="ibox o" id="ptoneb"><div class="ilbl o">טיפ ללוחם</div><div class="itxt o" id="ptone"></div></div>
@@ -6589,7 +6594,7 @@ function bldCats(){
   if (!DB || DB.length === 0) {
     loadEl.innerHTML = '<div style="text-align:center;padding:20px;color:#D4862E;">' +
       'מתחבר לשרת...<br><br>' +
-      '<div style="font-size:11px;color:#7a9ab5;">v20260612-1326</div><br>' +
+      '<div style="font-size:11px;color:#7a9ab5;">v20260612-1358</div><br>' +
       '<button onclick="location.reload(true)" style="padding:10px 20px;background:#D4862E;color:#fff;border:none;border-radius:8px;font-family:inherit;cursor:pointer;font-weight:700;margin-top:10px;">🔄 רענן</button>' +
       '</div>';
     return;
@@ -9050,6 +9055,47 @@ function showDictPopupFallback(he, ar) {
       }
     }
     
+    // Show "Open in category" button if section is known
+    var goToBtn = document.getElementById('dict-go-to-category');
+    var goToText = document.getElementById('dict-go-to-category-text');
+    if (goToBtn && goToText) {
+      var sectionTabMap = {
+        'DB': 'lib',
+        'DAILY': 'day',
+        'HRT': 'hrt',
+        'SEM': 'sem',
+        'CUS': 'cus',
+        'ARTS': 'art',
+        'INTEL': 'intel',
+        'SCN': 'scn',
+        'ANN': 'ann',
+        'NAVY': 'navy',
+        'DICT': null
+      };
+      var sectionDisplayNames = {
+        'DB': '📚 מבצעי',
+        'DAILY': '☕ יומיומי',
+        'HRT': '🤝 פותחים לב',
+        'SEM': '🧠 סמנטי',
+        'CUS': '🕌 מנהגים',
+        'ARTS': '📰 מאמרים',
+        'INTEL': '🕵️ מודיעין שטח',
+        'SCN': '🎬 תרחישים',
+        'NAVY': '⚓ ימי',
+        'ANN': '📢 כריזות'
+      };
+      
+      var targetTab = sectionTabMap[phraseRef.section];
+      if (targetTab) {
+        var displayName = sectionDisplayNames[phraseRef.section] || 'הקטגוריה';
+        goToText.textContent = '🔗 פתח בקטגוריה ' + displayName;
+        goToBtn.style.display = 'block';
+        window._dictTargetTab = targetTab;
+      } else {
+        goToBtn.style.display = 'none';
+      }
+    }
+    
     // Show the popup
     shV('vpop');
   } catch(e) { 
@@ -9369,6 +9415,10 @@ function setPopupLabel(section){
 }
 
 function closePopup(){
+  // Reset dict-specific button
+  var goToBtn = document.getElementById('dict-go-to-category');
+  if (goToBtn) goToBtn.style.display = 'none';
+  
   try {
     // Go back to category list if we have a current category, otherwise to categories grid
     if (typeof curC !== 'undefined' && curC) {
@@ -9378,6 +9428,14 @@ function closePopup(){
     }
   } catch(e) { console.warn(e); shV('vcats'); }
 }
+
+function goToDictCategory(){
+  var tab = window._dictTargetTab || 'home';
+  closePopup();
+  setTimeout(function(){ navToTab(tab); }, 200);
+}
+
+
 
 function shV(id){['vcats','vlist','vsrch','vpop'].forEach(v=>{document.getElementById(v).className='scr'+(v===id?' on':'');});}
 
@@ -9666,7 +9724,10 @@ function playPopupAudio(btn, mode) {
   }
   
   var url = window._popupAudio || '';
-  if (!url) { alert('אין הקלטה למשפט זה'); return; }
+  if (!url) { 
+    alert('אין עדיין הקלטה למשפט זה.\n\nלחצי "פתח בקטגוריה" כדי לעבור לתרגל את הקטגוריה.');
+    return; 
+  }
   
   document.querySelectorAll('.big-pbtn').forEach(function(b){b.classList.remove('playing');});
   btn.classList.add('playing');
@@ -11230,6 +11291,10 @@ try { renderHome(); } catch(_){}
     <div onclick="document.getElementById('more-menu').style.display='none';navToTab('intel')" style="background:linear-gradient(135deg,rgba(231,76,60,0.2),rgba(231,76,60,0.05));border:1px solid rgba(231,76,60,0.4);border-radius:10px;padding:14px 6px;text-align:center;cursor:pointer;">
       <div style="font-size:22px;margin-bottom:4px;">🕵️</div>
       <div style="color:#E8D9B8;font-size:11px;font-weight:600;">מודיעין שטח</div>
+    </div>
+    <div onclick="document.getElementById('more-menu').style.display='none';navToTab('art')" style="background:#1F3147;border-radius:10px;padding:14px 6px;text-align:center;cursor:pointer;">
+      <div style="font-size:22px;margin-bottom:4px;">📰</div>
+      <div style="color:#E8D9B8;font-size:11px;font-weight:600;">מאמרים</div>
     </div>
     <div onclick="navToTab('nwf')" style="background:#1F3147;border-radius:10px;padding:14px 6px;text-align:center;cursor:pointer;">
       <div style="font-size:22px;margin-bottom:4px;">🆕</div>
