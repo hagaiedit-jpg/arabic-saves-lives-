@@ -2267,7 +2267,7 @@ body.day-mode #prog-achievements div[style*="color:#D4A24E"] {
       </div>
     </div>
     
-    <div class="loading" id="cats-loading"><div style="text-align:center;padding:20px;"><div style="font-size:16px;color:#D4862E;margin-bottom:8px;">טוען...</div><div style="font-size:10px;color:#7a9ab5;opacity:0.6;">v20260612-1224</div></div></div>
+    <div class="loading" id="cats-loading"><div style="text-align:center;padding:20px;"><div style="font-size:16px;color:#D4862E;margin-bottom:8px;">טוען...</div><div style="font-size:10px;color:#7a9ab5;opacity:0.6;">v20260612-1238</div></div></div>
     <div class="cgrid" id="cgrid" style="display:none;"></div>
   </div>
   <div id="vlist" class="scr">
@@ -6583,7 +6583,7 @@ function bldCats(){
   if (!DB || DB.length === 0) {
     loadEl.innerHTML = '<div style="text-align:center;padding:20px;color:#D4862E;">' +
       'מתחבר לשרת...<br><br>' +
-      '<div style="font-size:11px;color:#7a9ab5;">v20260612-1224</div><br>' +
+      '<div style="font-size:11px;color:#7a9ab5;">v20260612-1238</div><br>' +
       '<button onclick="location.reload(true)" style="padding:10px 20px;background:#D4862E;color:#fff;border:none;border-radius:8px;font-family:inherit;cursor:pointer;font-weight:700;margin-top:10px;">🔄 רענן</button>' +
       '</div>';
     return;
@@ -7595,30 +7595,14 @@ async function scnRecStart(){
         localStorage.setItem('practiced_phrases', JSON.stringify(practiced));
       } catch(e) {}
       
-      // Get user's audio duration
-      try {
-        var url = URL.createObjectURL(_scnRecBlob);
-        var tempAudio = new Audio(url);
-        tempAudio.addEventListener('loadedmetadata', function(){
-          window._scnUserDuration = isFinite(tempAudio.duration) ? tempAudio.duration : null;
-          // Also estimate audio volume from blob size / duration
-          if (_scnRecBlob.size && window._scnUserDuration > 0) {
-            window._scnUserVolume = _scnRecBlob.size / window._scnUserDuration; // bytes per sec
-          }
-          // Now calculate score
-          calcScnScore();
-        });
-        // Fallback if metadata doesn't load
-        setTimeout(function(){
-          if (!window._scnUserDuration) {
-            window._scnUserDuration = (Date.now() - (window._scnRecStartTime || Date.now())) / 1000;
-            calcScnScore();
-          }
-        }, 1500);
-      } catch(e) {
-        window._scnUserDuration = (Date.now() - (window._scnRecStartTime || Date.now())) / 1000;
-        calcScnScore();
+      // Calculate duration from timing (more reliable than audio metadata)
+      window._scnUserDuration = (Date.now() - (window._scnRecStartTime || Date.now())) / 1000;
+      if (_scnRecBlob.size && window._scnUserDuration > 0) {
+        window._scnUserVolume = _scnRecBlob.size / window._scnUserDuration;
       }
+      
+      // Calculate score immediately
+      calcScnScore();
     };
     _scnRec.start();
     window._scnRecStartTime = Date.now();
@@ -7706,44 +7690,37 @@ function calcScnScore(){
     var p = _scnSteps[idx];
     if (!p) { window._scnScore = null; renderScnChat(); return; }
     
-    // Check browser support for Speech Recognition
-    var SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-    if (!SpeechRecognition || !_scnRecBlob) {
-      // No support - don't show a score at all
-      window._scnScore = null;
-      renderScnChat();
-      return;
-    }
-    
     // If we already have recognition result - calculate now
     if (window._scnRecognizedText) {
       _finalizeScnScore();
       return;
     }
     
-    // Otherwise, wait for it (Speech Recognition may still be processing)
-    window._scnScore = { processing: true };
+    // No recognition yet - show simple completion confirmation (no score)
+    // Most mobile browsers don't support Arabic recognition reliably
+    window._scnScore = { 
+      simpleSuccess: true,
+      durationOk: (window._scnUserDuration && window._scnUserDuration > 0.5)
+    };
     renderScnChat();
     
-    // Poll for result every 200ms, give up after 2 seconds
+    // Still try to get recognition for 1 second (in case it arrives)
     var attempts = 0;
-    var maxAttempts = 10; // 2 seconds total
+    var maxAttempts = 5;
     var pollInterval = setInterval(function(){
       attempts++;
       if (window._scnRecognizedText) {
         clearInterval(pollInterval);
         _finalizeScnScore();
       } else if (attempts >= maxAttempts) {
-        // Timeout - no recognition received
         clearInterval(pollInterval);
-        window._scnScore = null;
-        renderScnChat();
+        // Keep the simpleSuccess - don't reset
       }
     }, 200);
     
   } catch(e) { 
     console.warn('calcScnScore error:', e); 
-    window._scnScore = null;
+    window._scnScore = { simpleSuccess: true };
     renderScnChat();
   }
 }
@@ -7880,7 +7857,19 @@ function renderScnScore(){
   if (!window._scnScore) return '';
   var s = window._scnScore;
   
-  // Processing state
+  // Simple success - recording done, no detailed score
+  if (s.simpleSuccess) {
+    var icon = s.durationOk !== false ? '✅' : '⚠️';
+    var msg = s.durationOk !== false ? 'מעולה! הקלטה הצליחה' : 'ההקלטה קצרה - נסי שוב';
+    var color = s.durationOk !== false ? '#1D9E75' : '#D4862E';
+    return '<div style="margin-top:10px;padding:14px;text-align:center;background:rgba(' + (s.durationOk !== false ? '29,158,117' : '212,134,46') + ',0.15);border:1px solid ' + color + ';border-radius:10px;">' +
+           '<div style="font-size:24px;margin-bottom:4px;">' + icon + '</div>' +
+           '<div style="color:' + color + ';font-size:13px;font-weight:700;">' + msg + '</div>' +
+           '<div style="color:#a0b8c8;font-size:11px;margin-top:4px;">לחצי "השמע שלי" כדי לבדוק</div>' +
+           '</div>';
+  }
+  
+  // Processing state (rare - only if actively waiting for Arabic recognition)
   if (s.processing) {
     return '<div style="margin-top:10px;padding:10px;text-align:center;color:#D4A24E;font-size:12px;background:rgba(212,162,78,0.1);border:1px solid rgba(212,162,78,0.3);border-radius:10px;">⏳ מנתח הקלטה...</div>';
   }
