@@ -2267,7 +2267,7 @@ body.day-mode #prog-achievements div[style*="color:#D4A24E"] {
       </div>
     </div>
     
-    <div class="loading" id="cats-loading"><div style="text-align:center;padding:20px;"><div style="font-size:16px;color:#D4862E;margin-bottom:8px;">טוען...</div><div style="font-size:10px;color:#7a9ab5;opacity:0.6;">v20260612-2022</div></div></div>
+    <div class="loading" id="cats-loading"><div style="text-align:center;padding:20px;"><div style="font-size:16px;color:#D4862E;margin-bottom:8px;">טוען...</div><div style="font-size:10px;color:#7a9ab5;opacity:0.6;">v20260612-2027</div></div></div>
     <div class="cgrid" id="cgrid" style="display:none;"></div>
   </div>
   <div id="vlist" class="scr">
@@ -6594,7 +6594,7 @@ function bldCats(){
   if (!DB || DB.length === 0) {
     loadEl.innerHTML = '<div style="text-align:center;padding:20px;color:#D4862E;">' +
       'מתחבר לשרת...<br><br>' +
-      '<div style="font-size:11px;color:#7a9ab5;">v20260612-2022</div><br>' +
+      '<div style="font-size:11px;color:#7a9ab5;">v20260612-2027</div><br>' +
       '<button onclick="location.reload(true)" style="padding:10px 20px;background:#D4862E;color:#fff;border:none;border-radius:8px;font-family:inherit;cursor:pointer;font-weight:700;margin-top:10px;">🔄 רענן</button>' +
       '</div>';
     return;
@@ -6614,6 +6614,13 @@ function bldCats(){
 function opC(cat,special){
   curC=cat;
   document.getElementById('ltitle').textContent=cat;
+  
+  // Auto-detect navy/announce by cat name (in case special wasn't passed)
+  if (!special) {
+    if (cat === 'ימי' || cat === 'תשאול ימי') special = 'navy';
+    else if (cat === 'כריזה') special = 'announce';
+  }
+  
   if(special==='announce'){
     const cats=[...new Set(ANNOUNCE.map(a=>a.cat))];
     if(cats.length===0){document.getElementById('litems').innerHTML='<div class="empty">אין כריזות עדיין</div>';}
@@ -6622,9 +6629,16 @@ function opC(cat,special){
         <div class="li" onclick="opAnnounceList('${c}')"><div class="lt">📢 ${c}</div><div class="la">‹</div></div>`).join('');
     }
   } else if(special==='navy'){
+    console.log('Navy click: NAVY.length=', NAVY.length, 'sample:', NAVY.slice(0,2));
     const cats=[...new Set(NAVY.map(a=>a.cat))];
-    document.getElementById('litems').innerHTML=cats.map(c=>`
-      <div class="li" onclick="opNavyList('${c}')"><div class="lt">⚓ ${c}</div><div class="la">‹</div></div>`).join('') || '<div class="empty">אין עדיין</div>';
+    if (NAVY.length === 0) {
+      document.getElementById('litems').innerHTML='<div class="empty" style="padding:30px;text-align:center;color:#a0b8c8;">⚠️ הקטגוריה ריקה. רעני את האפליקציה.</div>';
+    } else if (cats.length === 0) {
+      document.getElementById('litems').innerHTML='<div class="empty" style="padding:30px;text-align:center;color:#a0b8c8;">⚠️ ' + NAVY.length + ' משפטים קיימים אבל ללא קטגוריה</div>';
+    } else {
+      document.getElementById('litems').innerHTML=cats.map(c=>`
+        <div class="li" onclick="opNavyList('${c.replace(/'/g, "\\'")}')"><div class="lt">⚓ ${c}</div><div class="la">‹</div></div>`).join('');
+    }
   } else {
     // Regular category - add Learning Mode button at top
     const catPhrases = DB.filter(p=>p.cat===cat);
