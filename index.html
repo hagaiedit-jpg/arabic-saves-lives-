@@ -2267,7 +2267,7 @@ body.day-mode #prog-achievements div[style*="color:#D4A24E"] {
       </div>
     </div>
     
-    <div class="loading" id="cats-loading"><div style="text-align:center;padding:20px;"><div style="font-size:16px;color:#D4862E;margin-bottom:8px;">טוען...</div><div style="font-size:10px;color:#7a9ab5;opacity:0.6;">v20260612-1257</div></div></div>
+    <div class="loading" id="cats-loading"><div style="text-align:center;padding:20px;"><div style="font-size:16px;color:#D4862E;margin-bottom:8px;">טוען...</div><div style="font-size:10px;color:#7a9ab5;opacity:0.6;">v20260612-1310</div></div></div>
     <div class="cgrid" id="cgrid" style="display:none;"></div>
   </div>
   <div id="vlist" class="scr">
@@ -6583,7 +6583,7 @@ function bldCats(){
   if (!DB || DB.length === 0) {
     loadEl.innerHTML = '<div style="text-align:center;padding:20px;color:#D4862E;">' +
       'מתחבר לשרת...<br><br>' +
-      '<div style="font-size:11px;color:#7a9ab5;">v20260612-1257</div><br>' +
+      '<div style="font-size:11px;color:#7a9ab5;">v20260612-1310</div><br>' +
       '<button onclick="location.reload(true)" style="padding:10px 20px;background:#D4862E;color:#fff;border:none;border-radius:8px;font-family:inherit;cursor:pointer;font-weight:700;margin-top:10px;">🔄 רענן</button>' +
       '</div>';
     return;
@@ -7892,70 +7892,58 @@ function renderScnScore(){
   if (!window._scnScore) return '';
   var s = window._scnScore;
   
-  // Detailed result - duration comparison + listen-and-compare guidance
+  // Honest, simple result - side-by-side comparison
   if (s.detailed) {
-    var html = '<div style="margin-top:10px;padding:14px;background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.1);border-radius:10px;">';
+    var html = '<div style="margin-top:10px;padding:14px;background:rgba(255,255,255,0.03);border:1px solid rgba(212,162,78,0.3);border-radius:10px;">';
     
-    // Header based on duration match
-    var headerIcon, headerText, headerColor, advice;
-    switch(s.durationMatch) {
-      case 'good':
-        headerIcon = '🎯'; headerText = 'משך תואם למקור'; headerColor = '#1D9E75';
-        advice = 'השמיעי את שתי ההקלטות והשווי בעצמך - האם ההגייה דומה?';
-        break;
-      case 'ok':
-        headerIcon = '👍'; headerText = 'משך קרוב למקור'; headerColor = '#D4A24E';
-        advice = 'יש פער קל במשך - תוכלי להאיט/להאיץ. השמיעי והשווי.';
-        break;
-      case 'too_short':
-        headerIcon = '⚠️'; headerText = 'ההקלטה קצרה מדי'; headerColor = '#c0392b';
-        advice = 'נסי שוב - אולי לא נתפסה כל המילה. דברי ברור.';
-        break;
-      case 'too_fast':
-        headerIcon = '⏩'; headerText = 'אמרת מהר מדי'; headerColor = '#D4862E';
-        advice = 'המקור איטי יותר. נסי שוב לאט יותר.';
-        break;
-      case 'too_slow':
-        headerIcon = '⏪'; headerText = 'אמרת לאט מדי'; headerColor = '#D4862E';
-        advice = 'המקור מהיר יותר. נסי שוב בקצב טבעי.';
-        break;
-      default:
-        headerIcon = '🎤'; headerText = 'ההקלטה נשמרה'; headerColor = '#D4A24E';
-        advice = 'השמיעי את שתי ההקלטות והשווי בעצמך.';
-    }
+    // Detect if recording was actually made (anything > 0.4s)
+    var recordingExists = s.userDuration && s.userDuration > 0.4;
     
-    // Header
-    html += '<div style="display:flex;align-items:center;gap:8px;margin-bottom:10px;padding-bottom:10px;border-bottom:1px solid rgba(255,255,255,0.08);">';
-    html += '<div style="font-size:24px;">' + headerIcon + '</div>';
-    html += '<div style="flex:1;"><div style="color:' + headerColor + ';font-size:14px;font-weight:700;">' + headerText + '</div></div>';
-    html += '</div>';
-    
-    // Duration comparison (only if we have both)
-    if (s.userDuration > 0) {
-      html += '<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:10px;">';
-      html += '<div style="background:rgba(212,162,78,0.1);border-radius:8px;padding:8px;text-align:center;">';
-      html += '<div style="color:#7a9ab5;font-size:10px;margin-bottom:2px;">⏱️ ההקלטה שלך</div>';
-      html += '<div style="color:#D4A24E;font-size:16px;font-weight:700;">' + s.userDuration.toFixed(1) + ' שנ\'</div>';
+    if (!recordingExists) {
+      // Too short to be a real recording
+      html += '<div style="text-align:center;padding:6px;">';
+      html += '<div style="font-size:32px;margin-bottom:8px;">⚠️</div>';
+      html += '<div style="color:#c0392b;font-size:14px;font-weight:700;margin-bottom:4px;">ההקלטה קצרה מדי</div>';
+      html += '<div style="color:#a0b8c8;font-size:12px;">נסי שוב - דברי ברור ולא ממהרת</div>';
+      html += '</div>';
+    } else {
+      // Header
+      html += '<div style="text-align:center;margin-bottom:12px;">';
+      html += '<div style="font-size:18px;font-weight:700;color:#D4A24E;margin-bottom:4px;">🎯 השוואת הגייה</div>';
+      html += '<div style="color:#a0b8c8;font-size:12px;">השמיעי את שתי ההקלטות והקשיבי טוב לטון, הדגשים והקצב</div>';
       html += '</div>';
       
-      if (s.originalDuration && s.originalDuration > 0) {
-        html += '<div style="background:rgba(29,158,117,0.1);border-radius:8px;padding:8px;text-align:center;">';
-        html += '<div style="color:#7a9ab5;font-size:10px;margin-bottom:2px;">⏱️ ההקלטה המקורית</div>';
-        html += '<div style="color:#1D9E75;font-size:16px;font-weight:700;">' + s.originalDuration.toFixed(1) + ' שנ\'</div>';
-        html += '</div>';
+      // Side-by-side comparison buttons
+      html += '<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px;">';
+      
+      // My recording
+      html += '<button onclick="scnRecPlay()" style="background:linear-gradient(135deg,#D4A24E,#b88a3d);border:none;color:#fff;border-radius:10px;padding:14px 8px;cursor:pointer;font-family:inherit;font-weight:700;">';
+      html += '<div style="font-size:24px;margin-bottom:4px;">🎤</div>';
+      html += '<div style="font-size:13px;">ההקלטה שלך</div>';
+      html += '</button>';
+      
+      // Original recording
+      if (s.hasOriginalAudio) {
+        html += '<button onclick="scnPlayOriginal()" style="background:linear-gradient(135deg,#1D9E75,#0e5a3f);border:none;color:#fff;border-radius:10px;padding:14px 8px;cursor:pointer;font-family:inherit;font-weight:700;">';
+        html += '<div style="font-size:24px;margin-bottom:4px;">🎵</div>';
+        html += '<div style="font-size:13px;">ההקלטה המקורית</div>';
+        html += '</button>';
       } else {
-        html += '<div style="background:rgba(255,255,255,0.03);border-radius:8px;padding:8px;text-align:center;">';
-        html += '<div style="color:#7a9ab5;font-size:10px;margin-bottom:2px;">⏱️ המקור</div>';
-        html += '<div style="color:#7a9ab5;font-size:13px;">' + (s.hasOriginalAudio ? 'טוען...' : 'אין') + '</div>';
+        html += '<div style="background:rgba(255,255,255,0.05);border-radius:10px;padding:14px 8px;text-align:center;color:#7a9ab5;">';
+        html += '<div style="font-size:24px;margin-bottom:4px;opacity:0.5;">🔇</div>';
+        html += '<div style="font-size:11px;">אין הקלטה למקור</div>';
         html += '</div>';
       }
       html += '</div>';
+      
+      // Honest tip
+      html += '<div style="background:rgba(0,0,0,0.3);padding:10px;border-radius:8px;color:#c0d0e0;font-size:12px;line-height:1.6;">';
+      html += '<div style="color:#D4A24E;font-weight:700;margin-bottom:4px;">💡 איך להעריך את עצמך:</div>';
+      html += '<div style="font-size:11px;">• אותו <b>טון</b> (גובה הקול)?</div>';
+      html += '<div style="font-size:11px;">• אותם <b>הדגשים</b> (איזה הברה מודגשת)?</div>';
+      html += '<div style="font-size:11px;">• אותו <b>קצב</b> כללי?</div>';
+      html += '</div>';
     }
-    
-    // Advice
-    html += '<div style="background:rgba(0,0,0,0.2);padding:10px;border-radius:8px;color:#c0d0e0;font-size:12px;line-height:1.5;">';
-    html += '💡 ' + advice;
-    html += '</div>';
     
     html += '</div>';
     return html;
@@ -8046,6 +8034,22 @@ function scnRecPlay(){
     audio.play();
   } catch(e) { console.warn(e); }
 }
+
+function scnPlayOriginal() {
+  try {
+    var stepIdx = window._scnInteractiveIdx || 0;
+    var stepData = _scnSteps[stepIdx];
+    if (!stepData || !stepData.audio) {
+      console.warn('No original audio for this step');
+      return;
+    }
+    var audio = new Audio(stepData.audio);
+    audio.play().catch(function(err){
+      console.warn('Play original failed:', err);
+    });
+  } catch(e) { console.warn('scnPlayOriginal error:', e); }
+}
+
 
 function scnRecCompare(idx){
   try {
@@ -8592,9 +8596,9 @@ function practiceSuccess(){
     document.getElementById('practice-count-text').textContent = text;
     doneBox.style.display = 'block';
     
-    // Check practice achievements
+    // Check practice achievements - delay so user sees the score first
     if (typeof checkPracticeAchievements === 'function') {
-      setTimeout(checkPracticeAchievements, 500);
+      setTimeout(checkPracticeAchievements, 2500);  // 2.5 sec - lets score appear and be read
     }
   } catch(e) { console.warn('practiceSuccess error:', e); }
 }
@@ -8973,35 +8977,7 @@ function escapeJsDict(str) {
 
 // Open a phrase from dictionary search (find it in all sources)
 function opDictPhrase(he, ar) {
-  // Search all sources for this phrase
-  var allSources = [
-    { data: typeof DB !== 'undefined' ? DB : [], func: 'opP' },
-    { data: typeof DAILY !== 'undefined' ? DAILY : [], func: 'opD' },
-    { data: typeof HRT !== 'undefined' ? HRT : [], func: 'opH' },
-    { data: typeof SEM !== 'undefined' ? SEM : [], func: 'opSem' },
-    { data: typeof CUS !== 'undefined' ? CUS : [], func: 'opCus' },
-    { data: typeof ARTS !== 'undefined' ? ARTS : [], func: 'opArt' },
-    { data: typeof SCENARIO !== 'undefined' ? SCENARIO : [], func: 'opScn' },
-    { data: typeof DICT !== 'undefined' ? DICT : [], func: 'opDictWord' }
-  ];
-  
-  for (var i = 0; i < allSources.length; i++) {
-    var src = allSources[i];
-    var idx = src.data.findIndex(function(p) {
-      return (p.he || '') === he && (p.ar || '') === ar;
-    });
-    if (idx >= 0) {
-      // Try to open it
-      try {
-        if (typeof window[src.func] === 'function') {
-          window[src.func](idx);
-          return;
-        }
-      } catch(e) { console.warn(e); }
-    }
-  }
-  
-  // Fallback: show popup directly
+  // Always use the reliable popup fallback - opens phrase popup with audio button
   showDictPopupFallback(he, ar);
 }
 
@@ -9020,22 +8996,60 @@ function showDictPopupFallback(he, ar) {
     });
   });
   
-  if (!phraseRef) return;
+  if (!phraseRef) {
+    console.warn('Dict phrase not found:', he, ar);
+    return;
+  }
+  
+  console.log('Opening dict phrase with audio:', phraseRef.audio || '(none)');
   
   try {
-    document.getElementById('phe').textContent = phraseRef.he;
-    document.getElementById('parsm').textContent = phraseRef.ar;
-    document.getElementById('ptrans').textContent = phraseRef.trans || '';
-    document.getElementById('pwhy').textContent = '';
-    document.getElementById('pwhyb').style.display = 'none';
-    document.getElementById('ptone').textContent = '';
-    document.getElementById('ptoneb').style.display = 'none';
-    document.querySelectorAll('.pbtn').forEach(function(b){ 
+    // Set all popup fields
+    var hEl = document.getElementById('phe');
+    var arEl = document.getElementById('parsm');
+    var trEl = document.getElementById('ptrans');
+    var whyEl = document.getElementById('pwhy');
+    var whyBox = document.getElementById('pwhyb');
+    var toneEl = document.getElementById('ptone');
+    var toneBox = document.getElementById('ptoneb');
+    
+    if (hEl) hEl.textContent = phraseRef.he;
+    if (arEl) arEl.textContent = phraseRef.ar;
+    if (trEl) trEl.textContent = phraseRef.trans || '';
+    if (whyEl) whyEl.textContent = phraseRef.why || '';
+    if (whyBox) whyBox.style.display = phraseRef.why ? 'block' : 'none';
+    if (toneEl) toneEl.textContent = '';
+    if (toneBox) toneBox.style.display = 'none';
+    
+    // Set audio URL for the play buttons (.big-pbtn uses window._popupAudio)
+    window._popupAudio = phraseRef.audio || '';
+    
+    // Also set data-audio attribute (legacy support)
+    document.querySelectorAll('.pbtn, .big-pbtn').forEach(function(b){ 
       b.setAttribute('data-audio', phraseRef.audio || ''); 
     });
-    window._popupAudio = phraseRef.audio || '';
+    
+    // Hide responses (none in dict view)
+    var respBox = document.getElementById('presponsesb');
+    if (respBox) respBox.style.display = 'none';
+    
+    // Set category badge
+    var badge = document.getElementById('pcatbadge');
+    if (badge) {
+      if (phraseRef.sectionName || phraseRef.cat) {
+        badge.textContent = (phraseRef.sectionName || '') + (phraseRef.cat ? ' / ' + phraseRef.cat : '');
+        badge.style.display = 'inline-flex';
+      } else {
+        badge.style.display = 'none';
+      }
+    }
+    
+    // Show the popup
     shV('vpop');
-  } catch(e) { console.warn(e); }
+  } catch(e) { 
+    console.warn('showDictPopupFallback error:', e); 
+    alert('שגיאה בהצגת המשפט');
+  }
 }
 
 // Rebuild index when data is reloaded
