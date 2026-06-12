@@ -9,6 +9,31 @@
 <!-- Google Analytics -->
 <script async src="https://www.googletagmanager.com/gtag/js?id=G-G91ERLFQ16"></script>
 <script>
+
+// === MediaRecorder format helper - works on iPhone, Android, Desktop ===
+function getBestRecordMime() {
+  if (typeof MediaRecorder === 'undefined' || !MediaRecorder.isTypeSupported) return '';
+  // iOS Safari: mp4/aac. Android/Desktop: webm/opus
+  var candidates = ['audio/mp4', 'audio/mp4;codecs=mp4a.40.2', 'audio/webm;codecs=opus', 'audio/webm', 'audio/ogg'];
+  for (var i = 0; i < candidates.length; i++) {
+    try {
+      if (MediaRecorder.isTypeSupported(candidates[i])) return candidates[i];
+    } catch(e) {}
+  }
+  return '';
+}
+
+function createRecorder(stream) {
+  var mime = getBestRecordMime();
+  var opts = mime ? {mimeType: mime} : {};
+  try {
+    return new MediaRecorder(stream, opts);
+  } catch(e) {
+    console.warn('MediaRecorder creation failed, trying default:', e);
+    return new MediaRecorder(stream);
+  }
+}
+
   window.dataLayer = window.dataLayer || [];
   function gtag(){dataLayer.push(arguments);}
   gtag('js', new Date());
@@ -2242,7 +2267,7 @@ body.day-mode #prog-achievements div[style*="color:#D4A24E"] {
       </div>
     </div>
     
-    <div class="loading" id="cats-loading"><div style="text-align:center;padding:20px;"><div style="font-size:16px;color:#D4862E;margin-bottom:8px;">טוען...</div><div style="font-size:10px;color:#7a9ab5;opacity:0.6;">v20260612-1157</div></div></div>
+    <div class="loading" id="cats-loading"><div style="text-align:center;padding:20px;"><div style="font-size:16px;color:#D4862E;margin-bottom:8px;">טוען...</div><div style="font-size:10px;color:#7a9ab5;opacity:0.6;">v20260612-1224</div></div></div>
     <div class="cgrid" id="cgrid" style="display:none;"></div>
   </div>
   <div id="vlist" class="scr">
@@ -2259,7 +2284,7 @@ body.day-mode #prog-achievements div[style*="color:#D4A24E"] {
   </div>
   <div id="vpop" class="scr">
     <div class="pbg"><div class="pop">
-      <button onclick="closePopup()" style="position:absolute;top:10px;left:10px;background:rgba(255,255,255,0.1);border:1px solid rgba(255,255,255,0.2);color:#E8D9B8;border-radius:50%;width:34px;height:34px;font-size:18px;font-weight:700;cursor:pointer;font-family:inherit;display:flex;align-items:center;justify-content:center;z-index:10;">✕</button>
+      <button onclick="closePopup()" style="position:absolute;top:12px;left:12px;background:linear-gradient(135deg,#D4A24E,#b88a3d);border:none;color:#fff;border-radius:10px;padding:8px 16px;font-size:14px;font-weight:700;cursor:pointer;font-family:inherit;display:flex;align-items:center;gap:6px;z-index:10;box-shadow:0 2px 8px rgba(0,0,0,0.3);">→ חזרה</button>
       <div id="pcatbadge" class="pcat-badge" style="display:none;"></div>
       <div class="phe" id="phe"></div>
       <div class="parsm" id="parsm"></div>
@@ -6518,10 +6543,10 @@ async function toggleRec(p){
   if(mrec&&mrec.state==='recording'){mrec.stop();btn.textContent='🎙 הקלט';btn.className='rec-btn idle';return;}
   try{
     const stream=await navigator.mediaDevices.getUserMedia({audio:true});
-    rchunks=[];mrec=new MediaRecorder(stream);
+    rchunks=[];mrec=createRecorder(stream);
     mrec.ondataavailable=e=>{if(e.data.size>0)rchunks.push(e.data);};
     mrec.onstop=()=>{
-      const blob=new Blob(rchunks,{type:'audio/webm'});
+      const blob=new Blob(rchunks,{type:(mrec && mrec.mimeType) || 'audio/webm'});
       rfiles[p]=new File([blob],'rec.webm',{type:'audio/webm'});
       const st=document.getElementById(p+'-status');if(st)st.textContent='✓ הוקלט';
       stream.getTracks().forEach(t=>t.stop());
@@ -6558,7 +6583,7 @@ function bldCats(){
   if (!DB || DB.length === 0) {
     loadEl.innerHTML = '<div style="text-align:center;padding:20px;color:#D4862E;">' +
       'מתחבר לשרת...<br><br>' +
-      '<div style="font-size:11px;color:#7a9ab5;">v20260612-1157</div><br>' +
+      '<div style="font-size:11px;color:#7a9ab5;">v20260612-1224</div><br>' +
       '<button onclick="location.reload(true)" style="padding:10px 20px;background:#D4862E;color:#fff;border:none;border-radius:8px;font-family:inherit;cursor:pointer;font-weight:700;margin-top:10px;">🔄 רענן</button>' +
       '</div>';
     return;
@@ -7554,13 +7579,13 @@ async function scnRecStart(){
     }
     _scnRecStream = await navigator.mediaDevices.getUserMedia({audio: true});
     _scnRecChunks = [];
-    _scnRec = new MediaRecorder(_scnRecStream);
+    _scnRec = createRecorder(_scnRecStream);
     
     _scnRec.ondataavailable = function(e){
       if (e.data.size > 0) _scnRecChunks.push(e.data);
     };
     _scnRec.onstop = function(){
-      _scnRecBlob = new Blob(_scnRecChunks, {type: 'audio/webm'});
+      _scnRecBlob = new Blob(_scnRecChunks, {type: (_scnRec && _scnRec.mimeType) || 'audio/webm'});
       if (_scnRecStream) _scnRecStream.getTracks().forEach(function(t){ t.stop(); });
       
       // Track practice
@@ -8386,14 +8411,14 @@ async function practiceStart(){
     
     var stream = await navigator.mediaDevices.getUserMedia({audio: true});
     practiceChunks = [];
-    practiceRec = new MediaRecorder(stream);
+    practiceRec = createRecorder(stream);
     
     practiceRec.ondataavailable = function(e){
       if (e.data.size > 0) practiceChunks.push(e.data);
     };
     
     practiceRec.onstop = function(){
-      practiceBlob = new Blob(practiceChunks, {type: 'audio/webm'});
+      practiceBlob = new Blob(practiceChunks, {type: (practiceRec && practiceRec.mimeType) || 'audio/webm'});
       stream.getTracks().forEach(function(t){ t.stop(); });
       // Show compare buttons
       document.getElementById('practice-recording').style.display = 'none';
@@ -10037,7 +10062,7 @@ async function recordResponse(idx){
   
   try {
     var stream = await navigator.mediaDevices.getUserMedia({audio:true});
-    var mediaRecorder = new MediaRecorder(stream);
+    var mediaRecorder = createRecorder(stream);
     var chunks = [];
     
     var statusEl = document.getElementById('resp-aud-status-'+idx);
@@ -10047,7 +10072,7 @@ async function recordResponse(idx){
     mediaRecorder.ondataavailable = function(e){ chunks.push(e.data); };
     mediaRecorder.onstop = async function(){
       stream.getTracks().forEach(function(t){t.stop();});
-      var blob = new Blob(chunks, {type:'audio/webm'});
+      var blob = new Blob(chunks, {type: (mediaRecorder && mediaRecorder.mimeType) || 'audio/webm'});
       
       statusEl.textContent = '⏳ מעלה...';
       statusEl.style.color = '#FFD700';
