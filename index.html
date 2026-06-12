@@ -2267,7 +2267,7 @@ body.day-mode #prog-achievements div[style*="color:#D4A24E"] {
       </div>
     </div>
     
-    <div class="loading" id="cats-loading"><div style="text-align:center;padding:20px;"><div style="font-size:16px;color:#D4862E;margin-bottom:8px;">טוען...</div><div style="font-size:10px;color:#7a9ab5;opacity:0.6;">v20260612-1310</div></div></div>
+    <div class="loading" id="cats-loading"><div style="text-align:center;padding:20px;"><div style="font-size:16px;color:#D4862E;margin-bottom:8px;">טוען...</div><div style="font-size:10px;color:#7a9ab5;opacity:0.6;">v20260612-1326</div></div></div>
     <div class="cgrid" id="cgrid" style="display:none;"></div>
   </div>
   <div id="vlist" class="scr">
@@ -2433,7 +2433,18 @@ body.day-mode #prog-achievements div[style*="color:#D4A24E"] {
 
 <!-- ARTICLES TAB -->
 <div class="scr" id="tab-art">
-  <div id="artlv"><div style="background:linear-gradient(135deg,rgba(231,76,60,0.15),rgba(231,76,60,0.05));border:1px solid rgba(231,76,60,0.4);border-radius:14px;padding:18px;margin:14px 12px 8px 12px;">
+  <div id="artlv"><div class="sec"><div class="stitle">מאמרים מהשטח</div><div id="artlist"></div></div></div>
+  <div id="artfv" style="display:none;">
+    <div style="padding:16px;">
+      <button class="bbtn" onclick="clsArt()" style="margin-bottom:14px;">→ חזור</button>
+      <div style="color:#0e1b2e;font-size:16px;font-weight:600;margin-bottom:10px;line-height:1.4;" id="art-title"></div>
+      <div style="color:#a0b8c8;font-size:14px;line-height:1.9;" id="art-body"></div>
+    </div>
+  </div>
+</div>
+
+<div class="scr" id="tab-intel">
+  <div style="background:linear-gradient(135deg,rgba(231,76,60,0.15),rgba(231,76,60,0.05));border:1px solid rgba(231,76,60,0.4);border-radius:14px;padding:18px;margin:14px 12px 8px 12px;">
     <div style="display:flex;align-items:center;gap:12px;margin-bottom:12px;">
       <div style="font-size:32px;">🕵️</div>
       <div>
@@ -2455,15 +2466,9 @@ body.day-mode #prog-achievements div[style*="color:#D4A24E"] {
       💡 הבנת מה הצד השני אומר = יתרון מבצעי
     </div>
   </div>
-  <div class="sec"><div class="stitle">מאמרים מהשטח</div><div id="artlist"></div></div></div>
-  <div id="artfv" style="display:none;">
-    <div style="padding:16px;">
-      <button class="bbtn" onclick="clsArt()" style="margin-bottom:14px;">→ חזור</button>
-      <div style="color:#0e1b2e;font-size:16px;font-weight:600;margin-bottom:10px;line-height:1.4;" id="art-title"></div>
-      <div style="color:#a0b8c8;font-size:14px;line-height:1.9;" id="art-body"></div>
-    </div>
-  </div>
+  <div id="intellist" style="padding:0 8px 100px 8px;"></div>
 </div>
+
 
 
 <!-- NEW TAB -->
@@ -6482,9 +6487,10 @@ async function loadData(){
     SEM=data.filter(p=>p.section==='semantic').map(p=>({...mp(p),risk:p.tone||'low',dict:p.ar,field:p.why}));
     CUS=data.filter(p=>p.section==='customs' || (p.section==='heart' && p.cat==='מנהגים')).map(mp);
     ARTS=data.filter(p=>p.section==='article').map(mp);
+    INTEL=data.filter(p=>p.section==='intel_field').map(mp);
     document.getElementById('status-badge').textContent='מחובר';
     document.getElementById('status-badge').style.background='#1D9E75';
-    bldCats();rDG();rHrt();rSem();rCus();rArts();renderDict();rQK();updateNewDot();renderPotd();renderStreak();renderProgress();renderScnGrid();renderHome();if(typeof checkAchievements==='function')setTimeout(checkAchievements,1500);
+    bldCats();rDG();rHrt();rSem();rCus();rArts();rIntel();renderDict();rQK();updateNewDot();renderPotd();renderStreak();renderProgress();renderScnGrid();renderHome();if(typeof checkAchievements==='function')setTimeout(checkAchievements,1500);
   }catch(e){
     console.error('loadData failed:', e);
     document.getElementById('status-badge').textContent='אופליין';
@@ -6583,7 +6589,7 @@ function bldCats(){
   if (!DB || DB.length === 0) {
     loadEl.innerHTML = '<div style="text-align:center;padding:20px;color:#D4862E;">' +
       'מתחבר לשרת...<br><br>' +
-      '<div style="font-size:11px;color:#7a9ab5;">v20260612-1310</div><br>' +
+      '<div style="font-size:11px;color:#7a9ab5;">v20260612-1326</div><br>' +
       '<button onclick="location.reload(true)" style="padding:10px 20px;background:#D4862E;color:#fff;border:none;border-radius:8px;font-family:inherit;cursor:pointer;font-weight:700;margin-top:10px;">🔄 רענן</button>' +
       '</div>';
     return;
@@ -9220,6 +9226,80 @@ function rArts(){
     <div class="card" onclick="opArt(${i})"><div class="che">${a.he}</div>
     <div class="csub" style="margin-top:5px;">${(a.why||a.ar||'').substring(0,90)}...</div></div>`).join(''):'<div class="empty">אין עדיין</div>';
 }
+
+function rIntel(){
+  var listEl = document.getElementById('intellist');
+  if (!listEl) return;
+  
+  if (!INTEL.length) {
+    listEl.innerHTML = '<div class="empty" style="padding:30px;text-align:center;color:#7a9ab5;">אין עדיין ביטויים. עלי תוכן דרך כלי ההעלאה.</div>';
+    return;
+  }
+  
+  // Group by category
+  var byCategory = {};
+  INTEL.forEach(function(item, i){
+    var cat = item.cat || 'כללי';
+    if (!byCategory[cat]) byCategory[cat] = [];
+    byCategory[cat].push({...item, _idx: i});
+  });
+  
+  var html = '';
+  Object.keys(byCategory).forEach(function(catName){
+    var items = byCategory[catName];
+    // Category header
+    html += '<div style="color:#e74c3c;font-size:13px;font-weight:700;margin:14px 6px 8px 6px;padding-bottom:4px;border-bottom:1px solid rgba(231,76,60,0.3);">';
+    html += catName + ' <span style="color:#7a9ab5;font-size:11px;font-weight:400;">(' + items.length + ')</span>';
+    html += '</div>';
+    
+    items.forEach(function(item){
+      html += '<div class="card" onclick="opIntel(' + item._idx + ')">';
+      html += '<div class="che">' + (item.he || '') + '</div>';
+      if (item.trans) {
+        html += '<div style="color:#D4A24E;font-size:13px;margin-top:4px;">' + item.trans + '</div>';
+      }
+      if (item.ar) {
+        html += '<div style="color:#a0b8c8;font-size:13px;direction:rtl;margin-top:2px;">' + item.ar + '</div>';
+      }
+      if (item.why) {
+        html += '<div class="csub" style="margin-top:6px;color:#7a9ab5;font-size:11px;">' + item.why + '</div>';
+      }
+      html += '</div>';
+    });
+  });
+  
+  listEl.innerHTML = html;
+}
+
+function opIntel(i){
+  var p = INTEL[i];
+  if (!p) return;
+  try {
+    if (typeof saveRecent === 'function') saveRecent(p.id);
+    if (typeof trackLearned === 'function') trackLearned(p.id);
+    if (typeof setPopupLabel === 'function') setPopupLabel('intel');
+    if (typeof setPopupExtras === 'function') setPopupExtras(p);
+    
+    var hEl = document.getElementById('phe');
+    var arEl = document.getElementById('parsm');
+    var trEl = document.getElementById('ptrans');
+    var whyEl = document.getElementById('pwhy');
+    var whyBox = document.getElementById('pwhyb');
+    
+    if (hEl) hEl.textContent = p.he || '';
+    if (arEl) arEl.textContent = p.ar || '';
+    if (trEl) trEl.textContent = p.trans || '';
+    if (whyEl) whyEl.textContent = p.why || '';
+    if (whyBox) whyBox.style.display = p.why ? 'block' : 'none';
+    
+    window._popupAudio = p.audio || '';
+    document.querySelectorAll('.pbtn, .big-pbtn').forEach(function(b){
+      b.setAttribute('data-audio', p.audio || '');
+    });
+    
+    shV('vpop');
+  } catch(e) { console.warn('opIntel error:', e); }
+}
 function opArt(i){
   const a=ARTS[i];
   document.getElementById('art-title').textContent=a.he;
@@ -11147,7 +11227,7 @@ try { renderHome(); } catch(_){}
       <div style="font-size:22px;margin-bottom:4px;">🤝</div>
       <div style="color:#E8D9B8;font-size:11px;font-weight:600;">פותחים לב</div>
     </div>
-    <div onclick="document.getElementById('more-menu').style.display='none';navToTab('art')" style="background:linear-gradient(135deg,rgba(231,76,60,0.2),rgba(231,76,60,0.05));border:1px solid rgba(231,76,60,0.4);border-radius:10px;padding:14px 6px;text-align:center;cursor:pointer;">
+    <div onclick="document.getElementById('more-menu').style.display='none';navToTab('intel')" style="background:linear-gradient(135deg,rgba(231,76,60,0.2),rgba(231,76,60,0.05));border:1px solid rgba(231,76,60,0.4);border-radius:10px;padding:14px 6px;text-align:center;cursor:pointer;">
       <div style="font-size:22px;margin-bottom:4px;">🕵️</div>
       <div style="color:#E8D9B8;font-size:11px;font-weight:600;">מודיעין שטח</div>
     </div>
@@ -11218,6 +11298,13 @@ function navToTab(tabId){
         try { 
           if (typeof renderDict === 'function') renderDict(); 
         } catch(e) { console.warn('renderDict error:', e); }
+      }, 50);
+    }
+    if (tabId === 'intel') {
+      setTimeout(function(){ 
+        try { 
+          if (typeof rIntel === 'function') rIntel(); 
+        } catch(e) { console.warn('rIntel error:', e); }
       }, 50);
     }
     
