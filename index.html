@@ -1763,6 +1763,107 @@ body, body *, .scr, .scr *, button, input, textarea, select {
 </head>
 <body>
 
+<!-- ===== LANDING PAGE ===== -->
+<div id="landing-overlay" style="display:none;position:fixed;top:0;left:0;right:0;bottom:0;background:#0E1B2E;z-index:10000;overflow-y:auto;direction:rtl;font-family:'Noto Sans Hebrew','Heebo',sans-serif;">
+  
+  <!-- Subtle background pattern -->
+  <div style="position:absolute;top:0;left:0;right:0;bottom:0;background:radial-gradient(circle at 30% 20%,rgba(212,162,78,0.08) 0%,transparent 50%),radial-gradient(circle at 70% 80%,rgba(29,158,117,0.06) 0%,transparent 50%);pointer-events:none;"></div>
+  
+  <div style="position:relative;max-width:520px;margin:0 auto;padding:40px 24px 48px;min-height:100vh;display:flex;flex-direction:column;">
+    
+    <!-- Spacing for breathing room -->
+    <div style="flex:1;display:flex;flex-direction:column;justify-content:center;padding:20px 0;">
+      
+      <!-- Headline - large and clear -->
+      <div style="text-align:center;margin-bottom:14px;">
+        <h1 style="color:#E8D9B8;font-size:36px;font-weight:800;letter-spacing:0.5px;line-height:1.15;margin:0;">
+          ערבית מצילה חיים
+        </h1>
+      </div>
+      
+      <!-- Sub-headline - the WHAT -->
+      <div style="text-align:center;margin-bottom:34px;">
+        <div style="color:#D4A24E;font-size:16px;font-weight:600;letter-spacing:0.3px;line-height:1.4;">
+          כלי שטח לכוחות הביטחון
+        </div>
+      </div>
+      
+
+      <!-- What you'll learn - clean list -->
+      <div style="background:rgba(255,255,255,0.025);border:1px solid rgba(255,255,255,0.06);border-radius:16px;padding:24px 22px;margin-bottom:32px;">
+        <div style="color:#D4A24E;font-size:13px;font-weight:700;letter-spacing:1px;margin-bottom:16px;text-align:center;">
+          מה תלמדו כאן
+        </div>
+        
+        <div style="display:flex;flex-direction:column;gap:14px;">
+          <div style="display:flex;align-items:flex-start;gap:12px;">
+            <span style="color:#1D9E75;font-size:16px;font-weight:800;line-height:1.4;flex-shrink:0;">✓</span>
+            <span style="color:#E8D9B8;font-size:14.5px;line-height:1.55;">פקודות מבצעיות במחסום, ברכב ובבית</span>
+          </div>
+          <div style="display:flex;align-items:flex-start;gap:12px;">
+            <span style="color:#1D9E75;font-size:16px;font-weight:800;line-height:1.4;flex-shrink:0;">✓</span>
+            <span style="color:#E8D9B8;font-size:14.5px;line-height:1.55;">זיהוי טון, כוונה וביטויים דו-משמעיים</span>
+          </div>
+          <div style="display:flex;align-items:flex-start;gap:12px;">
+            <span style="color:#1D9E75;font-size:16px;font-weight:800;line-height:1.4;flex-shrink:0;">✓</span>
+            <span style="color:#E8D9B8;font-size:14.5px;line-height:1.55;">תרחישים אמיתיים מהשטח - מבוססים על סיפורי חיילים</span>
+          </div>
+          <div style="display:flex;align-items:flex-start;gap:12px;">
+            <span style="color:#1D9E75;font-size:16px;font-weight:800;line-height:1.4;flex-shrink:0;">✓</span>
+            <span style="color:#E8D9B8;font-size:14.5px;line-height:1.55;">מנהגי תרבות חיוניים להבנה ולהתנהלות נכונה בשטח</span>
+          </div>
+        </div>
+      </div>
+      
+    </div>
+    
+    <!-- CTA at bottom for thumb reach -->
+    <div>
+      <button onclick="closeLanding()" style="background:linear-gradient(135deg,#1D9E75 0%,#0e5a3f 100%);border:none;color:#fff;border-radius:14px;padding:18px 32px;font-size:17px;font-weight:800;cursor:pointer;font-family:inherit;width:100%;box-shadow:0 6px 24px rgba(29,158,117,0.35);letter-spacing:0.8px;">
+        כניסה לאפליקציה
+      </button>
+      
+      <div style="text-align:center;margin-top:18px;color:#5e7a92;font-size:12px;letter-spacing:0.3px;">
+        תוכן מבוסס על סיטואציות אמיתיות בשטח
+      </div>
+    </div>
+    
+  </div>
+</div>
+
+<script>
+// Show landing on first visit only
+(function() {
+  try {
+    var seen = localStorage.getItem('hasSeenLanding');
+    if (!seen) {
+      var showIt = function() {
+        var el = document.getElementById('landing-overlay');
+        if (el) el.style.display = 'block';
+      };
+      if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', showIt);
+      } else {
+        showIt();
+      }
+    }
+  } catch(e) { console.warn('Landing error:', e); }
+})();
+
+function closeLanding() {
+  try {
+    document.getElementById('landing-overlay').style.display = 'none';
+    localStorage.setItem('hasSeenLanding', '1');
+  } catch(e) {}
+}
+
+function showLanding() {
+  try { document.getElementById('landing-overlay').style.display = 'block'; } catch(e) {}
+}
+</script>
+
+
+
 <div class="W">
 <div class="topbar">
   <div class="tb-top" style="display:flex;align-items:center;justify-content:space-between;padding:14px 14px 12px;direction:rtl;">
@@ -2276,7 +2377,7 @@ body, body *, .scr, .scr *, button, input, textarea, select {
       </div>
     </div>
     
-    <div class="loading" id="cats-loading"><div style="text-align:center;padding:20px;"><div style="font-size:16px;color:#D4862E;margin-bottom:8px;">טוען...</div><div style="font-size:10px;color:#7a9ab5;opacity:0.6;">v20260613-1926</div></div></div>
+    <div class="loading" id="cats-loading"><div style="text-align:center;padding:20px;"><div style="font-size:16px;color:#D4862E;margin-bottom:8px;">טוען...</div><div style="font-size:10px;color:#7a9ab5;opacity:0.6;">v20260613-2027</div></div></div>
     <div class="cgrid" id="cgrid" style="display:none;"></div>
   </div>
   <div id="vlist" class="scr">
@@ -6603,7 +6704,7 @@ function bldCats(){
   if (!DB || DB.length === 0) {
     loadEl.innerHTML = '<div style="text-align:center;padding:20px;color:#D4862E;">' +
       'מתחבר לשרת...<br><br>' +
-      '<div style="font-size:11px;color:#7a9ab5;">v20260613-1926</div><br>' +
+      '<div style="font-size:11px;color:#7a9ab5;">v20260613-2027</div><br>' +
       '<button onclick="location.reload(true)" style="padding:10px 20px;background:#D4862E;color:#fff;border:none;border-radius:8px;font-family:inherit;cursor:pointer;font-weight:700;margin-top:10px;">🔄 רענן</button>' +
       '</div>';
     return;
