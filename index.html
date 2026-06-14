@@ -1775,19 +1775,13 @@ body, body *, .scr, .scr *, button, input, textarea, select {
     <div style="flex:1;display:flex;flex-direction:column;justify-content:center;padding:20px 0;">
       
       <!-- Headline - large and clear -->
-      <div style="text-align:center;margin-bottom:14px;">
-        <h1 style="color:#E8D9B8;font-size:36px;font-weight:800;letter-spacing:0.5px;line-height:1.15;margin:0;">
+      <div style="text-align:center;margin-bottom:40px;">
+        <h1 style="color:#E8D9B8;font-size:38px;font-weight:800;letter-spacing:0.5px;line-height:1.15;margin:0;">
           ערבית מצילה חיים
         </h1>
       </div>
       
-      <!-- Sub-headline - the WHAT -->
-      <div style="text-align:center;margin-bottom:34px;">
-        <div style="color:#D4A24E;font-size:16px;font-weight:600;letter-spacing:0.3px;line-height:1.4;">
-          כלי שטח לכוחות הביטחון
-        </div>
-      </div>
-      
+
 
       <!-- What you'll learn - clean list -->
       <div style="background:rgba(255,255,255,0.025);border:1px solid rgba(255,255,255,0.06);border-radius:16px;padding:24px 22px;margin-bottom:32px;">
@@ -1868,9 +1862,7 @@ function showLanding() {
 <div class="topbar">
   <div class="tb-top" style="display:flex;align-items:center;justify-content:space-between;padding:14px 14px 12px;direction:rtl;">
     <!-- Right side: Role button -->
-    <button class="role-circle" id="roleBtn" onclick="showWelcome()" title="בחירת תפקיד" style="background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.1);border-radius:50%;width:38px;height:38px;display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:18px;flex-shrink:0;">
-      <span id="roleBtnEmoji">👤</span>
-    </button>
+    
     
     <!-- Center: Title -->
     <div style="flex:1;text-align:center;padding:0 8px;">
@@ -2377,7 +2369,7 @@ function showLanding() {
       </div>
     </div>
     
-    <div class="loading" id="cats-loading"><div style="text-align:center;padding:20px;"><div style="font-size:16px;color:#D4862E;margin-bottom:8px;">טוען...</div><div style="font-size:10px;color:#7a9ab5;opacity:0.6;">v20260613-2027</div></div></div>
+    <div class="loading" id="cats-loading"><div style="text-align:center;padding:20px;"><div style="font-size:16px;color:#D4862E;margin-bottom:8px;">טוען...</div><div style="font-size:10px;color:#7a9ab5;opacity:0.6;">v20260614-1243</div></div></div>
     <div class="cgrid" id="cgrid" style="display:none;"></div>
   </div>
   <div id="vlist" class="scr">
@@ -6704,7 +6696,7 @@ function bldCats(){
   if (!DB || DB.length === 0) {
     loadEl.innerHTML = '<div style="text-align:center;padding:20px;color:#D4862E;">' +
       'מתחבר לשרת...<br><br>' +
-      '<div style="font-size:11px;color:#7a9ab5;">v20260613-2027</div><br>' +
+      '<div style="font-size:11px;color:#7a9ab5;">v20260614-1243</div><br>' +
       '<button onclick="location.reload(true)" style="padding:10px 20px;background:#D4862E;color:#fff;border:none;border-radius:8px;font-family:inherit;cursor:pointer;font-weight:700;margin-top:10px;">🔄 רענן</button>' +
       '</div>';
     return;
@@ -11425,7 +11417,7 @@ function setRole(role){
   if(typeof doS==='function')doS();
 }
 
-function showWelcome(){document.getElementById('welcomePopup').style.display='flex';}
+function showWelcome(){/* disabled - landing page replaces this */}
 function hideWelcome(){document.getElementById('welcomePopup').style.display='none';}
 function selectRole(r){
   try {
@@ -11541,7 +11533,7 @@ try { renderHome(); } catch(_){}
 </div>
 
 <!-- Welcome Popup -->
-<div id="welcomePopup" class="welcome-bg" style="display:none;" onclick="if(event.target===this)hideWelcome()">
+<div id="welcomePopup" class="welcome-bg" style="display:none !important;" onclick="if(event.target===this)hideWelcome()">
   <div class="welcome-pop">
     <div class="welcome-title">ברוכים הבאים</div>
     <div class="welcome-sub">בחר/י את התפקיד שלך:</div>
