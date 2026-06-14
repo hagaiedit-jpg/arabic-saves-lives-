@@ -2377,7 +2377,7 @@ function showLanding() {
       </div>
     </div>
     
-    <div class="loading" id="cats-loading"><div style="text-align:center;padding:20px;"><div style="font-size:16px;color:#D4A24E;margin-bottom:8px;">טוען...</div><div style="font-size:10px;color:#7a9ab5;opacity:0.6;">v20260614-1331</div></div></div>
+    <div class="loading" id="cats-loading"><div style="text-align:center;padding:20px;"><div style="font-size:16px;color:#D4A24E;margin-bottom:8px;">טוען...</div><div style="font-size:10px;color:#7a9ab5;opacity:0.6;">v20260614-1445</div></div></div>
     <div class="cgrid" id="cgrid" style="display:none;"></div>
   </div>
   <div id="vlist" class="scr">
@@ -4490,7 +4490,7 @@ function showEmergencyChallengeModal() {
   html += '<div id="emerg-options" style="display:grid;gap:6px;">';
   q.options.forEach(function(opt, idx){
     html += '<div onclick="emergChallengeAnswer(' + idx + ')" class="emerg-opt" data-opt-idx="' + idx + '" style="background:#1F3147;border:1px solid #2A3D52;color:#fff;border-radius:10px;padding:10px 12px;cursor:pointer;text-align:right;line-height:1.4;transition:all 0.2s;">';
-    html += '<div style="color:#fff;font-size:15px;font-weight:700;margin-bottom:2px;">' + (opt.trans || opt.ar || '') + '</div>';
+    html += '<div style="color:#fff;font-size:13px;font-weight:700;margin-bottom:2px;line-height:1.4;">' + (opt.trans || opt.ar || '') + '</div>';
     if (opt.ar) {
       html += '<div style="color:#E8D9B8;font-size:11px;font-family:Georgia,serif;">' + opt.ar + '</div>';
     }
@@ -4599,7 +4599,7 @@ function emergChallengeAnswer(selectedIdx) {
     html += '<div style="color:' + color + ';font-size:13px;font-weight:700;text-align:center;margin-bottom:8px;">' + msg + '</div>';
     html += '<div style="border-top:1px solid rgba(255,255,255,0.05);padding-top:8px;">';
     html += '<div style="color:#a0b8c8;font-size:10px;margin-bottom:3px;text-align:center;">התשובה הנכונה:</div>';
-    html += '<div style="color:#fff;font-size:16px;font-weight:700;text-align:center;line-height:1.4;">' + (q.phrase.trans || '') + '</div>';
+    html += '<div style="color:#fff;font-size:14px;font-weight:700;text-align:center;line-height:1.4;">' + (q.phrase.trans || '') + '</div>';
     html += '<div style="color:#E8D9B8;font-size:12px;text-align:center;font-family:Georgia,serif;margin-top:2px;">' + (q.phrase.ar || '') + '</div>';
     html += '<div style="color:#a0b8c8;font-size:10px;text-align:center;font-style:italic;margin-top:4px;">(' + (q.phrase.he || '') + ')</div>';
     html += '</div>';
@@ -6218,7 +6218,7 @@ function renderFlashQuestion(){
     if (optionsEl) {
       optionsEl.innerHTML = q.options.map(function(opt, optIdx){
         return '<div onclick="flashAnswerByIdx(' + optIdx + ')" class="flash-opt" data-opt-idx="' + optIdx + '" style="background:#1F3147;border:1px solid #2A3D52;color:#fff;border-radius:10px;padding:14px 12px;font-size:14px;font-weight:600;cursor:pointer;text-align:right;font-family:inherit;direction:rtl;line-height:1.5;user-select:none;-webkit-tap-highlight-color:rgba(212,162,78,0.3);">' +
-          '<div style="color:#fff;font-size:16px;font-weight:700;margin-bottom:4px;pointer-events:none;line-height:1.4;">' + (opt.trans || '') + '</div>' +
+          '<div style="color:#fff;font-size:14px;font-weight:700;margin-bottom:4px;pointer-events:none;line-height:1.4;">' + (opt.trans || '') + '</div>' +
           '<div style="color:#E8D9B8;font-size:13px;pointer-events:none;font-family:Georgia,serif;">' + opt.ar + '</div>' +
           '</div>';
       }).join('');
@@ -6698,7 +6698,7 @@ function bldCats(){
   if (!DB || DB.length === 0) {
     loadEl.innerHTML = '<div style="text-align:center;padding:20px;color:#D4A24E;">' +
       'מתחבר לשרת...<br><br>' +
-      '<div style="font-size:11px;color:#7a9ab5;">v20260614-1331</div><br>' +
+      '<div style="font-size:11px;color:#7a9ab5;">v20260614-1445</div><br>' +
       '<button onclick="location.reload(true)" style="padding:10px 20px;background:#D4A24E;color:#fff;border:none;border-radius:8px;font-family:inherit;cursor:pointer;font-weight:700;margin-top:10px;">🔄 רענן</button>' +
       '</div>';
     return;
