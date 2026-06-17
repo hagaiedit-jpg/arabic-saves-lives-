@@ -1774,13 +1774,18 @@ body, body *, .scr, .scr *, button, input, textarea, select {
     <!-- Spacing for breathing room -->
     <div style="flex:1;display:flex;flex-direction:column;justify-content:center;padding:20px 0;">
       
-      <!-- Headline - large and clear -->
-      <div style="text-align:center;margin-bottom:40px;">
-        <h1 style="color:#D4A24E;font-size:38px;font-weight:800;letter-spacing:0.5px;line-height:1.15;margin:0;">
+      <!-- Headline + emotional hook -->
+      <div style="text-align:center;margin-bottom:36px;">
+        <h1 style="color:#D4A24E;font-size:38px;font-weight:800;letter-spacing:0.5px;line-height:1.15;margin:0 0 12px;">
           ערבית מצילה חיים
         </h1>
+        <div style="color:#E8D9B8;font-size:18px;font-weight:700;letter-spacing:0.5px;margin-bottom:18px;">לא קורס. שכבת הגנה.</div>
+        <div style="color:#a0b8c8;font-size:15px;line-height:1.7;max-width:420px;margin:0 auto;">
+          מילה אחת שלא הבנת יכולה להכריע אירוע שלם.<br>
+          כאן תלמד להבין מה קורה סביבך — בזמן אמת.
+        </div>
       </div>
-      
+
 
 
       <!-- What you'll learn - clean list -->
@@ -2331,7 +2336,7 @@ function showLanding() {
       </div>
     </div>
     
-    <div class="loading" id="cats-loading"><div style="text-align:center;padding:20px;"><div style="font-size:16px;color:#D4A24E;margin-bottom:8px;">טוען...</div><div style="font-size:10px;color:#7a9ab5;opacity:0.6;">v20260617-1500</div></div></div>
+    <div class="loading" id="cats-loading"><div style="text-align:center;padding:20px;"><div style="font-size:16px;color:#D4A24E;margin-bottom:8px;">טוען...</div><div style="font-size:10px;color:#7a9ab5;opacity:0.6;">v20260617-1600</div></div></div>
     <div class="cgrid" id="cgrid" style="display:none;"></div>
   </div>
   <div id="vlist" class="scr">
@@ -6646,7 +6651,7 @@ function bldCats(){
   if (!DB || DB.length === 0) {
     loadEl.innerHTML = '<div style="text-align:center;padding:20px;color:#D4A24E;">' +
       'מתחבר לשרת...<br><br>' +
-      '<div style="font-size:11px;color:#7a9ab5;">v20260617-1500</div><br>' +
+      '<div style="font-size:11px;color:#7a9ab5;">v20260617-1600</div><br>' +
       '<button onclick="location.reload(true)" style="padding:10px 20px;background:#D4A24E;color:#fff;border:none;border-radius:8px;font-family:inherit;cursor:pointer;font-weight:700;margin-top:10px;">🔄 רענן</button>' +
       '</div>';
     return;
