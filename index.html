@@ -510,7 +510,7 @@ body.day-mode .tb-tab{color:#5a6b80;}
 body.day-mode .tb-tab.active{color:#a85200;border-bottom-color:#a85200;}
 body.day-mode .tb-tab-sec{color:#5a6b80;}
 body.day-mode .tb-tab-sec.active{color:#a85200;border-bottom-color:#a85200;}
-.tb-tabs-sec{display:flex;overflow-x:hidden;background:#18293E;border-bottom:1px solid #1e3348;padding:0 4px;}
+.tb-tabs-sec{display:flex;overflow-x:hidden;background:#18293E;border-bottom:1px solid #1F3147;padding:0 4px;}
 .tb-tabs-sec::-webkit-scrollbar{display:none;}
 .tb-tab-sec{flex:1 1 0;min-width:0;text-align:center;padding:12px 3px;color:rgba(210,180,140,0.7);font-size:13.5px;font-weight:500;line-height:1.2;cursor:pointer;border-bottom:2px solid transparent;transition:color 0.15s,border-color 0.15s;}
 .tb-tab-sec.active{color:#E8D9B8;border-bottom-color:#D4A24E;}
@@ -535,11 +535,11 @@ body.day-mode .ct{border:none;border-bottom:1px solid #ebe0c5;border-left:1px so
 .ci{width:48px;height:48px;border-radius:14px;background:rgba(212,162,78,0.12);display:flex;align-items:center;justify-content:center;font-size:24px;transition:transform 0.2s;}
 .cn{color:#E8D9B8;font-size:13.5px;font-weight:700;text-align:center;line-height:1.3;letter-spacing:0.2px;}
 .cc{display:inline-block;background:rgba(212,162,78,0.12);color:#D4A24E;font-size:10px;font-weight:700;padding:3px 11px;border-radius:10px;letter-spacing:0.3px;}
-.lhdr{background:#18293E;padding:11px 16px;display:flex;align-items:center;gap:10px;border-bottom:1px solid #1e3348;}
+.lhdr{background:#18293E;padding:11px 16px;display:flex;align-items:center;gap:10px;border-bottom:1px solid #1F3147;}
 .bbtn{background:#0E1B2E;border:1px solid #2A3D52;border-radius:8px;color:#E8D9B8;font-size:13px;padding:5px 12px;cursor:pointer;font-family:inherit;}
 .ltitle{color:#E8D9B8;font-size:14px;font-weight:500;}
 .litems{background:#0E1B2E;}
-.li{padding:13px 16px;border-bottom:1px solid #1e3348;cursor:pointer;display:flex;justify-content:space-between;align-items:center;}
+.li{padding:13px 16px;border-bottom:1px solid #1F3147;cursor:pointer;display:flex;justify-content:space-between;align-items:center;}
 .li:last-child{border-bottom:none;}
 .li:active{background:#1F3147;}
 .lt{color:#fff;font-size:15px;line-height:1.4;}
@@ -658,7 +658,7 @@ body.day-mode .card:hover{
 .csub{color:#7a9ab5;font-size:12px;line-height:1.6;}
 .cwarn{color:#ffb0b0;font-size:12px;padding:7px 10px;background:#2a1010;border:1px solid #5a2020;border-radius:7px;margin-top:7px;line-height:1.6;}
 .nf{padding:14px 16px;}
-.nfi{display:flex;gap:12px;padding:11px 0;border-bottom:1px solid #1e3348;align-items:flex-start;}
+.nfi{display:flex;gap:12px;padding:11px 0;border-bottom:1px solid #1F3147;align-items:flex-start;}
 .nfi:last-child{border-bottom:none;}
 .nfd{width:8px;height:8px;border-radius:50%;background:#D4A24E;flex-shrink:0;margin-top:4px;}
 .nfdate{font-size:11px;color:#7a9ab5;margin-bottom:2px;}
@@ -2268,19 +2268,6 @@ function showLanding() {
       </div>
       <div id="prog-categories"></div>
     </div>
-    
-    <!-- Achievements -->
-    <div style="background:linear-gradient(135deg,#18293E 0%,#1F3147 100%);border:1px solid rgba(212,162,78,0.25);border-radius:14px;padding:16px;margin-bottom:14px;">
-      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;">
-        <div style="display:flex;align-items:center;gap:8px;">
-          <span style="font-size:16px;">🏆</span>
-          <span style="color:#D4A24E;font-size:12px;font-weight:700;letter-spacing:0.5px;">הישגים</span>
-        </div>
-        <span id="prog-ach-count" style="color:#7a9ab5;font-size:11px;font-weight:600;">0/6</span>
-      </div>
-      <div id="prog-achievements" style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;"></div>
-    </div>
-    
 
     <!-- Activity Summary -->
     <div style="background:linear-gradient(135deg,#18293E 0%,#1F3147 100%);border:1px solid rgba(212,162,78,0.25);border-radius:14px;padding:16px;margin-bottom:14px;">
@@ -2377,7 +2364,7 @@ function showLanding() {
       </div>
     </div>
     
-    <div class="loading" id="cats-loading"><div style="text-align:center;padding:20px;"><div style="font-size:16px;color:#D4A24E;margin-bottom:8px;">טוען...</div><div style="font-size:10px;color:#7a9ab5;opacity:0.6;">v20260614-1510</div></div></div>
+    <div class="loading" id="cats-loading"><div style="text-align:center;padding:20px;"><div style="font-size:16px;color:#D4A24E;margin-bottom:8px;">טוען...</div><div style="font-size:10px;color:#7a9ab5;opacity:0.6;">v20260617-0900</div></div></div>
     <div class="cgrid" id="cgrid" style="display:none;"></div>
   </div>
   <div id="vlist" class="scr">
@@ -5256,36 +5243,8 @@ function renderProgress(){
       }
     }
     
-    // Achievements
-    var achEl = document.getElementById('prog-achievements');
-    var achCountEl = document.getElementById('prog-ach-count');
-    if (achEl && typeof ACHIEVEMENTS !== 'undefined') {
-      var earnedList = JSON.parse(localStorage.getItem('earned_achievements') || '[]');
-      var totalAch = ACHIEVEMENTS.length;
-      var earnedCount = earnedList.length;
-      if (achCountEl) achCountEl.textContent = earnedCount + '/' + totalAch;
-      
-      var achHtml = '';
-      ACHIEVEMENTS.forEach(function(ach){
-        var isEarned = earnedList.indexOf(ach.id) !== -1;
-        var bgColor = isEarned ? 'linear-gradient(135deg,#D4A24E 0%,#b87325 100%)' : 'rgba(255,255,255,0.04)';
-        var border = isEarned ? '1px solid #D4A24E' : '1px solid rgba(255,255,255,0.08)';
-        var iconColor = isEarned ? '#fff' : '#5a6b80';
-        var titleColor = isEarned ? '#fff' : '#5a6b80';
-        var descColor = isEarned ? 'rgba(255,255,255,0.85)' : '#5a6b80';
-        var iconOpacity = isEarned ? '1' : '0.3';
-        var lockIcon = isEarned ? '' : '<div style="position:absolute;top:4px;left:4px;font-size:10px;opacity:0.5;">🔒</div>';
-        
-        achHtml += '<div style="position:relative;background:' + bgColor + ';border:' + border + ';border-radius:10px;padding:10px 6px;text-align:center;min-height:90px;display:flex;flex-direction:column;align-items:center;justify-content:center;">';
-        achHtml += lockIcon;
-        achHtml += '<div style="font-size:24px;line-height:1;margin-bottom:4px;opacity:' + iconOpacity + ';">' + ach.icon + '</div>';
-        achHtml += '<div style="color:' + titleColor + ';font-size:10px;font-weight:700;line-height:1.2;margin-bottom:2px;">' + ach.title + '</div>';
-        achHtml += '<div style="color:' + descColor + ';font-size:9px;line-height:1.2;opacity:0.85;">' + ach.desc + '</div>';
-        achHtml += '</div>';
-      });
-      achEl.innerHTML = achHtml;
-    }
-    
+    // Achievements panel is rendered by renderAchievementsPanel() (tier-grouped view)
+
     // Activity Summary
     var actEl = document.getElementById('prog-activity');
     if (actEl) {
@@ -6698,7 +6657,7 @@ function bldCats(){
   if (!DB || DB.length === 0) {
     loadEl.innerHTML = '<div style="text-align:center;padding:20px;color:#D4A24E;">' +
       'מתחבר לשרת...<br><br>' +
-      '<div style="font-size:11px;color:#7a9ab5;">v20260614-1510</div><br>' +
+      '<div style="font-size:11px;color:#7a9ab5;">v20260617-0900</div><br>' +
       '<button onclick="location.reload(true)" style="padding:10px 20px;background:#D4A24E;color:#fff;border:none;border-radius:8px;font-family:inherit;cursor:pointer;font-weight:700;margin-top:10px;">🔄 רענן</button>' +
       '</div>';
     return;
