@@ -523,9 +523,9 @@ body.day-mode .tb-tab-sec.active{color:#a85200;border-bottom-color:#a85200;}
 .lrow{background:#e07800;padding:4px 12px;display:flex;gap:6px;}
 .lb{flex:1;padding:5px;border-radius:6px;border:1px solid rgba(255,255,255,0.3);background:transparent;color:rgba(255,255,255,0.65);font-size:12px;cursor:pointer;font-family:inherit;text-align:center;}
 .lb.active{background:rgba(255,255,255,0.2);color:#fff;border-color:rgba(255,255,255,0.8);}
-.cgrid{display:grid;grid-template-columns:1fr 1fr;gap:1px;background:#18293E;}
-body.day-mode .cgrid{background:#fff;gap:0;}
-body.day-mode .ct{border:none;border-bottom:1px solid #ebe0c5;border-left:1px solid #ebe0c5;}
+.cgrid{display:grid;grid-template-columns:1fr 1fr;gap:10px;background:transparent;}
+body.day-mode .cgrid{background:transparent;gap:10px;}
+body.day-mode .ct{border:1px solid #ebe0c5;}
 .ct{background:linear-gradient(160deg,#1F3147 0%,#243a55 100%);padding:22px 12px 18px;display:flex;flex-direction:column;align-items:center;gap:10px;cursor:pointer;min-height:128px;justify-content:center;transition:transform 0.15s,box-shadow 0.15s;position:relative;border-radius:16px;box-shadow:0 2px 8px rgba(0,0,0,0.2);border:1px solid rgba(212,162,78,0.15);}
 .ct:active{background:#2a3f54;}
 .ct.daily{background:linear-gradient(160deg,#1F3147 0%,#243a55 100%);}.ct.daily:active{transform:scale(0.97);}
@@ -2336,6 +2336,11 @@ function showLanding() {
     <button class="lb" id="lbar" onclick="setL('ar')">🔍 ערבית</button>
   </div>
   <div id="vcats" class="scr on">
+    <div style="text-align:center;margin-bottom:22px;">
+      <div style="font-size:28px;margin-bottom:6px;">📚</div>
+      <div style="color:#E8D9B8;font-size:18px;font-weight:800;letter-spacing:0.5px;margin-bottom:4px;">ספריית מבצעי</div>
+      <div style="color:#7a9ab5;font-size:12px;">ביטויים חיוניים למצבי שטח</div>
+    </div>
     <!-- Phrase of the Day Banner - MOVED to home tab, hidden here -->
     <div id="potd-banner" style="display:none !important;position:relative;background:#18293E;border-radius:12px;padding:14px 16px;margin-bottom:14px;border:1px solid rgba(212,162,78,0.25);border-right:3px solid #D4A24E;">
       <button onclick="potdDismiss()" title="הסתר" style="position:absolute;top:8px;left:8px;background:transparent;border:none;color:#7a9ab5;font-size:18px;cursor:pointer;padding:2px 8px;line-height:1;font-family:inherit;border-radius:6px;">×</button>
@@ -2364,7 +2369,7 @@ function showLanding() {
       </div>
     </div>
     
-    <div class="loading" id="cats-loading"><div style="text-align:center;padding:20px;"><div style="font-size:16px;color:#D4A24E;margin-bottom:8px;">טוען...</div><div style="font-size:10px;color:#7a9ab5;opacity:0.6;">v20260617-0900</div></div></div>
+    <div class="loading" id="cats-loading"><div style="text-align:center;padding:20px;"><div style="font-size:16px;color:#D4A24E;margin-bottom:8px;">טוען...</div><div style="font-size:10px;color:#7a9ab5;opacity:0.6;">v20260617-1000</div></div></div>
     <div class="cgrid" id="cgrid" style="display:none;"></div>
   </div>
   <div id="vlist" class="scr">
@@ -2470,7 +2475,14 @@ function showLanding() {
     <div class="litems" id="day-sres"></div>
   </div>
   <div id="daily-grid-view">
-    <div class="sec"><div class="stitle">ערבית יומיומית</div><div class="cgrid" id="dgrid"></div></div>
+    <div class="sec">
+      <div style="text-align:center;margin-bottom:22px;">
+        <div style="font-size:28px;margin-bottom:6px;">☕</div>
+        <div style="color:#E8D9B8;font-size:18px;font-weight:800;letter-spacing:0.5px;margin-bottom:4px;">ערבית יומיומית</div>
+        <div style="color:#7a9ab5;font-size:12px;">שיחות וביטויים לחיי היומיום</div>
+      </div>
+      <div class="cgrid" id="dgrid"></div>
+    </div>
   </div>
   <div id="daily-list-view" style="display:none;">
     <div class="lhdr"><button class="bbtn" onclick="goB('day')">→ חזור</button><div class="ltitle" id="dltitle"></div></div>
@@ -2521,8 +2533,11 @@ function showLanding() {
 <div class="scr" id="tab-cus">
   <div class="sec">
     <div id="customs-home">
-      <div class="stitle">📜 מנהגים</div>
-      <div style="color:#7a9ab5;font-size:12px;margin-bottom:14px;">בחר נושא</div>
+      <div style="text-align:center;margin-bottom:22px;">
+        <div style="font-size:28px;margin-bottom:6px;">🕌</div>
+        <div style="color:#E8D9B8;font-size:18px;font-weight:800;letter-spacing:0.5px;margin-bottom:4px;">מנהגים ותרבות</div>
+        <div style="color:#7a9ab5;font-size:12px;">להבין את הצד השני — כבוד, דת ומשפחה</div>
+      </div>
       <div class="customs-grid" id="customs-grid"></div>
     </div>
     <div id="customs-list" style="display:none;">
@@ -6657,7 +6672,7 @@ function bldCats(){
   if (!DB || DB.length === 0) {
     loadEl.innerHTML = '<div style="text-align:center;padding:20px;color:#D4A24E;">' +
       'מתחבר לשרת...<br><br>' +
-      '<div style="font-size:11px;color:#7a9ab5;">v20260617-0900</div><br>' +
+      '<div style="font-size:11px;color:#7a9ab5;">v20260617-1000</div><br>' +
       '<button onclick="location.reload(true)" style="padding:10px 20px;background:#D4A24E;color:#fff;border:none;border-radius:8px;font-family:inherit;cursor:pointer;font-weight:700;margin-top:10px;">🔄 רענן</button>' +
       '</div>';
     return;
@@ -9401,10 +9416,14 @@ function showDictPopupFallback(he, ar) {
       }
     }
     
-    // Show the popup
+    // Show the popup (activate the library tab where the popup lives, so it's
+    // visible even when opened from the dictionary tab)
+    window._popupFromDict = true;
+    document.querySelectorAll('[id^="tab-"]').forEach(function(x){ x.className = 'scr'; });
+    document.getElementById('tab-lib').className = 'scr on';
     shV('vpop');
-  } catch(e) { 
-    console.warn('showDictPopupFallback error:', e); 
+  } catch(e) {
+    console.warn('showDictPopupFallback error:', e);
     alert('שגיאה בהצגת המשפט');
   }
 }
@@ -9723,7 +9742,13 @@ function closePopup(){
   // Reset dict-specific button
   var goToBtn = document.getElementById('dict-go-to-category');
   if (goToBtn) goToBtn.style.display = 'none';
-  
+
+  // If this popup was opened from the dictionary, return to the dictionary tab
+  if (window._popupFromDict) {
+    window._popupFromDict = false;
+    try { navToTab('dict'); return; } catch(e) { /* fall through */ }
+  }
+
   try {
     // Go back to category list if we have a current category, otherwise to categories grid
     if (typeof curC !== 'undefined' && curC) {
@@ -9736,6 +9761,8 @@ function closePopup(){
 
 function goToDictCategory(){
   var tab = window._dictTargetTab || 'home';
+  // Navigating to the category itself - don't bounce back to the dictionary
+  window._popupFromDict = false;
   closePopup();
   setTimeout(function(){ navToTab(tab); }, 200);
 }
