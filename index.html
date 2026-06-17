@@ -2369,7 +2369,7 @@ function showLanding() {
       </div>
     </div>
     
-    <div class="loading" id="cats-loading"><div style="text-align:center;padding:20px;"><div style="font-size:16px;color:#D4A24E;margin-bottom:8px;">טוען...</div><div style="font-size:10px;color:#7a9ab5;opacity:0.6;">v20260617-1000</div></div></div>
+    <div class="loading" id="cats-loading"><div style="text-align:center;padding:20px;"><div style="font-size:16px;color:#D4A24E;margin-bottom:8px;">טוען...</div><div style="font-size:10px;color:#7a9ab5;opacity:0.6;">v20260617-1100</div></div></div>
     <div class="cgrid" id="cgrid" style="display:none;"></div>
   </div>
   <div id="vlist" class="scr">
@@ -6672,7 +6672,7 @@ function bldCats(){
   if (!DB || DB.length === 0) {
     loadEl.innerHTML = '<div style="text-align:center;padding:20px;color:#D4A24E;">' +
       'מתחבר לשרת...<br><br>' +
-      '<div style="font-size:11px;color:#7a9ab5;">v20260617-1000</div><br>' +
+      '<div style="font-size:11px;color:#7a9ab5;">v20260617-1100</div><br>' +
       '<button onclick="location.reload(true)" style="padding:10px 20px;background:#D4A24E;color:#fff;border:none;border-radius:8px;font-family:inherit;cursor:pointer;font-weight:700;margin-top:10px;">🔄 רענן</button>' +
       '</div>';
     return;
@@ -7102,6 +7102,7 @@ if (typeof escapeHtml !== 'function') {
 
 function opAnnounce(i){
   const a=ANNOUNCE[i];
+  window._popupAudio = a.audio || '';
   // Show announcement popup with text + translation toggle
   document.getElementById('phe').textContent=a.he;
   document.getElementById('parsm').textContent='';
@@ -9769,7 +9770,18 @@ function goToDictCategory(){
 
 
 
-function shV(id){['vcats','vlist','vsrch','vpop'].forEach(v=>{document.getElementById(v).className='scr'+(v===id?' on':'');});}
+function shV(id){
+  ['vcats','vlist','vsrch','vpop'].forEach(v=>{document.getElementById(v).className='scr'+(v===id?' on':'');});
+  // When showing the phrase popup: hide audio controls if there is no recording
+  // (e.g. informational categories like Customs that have no audio by design)
+  if(id==='vpop'){
+    var hasAudio=!!(window._popupAudio);
+    var playRow=document.querySelector('#vpop .play-row');
+    var waveRow=document.querySelector('#vpop .ww');
+    if(playRow) playRow.style.display=hasAudio?'':'none';
+    if(waveRow) waveRow.style.display=hasAudio?'':'none';
+  }
+}
 
 function goB(tab){
   if(tab==='day'){
@@ -10123,9 +10135,8 @@ function resetPopupControls() {
 
 // Set category badge & cultural fact in popup
 function setPopupExtras(p) {
-  // Store audio URL for repeat/loop buttons (caller may have set it; prefer p.audio if available)
-  if (p && p.audio) window._popupAudio = p.audio;
-  else if (!window._popupAudio) window._popupAudio = '';
+  // Store audio URL for repeat/loop buttons - always reflect the current phrase
+  window._popupAudio = (p && p.audio) ? p.audio : '';
   // Category badge
   var badge = document.getElementById('pcatbadge');
   if (badge) {
