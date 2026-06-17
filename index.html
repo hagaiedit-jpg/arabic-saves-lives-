@@ -2331,7 +2331,7 @@ function showLanding() {
       </div>
     </div>
     
-    <div class="loading" id="cats-loading"><div style="text-align:center;padding:20px;"><div style="font-size:16px;color:#D4A24E;margin-bottom:8px;">טוען...</div><div style="font-size:10px;color:#7a9ab5;opacity:0.6;">v20260617-1400</div></div></div>
+    <div class="loading" id="cats-loading"><div style="text-align:center;padding:20px;"><div style="font-size:16px;color:#D4A24E;margin-bottom:8px;">טוען...</div><div style="font-size:10px;color:#7a9ab5;opacity:0.6;">v20260617-1500</div></div></div>
     <div class="cgrid" id="cgrid" style="display:none;"></div>
   </div>
   <div id="vlist" class="scr">
@@ -2562,6 +2562,11 @@ function showLanding() {
       <div style="font-size:28px;margin-bottom:6px;">💬</div>
       <div style="color:#E8D9B8;font-size:18px;font-weight:800;letter-spacing:0.5px;margin-bottom:4px;">ספריית תרחישים</div>
       <div style="color:#7a9ab5;font-size:12px;">תרגול שיחות אמיתיות מהשטח</div>
+    </div>
+    <div style="background:#1F3147;border:1px solid #2A3D52;border-radius:12px;padding:10px;margin-bottom:16px;display:flex;align-items:center;gap:8px;">
+      <span style="color:#D4A24E;font-size:18px;">🔍</span>
+      <input id="scn-search" placeholder="חפש תרחיש: מחסום, בית, פצוע..." oninput="scnSearch()" style="flex:1;background:transparent;border:none;color:#E8D9B8;font-size:15px;font-family:inherit;outline:none;direction:rtl;text-align:right;"/>
+      <button onclick="document.getElementById('scn-search').value='';scnSearch()" style="background:rgba(255,255,255,0.1);border:none;color:#E8D9B8;width:28px;height:28px;border-radius:50%;cursor:pointer;font-size:16px;">×</button>
     </div>
     <div id="scn-grid"></div>
   </div>
@@ -6641,7 +6646,7 @@ function bldCats(){
   if (!DB || DB.length === 0) {
     loadEl.innerHTML = '<div style="text-align:center;padding:20px;color:#D4A24E;">' +
       'מתחבר לשרת...<br><br>' +
-      '<div style="font-size:11px;color:#7a9ab5;">v20260617-1400</div><br>' +
+      '<div style="font-size:11px;color:#7a9ab5;">v20260617-1500</div><br>' +
       '<button onclick="location.reload(true)" style="padding:10px 20px;background:#D4A24E;color:#fff;border:none;border-radius:8px;font-family:inherit;cursor:pointer;font-weight:700;margin-top:10px;">🔄 רענן</button>' +
       '</div>';
     return;
@@ -7555,7 +7560,7 @@ var SCN_STORIES = {
 
 
 // Track which categories are expanded
-var _scnExpandedCats = {cat1:true, cat2:true, cat3:true, cat4:true, cat5:true};
+var _scnExpandedCats = {};
 
 var _scnCurrent = null;  // current scenario id
 var _scnSteps = [];      // current scenario steps array
@@ -7569,7 +7574,7 @@ function renderScnGrid(){
     var html = '';
     
     SCN_CATEGORIES.forEach(function(cat){
-      var isExpanded = _scnExpandedCats[cat.id] !== false;
+      var isExpanded = _scnExpandedCats[cat.id] === true;
       
       // Count scenarios with content in this category
       var ANNOUNCE_SCN_LIST = ['כריזה לבית','כריזה לרכב','כריזה לקהל'];
@@ -7594,6 +7599,12 @@ function renderScnGrid(){
       html += '<div style="color:#7a9ab5;font-size:12px;margin-top:3px;">' + cat.scenarios.length + ' תרחישים';
       if (readyCount > 0) html += ' · <span style="color:#1D9E75;font-weight:600;">' + readyCount + ' מוכנים</span>';
       html += '</div>';
+      // Preview of what's inside (only when collapsed) - so the soldier knows the content without guessing
+      if (!isExpanded) {
+        var _scnPrev = cat.scenarios.slice(0, 4).map(function(s){ return s.title; }).join(' · ');
+        if (cat.scenarios.length > 4) _scnPrev += '...';
+        html += '<div style="color:#5a6b80;font-size:11px;margin-top:5px;line-height:1.45;">' + _scnPrev + '</div>';
+      }
       html += '</div>';
       html += '</div>';
       html += '<span style="color:#7a9ab5;font-size:16px;transform:rotate(' + (isExpanded ? '90deg' : '0deg') + ');transition:transform 0.3s;display:inline-block;">›</span>';
@@ -7662,12 +7673,72 @@ function renderScnGrid(){
 
 function scnToggleCat(catId){
   try {
-    _scnExpandedCats[catId] = !(_scnExpandedCats[catId] !== false);
+    _scnExpandedCats[catId] = !_scnExpandedCats[catId];
     renderScnGrid();
   } catch(e) { console.warn(e); }
 }
 
 function scnOpen_old_helper(){}
+
+// === Scenario search - filter scenarios across all categories ===
+function _scnNorm(s){
+  return (s || '').toString().toLowerCase().replace(/[֑-ׇ]/g, '');
+}
+function scnSearch(){
+  try {
+    var inp = document.getElementById('scn-search');
+    var q = inp ? _scnNorm(inp.value.trim()) : '';
+    var el = document.getElementById('scn-grid');
+    if (!el) return;
+    if (!q) { renderScnGrid(); return; }
+
+    var ANNOUNCE_SCN_LIST = ['כריזה לבית','כריזה לרכב','כריזה לקהל'];
+    var completed = {};
+    try { completed = JSON.parse(localStorage.getItem('completed_scenarios') || '{}'); } catch(e){}
+
+    var matches = [];
+    SCN_CATEGORIES.forEach(function(cat){
+      cat.scenarios.forEach(function(s){
+        var hay = _scnNorm(s.title) + ' ' + _scnNorm(cat.title);
+        if (hay.indexOf(q) !== -1) matches.push(s);
+      });
+    });
+
+    if (matches.length === 0) {
+      el.innerHTML = '<div style="text-align:center;padding:30px;color:#a0b8c8;"><div style="font-size:36px;margin-bottom:8px;">🔍</div>לא נמצאו תרחישים ל-"' + (inp.value || '') + '"</div>';
+      return;
+    }
+
+    var html = '<div style="font-size:11px;color:#7a9ab5;text-align:center;margin-bottom:12px;">נמצאו ' + matches.length + ' תרחישים</div>';
+    html += '<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">';
+    matches.forEach(function(s){
+      var sourceList = SCENARIO;
+      if (ANNOUNCE_SCN_LIST.indexOf(s.id) !== -1 && typeof ANNOUNCE !== 'undefined' && ANNOUNCE) sourceList = ANNOUNCE;
+      var phrases = (typeof sourceList !== 'undefined' && sourceList) ? sourceList.filter(function(p){return p.cat === s.id;}) : [];
+      var ready = phrases.length > 0;
+      var isCompleted = !!completed[s.id];
+      var cardBg = ready ? 'linear-gradient(160deg,#1F3147 0%,#243a55 100%)' : 'rgba(31,49,71,0.4)';
+      var cardBorder = isCompleted ? '#1D9E75' : (ready ? 'rgba(212,162,78,0.25)' : 'rgba(212,162,78,0.1)');
+      var cardOpacity = ready ? '1' : '0.55';
+      var clickHandler = ready ? 'onclick="scnOpen(\'' + s.id + '\')"' : 'onclick="alert(\'תרחיש זה יוסף בקרוב\')"';
+      html += '<div style="background:' + cardBg + ';border:1px solid ' + cardBorder + ';border-radius:14px;padding:16px 10px 12px;text-align:center;cursor:pointer;opacity:' + cardOpacity + ';position:relative;" ' + clickHandler + '>';
+      if (isCompleted) html += '<div style="position:absolute;top:8px;left:8px;background:#1D9E75;color:#fff;border-radius:50%;width:22px;height:22px;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;">✓</div>';
+      html += '<div style="font-size:28px;margin-bottom:10px;line-height:1;">' + s.icon + '</div>';
+      html += '<div style="color:#E8D9B8;font-size:12.5px;font-weight:700;line-height:1.3;margin-bottom:6px;min-height:32px;display:flex;align-items:center;justify-content:center;">' + s.title + '</div>';
+      if (ready) {
+        var pillBg = isCompleted ? 'rgba(29,158,117,0.18)' : 'rgba(212,162,78,0.12)';
+        var pillColor = isCompleted ? '#1D9E75' : '#D4A24E';
+        var pillText = isCompleted ? '✓ הושלם' : phrases.length + ' שלבים';
+        html += '<div style="display:inline-block;background:' + pillBg + ';color:' + pillColor + ';font-size:10px;font-weight:700;padding:3px 10px;border-radius:10px;">' + pillText + '</div>';
+      } else {
+        html += '<div style="display:inline-block;background:rgba(122,154,181,0.1);color:#7a9ab5;font-size:10px;font-weight:600;padding:3px 10px;border-radius:10px;">בקרוב</div>';
+      }
+      html += '</div>';
+    });
+    html += '</div>';
+    el.innerHTML = html;
+  } catch(e){ console.warn('scnSearch error:', e); }
+}
 
 // === Show real-story intro before scenario ===
 function showScenarioIntro(scnId) {
@@ -8736,6 +8807,9 @@ function scnBack(){
   _scnCurrent = null;
   _scnSteps = [];
   _scnIdx = 0;
+  // Clear any previous search so the category overview shows
+  var scnSearchEl = document.getElementById('scn-search');
+  if (scnSearchEl) scnSearchEl.value = '';
   // Refresh grid to show ✓ on completed scenarios
   if (typeof renderScnGrid === 'function') renderScnGrid();
 }
