@@ -1834,7 +1834,7 @@ body, body *, .scr, .scr *, button, input, textarea, select {
     
     <!-- CTA at bottom for thumb reach -->
     <div>
-      <button onclick="closeLanding()" style="background:linear-gradient(135deg,#1D9E75 0%,#0e5a3f 100%);border:none;color:#fff;border-radius:14px;padding:18px 32px;font-size:17px;font-weight:800;cursor:pointer;font-family:inherit;width:100%;box-shadow:0 6px 24px rgba(29,158,117,0.35);letter-spacing:0.8px;">
+      <button onclick="closeLanding()" style="background:linear-gradient(135deg,#1D9E75 0%,#0e5a3f 100%);border:none;color:#fff;border-radius:14px;padding:18px 32px;font-size:17px;font-weight:800;cursor:pointer;font-family:inherit;width:100%;letter-spacing:0.8px;">
         כניסה לאפליקציה
       </button>
       
@@ -1844,7 +1844,7 @@ body, body *, .scr, .scr *, button, input, textarea, select {
       
       <!-- Contact link -->
       <div style="text-align:center;margin-top:24px;">
-        <a href="https://wa.me/972529247768" target="_blank" style="display:inline-flex;align-items:center;gap:8px;background:#25D366;color:#fff;text-decoration:none;border-radius:12px;padding:10px 22px;font-size:14px;font-weight:600;font-family:inherit;box-shadow:0 4px 14px rgba(37,211,102,0.3);">
+        <a href="https://wa.me/972529247768" target="_blank" style="display:inline-flex;align-items:center;gap:8px;background:#25D366;color:#fff;text-decoration:none;border-radius:12px;padding:10px 22px;font-size:14px;font-weight:600;font-family:inherit;">
           <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M.057 24l1.687-6.163c-1.041-1.804-1.588-3.849-1.587-5.946.003-6.556 5.338-11.891 11.893-11.891 3.181.001 6.167 1.24 8.413 3.488 2.245 2.248 3.481 5.236 3.48 8.414-.003 6.557-5.338 11.892-11.893 11.892-1.99-.001-3.951-.5-5.688-1.448l-6.305 1.654zm6.597-3.807c1.676.995 3.276 1.591 5.392 1.592 5.448 0 9.886-4.434 9.889-9.885.002-5.462-4.415-9.89-9.881-9.892-5.452 0-9.887 4.434-9.889 9.884-.001 2.225.651 3.891 1.746 5.634l-.999 3.648 3.742-.981zm11.387-5.464c-.074-.124-.272-.198-.57-.347-.297-.149-1.758-.868-2.031-.967-.272-.099-.47-.149-.669.149-.198.297-.768.967-.941 1.165-.173.198-.347.223-.644.074-.297-.149-1.255-.462-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.297-.347.446-.521.151-.172.2-.296.3-.495.099-.198.05-.372-.025-.521-.075-.148-.669-1.611-.916-2.206-.242-.579-.487-.501-.669-.51l-.57-.01c-.198 0-.52.074-.792.372s-1.04 1.016-1.04 2.479 1.065 2.876 1.213 3.074c.149.198 2.095 3.2 5.076 4.487.709.306 1.263.489 1.694.626.712.226 1.36.194 1.872.118.571-.085 1.758-.719 2.006-1.413.248-.695.248-1.29.173-1.414z"/></svg>
           <span>צור קשר בוואטסאפ</span>
         </a>
@@ -1978,10 +1978,20 @@ function showLanding() {
     </div>
     
     <!-- Prep Path - Combat Readiness Track (HERO - the main "what to do now") -->
-    <div onclick="startPrepPath()" id="home-prep-card" style="background:linear-gradient(135deg,#D4A24E 0%,#a85200 100%);border-radius:14px;padding:14px 16px;margin-bottom:14px;cursor:pointer;box-shadow:0 4px 12px rgba(212,134,46,0.25);position:relative;overflow:hidden;min-height:60px;">
+    <div onclick="heroAction()" id="home-prep-card" style="background:linear-gradient(135deg,#D4A24E 0%,#a85200 100%);border-radius:14px;padding:14px 16px;margin-bottom:14px;cursor:pointer;box-shadow:0 4px 12px rgba(212,134,46,0.25);position:relative;overflow:hidden;min-height:60px;">
       <!-- Content set by JS -->
     </div>
     
+    <!-- 10 must-know phrases - flagship for new recruits -->
+    <div onclick="navToTab('ten')" style="background:linear-gradient(135deg,#18293E 0%,#1F3147 100%);border:1px solid rgba(212,162,78,0.4);border-radius:14px;padding:14px 16px;margin-bottom:14px;cursor:pointer;display:flex;align-items:center;gap:14px;box-shadow:0 2px 8px rgba(0,0,0,0.2);">
+      <div style="font-size:30px;flex-shrink:0;">🎖️</div>
+      <div style="flex:1;min-width:0;">
+        <div style="color:#E8D9B8;font-size:14px;font-weight:800;margin-bottom:2px;">10 המשפטים שכל לוחם חייב</div>
+        <div style="color:#7a9ab5;font-size:11px;line-height:1.4;">הבסיס הקריטי להכיר לפני שטח</div>
+      </div>
+      <div style="color:#D4A24E;font-size:22px;flex-shrink:0;">◀</div>
+    </div>
+
     <!-- Secondary actions - uniform clean grid (2x2) -->
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px;">
       <div onclick="startFlashcards()" style="background:linear-gradient(160deg,#1F3147 0%,#243a55 100%);border:1px solid rgba(212,162,78,0.2);border-radius:14px;padding:18px 10px;text-align:center;cursor:pointer;box-shadow:0 2px 8px rgba(0,0,0,0.2);">
@@ -2352,7 +2362,7 @@ function showLanding() {
       </div>
     </div>
     
-    <div class="loading" id="cats-loading"><div style="text-align:center;padding:20px;"><div style="font-size:16px;color:#D4A24E;margin-bottom:8px;">טוען...</div><div style="font-size:10px;color:#7a9ab5;opacity:0.6;">v20260617-1900</div></div></div>
+    <div class="loading" id="cats-loading"><div style="text-align:center;padding:20px;"><div style="font-size:16px;color:#D4A24E;margin-bottom:8px;">טוען...</div><div style="font-size:10px;color:#7a9ab5;opacity:0.6;">v20260617-2120</div></div></div>
     <div class="cgrid" id="cgrid" style="display:none;"></div>
   </div>
   <div id="vlist" class="scr">
@@ -2504,6 +2514,18 @@ function showLanding() {
       <button onclick="document.getElementById('dict-search').value='';searchDict()" style="background:rgba(255,255,255,0.1);border:none;color:#E8D9B8;width:28px;height:28px;border-radius:50%;cursor:pointer;font-size:16px;">×</button>
     </div>
     <div id="dict-results"></div>
+  </div>
+</div>
+
+<!-- 10 ESSENTIAL PHRASES TAB -->
+<div class="scr" id="tab-ten">
+  <div style="padding:18px 16px 100px;">
+    <div style="text-align:center;margin-bottom:22px;">
+      <div style="font-size:28px;margin-bottom:6px;">🎖️</div>
+      <div style="color:#E8D9B8;font-size:18px;font-weight:800;letter-spacing:0.5px;margin-bottom:4px;">10 המשפטים שכל לוחם חייב</div>
+      <div style="color:#7a9ab5;font-size:12px;line-height:1.5;">המשפטים הקריטיים להכיר לפני שטח — לחצו לתרגול</div>
+    </div>
+    <div id="ten-list"></div>
   </div>
 </div>
 
@@ -4301,6 +4323,50 @@ function autoCheckPrepDayCompletion() {
   } catch(e) {}
 }
 
+// Smart hero: decide what the main home card shows and does
+function renderSmartHero(){
+  try {
+    var card = document.getElementById('home-prep-card');
+    if (!card) return;
+    // Priority 1: an active, not-yet-completed scenario
+    var lastScn = localStorage.getItem('last_scenario_id');
+    var completed = {};
+    try { completed = JSON.parse(localStorage.getItem('completed_scenarios') || '{}'); } catch(e){}
+    var foundScn = null;
+    if (lastScn && !completed[lastScn] && typeof SCN_CATEGORIES !== 'undefined') {
+      for (var i = 0; i < SCN_CATEGORIES.length; i++) {
+        var m = SCN_CATEGORIES[i].scenarios.find(function(s){ return s.id === lastScn; });
+        if (m) { foundScn = m; break; }
+      }
+    }
+    if (foundScn) {
+      window._heroMode = 'scenario';
+      card.innerHTML =
+        '<div style="display:flex;align-items:center;gap:14px;">' +
+        '<div style="font-size:32px;flex-shrink:0;">' + foundScn.icon + '</div>' +
+        '<div style="flex:1;min-width:0;">' +
+        '<div style="color:rgba(255,255,255,0.9);font-size:11px;font-weight:700;letter-spacing:0.5px;margin-bottom:2px;" class="keep-white">🔄 התרגול של היום</div>' +
+        '<div style="color:#fff;font-size:15px;font-weight:800;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;" class="keep-white">המשך: ' + foundScn.title + '</div>' +
+        '</div>' +
+        '<div style="color:#fff;font-size:22px;flex-shrink:0;" class="keep-white">◀</div>' +
+        '</div>';
+      return;
+    }
+    // Priority 2/3: prep path (the existing adaptive card handles "start" vs "continue day")
+    window._heroMode = 'prep';
+    if (typeof renderPrepPathHomeCard === 'function') renderPrepPathHomeCard();
+  } catch(e){
+    console.warn('renderSmartHero error:', e);
+    window._heroMode = 'prep';
+    try { renderPrepPathHomeCard(); } catch(_){}
+  }
+}
+
+function heroAction(){
+  if (window._heroMode === 'scenario' && typeof homeContinue === 'function') { homeContinue(); return; }
+  if (typeof startPrepPath === 'function') startPrepPath();
+}
+
 function renderPrepPathHomeCard() {
   try {
     var card = document.getElementById('home-prep-card');
@@ -4655,8 +4721,8 @@ function renderHome(){
     // 2. Render new streak card (big and prominent)
     renderStreakCard();
     
-    // 2.5 Render prep path card
-    try { renderPrepPathHomeCard(); } catch(e) {}
+    // 2.5 Render smart hero (decides: continue scenario / prep path / start)
+    try { renderSmartHero(); } catch(e) {}
     
     // 2b. Render weekly summary (only when there's an active streak)
     renderWeeklySummary();
@@ -4667,35 +4733,10 @@ function renderHome(){
       sub.textContent = 'בואו נמשיך לתרגל';
     }
     
-    // 3. Continue card - last opened scenario (only if NOT completed)
+    // 3. Continue card - now handled by the smart hero, so keep this standalone card hidden
     var continueCard = document.getElementById('home-continue-card');
-    if (continueCard) {
-      var lastScn = localStorage.getItem('last_scenario_id');
-      var completed = {};
-      try { completed = JSON.parse(localStorage.getItem('completed_scenarios') || '{}'); } catch(e) {}
-      
-      if (lastScn && !completed[lastScn]) {
-        // Find scenario info
-        var foundScn = null;
-        var foundCat = null;
-        if (typeof SCN_CATEGORIES !== 'undefined') {
-          for (var i = 0; i < SCN_CATEGORIES.length; i++) {
-            var match = SCN_CATEGORIES[i].scenarios.find(function(s){return s.id === lastScn;});
-            if (match) { foundScn = match; foundCat = SCN_CATEGORIES[i]; break; }
-          }
-        }
-        if (foundScn) {
-          document.getElementById('home-continue-title').textContent = foundScn.icon + ' ' + foundScn.title;
-          continueCard.style.display = 'block';
-        } else {
-          continueCard.style.display = 'none';
-        }
-      } else {
-        // No scenario, or already completed - hide
-        continueCard.style.display = 'none';
-      }
-    }
-    
+    if (continueCard) continueCard.style.display = 'none';
+
     // 4. Update 4 stats cubes
     var learned = JSON.parse(localStorage.getItem('learned_phrases') || '{}');
     var practiced = JSON.parse(localStorage.getItem('practiced_phrases') || '{}');
@@ -6607,6 +6648,7 @@ function populateFromData(data){
 // Render everything that depends on the loaded data
 function renderAllData(){
   bldCats();rDG();rHrt();rSem();rCus();rArts();rIntel();renderDict();rQK();updateNewDot();renderPotd();renderStreak();renderProgress();renderScnGrid();renderHome();
+  try{ renderTen(); }catch(e){}
 }
 
 
@@ -6689,6 +6731,62 @@ const HCATS=[
   {id:'ביטויים ופתגמים',icon:'📜'}
 ];
 
+// === 10 essential phrases every recruit must know before combat service ===
+const TEN_PHRASES=[
+  {he:'עצור!',          trans:'קִף',                      ar:'قف',                       icon:'✋', audio:''},
+  {he:'ידיים למעלה!',   trans:'אִרְפַע אִידֵיכּ',           ar:'ارفع يديك',                icon:'🙌', audio:''},
+  {he:'אל תזוז!',       trans:'לַא תִתְחַרַכּ',             ar:'لا تتحرك',                 icon:'🛑', audio:''},
+  {he:'בוא הנה',        trans:'תַעַאל לַהוֹן',             ar:'تعال لهون',                icon:'👈', audio:''},
+  {he:'תן תעודה',       trans:'אַעְטִינִי אֶלהַוִּיֶה',      ar:'اعطيني الهوية',            icon:'🪪', audio:''},
+  {he:'מי בבית?',       trans:'מִין פִי אֶלבֵּית',          ar:'مين في البيت؟',            icon:'🏠', audio:''},
+  {he:'תפתח את הדלת',   trans:'אִפְתַח אֶלבַּאבּ',          ar:'افتح الباب',               icon:'🚪', audio:''},
+  {he:'אל תפחד',        trans:"לַא תְחַ'אף",               ar:'لا تخاف',                  icon:'🤲', audio:''},
+  {he:'אנחנו צה"ל',     trans:"אִחְנַא גַ'יְשׁ אֶלדִּפַאע אֶלאִסְרַאאִילִי", ar:'احنا جيش الدفاع الإسرائيلي', icon:'🪖', audio:''},
+  {he:'יש פצוע?',       trans:"פִי מַגְ'רוּח",             ar:'في مجروح؟',                icon:'🩹', audio:''}
+];
+
+function renderTen(){
+  var el=document.getElementById('ten-list');
+  if(!el)return;
+  var html='';
+  TEN_PHRASES.forEach(function(p,i){
+    html+='<div onclick="openTenPhrase('+i+')" style="background:linear-gradient(160deg,#1F3147 0%,#243a55 100%);border:1px solid rgba(212,162,78,0.22);border-radius:14px;padding:14px 16px;margin-bottom:10px;cursor:pointer;display:flex;align-items:center;gap:14px;box-shadow:0 2px 8px rgba(0,0,0,0.2);">';
+    html+='<div style="width:38px;height:38px;flex-shrink:0;background:rgba(212,162,78,0.12);border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:18px;color:#D4A24E;font-weight:800;">'+(i+1)+'</div>';
+    html+='<div style="flex:1;min-width:0;">';
+    html+='<div style="color:#E8D9B8;font-size:15px;font-weight:700;margin-bottom:2px;">'+p.he+'</div>';
+    html+='<div style="color:#D4A24E;font-size:13px;">'+p.trans+'</div>';
+    html+='<div style="color:#7a9ab5;font-size:14px;direction:rtl;margin-top:2px;">'+p.ar+'</div>';
+    html+='</div>';
+    html+='<div style="color:#D4A24E;font-size:18px;flex-shrink:0;">◀</div>';
+    html+='</div>';
+  });
+  el.innerHTML=html;
+}
+
+function openTenPhrase(i){
+  var p=TEN_PHRASES[i];
+  if(!p)return;
+  window._popupSource='ten';
+  window._popupReturnTab='ten';
+  window._popupAudio=p.audio||'';
+  if(typeof setPopupLabel==='function')setPopupLabel('military');
+  document.getElementById('phe').textContent=p.he;
+  document.getElementById('parsm').textContent=p.ar;
+  document.getElementById('ptrans').textContent=p.trans||'';
+  document.getElementById('pwhy').textContent='';
+  document.getElementById('pwhyb').style.display='none';
+  document.getElementById('ptone').textContent='';
+  document.getElementById('ptoneb').style.display='none';
+  var rb=document.getElementById('presponsesb'); if(rb)rb.style.display='none';
+  var badge=document.getElementById('pcatbadge'); if(badge)badge.style.display='none';
+  var goTo=document.getElementById('dict-go-to-category'); if(goTo)goTo.style.display='none';
+  try{bldW();}catch(e){}
+  var wt=document.getElementById('wtime'); if(wt)wt.textContent='0:00';
+  document.querySelectorAll('[id^="tab-"]').forEach(function(x){x.className='scr';});
+  document.getElementById('tab-lib').className='scr on';
+  shV('vpop');
+}
+
 function cntC(c){return DB.filter(p=>p.cat===c).length;}
 function bldCats(){
   var loadEl = document.getElementById('cats-loading');
@@ -6698,7 +6796,7 @@ function bldCats(){
   if (!DB || DB.length === 0) {
     loadEl.innerHTML = '<div style="text-align:center;padding:20px;color:#D4A24E;">' +
       'מתחבר לשרת...<br><br>' +
-      '<div style="font-size:11px;color:#7a9ab5;">v20260617-1900</div><br>' +
+      '<div style="font-size:11px;color:#7a9ab5;">v20260617-2120</div><br>' +
       '<button onclick="location.reload(true)" style="padding:10px 20px;background:#D4A24E;color:#fff;border:none;border-radius:8px;font-family:inherit;cursor:pointer;font-weight:700;margin-top:10px;">🔄 רענן</button>' +
       '</div>';
     return;
@@ -9839,6 +9937,13 @@ function closePopup(){
   var goToBtn = document.getElementById('dict-go-to-category');
   if (goToBtn) goToBtn.style.display = 'none';
 
+  // If opened from a specific tab (e.g. the 10-phrases screen), return to it
+  if (window._popupReturnTab) {
+    var rt = window._popupReturnTab;
+    window._popupReturnTab = '';
+    try { navToTab(rt); return; } catch(e) { /* fall through */ }
+  }
+
   // If this popup was opened from the dictionary, return to the dictionary tab
   if (window._popupFromDict) {
     window._popupFromDict = false;
@@ -9875,6 +9980,9 @@ function shV(id){
     var waveRow=document.querySelector('#vpop .ww');
     if(playRow) playRow.style.display=hasAudio?'':'none';
     if(waveRow) waveRow.style.display=hasAudio?'':'none';
+    // Pronunciation practice needs a reference recording to compare against
+    var practiceSec=document.getElementById('practice-section');
+    if(practiceSec) practiceSec.style.display=hasAudio?'':'none';
   }
 }
 
@@ -10105,7 +10213,7 @@ function opPop(i,section){
 function clsP(){
   if(curAudio){curAudio.pause();curAudio=null;}
   if(pt)clearInterval(pt);
-  
+  window._popupReturnTab='';
   var src=window._popupSource;
   // Map popup source -> target tab key + which row + post-switch callback
   var routes={
@@ -10114,7 +10222,8 @@ function clsP(){
     'fav':  {tab:'fav', row:'primary',   cb:function(){rFav();rRecent();}},
     'daily':{tab:'day', row:'secondary', cb:null},
     'dict': {tab:'dict',row:'secondary', cb:function(){renderDict();}},
-    'sem':  {tab:'sem', row:'secondary', cb:function(){if(typeof rSem==='function')rSem();}}
+    'sem':  {tab:'sem', row:'secondary', cb:function(){if(typeof rSem==='function')rSem();}},
+    'ten':  {tab:'ten', row:'secondary', cb:function(){if(typeof renderTen==='function')renderTen();}}
   };
   if(src && routes[src]){
     var r=routes[src];
@@ -11702,6 +11811,10 @@ try { renderHome(); } catch(_){}
 <div id="more-menu" style="display:none;position:fixed;bottom:80px;left:8px;right:8px;background:#18293E;border:1px solid #2e4558;border-radius:14px;padding:12px;z-index:99;box-shadow:0 -4px 20px rgba(0,0,0,0.6);direction:rtl;">
   <div style="text-align:center;color:#D4A24E;font-size:12px;font-weight:700;letter-spacing:1px;margin-bottom:10px;">תפריט נוסף</div>
   <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;">
+    <div onclick="document.getElementById('more-menu').style.display='none';navToTab('ten');" style="background:linear-gradient(135deg,rgba(212,162,78,0.2),rgba(212,162,78,0.05));border:1px solid rgba(212,162,78,0.5);border-radius:10px;padding:14px 6px;text-align:center;cursor:pointer;">
+      <div style="font-size:22px;margin-bottom:4px;">🎖️</div>
+      <div style="color:#D4A24E;font-size:11px;font-weight:700;">10 משפטים</div>
+    </div>
     <div onclick="document.getElementById('more-menu').style.display='none';navToTab('dict');" style="background:linear-gradient(135deg,rgba(212,162,78,0.2),rgba(212,162,78,0.05));border:1px solid rgba(212,162,78,0.5);border-radius:10px;padding:14px 6px;text-align:center;cursor:pointer;">
       <div style="font-size:22px;margin-bottom:4px;">📖</div>
       <div style="color:#D4A24E;font-size:11px;font-weight:700;">מילון חכם</div>
@@ -11801,11 +11914,14 @@ function navToTab(tabId){
     
     // Trigger render functions for specific tabs
     if (tabId === 'dict') {
-      setTimeout(function(){ 
-        try { 
-          if (typeof renderDict === 'function') renderDict(); 
+      setTimeout(function(){
+        try {
+          if (typeof renderDict === 'function') renderDict();
         } catch(e) { console.warn('renderDict error:', e); }
       }, 50);
+    }
+    if (tabId === 'ten') {
+      try { if (typeof renderTen === 'function') renderTen(); } catch(e) {}
     }
     if (tabId === 'intel') {
       setTimeout(function(){ 
