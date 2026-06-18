@@ -2362,7 +2362,7 @@ function showLanding() {
       </div>
     </div>
     
-    <div class="loading" id="cats-loading"><div style="text-align:center;padding:20px;"><div style="font-size:16px;color:#D4A24E;margin-bottom:8px;">טוען...</div><div style="font-size:10px;color:#7a9ab5;opacity:0.6;">v20260617-2200</div></div></div>
+    <div class="loading" id="cats-loading"><div style="text-align:center;padding:20px;"><div style="font-size:16px;color:#D4A24E;margin-bottom:8px;">טוען...</div><div style="font-size:10px;color:#7a9ab5;opacity:0.6;">v20260617-2210</div></div></div>
     <div class="cgrid" id="cgrid" style="display:none;"></div>
   </div>
   <div id="vlist" class="scr">
@@ -2701,14 +2701,6 @@ function showLanding() {
       <div class="afl"><label>למה זה חשוב</label><textarea id="apwy"></textarea></div>
       <div class="afl"><label>טיפ ללוחם</label><textarea id="aptn"></textarea></div>
       <div class="afl"><label>פאקט תרבותי <span style="color:#7a9ab5;font-size:11px;">(אופציונלי - רקע תרבותי על הביטוי)</span></label><textarea id="apcult" placeholder="לדוגמה: ביטוי דתי, ברכה מקובלת באזור הזה..."></textarea></div>
-      <div class="afl"><label>למי המשפט מתאים? <span style="color:#7a9ab5;font-size:11px;">(אפשר לסמן כמה. ללא סימון = יוצג לכולם)</span></label>
-        <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-top:4px;">
-          <label style="display:flex;align-items:center;gap:6px;background:rgba(255,255,255,0.04);padding:9px;border-radius:8px;cursor:pointer;font-weight:normal;color:#fff;font-size:13px;"><input type="checkbox" id="role_idf" style="margin:0;cursor:pointer;width:16px;height:16px;"> 🪖 צה"ל</label>
-          <label style="display:flex;align-items:center;gap:6px;background:rgba(255,255,255,0.04);padding:9px;border-radius:8px;cursor:pointer;font-weight:normal;color:#fff;font-size:13px;"><input type="checkbox" id="role_police" style="margin:0;cursor:pointer;width:16px;height:16px;"> 🚓 משטרה</label>
-          <label style="display:flex;align-items:center;gap:6px;background:rgba(255,255,255,0.04);padding:9px;border-radius:8px;cursor:pointer;font-weight:normal;color:#fff;font-size:13px;"><input type="checkbox" id="role_security" style="margin:0;cursor:pointer;width:16px;height:16px;"> 🛡️ ביטחון</label>
-          <label style="display:flex;align-items:center;gap:6px;background:rgba(255,255,255,0.04);padding:9px;border-radius:8px;cursor:pointer;font-weight:normal;color:#fff;font-size:13px;"><input type="checkbox" id="role_preidf" style="margin:0;cursor:pointer;width:16px;height:16px;"> 🎒 מלש"ב</label>
-        </div>
-      </div>
       <div class="afl"><label style="display:flex;align-items:center;gap:8px;cursor:pointer;background:rgba(255,215,0,0.06);padding:10px;border-radius:8px;border:1px solid rgba(255,215,0,0.25);"><input type="checkbox" id="ap_gold" style="margin:0;cursor:pointer;width:16px;height:16px;"> ⭐ <strong style="color:#FFD700;">משפט זהב</strong> <span style="color:#7a9ab5;font-size:11px;font-weight:normal;">(יופיע בראש מסך החירום)</span></label></div>
       <div class="afl"><label>דחיפות</label><select id="apurg"><option value="">רגיל</option><option value="urgent">🔴 מיידי</option><option value="sensitive">🟡 רגיש</option></select></div>
       <div class="afl"><label>הקלטה</label>
@@ -2887,14 +2879,6 @@ function showLanding() {
       <label>💬 תשובות אפשריות מהאזרח <span style="color:#7a9ab5;font-size:11px;">(אופציונלי)</span></label>
       <div id="edit-responses-list" style="display:flex;flex-direction:column;gap:8px;margin-top:6px;"></div>
       <button type="button" onclick="addResponseRow()" style="margin-top:8px;background:rgba(29,158,117,0.2);border:1px dashed #1D9E75;color:#7eecc1;padding:10px;border-radius:8px;width:100%;font-family:inherit;font-size:13px;font-weight:600;cursor:pointer;">➕ הוסף תשובה</button>
-    </div>
-    <div class="afl"><label>למי המשפט מתאים? <span style="color:#7a9ab5;font-size:11px;">(ניתן לסמן כמה. ללא סימון = יוצג לכולם)</span></label>
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-top:4px;">
-        <label style="display:flex;align-items:center;gap:6px;background:rgba(255,255,255,0.04);padding:9px;border-radius:8px;cursor:pointer;font-weight:normal;color:#fff;font-size:13px;"><input type="checkbox" id="edit_role_idf" style="margin:0;cursor:pointer;width:16px;height:16px;"> 🪖 צה"ל</label>
-        <label style="display:flex;align-items:center;gap:6px;background:rgba(255,255,255,0.04);padding:9px;border-radius:8px;cursor:pointer;font-weight:normal;color:#fff;font-size:13px;"><input type="checkbox" id="edit_role_police" style="margin:0;cursor:pointer;width:16px;height:16px;"> 🚓 משטרה</label>
-        <label style="display:flex;align-items:center;gap:6px;background:rgba(255,255,255,0.04);padding:9px;border-radius:8px;cursor:pointer;font-weight:normal;color:#fff;font-size:13px;"><input type="checkbox" id="edit_role_security" style="margin:0;cursor:pointer;width:16px;height:16px;"> 🛡️ ביטחון</label>
-        <label style="display:flex;align-items:center;gap:6px;background:rgba(255,255,255,0.04);padding:9px;border-radius:8px;cursor:pointer;font-weight:normal;color:#fff;font-size:13px;"><input type="checkbox" id="edit_role_preidf" style="margin:0;cursor:pointer;width:16px;height:16px;"> 🎒 מלש"ב</label>
-      </div>
     </div>
     <div class="afl"><label style="display:flex;align-items:center;gap:8px;cursor:pointer;background:rgba(255,215,0,0.06);padding:10px;border-radius:8px;border:1px solid rgba(255,215,0,0.25);"><input type="checkbox" id="edit_gold" style="margin:0;cursor:pointer;width:16px;height:16px;"> ⭐ <strong style="color:#FFD700;">משפט זהב</strong> <span style="color:#7a9ab5;font-size:11px;font-weight:normal;">(יופיע בחירום)</span></label></div>
     <div class="afl"><label>דחיפות</label><select id="edit-urg"><option value="">רגיל</option><option value="urgent">🔴 מיידי</option><option value="sensitive">🟡 רגיש</option></select></div>
@@ -6844,7 +6828,7 @@ function bldCats(){
   if (!DB || DB.length === 0) {
     loadEl.innerHTML = '<div style="text-align:center;padding:20px;color:#D4A24E;">' +
       'מתחבר לשרת...<br><br>' +
-      '<div style="font-size:11px;color:#7a9ab5;">v20260617-2200</div><br>' +
+      '<div style="font-size:11px;color:#7a9ab5;">v20260617-2210</div><br>' +
       '<button onclick="location.reload(true)" style="padding:10px 20px;background:#D4A24E;color:#fff;border:none;border-radius:8px;font-family:inherit;cursor:pointer;font-weight:700;margin-top:10px;">🔄 רענן</button>' +
       '</div>';
     return;
@@ -10826,12 +10810,8 @@ function openEditIdx(idx) {
     }
     
     
-    // Parse tags for roles + gold flag
+    // Parse tags for gold flag
     var tagsLower = (p.tags || '').toLowerCase();
-    document.getElementById('edit_role_idf').checked      = tagsLower.indexOf('@idf') !== -1;
-    document.getElementById('edit_role_police').checked   = tagsLower.indexOf('@police') !== -1;
-    document.getElementById('edit_role_security').checked = tagsLower.indexOf('@security') !== -1;
-    document.getElementById('edit_role_preidf').checked   = tagsLower.indexOf('@preidf') !== -1;
     document.getElementById('edit_gold').checked          = tagsLower.indexOf('@gold') !== -1;
     
     // Strip the @-tags from displayed tags (if there's a tags field shown in future)
@@ -10969,10 +10949,6 @@ async function saveEdit(){
     return t && l.indexOf('@idf')===-1 && l.indexOf('@police')===-1 && l.indexOf('@security')===-1 && l.indexOf('@preidf')===-1 && l.indexOf('@gold')===-1;
   }).join(' ');
   var newTags = [nonRoleTags];
-  if (document.getElementById('edit_role_idf').checked)      newTags.push('@idf');
-  if (document.getElementById('edit_role_police').checked)   newTags.push('@police');
-  if (document.getElementById('edit_role_security').checked) newTags.push('@security');
-  if (document.getElementById('edit_role_preidf').checked)   newTags.push('@preidf');
   if (document.getElementById('edit_gold').checked)          newTags.push('@gold');
   var finalTags = newTags.filter(function(s){return s;}).join(' ').trim();
   
@@ -11708,16 +11684,9 @@ function loadRole(){
 }
 
 function visibleToRole(p){
-  var role=getCurrentRole();
-  if(!role||role==='all')return true;
-  var tags=((p&&p.tags)||'').toLowerCase();
-  var hasRoleTag=/@(idf|police|security|preidf)/.test(tags);
-  if(!hasRoleTag)return true;
-  // "forces" = unified security forces (idf + police + security)
-  if(role==='forces'){
-    return tags.indexOf('@idf')!==-1 || tags.indexOf('@police')!==-1 || tags.indexOf('@security')!==-1;
-  }
-  return tags.indexOf('@'+role)!==-1;
+  // Audience targeting removed — the app serves everyone (army, police, security,
+  // pre-enlistment) without per-phrase tagging. Every phrase is visible to all.
+  return true;
 }
 
 function isGoldPhrase(p){
