@@ -2362,7 +2362,7 @@ function showLanding() {
       </div>
     </div>
     
-    <div class="loading" id="cats-loading"><div style="text-align:center;padding:20px;"><div style="font-size:16px;color:#D4A24E;margin-bottom:8px;">טוען...</div><div style="font-size:10px;color:#7a9ab5;opacity:0.6;">v20260617-2140</div></div></div>
+    <div class="loading" id="cats-loading"><div style="text-align:center;padding:20px;"><div style="font-size:16px;color:#D4A24E;margin-bottom:8px;">טוען...</div><div style="font-size:10px;color:#7a9ab5;opacity:0.6;">v20260617-2150</div></div></div>
     <div class="cgrid" id="cgrid" style="display:none;"></div>
   </div>
   <div id="vlist" class="scr">
@@ -6796,7 +6796,7 @@ function bldCats(){
   if (!DB || DB.length === 0) {
     loadEl.innerHTML = '<div style="text-align:center;padding:20px;color:#D4A24E;">' +
       'מתחבר לשרת...<br><br>' +
-      '<div style="font-size:11px;color:#7a9ab5;">v20260617-2140</div><br>' +
+      '<div style="font-size:11px;color:#7a9ab5;">v20260617-2150</div><br>' +
       '<button onclick="location.reload(true)" style="padding:10px 20px;background:#D4A24E;color:#fff;border:none;border-radius:8px;font-family:inherit;cursor:pointer;font-weight:700;margin-top:10px;">🔄 רענן</button>' +
       '</div>';
     return;
@@ -11784,7 +11784,7 @@ try { renderHome(); } catch(_){}
 </div>
 
 <!-- Bottom Nav (mobile-first navigation) -->
-<div id="bottom-nav" style="position:fixed;bottom:0;left:0;right:0;background:#0E1B2E;border-top:1px solid #2e4558;padding:8px 6px;display:flex;justify-content:space-around;align-items:center;z-index:100;direction:rtl;box-shadow:0 -4px 12px rgba(0,0,0,0.4);">
+<div id="bottom-nav" style="position:fixed;bottom:0;left:50%;transform:translateX(-50%);width:100%;max-width:480px;box-sizing:border-box;background:#0E1B2E;border-top:1px solid #2e4558;padding:8px 6px;display:flex;justify-content:space-around;align-items:center;z-index:100;direction:rtl;box-shadow:0 -4px 12px rgba(0,0,0,0.4);">
   <div onclick="navToTab('home')" class="bn-btn" data-tab="home" style="flex:1;text-align:center;cursor:pointer;padding:6px 4px;border-radius:10px;transition:all 0.2s;">
     <div style="font-size:24px;line-height:1;margin-bottom:4px;">🏠</div>
     <div style="color:#E8D9B8;font-size:11px;font-weight:700;">בית</div>
@@ -11808,7 +11808,7 @@ try { renderHome(); } catch(_){}
 </div>
 
 <!-- More Menu (popup from bottom) -->
-<div id="more-menu" style="display:none;position:fixed;bottom:80px;left:8px;right:8px;background:#18293E;border:1px solid #2e4558;border-radius:14px;padding:12px;z-index:99;box-shadow:0 -4px 20px rgba(0,0,0,0.6);direction:rtl;">
+<div id="more-menu" style="display:none;position:fixed;bottom:80px;left:50%;transform:translateX(-50%);width:calc(100% - 16px);max-width:464px;box-sizing:border-box;background:#18293E;border:1px solid #2e4558;border-radius:14px;padding:12px;z-index:99;box-shadow:0 -4px 20px rgba(0,0,0,0.6);direction:rtl;">
   <div style="text-align:center;color:#D4A24E;font-size:12px;font-weight:700;letter-spacing:1px;margin-bottom:10px;">תפריט נוסף</div>
   <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;">
     <div onclick="document.getElementById('more-menu').style.display='none';navToTab('ten');" style="background:linear-gradient(135deg,rgba(212,162,78,0.2),rgba(212,162,78,0.05));border:1px solid rgba(212,162,78,0.5);border-radius:10px;padding:14px 6px;text-align:center;cursor:pointer;">
