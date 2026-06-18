@@ -2362,7 +2362,7 @@ function showLanding() {
       </div>
     </div>
     
-    <div class="loading" id="cats-loading"><div style="text-align:center;padding:20px;"><div style="font-size:16px;color:#D4A24E;margin-bottom:8px;">טוען...</div><div style="font-size:10px;color:#7a9ab5;opacity:0.6;">v20260617-2220</div></div></div>
+    <div class="loading" id="cats-loading"><div style="text-align:center;padding:20px;"><div style="font-size:16px;color:#D4A24E;margin-bottom:8px;">טוען...</div><div style="font-size:10px;color:#7a9ab5;opacity:0.6;">v20260617-2230</div></div></div>
     <div class="cgrid" id="cgrid" style="display:none;"></div>
   </div>
   <div id="vlist" class="scr">
@@ -3376,6 +3376,21 @@ function showStreakInfo() {
 
 
 // === Weekly Summary Rendering ===
+// Safari-safe date parsing: iOS Safari fails to parse toDateString() output
+// (e.g. "Wed Jun 18 2026") via new Date(), returning Invalid Date — which
+// silently zeroed all activity counts on iPhone. Parse such strings manually.
+var _ACT_MON={Jan:0,Feb:1,Mar:2,Apr:3,May:4,Jun:5,Jul:6,Aug:7,Sep:8,Oct:9,Nov:10,Dec:11};
+function _actDate(val){
+  if(val==null) return null;
+  if(typeof val==='string'){
+    var m=val.match(/^[A-Za-z]{3}\s+([A-Za-z]{3})\s+(\d{1,2})\s+(\d{4})/);
+    if(m){ return new Date(parseInt(m[3],10), _ACT_MON[m[1]], parseInt(m[2],10)); }
+  }
+  var d=new Date(val);
+  return isNaN(d.getTime())?null:d;
+}
+function _actDay(val){ var d=_actDate(val); return d?d.toDateString():''; }
+
 function renderWeeklySummary() {
   try {
     var streak = parseInt(localStorage.getItem('streak_count') || '0', 10);
@@ -3417,12 +3432,12 @@ function renderWeeklySummary() {
       
       for (var key in learned) {
         try {
-          if (new Date(learned[key]).toDateString() === dStr) count++;
+          if (_actDay(learned[key]) === dStr) count++;
         } catch(e) {}
       }
       for (var key in practiced) {
         try {
-          if (new Date(practiced[key]).toDateString() === dStr) count++;
+          if (_actDay(practiced[key]) === dStr) count++;
         } catch(e) {}
       }
       
@@ -4257,7 +4272,7 @@ function checkPrepDayProgress(day) {
         DB.forEach(function(p){
           if (p.cat === dayData.cat && learned[p.id]) {
             try {
-              if (new Date(learned[p.id]).toDateString() === todayStr) count++;
+              if (_actDay(learned[p.id]) === todayStr) count++;
             } catch(e) {}
           }
         });
@@ -4284,7 +4299,7 @@ function checkPrepDayProgress(day) {
       try { completed = JSON.parse(localStorage.getItem('completed_scenarios') || '{}'); } catch(e) {}
       for (var key in completed) {
         try {
-          if (new Date(completed[key]).toDateString() === todayStr) scnCount++;
+          if (_actDay(completed[key]) === todayStr) scnCount++;
         } catch(e) {}
       }
       return { current: Math.min(scnCount, dayData.count), target: dayData.count, done: scnCount >= dayData.count };
@@ -4744,15 +4759,13 @@ function renderHome(){
     var todayCount = 0;
     for (var key in learned) {
       try {
-        var d = new Date(learned[key]);
-        if (d.toDateString() === todayStr) todayCount++;
+        if (_actDay(learned[key]) === todayStr) todayCount++;
       } catch(e) {}
     }
     // Add practices today
     for (var key in practiced) {
       try {
-        var d = new Date(practiced[key]);
-        if (d.toDateString() === todayStr) todayCount++;
+        if (_actDay(practiced[key]) === todayStr) todayCount++;
       } catch(e) {}
     }
     var goalNum = document.getElementById('home-cube-goal-num');
@@ -4974,7 +4987,7 @@ function renderInsights() {
     var todayStr = new Date().toDateString();
     var todayCount = 0;
     for (var key in learned) {
-      try { if (new Date(learned[key]).toDateString() === todayStr) todayCount++; } catch(e) {}
+      try { if (_actDay(learned[key]) === todayStr) todayCount++; } catch(e) {}
     }
     
     var totalLearned = Object.keys(learned).length;
@@ -6845,7 +6858,7 @@ function bldCats(){
   if (!DB || DB.length === 0) {
     loadEl.innerHTML = '<div style="text-align:center;padding:20px;color:#D4A24E;">' +
       'מתחבר לשרת...<br><br>' +
-      '<div style="font-size:11px;color:#7a9ab5;">v20260617-2220</div><br>' +
+      '<div style="font-size:11px;color:#7a9ab5;">v20260617-2230</div><br>' +
       '<button onclick="location.reload(true)" style="padding:10px 20px;background:#D4A24E;color:#fff;border:none;border-radius:8px;font-family:inherit;cursor:pointer;font-weight:700;margin-top:10px;">🔄 רענן</button>' +
       '</div>';
     return;
@@ -8940,8 +8953,8 @@ function scnComplete(){
     var weekCount = 0;
     for (var k in completed) {
       try {
-        var d = new Date(completed[k]);
-        if (d >= weekAgo) weekCount++;
+        var d = _actDate(completed[k]);
+        if (d && d >= weekAgo) weekCount++;
       } catch(e) {}
     }
     
@@ -9158,8 +9171,8 @@ function practiceSuccess(){
     var weekCount = 0;
     for (var k in practiced) {
       try {
-        var d = new Date(practiced[k]);
-        if (d >= weekAgo) weekCount++;
+        var d = _actDate(practiced[k]);
+        if (d && d >= weekAgo) weekCount++;
       } catch(e) {}
     }
     
