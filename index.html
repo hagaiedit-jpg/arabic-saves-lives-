@@ -2362,7 +2362,7 @@ function showLanding() {
       </div>
     </div>
     
-    <div class="loading" id="cats-loading"><div style="text-align:center;padding:20px;"><div style="font-size:16px;color:#D4A24E;margin-bottom:8px;">טוען...</div><div style="font-size:10px;color:#7a9ab5;opacity:0.6;">v20260617-2150</div></div></div>
+    <div class="loading" id="cats-loading"><div style="text-align:center;padding:20px;"><div style="font-size:16px;color:#D4A24E;margin-bottom:8px;">טוען...</div><div style="font-size:10px;color:#7a9ab5;opacity:0.6;">v20260617-2200</div></div></div>
     <div class="cgrid" id="cgrid" style="display:none;"></div>
   </div>
   <div id="vlist" class="scr">
@@ -2844,7 +2844,13 @@ function showLanding() {
       </div>
       <button class="sbtn" onclick="addSem()">שמור</button>
     </div></div>
-    <div id="at-al" style="display:none;"><div id="admin-list"></div></div>
+    <div id="at-al" style="display:none;">
+      <div style="margin-bottom:12px;">
+        <button onclick="importTenPhrases(this)" style="width:100%;padding:12px;background:linear-gradient(135deg,#D4A24E 0%,#b88a3d 100%);border:none;border-radius:10px;color:#0E1B2E;font-size:13px;font-weight:800;cursor:pointer;font-family:inherit;">🎖️ ייבא את 10 משפטי החובה לרשימה (חד-פעמי)</button>
+        <div style="text-align:center;color:#7a9ab5;font-size:11px;margin-top:5px;">לאחר הייבוא הם יופיעו ברשימה תחת סינון "🔇 צריך הקלטה"</div>
+      </div>
+      <div id="admin-list"></div>
+    </div>
 
     <!-- Categories -->
     <div id="at-acat" style="display:none;"><div class="acard">
@@ -6745,11 +6751,27 @@ const TEN_PHRASES=[
   {he:'יש פצוע?',       trans:"פִיה מַגְ'רוּח",            ar:'فيه مجروح؟',               icon:'🩹', audio:''}
 ];
 
+// Category used to store the 10 phrases in the DB (so they appear in admin & can be recorded)
+const TEN_CAT='10 משפטי חובה';
+
+// Merge the canonical 10 (correct text) with any matching DB rows to pull recorded audio
+function getTenList(){
+  var byHe={};
+  try{
+    (DB||[]).filter(function(p){return p.cat===TEN_CAT;}).forEach(function(p){byHe[p.he]=p;});
+  }catch(e){}
+  return TEN_PHRASES.map(function(p){
+    var d=byHe[p.he];
+    return {he:p.he,trans:p.trans,ar:p.ar,icon:p.icon,audio:(d&&d.audio)||p.audio||''};
+  });
+}
+
 function renderTen(){
   var el=document.getElementById('ten-list');
   if(!el)return;
+  window._tenList=getTenList();
   var html='';
-  TEN_PHRASES.forEach(function(p,i){
+  window._tenList.forEach(function(p,i){
     html+='<div onclick="openTenPhrase('+i+')" style="background:linear-gradient(160deg,#1F3147 0%,#243a55 100%);border:1px solid rgba(212,162,78,0.22);border-radius:14px;padding:14px 16px;margin-bottom:10px;cursor:pointer;display:flex;align-items:center;gap:14px;box-shadow:0 2px 8px rgba(0,0,0,0.2);">';
     html+='<div style="width:38px;height:38px;flex-shrink:0;background:rgba(212,162,78,0.12);border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:18px;color:#D4A24E;font-weight:800;">'+(i+1)+'</div>';
     html+='<div style="flex:1;min-width:0;">';
@@ -6764,7 +6786,8 @@ function renderTen(){
 }
 
 function openTenPhrase(i){
-  var p=TEN_PHRASES[i];
+  var list=window._tenList||TEN_PHRASES;
+  var p=list[i];
   if(!p)return;
   window._popupSource='ten';
   window._popupReturnTab='ten';
@@ -6787,6 +6810,31 @@ function openTenPhrase(i){
   shV('vpop');
 }
 
+// One-time import: turn the canonical 10 into real DB rows so they show in admin and can be recorded
+async function importTenPhrases(btn){
+  if(!confirm('להוסיף את 10 משפטי החובה לרשימות? פעולה חד-פעמית (לא תיווצר כפילות אם כבר קיימים).'))return;
+  var old=btn.textContent; btn.disabled=true; btn.textContent='מוסיף...';
+  try{
+    var existing=await sbFetch('/rest/v1/phrases?select=he&section=eq.military&cat=eq.'+encodeURIComponent(TEN_CAT));
+    var have={}; (existing||[]).forEach(function(p){have[p.he]=1;});
+    var added=0;
+    for(var i=0;i<TEN_PHRASES.length;i++){
+      var p=TEN_PHRASES[i];
+      if(have[p.he])continue;
+      await sbFetch('/rest/v1/phrases','POST',{cat:TEN_CAT,he:p.he,trans:p.trans,ar:p.ar,tags:'',why:'',tone:'',audio_url:'',is_new:false,section:'military'});
+      added++;
+    }
+    btn.textContent='✓ נוספו '+added;
+    await loadData();
+    renderAdminList();
+    alert('✓ נוספו '+added+' משפטים לרשימה. אפשר להקליט אותם עכשיו (סינון "🔇 צריך הקלטה"). אם נוספו 0 — הם כבר היו קיימים.');
+  }catch(e){
+    alert('שגיאה: '+(e&&e.message?e.message:e));
+    btn.textContent=old;
+  }
+  btn.disabled=false;
+}
+
 function cntC(c){return DB.filter(p=>p.cat===c).length;}
 function bldCats(){
   var loadEl = document.getElementById('cats-loading');
@@ -6796,7 +6844,7 @@ function bldCats(){
   if (!DB || DB.length === 0) {
     loadEl.innerHTML = '<div style="text-align:center;padding:20px;color:#D4A24E;">' +
       'מתחבר לשרת...<br><br>' +
-      '<div style="font-size:11px;color:#7a9ab5;">v20260617-2150</div><br>' +
+      '<div style="font-size:11px;color:#7a9ab5;">v20260617-2200</div><br>' +
       '<button onclick="location.reload(true)" style="padding:10px 20px;background:#D4A24E;color:#fff;border:none;border-radius:8px;font-family:inherit;cursor:pointer;font-weight:700;margin-top:10px;">🔄 רענן</button>' +
       '</div>';
     return;
@@ -11860,10 +11908,6 @@ try { renderHome(); } catch(_){}
       <div style="color:#D4A24E;font-size:11px;font-weight:600;">ניהול</div>
     </div>
   </div>
-  <a href="https://wa.me/972529247768?text=שלום, אני פונה דרך אפליקציית ערבית מצילה חיים" target="_blank" onclick="document.getElementById('more-menu').style.display='none';" style="display:flex;align-items:center;justify-content:center;gap:8px;background:#25D366;color:#fff;text-decoration:none;border-radius:10px;padding:12px;margin-top:10px;font-size:13px;font-weight:700;font-family:inherit;box-shadow:0 4px 14px rgba(37,211,102,0.3);">
-    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M.057 24l1.687-6.163c-1.041-1.804-1.588-3.849-1.587-5.946.003-6.556 5.338-11.891 11.893-11.891 3.181.001 6.167 1.24 8.413 3.488 2.245 2.248 3.481 5.236 3.48 8.414-.003 6.557-5.338 11.892-11.893 11.892-1.99-.001-3.951-.5-5.688-1.448l-6.305 1.654zm6.597-3.807c1.676.995 3.276 1.591 5.392 1.592 5.448 0 9.886-4.434 9.889-9.885.002-5.462-4.415-9.89-9.881-9.892-5.452 0-9.887 4.434-9.889 9.884-.001 2.225.651 3.891 1.746 5.634l-.999 3.648 3.742-.981zm11.387-5.464c-.074-.124-.272-.198-.57-.347-.297-.149-1.758-.868-2.031-.967-.272-.099-.47-.149-.669.149-.198.297-.768.967-.941 1.165-.173.198-.347.223-.644.074-.297-.149-1.255-.462-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.297-.347.446-.521.151-.172.2-.296.3-.495.099-.198.05-.372-.025-.521-.075-.148-.669-1.611-.916-2.206-.242-.579-.487-.501-.669-.51l-.57-.01c-.198 0-.52.074-.792.372s-1.04 1.016-1.04 2.479 1.065 2.876 1.213 3.074c.149.198 2.095 3.2 5.076 4.487.709.306 1.263.489 1.694.626.712.226 1.36.194 1.872.118.571-.085 1.758-.719 2.006-1.413.248-.695.248-1.29.173-1.414z"/></svg>
-    <span>צריך עזרה? כתבו לי בוואטסאפ</span>
-  </a>
 </div>
 
 <script>
