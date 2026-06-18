@@ -2362,7 +2362,7 @@ function showLanding() {
       </div>
     </div>
     
-    <div class="loading" id="cats-loading"><div style="text-align:center;padding:20px;"><div style="font-size:16px;color:#D4A24E;margin-bottom:8px;">טוען...</div><div style="font-size:10px;color:#7a9ab5;opacity:0.6;">v20260617-2210</div></div></div>
+    <div class="loading" id="cats-loading"><div style="text-align:center;padding:20px;"><div style="font-size:16px;color:#D4A24E;margin-bottom:8px;">טוען...</div><div style="font-size:10px;color:#7a9ab5;opacity:0.6;">v20260617-2220</div></div></div>
     <div class="cgrid" id="cgrid" style="display:none;"></div>
   </div>
   <div id="vlist" class="scr">
@@ -6738,15 +6738,31 @@ const TEN_PHRASES=[
 // Category used to store the 10 phrases in the DB (so they appear in admin & can be recorded)
 const TEN_CAT='10 משפטי חובה';
 
-// Merge the canonical 10 (correct text) with any matching DB rows to pull recorded audio
+// Merge the canonical 10 (correct text) with any matching recorded phrase to pull audio.
+// Matches by Hebrew OR Arabic (normalized) across all loaded sections, so a recording
+// added in admin is picked up regardless of its exact category.
+function _tenNormHe(s){return (s||'').replace(/\s+/g,' ').trim();}
+function _tenNormAr(s){return (s||'').replace(/[\s،؛؟?!.,؛]/g,'').trim();}
 function getTenList(){
-  var byHe={};
-  try{
-    (DB||[]).filter(function(p){return p.cat===TEN_CAT;}).forEach(function(p){byHe[p.he]=p;});
-  }catch(e){}
+  var pool=[];
+  [typeof DB!=='undefined'?DB:null,
+   typeof DAILY!=='undefined'?DAILY:null,
+   typeof HEART!=='undefined'?HEART:null,
+   typeof NAVY!=='undefined'?NAVY:null,
+   typeof ANNOUNCE!=='undefined'?ANNOUNCE:null,
+   typeof CUS!=='undefined'?CUS:null,
+   typeof INTEL!=='undefined'?INTEL:null].forEach(function(a){
+    if(Array.isArray(a))pool=pool.concat(a);
+  });
   return TEN_PHRASES.map(function(p){
-    var d=byHe[p.he];
-    return {he:p.he,trans:p.trans,ar:p.ar,icon:p.icon,audio:(d&&d.audio)||p.audio||''};
+    var heN=_tenNormHe(p.he), arN=_tenNormAr(p.ar), audio='';
+    for(var i=0;i<pool.length;i++){
+      var r=pool[i]; if(!r)continue;
+      if(_tenNormHe(r.he)===heN || (arN && _tenNormAr(r.ar)===arN)){
+        if(r.audio){audio=r.audio;break;}
+      }
+    }
+    return {he:p.he,trans:p.trans,ar:p.ar,icon:p.icon,audio:audio||p.audio||''};
   });
 }
 
@@ -6763,6 +6779,7 @@ function renderTen(){
     html+='<div style="color:#D4A24E;font-size:13px;">'+p.trans+'</div>';
     html+='<div style="color:#7a9ab5;font-size:14px;direction:rtl;margin-top:2px;">'+p.ar+'</div>';
     html+='</div>';
+    html+=p.audio?'<div style="color:#1D9E75;font-size:18px;flex-shrink:0;">🔊</div>':'';
     html+='<div style="color:#D4A24E;font-size:18px;flex-shrink:0;">◀</div>';
     html+='</div>';
   });
@@ -6828,7 +6845,7 @@ function bldCats(){
   if (!DB || DB.length === 0) {
     loadEl.innerHTML = '<div style="text-align:center;padding:20px;color:#D4A24E;">' +
       'מתחבר לשרת...<br><br>' +
-      '<div style="font-size:11px;color:#7a9ab5;">v20260617-2210</div><br>' +
+      '<div style="font-size:11px;color:#7a9ab5;">v20260617-2220</div><br>' +
       '<button onclick="location.reload(true)" style="padding:10px 20px;background:#D4A24E;color:#fff;border:none;border-radius:8px;font-family:inherit;cursor:pointer;font-weight:700;margin-top:10px;">🔄 רענן</button>' +
       '</div>';
     return;
