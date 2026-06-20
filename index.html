@@ -4747,8 +4747,9 @@ function renderHome(){
     
     var totalLearned = Object.keys(learned).length;
     var todayStr = new Date().toDateString();
-    
-    // Cube 1: Streak (already calculated above)
+
+    // Cube 1: Streak - read the count that updateStreak() persisted at the top of renderHome
+    var streak = parseInt(localStorage.getItem('streak_count') || '0', 10);
     var streakNum = document.getElementById('home-cube-streak-num');
     if (streakNum) streakNum.textContent = streak;
     
