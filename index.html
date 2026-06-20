@@ -2333,6 +2333,7 @@ function showLanding() {
 </div>
 <!-- MILITARY TAB -->
 <div class="scr" id="tab-lib">
+  <button onclick="navToTab('home')" style="background:transparent;border:none;color:#a0b8c8;font-size:15px;cursor:pointer;font-family:inherit;padding:8px 14px 0;margin:0;display:flex;align-items:center;gap:6px;">◀ חזרה לבית</button>
   <div class="sbar">
     <div class="si">
       <span style="color:#aaa;font-size:15px;">🔍</span>
@@ -2536,6 +2537,7 @@ function showLanding() {
 <!-- 10 ESSENTIAL PHRASES TAB -->
 <div class="scr" id="tab-ten">
   <div style="padding:18px 16px 100px;">
+    <button onclick="navToTab('home')" style="background:transparent;border:none;color:#a0b8c8;font-size:15px;cursor:pointer;font-family:inherit;padding:4px 0;margin-bottom:10px;display:flex;align-items:center;gap:6px;">◀ חזרה לבית</button>
     <div style="text-align:center;margin-bottom:22px;">
       <div style="font-size:28px;margin-bottom:6px;">🎖️</div>
       <div style="color:#E8D9B8;font-size:18px;font-weight:800;letter-spacing:0.5px;margin-bottom:4px;">10 המשפטים שכל לוחם חייב</div>
@@ -2554,6 +2556,7 @@ function showLanding() {
 <div class="scr" id="tab-cus">
   <div class="sec">
     <div id="customs-home">
+      <button onclick="navToTab('home')" style="background:transparent;border:none;color:#a0b8c8;font-size:15px;cursor:pointer;font-family:inherit;padding:4px 0;margin-bottom:10px;display:flex;align-items:center;gap:6px;">◀ חזרה לבית</button>
       <div style="text-align:center;margin-bottom:22px;">
         <div style="font-size:28px;margin-bottom:6px;">🕌</div>
         <div style="color:#E8D9B8;font-size:18px;font-weight:800;letter-spacing:0.5px;margin-bottom:4px;">מנהגים ותרבות</div>
@@ -2617,6 +2620,7 @@ function showLanding() {
 <div class="scr" id="tab-scn">
   <!-- Grid view -->
   <div id="scn-grid-view" style="padding:18px 16px 16px;">
+    <button onclick="navToTab('home')" style="background:transparent;border:none;color:#a0b8c8;font-size:15px;cursor:pointer;font-family:inherit;padding:4px 0;margin-bottom:10px;display:flex;align-items:center;gap:6px;">◀ חזרה לבית</button>
     <div style="text-align:center;margin-bottom:22px;">
       <div style="font-size:28px;margin-bottom:6px;">💬</div>
       <div style="color:#E8D9B8;font-size:18px;font-weight:800;letter-spacing:0.5px;margin-bottom:4px;">ספריית תרחישים</div>
@@ -11874,10 +11878,6 @@ try { renderHome(); } catch(_){}
 <div id="more-menu" style="display:none;position:fixed;bottom:80px;left:50%;transform:translateX(-50%);width:calc(100% - 16px);max-width:464px;box-sizing:border-box;background:#18293E;border:1px solid #2e4558;border-radius:14px;padding:12px;z-index:99;box-shadow:0 -4px 20px rgba(0,0,0,0.6);direction:rtl;">
   <div style="text-align:center;color:#D4A24E;font-size:12px;font-weight:700;letter-spacing:1px;margin-bottom:10px;">תפריט נוסף</div>
   <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;">
-    <div onclick="document.getElementById('more-menu').style.display='none';navToTab('ten');" style="background:linear-gradient(135deg,rgba(212,162,78,0.2),rgba(212,162,78,0.05));border:1px solid rgba(212,162,78,0.5);border-radius:10px;padding:14px 6px;text-align:center;cursor:pointer;">
-      <div style="font-size:22px;margin-bottom:4px;">🎖️</div>
-      <div style="color:#D4A24E;font-size:11px;font-weight:700;">10 משפטים</div>
-    </div>
     <div onclick="document.getElementById('more-menu').style.display='none';navToTab('dict');" style="background:linear-gradient(135deg,rgba(212,162,78,0.2),rgba(212,162,78,0.05));border:1px solid rgba(212,162,78,0.5);border-radius:10px;padding:14px 6px;text-align:center;cursor:pointer;">
       <div style="font-size:22px;margin-bottom:4px;">📖</div>
       <div style="color:#D4A24E;font-size:11px;font-weight:700;">מילון חכם</div>
@@ -11894,10 +11894,6 @@ try { renderHome(); } catch(_){}
       <div style="font-size:22px;margin-bottom:4px;">☕</div>
       <div style="color:#E8D9B8;font-size:11px;font-weight:600;">יומיומי</div>
     </div>
-    <div onclick="navToTab('cus')" style="background:#1F3147;border-radius:10px;padding:14px 6px;text-align:center;cursor:pointer;">
-      <div style="font-size:22px;margin-bottom:4px;">🕌</div>
-      <div style="color:#E8D9B8;font-size:11px;font-weight:600;">מנהגים</div>
-    </div>
     <div onclick="navToTab('hrt')" style="background:#1F3147;border-radius:10px;padding:14px 6px;text-align:center;cursor:pointer;">
       <div style="font-size:22px;margin-bottom:4px;">🤝</div>
       <div style="color:#E8D9B8;font-size:11px;font-weight:600;">פותחים לב</div>
@@ -11913,10 +11909,6 @@ try { renderHome(); } catch(_){}
     <div onclick="navToTab('nwf')" style="background:#1F3147;border-radius:10px;padding:14px 6px;text-align:center;cursor:pointer;">
       <div style="font-size:22px;margin-bottom:4px;">🆕</div>
       <div style="color:#E8D9B8;font-size:11px;font-weight:600;">חדש</div>
-    </div>
-    <div onclick="navToTab('progress')" style="background:linear-gradient(135deg,rgba(29,158,117,0.15),rgba(29,158,117,0.05));border:1px solid rgba(29,158,117,0.4);border-radius:10px;padding:14px 6px;text-align:center;cursor:pointer;">
-      <div style="font-size:22px;margin-bottom:4px;">📊</div>
-      <div style="color:#1D9E75;font-size:11px;font-weight:600;">התקדמות</div>
     </div>
     <div onclick="openAdminFromMenu()" style="background:linear-gradient(135deg,rgba(212,162,78,0.15),rgba(212,162,78,0.05));border:1px solid rgba(212,162,78,0.4);border-radius:10px;padding:14px 6px;text-align:center;cursor:pointer;">
       <div style="font-size:22px;margin-bottom:4px;">🔒</div>
