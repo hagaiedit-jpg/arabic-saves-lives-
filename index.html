@@ -1984,7 +1984,51 @@ function showLanding() {
     <div onclick="heroAction()" id="home-prep-card" style="background:linear-gradient(135deg,#D4A24E 0%,#a85200 100%);border-radius:14px;padding:14px 16px;margin-bottom:14px;cursor:pointer;box-shadow:0 4px 12px rgba(212,134,46,0.25);position:relative;overflow:hidden;min-height:60px;">
       <!-- Content set by JS -->
     </div>
-    
+
+    <!-- 🧭 What do you want today? - intent-based quick entry -->
+    <div style="margin-bottom:14px;">
+      <div style="color:#D4A24E;font-size:13px;font-weight:700;letter-spacing:0.5px;margin-bottom:10px;display:flex;align-items:center;gap:6px;">🧭 מה מעניין אותך היום?</div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
+
+        <div onclick="startFlashcards()" style="background:linear-gradient(160deg,#1F3147 0%,#243a55 100%);border:1px solid rgba(212,162,78,0.2);border-radius:14px;padding:14px 12px;cursor:pointer;box-shadow:0 2px 8px rgba(0,0,0,0.2);">
+          <div style="font-size:26px;margin-bottom:6px;line-height:1;">⏱️</div>
+          <div style="color:#E8D9B8;font-size:13px;font-weight:800;margin-bottom:2px;">יש לי כמה דקות</div>
+          <div style="color:#7a9ab5;font-size:10.5px;line-height:1.4;">תרגול מהיר וחזרה</div>
+        </div>
+
+        <div onclick="startFieldMode()" style="background:linear-gradient(160deg,#1F3147 0%,#243a55 100%);border:1px solid rgba(212,162,78,0.2);border-radius:14px;padding:14px 12px;cursor:pointer;box-shadow:0 2px 8px rgba(0,0,0,0.2);">
+          <div style="font-size:26px;margin-bottom:6px;line-height:1;">🎯</div>
+          <div style="color:#E8D9B8;font-size:13px;font-weight:800;margin-bottom:2px;">מצב לחץ אמיתי</div>
+          <div style="color:#7a9ab5;font-size:10.5px;line-height:1.4;">תרגול מצב שטח</div>
+        </div>
+
+        <div onclick="navToTab('scn')" style="background:linear-gradient(160deg,#1F3147 0%,#243a55 100%);border:1px solid rgba(212,162,78,0.2);border-radius:14px;padding:14px 12px;cursor:pointer;box-shadow:0 2px 8px rgba(0,0,0,0.2);">
+          <div style="font-size:26px;margin-bottom:6px;line-height:1;">💬</div>
+          <div style="color:#E8D9B8;font-size:13px;font-weight:800;margin-bottom:2px;">להתאמן על שיחה</div>
+          <div style="color:#7a9ab5;font-size:10.5px;line-height:1.4;">תרחישים מהשטח</div>
+        </div>
+
+        <div onclick="navToTab('ten')" style="background:linear-gradient(160deg,#1F3147 0%,#243a55 100%);border:1px solid rgba(212,162,78,0.2);border-radius:14px;padding:14px 12px;cursor:pointer;box-shadow:0 2px 8px rgba(0,0,0,0.2);">
+          <div style="font-size:26px;margin-bottom:6px;line-height:1;">🎖️</div>
+          <div style="color:#E8D9B8;font-size:13px;font-weight:800;margin-bottom:2px;">מילים שמצילות חיים</div>
+          <div style="color:#7a9ab5;font-size:10.5px;line-height:1.4;">10 המשפטים הקריטיים</div>
+        </div>
+
+        <div onclick="navToTab('lib')" style="background:linear-gradient(160deg,#1F3147 0%,#243a55 100%);border:1px solid rgba(212,162,78,0.2);border-radius:14px;padding:14px 12px;cursor:pointer;box-shadow:0 2px 8px rgba(0,0,0,0.2);">
+          <div style="font-size:26px;margin-bottom:6px;line-height:1;">📚</div>
+          <div style="color:#E8D9B8;font-size:13px;font-weight:800;margin-bottom:2px;">לחפש מילה או נושא</div>
+          <div style="color:#7a9ab5;font-size:10.5px;line-height:1.4;">הספרייה המבצעית</div>
+        </div>
+
+        <div onclick="navToTab('cus')" style="background:linear-gradient(160deg,#1F3147 0%,#243a55 100%);border:1px solid rgba(212,162,78,0.2);border-radius:14px;padding:14px 12px;cursor:pointer;box-shadow:0 2px 8px rgba(0,0,0,0.2);">
+          <div style="font-size:26px;margin-bottom:6px;line-height:1;">🕌</div>
+          <div style="color:#E8D9B8;font-size:13px;font-weight:800;margin-bottom:2px;">תרבות ומנהגים</div>
+          <div style="color:#7a9ab5;font-size:10.5px;line-height:1.4;">להבין את הצד השני</div>
+        </div>
+
+      </div>
+    </div>
+
     <!-- 10 must-know phrases - flagship for new recruits -->
     <div onclick="navToTab('ten')" style="background:linear-gradient(135deg,#18293E 0%,#1F3147 100%);border:1px solid rgba(212,162,78,0.4);border-radius:14px;padding:14px 16px;margin-bottom:14px;cursor:pointer;display:flex;align-items:center;gap:14px;box-shadow:0 2px 8px rgba(0,0,0,0.2);">
       <div style="font-size:30px;flex-shrink:0;">🎖️</div>
