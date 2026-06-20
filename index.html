@@ -1877,9 +1877,11 @@ function showLanding() {
 <div class="W">
 <div class="topbar">
   <div class="tb-top" style="display:flex;align-items:center;justify-content:space-between;padding:14px 14px 12px;direction:rtl;">
-    <!-- Right side: Role button -->
-    
-    
+    <!-- Right side: Dictionary (primary content shortcut, discoverable) -->
+    <button onclick="openDictTab()" id="dictTopBtn" title="מילון" style="background:rgba(212,162,78,0.12);border:1px solid rgba(212,162,78,0.4);border-radius:20px;height:38px;padding:0 14px;display:flex;align-items:center;gap:6px;cursor:pointer;font-size:14px;color:#D4A24E;font-family:inherit;font-weight:800;flex-shrink:0;">
+      <span style="font-size:17px;">📖</span><span>מילון</span>
+    </button>
+
     <!-- Center: Title -->
     <div style="flex:1;text-align:center;padding:0 8px;">
       <div class="tb-brand" id="brand-title" style="cursor:pointer;user-select:none;color:#D4A24E;font-size:17px;font-weight:800;line-height:1.1;">ערבית מצילה חיים</div>
@@ -1902,10 +1904,6 @@ function showLanding() {
   
   <!-- Header Menu (popup) -->
   <div id="header-menu" style="display:none;position:absolute;top:62px;left:10px;background:#18293E;border:1px solid #2e4558;border-radius:12px;padding:8px;z-index:50;box-shadow:0 4px 20px rgba(0,0,0,0.6);min-width:180px;direction:rtl;">
-    <button onclick="openDictTab();document.getElementById('header-menu').style.display='none';" style="display:flex;align-items:center;gap:10px;width:100%;background:transparent;border:none;color:#E8D9B8;padding:10px 12px;text-align:right;cursor:pointer;font-family:inherit;font-size:14px;border-radius:8px;">
-      <span style="font-size:18px;">📖</span>
-      <span>מילון</span>
-    </button>
     <button onclick="toggleTheme();document.getElementById('header-menu').style.display='none';" style="display:flex;align-items:center;gap:10px;width:100%;background:transparent;border:none;color:#E8D9B8;padding:10px 12px;text-align:right;cursor:pointer;font-family:inherit;font-size:14px;border-radius:8px;">
       <span id="themeMenuIcon" style="font-size:18px;">🌙</span>
       <span id="themeMenuLabel">מצב יום</span>
