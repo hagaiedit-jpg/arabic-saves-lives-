@@ -2046,7 +2046,7 @@ function showLanding() {
 
     
     <!-- 4 Stats Cubes - shown only when NO streak (helps new users) -->
-    <div id="home-stats-cubes" style="display:none;background:linear-gradient(135deg,#18293E 0%,#1F3147 100%);border:1px solid rgba(212,162,78,0.2);border-radius:12px;padding:12px;margin-bottom:12px;">
+    <div id="home-stats-cubes" onclick="navToTab('progress')" style="display:none;background:linear-gradient(135deg,#18293E 0%,#1F3147 100%);border:1px solid rgba(212,162,78,0.2);border-radius:12px;padding:12px;margin-bottom:12px;cursor:pointer;">
       <div style="display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:6px;">
         
         <!-- Cube 1: Streak -->
@@ -2077,8 +2077,9 @@ function showLanding() {
           <div style="color:#a0b8c8;font-size:9px;font-weight:600;margin-top:2px;">סה"כ</div>
         </div>
       </div>
+      <div style="text-align:center;margin-top:10px;padding-top:8px;border-top:1px solid rgba(255,255,255,0.08);color:#7a9ab5;font-size:10px;font-weight:600;">לחצו לסטטוס ההתקדמות המלא ◀</div>
     </div>
-    
+
     <!-- Phrase of the Day -->
     <div id="home-potd-card" style="display:none;background:#18293E;border:1px solid rgba(212,162,78,0.25);border-right:3px solid #D4A24E;border-radius:14px;padding:16px;margin-bottom:18px;">
       <div style="display:flex;align-items:center;gap:8px;margin-bottom:10px;">
