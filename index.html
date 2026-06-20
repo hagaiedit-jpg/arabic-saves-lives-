@@ -10587,8 +10587,16 @@ function renderQuestionAudit(){
       + '<div style="color:#D4A24E;font-size:12.5px;font-weight:800;margin-bottom:8px;border-bottom:1px solid #2A3D52;padding-bottom:5px;">'
       + s.icon + ' ' + s.label + ' — ' + missing.length + ' שאלות בלי תשובות</div>';
     missing.forEach(function(p){
-      html += '<div style="background:#18293E;border:1px solid #2A3D52;border-right:3px solid #c0392b;border-radius:10px;padding:10px 12px;margin-bottom:8px;">'
-        + '<div style="color:#E8D9B8;font-size:13px;font-weight:600;margin-bottom:2px;">' + (p.he||'(ללא עברית)') + '</div>'
+      var clickable = !!p.id;
+      var idArg = "'" + String(p.id).replace(/\\/g,'\\\\').replace(/'/g,"\\'") + "'";
+      var attrs = clickable
+        ? ' onclick="openEditById('+idArg+')" style="cursor:pointer;background:#18293E;border:1px solid #2A3D52;border-right:3px solid #c0392b;border-radius:10px;padding:10px 12px;margin-bottom:8px;"'
+        : ' style="background:#18293E;border:1px solid #2A3D52;border-right:3px solid #c0392b;border-radius:10px;padding:10px 12px;margin-bottom:8px;"';
+      html += '<div'+attrs+'>'
+        + '<div style="display:flex;justify-content:space-between;align-items:center;gap:8px;">'
+        + '<div style="color:#E8D9B8;font-size:13px;font-weight:600;margin-bottom:2px;flex:1;">' + (p.he||'(ללא עברית)') + '</div>'
+        + (clickable ? '<span style="color:#D4A24E;font-size:11px;font-weight:700;white-space:nowrap;">✏️ הוסף תשובות</span>' : '')
+        + '</div>'
         + (p.ar ? '<div style="color:#a0b8c8;font-size:13px;font-family:Georgia,serif;direction:rtl;margin-bottom:2px;">' + p.ar + '</div>' : '')
         + '<div style="color:#7a9ab5;font-size:10.5px;">' + (p.cat||'') + (p.id?(' · #' + p.id):'') + '</div>'
         + '</div>';
@@ -10838,9 +10846,22 @@ function onAdminSearch(val){
 
 
 function openEditIdx(idx) {
+  const p = window._adminItems && window._adminItems[idx];
+  if (!p) { alert('שגיאה בטעינת הפריט'); return; }
+  openEditRow(p);
+}
+// Open the editor by phrase id, always loading the RAW DB row (not the in-memory
+// mapped object) so the why/cultural split and responses are preserved on save.
+async function openEditById(id){
+  try{
+    var p = (window._adminItems||[]).find(function(x){return String(x.id)===String(id);});
+    if(!p){ var rows = await sbFetch('/rest/v1/phrases?id=eq.'+id+'&select=*'); p = rows && rows[0]; }
+    if(!p){ alert('הביטוי לא נמצא'); return; }
+    openEditRow(p);
+  }catch(e){ alert('שגיאה: '+e.message); }
+}
+function openEditRow(p) {
   try {
-    const p = window._adminItems && window._adminItems[idx];
-    if (!p) { alert('שגיאה בטעינת הפריט'); return; }
     document.getElementById('edit-id').value = p.id || '';
     document.getElementById('edit-he').value = p.he || '';
     document.getElementById('edit-trans').value = p.trans || '';
@@ -11078,7 +11099,7 @@ async function saveEdit(){
   };
   
   const au=await getAudio('edit',document.getElementById('edit-status'));if(au)updates.audio_url=au;
-  try{await sbFetch('/rest/v1/phrases?id=eq.'+id,'PATCH',updates);closeEdit();await loadData();renderAdminList();btn.textContent='שמור';alert('✓ נשמר!');}catch(e){btn.textContent='שמור';alert('שגיאה: '+e.message);}
+  try{await sbFetch('/rest/v1/phrases?id=eq.'+id,'PATCH',updates);closeEdit();await loadData();renderAdminList();var av=document.getElementById('at-audit');if(av&&av.style.display!=='none'&&typeof renderQuestionAudit==='function')renderQuestionAudit();btn.textContent='שמור';alert('✓ נשמר!');}catch(e){btn.textContent='שמור';alert('שגיאה: '+e.message);}
 }
 function closeEdit(){document.getElementById('edit-modal').style.display='none';delete rfiles['edit'];}
 async function delP(id){
