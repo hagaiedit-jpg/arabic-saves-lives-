@@ -2025,11 +2025,21 @@ function showLanding() {
         <div style="color:#D4A24E;font-size:12.5px;font-weight:700;line-height:1.3;">סטטוס ההתקדמות שלי</div>
       </div>
     </div>
-    
-    
-    
-    
-    
+
+    <!-- Saved phrases - quick access to personal review list -->
+    <div onclick="navToTab('fav')" style="background:linear-gradient(160deg,#1F3147 0%,#243a55 100%);border:1px solid rgba(212,162,78,0.2);border-radius:14px;padding:14px 16px;margin-bottom:14px;cursor:pointer;box-shadow:0 2px 8px rgba(0,0,0,0.2);display:flex;align-items:center;gap:12px;">
+      <div style="font-size:26px;line-height:1;flex-shrink:0;">⭐</div>
+      <div style="flex:1;min-width:0;">
+        <div style="color:#E8D9B8;font-size:13px;font-weight:800;margin-bottom:2px;">שמורים</div>
+        <div style="color:#7a9ab5;font-size:10.5px;line-height:1.4;">המילים ששמרת + ה־15 האחרונות — רשימת החזרה שלך</div>
+      </div>
+      <div style="color:#D4A24E;font-size:18px;flex-shrink:0;">◀</div>
+    </div>
+
+
+
+
+
     <!-- Daily Reminder - Compact (like field mode + flashcards style) -->
     <div id="reminder-banner" onclick="reminderGoToScenarios()" style="display:none;background:linear-gradient(135deg,#D4A24E 0%,#b87325 100%);border-radius:14px;padding:14px 16px;margin-bottom:14px;cursor:pointer;box-shadow:0 4px 12px rgba(212,134,46,0.25);position:relative;overflow:hidden;">
       <button onclick="event.stopPropagation();dismissReminder();" style="position:absolute;top:6px;left:6px;background:rgba(255,255,255,0.15);border:none;color:#fff;border-radius:50%;width:22px;height:22px;font-size:11px;font-weight:700;cursor:pointer;font-family:inherit;display:flex;align-items:center;justify-content:center;padding:0;z-index:2;">✕</button>
@@ -2318,7 +2328,7 @@ function showLanding() {
 
 
 <div class="scr" id="tab-fav">
-  <div class="sec"><div class="stitle">⭐ המועדפים שלי</div><div id="favlist"><div class="empty">אין מועדפים עדיין. לחצו ☆ שמור למועדפים ליד משפט.</div></div><div id="recentlist" style="margin-top:16px;"></div></div>
+  <div class="sec"><button onclick="navToTab('home')" style="background:transparent;border:none;color:#a0b8c8;font-size:15px;cursor:pointer;font-family:inherit;padding:4px 0;margin-bottom:10px;display:flex;align-items:center;gap:6px;">◀ חזרה לבית</button><div class="stitle">⭐ המועדפים שלי</div><div id="favlist"><div class="empty">אין מועדפים עדיין. לחצו ☆ שמור למועדפים ליד משפט.</div></div><div id="recentlist" style="margin-top:16px;"></div></div>
 </div>
 <!-- MILITARY TAB -->
 <div class="scr" id="tab-lib">
@@ -11858,10 +11868,6 @@ try { renderHome(); } catch(_){}
 <div id="more-menu" style="display:none;position:fixed;bottom:80px;left:50%;transform:translateX(-50%);width:calc(100% - 16px);max-width:464px;box-sizing:border-box;background:#18293E;border:1px solid #2e4558;border-radius:14px;padding:12px;z-index:99;box-shadow:0 -4px 20px rgba(0,0,0,0.6);direction:rtl;">
   <div style="text-align:center;color:#D4A24E;font-size:12px;font-weight:700;letter-spacing:1px;margin-bottom:10px;">תפריט נוסף</div>
   <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;">
-    <div onclick="document.getElementById('more-menu').style.display='none';navToTab('fav');" style="background:#1F3147;border-radius:10px;padding:14px 6px;text-align:center;cursor:pointer;">
-      <div style="font-size:22px;margin-bottom:4px;">⭐</div>
-      <div style="color:#E8D9B8;font-size:11px;font-weight:600;">שמורים</div>
-    </div>
     <div onclick="navToTab('sem')" style="background:#1F3147;border-radius:10px;padding:14px 6px;text-align:center;cursor:pointer;">
       <div style="font-size:22px;margin-bottom:4px;">🧠</div>
       <div style="color:#E8D9B8;font-size:11px;font-weight:600;">סמנטי</div>
