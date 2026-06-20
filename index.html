@@ -2856,7 +2856,7 @@ function showLanding() {
     <div id="at-audit" style="display:none;">
       <div class="acard">
         <div style="color:#E8D9B8;font-size:14px;font-weight:700;margin-bottom:6px;">🔎 שאלות בלי תשובות אפשריות</div>
-        <div style="color:#7a9ab5;font-size:11.5px;line-height:1.6;margin-bottom:12px;">סורק את כל הביטויים הטעונים ומציג כל שאלה (טקסט שמכיל "?") שאין לה אף תשובה אפשרית בערבית. כך תדעי בדיוק לאילו שאלות עוד צריך להוסיף תשובות צפויות.</div>
+        <div style="color:#7a9ab5;font-size:11.5px;line-height:1.6;margin-bottom:12px;">סורק שאלות (טקסט שמכיל "?") בקטגוריות שבהן מצופה מענה מהאזרח — <b>מבצעי, תשאול ימי, ויומיומי</b> — ומציג כל שאלה שאין לה אף תשובה אפשרית. תרחישים, כריזה ושיחה לא נכללים כי שם אין צורך בתשובות.</div>
         <button onclick="renderQuestionAudit()" style="width:100%;padding:12px;background:linear-gradient(135deg,#D4A24E 0%,#b88a3d 100%);border:none;border-radius:10px;color:#0E1B2E;font-size:13px;font-weight:800;cursor:pointer;font-family:inherit;">🔎 הרץ בדיקה</button>
       </div>
       <div id="audit-results" style="margin-top:6px;"></div>
@@ -10561,17 +10561,12 @@ function aT(t,el){
 function renderQuestionAudit(){
   var out = document.getElementById('audit-results');
   if(!out) return;
-  // All loaded sections that can carry "possible answers" (responses), with display labels
+  // Only sections where a citizen is actually expected to answer back.
+  // Conversational sections (scenarios, announce, customs, semantic) are excluded by design.
   var sections = [
-    {label:'מבצעי',       icon:'🎖️', arr: (typeof DB!=='undefined'?DB:[])},
-    {label:'יומיומי',     icon:'☕', arr: (typeof DAILY!=='undefined'?DAILY:[])},
-    {label:'פותחים לב',   icon:'🤝', arr: (typeof HEART!=='undefined'?HEART:[])},
-    {label:'תשאול ימי',   icon:'⚓', arr: (typeof NAVY!=='undefined'?NAVY:[])},
-    {label:'כריזה',       icon:'📢', arr: (typeof ANNOUNCE!=='undefined'?ANNOUNCE:[])},
-    {label:'תרחישים',     icon:'💬', arr: (typeof SCENARIO!=='undefined'?SCENARIO:[])},
-    {label:'מנהגים',      icon:'🕌', arr: (typeof CUS!=='undefined'?CUS:[])},
-    {label:'סמנטי',       icon:'🧠', arr: (typeof SEM!=='undefined'?SEM:[])},
-    {label:'מודיעין שטח', icon:'🕵️', arr: (typeof INTEL!=='undefined'?INTEL:[])}
+    {label:'מבצעי',     icon:'🎖️', arr: (typeof DB!=='undefined'?DB:[])},
+    {label:'תשאול ימי', icon:'⚓', arr: (typeof NAVY!=='undefined'?NAVY:[])},
+    {label:'יומיומי',   icon:'☕', arr: (typeof DAILY!=='undefined'?DAILY:[])}
   ];
   function isQuestion(p){
     var t = (p.he||'') + ' ' + (p.ar||'');
