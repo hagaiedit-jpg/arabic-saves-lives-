@@ -2690,6 +2690,7 @@ function showLanding() {
       <button class="atab" onclick="aT('adict',this)">+ מילון</button>
       <button class="atab" onclick="aT('asem',this)">+ סמנטי</button>
       <button class="atab" onclick="aT('al',this)">📋 רשימה</button>
+      <button class="atab" onclick="aT('audit',this)">🔎 שאלות בלי תשובות</button>
       <button class="atab" onclick="aT('acat',this)">⚙️ קטגוריות</button>
     </div>
 
@@ -2849,6 +2850,16 @@ function showLanding() {
         <div style="text-align:center;color:#7a9ab5;font-size:11px;margin-top:5px;">לאחר הייבוא הם יופיעו ברשימה תחת סינון "🔇 צריך הקלטה"</div>
       </div>
       <div id="admin-list"></div>
+    </div>
+
+    <!-- Question audit: questions (text with "?") that have no possible Arabic answers -->
+    <div id="at-audit" style="display:none;">
+      <div class="acard">
+        <div style="color:#E8D9B8;font-size:14px;font-weight:700;margin-bottom:6px;">🔎 שאלות בלי תשובות אפשריות</div>
+        <div style="color:#7a9ab5;font-size:11.5px;line-height:1.6;margin-bottom:12px;">סורק את כל הביטויים הטעונים ומציג כל שאלה (טקסט שמכיל "?") שאין לה אף תשובה אפשרית בערבית. כך תדעי בדיוק לאילו שאלות עוד צריך להוסיף תשובות צפויות.</div>
+        <button onclick="renderQuestionAudit()" style="width:100%;padding:12px;background:linear-gradient(135deg,#D4A24E 0%,#b88a3d 100%);border:none;border-radius:10px;color:#0E1B2E;font-size:13px;font-weight:800;cursor:pointer;font-family:inherit;">🔎 הרץ בדיקה</button>
+      </div>
+      <div id="audit-results" style="margin-top:6px;"></div>
     </div>
 
     <!-- Categories -->
@@ -10541,9 +10552,61 @@ function rNF(){
 
 function aT(t,el){
   document.querySelectorAll('.atab').forEach(b=>b.classList.remove('active'));el.classList.add('active');
-  ['ap','ad','ah','ak','an','adict','asem','al','acat'].forEach(id=>document.getElementById('at-'+id).style.display='none');
+  ['ap','ad','ah','ak','an','adict','asem','al','audit','acat'].forEach(id=>document.getElementById('at-'+id).style.display='none');
   document.getElementById('at-'+t).style.display='block';
-  if(t==='al')renderAdminList();if(t==='acat')renderCatList();
+  if(t==='al')renderAdminList();if(t==='acat')renderCatList();if(t==='audit')renderQuestionAudit();
+}
+
+// Audit: find questions (Hebrew/Arabic text containing "?") that have no possible answers.
+function renderQuestionAudit(){
+  var out = document.getElementById('audit-results');
+  if(!out) return;
+  // All loaded sections that can carry "possible answers" (responses), with display labels
+  var sections = [
+    {label:'מבצעי',       icon:'🎖️', arr: (typeof DB!=='undefined'?DB:[])},
+    {label:'יומיומי',     icon:'☕', arr: (typeof DAILY!=='undefined'?DAILY:[])},
+    {label:'פותחים לב',   icon:'🤝', arr: (typeof HEART!=='undefined'?HEART:[])},
+    {label:'תשאול ימי',   icon:'⚓', arr: (typeof NAVY!=='undefined'?NAVY:[])},
+    {label:'כריזה',       icon:'📢', arr: (typeof ANNOUNCE!=='undefined'?ANNOUNCE:[])},
+    {label:'תרחישים',     icon:'💬', arr: (typeof SCENARIO!=='undefined'?SCENARIO:[])},
+    {label:'מנהגים',      icon:'🕌', arr: (typeof CUS!=='undefined'?CUS:[])},
+    {label:'סמנטי',       icon:'🧠', arr: (typeof SEM!=='undefined'?SEM:[])},
+    {label:'מודיעין שטח', icon:'🕵️', arr: (typeof INTEL!=='undefined'?INTEL:[])}
+  ];
+  function isQuestion(p){
+    var t = (p.he||'') + ' ' + (p.ar||'');
+    return t.indexOf('?') !== -1 || t.indexOf('؟') !== -1;
+  }
+  function hasAnswers(p){
+    return Array.isArray(p.responses) && p.responses.length > 0;
+  }
+  var totalQuestions = 0, totalMissing = 0, html = '';
+  sections.forEach(function(s){
+    if(!Array.isArray(s.arr) || !s.arr.length) return;
+    var qs = s.arr.filter(isQuestion);
+    var missing = qs.filter(function(p){ return !hasAnswers(p); });
+    totalQuestions += qs.length;
+    totalMissing += missing.length;
+    if(!missing.length) return;
+    html += '<div style="margin-top:14px;">'
+      + '<div style="color:#D4A24E;font-size:12.5px;font-weight:800;margin-bottom:8px;border-bottom:1px solid #2A3D52;padding-bottom:5px;">'
+      + s.icon + ' ' + s.label + ' — ' + missing.length + ' שאלות בלי תשובות</div>';
+    missing.forEach(function(p){
+      html += '<div style="background:#18293E;border:1px solid #2A3D52;border-right:3px solid #c0392b;border-radius:10px;padding:10px 12px;margin-bottom:8px;">'
+        + '<div style="color:#E8D9B8;font-size:13px;font-weight:600;margin-bottom:2px;">' + (p.he||'(ללא עברית)') + '</div>'
+        + (p.ar ? '<div style="color:#a0b8c8;font-size:13px;font-family:Georgia,serif;direction:rtl;margin-bottom:2px;">' + p.ar + '</div>' : '')
+        + '<div style="color:#7a9ab5;font-size:10.5px;">' + (p.cat||'') + (p.id?(' · #' + p.id):'') + '</div>'
+        + '</div>';
+    });
+    html += '</div>';
+  });
+  var summary = '<div style="background:'+(totalMissing? 'rgba(192,57,43,0.12)':'rgba(29,158,117,0.12)')+';border:1px solid '+(totalMissing?'rgba(192,57,43,0.4)':'rgba(29,158,117,0.4)')+';border-radius:10px;padding:12px;margin-bottom:6px;text-align:center;">'
+    + '<div style="color:'+(totalMissing?'#e74c3c':'#1D9E75')+';font-size:15px;font-weight:800;">'+(totalMissing? (totalMissing+' שאלות בלי תשובות') : '✓ כל השאלות מכוסות!')+'</div>'
+    + '<div style="color:#7a9ab5;font-size:11px;margin-top:3px;">מתוך '+totalQuestions+' שאלות שנמצאו בסך הכל</div></div>';
+  if(totalQuestions === 0){
+    summary = '<div style="background:rgba(122,154,181,0.12);border:1px solid #2A3D52;border-radius:10px;padding:14px;text-align:center;color:#a0b8c8;font-size:12px;">לא נמצאו שאלות בנתונים שנטענו. ודאי שהאפליקציה סיימה לטעון את הנתונים מהשרת (אם את במצב אופליין, הבדיקה תרוץ רק על מה שנשמר במטמון).</div>';
+  }
+  out.innerHTML = summary + html;
 }
 
 // ADD functions
