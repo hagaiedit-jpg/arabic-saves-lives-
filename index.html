@@ -7235,7 +7235,18 @@ function startCatLearn(cat, phrasesOverride){
 function opAnnounceList(cat){
   document.getElementById('ltitle').textContent=cat;
   const items=ANNOUNCE.filter(a=>a.cat===cat);
-  document.getElementById('litems').innerHTML=items.map((a,i)=>`
+  let learnCard='';
+  if(items.length>0){
+    learnCard=`<div onclick="startAnnounceLearn('${cat.replace(/'/g,"\\'")}')" style="background:linear-gradient(135deg,#1D9E75 0%,#0e5a3f 100%);border-radius:14px;padding:14px;margin-bottom:14px;cursor:pointer;box-shadow:0 4px 12px rgba(29,158,117,0.3);">
+      <div style="display:flex;align-items:center;gap:10px;">
+        <div style="font-size:24px;">🎯</div>
+        <div>
+          <div class="keep-white" style="color:#fff;font-size:15px;font-weight:700;">התחל מצב למידה</div>
+          <div style="color:rgba(255,255,255,0.85);font-size:12px;">תרגל את כל הקטגוריה שלב-שלב</div>
+        </div>
+      </div></div>`;
+  }
+  document.getElementById('litems').innerHTML=learnCard+items.map((a,i)=>`
     <div class="li" onclick="opAnnounce(${ANNOUNCE.indexOf(a)})"><div class="lt">📢 ${a.he}</div><div class="la">‹</div></div>`).join('');
 }
 
@@ -7296,6 +7307,18 @@ function startNavyLearn(cat) {
 function startDailyLearn(cat) {
   // Same learning mode, with DAILY data
   var items = DAILY.filter(d => d.cat === cat);
+  if (items.length === 0) { alert('אין משפטים בקטגוריה זו'); return; }
+  startCatLearn(cat, items);
+}
+
+function startHeartLearn(cat) {
+  var items = HEART.filter(h => h.cat === cat);
+  if (items.length === 0) { alert('אין משפטים בקטגוריה זו'); return; }
+  startCatLearn(cat, items);
+}
+
+function startAnnounceLearn(cat) {
+  var items = ANNOUNCE.filter(a => a.cat === cat);
   if (items.length === 0) { alert('אין משפטים בקטגוריה זו'); return; }
   startCatLearn(cat, items);
 }
@@ -9339,14 +9362,25 @@ function rHrt(){
 function opHC(cat){
   document.getElementById('hltitle').textContent=cat;
   const items=HEART.filter(h=>h.cat===cat);
-  document.getElementById('hlist').innerHTML=items.length?items.map((h)=>{
+  let learnCard='';
+  if(items.length>0){
+    learnCard=`<div onclick="startHeartLearn('${cat.replace(/'/g,"\\'")}')" style="background:linear-gradient(135deg,#1D9E75 0%,#0e5a3f 100%);border-radius:14px;padding:14px;margin-bottom:14px;cursor:pointer;box-shadow:0 4px 12px rgba(29,158,117,0.3);">
+      <div style="display:flex;align-items:center;gap:10px;">
+        <div style="font-size:24px;">🎯</div>
+        <div>
+          <div class="keep-white" style="color:#fff;font-size:15px;font-weight:700;">התחל מצב למידה</div>
+          <div style="color:rgba(255,255,255,0.85);font-size:12px;">תרגל את כל הקטגוריה שלב-שלב</div>
+        </div>
+      </div></div>`;
+  }
+  document.getElementById('hlist').innerHTML=learnCard+(items.length?items.map((h)=>{
     const i=HEART.indexOf(h);
     return `<div class="card" onclick="opPop(${i},'heart')">
       <div class="ctags"><span class="tag theart">❤️ פותח לב</span></div>
       <div class="che">${h.he}</div><div class="car">${h.ar}</div>
       <div class="csub">${h.when||''}</div>
     </div>`;
-  }).join(''):'<div class="empty">אין עדיין בקטגוריה זו</div>';
+  }).join(''):'<div class="empty">אין עדיין בקטגוריה זו</div>');
   document.getElementById('hrt-grid-view').style.display='none';
   document.getElementById('hrt-list-view').style.display='block';
 }
