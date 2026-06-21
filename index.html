@@ -2885,6 +2885,11 @@ function showLanding() {
 <div id="edit-modal" style="display:none;position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.85);z-index:9999;align-items:center;justify-content:center;padding:16px;direction:rtl;">
   <div style="background:#0E1B2E;border:1px solid #2A3D52;border-radius:16px;padding:18px;width:100%;max-width:440px;max-height:90vh;overflow-y:auto;">
     <div style="color:#E8D9B8;font-size:16px;font-weight:600;margin-bottom:16px;">✏️ עריכה</div>
+    <div id="edit-audit-nav" style="display:none;align-items:center;justify-content:space-between;gap:8px;margin-bottom:14px;background:#13263c;border:1px solid #D4A24E;border-radius:10px;padding:8px 10px;">
+      <button type="button" onclick="auditNavStep(-1)" style="padding:7px 12px;background:#2A3D52;border:none;border-radius:7px;color:#E8D9B8;font-size:13px;cursor:pointer;font-family:inherit;">‹ הקודם</button>
+      <span id="edit-audit-pos" style="color:#D4A24E;font-size:12px;font-weight:700;"></span>
+      <button type="button" onclick="auditNavStep(1)" style="padding:7px 12px;background:#2A3D52;border:none;border-radius:7px;color:#E8D9B8;font-size:13px;cursor:pointer;font-family:inherit;">הבא ›</button>
+    </div>
     <input type="hidden" id="edit-id"/>
     <div class="afl"><label>עברית *</label><input id="edit-he"/></div>
     <div class="afl"><label>תעתיק</label><input id="edit-trans"/></div>
@@ -2913,6 +2918,7 @@ function showLanding() {
       <button onclick="closeEdit()" style="flex:1;padding:12px;background:#2A3D52;border:none;border-radius:8px;color:#E8D9B8;font-size:14px;cursor:pointer;font-family:inherit;">ביטול</button>
       <button id="edit-save-btn" onclick="saveEdit()" style="flex:2;padding:12px;background:#D4A24E;border:none;border-radius:8px;color:#fff;font-size:14px;font-weight:600;cursor:pointer;font-family:inherit;">שמור</button>
     </div>
+    <button id="edit-savenext-btn" onclick="saveEdit(true)" style="display:none;width:100%;margin-top:8px;padding:12px;background:#1D9E75;border:none;border-radius:8px;color:#fff;font-size:14px;font-weight:700;cursor:pointer;font-family:inherit;">💾 שמור ולשאלה הבאה ›</button>
   </div>
 </div>
 
@@ -10576,6 +10582,7 @@ function renderQuestionAudit(){
     return Array.isArray(p.responses) && p.responses.length > 0;
   }
   var totalQuestions = 0, totalMissing = 0, html = '';
+  window._auditNav = []; // ordered ids of missing questions, for prev/next navigation in the editor
   sections.forEach(function(s){
     if(!Array.isArray(s.arr) || !s.arr.length) return;
     var qs = s.arr.filter(isQuestion);
@@ -10588,6 +10595,7 @@ function renderQuestionAudit(){
       + s.icon + ' ' + s.label + ' — ' + missing.length + ' שאלות בלי תשובות</div>';
     missing.forEach(function(p){
       var clickable = !!p.id;
+      if(clickable) window._auditNav.push(String(p.id));
       var idArg = "'" + String(p.id).replace(/\\/g,'\\\\').replace(/'/g,"\\'") + "'";
       var attrs = clickable
         ? ' onclick="openEditById('+idArg+')" style="cursor:pointer;background:#18293E;border:1px solid #2A3D52;border-right:3px solid #c0392b;border-radius:10px;padding:10px 12px;margin-bottom:8px;"'
@@ -10929,8 +10937,32 @@ function openEditRow(p) {
     document.getElementById('edit-audio-cur').textContent = p.audio_url ? '✓ יש הקלטה' : 'אין הקלטה';
     document.getElementById('edit-status').textContent = '';
     if(mrec && mrec.state==='recording') { mrec.stop(); }
+    // Audit navigation: show prev/next + save-and-next only if this phrase is part of the audit list
+    var navIdx = (window._auditNav || []).indexOf(String(p.id || ''));
+    window._auditNavPos = navIdx;
+    var navBar = document.getElementById('edit-audit-nav');
+    var navBtn = document.getElementById('edit-savenext-btn');
+    if (navIdx >= 0) {
+      navBar.style.display = 'flex';
+      if (navBtn) navBtn.style.display = 'block';
+      document.getElementById('edit-audit-pos').textContent = 'שאלה ' + (navIdx + 1) + ' מתוך ' + window._auditNav.length;
+    } else {
+      navBar.style.display = 'none';
+      if (navBtn) navBtn.style.display = 'none';
+    }
     document.getElementById('edit-modal').style.display = 'flex';
   } catch(e) { alert('שגיאה: ' + e.message); }
+}
+// Step to the previous/next missing question in the audit list (warns if unsaved answers exist).
+function auditNavStep(d){
+  if(!window._auditNav || !window._auditNav.length) return;
+  var pos = (typeof window._auditNavPos==='number') ? window._auditNavPos : -1;
+  var n = pos + d;
+  if(n < 0) n = 0;
+  if(n >= window._auditNav.length) n = window._auditNav.length - 1;
+  if(n === pos) return;
+  if(window._editResponses && window._editResponses.length && !confirm('לעבור לשאלה אחרת בלי לשמור את התשובות שהזנת?')) return;
+  openEditById(window._auditNav[n]);
 }
 
 function openEdit(id,he,trans,ar,why,tone,audioUrl){
@@ -11041,9 +11073,9 @@ async function recordResponse(idx){
   }
 }
 
-async function saveEdit(){
+async function saveEdit(advance){
   const id=document.getElementById('edit-id').value;
-  const btn=document.getElementById('edit-save-btn');btn.textContent='שומר...';
+  const btn=document.getElementById(advance?'edit-savenext-btn':'edit-save-btn');const btnTxt=btn.textContent;btn.textContent='שומר...';
   
   // Compose tone field: encode urgency if set, prepend to tip
   var urgVal = document.getElementById('edit-urg').value;
@@ -11099,9 +11131,22 @@ async function saveEdit(){
   };
   
   const au=await getAudio('edit',document.getElementById('edit-status'));if(au)updates.audio_url=au;
-  try{await sbFetch('/rest/v1/phrases?id=eq.'+id,'PATCH',updates);closeEdit();await loadData();renderAdminList();var av=document.getElementById('at-audit');if(av&&av.style.display!=='none'&&typeof renderQuestionAudit==='function')renderQuestionAudit();btn.textContent='שמור';alert('✓ נשמר!');}catch(e){btn.textContent='שמור';alert('שגיאה: '+e.message);}
+  try{
+    await sbFetch('/rest/v1/phrases?id=eq.'+id,'PATCH',updates);
+    await loadData();renderAdminList();
+    if(typeof renderQuestionAudit==='function')renderQuestionAudit(); // rebuilds _auditNav without the just-fixed item
+    btn.textContent=btnTxt;
+    if(advance && Array.isArray(window._auditNav)){
+      // The saved item dropped out of the list, so the same index now points to the next question.
+      var pos=(typeof window._auditNavPos==='number')?window._auditNavPos:0;
+      if(pos < window._auditNav.length){ openEditById(window._auditNav[pos]); }
+      else { closeEdit(); alert('🎉 סיימת! אין עוד שאלות בלי תשובות בקטגוריות שנבחרו.'); }
+    } else {
+      closeEdit();alert('✓ נשמר!');
+    }
+  }catch(e){btn.textContent=btnTxt;alert('שגיאה: '+e.message);}
 }
-function closeEdit(){document.getElementById('edit-modal').style.display='none';delete rfiles['edit'];}
+function closeEdit(){document.getElementById('edit-modal').style.display='none';delete rfiles['edit'];window._auditNavPos=-1;var nb=document.getElementById('edit-audit-nav');if(nb)nb.style.display='none';var sb=document.getElementById('edit-savenext-btn');if(sb)sb.style.display='none';}
 async function delP(id){
   if(!confirm('למחוק?'))return;
   try{await sbFetch('/rest/v1/phrases?id=eq.'+id,'DELETE');await loadData();renderAdminList();}catch(e){alert('שגיאה');}
