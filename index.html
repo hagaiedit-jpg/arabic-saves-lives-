@@ -6798,14 +6798,15 @@ function getTenList(){
     if(Array.isArray(a))pool=pool.concat(a);
   });
   return TEN_PHRASES.map(function(p){
-    var heN=_tenNormHe(p.he), arN=_tenNormAr(p.ar), audio='';
+    var heN=_tenNormHe(p.he), arN=_tenNormAr(p.ar), audio='', responses=[];
     for(var i=0;i<pool.length;i++){
       var r=pool[i]; if(!r)continue;
       if(_tenNormHe(r.he)===heN || (arN && _tenNormAr(r.ar)===arN)){
-        if(r.audio){audio=r.audio;break;}
+        if(!audio && r.audio)audio=r.audio;
+        if((!responses||!responses.length) && Array.isArray(r.responses) && r.responses.length)responses=r.responses;
       }
     }
-    return {he:p.he,trans:p.trans,ar:p.ar,icon:p.icon,audio:audio||p.audio||''};
+    return {he:p.he,trans:p.trans,ar:p.ar,icon:p.icon,audio:audio||p.audio||'',responses:responses};
   });
 }
 
@@ -6844,7 +6845,7 @@ function openTenPhrase(i){
   document.getElementById('pwhyb').style.display='none';
   document.getElementById('ptone').textContent='';
   document.getElementById('ptoneb').style.display='none';
-  var rb=document.getElementById('presponsesb'); if(rb)rb.style.display='none';
+  renderPhraseResponses(p);
   var badge=document.getElementById('pcatbadge'); if(badge)badge.style.display='none';
   var goTo=document.getElementById('dict-go-to-category'); if(goTo)goTo.style.display='none';
   try{bldW();}catch(e){}
@@ -7349,34 +7350,7 @@ function opNavyP(i){
   document.querySelectorAll('.pbtn').forEach(b=>b.setAttribute('data-audio',p.audio||''));
   updateFavBtn(p.id);
   
-  // Render responses if exists
-  var respBox = document.getElementById('presponsesb');
-  var respList = document.getElementById('presponses');
-  if (respBox && respList) {
-    if (p.responses && p.responses.length > 0) {
-      var html = '';
-      for (var ri = 0; ri < p.responses.length; ri++) {
-        var r = p.responses[ri];
-        html += '<div class="response-item">';
-        html += '<div class="response-content">';
-        if (r.he) html += '<div class="response-he">' + r.he + '</div>';
-        if (r.trans) html += '<div class="response-trans">' + r.trans + '</div>';
-        if (r.ar) html += '<div class="response-ar">' + r.ar + '</div>';
-        html += '</div>';
-        if (r.audio_url) {
-          html += '<button class="response-play-btn" onclick="playResponseAudio(\'' + r.audio_url.replace(/\'/g, "\\'") + '\', this)" title="השמע">▶</button>';
-        } else {
-          html += '<button class="response-play-btn no-audio" title="אין הקלטה">▶</button>';
-        }
-        html += '</div>';
-      }
-      respList.innerHTML = html;
-      respBox.style.display = 'block';
-    } else {
-      respBox.style.display = 'none';
-    }
-  }
-  
+  renderPhraseResponses(p);
   bldW();document.getElementById('wtime').textContent='0:00';
   shV('vpop');
 }
@@ -10242,6 +10216,27 @@ function playResponseAudio(url, btn) {
 }
 window.playResponseAudio = playResponseAudio;
 
+function renderPhraseResponses(p){
+  var respBox=document.getElementById('presponsesb');
+  var respList=document.getElementById('presponses');
+  if(!respBox||!respList)return;
+  var arr=(p && Array.isArray(p.responses))?p.responses:[];
+  if(!arr.length){ respBox.style.display='none'; respList.innerHTML=''; return; }
+  var html='';
+  for(var ri=0;ri<arr.length;ri++){
+    var r=arr[ri];
+    html+='<div class="response-item"><div class="response-content">';
+    if(r.he)html+='<div class="response-he">'+r.he+'</div>';
+    if(r.trans)html+='<div class="response-trans">'+r.trans+'</div>';
+    if(r.ar)html+='<div class="response-ar">'+r.ar+'</div>';
+    html+='</div>';
+    if(r.audio_url){ html+='<button class="response-play-btn" onclick="playResponseAudio(\''+r.audio_url.replace(/\'/g,"\\'")+'\', this)" title="השמע">▶</button>'; }
+    else { html+='<button class="response-play-btn no-audio" title="אין הקלטה">▶</button>'; }
+    html+='</div>';
+  }
+  respList.innerHTML=html;
+  respBox.style.display='block';
+}
 function opP(i){
   const p=DB[i];
   saveRecent(p.id);
@@ -10255,34 +10250,7 @@ function opP(i){
   document.getElementById('ptoneb').style.display=p.tone?'block':'none';
   document.querySelectorAll('.pbtn').forEach(b=>b.setAttribute('data-audio',p.audio||''));
   updateFavBtn(p.id);
-  // Render responses if exists
-  var respBox = document.getElementById('presponsesb');
-  var respList = document.getElementById('presponses');
-  if (respBox && respList) {
-    if (p.responses && p.responses.length > 0) {
-      var html = '';
-      for (var ri = 0; ri < p.responses.length; ri++) {
-        var r = p.responses[ri];
-        html += '<div class="response-item">';
-        html += '<div class="response-content">';
-        if (r.he) html += '<div class="response-he">' + r.he + '</div>';
-        if (r.trans) html += '<div class="response-trans">' + r.trans + '</div>';
-        if (r.ar) html += '<div class="response-ar">' + r.ar + '</div>';
-        html += '</div>';
-        // Play button
-        if (r.audio_url) {
-          html += '<button class="response-play-btn" onclick="playResponseAudio(\'' + r.audio_url.replace(/\'/g, "\\'") + '\', this)" title="השמע">▶</button>';
-        } else {
-          html += '<button class="response-play-btn no-audio" title="אין הקלטה">▶</button>';
-        }
-        html += '</div>';
-      }
-      respList.innerHTML = html;
-      respBox.style.display = 'block';
-    } else {
-      respBox.style.display = 'none';
-    }
-  }
+  renderPhraseResponses(p);
   bldW();document.getElementById('wtime').textContent='0:00';shV('vpop');
 }
 function opPop(i,section){
@@ -10298,6 +10266,7 @@ function opPop(i,section){
   document.getElementById('ptone').textContent='';document.getElementById('ptoneb').style.display='none';
   document.querySelectorAll('.pbtn').forEach(b=>b.setAttribute('data-audio',p.audio||''));
   updateFavBtn(p.id);
+  renderPhraseResponses(p);
   bldW();document.getElementById('wtime').textContent='0:00';
   document.querySelectorAll('[id^="tab-"]').forEach(x=>x.className='scr');
   document.getElementById('tab-lib').className='scr on';shV('vpop');
