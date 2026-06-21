@@ -7153,14 +7153,14 @@ function opC(cat,special){
   shV('vlist');
 }
 
-function startCatLearn(cat){
+function startCatLearn(cat, phrasesOverride){
   try {
-    if (!DB) {
+    if (!Array.isArray(phrasesOverride) && !DB) {
       alert('הנתונים עוד לא נטענו');
       return;
     }
-    // Get all phrases in the category
-    var catPhrases = DB.filter(function(p){ return p.cat === cat; });
+    // Get all phrases in the category (or use an explicit list, e.g. for daily/navy)
+    var catPhrases = Array.isArray(phrasesOverride) ? phrasesOverride : DB.filter(function(p){ return p.cat === cat; });
     if (catPhrases.length === 0) {
       alert('אין משפטים בקטגוריה זו');
       return;
@@ -7289,25 +7289,15 @@ function opNavyList(cat){
 function startNavyLearn(cat) {
   // Use same learning mode but with NAVY data
   var items = NAVY.filter(n => n.cat === cat);
-  if (items.length === 0) return;
-  
-  // Set as current learning category
-  window._currentLearnCat = cat;
-  window._currentLearnItems = items.slice();
-  window._currentLearnIdx = 0;
-  
-  if (typeof startCatLearn === 'function') {
-    // Try to use existing learning mode
-    try {
-      // Override DB temporarily for the learning session
-      window._learnNavyMode = true;
-      window._learnNavyItems = items;
-      startCatLearn(cat);
-    } catch(e) { 
-      console.warn('Learn mode error:', e);
-      alert('מצב למידה לא זמין כרגע. נסי להריץ ידנית.');
-    }
-  }
+  if (items.length === 0) { alert('אין משפטים בקטגוריה זו'); return; }
+  startCatLearn(cat, items);
+}
+
+function startDailyLearn(cat) {
+  // Same learning mode, with DAILY data
+  var items = DAILY.filter(d => d.cat === cat);
+  if (items.length === 0) { alert('אין משפטים בקטגוריה זו'); return; }
+  startCatLearn(cat, items);
 }
 
 // HTML escape helper if not exists
@@ -9314,10 +9304,22 @@ function rDG(){
 function opDC(cat){
   curDailyCat=cat;
   document.getElementById('dltitle').textContent=cat;
-  document.getElementById('dlitems').innerHTML=DAILY.filter(d=>d.cat===cat).map(d=>{
+  const dItems=DAILY.filter(d=>d.cat===cat);
+  let learnCard='';
+  if(dItems.length>0){
+    learnCard=`<div onclick="startDailyLearn('${cat.replace(/'/g,"\\'")}')" style="background:linear-gradient(135deg,#1D9E75 0%,#0e5a3f 100%);border-radius:14px;padding:14px;margin-bottom:14px;cursor:pointer;box-shadow:0 4px 12px rgba(29,158,117,0.3);">
+      <div style="display:flex;align-items:center;gap:10px;">
+        <div style="font-size:24px;">🎯</div>
+        <div>
+          <div class="keep-white" style="color:#fff;font-size:15px;font-weight:700;">התחל מצב למידה</div>
+          <div style="color:rgba(255,255,255,0.85);font-size:12px;">תרגל את כל הקטגוריה שלב-שלב</div>
+        </div>
+      </div></div>`;
+  }
+  document.getElementById('dlitems').innerHTML=learnCard+(dItems.map(d=>{
     const i=DAILY.indexOf(d);
     return`<div class="li" onclick="opPop(${i},'daily')"><div class="lt">${d.he}</div><div class="la">‹</div></div>`;
-  }).join('')||'<div class="empty">אין עדיין</div>';
+  }).join('')||'<div class="empty">אין עדיין</div>');
   document.getElementById('daily-grid-view').style.display='none';
   document.getElementById('daily-list-view').style.display='block';
 }
@@ -10195,12 +10197,25 @@ function bldW(){const el=document.getElementById('wbars');el.innerHTML='';for(le
 function playResponseAudio(url, btn) {
   if (!url) return;
   try {
-    // Stop any existing audio
+    // Clicking the button that is currently active -> toggle pause / resume
+    if (window._responseAudio && window._responseBtn === btn) {
+      if (!window._responseAudio.paused) {
+        window._responseAudio.pause();
+        if (btn) btn.textContent = '▶';
+      } else {
+        window._responseAudio.play();
+        if (btn) btn.textContent = '⏸';
+      }
+      return;
+    }
+    // Different button (or first play): stop the previous one
     if (window._responseAudio) {
       try { window._responseAudio.pause(); } catch(e) {}
+      if (window._responseBtn) window._responseBtn.textContent = '▶';
     }
     var audio = new Audio(url);
     window._responseAudio = audio;
+    window._responseBtn = btn;
     if (btn) {
       btn.textContent = '⏸';
       audio.onended = function() { btn.textContent = '▶'; };
