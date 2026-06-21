@@ -9441,7 +9441,13 @@ function buildSmartDictIndex() {
     
     // Extract words from Hebrew, Arabic, and Transliteration
     var allText = [(phrase.he || ''), (phrase.ar || ''), (phrase.trans || '')];
-    
+    // Also index the possible citizen answers (responses) so their words are searchable
+    if (Array.isArray(phrase.responses)) {
+      phrase.responses.forEach(function(r){
+        if (r) { allText.push(r.he || ''); allText.push(r.trans || ''); allText.push(r.ar || ''); }
+      });
+    }
+
     allText.forEach(function(text) {
       // Split by whitespace and punctuation
       var words = text.split(/[\s.,!?;:()\[\]،؟]+/);
