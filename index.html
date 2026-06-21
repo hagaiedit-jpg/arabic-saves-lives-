@@ -2691,6 +2691,7 @@ function showLanding() {
       <button class="atab" onclick="aT('asem',this)">+ סמנטי</button>
       <button class="atab" onclick="aT('al',this)">📋 רשימה</button>
       <button class="atab" onclick="aT('audit',this)">🔎 שאלות בלי תשובות</button>
+      <button class="atab" onclick="aT('qrec',this)">🎤 הקלטת תשובות</button>
       <button class="atab" onclick="aT('acat',this)">⚙️ קטגוריות</button>
     </div>
 
@@ -2858,8 +2859,21 @@ function showLanding() {
         <div style="color:#E8D9B8;font-size:14px;font-weight:700;margin-bottom:6px;">🔎 שאלות בלי תשובות אפשריות</div>
         <div style="color:#7a9ab5;font-size:11.5px;line-height:1.6;margin-bottom:12px;">סורק שאלות (טקסט שמכיל "?") בקטגוריות שבהן מצופה מענה מהאזרח — <b>מבצעי, תשאול ימי, ויומיומי</b> — ומציג כל שאלה שאין לה אף תשובה אפשרית. תרחישים, כריזה ושיחה לא נכללים כי שם אין צורך בתשובות.</div>
         <button onclick="renderQuestionAudit()" style="width:100%;padding:12px;background:linear-gradient(135deg,#D4A24E 0%,#b88a3d 100%);border:none;border-radius:10px;color:#0E1B2E;font-size:13px;font-weight:800;cursor:pointer;font-family:inherit;">🔎 הרץ בדיקה</button>
+        <button onclick="importAuditAnswers(this)" style="width:100%;margin-top:8px;padding:12px;background:rgba(29,158,117,0.18);border:1px dashed #1D9E75;border-radius:10px;color:#7eecc1;font-size:13px;font-weight:800;cursor:pointer;font-family:inherit;">⬇️ ייבא את התשובות המוכנות (חד-פעמי)</button>
+        <div style="text-align:center;color:#7a9ab5;font-size:10.5px;margin-top:5px;">מתאים תשובות מוכנות לשאלות לפי הטקסט בעברית. מוסיף רק לשאלות שעדיין בלי תשובות (לא דורס קיים).</div>
       </div>
       <div id="audit-results" style="margin-top:6px;"></div>
+    </div>
+
+    <!-- Response recording queue: record audio for every possible answer, one after another -->
+    <div id="at-qrec" style="display:none;">
+      <div class="acard">
+        <div style="color:#E8D9B8;font-size:14px;font-weight:700;margin-bottom:6px;">🎤 הקלטת תשובות</div>
+        <div style="color:#7a9ab5;font-size:11.5px;line-height:1.6;margin-bottom:12px;">כל התשובות האפשריות, בזו אחר זו. לחצי 🎤 כדי להקליט תשובה (נשמרת מיד), ▶ כדי לשמוע, או ✏️ כדי לערוך את הטקסט.</div>
+        <label style="display:flex;align-items:center;gap:8px;cursor:pointer;color:#E8D9B8;font-size:12.5px;margin-bottom:6px;"><input type="checkbox" id="qrec-onlymissing" onchange="renderRespRecList()" style="width:15px;height:15px;cursor:pointer;"> הצג רק תשובות בלי הקלטה</label>
+        <button onclick="renderRespRecList()" style="width:100%;padding:10px;background:#2A3D52;border:none;border-radius:8px;color:#E8D9B8;font-size:12px;font-weight:700;cursor:pointer;font-family:inherit;">🔄 רענן רשימה</button>
+      </div>
+      <div id="resprec-list" style="margin-top:6px;"></div>
     </div>
 
     <!-- Categories -->
@@ -10558,9 +10572,9 @@ function rNF(){
 
 function aT(t,el){
   document.querySelectorAll('.atab').forEach(b=>b.classList.remove('active'));el.classList.add('active');
-  ['ap','ad','ah','ak','an','adict','asem','al','audit','acat'].forEach(id=>document.getElementById('at-'+id).style.display='none');
+  ['ap','ad','ah','ak','an','adict','asem','al','audit','qrec','acat'].forEach(id=>document.getElementById('at-'+id).style.display='none');
   document.getElementById('at-'+t).style.display='block';
-  if(t==='al')renderAdminList();if(t==='acat')renderCatList();if(t==='audit')renderQuestionAudit();
+  if(t==='al')renderAdminList();if(t==='acat')renderCatList();if(t==='audit')renderQuestionAudit();if(t==='qrec')renderRespRecList();
 }
 
 // Audit: find questions (Hebrew/Arabic text containing "?") that have no possible answers.
@@ -10618,6 +10632,239 @@ function renderQuestionAudit(){
     summary = '<div style="background:rgba(122,154,181,0.12);border:1px solid #2A3D52;border-radius:10px;padding:14px;text-align:center;color:#a0b8c8;font-size:12px;">לא נמצאו שאלות בנתונים שנטענו. ודאי שהאפליקציה סיימה לטעון את הנתונים מהשרת (אם את במצב אופליין, הבדיקה תרוץ רק על מה שנשמר במטמון).</div>';
   }
   out.innerHTML = summary + html;
+}
+
+// ===== Prepared answers (verified Palestinian colloquial) for one-time import =====
+// Each entry: q = Hebrew question text (string or array of candidates), responses = [{he,trans,ar}]
+var PREPARED_ANSWERS = [
+  {q:[`של מי המכונית הזאת?`,`של מי הרכב?`,`זאת המכונית שלך?`,`של מי האוטו?`], responses:[
+    {he:`זאת המכונית שלי`, trans:`האי סייّארתי`, ar:`هاي سيارتي`},
+    {he:`של אחי / אבי`, trans:`סייّארת אח'וי / אבّוי`, ar:`سيارة أخوي / أبوي`},
+    {he:`לא שלי, השאלתי אותה`, trans:`מש סייّארתי, מסתעירהא`, ar:`مش سيارتي، مستعيرها`}
+  ]},
+  {q:[`כמה אנשים ברכב?`,`כמה אנשים באוטו?`], responses:[
+    {he:`אחד / שניים / שלושה / ארבעה`, trans:`ואחַד / תְנֵין / תלאתֶה / ארבּעה`, ar:`واحد / تنين / تلاتة / أربعة`},
+    {he:`רק אני לבד`, trans:`אנא בַּס לחאלי`, ar:`أنا بس لحالي`},
+    {he:`אנחנו ארבעה`, trans:`אחְנא ארבּעה`, ar:`إحنا أربعة`}
+  ]},
+  {q:[`מאיפה את?`,`מאיפה אתה?`,`מאיפה אתם?`], responses:[
+    {he:`אני מחברון / שכם / רמאללה`, trans:`אנא מן אלח'ליל / נאבְּלֻס / ראם אללה`, ar:`أنا من الخليل / نابلس / رام الله`},
+    {he:`מכאן, מהכפר`, trans:`מן הון, מן אלבַּלַד`, ar:`من هون، من البلد`}
+  ]},
+  {q:[`מה העבודה שלך?`,`מה אתה עובד?`,`במה אתה עובד?`], responses:[
+    {he:`חקלאי / מורה / סטודנט / נהג / סוחר / פועל בניין`, trans:`אנא פַלّאח / מֻעַלّם / טאלֶבּ / סַוّאק / תאג'ֶר / עאמֶל בּנאא`, ar:`أنا فلاح / معلّم / طالب / سواق / تاجر / عامل بناء`}
+  ]},
+  {q:[`אתה נשוי?`,`את נשואה?`], responses:[
+    {he:`כן, נשוי`, trans:`אה, מִתְגַ'וُّז`, ar:`آه، متجوّز`},
+    {he:`לא, רווק`, trans:`לא, אעזַבּ`, ar:`لا، أعزب`}
+  ]},
+  {q:[`מה שם אביך ושם המשפחה?`,`מה השם של אבא שלך ושם המשפחה?`], responses:[
+    {he:`שם אבי ..., שם המשפחה ...`, trans:`אסם אבّוי ..., וִאלעֵילֶה ...`, ar:`اسم أبوي [...]، والعيلة [...]`}
+  ]},
+  {q:[`פתח את התיק, מה יש בו?`,`תפתח את התיק, מה יש בפנים?`], responses:[
+    {he:`אוכל / ספרים / בגדים / תרופות`, trans:`פִיהא אַכֶּל / כֻּתֻבּ / מלאבֶּס / דַוא`, ar:`فيها أكل / كتب / ملابس / دوا`},
+    {he:`חפצים אישיים`, trans:`אע'ראצ' שח'صִיّה`, ar:`أغراض شخصية`},
+    {he:`ריק, אין כלום`, trans:`פאצ'יה, מא פִי אִשִי`, ar:`فاضية، ما في إشي`}
+  ]},
+  {q:[`של מי האקדח הזה?`,`של מי הנשק?`], responses:[
+    {he:`לא שלי`, trans:`מש אִלִי`, ar:`مش إلي`},
+    {he:`אני לא יודע`, trans:`מא בַּעְרֶף`, ar:`ما بعرف`}
+  ]},
+  {q:[`אתה פצוע?`,`את פצועה?`], responses:[
+    {he:`כן, אני פצוע / פצועה`, trans:`אה, אנא מַגְ'רוח / מַגְ'רוחה`, ar:`آه، أنا مجروح / مجروحة`},
+    {he:`לא, אני בסדר`, trans:`לא, אנא מְנִיח / מְנִיחה`, ar:`لا، أنا منيح / منيحة`}
+  ]},
+  {q:[`איפה כואב לך?`,`איפה כואב?`], responses:[
+    {he:`כואב לי הראש / הבטן / הרגל / היד / הגב / החזה`, trans:`בִּיוְג'עְני ראסי / בַּטְני / אִגְ'רי / אִידי / צַ'הְרי / צַדְרי`, ar:`بيوجعني راسي / بطني / إجري / إيدي / ظهري / صدري`},
+    {he:`כאן`, trans:`הון`, ar:`هون`}
+  ]},
+  {q:[`אתה שומע אותי?`,`את שומעת אותי?`], responses:[
+    {he:`כן, אני שומע אותך`, trans:`אה, בַּסְמַעַכּ`, ar:`آه، بسمعك`},
+    {he:`שומע אותך קצת`, trans:`בַּסְמַעַכּ שְוַيّ`, ar:`بسمعك شوي`},
+    {he:`לא, אני לא שומע טוב`, trans:`לא, מא בַּסְמַע מְנִיח`, ar:`لا، ما بسمع منيح`}
+  ]},
+  {q:[`יש לך דימום?`,`יש דימום?`], responses:[
+    {he:`כן, יש דם`, trans:`אה, פִיה דַםّ`, ar:`آه، فيه دم`},
+    {he:`לא, אין דימום`, trans:`לא, מא פִיה נַזִיף`, ar:`لا، ما فيه نزيف`},
+    {he:`מכאן`, trans:`מן הון`, ar:`من هون`}
+  ]},
+  {q:[`למה זרקת אבנים?`,`למה זרקתם אבנים?`], responses:[
+    {he:`לא זרקתי כלום`, trans:`מא רַמֵית אִשִי`, ar:`ما رميت إشي`},
+    {he:`זה לא אני`, trans:`מש אנא`, ar:`مش أنا`}
+  ]},
+  {q:[`מה אתה עושה פה? אתה לא יודע שיש עוצר?`,`מה אתה עושה כאן? יש עוצר`,`מה אתה עושה פה?`], responses:[
+    {he:`הולך הביתה`, trans:`ראיֶח עַלא(ל)בֵּית`, ar:`رايح على البيت`},
+    {he:`לא ידעתי שיש עוצר`, trans:`מא כֻּנְת עארֶף פִיה מַנְע תַגַוّّל`, ar:`ما كنت عارف فيه منع تجول`},
+    {he:`הולך להביא תרופה / אוכל`, trans:`ראיֶח אג'יבּ דַוא / אַכֶּל`, ar:`رايح أجيب دوا / أكل`}
+  ]},
+  {q:[`איפה בית הספר?`], responses:[
+    {he:`בית הספר שם, קרוב`, trans:`אלמַדְרַסֶה הְנאכּ, קַרִיבֶּה`, ar:`المدرسة هناك، قريبة`},
+    {he:`ישר ואז ימינה / שמאלה`, trans:`עַלא טול וּבַּעְדֵין יַמִין / שְמאל`, ar:`على طول وبعدين يمين / شمال`}
+  ]},
+  {q:[`באיזה כיתה אתה?`,`באיזו כיתה אתה?`], responses:[
+    {he:`בכיתה א / ב / ז / י`, trans:`בְּצַףّ אַוّל / תאני / סאבֶּע / עאשֶר`, ar:`بصف أول / تاني / سابع / عاشر`},
+    {he:`בכיתה יב (בגרות)`, trans:`בִּתַّוְג'יהי`, ar:`بالتوجيهي`}
+  ]},
+  {q:[`בן כמה הילד?`,`כמה בן הילד?`], responses:[
+    {he:`בן שנה / שנתיים / חמש`, trans:`עֻמְרה סַנֶה / סַנְתֵין / ח'מְס סְנִין`, ar:`عمره سنة / سنتين / خمس سنين`},
+    {he:`קטן, חודשים`, trans:`זְעִ'יר, שְהور`, ar:`صغير، شهور`}
+  ]},
+  {q:[`הילד נמצא בבית?`,`הילד בבית?`], responses:[
+    {he:`כן, בבית`, trans:`אה, בִּ(ל)בֵּית`, ar:`آه، بالبيت`},
+    {he:`לא, בבית הספר / בחוץ`, trans:`לא, בִּ(ל)מַדְרַסֶה / בַּרّא`, ar:`لا، بالمدرسة / برّا`}
+  ]},
+  {q:[`כמה רחוק זה?`,`כמה רחוק?`], responses:[
+    {he:`קרוב, חמש דקות`, trans:`קַרִיבּ, ח'מְס דַקאיֶק`, ar:`قريب، خمس دقايق`},
+    {he:`רחוק, חצי שעה`, trans:`בְּעִיד, נֻץّ סאעה`, ar:`بعيد، نص ساعة`},
+    {he:`בערך קילומטר`, trans:`כִּילومֶתר תַקְרִיבַּן`, ar:`كيلومتر تقريباً`}
+  ]},
+  {q:[`טרי? מהיום?`,`זה טרי?`], responses:[
+    {he:`כן, טרי, מהיום`, trans:`אה, טאזה, מן אליوם`, ar:`آه، طازة، من اليوم`},
+    {he:`לא, מאתמול`, trans:`לא, מן אִמְבּארֶח`, ar:`لا، من امبارح`}
+  ]},
+  {q:[`יש לך עודף?`,`יש לך עודף / כסף קטן?`,`יש לך כסף קטן?`], responses:[
+    {he:`כן, יש עודף`, trans:`אה, עִנְדי פְראטה`, ar:`آه، عندي فراطة`},
+    {he:`לא, אין לי`, trans:`לא, מא עִנְדי`, ar:`لا، ما عندي`},
+    {he:`יש לי רק שטר גדול`, trans:`בַּס עִנְדי וַרַקה כְּבִּירה`, ar:`بس عندي ورقة كبيرة`}
+  ]},
+  {q:[`מה אתה ממליץ?`,`מה אתה ממליץ עליו?`], responses:[
+    {he:`תנסה מנסף / מקלובה / מסח'ן / חומוס / שווארמה`, trans:`גַ'רّבּ אלמַנְסַף / אלמַקְלובּה / אלמֻסַח'ّן / אלחֻמّص / א(ל)שّاוַרְמא`, ar:`جرّب المنسف / المقلوبة / المسخّن / الحمص / الشاورما`}
+  ]},
+  {q:[`מי גר בבית הזה?`,`מי גר פה?`], responses:[
+    {he:`אני ומשפחתי`, trans:`אנא וُעֵילְתי`, ar:`أنا وعيلتي`},
+    {he:`הבית ריק / מושכר`, trans:`אלבֵּית פאצ'י / מֻאَגַّ'ר`, ar:`البيت فاضي / مؤجّر`}
+  ]},
+  {q:[`מי ראש הכפר?`,`מי המוכתאר?`], responses:[
+    {he:`המוכתאר שמו ...`, trans:`אלמֻח'תאר אסְמה ...`, ar:`المختار اسمه [...]`},
+    {he:`ראש המועצה ...`, trans:`רַئִיס אלמַגְ'לֶס ...`, ar:`رئيس المجلس [...]`}
+  ]}
+];
+
+// Match prepared answers to existing phrases by Hebrew text and fill empty "responses".
+async function importAuditAnswers(btn){
+  if(!confirm('לייבא את התשובות המוכנות לשאלות התואמות?\nתשובות יתווספו רק לשאלות שכרגע בלי תשובות (לא דורס קיים).'))return;
+  var orig = btn ? btn.textContent : '';
+  if(btn){ btn.disabled=true; btn.textContent='מייבא...'; }
+  function norm(s){ return String(s||'').replace(/[^֐-׿0-9A-Za-z]/g,''); }
+  var pools = [ (typeof DB!=='undefined'?DB:[]), (typeof NAVY!=='undefined'?NAVY:[]), (typeof DAILY!=='undefined'?DAILY:[]) ];
+  var matched=[], skipped=[], notfound=[], errors=[];
+  for(var e=0;e<PREPARED_ANSWERS.length;e++){
+    var entry=PREPARED_ANSWERS[e];
+    var cands=(Array.isArray(entry.q)?entry.q:[entry.q]).map(norm).filter(Boolean);
+    var found=null;
+    for(var pi=0; pi<pools.length && !found; pi++){
+      var arr=pools[pi]||[];
+      for(var j=0;j<arr.length;j++){
+        var pn=norm(arr[j].he); if(!pn)continue;
+        var hit = cands.indexOf(pn)>=0 || cands.some(function(c){ return c.length>=6 && (pn.indexOf(c)>=0 || c.indexOf(pn)>=0); });
+        if(hit){ found=arr[j]; break; }
+      }
+    }
+    if(!found){ notfound.push((Array.isArray(entry.q)?entry.q[0]:entry.q)); continue; }
+    if(Array.isArray(found.responses) && found.responses.length){ skipped.push(found.he); continue; }
+    try{
+      var resp=entry.responses.map(function(r){ return {he:r.he, trans:r.trans, ar:r.ar, audio_url:''}; });
+      await sbFetch('/rest/v1/phrases?id=eq.'+found.id,'PATCH',{responses:JSON.stringify(resp)});
+      matched.push(found.he);
+    }catch(err){ errors.push(found.he+': '+err.message); }
+  }
+  await loadData();
+  if(typeof renderQuestionAudit==='function') renderQuestionAudit();
+  if(btn){ btn.disabled=false; btn.textContent=orig; }
+  var msg='✓ יובאו תשובות ל-'+matched.length+' שאלות.\n⏭️ דולגו (כבר היו תשובות): '+skipped.length+'\n❓ לא נמצאה התאמה: '+notfound.length;
+  if(notfound.length) msg+='\n\nשאלות שלא נמצאו (אולי הניסוח שונה במאגר):\n— '+notfound.join('\n— ');
+  if(errors.length) msg+='\n\nשגיאות:\n'+errors.join('\n');
+  msg+='\n\nעכשיו עברי לטאב 🎤 הקלטת תשובות כדי להקליט אותן.';
+  alert(msg);
+}
+
+// ===== Response recording queue =====
+function findPhraseById(id){
+  var pools=[ (typeof DB!=='undefined'?DB:[]), (typeof NAVY!=='undefined'?NAVY:[]), (typeof DAILY!=='undefined'?DAILY:[]), (typeof HEART!=='undefined'?HEART:[]), (typeof ANNOUNCE!=='undefined'?ANNOUNCE:[]) ];
+  for(var i=0;i<pools.length;i++){ var a=pools[i]||[]; for(var j=0;j<a.length;j++){ if(String(a[j].id)===String(id)) return a[j]; } }
+  return null;
+}
+function renderRespRecList(){
+  var out=document.getElementById('resprec-list'); if(!out)return;
+  var onlyMissingEl=document.getElementById('qrec-onlymissing');
+  var onlyMissing = onlyMissingEl && onlyMissingEl.checked;
+  var pools=[ (typeof DB!=='undefined'?DB:[]), (typeof NAVY!=='undefined'?NAVY:[]), (typeof DAILY!=='undefined'?DAILY:[]) ];
+  var rows=[];
+  pools.forEach(function(arr){ (arr||[]).forEach(function(p){
+    if(Array.isArray(p.responses) && p.responses.length){
+      p.responses.forEach(function(r,ri){
+        if(onlyMissing && r.audio_url) return;
+        rows.push({pid:p.id, ri:ri, qHe:p.he||'', he:r.he||'', trans:r.trans||'', ar:r.ar||'', audio:r.audio_url||''});
+      });
+    }
+  });});
+  window._respRecRows=rows;
+  if(!rows.length){ out.innerHTML='<div style="text-align:center;color:#7a9ab5;font-size:12px;padding:20px;">'+(onlyMissing?'אין תשובות בלי הקלטה 🎉':'אין תשובות עדיין — ייבאי קודם את התשובות בטאב 🔎.')+'</div>'; return; }
+  var recorded=rows.filter(function(r){return r.audio;}).length;
+  var html='<div style="background:#13263c;border:1px solid #2A3D52;border-radius:10px;padding:10px;margin-bottom:8px;text-align:center;color:#E8D9B8;font-size:12.5px;font-weight:700;">סה"כ '+rows.length+' תשובות · '+recorded+' הוקלטו · '+(rows.length-recorded)+' נותרו</div>';
+  var lastQ=null;
+  rows.forEach(function(row,i){
+    if(row.qHe!==lastQ){ html+='<div style="color:#D4A24E;font-size:12.5px;font-weight:800;margin:14px 0 6px;border-bottom:1px solid #2A3D52;padding-bottom:4px;">❓ '+row.qHe+'</div>'; lastQ=row.qHe; }
+    var pidArg="'"+String(row.pid).replace(/\\/g,'\\\\').replace(/'/g,"\\'")+"'";
+    var done=!!row.audio;
+    html+='<div style="background:#18293E;border:1px solid #2A3D52;border-radius:10px;padding:10px 12px;margin-bottom:8px;">'
+      +'<div style="color:#E8D9B8;font-size:13px;font-weight:600;">'+(row.he||'(ללא עברית)')+'</div>'
+      +(row.trans?'<div style="color:#a0b8c8;font-size:12px;">'+row.trans+'</div>':'')
+      +(row.ar?'<div style="color:#FFD700;font-size:15px;font-family:Georgia,serif;direction:rtl;">'+row.ar+'</div>':'')
+      +'<div style="display:flex;gap:6px;align-items:center;margin-top:8px;flex-wrap:wrap;">'
+        +'<button id="qrec-btn-'+i+'" onclick="recordQueueItem('+i+')" style="background:rgba(192,57,43,0.2);border:1px solid #c0392b;color:#fff;padding:6px 12px;border-radius:7px;font-size:12px;cursor:pointer;font-family:inherit;">🎤 הקלט</button>'
+        +(done?'<button onclick="playQueueAudio('+i+')" style="background:#2A3D52;border:none;color:#E8D9B8;padding:6px 12px;border-radius:7px;font-size:12px;cursor:pointer;font-family:inherit;">▶ נגן</button>':'')
+        +'<button onclick="openEditById('+pidArg+')" style="background:none;border:1px solid #2A3D52;color:#7a9ab5;padding:6px 12px;border-radius:7px;font-size:12px;cursor:pointer;font-family:inherit;">✏️ ערוך</button>'
+        +'<span id="qrec-status-'+i+'" style="font-size:11px;color:'+(done?'#1D9E75':'#7a9ab5')+';">'+(done?'✓ הוקלט':'בלי הקלטה')+'</span>'
+      +'</div>'
+    +'</div>';
+  });
+  out.innerHTML=html;
+}
+function playQueueAudio(i){
+  var row=window._respRecRows && window._respRecRows[i];
+  if(row && row.audio){ try{ new Audio(row.audio).play(); }catch(e){} }
+}
+async function recordQueueItem(i){
+  var row=window._respRecRows && window._respRecRows[i]; if(!row)return;
+  var statusEl=document.getElementById('qrec-status-'+i);
+  var btn=document.getElementById('qrec-btn-'+i);
+  // Toggle: if this row is recording, stop it
+  if(window._queueRec && window._queueRec.state==='recording' && window._queueRecIdx===i){ window._queueRec.stop(); return; }
+  if(window._queueRec && window._queueRec.state==='recording'){ alert('יש הקלטה פעילה — עצרי אותה קודם'); return; }
+  try{
+    var stream=await navigator.mediaDevices.getUserMedia({audio:true});
+    var rec=createRecorder(stream); var chunks=[];
+    window._queueRec=rec; window._queueRecIdx=i;
+    if(statusEl){ statusEl.textContent='🔴 מקליט... לחצי לעצור'; statusEl.style.color='#e74c3c'; }
+    if(btn) btn.textContent='⏹ עצור';
+    rec.ondataavailable=function(ev){ if(ev.data && ev.data.size>0) chunks.push(ev.data); };
+    rec.onstop=async function(){
+      stream.getTracks().forEach(function(t){t.stop();});
+      if(btn) btn.textContent='🎤 הקלט';
+      if(statusEl){ statusEl.textContent='⏳ מעלה...'; statusEl.style.color='#FFD700'; }
+      try{
+        var file=new File(chunks,'rec.webm',{type:'audio/webm'});
+        var url=await cloudUp(file);
+        if(!url) throw new Error('לא התקבל קישור מההעלאה');
+        var p=findPhraseById(row.pid);
+        if(!p || !Array.isArray(p.responses) || !p.responses[row.ri]) throw new Error('התשובה לא נמצאה במאגר');
+        p.responses[row.ri].audio_url=url;
+        await sbFetch('/rest/v1/phrases?id=eq.'+row.pid,'PATCH',{responses:JSON.stringify(p.responses)});
+        row.audio=url;
+        if(statusEl){ statusEl.textContent='✓ הוקלט ונשמר'; statusEl.style.color='#1D9E75'; }
+        renderRespRecList();
+      }catch(err){
+        if(statusEl){ statusEl.textContent='✗ שגיאה'; statusEl.style.color='#e74c3c'; }
+        alert('שגיאה בשמירת ההקלטה: '+err.message);
+      }
+      window._queueRec=null; window._queueRecIdx=-1;
+    };
+    rec.start();
+  }catch(err){
+    if(statusEl){ statusEl.textContent='✗ אין גישה למיקרופון'; statusEl.style.color='#e74c3c'; }
+    alert('שגיאת מיקרופון: '+err.message);
+  }
 }
 
 // ADD functions
