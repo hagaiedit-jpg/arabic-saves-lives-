@@ -9396,6 +9396,15 @@ var SMART_DICT_INDEX = null;  // {word: [phrase_refs]}
 var DICT_STOPWORDS_HE = ['את','של','על','לא','אני','אתה','אתם','אנחנו','הוא','היא','הם','הן','זה','זאת','עם','כי','גם','אם','או','כן','לי','לך','לו','לה'];
 var DICT_STOPWORDS_AR = ['ال','و','في','من','على','إلى','عن','هو','هي','هم','هن','أنا','أنت','أنتم','نحن','هذا','هذه','مع','إذا','أو','نعم','لي','لك','له','لها'];
 
+function dictNorm(s){
+  return String(s || '')
+    .toLowerCase()
+    .replace(/[֑-ׇ]/g, '')              // Hebrew niqqud / cantillation
+    .replace(/[ً-ْٰٱ]/g, '')  // Arabic harakat (incl. shadda)
+    .replace(/[׳״'"`׳״]/g, '')          // geresh / gershayim / apostrophes (כ׳ ח׳ ג׳ ...)
+    .replace(/ך/g,'כ').replace(/ם/g,'מ').replace(/ן/g,'נ').replace(/ף/g,'פ').replace(/ץ/g,'צ') // Hebrew final letters
+    .trim();
+}
 function buildSmartDictIndex() {
   // Build index from ALL phrase sources
   var allPhrases = [];
@@ -9435,7 +9444,7 @@ function buildSmartDictIndex() {
     
     allText.forEach(function(text) {
       // Split by whitespace and punctuation
-      var words = text.split(/[\s.,!?;:()\[\]'"\u05F4\u05F3،؟،"'`،]+/);
+      var words = text.split(/[\s.,!?;:()\[\]،؟]+/);
       
       words.forEach(function(rawWord) {
         if (!rawWord) return;
@@ -9448,11 +9457,9 @@ function buildSmartDictIndex() {
         if (DICT_STOPWORDS_HE.indexOf(cleanWord) !== -1) return;
         if (DICT_STOPWORDS_AR.indexOf(cleanWord) !== -1) return;
         
-        // Normalize: remove Hebrew niqqud for indexing (search ignores niqqud)
-        var normalizedWord = cleanWord.replace(/[\u0591-\u05C7]/g, '').replace(/[\u064B-\u0652\u0670\u0671]/g, '');
-        if (!normalizedWord || normalizedWord.length < 2) return;
-        
-        var key = normalizedWord.toLowerCase();
+        // Unified normalization (niqqud, harakat, geresh, final letters) for both index + search
+        var key = dictNorm(cleanWord);
+        if (!key || key.length < 2) return;
         
         if (!index[key]) {
           index[key] = { 
@@ -9495,9 +9502,9 @@ function renderDict(){
 function searchDict(){
   if (!SMART_DICT_INDEX) buildSmartDictIndex();
   
-  var q = (document.getElementById('dict-search').value || '').trim().toLowerCase();
-  // Normalize search - remove niqqud
-  var normalizedQ = q.replace(/[\u0591-\u05C7]/g, '').replace(/[\u064B-\u0652\u0670\u0671]/g, '');
+  var q = (document.getElementById('dict-search').value || '').trim();
+  // Same normalization as the index (niqqud, harakat, geresh, final letters)
+  var normalizedQ = dictNorm(q);
   
   var resultsEl = document.getElementById('dict-results');
   if (!resultsEl) return;
