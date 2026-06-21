@@ -9427,62 +9427,51 @@ function buildSmartDictIndex() {
   var index = {};
   
   allPhrases.forEach(function(phrase, idx) {
-    var phraseRef = {
-      he: phrase.he || '',
-      ar: phrase.ar || '',
-      trans: phrase.trans || '',
-      cat: phrase.cat || '',
-      audio: phrase.audio_url || phrase.audio || '',
-      section: phrase._source,
-      sectionName: phrase._sectionName,
-      origIdx: idx,
-      origPhrase: phrase
-    };
-    
-    // Extract words from Hebrew, Arabic, and Transliteration
-    var allText = [(phrase.he || ''), (phrase.ar || ''), (phrase.trans || '')];
-    // Also index the possible citizen answers (responses) so their words are searchable
+    // Build units: the phrase itself + each possible answer, so answer words are
+    // searchable AND displayed with their own text (not the parent question).
+    var units = [{
+      he: phrase.he || '', ar: phrase.ar || '', trans: phrase.trans || '',
+      audio: phrase.audio_url || phrase.audio || '', isResponse: false
+    }];
     if (Array.isArray(phrase.responses)) {
       phrase.responses.forEach(function(r){
-        if (r) { allText.push(r.he || ''); allText.push(r.trans || ''); allText.push(r.ar || ''); }
+        if (r && (r.he || r.ar || r.trans)) units.push({
+          he: r.he || '', ar: r.ar || '', trans: r.trans || '',
+          audio: r.audio_url || '', isResponse: true
+        });
       });
     }
 
-    allText.forEach(function(text) {
-      // Split by whitespace and punctuation
-      var words = text.split(/[\s.,!?;:()\[\]،؟]+/);
-      
-      words.forEach(function(rawWord) {
-        if (!rawWord) return;
-        // Clean word - remove punctuation/marks
-        var cleanWord = rawWord.replace(/[.,!?;:()\[\]'"\u05F4\u05F3،؟"'`]/g, '').trim();
-        if (!cleanWord) return;
-        if (cleanWord.length < 2) return;
-        
-        // Skip stopwords
-        if (DICT_STOPWORDS_HE.indexOf(cleanWord) !== -1) return;
-        if (DICT_STOPWORDS_AR.indexOf(cleanWord) !== -1) return;
-        
-        // Unified normalization (niqqud, harakat, geresh, final letters) for both index + search
-        var key = dictNorm(cleanWord);
-        if (!key || key.length < 2) return;
-        
-        if (!index[key]) {
-          index[key] = { 
-            displayWords: new Set(),  // All forms of this word with niqqud
-            phrases: []
-          };
-        }
-        index[key].displayWords.add(cleanWord);
-        
-        // Avoid duplicate phrases (same he+ar)
-        var phraseKey = phraseRef.he + '||' + phraseRef.ar;
-        var alreadyAdded = index[key].phrases.some(function(p){
-          return (p.he + '||' + p.ar) === phraseKey;
+    units.forEach(function(unit){
+      var ref = {
+        he: unit.he, ar: unit.ar, trans: unit.trans,
+        cat: phrase.cat || '',
+        audio: unit.audio || '',
+        section: phrase._source,
+        sectionName: phrase._sectionName,
+        isResponse: unit.isResponse,
+        parentHe: phrase.he || '', parentAr: phrase.ar || '',
+        origIdx: idx, origPhrase: phrase
+      };
+
+      [unit.he, unit.ar, unit.trans].forEach(function(text){
+        var words = text.split(/[\s.,!?;:()\[\]،؟]+/);
+        words.forEach(function(rawWord) {
+          if (!rawWord) return;
+          var cleanWord = rawWord.trim();
+          if (cleanWord.length < 2) return;
+          if (DICT_STOPWORDS_HE.indexOf(cleanWord) !== -1) return;
+          if (DICT_STOPWORDS_AR.indexOf(cleanWord) !== -1) return;
+          var key = dictNorm(cleanWord);
+          if (!key || key.length < 2) return;
+          if (!index[key]) index[key] = { displayWords: new Set(), phrases: [] };
+          index[key].displayWords.add(cleanWord);
+          var phraseKey = ref.he + '||' + ref.ar + '||' + (ref.isResponse ? 'R' : 'P');
+          var alreadyAdded = index[key].phrases.some(function(p){
+            return (p.he + '||' + p.ar + '||' + (p.isResponse ? 'R' : 'P')) === phraseKey;
+          });
+          if (!alreadyAdded) index[key].phrases.push(ref);
         });
-        if (!alreadyAdded) {
-          index[key].phrases.push(phraseRef);
-        }
       });
     });
   });
@@ -9584,9 +9573,10 @@ function searchDict(){
       html += '<div onclick="opDictPhrase(\'' + escapeJsDict(p.he) + '\', \'' + escapeJsDict(p.ar) + '\')" style="background:rgba(255,255,255,0.03);border-right:3px solid #D4A24E;padding:8px 10px;margin-bottom:6px;border-radius:6px;cursor:pointer;transition:background 0.2s;" onmouseover="this.style.background=\'rgba(212,162,78,0.1)\'" onmouseout="this.style.background=\'rgba(255,255,255,0.03)\'">';
       html += '<div style="display:flex;justify-content:space-between;align-items:start;gap:8px;">';
       html += '<div style="flex:1;min-width:0;">';
-      html += '<div style="color:#fff;font-size:13px;font-weight:600;margin-bottom:3px;">' + escapeHtmlDict(p.he) + '</div>';
+      html += '<div style="color:#fff;font-size:13px;font-weight:600;margin-bottom:3px;">' + escapeHtmlDict(p.he) + (p.isResponse ? ' <span style="color:#7eecc1;font-size:10px;font-weight:700;background:rgba(29,158,117,0.15);padding:1px 6px;border-radius:6px;">💬 תשובה</span>' : '') + '</div>';
       if (p.trans) html += '<div style="color:#D4A24E;font-size:13px;margin-bottom:2px;">' + escapeHtmlDict(p.trans) + '</div>';
       html += '<div style="color:#7a9ab5;font-size:12px;direction:rtl;">' + escapeHtmlDict(p.ar) + '</div>';
+      if (p.isResponse && p.parentHe) html += '<div style="color:#7a9ab5;font-size:10px;margin-top:4px;">↩️ תשובה לשאלה: ' + escapeHtmlDict(p.parentHe) + '</div>';
       if (p.cat) html += '<div style="color:#7a9ab5;font-size:10px;margin-top:4px;">📂 ' + escapeHtmlDict(p.sectionName || p.section) + ' / ' + escapeHtmlDict(p.cat) + '</div>';
       html += '</div>';
       html += '<div style="font-size:18px;flex-shrink:0;">' + audioIcon + '</div>';
