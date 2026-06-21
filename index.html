@@ -10597,6 +10597,7 @@ function renderQuestionAudit(){
   }
   var totalQuestions = 0, totalMissing = 0, html = '';
   window._auditNav = []; // ordered ids of missing questions, for prev/next navigation in the editor
+  var copyLines = []; // plain-text list of remaining questions, for export
   sections.forEach(function(s){
     if(!Array.isArray(s.arr) || !s.arr.length) return;
     var qs = s.arr.filter(isQuestion);
@@ -10604,10 +10605,12 @@ function renderQuestionAudit(){
     totalQuestions += qs.length;
     totalMissing += missing.length;
     if(!missing.length) return;
+    copyLines.push('=== ' + s.label + ' ===');
     html += '<div style="margin-top:14px;">'
       + '<div style="color:#D4A24E;font-size:12.5px;font-weight:800;margin-bottom:8px;border-bottom:1px solid #2A3D52;padding-bottom:5px;">'
       + s.icon + ' ' + s.label + ' — ' + missing.length + ' שאלות בלי תשובות</div>';
     missing.forEach(function(p){
+      copyLines.push((p.he||'') + (p.ar ? ('  |  ' + p.ar) : ''));
       var clickable = !!p.id;
       if(clickable) window._auditNav.push(String(p.id));
       var idArg = "'" + String(p.id).replace(/\\/g,'\\\\').replace(/'/g,"\\'") + "'";
@@ -10625,13 +10628,27 @@ function renderQuestionAudit(){
     });
     html += '</div>';
   });
+  window._auditCopyText = copyLines.join('\n');
+  var copyBtn = totalMissing ? '<button onclick="copyAuditList(this)" style="width:100%;margin-top:8px;padding:11px;background:#2A3D52;border:none;border-radius:10px;color:#E8D9B8;font-size:12.5px;font-weight:700;cursor:pointer;font-family:inherit;">📋 העתק את השאלות שנותרו (לשליחה אליי)</button>' : '';
   var summary = '<div style="background:'+(totalMissing? 'rgba(192,57,43,0.12)':'rgba(29,158,117,0.12)')+';border:1px solid '+(totalMissing?'rgba(192,57,43,0.4)':'rgba(29,158,117,0.4)')+';border-radius:10px;padding:12px;margin-bottom:6px;text-align:center;">'
     + '<div style="color:'+(totalMissing?'#e74c3c':'#1D9E75')+';font-size:15px;font-weight:800;">'+(totalMissing? (totalMissing+' שאלות בלי תשובות') : '✓ כל השאלות מכוסות!')+'</div>'
-    + '<div style="color:#7a9ab5;font-size:11px;margin-top:3px;">מתוך '+totalQuestions+' שאלות שנמצאו בסך הכל</div></div>';
+    + '<div style="color:#7a9ab5;font-size:11px;margin-top:3px;">מתוך '+totalQuestions+' שאלות שנמצאו בסך הכל</div>'
+    + copyBtn + '</div>';
   if(totalQuestions === 0){
     summary = '<div style="background:rgba(122,154,181,0.12);border:1px solid #2A3D52;border-radius:10px;padding:14px;text-align:center;color:#a0b8c8;font-size:12px;">לא נמצאו שאלות בנתונים שנטענו. ודאי שהאפליקציה סיימה לטעון את הנתונים מהשרת (אם את במצב אופליין, הבדיקה תרוץ רק על מה שנשמר במטמון).</div>';
   }
   out.innerHTML = summary + html;
+}
+// Copy the remaining (answerless) questions to clipboard so they can be shared for answer drafting.
+function copyAuditList(btn){
+  var txt = window._auditCopyText || '';
+  if(!txt){ alert('אין מה להעתיק — הריצי קודם בדיקה.'); return; }
+  function done(){ if(btn){ var o=btn.textContent; btn.textContent='✓ הועתק!'; setTimeout(function(){btn.textContent=o;},1500); } }
+  if(navigator.clipboard && navigator.clipboard.writeText){
+    navigator.clipboard.writeText(txt).then(done, function(){ window.prompt('העתיקי ידנית (Ctrl+C):', txt); });
+  } else {
+    window.prompt('העתיקי ידנית (Ctrl+C):', txt);
+  }
 }
 
 // ===== Prepared answers (verified Palestinian colloquial) for one-time import =====
