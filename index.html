@@ -1002,6 +1002,26 @@ body.day-mode div[style*="color:#E8D9B8"]{color:#0e1b2e !important;}
 body.day-mode div[style*="color:#a0b8c8"]{color:#4a5a72 !important;}
 body.day-mode div[style*="color:#7a9ab5"]{color:#5a6b80 !important;}
 
+/* Keep the intro/landing splash readable in day mode (it has a fixed dark background) */
+body.day-mode #landing-overlay{background:#0E1B2E !important;}
+body.day-mode #landing-overlay h1,
+body.day-mode #landing-overlay [style*="color:#D4A24E"]{color:#D4A24E !important;}
+body.day-mode #landing-overlay [style*="color:#E8D9B8"]{color:#E8D9B8 !important;}
+body.day-mode #landing-overlay [style*="color:#a0b8c8"]{color:#a0b8c8 !important;}
+body.day-mode #landing-overlay [style*="color:#7a9ab5"]{color:#7a9ab5 !important;}
+body.day-mode #landing-overlay [style*="color:#5e7a92"]{color:#5e7a92 !important;}
+body.day-mode #landing-overlay [style*="color:#1D9E75"]{color:#1D9E75 !important;}
+
+/* Full-screen dark overlays/modals stay dark in both themes (keeps their light text readable) */
+body.day-mode .force-dark{background:#0E1B2E !important;}
+body.day-mode .force-dark [style*="background:#18293E"]{background:#18293E !important;}
+body.day-mode .force-dark [style*="background:#1F3147"]{background:#1F3147 !important;}
+body.day-mode .force-dark [style*="background:#0E1B2E"]{background:#0E1B2E !important;}
+body.day-mode .force-dark [style*="color:#E8D9B8"]{color:#E8D9B8 !important;}
+body.day-mode .force-dark [style*="color:#a0b8c8"]{color:#a0b8c8 !important;}
+body.day-mode .force-dark [style*="color:#7a9ab5"]{color:#7a9ab5 !important;}
+body.day-mode .force-dark [style*="color:#D4A24E"]{color:#D4A24E !important;}
+
 /* Home tab specific */
 body.day-mode #home-greeting{color:#0e1b2e !important;}
 body.day-mode #home-subtitle{color:#4a5a72 !important;}
@@ -2992,7 +3012,7 @@ function showLanding() {
 </div>
 
 <!-- Comprehension drill: understand the citizen's answer -->
-<div id="lc-modal" style="display:none;position:fixed;top:0;left:0;right:0;bottom:0;background:#0E1B2E;z-index:9998;direction:rtl;overflow-y:auto;">
+<div id="lc-modal" class="force-dark" style="display:none;position:fixed;top:0;left:0;right:0;bottom:0;background:#0E1B2E;z-index:9998;direction:rtl;overflow-y:auto;">
   <div style="max-width:460px;margin:0 auto;padding:18px 16px 40px;">
     <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;">
       <div style="color:#E8D9B8;font-size:17px;font-weight:800;">👂 הבנת תשובות</div>
@@ -3006,7 +3026,7 @@ function showLanding() {
 </div>
 
 <!-- Production drill: say the phrase in Arabic, then self-check -->
-<div id="pp-modal" style="display:none;position:fixed;top:0;left:0;right:0;bottom:0;background:#0E1B2E;z-index:9998;direction:rtl;overflow-y:auto;">
+<div id="pp-modal" class="force-dark" style="display:none;position:fixed;top:0;left:0;right:0;bottom:0;background:#0E1B2E;z-index:9998;direction:rtl;overflow-y:auto;">
   <div style="max-width:460px;margin:0 auto;padding:18px 16px 40px;">
     <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;">
       <div style="color:#E8D9B8;font-size:17px;font-weight:800;">🗣️ תרגול הפקה</div>
@@ -3020,7 +3040,7 @@ function showLanding() {
 </div>
 
 <!-- Hands-free listening mode -->
-<div id="lm-modal" style="display:none;position:fixed;top:0;left:0;right:0;bottom:0;background:#0E1B2E;z-index:9998;direction:rtl;overflow-y:auto;">
+<div id="lm-modal" class="force-dark" style="display:none;position:fixed;top:0;left:0;right:0;bottom:0;background:#0E1B2E;z-index:9998;direction:rtl;overflow-y:auto;">
   <div style="max-width:460px;margin:0 auto;padding:18px 16px 40px;display:flex;flex-direction:column;min-height:100vh;box-sizing:border-box;">
     <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;">
       <div style="color:#E8D9B8;font-size:17px;font-weight:800;">🎧 מצב האזנה</div>
@@ -3044,7 +3064,7 @@ function showLanding() {
 </div>
 
 <!-- Global search across all sections + dictionary -->
-<div id="gs-modal" style="display:none;position:fixed;top:0;left:0;right:0;bottom:0;background:#0E1B2E;z-index:9998;direction:rtl;overflow-y:auto;">
+<div id="gs-modal" class="force-dark" style="display:none;position:fixed;top:0;left:0;right:0;bottom:0;background:#0E1B2E;z-index:9998;direction:rtl;overflow-y:auto;">
   <div style="max-width:460px;margin:0 auto;padding:18px 16px 40px;">
     <div style="display:flex;align-items:center;gap:8px;margin-bottom:14px;">
       <div style="flex:1;background:#1F3147;border:1px solid #2A3D52;border-radius:12px;padding:10px;display:flex;align-items:center;gap:8px;">
@@ -3059,7 +3079,7 @@ function showLanding() {
 </div>
 
 <!-- Daily reminder settings -->
-<div id="reminder-modal" style="display:none;position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.6);z-index:9999;direction:rtl;" onclick="if(event.target===this)closeReminderSettings()">
+<div id="reminder-modal" class="force-dark" style="display:none;position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.6);z-index:9999;direction:rtl;" onclick="if(event.target===this)closeReminderSettings()">
   <div style="max-width:380px;margin:14vh auto 0;background:#18293E;border:1px solid #2e4558;border-radius:16px;padding:20px;">
     <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;">
       <div style="color:#E8D9B8;font-size:17px;font-weight:800;">🔔 תזכורת יומית</div>
@@ -3080,7 +3100,7 @@ function showLanding() {
 </div>
 
 <!-- Unit leaderboard -->
-<div id="lb-modal" style="display:none;position:fixed;top:0;left:0;right:0;bottom:0;background:#0E1B2E;z-index:9998;direction:rtl;overflow-y:auto;">
+<div id="lb-modal" class="force-dark" style="display:none;position:fixed;top:0;left:0;right:0;bottom:0;background:#0E1B2E;z-index:9998;direction:rtl;overflow-y:auto;">
   <div style="max-width:460px;margin:0 auto;padding:18px 16px 40px;">
     <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;">
       <div style="color:#E8D9B8;font-size:17px;font-weight:800;">🏆 לוח היחידה</div>
