@@ -2650,6 +2650,14 @@ function showLanding() {
       </div>
       <div style="color:#fff;font-size:20px;">◀</div>
     </div>
+    <div onclick="ppStart()" style="background:linear-gradient(135deg,#D4A24E 0%,#a85200 100%);border-radius:14px;padding:14px;margin-bottom:16px;cursor:pointer;box-shadow:0 4px 12px rgba(212,134,46,0.3);display:flex;align-items:center;gap:12px;">
+      <div style="font-size:26px;">🗣️</div>
+      <div style="flex:1;">
+        <div class="keep-white" style="color:#fff;font-size:15px;font-weight:800;">תרגול הפקה</div>
+        <div style="color:rgba(255,255,255,0.85);font-size:12px;">ראי בעברית — אמרי בערבית ובדקי את עצמך</div>
+      </div>
+      <div style="color:#fff;font-size:20px;">◀</div>
+    </div>
     <div id="scn-grid"></div>
   </div>
 
@@ -2980,6 +2988,20 @@ function showLanding() {
     <div id="lc-progress" style="height:6px;background:#1F3147;border-radius:3px;overflow:hidden;margin-bottom:4px;"><div id="lc-progress-bar" style="height:100%;width:0;background:#1D9E75;border-radius:3px;transition:width 0.3s;"></div></div>
     <div id="lc-score" style="text-align:center;color:#7a9ab5;font-size:11px;margin-bottom:14px;"></div>
     <div id="lc-body"></div>
+  </div>
+</div>
+
+<!-- Production drill: say the phrase in Arabic, then self-check -->
+<div id="pp-modal" style="display:none;position:fixed;top:0;left:0;right:0;bottom:0;background:#0E1B2E;z-index:9998;direction:rtl;overflow-y:auto;">
+  <div style="max-width:460px;margin:0 auto;padding:18px 16px 40px;">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;">
+      <div style="color:#E8D9B8;font-size:17px;font-weight:800;">🗣️ תרגול הפקה</div>
+      <button onclick="ppClose()" style="background:#2A3D52;border:none;color:#E8D9B8;width:34px;height:34px;border-radius:50%;font-size:18px;cursor:pointer;font-family:inherit;">✕</button>
+    </div>
+    <div style="color:#7a9ab5;font-size:12px;margin-bottom:12px;">ראי משפט בעברית, אמרי אותו בערבית בקול — ואז בדקי את עצמך מול ההקלטה.</div>
+    <div style="height:6px;background:#1F3147;border-radius:3px;overflow:hidden;margin-bottom:4px;"><div id="pp-progress-bar" style="height:100%;width:0;background:#D4A24E;border-radius:3px;transition:width 0.3s;"></div></div>
+    <div id="pp-score" style="text-align:center;color:#7a9ab5;font-size:11px;margin-bottom:14px;"></div>
+    <div id="pp-body"></div>
   </div>
 </div>
 
@@ -11129,6 +11151,76 @@ function lcFinish(){
     +'<button onclick="lcClose()" style="width:100%;padding:13px;background:#2A3D52;border:none;border-radius:10px;color:#E8D9B8;font-size:15px;cursor:pointer;font-family:inherit;">סיום</button></div>';
 }
 function lcClose(){ try{ if(window._lcAudio)window._lcAudio.pause(); }catch(e){} document.getElementById('lc-modal').style.display='none'; }
+
+// ===== Production drill: produce the Arabic from the Hebrew, then self-check =====
+function ppCollectPool(){
+  var pool=[];
+  [typeof DB!=='undefined'?DB:[], typeof DAILY!=='undefined'?DAILY:[], typeof NAVY!=='undefined'?NAVY:[], typeof HEART!=='undefined'?HEART:[]].forEach(function(arr){
+    (arr||[]).forEach(function(p){ if(p && p.he && p.ar) pool.push({he:p.he, trans:p.trans||'', ar:p.ar, audio:p.audio||''}); });
+  });
+  return pool;
+}
+function ppStart(){
+  var pool=ppCollectPool();
+  if(!pool.length){ alert('אין עדיין משפטים לתרגול הפקה.'); return; }
+  _lcShuffle(pool);
+  window._ppPool=pool; window._ppIdx=0; window._ppCorrect=0; window._ppTotal=Math.min(pool.length,10);
+  document.getElementById('pp-modal').style.display='block';
+  ppRender();
+}
+function ppRender(){
+  var idx=window._ppIdx, total=window._ppTotal;
+  var bar=document.getElementById('pp-progress-bar'); if(bar)bar.style.width=(idx/total*100)+'%';
+  document.getElementById('pp-score').textContent='שאלה '+(idx+1)+' מתוך '+total+' · '+window._ppCorrect+' ידעת';
+  if(idx>=total){ ppFinish(); return; }
+  var q=window._ppPool[idx];
+  var h='<div style="background:#18293E;border:1px solid #2A3D52;border-radius:14px;padding:18px 16px;margin-bottom:14px;text-align:center;">';
+  h+='<div style="color:#7a9ab5;font-size:11px;margin-bottom:8px;">איך אומרים בערבית?</div>';
+  h+='<div style="color:#E8D9B8;font-size:21px;font-weight:700;line-height:1.4;">'+q.he+'</div>';
+  h+='<div id="pp-reveal" style="margin-top:12px;"></div>';
+  h+='</div>';
+  h+='<button id="pp-show-btn" onclick="ppReveal()" style="width:100%;padding:14px;background:#D4A24E;border:none;border-radius:10px;color:#0E1B2E;font-size:15px;font-weight:800;cursor:pointer;font-family:inherit;">🔊 הצג תשובה והשמע</button>';
+  document.getElementById('pp-body').innerHTML=h;
+}
+function ppReveal(){
+  var q=window._ppPool[window._ppIdx];
+  var rev=document.getElementById('pp-reveal');
+  if(rev){
+    var r='<div style="border-top:1px solid #2A3D52;margin-top:8px;padding-top:10px;">';
+    if(q.trans)r+='<div style="color:#a0b8c8;font-size:14px;margin-bottom:4px;">'+q.trans+'</div>';
+    r+='<div style="color:#FFD700;font-size:22px;font-family:Georgia,serif;direction:rtl;">'+q.ar+'</div>';
+    r+='</div>';
+    rev.innerHTML=r;
+  }
+  ppPlay();
+  var body=document.getElementById('pp-body');
+  var showBtn=document.getElementById('pp-show-btn');
+  if(showBtn) showBtn.style.display='none';
+  var rate=document.createElement('div');
+  rate.style.cssText='display:flex;gap:8px;';
+  rate.innerHTML='<button onclick="ppRate(0)" style="flex:1;padding:13px;background:rgba(192,57,43,0.2);border:1px solid #c0392b;border-radius:10px;color:#E8D9B8;font-size:14px;font-weight:700;cursor:pointer;font-family:inherit;">✗ עוד לא</button>'
+    +'<button onclick="ppPlay()" style="padding:13px 16px;background:rgba(212,162,78,0.2);border:1px solid #D4A24E;border-radius:10px;color:#E8D9B8;font-size:14px;cursor:pointer;font-family:inherit;">🔊</button>'
+    +'<button onclick="ppRate(1)" style="flex:1;padding:13px;background:rgba(29,158,117,0.2);border:1px solid #1D9E75;border-radius:10px;color:#E8D9B8;font-size:14px;font-weight:700;cursor:pointer;font-family:inherit;">✓ ידעתי</button>';
+  body.appendChild(rate);
+}
+function ppPlay(){
+  var q=window._ppPool[window._ppIdx]; if(!q||!q.audio)return;
+  try{ if(window._ppAudio)window._ppAudio.pause(); window._ppAudio=new Audio(q.audio); window._ppAudio.play().catch(function(){}); }catch(e){}
+}
+function ppRate(correct){ if(correct)window._ppCorrect++; window._ppIdx++; ppRender(); }
+function ppFinish(){
+  var bar=document.getElementById('pp-progress-bar'); if(bar)bar.style.width='100%';
+  document.getElementById('pp-score').textContent='';
+  var pct=Math.round(window._ppCorrect/window._ppTotal*100);
+  var msg=pct>=80?'שליטה יפה! 🎯':(pct>=50?'ממשיכים להתאמן 💪':'שווה לחזור על ההקלטות 🎧');
+  document.getElementById('pp-body').innerHTML='<div style="text-align:center;padding:30px 10px;">'
+    +'<div style="font-size:46px;margin-bottom:10px;">'+(pct>=80?'🏆':'📊')+'</div>'
+    +'<div style="color:#E8D9B8;font-size:20px;font-weight:800;margin-bottom:6px;">'+window._ppCorrect+' / '+window._ppTotal+' ידעת</div>'
+    +'<div style="color:#7a9ab5;font-size:14px;margin-bottom:20px;">'+msg+'</div>'
+    +'<button onclick="ppStart()" style="width:100%;padding:13px;background:#D4A24E;border:none;border-radius:10px;color:#0E1B2E;font-size:15px;font-weight:700;cursor:pointer;font-family:inherit;margin-bottom:8px;">🔁 סבב נוסף</button>'
+    +'<button onclick="ppClose()" style="width:100%;padding:13px;background:#2A3D52;border:none;border-radius:10px;color:#E8D9B8;font-size:15px;cursor:pointer;font-family:inherit;">סיום</button></div>';
+}
+function ppClose(){ try{ if(window._ppAudio)window._ppAudio.pause(); }catch(e){} document.getElementById('pp-modal').style.display='none'; }
 
 // ===== Prepared answers (verified Palestinian colloquial) for one-time import =====
 // Each entry: q = Hebrew question text (string or array of candidates), responses = [{he,trans,ar}]
