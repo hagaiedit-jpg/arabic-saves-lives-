@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="512" height="512" viewBox="0 0 512 512">
+  <rect width="512" height="512" rx="96" fill="#0E1B2E"/>
+  <rect x="28" y="28" width="456" height="456" rx="76" fill="#18293E" stroke="#D4A24E" stroke-width="6"/>
+  <!-- speech bubble -->
+  <path d="M136 150 h240 a36 36 0 0 1 36 36 v120 a36 36 0 0 1 -36 36 H236 l-70 64 v-64 h-30 a36 36 0 0 1 -36 -36 V186 a36 36 0 0 1 36 -36 z" fill="#D4A24E"/>
+  <!-- pulse / heartbeat line = "saves lives" -->
+  <path d="M156 252 h44 l22 -44 28 96 24 -64 16 32 h54" fill="none" stroke="#0E1B2E" stroke-width="14" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>

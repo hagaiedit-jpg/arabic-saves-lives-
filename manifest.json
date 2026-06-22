@@ -1,0 +1,16 @@
+{
+  "name": "ערבית מצילה חיים",
+  "short_name": "ערבית מצילה",
+  "description": "ערבית מדוברת לתקשורת בשטח ולמניעת הסלמה — עובד גם בלי אינטרנט",
+  "lang": "he",
+  "dir": "rtl",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#0E1B2E",
+  "theme_color": "#18293E",
+  "icons": [
+    { "src": "./icon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any maskable" }
+  ]
+}
