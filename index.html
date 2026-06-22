@@ -1989,11 +1989,6 @@ function showLanding() {
     <!-- 🗓️ Weekly readiness ritual (shown once per week) -->
     <div id="home-weekly-ritual" style="display:none;margin-bottom:16px;"></div>
 
-    <!-- 🔥 BIG STREAK CARD (NEW!) -->
-    <div id="home-streak-card" style="display:none;margin-bottom:18px;border-radius:18px;padding:18px 16px;cursor:pointer;position:relative;overflow:hidden;" onclick="showStreakInfo()">
-      <!-- Content set by JS -->
-    </div>
-    
     <!-- Continue where you left off (small & compact) -->
     <div id="home-continue-card" style="display:none;background:linear-gradient(135deg,#D4A24E 0%,#b87325 100%);border:1px solid rgba(255,255,255,0.2);border-radius:12px;padding:10px 14px;margin-bottom:14px;cursor:pointer;box-shadow:0 2px 8px rgba(212,134,46,0.25);" onclick="homeContinue()">
       <div style="display:flex;align-items:center;justify-content:space-between;gap:10px;">
@@ -2067,14 +2062,12 @@ function showLanding() {
       </div>
     </div>
 
-    <!-- Saved phrases - quick access to personal review list -->
-    <div onclick="navToTab('fav')" style="background:linear-gradient(160deg,#1F3147 0%,#243a55 100%);border:1px solid rgba(212,162,78,0.2);border-radius:14px;padding:14px 16px;margin-bottom:14px;cursor:pointer;box-shadow:0 2px 8px rgba(0,0,0,0.2);display:flex;align-items:center;gap:12px;">
-      <div style="font-size:26px;line-height:1;flex-shrink:0;">⭐</div>
-      <div style="flex:1;min-width:0;">
-        <div style="color:#E8D9B8;font-size:13px;font-weight:800;margin-bottom:2px;">שמורים</div>
-        <div style="color:#7a9ab5;font-size:10.5px;line-height:1.4;">המילים ששמרת + ה־15 האחרונות — רשימת החזרה שלך</div>
-      </div>
-      <div style="color:#D4A24E;font-size:18px;flex-shrink:0;">◀</div>
+    <!-- Bottom row: saved + quick stats, side by side -->
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px;align-items:stretch;">
+    <div onclick="navToTab('fav')" style="background:linear-gradient(160deg,#1F3147 0%,#243a55 100%);border:1px solid rgba(212,162,78,0.2);border-radius:14px;padding:12px;cursor:pointer;box-shadow:0 2px 8px rgba(0,0,0,0.2);text-align:center;display:flex;flex-direction:column;justify-content:center;">
+      <div style="font-size:24px;line-height:1;margin-bottom:6px;">⭐</div>
+      <div style="color:#E8D9B8;font-size:13px;font-weight:800;margin-bottom:2px;">שמורים</div>
+      <div style="color:#7a9ab5;font-size:10px;line-height:1.4;">המילים ששמרת + אחרונות</div>
     </div>
 
 
@@ -2087,38 +2080,39 @@ function showLanding() {
 
     
     <!-- 4 Stats Cubes - shown only when NO streak (helps new users) -->
-    <div id="home-stats-cubes" onclick="navToTab('progress')" style="display:none;background:linear-gradient(135deg,#18293E 0%,#1F3147 100%);border:1px solid rgba(212,162,78,0.2);border-radius:12px;padding:12px;margin-bottom:12px;cursor:pointer;">
-      <div style="display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:6px;">
+    <div id="home-stats-cubes" onclick="navToTab('progress')" style="display:none;background:linear-gradient(135deg,#18293E 0%,#1F3147 100%);border:1px solid rgba(212,162,78,0.2);border-radius:14px;padding:10px;cursor:pointer;">
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;">
         
         <!-- Cube 1: Streak -->
-        <div style="text-align:center;padding:4px 2px;border-left:1px solid rgba(255,255,255,0.08);">
+        <div style="text-align:center;padding:6px 2px;">
           <div style="font-size:20px;line-height:1;margin-bottom:3px;">🔥</div>
           <div id="home-cube-streak-num" style="color:#D4A24E;font-size:18px;font-weight:900;line-height:1;">0</div>
           <div style="color:#a0b8c8;font-size:9px;font-weight:600;margin-top:2px;">רצף</div>
         </div>
         
         <!-- Cube 2: Daily Goal -->
-        <div style="text-align:center;padding:4px 2px;border-left:1px solid rgba(255,255,255,0.08);">
+        <div style="text-align:center;padding:6px 2px;">
           <div style="font-size:20px;line-height:1;margin-bottom:3px;">🎯</div>
           <div id="home-cube-goal-num" style="color:#1D9E75;font-size:16px;font-weight:900;line-height:1;">0/5</div>
           <div style="color:#a0b8c8;font-size:9px;font-weight:600;margin-top:2px;">יעד היום</div>
         </div>
         
         <!-- Cube 3: Accuracy -->
-        <div style="text-align:center;padding:4px 2px;border-left:1px solid rgba(255,255,255,0.08);">
+        <div style="text-align:center;padding:6px 2px;">
           <div style="font-size:20px;line-height:1;margin-bottom:3px;">⚡</div>
           <div id="home-cube-score-num" style="color:#D4A24E;font-size:18px;font-weight:900;line-height:1;">—</div>
           <div style="color:#a0b8c8;font-size:9px;font-weight:600;margin-top:2px;">דיוק</div>
         </div>
         
         <!-- Cube 4: Total Learned -->
-        <div style="text-align:center;padding:4px 2px;">
+        <div style="text-align:center;padding:6px 2px;">
           <div style="font-size:20px;line-height:1;margin-bottom:3px;">📚</div>
           <div id="home-cube-total-num" style="color:#D4A24E;font-size:18px;font-weight:900;line-height:1;">0</div>
           <div style="color:#a0b8c8;font-size:9px;font-weight:600;margin-top:2px;">סה"כ</div>
         </div>
       </div>
-      <div style="text-align:center;margin-top:10px;padding-top:8px;border-top:1px solid rgba(255,255,255,0.08);color:#7a9ab5;font-size:10px;font-weight:600;">לחצו לסטטוס ההתקדמות המלא ◀</div>
+      <div style="text-align:center;margin-top:8px;padding-top:6px;border-top:1px solid rgba(255,255,255,0.08);color:#7a9ab5;font-size:9.5px;font-weight:600;">סטטוס מלא ◀</div>
+    </div>
     </div>
 
     <!-- Phrase of the Day -->
