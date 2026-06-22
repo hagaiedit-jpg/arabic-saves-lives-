@@ -2013,10 +2013,10 @@ function showLanding() {
       <div style="color:#D4A24E;font-size:13px;font-weight:700;letter-spacing:0.5px;margin-bottom:10px;display:flex;align-items:center;gap:6px;">🧭 מה מעניין אותך היום?</div>
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
 
-        <div onclick="startFlashcards()" style="background:linear-gradient(160deg,#1F3147 0%,#243a55 100%);border:1px solid rgba(212,162,78,0.2);border-radius:14px;padding:14px 12px;cursor:pointer;box-shadow:0 2px 8px rgba(0,0,0,0.2);">
-          <div style="font-size:26px;margin-bottom:6px;line-height:1;">⏱️</div>
-          <div style="color:#E8D9B8;font-size:13px;font-weight:800;margin-bottom:2px;">יש לי כמה דקות</div>
-          <div style="color:#7a9ab5;font-size:10.5px;line-height:1.4;">תרגול מהיר וחזרה</div>
+        <div onclick="navToTab('train')" style="background:linear-gradient(160deg,#1F3147 0%,#243a55 100%);border:1px solid rgba(212,162,78,0.2);border-radius:14px;padding:14px 12px;cursor:pointer;box-shadow:0 2px 8px rgba(0,0,0,0.2);">
+          <div style="font-size:26px;margin-bottom:6px;line-height:1;">🎯</div>
+          <div style="color:#E8D9B8;font-size:13px;font-weight:800;margin-bottom:2px;">אימון ותרגול</div>
+          <div style="color:#7a9ab5;font-size:10.5px;line-height:1.4;">כל התרגילים במקום אחד</div>
         </div>
 
         <div onclick="startFieldMode()" style="background:linear-gradient(160deg,#1F3147 0%,#243a55 100%);border:1px solid rgba(212,162,78,0.2);border-radius:14px;padding:14px 12px;cursor:pointer;box-shadow:0 2px 8px rgba(0,0,0,0.2);">
@@ -2656,6 +2656,63 @@ function showLanding() {
 <!-- NEW TAB -->
 <div class="scr" id="tab-nwf"><button onclick="navToTab('home')" style="background:transparent;border:none;color:#a0b8c8;font-size:15px;cursor:pointer;font-family:inherit;padding:10px 14px 0;margin:0;display:flex;align-items:center;gap:6px;">◀ חזרה לבית</button><div class="nf" id="nflist"></div></div>
 
+<!-- TRAINING HUB (all practice drills in one place) -->
+<div class="scr" id="tab-train">
+  <div style="padding:18px 16px 16px;">
+    <button onclick="navToTab('home')" style="background:transparent;border:none;color:#a0b8c8;font-size:15px;cursor:pointer;font-family:inherit;padding:4px 0;margin-bottom:10px;display:flex;align-items:center;gap:6px;">◀ חזרה לבית</button>
+    <div style="text-align:center;margin-bottom:22px;">
+      <div style="font-size:28px;margin-bottom:6px;">🎯</div>
+      <div style="color:#E8D9B8;font-size:18px;font-weight:800;letter-spacing:0.5px;margin-bottom:4px;">אימון ותרגול</div>
+      <div style="color:#7a9ab5;font-size:12px;">בחר תרגיל — כל הכלים לחדד את הערבית במקום אחד</div>
+    </div>
+
+    <div onclick="navToTab('flash')" style="background:linear-gradient(135deg,#2e6da8 0%,#16335c 100%);border-radius:14px;padding:14px;margin-bottom:14px;cursor:pointer;box-shadow:0 4px 12px rgba(46,109,168,0.3);display:flex;align-items:center;gap:12px;">
+      <div style="font-size:26px;">⏱️</div>
+      <div style="flex:1;">
+        <div class="keep-white" style="color:#fff;font-size:15px;font-weight:800;">חזרה ובחינה</div>
+        <div style="color:rgba(255,255,255,0.85);font-size:12px;">פלאשקארדס וחזרה מרווחת על מה שלמדת</div>
+      </div>
+      <div style="color:#fff;font-size:20px;">◀</div>
+    </div>
+
+    <div onclick="lcStart()" style="background:linear-gradient(135deg,#1D9E75 0%,#0e5a3f 100%);border-radius:14px;padding:14px;margin-bottom:14px;cursor:pointer;box-shadow:0 4px 12px rgba(29,158,117,0.3);display:flex;align-items:center;gap:12px;">
+      <div style="font-size:26px;">👂</div>
+      <div style="flex:1;">
+        <div class="keep-white" style="color:#fff;font-size:15px;font-weight:800;">הבנת תשובות</div>
+        <div style="color:rgba(255,255,255,0.85);font-size:12px;">האזן לתשובת האזרח ובחר את המשמעות — הכי חשוב בשטח</div>
+      </div>
+      <div style="color:#fff;font-size:20px;">◀</div>
+    </div>
+
+    <div onclick="ppStart()" style="background:linear-gradient(135deg,#D4A24E 0%,#a85200 100%);border-radius:14px;padding:14px;margin-bottom:14px;cursor:pointer;box-shadow:0 4px 12px rgba(212,134,46,0.3);display:flex;align-items:center;gap:12px;">
+      <div style="font-size:26px;">🗣️</div>
+      <div style="flex:1;">
+        <div class="keep-white" style="color:#fff;font-size:15px;font-weight:800;">תרגול הפקה</div>
+        <div style="color:rgba(255,255,255,0.85);font-size:12px;">ראה בעברית — אמור בערבית ובדוק את עצמך</div>
+      </div>
+      <div style="color:#fff;font-size:20px;">◀</div>
+    </div>
+
+    <div onclick="lmStart()" style="background:linear-gradient(135deg,#6a4ca8 0%,#3a2a6b 100%);border-radius:14px;padding:14px;margin-bottom:14px;cursor:pointer;box-shadow:0 4px 12px rgba(106,76,168,0.3);display:flex;align-items:center;gap:12px;">
+      <div style="font-size:26px;">🎧</div>
+      <div style="flex:1;">
+        <div class="keep-white" style="color:#fff;font-size:15px;font-weight:800;">מצב האזנה</div>
+        <div style="color:rgba(255,255,255,0.85);font-size:12px;">האזנה רציפה ללא ידיים — לנהיגה ולשמירה</div>
+      </div>
+      <div style="color:#fff;font-size:20px;">◀</div>
+    </div>
+
+    <div onclick="startFieldMode()" style="background:linear-gradient(135deg,#c0392b 0%,#7a2018 100%);border-radius:14px;padding:14px;margin-bottom:6px;cursor:pointer;box-shadow:0 4px 12px rgba(192,57,43,0.3);display:flex;align-items:center;gap:12px;">
+      <div style="font-size:26px;">🎯</div>
+      <div style="flex:1;">
+        <div class="keep-white" style="color:#fff;font-size:15px;font-weight:800;">מצב לחץ אמיתי</div>
+        <div style="color:rgba(255,255,255,0.85);font-size:12px;">סימולציית שטח על זמן — לבדוק את עצמך בלחץ</div>
+      </div>
+      <div style="color:#fff;font-size:20px;">◀</div>
+    </div>
+  </div>
+</div>
+
 <!-- ADMIN TAB -->
 <!-- Scenarios tab (guided dialogues - Babbel style) -->
 <div class="scr" id="tab-scn">
@@ -2672,27 +2729,11 @@ function showLanding() {
       <input id="scn-search" placeholder="חפש תרחיש: מחסום, בית, פצוע..." oninput="scnSearch()" style="flex:1;background:transparent;border:none;color:#E8D9B8;font-size:15px;font-family:inherit;outline:none;direction:rtl;text-align:right;"/>
       <button onclick="document.getElementById('scn-search').value='';scnSearch()" style="background:rgba(255,255,255,0.1);border:none;color:#E8D9B8;width:28px;height:28px;border-radius:50%;cursor:pointer;font-size:16px;">×</button>
     </div>
-    <div onclick="lcStart()" style="background:linear-gradient(135deg,#1D9E75 0%,#0e5a3f 100%);border-radius:14px;padding:14px;margin-bottom:16px;cursor:pointer;box-shadow:0 4px 12px rgba(29,158,117,0.3);display:flex;align-items:center;gap:12px;">
-      <div style="font-size:26px;">👂</div>
+    <div onclick="navToTab('train')" style="background:linear-gradient(135deg,#D4A24E 0%,#a85200 100%);border-radius:14px;padding:14px;margin-bottom:16px;cursor:pointer;box-shadow:0 4px 12px rgba(212,134,46,0.3);display:flex;align-items:center;gap:12px;">
+      <div style="font-size:26px;">🎯</div>
       <div style="flex:1;">
-        <div class="keep-white" style="color:#fff;font-size:15px;font-weight:800;">תרגול הבנת תשובות</div>
-        <div style="color:rgba(255,255,255,0.85);font-size:12px;">האזן לתשובת האזרח ובחר את המשמעות — הכי חשוב בשטח</div>
-      </div>
-      <div style="color:#fff;font-size:20px;">◀</div>
-    </div>
-    <div onclick="ppStart()" style="background:linear-gradient(135deg,#D4A24E 0%,#a85200 100%);border-radius:14px;padding:14px;margin-bottom:16px;cursor:pointer;box-shadow:0 4px 12px rgba(212,134,46,0.3);display:flex;align-items:center;gap:12px;">
-      <div style="font-size:26px;">🗣️</div>
-      <div style="flex:1;">
-        <div class="keep-white" style="color:#fff;font-size:15px;font-weight:800;">תרגול הפקה</div>
-        <div style="color:rgba(255,255,255,0.85);font-size:12px;">ראה בעברית — אמור בערבית ובדוק את עצמך</div>
-      </div>
-      <div style="color:#fff;font-size:20px;">◀</div>
-    </div>
-    <div onclick="lmStart()" style="background:linear-gradient(135deg,#3a5a78 0%,#243a55 100%);border-radius:14px;padding:14px;margin-bottom:16px;cursor:pointer;box-shadow:0 4px 12px rgba(0,0,0,0.25);display:flex;align-items:center;gap:12px;">
-      <div style="font-size:26px;">🎧</div>
-      <div style="flex:1;">
-        <div class="keep-white" style="color:#fff;font-size:15px;font-weight:800;">מצב האזנה</div>
-        <div style="color:rgba(255,255,255,0.85);font-size:12px;">האזנה רציפה ללא ידיים — לנהיגה ולשמירה</div>
+        <div class="keep-white" style="color:#fff;font-size:15px;font-weight:800;">אימון ותרגול</div>
+        <div style="color:rgba(255,255,255,0.85);font-size:12px;">הבנת תשובות, הפקה, האזנה וחזרה — הכל במקום אחד</div>
       </div>
       <div style="color:#fff;font-size:20px;">◀</div>
     </div>
@@ -13319,6 +13360,10 @@ try { renderHome(); } catch(_){}
 <div id="more-menu" style="display:none;position:fixed;bottom:80px;left:50%;transform:translateX(-50%);width:calc(100% - 16px);max-width:464px;box-sizing:border-box;background:#18293E;border:1px solid #2e4558;border-radius:14px;padding:12px;z-index:99;box-shadow:0 -4px 20px rgba(0,0,0,0.6);direction:rtl;">
   <div style="text-align:center;color:#D4A24E;font-size:12px;font-weight:700;letter-spacing:1px;margin-bottom:10px;">תפריט נוסף</div>
   <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;">
+    <div onclick="document.getElementById('more-menu').style.display='none';navToTab('train')" style="background:linear-gradient(135deg,rgba(212,162,78,0.22),rgba(212,162,78,0.06));border:1px solid rgba(212,162,78,0.45);border-radius:10px;padding:14px 6px;text-align:center;cursor:pointer;">
+      <div style="font-size:22px;margin-bottom:4px;">🎯</div>
+      <div style="color:#D4A24E;font-size:11px;font-weight:700;">תרגול</div>
+    </div>
     <div onclick="navToTab('sem')" style="background:#1F3147;border-radius:10px;padding:14px 6px;text-align:center;cursor:pointer;">
       <div style="font-size:22px;margin-bottom:4px;">🧠</div>
       <div style="color:#E8D9B8;font-size:11px;font-weight:600;">סמנטי</div>
