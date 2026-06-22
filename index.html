@@ -1858,6 +1858,9 @@ body, body *, .scr, .scr *, button, input, textarea, select {
       <div style="text-align:center;margin-top:18px;color:#5e7a92;font-size:12px;letter-spacing:0.3px;">
         ערכה שנבנתה מסיטואציות אמיתיות בשטח — לא תיאוריה
       </div>
+      <div style="text-align:center;margin-top:10px;color:#5e7a92;font-size:11px;letter-spacing:0.2px;">
+        הניסוח בלשון זכר מטעמי נוחות, ומכוון לכל המשתמשים והמשתמשות כאחד
+      </div>
       
       <!-- Contact link -->
       <div style="text-align:center;margin-top:24px;">
@@ -2673,7 +2676,7 @@ function showLanding() {
       <div style="font-size:26px;">👂</div>
       <div style="flex:1;">
         <div class="keep-white" style="color:#fff;font-size:15px;font-weight:800;">תרגול הבנת תשובות</div>
-        <div style="color:rgba(255,255,255,0.85);font-size:12px;">האזיני לתשובת האזרח ובחרי את המשמעות — הכי חשוב בשטח</div>
+        <div style="color:rgba(255,255,255,0.85);font-size:12px;">האזן לתשובת האזרח ובחר את המשמעות — הכי חשוב בשטח</div>
       </div>
       <div style="color:#fff;font-size:20px;">◀</div>
     </div>
@@ -2681,7 +2684,7 @@ function showLanding() {
       <div style="font-size:26px;">🗣️</div>
       <div style="flex:1;">
         <div class="keep-white" style="color:#fff;font-size:15px;font-weight:800;">תרגול הפקה</div>
-        <div style="color:rgba(255,255,255,0.85);font-size:12px;">ראי בעברית — אמרי בערבית ובדקי את עצמך</div>
+        <div style="color:rgba(255,255,255,0.85);font-size:12px;">ראה בעברית — אמור בערבית ובדוק את עצמך</div>
       </div>
       <div style="color:#fff;font-size:20px;">◀</div>
     </div>
@@ -3019,7 +3022,7 @@ function showLanding() {
       <div style="color:#E8D9B8;font-size:17px;font-weight:800;">👂 הבנת תשובות</div>
       <button onclick="lcClose()" style="background:#2A3D52;border:none;color:#E8D9B8;width:34px;height:34px;border-radius:50%;font-size:18px;cursor:pointer;font-family:inherit;">✕</button>
     </div>
-    <div style="color:#7a9ab5;font-size:12px;margin-bottom:12px;">האזיני לתשובת האזרח בערבית — ובחרי את המשמעות הנכונה.</div>
+    <div style="color:#7a9ab5;font-size:12px;margin-bottom:12px;">האזן לתשובת האזרח בערבית — ובחר את המשמעות הנכונה.</div>
     <div id="lc-progress" style="height:6px;background:#1F3147;border-radius:3px;overflow:hidden;margin-bottom:4px;"><div id="lc-progress-bar" style="height:100%;width:0;background:#1D9E75;border-radius:3px;transition:width 0.3s;"></div></div>
     <div id="lc-score" style="text-align:center;color:#7a9ab5;font-size:11px;margin-bottom:14px;"></div>
     <div id="lc-body"></div>
@@ -3033,7 +3036,7 @@ function showLanding() {
       <div style="color:#E8D9B8;font-size:17px;font-weight:800;">🗣️ תרגול הפקה</div>
       <button onclick="ppClose()" style="background:#2A3D52;border:none;color:#E8D9B8;width:34px;height:34px;border-radius:50%;font-size:18px;cursor:pointer;font-family:inherit;">✕</button>
     </div>
-    <div style="color:#7a9ab5;font-size:12px;margin-bottom:12px;">ראי משפט בעברית, אמרי אותו בערבית בקול — ואז בדקי את עצמך מול ההקלטה.</div>
+    <div style="color:#7a9ab5;font-size:12px;margin-bottom:12px;">ראה משפט בעברית, אמור אותו בערבית בקול — ואז בדוק את עצמך מול ההקלטה.</div>
     <div style="height:6px;background:#1F3147;border-radius:3px;overflow:hidden;margin-bottom:4px;"><div id="pp-progress-bar" style="height:100%;width:0;background:#D4A24E;border-radius:3px;transition:width 0.3s;"></div></div>
     <div id="pp-score" style="text-align:center;color:#7a9ab5;font-size:11px;margin-bottom:14px;"></div>
     <div id="pp-body"></div>
@@ -3769,7 +3772,7 @@ function renderWeeklyRitual(){
     h += '<div style="flex:1;background:rgba(212,162,78,0.1);border:1px solid rgba(212,162,78,0.25);border-radius:9px;padding:7px;text-align:center;"><div style="color:#D4A24E;font-size:17px;font-weight:800;line-height:1;">' + total + '</div><div style="color:#a0b8c8;font-size:9px;margin-top:2px;">תרגולים השבוע</div></div>';
     h += '<div style="flex:1;background:rgba(212,162,78,0.1);border:1px solid rgba(212,162,78,0.25);border-radius:9px;padding:7px;text-align:center;"><div style="color:#D4A24E;font-size:17px;font-weight:800;line-height:1;">' + streak + '</div><div style="color:#a0b8c8;font-size:9px;margin-top:2px;">רצף ימים</div></div>';
     h += '</div>';
-    var sub = due > 0 ? (due + ' משפטים מחכים לחזרה — בואי נרענן אותם') : 'בואי נחזק את מה שלמדת השבוע';
+    var sub = due > 0 ? (due + ' משפטים מחכים לחזרה — בוא נרענן אותם') : 'בוא נחזק את מה שלמדת השבוע';
     h += '<div style="color:#E8D9B8;font-size:12px;margin-bottom:10px;line-height:1.4;">' + sub + '</div>';
     h += '<button onclick="startWeeklyReview()" style="width:100%;background:linear-gradient(135deg,#1D9E75 0%,#0e5a3f 100%);border:none;color:#fff;border-radius:10px;padding:10px;font-size:13.5px;font-weight:700;cursor:pointer;font-family:inherit;box-shadow:0 3px 10px rgba(29,158,117,0.3);">🎯 התחל חזרה שבועית</button>';
     h += '</div>';
@@ -11162,7 +11165,7 @@ function lcCollectPool(){
 }
 function lcStart(){
   var pool=lcCollectPool();
-  if(pool.length<4){ alert('צריך לפחות 4 תשובות עם ערבית ומשמעות כדי לתרגל. הוסיפי/ייבאי תשובות קודם.'); return; }
+  if(pool.length<4){ alert('צריך לפחות 4 תשובות עם ערבית ומשמעות כדי לתרגל. הוסף/ייבא תשובות קודם.'); return; }
   _lcShuffle(pool);
   window._lcPool=pool; window._lcAll=pool.slice();
   window._lcIdx=0; window._lcCorrect=0; window._lcTotal=Math.min(pool.length,10);
@@ -11181,7 +11184,7 @@ function lcRender(){
   _lcShuffle(opts);
   var html='<div style="background:#18293E;border:1px solid #2A3D52;border-radius:14px;padding:16px;margin-bottom:14px;text-align:center;">';
   if(q.q) html+='<div style="color:#7a9ab5;font-size:11px;margin-bottom:8px;">השאלה ששאלת: '+q.q+'</div>';
-  html+='<div style="color:#FFD700;font-size:24px;font-family:Georgia,serif;direction:rtl;margin-bottom:6px;">'+q.ar+'</div>';
+  html+='<div style="color:#FFD700;font-size:22px;font-weight:700;direction:rtl;margin-bottom:6px;">'+(q.trans||q.ar)+'</div>';
   if(q.audio) html+='<button onclick="lcPlay()" style="background:rgba(212,162,78,0.2);border:1px solid #D4A24E;color:#E8D9B8;padding:8px 18px;border-radius:10px;font-size:14px;cursor:pointer;font-family:inherit;margin-top:4px;">🔊 השמע שוב</button>';
   html+='<div id="lc-reveal" style="color:#7a9ab5;font-size:13px;margin-top:8px;min-height:18px;"></div></div>';
   html+='<div id="lc-opts" style="display:flex;flex-direction:column;gap:8px;">';
@@ -11205,7 +11208,7 @@ function lcAnswer(btn,correct){
     else if(b===btn){ b.style.background='rgba(192,57,43,0.25)'; b.style.borderColor='#c0392b'; }
   });
   if(correct) window._lcCorrect++;
-  var rev=document.getElementById('lc-reveal'); if(rev) rev.innerHTML=(q.trans?('<b>'+q.trans+'</b> — '):'')+q.he+(correct?' ✓':'');
+  var rev=document.getElementById('lc-reveal'); if(rev) rev.innerHTML='<b style="color:#E8D9B8;">'+q.he+'</b>'+(correct?' ✓':'');
   var nb=document.createElement('button');
   nb.textContent='הבא ›'; nb.onclick=lcNext;
   nb.style.cssText='width:100%;margin-top:12px;padding:13px;background:#D4A24E;border:none;border-radius:10px;color:#0E1B2E;font-size:15px;font-weight:800;cursor:pointer;font-family:inherit;';
@@ -11393,7 +11396,7 @@ function globalSearch(){
   var out = document.getElementById('gs-results'); if(!out) return;
   var inp = document.getElementById('gs-input');
   var q = (inp && inp.value || '').trim().toLowerCase();
-  if(!q){ out.innerHTML='<div style="text-align:center;color:#7a9ab5;font-size:13px;padding:30px 10px;">הקלידי מילה בעברית, ערבית או תעתיק כדי לחפש בכל האפליקציה.</div>'; return; }
+  if(!q){ out.innerHTML='<div style="text-align:center;color:#7a9ab5;font-size:13px;padding:30px 10px;">הקלד מילה בעברית, ערבית או תעתיק כדי לחפש בכל האפליקציה.</div>'; return; }
   var results = [];
   _gsSections().forEach(function(s){
     (s.arr||[]).forEach(function(p){
@@ -13248,22 +13251,40 @@ try { renderHome(); } catch(_){}
 <div id="helpPopup" class="welcome-bg" style="display:none;" onclick="if(event.target===this)hideHelp()">
   <div class="help-pop">
     <div class="help-header">
-      <div class="help-h-title">❓ עזרה ומקרא איקונים</div>
-      <div class="help-h-sub">מדריך קצר לאיקונים באפליקציה</div>
+      <div class="help-h-title">❓ עזרה ומקרא</div>
+      <div class="help-h-sub">מה יש באפליקציה ואיך להשתמש</div>
     </div>
     <div class="help-body">
       <div class="help-section">
-        <div class="help-title">איקונים ראשיים</div>
-        <div class="help-row"><span class="help-icon">📖</span><div class="help-txt"><strong>מילון</strong><span class="help-desc">חיפוש משפטים לפי מילה</span></div></div>
-        <div class="help-row"><span class="help-icon">🌙/☀️</span><div class="help-txt"><strong>מצב יום/לילה</strong><span class="help-desc">החלפת מצב תצוגה</span></div></div>
-        <div class="help-row"><span class="help-icon">👤</span><div class="help-txt"><strong>תפקיד</strong><span class="help-desc">החלף את התפקיד שלך</span></div></div>
-        <div class="help-row"><span class="help-icon">❓</span><div class="help-txt"><strong>עזרה</strong><span class="help-desc">המסך הזה</span></div></div>
+        <div class="help-title">ניווט ראשי (סרגל תחתון)</div>
+        <div class="help-row"><span class="help-icon">🏠</span><div class="help-txt"><strong>בית</strong><span class="help-desc">מסך הבית — חיפוש, התקדמות וכניסה מהירה</span></div></div>
+        <div class="help-row"><span class="help-icon">🚨</span><div class="help-txt"><strong>חירום</strong><span class="help-desc">משפטים קריטיים לפי קטגוריה + חיפוש מהיר</span></div></div>
+        <div class="help-row"><span class="help-icon">💬</span><div class="help-txt"><strong>תרחישים</strong><span class="help-desc">שיחות מהשטח + תרגילי התרגול</span></div></div>
+        <div class="help-row"><span class="help-icon">📚</span><div class="help-txt"><strong>מבצעי</strong><span class="help-desc">הספרייה המלאה</span></div></div>
+        <div class="help-row"><span class="help-icon">⋯</span><div class="help-txt"><strong>עוד</strong><span class="help-desc">יומיומי, פותחים לב, סמנטי, מאמרים ועוד</span></div></div>
       </div>
       <div class="help-section">
-        <div class="help-title">סטטוס משפטים</div>
+        <div class="help-title">תרגול ולמידה (במסך תרחישים)</div>
+        <div class="help-row"><span class="help-icon">🎯</span><div class="help-txt"><strong>חזרה חכמה</strong><span class="help-desc">שאלות לפי מה שצריך לחזור עליו (חזרה מרווחת)</span></div></div>
+        <div class="help-row"><span class="help-icon">👂</span><div class="help-txt"><strong>הבנת תשובות</strong><span class="help-desc">מאזינים לתשובת האזרח ובוחרים את המשמעות</span></div></div>
+        <div class="help-row"><span class="help-icon">🗣️</span><div class="help-txt"><strong>תרגול הפקה</strong><span class="help-desc">אומרים בערבית מהעברית ובודקים מול ההקלטה</span></div></div>
+        <div class="help-row"><span class="help-icon">🎧</span><div class="help-txt"><strong>מצב האזנה</strong><span class="help-desc">האזנה רציפה ללא ידיים — לנהיגה ולשמירה</span></div></div>
+      </div>
+      <div class="help-section">
+        <div class="help-title">כלים שימושיים</div>
+        <div class="help-row"><span class="help-icon">🔍</span><div class="help-txt"><strong>חיפוש בכל האפליקציה</strong><span class="help-desc">בראש מסך הבית — מוצא כל משפט בכל מדור</span></div></div>
+        <div class="help-row"><span class="help-icon">🖨️</span><div class="help-txt"><strong>דף כיס להדפסה</strong><span class="help-desc">במסך חירום — גיבוי נייר/PDF לשטח</span></div></div>
+        <div class="help-row"><span class="help-icon">🔔</span><div class="help-txt"><strong>תזכורת יומית</strong><span class="help-desc">בתפריט ☰ — תזכורת לתרגל בשעה שתבחר</span></div></div>
+        <div class="help-row"><span class="help-icon">📲</span><div class="help-txt"><strong>עובד אופליין</strong><span class="help-desc">אפשר להתקין למסך הבית ולהשתמש בלי קליטה</span></div></div>
+      </div>
+      <div class="help-section">
+        <div class="help-title">סימונים במשפט</div>
         <div class="help-row"><span class="help-icon">▶</span><div class="help-txt"><strong>השמעה</strong><span class="help-desc">לחיצה להשמעת ההקלטה</span></div></div>
-        <div class="help-row"><span class="help-icon">⭐</span><div class="help-txt"><strong>מועדפים</strong><span class="help-desc">משפטים ששמרת + 15 אחרונים</span></div></div>
-        <div class="help-row"><span class="help-icon">🚨</span><div class="help-txt"><strong>חירום</strong><span class="help-desc">4 קוביות סיטואציה למצבי שטח</span></div></div>
+        <div class="help-row"><span class="help-icon">⭐</span><div class="help-txt"><strong>שמורים</strong><span class="help-desc">משפטים ששמרת + ה־15 האחרונים</span></div></div>
+        <div class="help-row"><span class="help-icon">🔄/☀️/🌙</span><div class="help-txt"><strong>ערכת נושא</strong><span class="help-desc">אוטומטי (לפי שעה), יום או לילה — בתפריט ☰</span></div></div>
+      </div>
+      <div class="help-section">
+        <div class="help-desc" style="line-height:1.6;">ℹ️ <strong>לשון:</strong> מטעמי נוחות הניסוח באפליקציה בלשון זכר, אך מכוון לכל המשתמשים והמשתמשות כאחד.</div>
       </div>
     </div>
     <button class="help-close-btn" onclick="hideHelp()">✓ הבנתי, סגור</button>
