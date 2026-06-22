@@ -12004,28 +12004,29 @@ function sortPhrasesByScenario(phrases){
 }
 
 function _emergPhrasesForCat(emergCat){
+  // Auto-fill: include every phrase in the category (no manual ⭐ gating).
   var matches = DB.filter(function(p){
     if(!visibleToRole(p))return false;
     var pcat=(p.cat||'').trim();
-    var inCat=false;
     for(var i=0;i<emergCat.cats.length;i++){
-      if(pcat===emergCat.cats[i]||pcat.indexOf(emergCat.cats[i])!==-1){inCat=true;break;}
+      if(pcat===emergCat.cats[i]||pcat.indexOf(emergCat.cats[i])!==-1)return true;
     }
-    if(!inCat)return false;
-    if(emergCat.legacy)return true;
-    return isGoldPhrase(p);
+    return false;
   });
-  
-  // Sort by scenario order (stages in real-life encounter)
+
+  // Sort: gold phrases pinned to the top, then by real-encounter scenario stage
   matches.sort(function(a, b){
+    var ga = isGoldPhrase(a) ? 0 : 1;
+    var gb = isGoldPhrase(b) ? 0 : 1;
+    if (ga !== gb) return ga - gb;
     var oa = _getScenarioOrder(a, emergCat.key);
     var ob = _getScenarioOrder(b, emergCat.key);
     if (oa !== ob) return oa - ob;
     // Tiebreak: alphabetical by Hebrew
     return (a.he||'').localeCompare(b.he||'', 'he');
   });
-  
-  return matches.slice(0, 15);
+
+  return matches.slice(0, 30);
 }
 
 function rQK(){
@@ -12068,7 +12069,7 @@ function openEmergCat(key){
   
   var el=document.getElementById('emerg-items');
   if(!items.length){
-    el.innerHTML='<div class="empty">אין עדיין משפטים בקטגוריה זו.<br>סמני משפטים ב⭐ כדי שיופיעו כאן.</div>';
+    el.innerHTML='<div class="empty">אין עדיין משפטים בקטגוריה זו.<br>הוסיפי משפטים בקטגוריה המתאימה בספרייה והם יופיעו כאן אוטומטית.</div>';
     return;
   }
   
@@ -12078,7 +12079,7 @@ function openEmergCat(key){
     if(idx<0)idx=DB.indexOf(p);
     h+='<div class="emerg-card">';
     h+='<div class="emerg-card-content" onclick="opP('+idx+')">';
-    h+='<div class="emerg-card-he">⭐ '+p.he+'</div>';
+    h+='<div class="emerg-card-he">'+(isGoldPhrase(p)?'⭐ ':'')+p.he+'</div>';
     if(p.trans)h+='<div class="emerg-card-trans">'+p.trans+'</div>';
     if(p.ar)h+='<div class="emerg-card-ar">'+p.ar+'</div>';
     h+='</div>';
