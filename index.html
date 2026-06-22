@@ -1990,18 +1990,18 @@ function showLanding() {
     </div>
 
     <!-- Phrase of the Day (compact) - right under the greeting -->
-    <div id="home-potd-card" style="display:none;background:#18293E;border:1px solid rgba(212,162,78,0.25);border-right:3px solid #D4A24E;border-radius:12px;padding:8px 12px;margin-bottom:14px;">
+    <div id="home-potd-card" style="display:none;background:#18293E;border:1px solid rgba(212,162,78,0.25);border-right:3px solid #D4A24E;border-radius:12px;padding:10px 12px;margin-bottom:14px;">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:7px;">
+        <div style="color:#D4A24E;font-size:10px;font-weight:700;letter-spacing:0.5px;">✨ ביטוי היום</div>
+        <div onclick="homePotdDismiss()" title="הסתר" style="color:#5e7a92;font-size:15px;line-height:1;cursor:pointer;padding:2px 4px;">✕</div>
+      </div>
       <div style="display:flex;align-items:center;gap:10px;">
-        <button id="home-potd-play" onclick="homePotdPlay()" style="flex-shrink:0;background:transparent;border:1px solid #D4A24E;color:#D4A24E;border-radius:50%;width:32px;height:32px;font-size:13px;cursor:pointer;font-family:inherit;padding:0;">▶</button>
-        <div onclick="homePotdOpen()" style="flex:1;min-width:0;cursor:pointer;">
-          <div style="color:#D4A24E;font-size:9.5px;font-weight:700;letter-spacing:0.5px;margin-bottom:1px;">✨ ביטוי היום</div>
-          <div id="home-potd-he" style="color:#E8D9B8;font-size:13.5px;font-weight:700;line-height:1.25;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;"></div>
-          <div style="display:flex;gap:6px;align-items:baseline;line-height:1.25;overflow:hidden;">
-            <span id="home-potd-ar" style="color:#a0b8c8;font-size:12.5px;font-family:Georgia,serif;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;"></span>
-            <span id="home-potd-trans" style="color:#5e7a92;font-size:10px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;"></span>
-          </div>
+        <button id="home-potd-play" onclick="homePotdPlay()" style="flex-shrink:0;background:transparent;border:1px solid #D4A24E;color:#D4A24E;border-radius:50%;width:36px;height:36px;font-size:14px;cursor:pointer;font-family:inherit;padding:0;">▶</button>
+        <div style="flex:1;min-width:0;">
+          <div id="home-potd-he" style="color:#E8D9B8;font-size:15px;font-weight:700;line-height:1.35;"></div>
+          <div id="home-potd-ar" style="color:#E8D9B8;font-size:15px;font-family:Georgia,serif;line-height:1.35;direction:rtl;"></div>
+          <div id="home-potd-trans" style="color:#7a9ab5;font-size:12px;line-height:1.35;"></div>
         </div>
-        <div onclick="homePotdOpen()" style="flex-shrink:0;color:#D4A24E;font-size:16px;cursor:pointer;">◀</div>
       </div>
     </div>
 
@@ -5369,7 +5369,9 @@ function renderHome(){
     if (typeof getPhraseOfTheDay === 'function') {
       var p = getPhraseOfTheDay();
       var potdCard = document.getElementById('home-potd-card');
-      if (p && potdCard) {
+      var potdDismissed = false;
+      try { potdDismissed = (localStorage.getItem('home_potd_dismissed') === new Date().toDateString()); } catch(e){}
+      if (p && potdCard && !potdDismissed) {
         document.getElementById('home-potd-he').textContent = p.he || '';
         document.getElementById('home-potd-trans').textContent = p.trans || '';
         document.getElementById('home-potd-ar').textContent = p.ar || '';
@@ -7120,9 +7122,17 @@ function homeContinue(){
 function homePotdPlay(){
   try {
     if (!window._homePotdAudio) return;
-    var audio = new Audio(window._homePotdAudio);
-    audio.play();
+    try{ if (window._homePotdAudioObj) window._homePotdAudioObj.pause(); }catch(e){}
+    window._homePotdAudioObj = new Audio(window._homePotdAudio);
+    window._homePotdAudioObj.play().catch(function(){});
   } catch(e) { console.warn(e); }
+}
+
+function homePotdDismiss(){
+  try { localStorage.setItem('home_potd_dismissed', new Date().toDateString()); } catch(e){}
+  try { if (window._homePotdAudioObj) window._homePotdAudioObj.pause(); } catch(e){}
+  var c = document.getElementById('home-potd-card');
+  if (c) c.style.display = 'none';
 }
 
 function homePotdOpen(){
