@@ -1907,9 +1907,9 @@ function showLanding() {
   
   <!-- Header Menu (popup) -->
   <div id="header-menu" style="display:none;position:absolute;top:62px;left:10px;background:#18293E;border:1px solid #2e4558;border-radius:12px;padding:8px;z-index:50;box-shadow:0 4px 20px rgba(0,0,0,0.6);min-width:180px;direction:rtl;">
-    <button onclick="toggleTheme();document.getElementById('header-menu').style.display='none';" style="display:flex;align-items:center;gap:10px;width:100%;background:transparent;border:none;color:#E8D9B8;padding:10px 12px;text-align:right;cursor:pointer;font-family:inherit;font-size:14px;border-radius:8px;">
-      <span id="themeMenuIcon" style="font-size:18px;">🌙</span>
-      <span id="themeMenuLabel">מצב יום</span>
+    <button onclick="cycleTheme();" style="display:flex;align-items:center;gap:10px;width:100%;background:transparent;border:none;color:#E8D9B8;padding:10px 12px;text-align:right;cursor:pointer;font-family:inherit;font-size:14px;border-radius:8px;">
+      <span id="themeMenuIcon" style="font-size:18px;">🔄</span>
+      <span id="themeMenuLabel">ערכת נושא: אוטומטי</span>
     </button>
     <button onclick="openReminderSettings();" style="display:flex;align-items:center;gap:10px;width:100%;background:transparent;border:none;color:#E8D9B8;padding:10px 12px;text-align:right;cursor:pointer;font-family:inherit;font-size:14px;border-radius:8px;">
       <span style="font-size:18px;">🔔</span>
@@ -13013,14 +13013,51 @@ function openDictTab(){
 }
 
 function toggleTheme(){
+  // Manual day/night override (used by the legacy compatibility button)
   var current = document.body.classList.contains('day-mode') ? 'day' : 'night';
-  setTheme(current === 'day' ? 'night' : 'day');
+  try { localStorage.setItem('theme_pref', current === 'day' ? 'night' : 'day'); } catch(e) {}
+  applyThemeFromPref();
+}
+// Theme preference: 'auto' (by time of day), 'day', or 'night'. Default = auto.
+function _autoThemeMode(){ var h = new Date().getHours(); return (h >= 6 && h < 18) ? 'day' : 'night'; }
+function getThemePref(){ return localStorage.getItem('theme_pref') || 'auto'; }
+function _updateThemeMenu(pref, mode){
+  var icon = document.getElementById('themeMenuIcon');
+  var label = document.getElementById('themeMenuLabel');
+  if (pref === 'auto') {
+    if (icon) icon.textContent = '🔄';
+    if (label) label.textContent = 'ערכת נושא: אוטומטי';
+  } else {
+    if (icon) icon.textContent = (mode === 'day') ? '☀️' : '🌙';
+    if (label) label.textContent = (mode === 'day') ? 'ערכת נושא: יום' : 'ערכת נושא: לילה';
+  }
+}
+function applyThemeFromPref(){
+  var pref = getThemePref();
+  var mode = (pref === 'auto') ? _autoThemeMode() : pref;
+  setTheme(mode);
+  _updateThemeMenu(pref, mode);
+}
+// Cycle: auto -> day -> night -> auto
+function cycleTheme(){
+  var pref = getThemePref();
+  var next = (pref === 'auto') ? 'day' : (pref === 'day' ? 'night' : 'auto');
+  try { localStorage.setItem('theme_pref', next); } catch(e) {}
+  applyThemeFromPref();
 }
 function loadTheme(){
-  var saved=localStorage.getItem('theme')||'night';
-  setTheme(saved);
+  // Migrate older installs that only had an explicit 'theme' and no preference
+  if (!localStorage.getItem('theme_pref')) {
+    try { localStorage.setItem('theme_pref', 'auto'); } catch(e) {}
+  }
+  applyThemeFromPref();
 }
 loadTheme();
+// Keep auto mode in sync while the app stays open / is brought back
+try {
+  setInterval(function(){ if (getThemePref() === 'auto') applyThemeFromPref(); }, 10 * 60 * 1000);
+  document.addEventListener('visibilitychange', function(){ if (!document.hidden && getThemePref() === 'auto') applyThemeFromPref(); });
+} catch(e) {}
 
 // === Role selection ===
 var ROLE_INFO = {
