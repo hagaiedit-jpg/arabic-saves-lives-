@@ -5627,6 +5627,7 @@ function showFlashWelcome(){
   
   var available = (DB || []).filter(function(p){ return p.he && p.ar && (p.audio_url || p.audio); });
   var fStats = getFlashStats(available);
+  var dueCount = getFlashDueCount(available);
   var sessionStats = JSON.parse(localStorage.getItem('flash_stats') || '{"total":0,"correct":0,"sessions":0}');
   var avgPct = sessionStats.total > 0 ? Math.round((sessionStats.correct / sessionStats.total) * 100) : 0;
   
@@ -5682,11 +5683,22 @@ function showFlashWelcome(){
   }
   
   html += '</div>'; // stats card
-  
+
+  // Spaced-repetition "due today" banner
+  if (dueCount > 0) {
+    html += '<div style="background:linear-gradient(135deg,rgba(29,158,117,0.18),rgba(29,158,117,0.05));border:1px solid rgba(29,158,117,0.45);border-radius:12px;padding:12px 14px;margin-bottom:14px;display:flex;align-items:center;gap:10px;text-align:right;">';
+    html += '<span style="font-size:22px;">🔔</span>';
+    html += '<div style="flex:1;"><div style="color:#1D9E75;font-size:14px;font-weight:800;">' + dueCount + ' משפטים לחזרה היום</div>';
+    html += '<div style="color:#a0b8c8;font-size:11px;">הגיע הזמן לרענן אותם לפני שנשכחים</div></div>';
+    html += '</div>';
+  }
+
   // Smart Practice Button (primary)
   html += '<button onclick="flashStart(\'smart\')" style="width:100%;background:linear-gradient(135deg,#1D9E75 0%,#0e5a3f 100%);border:none;color:#fff;border-radius:12px;padding:14px;font-size:15px;font-weight:700;cursor:pointer;font-family:inherit;box-shadow:0 4px 12px rgba(29,158,117,0.3);margin-bottom:10px;">';
   html += '🎯 חזרה חכמה';
-  if (fStats.attention > 0) {
+  if (dueCount > 0) {
+    html += ' <span style="background:rgba(255,255,255,0.25);color:#fff;border-radius:10px;padding:2px 8px;font-size:11px;margin-right:6px;">' + dueCount + ' לחזרה</span>';
+  } else if (fStats.attention > 0) {
     html += ' <span style="background:rgba(192,57,43,0.9);color:#fff;border-radius:10px;padding:2px 8px;font-size:11px;margin-right:6px;">' + fStats.attention + ' דורשים תשומת לב</span>';
   }
   html += '</button>';
@@ -5738,6 +5750,23 @@ function getFlashStats(available){
   return stats;
 }
 
+// How many phrases are due for spaced-repetition review right now
+function getFlashDueCount(available){
+  var mem = getFlashMemory();
+  var now = Date.now();
+  var due = 0;
+  (available || []).forEach(function(p){
+    var m = mem[String(p.id)];
+    if (!m || !m.state) return; // brand-new cards aren't "review" yet
+    if (m.state === 'attention') { due++; return; }
+    var isDue = (typeof m.due === 'number')
+      ? (m.due <= now)
+      : (((now - (m.lastSeen || 0)) / (1000 * 60 * 60)) > 4);
+    if (isDue) due++;
+  });
+  return due;
+}
+
 function pickFlashQuestions(available, count, mode){
   // mode: 'smart' (default), 'challenge' (random), 'category'
   var mem = getFlashMemory();
@@ -5755,19 +5784,21 @@ function pickFlashQuestions(available, count, mode){
     var m = mem[key];
     if (!m || !m.state) {
       newPhrases.push(p);
-    } else if (m.state === 'attention') {
-      attention.push(p);
+      return;
+    }
+    // Spaced repetition: a card is "due" once its scheduled date has arrived.
+    // Legacy cards without a due date fall back to a 4-hour gap.
+    var isDue = (typeof m.due === 'number')
+      ? (m.due <= now)
+      : (((now - (m.lastSeen || 0)) / (1000 * 60 * 60)) > 4);
+    if (m.state === 'attention') {
+      attention.push(p); // struggling cards always need work
     } else if (m.state === 'mastered') {
-      // Show mastered phrases occasionally (10% chance per session)
-      if (Math.random() < 0.1) mastered.push(p);
+      if (isDue) dueForReview.push(p);          // mastered, but its time has come
+      else if (Math.random() < 0.05) mastered.push(p);
     } else if (m.state === 'learning') {
-      // Check if due for review (4 hours minimum gap)
-      var hoursSince = (now - (m.lastSeen || 0)) / (1000 * 60 * 60);
-      if (hoursSince > 4) {
-        dueForReview.push(p);
-      } else {
-        learning.push(p);
-      }
+      if (isDue) dueForReview.push(p);
+      else learning.push(p);
     }
   });
   
@@ -6372,6 +6403,21 @@ function flashAnswer(selectedId, selectedIdx){
       }
     }
     
+    // SRS scheduling: set the next review interval (days) + due date (spaced repetition)
+    var _DAY = 86400000;
+    if (isCorrect) {
+      if (pm.state === 'mastered') {
+        pm.interval = Math.min(180, Math.max(7, Math.round((pm.interval || 4) * 2)));
+      } else if (pm.state === 'learning') {
+        pm.interval = (pm.correctCount <= 1) ? 1 : 3;
+      } else {
+        pm.interval = 1;
+      }
+    } else {
+      pm.interval = 0; // got it wrong → due again right away
+    }
+    pm.due = Date.now() + pm.interval * _DAY;
+
     mem[pid] = pm;
     saveFlashMemory(mem);
   } catch(e) { console.warn('Memory update error:', e); }
