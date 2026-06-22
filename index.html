@@ -1989,6 +1989,22 @@ function showLanding() {
       </div>
     </div>
 
+    <!-- Phrase of the Day (compact) - right under the greeting -->
+    <div id="home-potd-card" style="display:none;background:#18293E;border:1px solid rgba(212,162,78,0.25);border-right:3px solid #D4A24E;border-radius:12px;padding:8px 12px;margin-bottom:14px;">
+      <div style="display:flex;align-items:center;gap:10px;">
+        <button id="home-potd-play" onclick="homePotdPlay()" style="flex-shrink:0;background:transparent;border:1px solid #D4A24E;color:#D4A24E;border-radius:50%;width:32px;height:32px;font-size:13px;cursor:pointer;font-family:inherit;padding:0;">▶</button>
+        <div onclick="homePotdOpen()" style="flex:1;min-width:0;cursor:pointer;">
+          <div style="color:#D4A24E;font-size:9.5px;font-weight:700;letter-spacing:0.5px;margin-bottom:1px;">✨ ביטוי היום</div>
+          <div id="home-potd-he" style="color:#E8D9B8;font-size:13.5px;font-weight:700;line-height:1.25;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;"></div>
+          <div style="display:flex;gap:6px;align-items:baseline;line-height:1.25;overflow:hidden;">
+            <span id="home-potd-ar" style="color:#a0b8c8;font-size:12.5px;font-family:Georgia,serif;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;"></span>
+            <span id="home-potd-trans" style="color:#5e7a92;font-size:10px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;"></span>
+          </div>
+        </div>
+        <div onclick="homePotdOpen()" style="flex-shrink:0;color:#D4A24E;font-size:16px;cursor:pointer;">◀</div>
+      </div>
+    </div>
+
     <!-- 🗓️ Weekly readiness ritual (shown once per week) -->
     <div id="home-weekly-ritual" style="display:none;margin-bottom:16px;"></div>
 
@@ -2113,22 +2129,8 @@ function showLanding() {
       </div>
     </div>
 
-    <!-- Phrase of the Day (compact) -->
-    <div id="home-potd-card" style="display:none;background:#18293E;border:1px solid rgba(212,162,78,0.25);border-right:3px solid #D4A24E;border-radius:12px;padding:8px 12px;margin-bottom:14px;">
-      <div style="display:flex;align-items:center;gap:10px;">
-        <button id="home-potd-play" onclick="homePotdPlay()" style="flex-shrink:0;background:transparent;border:1px solid #D4A24E;color:#D4A24E;border-radius:50%;width:32px;height:32px;font-size:13px;cursor:pointer;font-family:inherit;padding:0;">▶</button>
-        <div onclick="homePotdOpen()" style="flex:1;min-width:0;cursor:pointer;">
-          <div style="color:#D4A24E;font-size:9.5px;font-weight:700;letter-spacing:0.5px;margin-bottom:1px;">✨ ביטוי היום</div>
-          <div id="home-potd-he" style="color:#E8D9B8;font-size:13.5px;font-weight:700;line-height:1.25;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;"></div>
-          <div style="display:flex;gap:6px;align-items:baseline;line-height:1.25;overflow:hidden;">
-            <span id="home-potd-ar" style="color:#a0b8c8;font-size:12.5px;font-family:Georgia,serif;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;"></span>
-            <span id="home-potd-trans" style="color:#5e7a92;font-size:10px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;"></span>
-          </div>
-        </div>
-        <div onclick="homePotdOpen()" style="flex-shrink:0;color:#D4A24E;font-size:16px;cursor:pointer;">◀</div>
-      </div>
-    </div>
-    
+    <!-- Phrase of the Day moved up, right under the greeting -->
+
   </div>
 </div>
 
