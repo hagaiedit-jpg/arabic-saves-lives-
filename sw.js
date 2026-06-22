@@ -1,6 +1,6 @@
 /* Service worker for "ערבית מצילה חיים" — offline-first field use.
    Bump CACHE when shipping changes that must invalidate old caches. */
-const CACHE = 'asl-v1';
+const CACHE = 'asl-v2';
 const SHELL = ['./', './index.html', './manifest.json', './icon.svg'];
 
 self.addEventListener('install', function(e){
@@ -24,6 +24,25 @@ function cacheFirst(req){
     });
   });
 }
+
+// Best-effort daily reminder (Android installed PWA; not available on iOS)
+self.addEventListener('periodicsync', function(e){
+  if (e.tag === 'daily-reminder') {
+    e.waitUntil(self.registration.showNotification('ערבית מצילה חיים', {
+      body: 'זמן לתרגל — כמה דקות שומרות על המוכנות בשטח',
+      icon: './icon.svg', badge: './icon.svg', tag: 'daily-reminder'
+    }));
+  }
+});
+
+// Tapping a notification focuses/opens the app
+self.addEventListener('notificationclick', function(e){
+  e.notification.close();
+  e.waitUntil(clients.matchAll({type:'window'}).then(function(list){
+    for (var i=0;i<list.length;i++){ if('focus' in list[i]) return list[i].focus(); }
+    if (clients.openWindow) return clients.openWindow('./');
+  }));
+});
 
 self.addEventListener('fetch', function(e){
   var req = e.request;
