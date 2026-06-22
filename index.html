@@ -2301,6 +2301,7 @@ function showLanding() {
         <button onclick="document.getElementById('emerg-search').value='';emergSearch()" style="background:rgba(255,255,255,0.1);border:none;color:#E8D9B8;width:28px;height:28px;border-radius:50%;cursor:pointer;font-size:16px;flex-shrink:0;">×</button>
       </div>
       <div id="emerg-search-results" style="display:none;margin-bottom:8px;"></div>
+      <button onclick="printPocketCard()" style="width:100%;background:transparent;border:1px dashed #7a9ab5;color:#a0b8c8;border-radius:10px;padding:9px;font-size:12.5px;font-weight:600;cursor:pointer;font-family:inherit;margin-bottom:14px;display:flex;align-items:center;justify-content:center;gap:6px;">🖨️ דף כיס להדפסה (גיבוי נייר לשטח)</button>
 
       <!-- Daily Emergency Challenge Card -->
       <div id="emerg-challenge-card" style="display:none;background:linear-gradient(135deg,#c0392b 0%,#922d22 100%);border-radius:14px;padding:14px 16px;margin-bottom:14px;cursor:pointer;box-shadow:0 4px 14px rgba(192,57,43,0.35);position:relative;overflow:hidden;" onclick="startEmergencyChallenge()">
@@ -12444,6 +12445,48 @@ function _emergCardHTML(p){
   h+='<button class="emerg-play-btn" onclick="playEmergCard(\''+(p.audio||'')+'\',this)" '+(p.audio?'':'disabled')+'>▶</button>';
   h+='</div>';
   return h;
+}
+
+// Printable pocket cheat-sheet — an offline paper backup of the critical phrases
+function _escHtml(s){ return String(s == null ? '' : s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+function printPocketCard(){
+  var cats = [];
+  for (var i = 0; i < EMERG_CATS.length; i++) {
+    var items = _emergPhrasesForCat(EMERG_CATS[i]);
+    if (items.length) cats.push({ name: EMERG_CATS[i].emoji + ' ' + EMERG_CATS[i].name, items: items });
+  }
+  if (!cats.length) { alert('אין עדיין משפטים להדפסה. ודאי שהנתונים נטענו.'); return; }
+  var today = new Date().toLocaleDateString('he-IL');
+  var body = '';
+  cats.forEach(function(c){
+    body += '<section><h2>' + _escHtml(c.name) + '</h2><table><tr><th>עברית</th><th>תעתיק</th><th>ערבית</th></tr>';
+    c.items.forEach(function(p){
+      body += '<tr><td class="he">' + _escHtml(p.he) + '</td><td class="tr">' + _escHtml(p.trans) + '</td><td class="ar">' + _escHtml(p.ar) + '</td></tr>';
+    });
+    body += '</table></section>';
+  });
+  var doc = '<!DOCTYPE html><html lang="he" dir="rtl"><head><meta charset="UTF-8">'
+    + '<meta name="viewport" content="width=device-width, initial-scale=1.0">'
+    + '<title>דף כיס — ערבית מצילה חיים</title><style>'
+    + '*{box-sizing:border-box;}body{font-family:Arial,Helvetica,sans-serif;color:#111;margin:14px;direction:rtl;}'
+    + 'h1{font-size:18px;margin:0 0 2px;}.sub{font-size:11px;color:#555;margin-bottom:12px;}'
+    + 'section{break-inside:avoid;page-break-inside:avoid;margin-bottom:12px;}'
+    + 'h2{font-size:13px;background:#eee;padding:4px 6px;border-radius:4px;margin:0 0 4px;}'
+    + 'table{width:100%;border-collapse:collapse;font-size:11px;}'
+    + 'th{text-align:right;font-size:9px;color:#666;border-bottom:1px solid #bbb;padding:2px 4px;}'
+    + 'td{padding:3px 4px;border-bottom:1px solid #eee;vertical-align:top;}'
+    + 'td.he{font-weight:bold;width:34%;}td.tr{color:#333;width:33%;}td.ar{font-size:13px;width:33%;}'
+    + '.btns{margin-bottom:12px;}button{font-family:inherit;font-size:13px;padding:8px 16px;border:none;border-radius:6px;cursor:pointer;margin-left:6px;}'
+    + '.pb{background:#1D9E75;color:#fff;}.cb{background:#ddd;color:#111;}'
+    + '@media print{body{margin:8mm;}.noprint{display:none;}}'
+    + '</style></head><body>'
+    + '<div class="btns noprint"><button class="pb" onclick="window.print()">🖨️ הדפס / שמור כ-PDF</button><button class="cb" onclick="window.close()">סגור</button></div>'
+    + '<h1>ערבית מצילה חיים — דף כיס לחירום</h1>'
+    + '<div class="sub">משפטים קריטיים לשטח · הופק ' + _escHtml(today) + '</div>'
+    + body + '</body></html>';
+  var w = window.open('', '_blank');
+  if (!w) { alert('הדפדפן חסם את חלון ההדפסה. אפשרי חלונות קופצים (popups) לאתר ונסי שוב.'); return; }
+  w.document.open(); w.document.write(doc); w.document.close();
 }
 
 // Is this phrase part of any emergency category?
