@@ -11395,14 +11395,29 @@ function lmSpeakHe(text, done){
   }catch(e){ done(); }
 }
 function lmPlayAr(url, done){
-  if(!url){ done(); return; }
+  if(!url){ setTimeout(done, 250); return; }
   try{
-    if(window._lmAudio) window._lmAudio.pause();
-    window._lmAudio = new Audio(url);
-    window._lmAudio.onended = function(){ done(); };
-    window._lmAudio.onerror = function(){ done(); };
-    window._lmAudio.play().catch(function(){ done(); });
-  }catch(e){ done(); }
+    // Reuse a single Audio element: it gets "unlocked" by the first play
+    // (inside the user's tap on ▶), so later items can autoplay from timers.
+    if(!window._lmAudio){ window._lmAudio = new Audio(); }
+    var a = window._lmAudio;
+    a.onended = null; a.onerror = null;
+    try{ a.pause(); }catch(e){}
+    var finished = false;
+    var finish = function(){ if(!finished){ finished = true; done(); } };
+    a.onended = finish;
+    a.onerror = function(){ setTimeout(finish, 200); };
+    if(a.src !== url){ a.src = url; }
+    try{ a.currentTime = 0; }catch(e){}
+    var tries = 0;
+    var attempt = function(){
+      try{
+        var p = a.play();
+        if(p && p.catch){ p.catch(function(){ tries++; if(tries < 3){ setTimeout(attempt, 180); } else { setTimeout(finish, 300); } }); }
+      }catch(e){ setTimeout(finish, 300); }
+    };
+    attempt();
+  }catch(e){ setTimeout(done, 300); }
 }
 function lmNext(){ if(_lm.idx < _lm.pool.length-1) _lm.idx++; _lm.token++; if(_lm.playing) lmPlayFlow(); else lmRenderCard(); }
 function lmPrev(){ if(_lm.idx > 0) _lm.idx--; _lm.token++; if(_lm.playing) lmPlayFlow(); else lmRenderCard(); }
