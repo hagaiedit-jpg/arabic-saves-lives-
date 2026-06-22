@@ -1948,7 +1948,10 @@ function showLanding() {
         <span id="home-streak-count"></span>
       </div>
     </div>
-    
+
+    <!-- 🗓️ Weekly readiness ritual (shown once per week) -->
+    <div id="home-weekly-ritual" style="display:none;margin-bottom:16px;"></div>
+
     <!-- 🔥 BIG STREAK CARD (NEW!) -->
     <div id="home-streak-card" style="display:none;margin-bottom:18px;border-radius:18px;padding:18px 16px;cursor:pointer;position:relative;overflow:hidden;" onclick="showStreakInfo()">
       <!-- Content set by JS -->
@@ -3592,6 +3595,65 @@ function renderWeeklySummary() {
   } catch(e) { console.warn('renderWeeklySummary error:', e); }
 }
 
+// === Weekly readiness ritual ===
+// A scheduled weekly anchor: shows once per calendar week with a recap + focused review.
+function _weekKey(d){
+  d = d || new Date();
+  var onejan = new Date(d.getFullYear(), 0, 1);
+  var week = Math.ceil((((d - onejan) / 86400000) + onejan.getDay() + 1) / 7);
+  return d.getFullYear() + '-W' + week;
+}
+function renderWeeklyRitual(){
+  try {
+    var card = document.getElementById('home-weekly-ritual');
+    if (!card) return;
+    var curWeek = _weekKey();
+    var lastWeek = localStorage.getItem('weekly_ritual_week') || '';
+    var streak = parseInt(localStorage.getItem('streak_count') || '0', 10);
+    var learned = {}; try { learned = JSON.parse(localStorage.getItem('learned_phrases') || '{}'); } catch(e) {}
+    var hasHistory = streak > 0 || Object.keys(learned).length > 0;
+    // Show only once per week, and only once the user has some history to summarize
+    if (lastWeek === curWeek || !hasHistory) { card.style.display = 'none'; return; }
+
+    var practiced = {}; try { practiced = JSON.parse(localStorage.getItem('practiced_phrases') || '{}'); } catch(e) {}
+    var today = new Date(), activeDays = 0, total = 0;
+    for (var i = 6; i >= 0; i--) {
+      var dd = new Date(today); dd.setDate(dd.getDate() - i);
+      var ds = dd.toDateString(), c = 0;
+      for (var k in learned) { try { if (_actDay(learned[k]) === ds) c++; } catch(e) {} }
+      for (var k2 in practiced) { try { if (_actDay(practiced[k2]) === ds) c++; } catch(e) {} }
+      if (c > 0) { activeDays++; total += c; }
+    }
+    var due = 0;
+    try { var avail = (DB || []).filter(function(p){ return p.he && p.ar && (p.audio_url || p.audio); }); due = getFlashDueCount(avail); } catch(e) {}
+
+    var h = '<div style="background:linear-gradient(135deg,#243a55 0%,#18293E 100%);border:1px solid rgba(212,162,78,0.4);border-radius:16px;padding:16px;position:relative;">';
+    h += '<button onclick="dismissWeeklyRitual()" style="position:absolute;top:8px;left:10px;background:transparent;border:none;color:#7a9ab5;font-size:18px;cursor:pointer;font-family:inherit;line-height:1;">×</button>';
+    h += '<div style="color:#D4A24E;font-size:12px;font-weight:800;letter-spacing:0.5px;margin-bottom:10px;">🗓️ סיכום מוכנות שבועי</div>';
+    h += '<div style="display:flex;gap:8px;margin-bottom:14px;">';
+    h += '<div style="flex:1;background:rgba(29,158,117,0.1);border:1px solid rgba(29,158,117,0.25);border-radius:10px;padding:10px;text-align:center;"><div style="color:#1D9E75;font-size:20px;font-weight:800;line-height:1;">' + activeDays + '/7</div><div style="color:#a0b8c8;font-size:10px;margin-top:3px;">ימים פעילים</div></div>';
+    h += '<div style="flex:1;background:rgba(212,162,78,0.1);border:1px solid rgba(212,162,78,0.25);border-radius:10px;padding:10px;text-align:center;"><div style="color:#D4A24E;font-size:20px;font-weight:800;line-height:1;">' + total + '</div><div style="color:#a0b8c8;font-size:10px;margin-top:3px;">תרגולים השבוע</div></div>';
+    h += '<div style="flex:1;background:rgba(212,162,78,0.1);border:1px solid rgba(212,162,78,0.25);border-radius:10px;padding:10px;text-align:center;"><div style="color:#D4A24E;font-size:20px;font-weight:800;line-height:1;">' + streak + '</div><div style="color:#a0b8c8;font-size:10px;margin-top:3px;">רצף ימים</div></div>';
+    h += '</div>';
+    var sub = due > 0 ? (due + ' משפטים מחכים לחזרה — בואי נרענן אותם') : 'בואי נחזק את מה שלמדת השבוע';
+    h += '<div style="color:#E8D9B8;font-size:12.5px;margin-bottom:12px;line-height:1.5;">' + sub + '</div>';
+    h += '<button onclick="startWeeklyReview()" style="width:100%;background:linear-gradient(135deg,#1D9E75 0%,#0e5a3f 100%);border:none;color:#fff;border-radius:10px;padding:12px;font-size:14px;font-weight:700;cursor:pointer;font-family:inherit;box-shadow:0 4px 12px rgba(29,158,117,0.3);">🎯 התחל חזרה שבועית</button>';
+    h += '</div>';
+    card.innerHTML = h;
+    card.style.display = 'block';
+  } catch(e) { console.warn('renderWeeklyRitual error:', e); }
+}
+function startWeeklyReview(){
+  dismissWeeklyRitual();
+  try { navToTab('flash'); } catch(e) {}
+  setTimeout(function(){ try { if (typeof flashStart === 'function') flashStart('smart'); } catch(e) {} }, 60);
+}
+function dismissWeeklyRitual(){
+  try { localStorage.setItem('weekly_ritual_week', _weekKey()); } catch(e) {}
+  var card = document.getElementById('home-weekly-ritual');
+  if (card) card.style.display = 'none';
+}
+
 
 // === 30-Day Preparation Path ===
 // Dynamic structure - references categories, not specific phrases
@@ -4800,6 +4862,9 @@ function renderHome(){
     
     // 2b. Render weekly summary (only when there's an active streak)
     renderWeeklySummary();
+
+    // 2c. Weekly readiness ritual (once-per-week anchor)
+    try { renderWeeklyRitual(); } catch(e) {}
     
     // 3. Subtitle - simpler now
     var sub = document.getElementById('home-subtitle');
