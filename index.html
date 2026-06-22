@@ -2658,6 +2658,14 @@ function showLanding() {
       </div>
       <div style="color:#fff;font-size:20px;">◀</div>
     </div>
+    <div onclick="lmStart()" style="background:linear-gradient(135deg,#3a5a78 0%,#243a55 100%);border-radius:14px;padding:14px;margin-bottom:16px;cursor:pointer;box-shadow:0 4px 12px rgba(0,0,0,0.25);display:flex;align-items:center;gap:12px;">
+      <div style="font-size:26px;">🎧</div>
+      <div style="flex:1;">
+        <div class="keep-white" style="color:#fff;font-size:15px;font-weight:800;">מצב האזנה</div>
+        <div style="color:rgba(255,255,255,0.85);font-size:12px;">האזנה רציפה ללא ידיים — לנהיגה ולשמירה</div>
+      </div>
+      <div style="color:#fff;font-size:20px;">◀</div>
+    </div>
     <div id="scn-grid"></div>
   </div>
 
@@ -3002,6 +3010,30 @@ function showLanding() {
     <div style="height:6px;background:#1F3147;border-radius:3px;overflow:hidden;margin-bottom:4px;"><div id="pp-progress-bar" style="height:100%;width:0;background:#D4A24E;border-radius:3px;transition:width 0.3s;"></div></div>
     <div id="pp-score" style="text-align:center;color:#7a9ab5;font-size:11px;margin-bottom:14px;"></div>
     <div id="pp-body"></div>
+  </div>
+</div>
+
+<!-- Hands-free listening mode -->
+<div id="lm-modal" style="display:none;position:fixed;top:0;left:0;right:0;bottom:0;background:#0E1B2E;z-index:9998;direction:rtl;overflow-y:auto;">
+  <div style="max-width:460px;margin:0 auto;padding:18px 16px 40px;display:flex;flex-direction:column;min-height:100vh;box-sizing:border-box;">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;">
+      <div style="color:#E8D9B8;font-size:17px;font-weight:800;">🎧 מצב האזנה</div>
+      <button onclick="lmClose()" style="background:#2A3D52;border:none;color:#E8D9B8;width:34px;height:34px;border-radius:50%;font-size:18px;cursor:pointer;font-family:inherit;">✕</button>
+    </div>
+    <div style="color:#7a9ab5;font-size:12px;margin-bottom:6px;">האזנה רציפה — עברית ואז ערבית, ללא ידיים. מצוין ללמידה בנהיגה או בשמירה.</div>
+    <div id="lm-counter" style="text-align:center;color:#7a9ab5;font-size:12px;margin-bottom:14px;"></div>
+    <div style="flex:1;display:flex;flex-direction:column;justify-content:center;">
+      <div style="background:#18293E;border:1px solid #2A3D52;border-radius:16px;padding:26px 18px;text-align:center;margin-bottom:20px;">
+        <div id="lm-he" style="color:#E8D9B8;font-size:24px;font-weight:700;line-height:1.4;margin-bottom:10px;"></div>
+        <div id="lm-trans" style="color:#a0b8c8;font-size:15px;margin-bottom:8px;"></div>
+        <div id="lm-ar" style="color:#FFD700;font-size:24px;font-family:Georgia,serif;direction:rtl;line-height:1.5;"></div>
+      </div>
+      <div style="display:flex;align-items:center;justify-content:center;gap:14px;">
+        <button onclick="lmPrev()" style="background:#1F3147;border:1px solid #2A3D52;color:#E8D9B8;width:54px;height:54px;border-radius:50%;font-size:20px;cursor:pointer;font-family:inherit;">⏮</button>
+        <button id="lm-playbtn" onclick="lmToggle()" style="background:#1D9E75;border:none;color:#fff;min-width:130px;height:54px;border-radius:27px;font-size:16px;font-weight:800;cursor:pointer;font-family:inherit;">▶ נגן</button>
+        <button onclick="lmNext()" style="background:#1F3147;border:1px solid #2A3D52;color:#E8D9B8;width:54px;height:54px;border-radius:50%;font-size:20px;cursor:pointer;font-family:inherit;">⏭</button>
+      </div>
+    </div>
   </div>
 </div>
 
@@ -11221,6 +11253,74 @@ function ppFinish(){
     +'<button onclick="ppClose()" style="width:100%;padding:13px;background:#2A3D52;border:none;border-radius:10px;color:#E8D9B8;font-size:15px;cursor:pointer;font-family:inherit;">סיום</button></div>';
 }
 function ppClose(){ try{ if(window._ppAudio)window._ppAudio.pause(); }catch(e){} document.getElementById('pp-modal').style.display='none'; }
+
+// ===== Hands-free listening mode: TTS the Hebrew, then play the Arabic recording =====
+var _lm = { pool: [], idx: 0, playing: false, token: 0 };
+function lmStart(){
+  var pool = [];
+  [typeof DB!=='undefined'?DB:[], typeof DAILY!=='undefined'?DAILY:[], typeof NAVY!=='undefined'?NAVY:[], typeof HEART!=='undefined'?HEART:[]].forEach(function(arr){
+    (arr||[]).forEach(function(p){ if(p && p.audio && p.he) pool.push({he:p.he, trans:p.trans||'', ar:p.ar||'', audio:p.audio}); });
+  });
+  if(!pool.length){ alert('אין הקלטות זמינות להאזנה.'); return; }
+  _lm.pool = pool; _lm.idx = 0; _lm.playing = false; _lm.token++;
+  document.getElementById('lm-modal').style.display = 'block';
+  lmRenderCard();
+}
+function lmRenderCard(){
+  var q = _lm.pool[_lm.idx]; if(!q) return;
+  var c = document.getElementById('lm-counter'); if(c) c.textContent = (_lm.idx+1) + ' / ' + _lm.pool.length;
+  var he = document.getElementById('lm-he'); if(he) he.textContent = q.he;
+  var tr = document.getElementById('lm-trans'); if(tr) tr.textContent = q.trans;
+  var ar = document.getElementById('lm-ar'); if(ar) ar.textContent = q.ar;
+  var pb = document.getElementById('lm-playbtn'); if(pb) pb.textContent = _lm.playing ? '⏸ השהה' : '▶ נגן';
+}
+function lmToggle(){ if(_lm.playing) lmPause(); else lmPlayFlow(); }
+function lmPause(){
+  _lm.playing = false; _lm.token++;
+  try{ if(window._lmAudio) window._lmAudio.pause(); }catch(e){}
+  try{ if(window.speechSynthesis) speechSynthesis.cancel(); }catch(e){}
+  lmRenderCard();
+}
+function lmPlayFlow(){ _lm.playing = true; _lm.token++; lmRenderCard(); lmStep(_lm.token); }
+function lmStep(tk){
+  if(tk !== _lm.token || !_lm.playing) return;
+  var q = _lm.pool[_lm.idx];
+  if(!q){ _lm.playing = false; lmRenderCard(); return; }
+  lmRenderCard();
+  lmSpeakHe(q.he, function(){
+    if(tk !== _lm.token || !_lm.playing) return;
+    lmPlayAr(q.audio, function(){
+      if(tk !== _lm.token || !_lm.playing) return;
+      if(_lm.idx < _lm.pool.length - 1){ _lm.idx++; setTimeout(function(){ lmStep(tk); }, 600); }
+      else { _lm.playing = false; lmRenderCard(); }
+    });
+  });
+}
+function lmSpeakHe(text, done){
+  try{
+    if(!window.speechSynthesis || typeof SpeechSynthesisUtterance === 'undefined'){ done(); return; }
+    var u = new SpeechSynthesisUtterance(text); u.lang = 'he-IL'; u.rate = 0.95;
+    var finished = false;
+    u.onend = function(){ if(!finished){ finished = true; done(); } };
+    u.onerror = function(){ if(!finished){ finished = true; done(); } };
+    speechSynthesis.cancel(); speechSynthesis.speak(u);
+    // Safety net for browsers that don't fire onend
+    setTimeout(function(){ if(!finished){ finished = true; done(); } }, 4500);
+  }catch(e){ done(); }
+}
+function lmPlayAr(url, done){
+  if(!url){ done(); return; }
+  try{
+    if(window._lmAudio) window._lmAudio.pause();
+    window._lmAudio = new Audio(url);
+    window._lmAudio.onended = function(){ done(); };
+    window._lmAudio.onerror = function(){ done(); };
+    window._lmAudio.play().catch(function(){ done(); });
+  }catch(e){ done(); }
+}
+function lmNext(){ if(_lm.idx < _lm.pool.length-1) _lm.idx++; _lm.token++; if(_lm.playing) lmPlayFlow(); else lmRenderCard(); }
+function lmPrev(){ if(_lm.idx > 0) _lm.idx--; _lm.token++; if(_lm.playing) lmPlayFlow(); else lmRenderCard(); }
+function lmClose(){ lmPause(); document.getElementById('lm-modal').style.display = 'none'; }
 
 // ===== Prepared answers (verified Palestinian colloquial) for one-time import =====
 // Each entry: q = Hebrew question text (string or array of candidates), responses = [{he,trans,ar}]
