@@ -7325,6 +7325,24 @@ async function loadData(){
 
 }
 
+// Built-in scenarios that don't come from the remote dataset.
+// Civilian (speaker ב) lines are tagged 'civilian'; soldier (א) lines are not.
+var BUILTIN_SCENARIO_DATA = [
+  {id:'bi-harhaka-1',  section:'scenario', cat:'הרחקה מהשטח', tags:'step1',  he:'עצור במקום והרם ידיים!', ar:'اوقّف عندك وارفع إيديك لفوق!', trans:'וַקֵף עִנְדַכּ וַארְפַע אִידֵיכּ לַפוֹק'},
+  {id:'bi-harhaka-2',  section:'scenario', cat:'הרחקה מהשטח', tags:'step2',  he:'מה אתה עושה כאן?', ar:'شو بتعمل هون؟', trans:'שוּ בְּתִעְמֵל הוֹן?'},
+  {id:'bi-harhaka-3',  section:'scenario', cat:'הרחקה מהשטח', tags:'step3 civilian', he:'אני רועה את הצאן', ar:'أنا بارعى الغنم', trans:'אַנַא בַּארְעַא (א)לְעַ׳נַם'},
+  {id:'bi-harhaka-4',  section:'scenario', cat:'הרחקה מהשטח', tags:'step4',  he:'אל תעשה רעש, אף לא מילה!', ar:'ما تعمل دوشة ولا كلمة!', trans:'מַא תְעְמֵל דוֹשֶה וַלַא כִּלְמֶה'},
+  {id:'bi-harhaka-5',  section:'scenario', cat:'הרחקה מהשטח', tags:'step5',  he:'אסור לעבור כאן עכשיו!', ar:'ممنوع تعبّر من هون هلّق!', trans:'מַמְנוּע תֻעְבֻר מִן הוֹן הַלַק'},
+  {id:'bi-harhaka-6',  section:'scenario', cat:'הרחקה מהשטח', tags:'step6 civilian', he:'למה אסור? מי אתה?', ar:'ليش ممنوع؟ مين انت؟', trans:'לֵיש מַמְנוּע? מִין אִנְתֶ?'},
+  {id:'bi-harhaka-7',  section:'scenario', cat:'הרחקה מהשטח', tags:'step7',  he:'זה לא עניינך! אף מילה, אמרתי לך!', ar:'هدا مش شغلك! ولا كلمة قلت لك!', trans:'הַדַא מֻש שֻעְ׳לַכּ! וַלַא כִּלְמֶה קֻלְתֶ לַכּ!'},
+  {id:'bi-harhaka-8',  section:'scenario', cat:'הרחקה מהשטח', tags:'step8',  he:'לך מכאן, יותר טוב לך!', ar:'روح من هون أحسن لك!', trans:'רוּח מִן הוֹן אַחְסַן לַכּ'},
+  {id:'bi-harhaka-9',  section:'scenario', cat:'הרחקה מהשטח', tags:'step9',  he:'לך מכאן עם הצאן שלך!', ar:'روح من هون مع الغنم تبعك!', trans:'רוּח מִן הוֹן מַעַ (א)לְעַ׳נַם תַבַעַכּ'},
+  {id:'bi-harhaka-10', section:'scenario', cat:'הרחקה מהשטח', tags:'step10', he:'קדימה, מהר!', ar:'يالله بسرعة!', trans:'יַאללַה בְּסֻרְעַה'},
+  {id:'bi-harhaka-11', section:'scenario', cat:'הרחקה מהשטח', tags:'step11 civilian', he:'בסדר, אבל מי אתה?', ar:'حاضر بس مين انت؟', trans:'חַאצֵר בַּס מִין אִנְתֶ?'},
+  {id:'bi-harhaka-12', section:'scenario', cat:'הרחקה מהשטח', tags:'step12', he:'זה לא עניינך. אני לא רוצה לראות אותך כאן עוד פעם, הבנת?!', ar:'هدا مش شغلك. ما بدّي أشوفك هون كمان مرّة، فاهم؟!', trans:'הַדַא מֻש שֻעְ׳לַכּ. מַא בִּדִי אַשוּפַכּ הוֹן כַּמַאן מַרַה, פַאהֶם?!'},
+  {id:'bi-harhaka-13', section:'scenario', cat:'הרחקה מהשטח', tags:'step13 civilian', he:'בסדר, אדוני.', ar:'حاضر يا سيدي.', trans:'חַאצֵר יַא סִידִי'}
+];
+
 // Populate all section arrays from a raw phrases array (used for both live and cached data)
 function populateFromData(data){
   DB=data.filter(p=>p.section==='military').map(mp);
@@ -7338,6 +7356,7 @@ function populateFromData(data){
   NAVY=data.filter(p=>p.section==='navy').map(mp);
   ANNOUNCE=data.filter(p=>p.section==='announce').map(mp);
   SCENARIO=data.filter(p=>p.section==='scenario').map(mp);
+  try{ if(typeof BUILTIN_SCENARIO_DATA!=='undefined' && BUILTIN_SCENARIO_DATA.length){ SCENARIO=SCENARIO.concat(BUILTIN_SCENARIO_DATA.map(mp)); } }catch(e){}
   DICT=data.filter(p=>p.section==='dictionary').map(mp);
   SEM=data.filter(p=>p.section==='semantic').map(p=>({...mp(p),risk:p.tone||'low',dict:p.ar,field:p.why}));
   CUS=data.filter(p=>p.section==='customs' || (p.section==='heart' && p.cat==='מנהגים')).map(mp);
@@ -8373,7 +8392,8 @@ var SCN_CATEGORIES = [
       {id:'חיפוש פנימי ברכב', icon:'🚗', title:'חיפוש פנימי ברכב'},
       {id:'חיכוך במחסום', icon:'😤', title:'חיכוך במחסום'},
       {id:'אישורי כניסה', icon:'📄', title:'אישורי כניסה'},
-      {id:'עוצר', icon:'🚫', title:'הטלת/הסרת עוצר'}
+      {id:'עוצר', icon:'🚫', title:'הטלת/הסרת עוצר'},
+      {id:'הרחקה מהשטח', icon:'🚷', title:'הרחקה מהשטח'}
     ]
   },
   {
