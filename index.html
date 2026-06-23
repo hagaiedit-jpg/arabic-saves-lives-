@@ -11871,34 +11871,68 @@ function _gsSections(){
     { arr: typeof DICT!=='undefined'?DICT:[],   label:'מילון',     icon:'📖' }
   ];
 }
+var _gsFilter = 'all';
+function _gsRecentGet(){ try { return JSON.parse(localStorage.getItem('gs_recent') || '[]'); } catch(e) { return []; } }
+function _gsRecentAdd(q){
+  q = (q || '').trim(); if (q.length < 2) return;
+  try { var r = _gsRecentGet().filter(function(x){ return x !== q; }); r.unshift(q); localStorage.setItem('gs_recent', JSON.stringify(r.slice(0, 6))); } catch(e) {}
+}
+function _gsChipStyle(active){
+  return 'background:'+(active?'#D4A24E':'#18293E')+';border:1px solid '+(active?'#D4A24E':'#2A3D52')+';color:'+(active?'#0E1B2E':'#a0b8c8')+';border-radius:14px;padding:5px 11px;font-size:11px;font-weight:700;cursor:pointer;font-family:inherit;white-space:nowrap;';
+}
+function _gsEmptyHtml(){
+  var rec = _gsRecentGet();
+  var h = '<div style="text-align:center;color:#7a9ab5;font-size:13px;padding:24px 10px 14px;">הקלד מילה בעברית, ערבית או תעתיק כדי לחפש בכל הערכה.</div>';
+  if (rec.length) {
+    h += '<div style="color:#7a9ab5;font-size:11px;margin:0 2px 8px;">🕘 חיפושים אחרונים</div><div style="display:flex;flex-wrap:wrap;gap:8px;">';
+    rec.forEach(function(q){
+      var safe = String(q).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/'/g,"\\'");
+      h += '<button onclick="gsUseRecent(\''+safe+'\')" style="background:#18293E;border:1px solid #2A3D52;border-radius:14px;padding:7px 14px;color:#E8D9B8;font-size:13px;cursor:pointer;font-family:inherit;">'+String(q).replace(/&/g,'&amp;').replace(/</g,'&lt;')+'</button>';
+    });
+    h += '</div>';
+  }
+  return h;
+}
+function gsUseRecent(q){ var inp = document.getElementById('gs-input'); if (inp) inp.value = q; _gsFilter = 'all'; globalSearch(); }
+function setGsFilter(label){ _gsFilter = label; globalSearch(); }
 function openGlobalSearch(){
   var m = document.getElementById('gs-modal'); if(!m) return;
   m.style.display = 'block';
+  _gsFilter = 'all';
   var inp = document.getElementById('gs-input');
   if(inp){ inp.value=''; setTimeout(function(){ try{ inp.focus(); }catch(e){} }, 100); }
   globalSearch();
 }
 function closeGlobalSearch(){
   try{ if(window._gsAudio) window._gsAudio.pause(); }catch(e){}
+  try{ var inp = document.getElementById('gs-input'); if(inp) _gsRecentAdd(inp.value); }catch(e){}
   var m = document.getElementById('gs-modal'); if(m) m.style.display = 'none';
 }
 function globalSearch(){
   var out = document.getElementById('gs-results'); if(!out) return;
   var inp = document.getElementById('gs-input');
   var q = (inp && inp.value || '').trim().toLowerCase();
-  if(!q){ out.innerHTML='<div style="text-align:center;color:#7a9ab5;font-size:13px;padding:30px 10px;">הקלד מילה בעברית, ערבית או תעתיק כדי לחפש בכל הערכה.</div>'; return; }
+  if(!q){ out.innerHTML = _gsEmptyHtml(); return; }
   var results = [];
   _gsSections().forEach(function(s){
     (s.arr||[]).forEach(function(p){
       if(!p) return;
       var hay = ((p.he||'')+' '+(p.trans||'')+' '+(p.ar||'')+' '+(p.dict||'')+' '+(p.field||'')).toLowerCase();
       if(hay.indexOf(q)!==-1) results.push({ p:p, label:s.label, icon:s.icon });
-      // stop runaway
     });
   });
   if(!results.length){ out.innerHTML='<div style="text-align:center;color:#7a9ab5;font-size:13px;padding:30px 10px;">לא נמצאו תוצאות ל"'+q+'".</div>'; return; }
-  var capped = results.slice(0, 80);
-  var h = '<div style="color:#7a9ab5;font-size:11px;margin-bottom:10px;">'+results.length+' תוצאות'+(results.length>80?' (מוצגות 80 הראשונות)':'')+'</div>';
+  // Counts per section + filter chips
+  var counts = {}; results.forEach(function(r){ counts[r.label]=(counts[r.label]||0)+1; });
+  if(_gsFilter !== 'all' && !counts[_gsFilter]) _gsFilter = 'all';
+  var shown = results.filter(function(r){ return _gsFilter==='all' || r.label===_gsFilter; });
+  var chips = '<div style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:10px;">';
+  chips += '<button onclick="setGsFilter(\'all\')" style="'+_gsChipStyle(_gsFilter==='all')+'">הכל ('+results.length+')</button>';
+  _gsSections().forEach(function(s){ if(counts[s.label]) chips += '<button onclick="setGsFilter(\''+s.label.replace(/'/g,"\\'")+'\')" style="'+_gsChipStyle(_gsFilter===s.label)+'">'+s.icon+' '+s.label+' ('+counts[s.label]+')</button>'; });
+  chips += '</div>';
+  var capped = shown.slice(0, 80);
+  var h = chips;
+  h += '<div style="color:#7a9ab5;font-size:11px;margin-bottom:10px;">'+shown.length+' תוצאות'+(shown.length>80?' (מוצגות 80 הראשונות)':'')+'</div>';
   capped.forEach(function(r){
     var p = r.p;
     h += '<div style="background:#18293E;border:1px solid #2A3D52;border-radius:10px;padding:10px 12px;margin-bottom:8px;display:flex;align-items:center;gap:8px;">';
@@ -13572,6 +13606,25 @@ function initSunMode(){
   applySunMode(on);
 }
 try { initSunMode(); } catch(e) {}
+
+// Live offline/online indicator — reassures the soldier the kit works without signal.
+function updateConnStatus(){
+  try {
+    var b = document.getElementById('status-badge');
+    if (!b) return;
+    if (navigator.onLine === false) {
+      var hasCache = false; try { hasCache = !!localStorage.getItem('cached_phrases'); } catch(e) {}
+      b.textContent = hasCache ? '📴 אופליין · התוכן שמור' : '📴 אופליין';
+      b.style.background = '#D4A24E';
+    } else {
+      b.textContent = 'מחובר';
+      b.style.background = '#1D9E75';
+    }
+  } catch(e) {}
+}
+window.addEventListener('offline', updateConnStatus);
+window.addEventListener('online', updateConnStatus);
+try { if (navigator.onLine === false) updateConnStatus(); } catch(e) {}
 
 // PWA install prompt — capture the event and offer a one-time install banner.
 var _deferredInstall = null;
