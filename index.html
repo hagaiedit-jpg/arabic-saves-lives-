@@ -7796,7 +7796,7 @@ function bldCats(){
     const cls='ct'+(c.special==='navy'?' navy':c.special==='announce'?' announce':'');
     const cnt=c.special==='announce'?ANNOUNCE.length:c.special==='navy'?NAVY.length:cntC(c.id);
     return`<div class="${cls}" onclick="opC('${c.id}','${c.special||''}')">
-      ${n?'<div style="width:7px;height:7px;border-radius:50%;background:#D4A24E;position:absolute;top:9px;left:9px;"></div>':''}
+      ${n?'<div style="position:absolute;top:7px;left:7px;background:#D4A24E;color:#0E1B2E;font-size:9px;font-weight:800;padding:1px 7px;border-radius:8px;letter-spacing:0.3px;line-height:1.5;">חדש</div>':''}
       <div class="ci">${c.icon}</div><div class="cn">${c.id}</div><div class="cc">${cnt} פריטים</div></div>`;
   }).join('');
 }
