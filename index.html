@@ -3143,6 +3143,18 @@ function showLanding() {
     </div>
     <div id="reminder-status" style="color:#7a9ab5;font-size:11px;margin-bottom:14px;line-height:1.6;"></div>
     <button onclick="saveReminderSettings()" style="width:100%;background:#D4A24E;border:none;color:#0E1B2E;border-radius:10px;padding:12px;font-size:14px;font-weight:800;cursor:pointer;font-family:inherit;">שמור</button>
+
+    <div style="border-top:1px solid #2e4558;margin:18px 0 14px;"></div>
+    <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px;">
+      <span style="font-size:16px;">📲</span>
+      <span style="color:#E8D9B8;font-size:14px;font-weight:800;">תזכורת בוואטסאפ</span>
+    </div>
+    <div style="color:#7a9ab5;font-size:11.5px;line-height:1.6;margin-bottom:10px;">בלחיצה ייפתח וואטסאפ עם הודעה מוכנה לפי ההתקדמות שלך (רצף ומה שמחכה לחזרה). אפשר לשלוח לעצמך, לחבר לצוות או למפקד. ניתן לשמור את ההודעה כ"הודעה לעצמי" בוואטסאפ.</div>
+    <div style="display:flex;align-items:center;justify-content:space-between;background:rgba(255,255,255,0.04);padding:10px 12px;border-radius:10px;margin-bottom:10px;gap:8px;">
+      <span style="color:#E8D9B8;font-size:13px;white-space:nowrap;">המספר שלי (אופציונלי)</span>
+      <input type="tel" id="wa-self-number" placeholder="05X-XXXXXXX" onblur="saveMyWaNumber()" style="flex:1;min-width:0;background:#0E1B2E;border:1px solid #2e4558;color:#E8D9B8;border-radius:8px;padding:6px 10px;font-family:inherit;font-size:14px;direction:ltr;text-align:left;">
+    </div>
+    <button onclick="saveMyWaNumber();sendWaReminder()" style="width:100%;background:#1faf55;border:none;color:#fff;border-radius:10px;padding:12px;font-size:14px;font-weight:800;cursor:pointer;font-family:inherit;">📲 שלח תזכורת לוואטסאפ</button>
   </div>
 </div>
 
@@ -3841,6 +3853,7 @@ function openReminderSettings(){
   var cfg = _getReminderCfg();
   var en = document.getElementById('reminder-enabled'); if (en) en.checked = !!cfg.enabled;
   var tm = document.getElementById('reminder-time'); if (tm) tm.value = cfg.time || '08:00';
+  var wn = document.getElementById('wa-self-number'); if (wn) wn.value = getMyWaNumber();
   _updateReminderStatus();
   var m = document.getElementById('reminder-modal'); if (m) m.style.display = 'block';
 }
@@ -3908,7 +3921,70 @@ function _fireDailyReminder(){
   } catch(e) { console.warn('_fireDailyReminder error:', e); }
 }
 
-// === Unit leaderboard ===
+// === WhatsApp reminder (free, no server) — builds a progress-aware message
+// and opens WhatsApp so the soldier can send it to themselves / a buddy. ===
+function getDuePhrases(limit){
+  var out = [];
+  try {
+    var mem = getFlashMemory();
+    var now = Date.now();
+    var avail = (typeof DB !== 'undefined' && DB) ? DB.filter(function(p){ return p.he && p.ar && (p.audio_url || p.audio); }) : [];
+    for (var i = 0; i < avail.length && out.length < (limit || 3); i++) {
+      var p = avail[i];
+      var m = mem[String(p.id)];
+      if (!m || !m.state) continue;
+      var isDue = (m.state === 'attention') || ((typeof m.due === 'number') ? (m.due <= now) : (((now - (m.lastSeen || 0)) / 3600000) > 4));
+      if (isDue) out.push(p.he);
+    }
+  } catch(e) {}
+  return out;
+}
+function getMyWaNumber(){ try { return localStorage.getItem('wa_self_number') || ''; } catch(e) { return ''; } }
+function buildWaReminderText(){
+  var streak = 0, due = 0;
+  try { streak = parseInt(localStorage.getItem('streak_count') || '0', 10); } catch(e) {}
+  try {
+    var avail = (typeof DB !== 'undefined' && DB) ? DB.filter(function(p){ return p.he && p.ar && (p.audio_url || p.audio); }) : [];
+    due = getFlashDueCount(avail);
+  } catch(e) {}
+  var examples = getDuePhrases(3);
+  var lines = [];
+  lines.push('🎯 ערבית מצילה חיים — תזכורת תרגול');
+  lines.push('');
+  if (streak > 0) lines.push('🔥 רצף: ' + streak + ' ימים — אל תשבור אותו!');
+  if (due > 0) {
+    lines.push('📌 ' + due + ' משפטים מחכים לחזרה');
+    if (examples.length) {
+      lines.push('');
+      lines.push('לחזור היום:');
+      examples.forEach(function(he){ lines.push('• ' + he); });
+    }
+  } else {
+    lines.push('✅ אין כרגע משפטים לחזרה — זה הזמן ללמוד משפטים חדשים');
+  }
+  lines.push('');
+  lines.push('3 דקות תרגול היום שומרות על המוכנות 💪');
+  try { lines.push(location.origin + location.pathname); } catch(e) {}
+  return lines.join('\n');
+}
+function sendWaReminder(){
+  var text = encodeURIComponent(buildWaReminderText());
+  var num = (getMyWaNumber() || '').replace(/[^0-9]/g, '');
+  var url = num ? ('https://wa.me/' + num + '?text=' + text) : ('https://wa.me/?text=' + text);
+  try { window.open(url, '_blank'); } catch(e) { location.href = url; }
+}
+function saveMyWaNumber(){
+  var inp = document.getElementById('wa-self-number');
+  var raw = inp ? (inp.value || '') : '';
+  var digits = raw.replace(/[^0-9+]/g, '');
+  // Normalize a leading 0 to Israel country code (+972) for wa.me
+  var norm = digits.replace(/^\+/, '');
+  if (norm.charAt(0) === '0') norm = '972' + norm.slice(1);
+  try { localStorage.setItem('wa_self_number', norm); } catch(e) {}
+  if (inp) inp.value = raw;
+}
+
+
 function _lbUUID(){
   try { if (window.crypto && crypto.randomUUID) return crypto.randomUUID(); } catch(e) {}
   return 'c-' + Date.now().toString(36) + '-' + Math.random().toString(36).slice(2, 10);
