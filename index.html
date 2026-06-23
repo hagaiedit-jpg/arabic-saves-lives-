@@ -1022,12 +1022,16 @@ body.day-mode .force-dark [style*="color:#a0b8c8"]{color:#a0b8c8 !important;}
 body.day-mode .force-dark [style*="color:#7a9ab5"]{color:#7a9ab5 !important;}
 body.day-mode .force-dark [style*="color:#D4A24E"]{color:#D4A24E !important;}
 
-/* Weekly ritual card is a dark accent card — keep its text light/readable in day mode */
-body.day-mode #home-weekly-ritual [style*="color:#E8D9B8"]{color:#E8D9B8 !important;}
-body.day-mode #home-weekly-ritual [style*="color:#a0b8c8"]{color:#a0b8c8 !important;}
-body.day-mode #home-weekly-ritual [style*="color:#7a9ab5"]{color:#7a9ab5 !important;}
-body.day-mode #home-weekly-ritual [style*="color:#1D9E75"]{color:#1D9E75 !important;}
-body.day-mode #home-weekly-ritual [style*="color:#D4A24E"]{color:#D4A24E !important;}
+/* Weekly ritual card: match the app's light theme in day mode (was a dark accent) */
+body.day-mode #home-weekly-ritual > div{
+  background:linear-gradient(135deg,#fff8e7 0%,#f5e6c8 100%) !important;
+  border-color:rgba(212,134,46,0.4) !important;
+}
+body.day-mode #home-weekly-ritual [style*="color:#E8D9B8"]{color:#2c1810 !important;}
+body.day-mode #home-weekly-ritual [style*="color:#a0b8c8"]{color:#8B6F2B !important;}
+body.day-mode #home-weekly-ritual [style*="color:#7a9ab5"]{color:#8B6F2B !important;}
+body.day-mode #home-weekly-ritual [style*="color:#1D9E75"]{color:#0e5a3f !important;}
+body.day-mode #home-weekly-ritual [style*="color:#D4A24E"]{color:#a85200 !important;}
 
 /* Home tab specific */
 body.day-mode #home-greeting{color:#0e1b2e !important;}
