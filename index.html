@@ -7397,6 +7397,11 @@ function renderAllData(){
 }
 
 
+// Remove Arabic combining vowel-marks (fatha..sukun, shadda, superscript alef)
+// that corrupt Hebrew transliteration text (they show up as ▯). Safe on
+// transliteration only — never call this on the Arabic field.
+function _sanitizeTranslit(s){ return (s || '').replace(/[\u064B-\u065F\u0670]/g, ''); }
+
 function mp(p){
   const seen = getSeenIds();
   // Parse why field: may contain "real why\n---\ncultural fact"
@@ -7417,7 +7422,10 @@ function mp(p){
       if (!Array.isArray(parsedResponses)) parsedResponses = [];
     } catch(e) { parsedResponses = []; }
   }
-  var res={id:p.id,cat:p.cat||'',he:p.he||'',trans:p.trans||'',ar:p.ar||'',tags:p.tags||'',why:parsedWhy,tone:p.tone||'',audio:p.audio_url||'',when:p.tags||'',tip:parsedWhy,cultural:parsedCult,isNew:(p.is_new||false)&&!seen.includes(p.id),section:p.section,urgency:'',responses:parsedResponses};
+  // Strip Arabic vowel-marks (harakat/shadda/tanwin) that slipped into the
+  // Hebrew transliteration in some source rows and render as ▯ boxes.
+  try { parsedResponses = parsedResponses.map(function(r){ if (r && r.trans) r.trans = _sanitizeTranslit(r.trans); return r; }); } catch(e) {}
+  var res={id:p.id,cat:p.cat||'',he:p.he||'',trans:_sanitizeTranslit(p.trans),ar:p.ar||'',tags:p.tags||'',why:parsedWhy,tone:p.tone||'',audio:p.audio_url||'',when:p.tags||'',tip:parsedWhy,cultural:parsedCult,isNew:(p.is_new||false)&&!seen.includes(p.id),section:p.section,urgency:'',responses:parsedResponses};
   var _t=res.tone||'';
   var _m=_t.match(/^\[(urgent|sensitive)\]\s*/);
   if(_m){res.urgency=_m[1];res.tone=_t.substring(_m[0].length);}
