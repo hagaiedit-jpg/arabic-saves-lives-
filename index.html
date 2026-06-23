@@ -385,6 +385,7 @@ body.day-mode .toast{background:#fff;color:#0e1b2e;}
 .customs-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:6px;}
 .customs-cube{
   border-radius:16px;
+  position:relative;
   padding:22px 14px;
   text-align:center;
   cursor:pointer;
@@ -7776,6 +7777,10 @@ async function importBuiltinScenarios(btn){
 }
 
 function cntC(c){return DB.filter(p=>p.cat===c).length;}
+// Small "new content" label shown on a category cube (replaces the old dot).
+function _newTagHtml(){
+  return '<div style="position:absolute;top:7px;left:7px;background:#D4A24E;color:#0E1B2E;font-size:9px;font-weight:800;padding:1px 7px;border-radius:8px;letter-spacing:0.3px;line-height:1.5;">חדש</div>';
+}
 function bldCats(){
   var loadEl = document.getElementById('cats-loading');
   var gridEl = document.getElementById('cgrid');
@@ -7792,11 +7797,13 @@ function bldCats(){
   loadEl.style.display='none';
   gridEl.style.display='grid';
   gridEl.innerHTML=CATS.map(c=>{
-    const n=DB.some(p=>p.cat===c.id&&p.isNew);
+    const n = c.special==='navy' ? NAVY.some(p=>p.isNew)
+            : c.special==='announce' ? ANNOUNCE.some(p=>p.isNew)
+            : DB.some(p=>p.cat===c.id&&p.isNew);
     const cls='ct'+(c.special==='navy'?' navy':c.special==='announce'?' announce':'');
     const cnt=c.special==='announce'?ANNOUNCE.length:c.special==='navy'?NAVY.length:cntC(c.id);
     return`<div class="${cls}" onclick="opC('${c.id}','${c.special||''}')">
-      ${n?'<div style="position:absolute;top:7px;left:7px;background:#D4A24E;color:#0E1B2E;font-size:9px;font-weight:800;padding:1px 7px;border-radius:8px;letter-spacing:0.3px;line-height:1.5;">חדש</div>':''}
+      ${n?_newTagHtml():''}
       <div class="ci">${c.icon}</div><div class="cn">${c.id}</div><div class="cc">${cnt} פריטים</div></div>`;
   }).join('');
 }
@@ -10258,10 +10265,13 @@ function potdOpen(){
 }
 
 function rDG(){
-  document.getElementById('dgrid').innerHTML=DCATS.map(c=>`
-    <div class="ct daily" onclick="opDC('${c.id}')">
+  document.getElementById('dgrid').innerHTML=DCATS.map(c=>{
+    const n=DAILY.some(d=>d.cat===c.id&&d.isNew);
+    return `<div class="ct daily" onclick="opDC('${c.id}')">
+    ${n?_newTagHtml():''}
     <div class="ci">${c.icon}</div><div class="cn">${c.id}</div>
-    <div class="cc">${DAILY.filter(d=>d.cat===c.id).length} משפטים</div></div>`).join('');
+    <div class="cc">${DAILY.filter(d=>d.cat===c.id).length} משפטים</div></div>`;
+  }).join('');
 }
 
 function opDC(cat){
@@ -10291,7 +10301,9 @@ function rHrt(){
   // Render grid of categories instead of full list
   document.getElementById('hgrid').innerHTML=HCATS.map(c=>{
     const count = HEART.filter(h=>h.cat===c.id).length;
+    const n=HEART.some(h=>h.cat===c.id&&h.isNew);
     return `<div class="ct heart" onclick="opHC('${c.id}')">
+      ${n?_newTagHtml():''}
       <div class="ci">${c.icon}</div>
       <div class="cn">${c.id}</div>
       <div class="cc">${count} פריטים</div>
@@ -10778,7 +10790,9 @@ function rCus(){
     var items = groups[group.name] || [];
     if (items.length === 0) return; // skip empty groups
     var safeName = group.name.replace(/'/g, "\\'");
+    var gNew = items.some(function(it){ return it && it.isNew; });
     html += '<div class="customs-cube" style="background:' + group.color + ';" onclick="openCustomsGroup(\'' + safeName + '\')">'
+      + (gNew ? _newTagHtml() : '')
       + '<div class="customs-cube-icon">' + group.icon + '</div>'
       + '<div class="customs-cube-title">' + group.name + '</div>'
       + '<div class="customs-cube-count">' + items.length + ' פריטים</div>'
