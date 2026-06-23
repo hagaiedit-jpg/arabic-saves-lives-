@@ -859,6 +859,10 @@ body.day-mode .card:hover{
   transition:all 0.15s;
 }
 .scn-play-btn:active{transform:scale(0.95);}
+.scn-rec-btn{background:rgba(255,255,255,0.12);border:1px solid rgba(255,255,255,0.28);color:#fff;border-radius:14px;padding:5px 10px;font-size:12px;cursor:pointer;font-family:inherit;margin-right:6px;transition:all 0.15s;}
+.scn-rec-btn:active{transform:scale(0.95);}
+.scn-rec-btn.has-rec{background:rgba(29,158,117,0.25);border-color:#1D9E75;}
+.scn-rec-btn.recording{background:rgba(192,57,43,0.35);border-color:#c0392b;animation:badgePulse 1.4s ease-in-out infinite;}
 .scn-play-civilian{
   background:rgba(29,158,117,0.2);
   border-color:rgba(29,158,117,0.5);
@@ -7340,7 +7344,21 @@ var BUILTIN_SCENARIO_DATA = [
   {id:'bi-harhaka-10', section:'scenario', cat:'הרחקה מהשטח', tags:'step10', he:'קדימה, מהר!', ar:'يالله بسرعة!', trans:'יַאללַה בְּסֻרְעַה'},
   {id:'bi-harhaka-11', section:'scenario', cat:'הרחקה מהשטח', tags:'step11 civilian', he:'בסדר, אבל מי אתה?', ar:'حاضر بس مين انت؟', trans:'חַאצֵר בַּס מִין אִנְתֶ?'},
   {id:'bi-harhaka-12', section:'scenario', cat:'הרחקה מהשטח', tags:'step12', he:'זה לא עניינך. אני לא רוצה לראות אותך כאן עוד פעם, הבנת?!', ar:'هدا مش شغلك. ما بدّي أشوفك هون كمان مرّة، فاهم؟!', trans:'הַדַא מֻש שֻעְ׳לַכּ. מַא בִּדִי אַשוּפַכּ הוֹן כַּמַאן מַרַה, פַאהֶם?!'},
-  {id:'bi-harhaka-13', section:'scenario', cat:'הרחקה מהשטח', tags:'step13 civilian', he:'בסדר, אדוני.', ar:'حاضر يا سيدي.', trans:'חַאצֵר יַא סִידִי'}
+  {id:'bi-harhaka-13', section:'scenario', cat:'הרחקה מהשטח', tags:'step13 civilian', he:'בסדר, אדוני.', ar:'حاضر يا سيدي.', trans:'חַאצֵר יַא סִידִי'},
+
+  // שיחה 8: חקירה (interrogation) — soldier (א) ↔ interrogee (ב). Arabic + Hebrew reconstructed from the transliteration; verify line 11.
+  {id:'bi-haqira-1',  section:'scenario', cat:'חקירה', tags:'step1',  he:'ספר לי, אני רוצה לדעת — ראית מישהו חובש כובע (טאקייה) שעבר כאן לפני זמן קצר?', ar:'احكي لي، بدّي أعرف، إذا شفت واحد لابس طاقية فات من هون قبل شوي؟', trans:'אֶחְכִּי לִי, בִּדִּי אַעְרֵף — אִזַא שֻׁפְת וַאחַד לַאבֵּס טַקִיֶּה פַאת מִן הוֹן קַבֵּל שְׁוַי?'},
+  {id:'bi-haqira-2',  section:'scenario', cat:'חקירה', tags:'step2 civilian', he:'בחיי, ראיתי מישהו נכנס לבניין ההוא.', ar:'والله شفت واحد داخل لهديك (ال)عمارة', trans:'וַאללַה שֻׁפְת וַאחַד דַאחֵל לַהַדִיכּ (אל)עְמַארַה'},
+  {id:'bi-haqira-3',  section:'scenario', cat:'חקירה', tags:'step3',  he:'איזה בניין בדיוק? תראה לי!', ar:'أي عمارة بالضبط، فرجيني!', trans:'אַיّ עְמַארַה בִּ(אל)זַّבְּט, פַרְגִّינִי!'},
+  {id:'bi-haqira-4',  section:'scenario', cat:'חקירה', tags:'step4 civilian', he:'ההוא שיש בו שני חלונות ועליהם סורג.', ar:'هديك اللي فيها شبّاكين وعليهم شبكة', trans:'הַדִיכּ אֵללִّי פִיהַא שֻבַّאכֵּין וַעְלֵיהֻם שַׁבְּכֶּה'},
+  {id:'bi-haqira-5',  section:'scenario', cat:'חקירה', tags:'step5',  he:'ההוא שיש בו שלוש קומות?', ar:'هديك اللي فيها تلات طوابق؟', trans:'הַדִיכּ אֵללִّי פִיהַא תְלַאת טְוַאבֵּק?'},
+  {id:'bi-haqira-6',  section:'scenario', cat:'חקירה', tags:'step6 civilian', he:'כן, זה בדיוק.', ar:'اه، هادي بالضبط.', trans:'אַה, הַאדִי בִּ(אל)זַّבְּט.'},
+  {id:'bi-haqira-7',  section:'scenario', cat:'חקירה', tags:'step7',  he:'מה הוא החזיק בידו? אולי ראית משהו.', ar:'شو كان ماسك بإيدو؟ يمكن شفت إشي.', trans:'שׁוּ כַּאן מַאסֵّכּ בִּאִידוֹ? יִמְכֵּן שֻׁפְת אִשִׁי.'},
+  {id:'bi-haqira-8',  section:'scenario', cat:'חקירה', tags:'step8 civilian', he:'היו איתו שקית וסל, אולי חזר מהשוק.', ar:'كان معو كيس وسلّة، يمكن رجّع من (ال)سوق.', trans:'כַּאן מַעוֹ כִּיס וְסַלֶّה, יִמְכֵּן רַגֵّע מִן (אל)סּוּק.'},
+  {id:'bi-haqira-9',  section:'scenario', cat:'חקירה', tags:'step9',  he:'אתה מכיר את האיש הזה?', ar:'انت بتعرفو هـ(ال)زلمة؟', trans:'אִנְתֶ בְּתִעְרְפוֹ הַ(אל)זַّלַמֶה?'},
+  {id:'bi-haqira-10', section:'scenario', cat:'חקירה', tags:'step10 civilian', he:'לא, אני לא מכיר אותו.', ar:'لا، ما بعرفو.', trans:'לַא, מַא בַּעְרְפוֹ.'},
+  {id:'bi-haqira-11', section:'scenario', cat:'חקירה', tags:'step11', he:'אתה שקרן! ספר לי את האמת. אם לא בטובות — אז בדרך אחרת!', ar:'انت كذّاب! احكي لي (ال)صحيح. إذا مش بالمنيح — في غيرو!', trans:'אִנְתֶ כַּדַّאב! אֶחְכִּי לִי (אל)צַّחִיח. אִזַא מֻש בִּ(אל)מְנִיח — פִי עֵ׳ירוֹ!'},
+  {id:'bi-haqira-12', section:'scenario', cat:'חקירה', tags:'step12 civilian', he:'בחיי, אני לא מכיר אותו, אבל לפעמים הוא עובר כאן, לא תמיד.', ar:'والله أنا ما بعرفو، بس مرّات بيمرق من هون، مش دايماً.', trans:'וַאללַה אַנַא מַא בַּעְרְפוֹ, בַּס מַרّאת בְּיִמְרֻק מִן הוֹן, מֻש דַאיְמַן.'}
 ];
 
 // Populate all section arrays from a raw phrases array (used for both live and cached data)
@@ -8376,7 +8394,8 @@ var SCN_CATEGORIES = [
       {id:'חיכוך בכפר', icon:'🏪', title:'חיכוך עם תושבים בכפר'},
       {id:'זיהוי שקרים', icon:'🕵️', title:'זיהוי שקרים'},
       {id:'איתור מבוקש', icon:'📍', title:'איתור מבוקש'},
-      {id:'תפיסת מחבל ללא מתשאל', icon:'🎯', title:'תפיסת חשוד ללא מתורגמן'}
+      {id:'תפיסת מחבל ללא מתשאל', icon:'🎯', title:'תפיסת חשוד ללא מתורגמן'},
+      {id:'חקירה', icon:'🕵️‍♂️', title:'חקירה'}
     ]
   },
   {
@@ -9499,6 +9518,7 @@ function renderScnChat(){
         if (p.ar) html += '<div class="scn-bubble-ar">' + p.ar + '</div>';
         html += '<div class="scn-bubble-footer">';
         html += '<button onclick="scnPlayBubble(' + idx + ',this)" class="scn-play-btn scn-play-civilian">▶ השמע</button>';
+        html += scnRecBtnHtml(idx);
         html += '<span class="scn-step-num">' + (idx + 1) + '/' + _scnSteps.length + '</span>';
         html += '</div>';
         html += '</div>';
@@ -9514,6 +9534,7 @@ function renderScnChat(){
         if (p.ar) html += '<div class="scn-bubble-ar">' + p.ar + '</div>';
         html += '<div class="scn-bubble-footer">';
         html += '<button onclick="scnPlayBubble(' + idx + ',this)" class="scn-play-btn scn-play-fsoldier">▶ השמע</button>';
+        html += scnRecBtnHtml(idx);
         html += '<span class="scn-step-num">' + (idx + 1) + '/' + _scnSteps.length + '</span>';
         html += '</div>';
         html += '</div>';
@@ -9529,6 +9550,7 @@ function renderScnChat(){
         if (p.ar) html += '<div class="scn-bubble-ar">' + p.ar + '</div>';
         html += '<div class="scn-bubble-footer">';
         html += '<button onclick="scnPlayBubble(' + idx + ',this)" class="scn-play-btn scn-play-soldier">▶ השמע</button>';
+        html += scnRecBtnHtml(idx);
         html += '<span class="scn-step-num">' + (idx + 1) + '/' + _scnSteps.length + '</span>';
         html += '</div>';
         html += '</div>';
@@ -9538,6 +9560,7 @@ function renderScnChat(){
     });
     
     chatEl.innerHTML = html;
+    try { scnMarkRecordings(); } catch(e) {}
     
     // Show done card - in continuous mode always, in interactive only when reached last step
     var doneCard = document.getElementById('scn-done-card');
@@ -9549,40 +9572,105 @@ function renderScnChat(){
   } catch(e) { console.warn('renderScnChat error:', e); }
 }
 
+// === Local audio recordings for scenario lines (free, on-device, IndexedDB) ===
+function _recDB(cb){
+  try {
+    var req = indexedDB.open('asl_recordings', 1);
+    req.onupgradeneeded = function(){ try { req.result.createObjectStore('audio'); } catch(e){} };
+    req.onsuccess = function(){ cb(req.result); };
+    req.onerror = function(){ cb(null); };
+  } catch(e) { cb(null); }
+}
+function recSaveBlob(id, blob, done){
+  if (id == null) { done && done(false); return; }
+  _recDB(function(db){
+    if (!db) { done && done(false); return; }
+    try { var tx = db.transaction('audio','readwrite'); tx.objectStore('audio').put(blob, String(id));
+      tx.oncomplete = function(){ done && done(true); }; tx.onerror = function(){ done && done(false); };
+    } catch(e){ done && done(false); }
+  });
+}
+function recGetBlob(id, done){
+  if (id == null) { done(null); return; }
+  _recDB(function(db){
+    if (!db) { done(null); return; }
+    try { var r = db.transaction('audio','readonly').objectStore('audio').get(String(id));
+      r.onsuccess = function(){ done(r.result || null); }; r.onerror = function(){ done(null); };
+    } catch(e){ done(null); }
+  });
+}
+function recDeleteBlob(id, done){
+  if (id == null) { done && done(false); return; }
+  _recDB(function(db){
+    if (!db) { done && done(false); return; }
+    try { var tx = db.transaction('audio','readwrite'); tx.objectStore('audio').delete(String(id));
+      tx.oncomplete = function(){ done && done(true); }; tx.onerror = function(){ done && done(false); };
+    } catch(e){ done && done(false); }
+  });
+}
+function scnRecBtnHtml(idx){
+  return '<button onclick="scnToggleRecord(' + idx + ',this)" id="scn-rec-' + idx + '" class="scn-rec-btn" title="הקלט / החלף הקלטה">🎙</button>';
+}
+// After a dialogue render, mark which lines already have a local recording.
+function scnMarkRecordings(){
+  if (!_scnSteps) return;
+  _scnSteps.forEach(function(p, i){
+    recGetBlob(p.id, function(blob){
+      var b = document.getElementById('scn-rec-' + i);
+      if (b && blob) { b.textContent = '🎙✓'; b.classList.add('has-rec'); }
+    });
+  });
+}
+var _scnRec = { rec:null, chunks:[], stream:null };
+function scnToggleRecord(idx, btn){
+  try {
+    if (!_scnSteps || !_scnSteps[idx]) return;
+    var step = _scnSteps[idx];
+    if (_scnRec.rec && _scnRec.rec.state === 'recording') { _scnRec.rec.stop(); return; }
+    if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia || typeof MediaRecorder === 'undefined') {
+      alert('המכשיר/דפדפן לא תומך בהקלטה.'); return;
+    }
+    navigator.mediaDevices.getUserMedia({ audio:true }).then(function(stream){
+      var rec; try { rec = new MediaRecorder(stream); } catch(e) { rec = new MediaRecorder(stream, {}); }
+      _scnRec.rec = rec; _scnRec.chunks = []; _scnRec.stream = stream;
+      rec.ondataavailable = function(e){ if (e.data && e.data.size) _scnRec.chunks.push(e.data); };
+      rec.onstop = function(){
+        try { stream.getTracks().forEach(function(t){ t.stop(); }); } catch(e){}
+        var type = (_scnRec.chunks[0] && _scnRec.chunks[0].type) || 'audio/webm';
+        var blob = new Blob(_scnRec.chunks, { type: type });
+        recSaveBlob(step.id, blob, function(ok){
+          if (btn) { btn.textContent = ok ? '🎙✓' : '🎙'; btn.classList.remove('recording'); if (ok) btn.classList.add('has-rec'); }
+        });
+      };
+      rec.start();
+      if (btn) { btn.textContent = '⏹ עצור'; btn.classList.add('recording'); }
+    }).catch(function(){ alert('לא ניתן לגשת למיקרופון — צריך לאשר הרשאה.'); });
+  } catch(e) { console.warn(e); }
+}
+
+function _scnPlayUrl(url, btn, revoke){
+  document.querySelectorAll('.scn-play-btn.playing').forEach(function(b){ b.classList.remove('playing'); b.textContent = '▶ השמע'; });
+  if (window._scnCurrentAudio) { try { window._scnCurrentAudio.pause(); } catch(e){} }
+  window._scnCurrentAudio = new Audio(url);
+  if (btn) {
+    btn.classList.add('playing'); btn.textContent = '⏸ עוצר';
+    var reset = function(){ btn.classList.remove('playing'); btn.textContent = '▶ השמע'; if (revoke) { try { URL.revokeObjectURL(url); } catch(e){} } };
+    window._scnCurrentAudio.onended = reset;
+    window._scnCurrentAudio.onerror = reset;
+  }
+  window._scnCurrentAudio.play().catch(function(){});
+}
 function scnPlayBubble(idx, btn){
   try {
     if (!_scnSteps || !_scnSteps[idx]) return;
-    var audioUrl = _scnSteps[idx].audio;
-    if (!audioUrl) {
-      alert('אין הקלטה למשפט זה עדיין');
-      return;
-    }
-    // Track this phrase as learned
-    if (_scnSteps[idx].id && typeof trackLearned === 'function') {
-      trackLearned(_scnSteps[idx].id);
-    }
-    // Clear all playing states
-    document.querySelectorAll('.scn-play-btn.playing').forEach(function(b){
-      b.classList.remove('playing');
-      b.textContent = '▶ השמע';
+    var step = _scnSteps[idx];
+    if (step.id && typeof trackLearned === 'function') trackLearned(step.id);
+    if (step.audio) { _scnPlayUrl(step.audio, btn, false); return; }
+    // No official recording — fall back to a clip recorded locally on this device
+    recGetBlob(step.id, function(blob){
+      if (blob) { _scnPlayUrl(URL.createObjectURL(blob), btn, true); }
+      else { alert('אין הקלטה למשפט זה עדיין — אפשר להקליט עם 🎙'); }
     });
-    if (window._scnCurrentAudio) {
-      window._scnCurrentAudio.pause();
-    }
-    window._scnCurrentAudio = new Audio(audioUrl);
-    if (btn) {
-      btn.classList.add('playing');
-      btn.textContent = '⏸ עוצר';
-      window._scnCurrentAudio.onended = function(){
-        btn.classList.remove('playing');
-        btn.textContent = '▶ השמע';
-      };
-      window._scnCurrentAudio.onerror = function(){
-        btn.classList.remove('playing');
-        btn.textContent = '▶ השמע';
-      };
-    }
-    window._scnCurrentAudio.play();
   } catch(e) { console.warn(e); }
 }
 
