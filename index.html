@@ -9588,7 +9588,6 @@ function renderScnChat(){
         if (p.ar) html += '<div class="scn-bubble-ar">' + p.ar + '</div>';
         html += '<div class="scn-bubble-footer">';
         html += '<button onclick="scnPlayBubble(' + idx + ',this)" class="scn-play-btn scn-play-civilian">▶ השמע</button>';
-        html += scnRecBtnHtml(idx);
         html += '<span class="scn-step-num">' + (idx + 1) + '/' + _scnSteps.length + '</span>';
         html += '</div>';
         html += '</div>';
@@ -9604,7 +9603,6 @@ function renderScnChat(){
         if (p.ar) html += '<div class="scn-bubble-ar">' + p.ar + '</div>';
         html += '<div class="scn-bubble-footer">';
         html += '<button onclick="scnPlayBubble(' + idx + ',this)" class="scn-play-btn scn-play-fsoldier">▶ השמע</button>';
-        html += scnRecBtnHtml(idx);
         html += '<span class="scn-step-num">' + (idx + 1) + '/' + _scnSteps.length + '</span>';
         html += '</div>';
         html += '</div>';
@@ -9620,7 +9618,6 @@ function renderScnChat(){
         if (p.ar) html += '<div class="scn-bubble-ar">' + p.ar + '</div>';
         html += '<div class="scn-bubble-footer">';
         html += '<button onclick="scnPlayBubble(' + idx + ',this)" class="scn-play-btn scn-play-soldier">▶ השמע</button>';
-        html += scnRecBtnHtml(idx);
         html += '<span class="scn-step-num">' + (idx + 1) + '/' + _scnSteps.length + '</span>';
         html += '</div>';
         html += '</div>';
@@ -9630,7 +9627,6 @@ function renderScnChat(){
     });
     
     chatEl.innerHTML = html;
-    try { scnMarkRecordings(); } catch(e) {}
     
     // Show done card - in continuous mode always, in interactive only when reached last step
     var doneCard = document.getElementById('scn-done-card');
