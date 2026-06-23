@@ -518,6 +518,9 @@ body.day-mode .tb-tab-sec.active{color:#a85200;border-bottom-color:#a85200;}
 .tb-tab-sec{flex:1 1 0;min-width:0;text-align:center;padding:12px 3px;color:rgba(210,180,140,0.7);font-size:13.5px;font-weight:500;line-height:1.2;cursor:pointer;border-bottom:2px solid transparent;transition:color 0.15s,border-color 0.15s;}
 .tb-tab-sec.active{color:#E8D9B8;border-bottom-color:#D4A24E;}
 .scr{display:none;max-width:480px;margin-left:auto;margin-right:auto;}.scr.on{display:block;}
+/* Accessibility: larger text for field use (zoom scales the on-screen content) */
+body.text-lg .scr{ zoom:1.12; }
+body.text-xl .scr{ zoom:1.25; }
 .sbar{background:#D4A24E;padding:10px 12px;}
 .si{background:#fff;border-radius:8px;display:flex;align-items:center;padding:0 12px;gap:8px;}
 .si input{flex:1;border:none;outline:none;font-size:16px;padding:11px 0;direction:rtl;font-family:inherit;color:#222;background:transparent;}
@@ -1999,6 +2002,10 @@ function showLanding() {
       <span id="themeMenuIcon" style="font-size:18px;">🔄</span>
       <span id="themeMenuLabel">ערכת נושא: אוטומטי</span>
     </button>
+    <button onclick="cycleTextSize();" style="display:flex;align-items:center;gap:10px;width:100%;background:transparent;border:none;color:#E8D9B8;padding:10px 12px;text-align:right;cursor:pointer;font-family:inherit;font-size:14px;border-radius:8px;">
+      <span style="font-size:18px;">🔤</span>
+      <span id="textSizeLabel">גודל טקסט: רגיל</span>
+    </button>
     <button onclick="openReminderSettings();" style="display:flex;align-items:center;gap:10px;width:100%;background:transparent;border:none;color:#E8D9B8;padding:10px 12px;text-align:right;cursor:pointer;font-family:inherit;font-size:14px;border-radius:8px;">
       <span style="font-size:18px;">🔔</span>
       <span>תזכורת יומית</span>
@@ -2061,6 +2068,16 @@ function showLanding() {
           <div id="home-potd-trans" style="color:#7a9ab5;font-size:12px;line-height:1.35;"></div>
         </div>
       </div>
+    </div>
+
+    <!-- ⏱️ Daily nudge: minute-a-day / streak-at-risk (only when not practiced today) -->
+    <div id="home-daily-nudge" onclick="quickDailyDrill()" style="display:none;align-items:center;gap:12px;background:linear-gradient(135deg,#c0392b 0%,#7a2018 100%);border-radius:14px;padding:13px 15px;margin-bottom:14px;cursor:pointer;box-shadow:0 4px 12px rgba(192,57,43,0.3);">
+      <div id="home-daily-nudge-icon" style="font-size:26px;">🔥</div>
+      <div style="flex:1;min-width:0;">
+        <div id="home-daily-nudge-title" class="keep-white" style="color:#fff;font-size:15px;font-weight:800;"></div>
+        <div id="home-daily-nudge-sub" style="color:rgba(255,255,255,0.9);font-size:12px;"></div>
+      </div>
+      <div class="keep-white" style="color:#fff;font-size:20px;">◀</div>
     </div>
 
     <!-- 🗓️ Weekly readiness ritual (shown once per week) -->
@@ -3720,6 +3737,25 @@ function _actDate(val){
 }
 function _actDay(val){ var d=_actDate(val); return d?d.toDateString():''; }
 
+// Did the soldier practice today? (used for the daily nudge / streak-at-risk)
+function _practicedToday(){
+  try {
+    var today = new Date().toDateString();
+    var learned = {}, practiced = {};
+    try { learned = JSON.parse(localStorage.getItem('learned_phrases') || '{}'); } catch(e) {}
+    try { practiced = JSON.parse(localStorage.getItem('practiced_phrases') || '{}'); } catch(e) {}
+    for (var k in learned) { if (_actDay(learned[k]) === today) return true; }
+    for (var k2 in practiced) { if (_actDay(practiced[k2]) === today) return true; }
+  } catch(e) {}
+  return false;
+}
+// "דקה ביום" — a frictionless 5-card session that REUSES the existing SRS
+// review (no new drill type), so it never overlaps with the training hub.
+function quickDailyDrill(){
+  try { navToTab('flash'); } catch(e) {}
+  setTimeout(function(){ try { flashStart('smart', 5); } catch(e) {} }, 60);
+}
+
 function renderWeeklySummary() {
   try {
     var cubesEl = document.getElementById('home-stats-cubes');
@@ -3968,7 +4004,15 @@ function _fireDailyReminder(){
     var due = 0;
     try { var avail = (DB || []).filter(function(p){ return p.he && p.ar && (p.audio_url || p.audio); }); due = getFlashDueCount(avail); } catch(e) {}
     if (practicedToday && due === 0) return; // nothing worth nudging about
-    var body = due > 0 ? (due + ' משפטים מחכים לחזרה — 3 דקות וזה נצרב') : 'דקות ספורות של תרגול היום שומרות על המוכנות';
+    var streak = 0; try { streak = parseInt(localStorage.getItem('streak_count') || '0', 10); } catch(e) {}
+    var body;
+    if (!practicedToday && streak > 0) {
+      body = '🔥 הרצף שלך (' + streak + ' ימים) בסכנה — דקה אחת שומרת עליו';
+    } else if (due > 0) {
+      body = due + ' משפטים מחכים לחזרה — 3 דקות וזה נצרב';
+    } else {
+      body = 'דקות ספורות של תרגול היום שומרות על המוכנות';
+    }
     var title = 'ערבית מצילה חיים';
     var opts = { body: body, icon: './icon.svg', badge: './icon.svg', tag: 'daily-reminder' };
     if ('serviceWorker' in navigator && navigator.serviceWorker.controller) {
@@ -5578,6 +5622,33 @@ function renderHome(){
         potdCard.style.display = 'none';
       }
     }
+
+    // Daily nudge — minute-a-day / streak-at-risk (only when not practiced today)
+    try {
+      var nudge = document.getElementById('home-daily-nudge');
+      if (nudge) {
+        if (_practicedToday()) {
+          nudge.style.display = 'none';
+        } else {
+          var nStreak = parseInt(localStorage.getItem('streak_count') || '0', 10);
+          var nT = document.getElementById('home-daily-nudge-title');
+          var nS = document.getElementById('home-daily-nudge-sub');
+          var nI = document.getElementById('home-daily-nudge-icon');
+          if (nStreak > 0) {
+            if (nI) nI.textContent = '🔥';
+            if (nT) nT.textContent = 'הרצף שלך (' + nStreak + ') בסכנה';
+            if (nS) nS.textContent = 'דקה אחת של תרגול שומרת עליו — קדימה';
+            nudge.style.background = 'linear-gradient(135deg,#c0392b 0%,#7a2018 100%)';
+          } else {
+            if (nI) nI.textContent = '⏱️';
+            if (nT) nT.textContent = 'דקה ביום';
+            if (nS) nS.textContent = 'תרגול קצר לשמירה על המוכנות — 5 כרטיסים';
+            nudge.style.background = 'linear-gradient(135deg,#1D9E75 0%,#0e5a3f 100%)';
+          }
+          nudge.style.display = 'flex';
+        }
+      }
+    } catch(e) {}
   } catch(e) { console.warn('renderHome error:', e); }
 }
 
@@ -6866,7 +6937,7 @@ function exitFieldMode(){
   navToTab('home');
 }
 
-function flashStart(mode){
+function flashStart(mode, qCountOverride){
   mode = mode || 'smart';
   _flashState.mode = mode;
   
@@ -6885,7 +6956,7 @@ function flashStart(mode){
   }
   
   // Determine how many questions (no daily limit!)
-  var qCount = Math.min(10, available.length);
+  var qCount = qCountOverride ? Math.min(qCountOverride, available.length) : Math.min(10, available.length);
   var selected = pickFlashQuestions(available, qCount, mode);
   
   // Generate questions with type
@@ -13408,6 +13479,28 @@ function toggleTheme(){
   try { localStorage.setItem('theme_pref', current === 'day' ? 'night' : 'day'); } catch(e) {}
   applyThemeFromPref();
 }
+// Accessibility: text size (0=normal, 1=large, 2=xl) — scales on-screen content.
+function applyTextScale(level){
+  try {
+    document.body.classList.remove('text-lg','text-xl');
+    if (level === 1) document.body.classList.add('text-lg');
+    else if (level === 2) document.body.classList.add('text-xl');
+    var lbl = document.getElementById('textSizeLabel');
+    if (lbl) lbl.textContent = 'גודל טקסט: ' + (level === 0 ? 'רגיל' : (level === 1 ? 'גדול' : 'ענק'));
+  } catch(e) {}
+}
+function cycleTextSize(){
+  var cur = 0; try { cur = parseInt(localStorage.getItem('text_scale') || '0', 10) || 0; } catch(e) {}
+  cur = (cur + 1) % 3;
+  try { localStorage.setItem('text_scale', String(cur)); } catch(e) {}
+  applyTextScale(cur);
+}
+function initTextScale(){
+  var cur = 0; try { cur = parseInt(localStorage.getItem('text_scale') || '0', 10) || 0; } catch(e) {}
+  applyTextScale(cur);
+}
+try { initTextScale(); } catch(e) {}
+
 // Theme preference: 'auto' (by time of day), 'day', or 'night'. Default = auto.
 function _autoThemeMode(){ var h = new Date().getHours(); return (h >= 6 && h < 18) ? 'day' : 'night'; }
 function getThemePref(){ return localStorage.getItem('theme_pref') || 'auto'; }
