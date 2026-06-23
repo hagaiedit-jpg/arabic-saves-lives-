@@ -3983,6 +3983,18 @@ function saveMyWaNumber(){
   try { localStorage.setItem('wa_self_number', norm); } catch(e) {}
   if (inp) inp.value = raw;
 }
+// Reusable "keep the streak" prompt shown at the end of every practice session,
+// so the reminder/WhatsApp options are caught at peak motivation (not hidden in settings).
+function continuityCtaHtml(){
+  var h = '<div style="background:rgba(31,175,85,0.08);border:1px solid rgba(31,175,85,0.3);border-radius:12px;padding:12px;margin-top:14px;text-align:center;">';
+  h += '<div style="color:#E8D9B8;font-size:12.5px;font-weight:800;margin-bottom:3px;">📌 שמור על הרצף</div>';
+  h += '<div style="color:#7a9ab5;font-size:11px;margin-bottom:10px;line-height:1.5;">קבע תזכורת לתרגול הבא — דקות ביום שומרות על המוכנות</div>';
+  h += '<div style="display:flex;gap:8px;">';
+  h += '<button onclick="sendWaReminder()" style="flex:1;background:#1faf55;border:none;color:#fff;border-radius:9px;padding:11px;font-size:13px;font-weight:800;cursor:pointer;font-family:inherit;">📲 וואטסאפ</button>';
+  h += '<button onclick="openReminderSettings()" style="flex:1;background:rgba(212,162,78,0.18);border:1px solid #D4A24E;color:#E8D9B8;border-radius:9px;padding:11px;font-size:13px;font-weight:700;cursor:pointer;font-family:inherit;">🔔 תזכורת יומית</button>';
+  h += '</div></div>';
+  return h;
+}
 
 
 function _lbUUID(){
@@ -6718,7 +6730,8 @@ function finishFieldMode(){
   html += '<button onclick="startFieldMode()" style="background:linear-gradient(135deg,#c0392b 0%,#922d22 100%);border:none;color:#fff;border-radius:10px;padding:12px 22px;font-size:13px;font-weight:700;cursor:pointer;font-family:inherit;">🔄 שוב</button>';
   html += '<button onclick="exitFieldMode()" style="background:transparent;border:1px solid #7a9ab5;color:#a0b8c8;border-radius:10px;padding:12px 22px;font-size:13px;font-weight:700;cursor:pointer;font-family:inherit;">סיום</button>';
   html += '</div>';
-  
+
+  html += continuityCtaHtml();
   html += '</div>';
   container.innerHTML = html;
   
@@ -7107,7 +7120,8 @@ function flashFinish(){
       }
       html += '</div>';
     }
-    
+
+    html += continuityCtaHtml();
     msgEl.innerHTML = html;
     msgEl.className = 'result-msg-anim';
   }
@@ -11354,7 +11368,7 @@ function lcFinish(){
     +'<div style="color:#E8D9B8;font-size:20px;font-weight:800;margin-bottom:6px;">'+window._lcCorrect+' / '+window._lcTotal+' נכונות</div>'
     +'<div style="color:#7a9ab5;font-size:14px;margin-bottom:20px;">'+msg+'</div>'
     +'<button onclick="lcStart()" style="width:100%;padding:13px;background:#1D9E75;border:none;border-radius:10px;color:#fff;font-size:15px;font-weight:700;cursor:pointer;font-family:inherit;margin-bottom:8px;">🔁 סבב נוסף</button>'
-    +'<button onclick="lcClose()" style="width:100%;padding:13px;background:#2A3D52;border:none;border-radius:10px;color:#E8D9B8;font-size:15px;cursor:pointer;font-family:inherit;">סיום</button></div>';
+    +'<button onclick="lcClose()" style="width:100%;padding:13px;background:#2A3D52;border:none;border-radius:10px;color:#E8D9B8;font-size:15px;cursor:pointer;font-family:inherit;">סיום</button>'+continuityCtaHtml()+'</div>';
 }
 function lcClose(){ try{ if(window._lcAudio)window._lcAudio.pause(); }catch(e){} document.getElementById('lc-modal').style.display='none'; }
 
@@ -11424,7 +11438,7 @@ function ppFinish(){
     +'<div style="color:#E8D9B8;font-size:20px;font-weight:800;margin-bottom:6px;">'+window._ppCorrect+' / '+window._ppTotal+' ידעת</div>'
     +'<div style="color:#7a9ab5;font-size:14px;margin-bottom:20px;">'+msg+'</div>'
     +'<button onclick="ppStart()" style="width:100%;padding:13px;background:#D4A24E;border:none;border-radius:10px;color:#0E1B2E;font-size:15px;font-weight:700;cursor:pointer;font-family:inherit;margin-bottom:8px;">🔁 סבב נוסף</button>'
-    +'<button onclick="ppClose()" style="width:100%;padding:13px;background:#2A3D52;border:none;border-radius:10px;color:#E8D9B8;font-size:15px;cursor:pointer;font-family:inherit;">סיום</button></div>';
+    +'<button onclick="ppClose()" style="width:100%;padding:13px;background:#2A3D52;border:none;border-radius:10px;color:#E8D9B8;font-size:15px;cursor:pointer;font-family:inherit;">סיום</button>'+continuityCtaHtml()+'</div>';
 }
 function ppClose(){ try{ if(window._ppAudio)window._ppAudio.pause(); }catch(e){} document.getElementById('pp-modal').style.display='none'; }
 
