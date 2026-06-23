@@ -3993,7 +3993,53 @@ function continuityCtaHtml(){
   h += '<button onclick="sendWaReminder()" style="flex:1;background:#1faf55;border:none;color:#fff;border-radius:9px;padding:11px;font-size:13px;font-weight:800;cursor:pointer;font-family:inherit;">📲 וואטסאפ</button>';
   h += '<button onclick="openReminderSettings()" style="flex:1;background:rgba(212,162,78,0.18);border:1px solid #D4A24E;color:#E8D9B8;border-radius:9px;padding:11px;font-size:13px;font-weight:700;cursor:pointer;font-family:inherit;">🔔 תזכורת יומית</button>';
   h += '</div></div>';
+  try { setTimeout(maybePromptReminderOnboarding, 900); } catch(e){}
   return h;
+}
+
+// One-time gentle nudge to turn on the automatic daily reminder, shown after
+// the first finished practice session (the free channel that reaches the
+// soldier when the app is closed).
+function maybePromptReminderOnboarding(){
+  try {
+    if (localStorage.getItem('onboard_reminder_prompted') === '1') return;
+    var cfg = {}; try { cfg = JSON.parse(localStorage.getItem('daily_reminder') || '{}'); } catch(e) {}
+    if (cfg.enabled) { localStorage.setItem('onboard_reminder_prompted', '1'); return; }
+    if (typeof Notification !== 'undefined' && Notification.permission === 'denied') { localStorage.setItem('onboard_reminder_prompted', '1'); return; }
+    localStorage.setItem('onboard_reminder_prompted', '1');
+    showReminderOnboarding();
+  } catch(e) {}
+}
+function showReminderOnboarding(){
+  var m = document.getElementById('reminder-onboard-modal');
+  if (!m) {
+    m = document.createElement('div');
+    m.id = 'reminder-onboard-modal';
+    m.style.cssText = 'position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.65);z-index:10000;direction:rtl;display:flex;align-items:center;justify-content:center;padding:20px;';
+    m.onclick = function(e){ if (e.target === m) closeReminderOnboarding(); };
+    m.innerHTML =
+      '<div style="max-width:340px;width:100%;background:#18293E;border:1px solid #2e4558;border-radius:16px;padding:22px 20px;text-align:center;box-shadow:0 10px 40px rgba(0,0,0,0.5);">'
+      + '<div style="font-size:42px;margin-bottom:8px;">🔔</div>'
+      + '<div style="color:#E8D9B8;font-size:18px;font-weight:800;margin-bottom:8px;">שנשמור על הרצף?</div>'
+      + '<div style="color:#7a9ab5;font-size:13px;line-height:1.6;margin-bottom:18px;">נזכיר לך כל יום בקצרה לתרגל את מה שמחכה לחזרה — דקות ביום שומרות על המוכנות. אפשר לבטל בכל רגע.</div>'
+      + '<button onclick="enableDailyReminderQuick()" style="width:100%;background:#D4A24E;border:none;color:#0E1B2E;border-radius:10px;padding:13px;font-size:14px;font-weight:800;cursor:pointer;font-family:inherit;margin-bottom:8px;">כן, הפעל תזכורת יומית</button>'
+      + '<button onclick="closeReminderOnboarding()" style="width:100%;background:transparent;border:none;color:#7a9ab5;border-radius:10px;padding:8px;font-size:13px;cursor:pointer;font-family:inherit;">אולי אחר כך</button>'
+      + '</div>';
+    document.body.appendChild(m);
+  }
+  m.style.display = 'flex';
+}
+function closeReminderOnboarding(){ var m = document.getElementById('reminder-onboard-modal'); if (m) m.style.display = 'none'; }
+function enableDailyReminderQuick(){
+  closeReminderOnboarding();
+  function finish(){
+    try { localStorage.setItem('daily_reminder', JSON.stringify({ enabled: true, time: '08:00' })); } catch(e) {}
+    try { scheduleDailyReminder(); } catch(e) {}
+    try { openReminderSettings(); } catch(e) {} // let them pick a time + see options
+  }
+  if (typeof Notification !== 'undefined' && Notification.permission === 'default') {
+    try { Notification.requestPermission().then(finish); } catch(e) { finish(); }
+  } else { finish(); }
 }
 
 
