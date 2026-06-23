@@ -521,6 +521,13 @@ body.day-mode .tb-tab-sec.active{color:#a85200;border-bottom-color:#a85200;}
 /* Accessibility: larger text for field use (zoom scales the on-screen content) */
 body.text-lg .scr{ zoom:1.12; }
 body.text-xl .scr{ zoom:1.25; }
+/* Sun mode: higher contrast + larger tap targets for bright outdoors / gloves */
+body.sun-mode .scr{ filter:contrast(1.2) saturate(1.05); }
+body.sun-mode #bottom-nav{ padding-top:11px; padding-bottom:11px; }
+body.sun-mode .bn-btn{ padding:10px 4px; }
+body.sun-mode .scn-play-btn,
+body.sun-mode .scn-rec-btn{ padding:9px 18px; font-size:14px; }
+body.sun-mode .qk-card, body.sun-mode .card{ border-width:2px; }
 .sbar{background:#D4A24E;padding:10px 12px;}
 .si{background:#fff;border-radius:8px;display:flex;align-items:center;padding:0 12px;gap:8px;}
 .si input{flex:1;border:none;outline:none;font-size:16px;padding:11px 0;direction:rtl;font-family:inherit;color:#222;background:transparent;}
@@ -2005,6 +2012,10 @@ function showLanding() {
     <button onclick="cycleTextSize();" style="display:flex;align-items:center;gap:10px;width:100%;background:transparent;border:none;color:#E8D9B8;padding:10px 12px;text-align:right;cursor:pointer;font-family:inherit;font-size:14px;border-radius:8px;">
       <span style="font-size:18px;">🔤</span>
       <span id="textSizeLabel">גודל טקסט: רגיל</span>
+    </button>
+    <button onclick="toggleSunMode();" style="display:flex;align-items:center;gap:10px;width:100%;background:transparent;border:none;color:#E8D9B8;padding:10px 12px;text-align:right;cursor:pointer;font-family:inherit;font-size:14px;border-radius:8px;">
+      <span style="font-size:18px;">☀️</span>
+      <span id="sunModeLabel">מצב שמש: כבוי</span>
     </button>
     <button onclick="openReminderSettings();" style="display:flex;align-items:center;gap:10px;width:100%;background:transparent;border:none;color:#E8D9B8;padding:10px 12px;text-align:right;cursor:pointer;font-family:inherit;font-size:14px;border-radius:8px;">
       <span style="font-size:18px;">🔔</span>
@@ -3736,6 +3747,17 @@ function _actDate(val){
   return isNaN(d.getTime())?null:d;
 }
 function _actDay(val){ var d=_actDate(val); return d?d.toDateString():''; }
+
+// Celebrate reaching the daily goal — once per day (confetti + toast).
+function _celebrateDailyGoal(){
+  try {
+    var today = new Date().toDateString();
+    if (localStorage.getItem('daily_goal_celebrated') === today) return;
+    localStorage.setItem('daily_goal_celebrated', today);
+    if (typeof launchConfetti === 'function') setTimeout(launchConfetti, 200);
+    if (typeof showToast === 'function') showToast('🎯 סיימת את היעד היומי! כל הכבוד', 'success');
+  } catch(e) {}
+}
 
 // Did the soldier practice today? (used for the daily nudge / streak-at-risk)
 function _practicedToday(){
@@ -5514,6 +5536,7 @@ function renderHome(){
       // Highlight when goal completed
       if (todayCount >= dailyGoal) {
         goalNum.style.color = '#1D9E75';
+        try { _celebrateDailyGoal(); } catch(e) {}
       }
     }
     
@@ -13530,6 +13553,25 @@ function initTextScale(){
   applyTextScale(cur);
 }
 try { initTextScale(); } catch(e) {}
+
+// Sun mode: high-contrast + bigger tap targets for outdoor / gloved use.
+function applySunMode(on){
+  try {
+    document.body.classList.toggle('sun-mode', !!on);
+    var lbl = document.getElementById('sunModeLabel');
+    if (lbl) lbl.textContent = 'מצב שמש: ' + (on ? 'פעיל' : 'כבוי');
+  } catch(e) {}
+}
+function toggleSunMode(){
+  var on = !document.body.classList.contains('sun-mode');
+  try { localStorage.setItem('sun_mode', on ? '1' : '0'); } catch(e) {}
+  applySunMode(on);
+}
+function initSunMode(){
+  var on = false; try { on = localStorage.getItem('sun_mode') === '1'; } catch(e) {}
+  applySunMode(on);
+}
+try { initSunMode(); } catch(e) {}
 
 // PWA install prompt — capture the event and offer a one-time install banner.
 var _deferredInstall = null;
