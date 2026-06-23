@@ -7479,13 +7479,13 @@ var BUILTIN_CUSTOMS = [
     id:'bi-cust-talaq', section:'customs', cat:'דת ואסלאם',
     he:'🕌 גירושין באסלאם — דע לפני שאתה בשטח',
     trans:'אַנְתִ טָאלֶק', ar:'انتِ طالق',
-    why:"הגירושין מותרים, אבל שנואים. אומר החדית': מכל המותר — הגירושין הם השנואים ביותר בעיני אלוהים.<br><br>📌 <b>המילה שמפעילה הכול:</b> \"אַנְתִ טָאלֶק\" (انتِ طالق) — \"הרי את מגורשת\". רק הבעל אומר אותה.<br><br>🔄 <b>יש דרך חזרה — תלוי בכמה פעמים:</b><br>• פעם 1 ← אפשר להתחרט תוך 130 יום (4 חודשים ו-10 ימים)<br>• בהריון? ← אסור לגרש עד אחרי הלידה<br>• 3 פעמים ← סוף. אין דרך חזרה<br><br>⚠️ <b>בשטח:</b> \"טָאלֶק\" היא מילה טעונה. אם היא עולה — הרגישות בשיא. נהג באיפוק."
+    why:"הגירושין מותרים, אבל שנואים. אומר החדית': מכל המותר — הגירושין הם השנואים ביותר בעיני אלוהים.<br><br>📌 <b>המילה שמפעילה הכול:</b> \"אַנְתִ טָאלֶק\" (انتِ طالق) — \"הרי את מגורשת\". רק הבעל אומר אותה.<br><br>🔄 <b>יש דרך חזרה — תלוי בכמה פעמים:</b><br>• פעם 1 ← אפשר להתחרט תוך 130 יום (4 חודשים ו-10 ימים)<br>• בהריון? ← אסור לגרש עד אחרי הלידה<br>• 3 פעמים ← סוף. אין דרך חזרה<br><br>⚠️ <b>ההקשר ללוחם:</b> \"טָאלֶק\" היא מילה טעונה. אם היא עולה — הרגישות בשיא. נהג באיפוק."
   },
   {
     id:'bi-cust-halal', section:'customs', cat:'דת ואסלאם',
     he:'🍖 מה אסור לאכול ולשתות באסלאם (חלאל)',
     trans:'חַלַאל / חַרַאם', ar:'حلال / حرام',
-    why:"באסלאם יש כללים ברורים על אוכל ושתייה — שווה להכיר, זה רגיש בשטח.<br><br>🚫 <b>בשר אסור (חַרַאם):</b><br>• חזיר<br>• בהמה שמתה מעצמה, נפלה מגובה, או נהרגה בידי חיה אחרת<br>• בשר שנשחט בלי לומר את שם אללה<br>• בשר שהוקרב לאלילים או שזכו בו בהימורים<br><br>✅ <b>מותר (חַלַאל):</b> בשר שנשחט כראוי, תוך אמירת שם אללה.<br><br>🍷 <b>אלכוהול — אסור לחלוטין.</b> הקוראן (סורת אל-מאאִדה): \"היין וההימורים... טומאה ומעשה שטן — התרחקו מהם\".<br><br>⚠️ <b>בשטח:</b> אל תציע אוכל או שתייה בלי לוודא — הצעת חזיר או אלכוהול נתפסת כעלבון חמור."
+    why:"באסלאם יש כללים ברורים על אוכל ושתייה — שווה להכיר, זה רגיש בשטח.<br><br>🚫 <b>בשר אסור (חַרַאם):</b><br>• חזיר<br>• בהמה שמתה מעצמה, נפלה מגובה, או נהרגה בידי חיה אחרת<br>• בשר שנשחט בלי לומר את שם אללה<br>• בשר שהוקרב לאלילים או שזכו בו בהימורים<br><br>✅ <b>מותר (חַלַאל):</b> בשר שנשחט כראוי, תוך אמירת שם אללה.<br><br>🍷 <b>אלכוהול — אסור לחלוטין.</b> הקוראן (סורת אל-מאאִדה): \"היין וההימורים... טומאה ומעשה שטן — התרחקו מהם\".<br><br>⚠️ <b>ההקשר ללוחם:</b> אל תציע אוכל או שתייה בלי לוודא — הצעת חזיר או אלכוהול נתפסת כעלבון חמור."
   }
 ];
 
@@ -10764,6 +10764,27 @@ function rCus(){
   grid.innerHTML = html;
 }
 
+// Make customs body text readable: structure server "wall of text" into lines
+// and present the field-context label uniformly. Built-in topics (already
+// structured with <br>/<b>) only get the label coloured.
+function formatCustomsBody(txt){
+  if (!txt) return '';
+  var s = String(txt).replace(/\r/g, '');
+  var preformatted = /<br|<b>/i.test(s);
+  if (!preformatted) {
+    s = s.replace(/\n/g, '<br>');
+    // Put the field-context label on its own bold/gold line
+    s = s.replace(/(?:⚠️\s*)?(ההקשר ללוחם|המלצה ללוחם|הקשר ללוחם|טיפ ללוחם)\s*:/g,
+      '<br><br>⚠️ <span style="color:#D4A24E;font-weight:700;">$1:</span><br>');
+    s = s.replace(/(<br>\s*){3,}/g, '<br><br>').replace(/^(?:<br>\s*)+/, '');
+  } else {
+    // already structured — just make the field label gold for consistency
+    s = s.replace(/<b>(⚠️\s*)?(ההקשר ללוחם|המלצה ללוחם|הקשר ללוחם|טיפ ללוחם)([^<]*)<\/b>/g,
+      '<b style="color:#D4A24E;">$1$2$3</b>');
+  }
+  return s;
+}
+
 function openCustomsGroup(groupName){
   // Show all items that belong to this main group
   var items = CUS.filter(function(c){
@@ -10775,12 +10796,8 @@ function openCustomsGroup(groupName){
   document.getElementById('customs-list-title').textContent = groupName;
   var html = '';
   items.forEach(function(c){
-    var txt = c.why || c.ar || '';
-    txt = txt.replace(/(המלצה ללוחם[:]?)/g, '<span style="color:#D4A24E;font-weight:700;font-size:14px;">$1</span>');
-    txt = txt.replace(/(ההקשר ללוחם[:]?)/g, '<span style="color:#D4A24E;font-weight:700;font-size:14px;">$1</span>');
-    txt = txt.replace(/(הקשר ללוחם[:]?)/g, '<span style="color:#D4A24E;font-weight:700;font-size:14px;">$1</span>');
-    txt = txt.replace(/(טיפ ללוחם[:]?)/g, '<span style="color:#D4A24E;font-weight:700;font-size:14px;">$1</span>');
-    html += '<div class="card"><div class="che">' + c.he + '</div><div style="color:#a0b8c8;font-size:13px;line-height:1.7;margin-top:6px;">' + txt + '</div></div>';
+    var txt = formatCustomsBody(c.why || c.ar || '');
+    html += '<div class="card"><div class="che">' + c.he + '</div><div style="color:#a0b8c8;font-size:13.5px;line-height:1.85;margin-top:8px;">' + txt + '</div></div>';
   });
   document.getElementById('cuslist').innerHTML = html;
 }
@@ -10793,12 +10810,8 @@ function openCustomsCat(cat){
   document.getElementById('customs-list-title').textContent = cat;
   var html = '';
   items.forEach(function(c){
-    var txt = c.why || c.ar || '';
-    txt = txt.replace(/(המלצה ללוחם[:]?)/g, '<span style="color:#D4A24E;font-weight:700;font-size:14px;">$1</span>');
-    txt = txt.replace(/(ההקשר ללוחם[:]?)/g, '<span style="color:#D4A24E;font-weight:700;font-size:14px;">$1</span>');
-    txt = txt.replace(/(הקשר ללוחם[:]?)/g, '<span style="color:#D4A24E;font-weight:700;font-size:14px;">$1</span>');
-    txt = txt.replace(/(טיפ ללוחם[:]?)/g, '<span style="color:#D4A24E;font-weight:700;font-size:14px;">$1</span>');
-    html += '<div class="card"><div class="che">' + c.he + '</div><div style="color:#a0b8c8;font-size:13px;line-height:1.7;margin-top:6px;">' + txt + '</div></div>';
+    var txt = formatCustomsBody(c.why || c.ar || '');
+    html += '<div class="card"><div class="che">' + c.he + '</div><div style="color:#a0b8c8;font-size:13.5px;line-height:1.85;margin-top:8px;">' + txt + '</div></div>';
   });
   document.getElementById('cuslist').innerHTML = html;
 }
