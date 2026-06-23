@@ -1681,6 +1681,28 @@ body.day-mode .emerg-grid{
 }
 
 
+/* === Day mode: scenarios grid + admin/edit lists (were hardcoded dark) === */
+body.day-mode #tab-scn [style*="#1F3147"],
+body.day-mode #tab-scn [style*="#243a55"],
+body.day-mode #tab-adm [style*="background:#0E1B2E"],
+body.day-mode #tab-adm [style*="background:#18293E"],
+body.day-mode #admin-list [style*="background:#0E1B2E"],
+body.day-mode #admin-list [style*="background:#18293E"]{
+  background:#fff8e7 !important;
+  border-color:rgba(212,134,46,0.3) !important;
+}
+body.day-mode #tab-adm [style*="background:#2A3D52"],
+body.day-mode #admin-list [style*="background:#2A3D52"]{ background:#efe0c2 !important; }
+body.day-mode #tab-scn [style*="color:#E8D9B8"],
+body.day-mode #tab-adm [style*="color:#E8D9B8"],
+body.day-mode #admin-list [style*="color:#E8D9B8"],
+body.day-mode #tab-adm [style*="color:#fff"],
+body.day-mode #admin-list [style*="color:#fff"]{ color:#1a2b3c !important; }
+body.day-mode #tab-scn [style*="color:#7a9ab5"],
+body.day-mode #tab-scn [style*="color:#5a6b80"],
+body.day-mode #tab-adm [style*="color:#7a9ab5"],
+body.day-mode #admin-list [style*="color:#7a9ab5"]{ color:#5a6b80 !important; }
+
 /* === Day Mode Overrides for New Components === */
 body.day-mode #home-streak-card,
 body.day-mode #home-weekly-summary,
