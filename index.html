@@ -1709,6 +1709,28 @@ body.day-mode #tab-scn [style*="color:#a0b8c8"],
 body.day-mode #tab-adm [style*="color:#7a9ab5"],
 body.day-mode #admin-list [style*="color:#7a9ab5"]{ color:#5a6b80 !important; }
 
+/* === Day mode: shared library / dictionary / announce / admin-form / edit / popups === */
+body.day-mode .lhdr{ background:#f5e6c8 !important; border-bottom-color:rgba(212,134,46,0.25) !important; }
+body.day-mode .dict-item{ background:#fff8e7 !important; border-color:rgba(212,134,46,0.3) !important; }
+body.day-mode .dict-he{ color:#1a2b3c !important; }
+body.day-mode .dict-ar{ color:#1a2b3c !important; }
+body.day-mode .dict-trans{ color:#a85200 !important; }
+body.day-mode .announce-text{ background:#fff8e7 !important; color:#1a2b3c !important; }
+body.day-mode .announce-trans{ background:#f5e6c8 !important; color:#3a2c10 !important; }
+body.day-mode .atab{ background:#efe0c2 !important; border-color:rgba(212,134,46,0.3) !important; color:#5a6b80 !important; }
+body.day-mode .acard{ background:#fff8e7 !important; border-color:rgba(212,134,46,0.3) !important; }
+body.day-mode .afl label{ color:#3a2c10 !important; }
+body.day-mode .afl input, body.day-mode .afl select, body.day-mode .afl textarea{ background:#fffdf7 !important; border-color:rgba(212,134,46,0.4) !important; color:#1a2b3c !important; }
+body.day-mode .afl select option{ background:#fffdf7 !important; color:#1a2b3c !important; }
+body.day-mode .welcome-pop, body.day-mode .help-pop{ background:linear-gradient(135deg,#fff8e7 0%,#f5e6c8 100%) !important; }
+body.day-mode .help-pop .help-h-sub, body.day-mode .help-pop .help-desc{ color:#5a6b80 !important; }
+body.day-mode .help-pop .help-txt strong, body.day-mode .help-pop strong{ color:#1a2b3c !important; }
+/* Edit modal */
+body.day-mode #edit-modal [style*="background:#0E1B2E"]{ background:#fff8e7 !important; border-color:rgba(212,134,46,0.3) !important; }
+body.day-mode #edit-modal [style*="#13263c"]{ background:#f5e6c8 !important; }
+body.day-mode #edit-modal [style*="background:#2A3D52"]{ background:#efe0c2 !important; }
+body.day-mode #edit-modal [style*="color:#E8D9B8"]{ color:#1a2b3c !important; }
+
 /* === Day Mode Overrides for New Components === */
 body.day-mode #home-streak-card,
 body.day-mode #home-weekly-summary,
@@ -3025,7 +3047,7 @@ function showLanding() {
     <div id="at-qrec" style="display:none;">
       <div class="acard">
         <div style="color:#E8D9B8;font-size:14px;font-weight:700;margin-bottom:6px;">🎤 הקלטת תשובות</div>
-        <div style="color:#7a9ab5;font-size:11.5px;line-height:1.6;margin-bottom:12px;">כל התשובות האפשריות, בזו אחר זו. לחצי 🎤 כדי להקליט תשובה (נשמרת מיד), ▶ כדי לשמוע, או ✏️ כדי לערוך את הטקסט.</div>
+        <div style="color:#7a9ab5;font-size:11.5px;line-height:1.6;margin-bottom:12px;">כל התשובות האפשריות, בזו אחר זו. לחץ 🎤 כדי להקליט תשובה (נשמרת מיד), ▶ כדי לשמוע, או ✏️ כדי לערוך את הטקסט.</div>
         <label style="display:flex;align-items:center;gap:8px;cursor:pointer;color:#E8D9B8;font-size:12.5px;margin-bottom:6px;"><input type="checkbox" id="qrec-onlymissing" onchange="renderRespRecList()" style="width:15px;height:15px;cursor:pointer;"> הצג רק תשובות בלי הקלטה</label>
         <button onclick="renderRespRecList()" style="width:100%;padding:10px;background:#2A3D52;border:none;border-radius:8px;color:#E8D9B8;font-size:12px;font-weight:700;cursor:pointer;font-family:inherit;">🔄 רענן רשימה</button>
       </div>
@@ -4114,8 +4136,8 @@ function _lbRenderSetup(){
   var b = document.getElementById('lb-body'); if (!b) return;
   b.innerHTML =
     '<div style="background:#18293E;border:1px solid #2A3D52;border-radius:14px;padding:16px;">'
-    + '<div style="color:#E8D9B8;font-size:14px;font-weight:700;margin-bottom:4px;">הצטרפי ללוח היחידה</div>'
-    + '<div style="color:#7a9ab5;font-size:11.5px;margin-bottom:14px;line-height:1.5;">בחרי כינוי וקוד יחידה. כל מי שמזין את אותו קוד רואה אותו לוח. אל תזיני שם מלא או פרטים מזהים.</div>'
+    + '<div style="color:#E8D9B8;font-size:14px;font-weight:700;margin-bottom:4px;">הצטרף ללוח היחידה</div>'
+    + '<div style="color:#7a9ab5;font-size:11.5px;margin-bottom:14px;line-height:1.5;">בחר כינוי וקוד יחידה. כל מי שמזין את אותו קוד רואה אותו לוח. אל תזין שם מלא או פרטים מזהים.</div>'
     + '<label style="color:#a0b8c8;font-size:12px;">כינוי</label>'
     + '<input id="lb-nick" maxlength="20" value="' + (p.nickname || '').replace(/"/g, '&quot;') + '" placeholder="לדוגמה: נמר" style="width:100%;box-sizing:border-box;background:#0E1B2E;border:1px solid #2e4558;color:#E8D9B8;border-radius:8px;padding:10px;font-family:inherit;font-size:15px;margin:4px 0 12px;direction:rtl;text-align:right;">'
     + '<label style="color:#a0b8c8;font-size:12px;">קוד יחידה</label>'
@@ -4150,7 +4172,7 @@ async function _lbLoad(){
   } catch(e) {
     b.innerHTML = '<div style="background:rgba(192,57,43,0.12);border:1px solid rgba(192,57,43,0.4);border-radius:12px;padding:16px;color:#E8D9B8;font-size:12.5px;line-height:1.6;">'
       + 'לא הצלחנו לטעון את הלוח. ייתכן שאין חיבור, או שטבלת <code>leaderboard</code> עדיין לא הוקמה בשרת.'
-      + '<div style="margin-top:10px;"><button onclick="_lbLoad()" style="background:#2A3D52;border:none;color:#E8D9B8;border-radius:8px;padding:8px 16px;cursor:pointer;font-family:inherit;font-size:12px;">נסי שוב</button> '
+      + '<div style="margin-top:10px;"><button onclick="_lbLoad()" style="background:#2A3D52;border:none;color:#E8D9B8;border-radius:8px;padding:8px 16px;cursor:pointer;font-family:inherit;font-size:12px;">נסה שוב</button> '
       + '<button onclick="_lbRenderSetup()" style="background:transparent;border:1px solid #2e4558;color:#a0b8c8;border-radius:8px;padding:8px 16px;cursor:pointer;font-family:inherit;font-size:12px;">שינוי כינוי/קוד</button></div></div>';
   }
 }
@@ -4161,7 +4183,7 @@ function _lbRenderBoard(rows, p, myScore, myStreak){
     + '<div><div style="color:#D4A24E;font-size:11px;font-weight:700;">היחידה שלך</div><div style="color:#E8D9B8;font-size:15px;font-weight:800;">' + (p.unit_code || '') + '</div></div>'
     + '<div style="text-align:left;"><div style="color:#1D9E75;font-size:18px;font-weight:800;">' + myScore + '</div><div style="color:#7a9ab5;font-size:10px;">הניקוד שלך השבוע</div></div></div>';
   if (!rows.length) {
-    h += '<div style="text-align:center;color:#7a9ab5;padding:24px;font-size:13px;">עדיין אין נתונים השבוע. תרגלי — ותהיי הראשונה בלוח! 💪</div>';
+    h += '<div style="text-align:center;color:#7a9ab5;padding:24px;font-size:13px;">עדיין אין נתונים השבוע. תרגל — ותהיה הראשון בלוח! 💪</div>';
   } else {
     h += '<div style="display:flex;flex-direction:column;gap:7px;">';
     rows.forEach(function(r, i){
@@ -4169,7 +4191,7 @@ function _lbRenderBoard(rows, p, myScore, myStreak){
       var rank = medals[i] || (i + 1);
       h += '<div style="display:flex;align-items:center;gap:10px;background:' + (isMe ? 'rgba(212,162,78,0.15)' : '#18293E') + ';border:1px solid ' + (isMe ? 'rgba(212,162,78,0.5)' : '#2A3D52') + ';border-radius:10px;padding:10px 12px;">'
         + '<div style="width:26px;text-align:center;font-size:' + (i < 3 ? '18px' : '13px') + ';font-weight:800;color:#a0b8c8;">' + rank + '</div>'
-        + '<div style="flex:1;min-width:0;color:#E8D9B8;font-size:14px;font-weight:' + (isMe ? '800' : '600') + ';overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">' + (r.nickname || '—') + (isMe ? ' (את)' : '') + '</div>'
+        + '<div style="flex:1;min-width:0;color:#E8D9B8;font-size:14px;font-weight:' + (isMe ? '800' : '600') + ';overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">' + (r.nickname || '—') + (isMe ? ' (אני)' : '') + '</div>'
         + '<div style="color:#7a9ab5;font-size:11px;">🔥' + (r.streak || 0) + '</div>'
         + '<div style="color:#1D9E75;font-size:15px;font-weight:800;min-width:34px;text-align:left;">' + (r.score || 0) + '</div>'
         + '</div>';
@@ -7309,18 +7331,6 @@ function homePotdDismiss(){
   if (c) c.style.display = 'none';
 }
 
-function homePotdOpen(){
-  try {
-    if (!window._homePotdId) return;
-    if (typeof DB === 'undefined' || !DB) return;
-    var i = DB.findIndex(function(x){return x.id === window._homePotdId;});
-    if (i >= 0 && typeof opP === 'function') {
-      navToTab('lib');
-      setTimeout(function(){ opP(i); }, 200);
-    }
-  } catch(e) { console.warn(e); }
-}
-
 async function loadData(){
   try{
     const data=await sbFetch('/rest/v1/phrases?select=*&order=created_at.asc');
@@ -8051,7 +8061,7 @@ function opNavyList(cat){
       '<div style="font-size:24px;">🎯</div>' +
       '<div>' +
         '<div style="color:#fff;font-size:15px;font-weight:700;">התחל מצב למידה</div>' +
-        '<div style="color:rgba(255,255,255,0.85);font-size:12px;">תרגלי את כל הקטגוריה שלב-שלב</div>' +
+        '<div style="color:rgba(255,255,255,0.85);font-size:12px;">תרגל את כל הקטגוריה שלב-שלב</div>' +
       '</div>' +
     '</div>' +
     '<div style="height:6px;background:rgba(255,255,255,0.2);border-radius:3px;overflow:hidden;">' +
@@ -9281,13 +9291,13 @@ function renderScnScore(){
       html += '<div style="text-align:center;padding:6px;">';
       html += '<div style="font-size:32px;margin-bottom:8px;">⚠️</div>';
       html += '<div style="color:#c0392b;font-size:14px;font-weight:700;margin-bottom:4px;">ההקלטה קצרה מדי</div>';
-      html += '<div style="color:#a0b8c8;font-size:12px;">נסי שוב - דברי ברור ולא ממהרת</div>';
+      html += '<div style="color:#a0b8c8;font-size:12px;">נסה שוב - דבר ברור ולא ממהר</div>';
       html += '</div>';
     } else {
       // Header
       html += '<div style="text-align:center;margin-bottom:12px;">';
       html += '<div style="font-size:18px;font-weight:700;color:#D4A24E;margin-bottom:4px;">🎯 השוואת הגייה</div>';
-      html += '<div style="color:#a0b8c8;font-size:12px;">השמיעי את שתי ההקלטות והקשיבי טוב לטון, הדגשים והקצב</div>';
+      html += '<div style="color:#a0b8c8;font-size:12px;">השמע את שתי ההקלטות והקשב טוב לטון, הדגשים והקצב</div>';
       html += '</div>';
       
       // Side-by-side comparison buttons
@@ -9329,12 +9339,12 @@ function renderScnScore(){
   // Simple success - DEPRECATED, kept for backward compat
   if (s.simpleSuccess) {
     var icon = s.durationOk !== false ? '✅' : '⚠️';
-    var msg = s.durationOk !== false ? 'הקלטה נשמרה' : 'ההקלטה קצרה - נסי שוב';
+    var msg = s.durationOk !== false ? 'הקלטה נשמרה' : 'ההקלטה קצרה - נסה שוב';
     var color = s.durationOk !== false ? '#1D9E75' : '#D4A24E';
     return '<div style="margin-top:10px;padding:14px;text-align:center;background:rgba(' + (s.durationOk !== false ? '29,158,117' : '212,134,46') + ',0.15);border:1px solid ' + color + ';border-radius:10px;">' +
            '<div style="font-size:24px;margin-bottom:4px;">' + icon + '</div>' +
            '<div style="color:' + color + ';font-size:13px;font-weight:700;">' + msg + '</div>' +
-           '<div style="color:#a0b8c8;font-size:11px;margin-top:4px;">לחצי "השמע שלי" כדי לבדוק</div>' +
+           '<div style="color:#a0b8c8;font-size:11px;margin-top:4px;">לחץ "השמע שלי" כדי לבדוק</div>' +
            '</div>';
   }
   
@@ -9375,7 +9385,7 @@ function renderScnScore(){
       break;
     default:
       color = '#c0392b'; bgColor = 'rgba(192,57,43,0.12)';
-      emoji = '🎯'; mainText = 'נסי שוב';
+      emoji = '🎯'; mainText = 'נסה שוב';
   }
   
   var html = '<div style="margin-top:10px;padding:12px;background:' + bgColor + ';border:1px solid ' + color + ';border-radius:10px;">';
@@ -9663,28 +9673,6 @@ function recGetBlob(id, done){
     try { var r = db.transaction('audio','readonly').objectStore('audio').get(String(id));
       r.onsuccess = function(){ done(r.result || null); }; r.onerror = function(){ done(null); };
     } catch(e){ done(null); }
-  });
-}
-function recDeleteBlob(id, done){
-  if (id == null) { done && done(false); return; }
-  _recDB(function(db){
-    if (!db) { done && done(false); return; }
-    try { var tx = db.transaction('audio','readwrite'); tx.objectStore('audio').delete(String(id));
-      tx.oncomplete = function(){ done && done(true); }; tx.onerror = function(){ done && done(false); };
-    } catch(e){ done && done(false); }
-  });
-}
-function scnRecBtnHtml(idx){
-  return '<button onclick="scnToggleRecord(' + idx + ',this)" id="scn-rec-' + idx + '" class="scn-rec-btn" title="הקלט / החלף הקלטה">🎙</button>';
-}
-// After a dialogue render, mark which lines already have a local recording.
-function scnMarkRecordings(){
-  if (!_scnSteps) return;
-  _scnSteps.forEach(function(p, i){
-    recGetBlob(p.id, function(blob){
-      var b = document.getElementById('scn-rec-' + i);
-      if (b && blob) { b.textContent = '🎙✓'; b.classList.add('has-rec'); }
-    });
   });
 }
 var _scnRec = { rec:null, chunks:[], stream:null };
@@ -11227,7 +11215,7 @@ function playPopupAudio(btn, mode) {
   
   var url = window._popupAudio || '';
   if (!url) { 
-    alert('אין עדיין הקלטה למשפט זה.\n\nלחצי "פתח בקטגוריה" כדי לעבור לתרגל את הקטגוריה.');
+    alert('אין עדיין הקלטה למשפט זה.\n\nלחץ "פתח בקטגוריה" כדי לעבור לתרגל את הקטגוריה.');
     return; 
   }
   
@@ -12150,7 +12138,7 @@ async function recordQueueItem(i){
     var stream=await navigator.mediaDevices.getUserMedia({audio:true});
     var rec=createRecorder(stream); var chunks=[];
     window._queueRec=rec; window._queueRecIdx=i;
-    if(statusEl){ statusEl.textContent='🔴 מקליט... לחצי לעצור'; statusEl.style.color='#e74c3c'; }
+    if(statusEl){ statusEl.textContent='🔴 מקליט... לחץ לעצור'; statusEl.style.color='#e74c3c'; }
     if(btn) btn.textContent='⏹ עצור';
     rec.ondataavailable=function(ev){ if(ev.data && ev.data.size>0) chunks.push(ev.data); };
     rec.onstop=async function(){
@@ -13107,7 +13095,7 @@ function openEmergCat(key){
   
   var el=document.getElementById('emerg-items');
   if(!items.length){
-    el.innerHTML='<div class="empty">אין עדיין משפטים בקטגוריה זו.<br>הוסיפי משפטים בקטגוריה המתאימה בספרייה והם יופיעו כאן אוטומטית.</div>';
+    el.innerHTML='<div class="empty">אין עדיין משפטים בקטגוריה זו.<br>הוסף משפטים בקטגוריה המתאימה בספרייה והם יופיעו כאן אוטומטית.</div>';
     return;
   }
   
@@ -13169,7 +13157,7 @@ function printPocketCard(){
     + '<div class="sub">משפטים קריטיים לשטח · הופק ' + _escHtml(today) + '</div>'
     + body + '</body></html>';
   var w = window.open('', '_blank');
-  if (!w) { alert('הדפדפן חסם את חלון ההדפסה. אפשרי חלונות קופצים (popups) לאתר ונסי שוב.'); return; }
+  if (!w) { alert('הדפדפן חסם את חלון ההדפסה. אפשרי חלונות קופצים (popups) לאתר ונסה שוב.'); return; }
   w.document.open(); w.document.write(doc); w.document.close();
 }
 
@@ -13607,7 +13595,7 @@ try { renderHome(); } catch(_){}
 <div id="welcomePopup" class="welcome-bg" style="display:none !important;" onclick="if(event.target===this)hideWelcome()">
   <div class="welcome-pop">
     <div class="welcome-title">ברוכים הבאים</div>
-    <div class="welcome-sub">בחר/י את התפקיד שלך:</div>
+    <div class="welcome-sub">בחר את התפקיד שלך:</div>
     <div class="welcome-roles">
       <button class="welcome-role-btn" onclick="selectRole('forces')">
         <span class="welcome-role-emoji">🛡️</span>
