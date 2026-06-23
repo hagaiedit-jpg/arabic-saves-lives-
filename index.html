@@ -7331,6 +7331,7 @@ async function loadData(){
 
 // Built-in scenarios that don't come from the remote dataset.
 // Civilian (speaker ב) lines are tagged 'civilian'; soldier (א) lines are not.
+function _scnStepKey(p){ var m=((p&&p.tags)||'').match(/step(\d+)/); return ((p&&p.cat)||'')+'#'+(m?m[1]:'?'); }
 var BUILTIN_SCENARIO_DATA = [
   {id:'bi-harhaka-1',  section:'scenario', cat:'הרחקה מהשטח', tags:'step1',  he:'עצור במקום והרם ידיים!', ar:'اوقّف عندك وارفع إيديك لفوق!', trans:'וַקֵף עִנְדַכּ וַארְפַע אִידֵיכּ לַפוֹק'},
   {id:'bi-harhaka-2',  section:'scenario', cat:'הרחקה מהשטח', tags:'step2',  he:'מה אתה עושה כאן?', ar:'شو بتعمل هون؟', trans:'שוּ בְּתִעְמֵל הוֹן?'},
@@ -7374,7 +7375,14 @@ function populateFromData(data){
   NAVY=data.filter(p=>p.section==='navy').map(mp);
   ANNOUNCE=data.filter(p=>p.section==='announce').map(mp);
   SCENARIO=data.filter(p=>p.section==='scenario').map(mp);
-  try{ if(typeof BUILTIN_SCENARIO_DATA!=='undefined' && BUILTIN_SCENARIO_DATA.length){ SCENARIO=SCENARIO.concat(BUILTIN_SCENARIO_DATA.map(mp)); } }catch(e){}
+  // Merge built-in scenarios, but skip any line already promoted to the DB
+  // (same category + step), so an uploaded recording replaces the built-in copy.
+  try{
+    if(typeof BUILTIN_SCENARIO_DATA!=='undefined' && BUILTIN_SCENARIO_DATA.length){
+      var _seenScn={}; SCENARIO.forEach(function(p){ _seenScn[_scnStepKey(p)]=true; });
+      BUILTIN_SCENARIO_DATA.forEach(function(b){ var k=_scnStepKey(b); if(!_seenScn[k]){ SCENARIO.push(mp(b)); _seenScn[k]=true; } });
+    }
+  }catch(e){}
   DICT=data.filter(p=>p.section==='dictionary').map(mp);
   SEM=data.filter(p=>p.section==='semantic').map(p=>({...mp(p),risk:p.tone||'low',dict:p.ar,field:p.why}));
   CUS=data.filter(p=>p.section==='customs' || (p.section==='heart' && p.cat==='מנהגים')).map(mp);
@@ -9638,14 +9646,42 @@ function scnToggleRecord(idx, btn){
         try { stream.getTracks().forEach(function(t){ t.stop(); }); } catch(e){}
         var type = (_scnRec.chunks[0] && _scnRec.chunks[0].type) || 'audio/webm';
         var blob = new Blob(_scnRec.chunks, { type: type });
-        recSaveBlob(step.id, blob, function(ok){
-          if (btn) { btn.textContent = ok ? '🎙✓' : '🎙'; btn.classList.remove('recording'); if (ok) btn.classList.add('has-rec'); }
-        });
+        recSaveBlob(step.id, blob, null); // keep a local copy (offline fallback)
+        if (btn) { btn.classList.remove('recording'); btn.classList.add('has-rec'); btn.textContent = '⬆️…'; }
+        scnPersistRecording(step, idx, blob, btn); // upload so all soldiers get it
       };
       rec.start();
       if (btn) { btn.textContent = '⏹ עצור'; btn.classList.add('recording'); }
     }).catch(function(){ alert('לא ניתן לגשת למיקרופון — צריך לאשר הרשאה.'); });
   } catch(e) { console.warn(e); }
+}
+
+// Upload a scenario recording to Cloudinary and persist it in the shared DB,
+// so every soldier gets the audio. Built-in lines are inserted as real rows;
+// existing DB lines are patched. Falls back to local-only on any failure.
+async function scnPersistRecording(step, idx, blob, btn){
+  try {
+    var file = new File([blob], 'scn-rec.webm', { type: blob.type || 'audio/webm' });
+    var url = await cloudUp(file);
+    if (!url) throw new Error('no cloud url');
+    var isBuiltin = String(step.id).indexOf('bi-') === 0;
+    if (isBuiltin) {
+      var row = { cat: step.cat || '', he: step.he || '', trans: step.trans || '', ar: step.ar || '', tags: step.tags || '', why: '', tone: '', audio_url: url, is_new: false, section: 'scenario' };
+      var res = await sbFetch('/rest/v1/phrases', 'POST', row);
+      var newId = (res && res[0] && res[0].id != null) ? res[0].id : null;
+      step.audio = url;
+      if (newId != null) step.id = newId; // future re-records will PATCH this row
+    } else {
+      await sbFetch('/rest/v1/phrases?id=eq.' + encodeURIComponent(step.id), 'PATCH', { audio_url: url });
+      step.audio = url;
+    }
+    if (btn) { btn.textContent = '🎙✓'; btn.classList.add('has-rec'); }
+    try { showToast('ההקלטה הועלתה — תשותף לכל החיילים ✓', 'success'); } catch(e){}
+  } catch(e) {
+    console.warn('scnPersistRecording', e);
+    if (btn) { btn.textContent = '🎙•'; btn.classList.add('has-rec'); }
+    try { showToast('נשמר במכשיר בלבד — ההעלאה לשרת נכשלה', 'warn'); } catch(e2){}
+  }
 }
 
 function _scnPlayUrl(url, btn, revoke){
