@@ -1880,7 +1880,7 @@ body, body *, .scr, .scr *, button, input, textarea, select {
         <div style="display:inline-block;color:#D4A24E;font-size:12px;font-weight:700;letter-spacing:2px;border:1px solid rgba(212,162,78,0.4);border-radius:20px;padding:5px 14px;margin-bottom:14px;">
           ערכת מוכנות מבצעית
         </div>
-        <div style="color:#E8D9B8;font-size:18px;font-weight:700;letter-spacing:0.5px;margin-bottom:16px;">לא קורס. לא עוד אפליקציה. שכבת הגנה.</div>
+        <div style="color:#E8D9B8;font-size:18px;font-weight:700;letter-spacing:0.5px;margin-bottom:16px;">לא קורס. לא עוד ערכה. שכבת הגנה.</div>
         <div style="color:#a0b8c8;font-size:15px;line-height:1.7;max-width:420px;margin:0 auto;">
           מילה אחת שלא הבנת יכולה להכריע אירוע שלם.<br>
           תוך 30 יום תבין מה קורה סביבך, תדע להגיב — ולא תקפא.
@@ -2051,7 +2051,7 @@ function showLanding() {
     <!-- Global search across the whole app -->
     <div onclick="openGlobalSearch()" style="background:#1F3147;border:1px solid #2A3D52;border-radius:12px;padding:11px 12px;margin-bottom:16px;display:flex;align-items:center;gap:8px;cursor:pointer;">
       <span style="color:#D4A24E;font-size:18px;">🔍</span>
-      <span style="flex:1;color:#7a9ab5;font-size:14px;">חיפוש בכל האפליקציה...</span>
+      <span style="flex:1;color:#7a9ab5;font-size:14px;">חיפוש בכל הערכה...</span>
     </div>
 
     <!-- Welcome -->
@@ -3273,7 +3273,7 @@ function showDebugErrors(){
   var el = document.getElementById('cats-loading');
   if (!el) return;
   var html = '<div style="text-align:right;padding:20px;color:#fff;background:#a82318;border-radius:10px;margin:10px;direction:rtl;">';
-  html += '<div style="font-size:16px;font-weight:700;margin-bottom:10px;">⚠️ שגיאה באפליקציה</div>';
+  html += '<div style="font-size:16px;font-weight:700;margin-bottom:10px;">⚠️ שגיאה בערכה</div>';
   for (var i=0; i<window._debugErrors.length; i++){
     var e = window._debugErrors[i];
     html += '<div style="font-size:11px;margin-bottom:8px;direction:ltr;text-align:left;font-family:monospace;background:rgba(0,0,0,0.3);padding:6px;border-radius:4px;">';
@@ -3977,7 +3977,7 @@ function _updateReminderStatus(){
   var perm = (typeof Notification !== 'undefined') ? Notification.permission : 'unsupported';
   if (perm === 'unsupported') { el.innerHTML = '⚠️ הדפדפן הזה לא תומך בהתראות.'; return; }
   if (perm === 'denied') { el.innerHTML = '⚠️ ההתראות חסומות. יש לאפשר אותן בהגדרות הדפדפן/המכשיר.'; return; }
-  el.innerHTML = '💡 לקבלת תזכורת גם כשהאפליקציה סגורה, התקיני אותה למסך הבית. בחלק מהמכשירים (במיוחד iPhone) התראות ברקע מוגבלות.';
+  el.innerHTML = '💡 לקבלת תזכורת גם כשהערכה סגורה, התקן אותה למסך הבית. בחלק מהמכשירים (במיוחד iPhone) התראות ברקע מוגבלות.';
 }
 function saveReminderSettings(){
   var enabled = !!(document.getElementById('reminder-enabled') || {}).checked;
@@ -11609,7 +11609,7 @@ function renderQuestionAudit(){
     + '<div style="color:#7a9ab5;font-size:11px;margin-top:3px;">מתוך '+totalQuestions+' שאלות שנמצאו בסך הכל</div>'
     + copyBtn + '</div>';
   if(totalQuestions === 0){
-    summary = '<div style="background:rgba(122,154,181,0.12);border:1px solid #2A3D52;border-radius:10px;padding:14px;text-align:center;color:#a0b8c8;font-size:12px;">לא נמצאו שאלות בנתונים שנטענו. ודאי שהאפליקציה סיימה לטעון את הנתונים מהשרת (אם את במצב אופליין, הבדיקה תרוץ רק על מה שנשמר במטמון).</div>';
+    summary = '<div style="background:rgba(122,154,181,0.12);border:1px solid #2A3D52;border-radius:10px;padding:14px;text-align:center;color:#a0b8c8;font-size:12px;">לא נמצאו שאלות בנתונים שנטענו. ודא שהערכה סיימה לטעון את הנתונים מהשרת (אם אתה במצב אופליין, הבדיקה תרוץ רק על מה שנשמר במטמון).</div>';
   }
   out.innerHTML = summary + html;
 }
@@ -11886,7 +11886,7 @@ function globalSearch(){
   var out = document.getElementById('gs-results'); if(!out) return;
   var inp = document.getElementById('gs-input');
   var q = (inp && inp.value || '').trim().toLowerCase();
-  if(!q){ out.innerHTML='<div style="text-align:center;color:#7a9ab5;font-size:13px;padding:30px 10px;">הקלד מילה בעברית, ערבית או תעתיק כדי לחפש בכל האפליקציה.</div>'; return; }
+  if(!q){ out.innerHTML='<div style="text-align:center;color:#7a9ab5;font-size:13px;padding:30px 10px;">הקלד מילה בעברית, ערבית או תעתיק כדי לחפש בכל הערכה.</div>'; return; }
   var results = [];
   _gsSections().forEach(function(s){
     (s.arr||[]).forEach(function(p){
@@ -13810,7 +13810,7 @@ try { renderHome(); } catch(_){}
   <div class="help-pop">
     <div class="help-header">
       <div class="help-h-title">❓ עזרה ומקרא</div>
-      <div class="help-h-sub">מה יש באפליקציה ואיך להשתמש</div>
+      <div class="help-h-sub">מה יש בערכה ואיך להשתמש</div>
     </div>
     <div class="help-body">
       <div class="help-section">
@@ -13830,7 +13830,7 @@ try { renderHome(); } catch(_){}
       </div>
       <div class="help-section">
         <div class="help-title">כלים שימושיים</div>
-        <div class="help-row"><span class="help-icon">🔍</span><div class="help-txt"><strong>חיפוש בכל האפליקציה</strong><span class="help-desc">בראש מסך הבית — מוצא כל משפט בכל מדור</span></div></div>
+        <div class="help-row"><span class="help-icon">🔍</span><div class="help-txt"><strong>חיפוש בכל הערכה</strong><span class="help-desc">בראש מסך הבית — מוצא כל משפט בכל מדור</span></div></div>
         <div class="help-row"><span class="help-icon">🖨️</span><div class="help-txt"><strong>דף כיס להדפסה</strong><span class="help-desc">במסך חירום — גיבוי נייר/PDF לשטח</span></div></div>
         <div class="help-row"><span class="help-icon">🔔</span><div class="help-txt"><strong>תזכורת יומית</strong><span class="help-desc">בתפריט ☰ — תזכורת לתרגל בשעה שתבחר</span></div></div>
         <div class="help-row"><span class="help-icon">📲</span><div class="help-txt"><strong>עובד אופליין</strong><span class="help-desc">אפשר להתקין למסך הבית ולהשתמש בלי קליטה</span></div></div>
@@ -13842,7 +13842,7 @@ try { renderHome(); } catch(_){}
         <div class="help-row"><span class="help-icon">🔄/☀️/🌙</span><div class="help-txt"><strong>ערכת נושא</strong><span class="help-desc">אוטומטי (לפי שעה), יום או לילה — בתפריט ☰</span></div></div>
       </div>
       <div class="help-section">
-        <div class="help-desc" style="line-height:1.6;">ℹ️ <strong>לשון:</strong> מטעמי נוחות הניסוח באפליקציה בלשון זכר, אך מכוון לכל המשתמשים והמשתמשות כאחד.</div>
+        <div class="help-desc" style="line-height:1.6;">ℹ️ <strong>לשון:</strong> מטעמי נוחות הניסוח בערכה בלשון זכר, אך מכוון לכל המשתמשים והמשתמשות כאחד.</div>
       </div>
     </div>
     <button class="help-close-btn" onclick="hideHelp()">✓ הבנתי, סגור</button>
