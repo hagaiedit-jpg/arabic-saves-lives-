@@ -7473,6 +7473,16 @@ var BUILTIN_SCENARIO_DATA = [
   {id:'bi-haqira-12', section:'scenario', cat:'חקירה', tags:'step12 civilian', he:'בחיי, אני לא מכיר אותו, אבל לפעמים הוא עובר כאן, לא תמיד.', ar:'والله أنا ما بعرفو، بس مرّات بيمرق من هون، مش دايماً.', trans:'וַאללַה אַנַא מַא בַּעְרְפוֹ, בַּס מַראת בְּיִמְרֻק מִן הוֹן, מֻש דַאיְמַן.'}
 ];
 
+// Built-in customs topics (added in the same shape as server customs: he=title, why=body).
+var BUILTIN_CUSTOMS = [
+  {
+    id:'bi-cust-talaq', section:'customs', cat:'דת ואסלאם',
+    he:'🕌 גירושין באסלאם — דע לפני שאתה בשטח',
+    trans:'אַנְתִ טָאלֶק', ar:'انتِ طالق',
+    why:"הגירושין מותרים, אבל שנואים. אומר החדית': מכל המותר — הגירושין הם השנואים ביותר בעיני אלוהים.<br><br>📌 <b>המילה שמפעילה הכול:</b> \"אַנְתִ טָאלֶק\" (انتِ طالق) — \"הרי את מגורשת\". רק הבעל אומר אותה.<br><br>🔄 <b>יש דרך חזרה — תלוי בכמה פעמים:</b><br>• פעם 1 ← אפשר להתחרט תוך 130 יום (4 חודשים ו-10 ימים)<br>• בהריון? ← אסור לגרש עד אחרי הלידה<br>• 3 פעמים ← סוף. אין דרך חזרה<br><br>⚠️ <b>בשטח:</b> \"טָאלֶק\" היא מילה טעונה. אם היא עולה — הרגישות בשיא. נהג באיפוק."
+  }
+];
+
 // Populate all section arrays from a raw phrases array (used for both live and cached data)
 function populateFromData(data){
   DB=data.filter(p=>p.section==='military').map(mp);
@@ -7497,6 +7507,7 @@ function populateFromData(data){
   DICT=data.filter(p=>p.section==='dictionary').map(mp);
   SEM=data.filter(p=>p.section==='semantic').map(p=>({...mp(p),risk:p.tone||'low',dict:p.ar,field:p.why}));
   CUS=data.filter(p=>p.section==='customs' || (p.section==='heart' && p.cat==='מנהגים')).map(mp);
+  try{ if(typeof BUILTIN_CUSTOMS!=='undefined' && BUILTIN_CUSTOMS.length){ CUS=CUS.concat(BUILTIN_CUSTOMS.map(mp)); } }catch(e){}
   ARTS=data.filter(p=>p.section==='article').map(mp);
   INTEL=data.filter(p=>p.section==='intel_field').map(mp);
 }
@@ -13501,6 +13512,33 @@ function initTextScale(){
 }
 try { initTextScale(); } catch(e) {}
 
+// PWA install prompt — capture the event and offer a one-time install banner.
+var _deferredInstall = null;
+window.addEventListener('beforeinstallprompt', function(e){
+  e.preventDefault();
+  _deferredInstall = e;
+  try {
+    var dismissed = localStorage.getItem('install_dismissed') === '1';
+    var standalone = window.matchMedia && window.matchMedia('(display-mode: standalone)').matches;
+    if (dismissed || standalone || navigator.standalone) return;
+    var b = document.getElementById('install-banner');
+    if (b) b.style.display = 'flex';
+  } catch(err) {}
+});
+function installApp(){
+  var b = document.getElementById('install-banner'); if (b) b.style.display = 'none';
+  if (!_deferredInstall) return;
+  try {
+    _deferredInstall.prompt();
+    _deferredInstall.userChoice.finally(function(){ _deferredInstall = null; try { localStorage.setItem('install_dismissed','1'); } catch(e){} });
+  } catch(e) {}
+}
+function dismissInstall(){
+  var b = document.getElementById('install-banner'); if (b) b.style.display = 'none';
+  try { localStorage.setItem('install_dismissed','1'); } catch(e) {}
+}
+window.addEventListener('appinstalled', function(){ try { localStorage.setItem('install_dismissed','1'); } catch(e){} var b=document.getElementById('install-banner'); if(b) b.style.display='none'; });
+
 // Theme preference: 'auto' (by time of day), 'day', or 'night'. Default = auto.
 function _autoThemeMode(){ var h = new Date().getHours(); return (h >= 6 && h < 18) ? 'day' : 'night'; }
 function getThemePref(){ return localStorage.getItem('theme_pref') || 'auto'; }
@@ -13751,6 +13789,17 @@ try { renderHome(); } catch(_){}
 </div>
 
 <!-- Bottom Nav (mobile-first navigation) -->
+<!-- PWA install prompt (offline access) — shown once when installable -->
+<div id="install-banner" style="display:none;position:fixed;bottom:78px;left:50%;transform:translateX(-50%);width:calc(100% - 16px);max-width:464px;box-sizing:border-box;background:linear-gradient(135deg,#D4A24E 0%,#a85200 100%);border-radius:12px;padding:10px 12px;z-index:101;box-shadow:0 4px 16px rgba(0,0,0,0.4);direction:rtl;align-items:center;gap:10px;">
+  <div style="font-size:22px;">📲</div>
+  <div style="flex:1;min-width:0;">
+    <div class="keep-white" style="color:#fff;font-size:13px;font-weight:800;">התקן למסך הבית</div>
+    <div style="color:rgba(255,255,255,0.9);font-size:11px;">גישה מהירה ועבודה גם בלי קליטה</div>
+  </div>
+  <button onclick="installApp()" style="background:#0E1B2E;border:none;color:#E8D9B8;border-radius:8px;padding:8px 14px;font-size:12px;font-weight:800;cursor:pointer;font-family:inherit;">התקן</button>
+  <button onclick="dismissInstall()" style="background:transparent;border:none;color:#fff;font-size:18px;cursor:pointer;font-family:inherit;padding:0 4px;">×</button>
+</div>
+
 <div id="bottom-nav" style="position:fixed;bottom:0;left:50%;transform:translateX(-50%);width:100%;max-width:480px;box-sizing:border-box;background:#0E1B2E;border-top:1px solid #2e4558;padding:8px 6px;display:flex;justify-content:space-around;align-items:center;z-index:100;direction:rtl;box-shadow:0 -4px 12px rgba(0,0,0,0.4);">
   <div onclick="navToTab('home')" class="bn-btn" data-tab="home" style="flex:1;text-align:center;cursor:pointer;padding:6px 4px;border-radius:10px;transition:all 0.2s;">
     <div style="font-size:24px;line-height:1;margin-bottom:4px;">🏠</div>
