@@ -7828,8 +7828,9 @@ async function dedupeScenarioRows(btn){
     var rows=await sbFetch('/rest/v1/phrases?select=id,cat,tags,he,audio_url&section=eq.scenario&limit=5000');
     var groups={};
     (rows||[]).forEach(function(r){
-      var m=(r.tags||'').match(/step(\d+)/);
-      var key=(r.cat||'')+'|'+(m?('s'+m[1]):('h'+(r.he||'')));
+      // Group ONLY by exact category+text — so a line is a "duplicate" only if
+      // another row has the identical Hebrew. Never groups distinct lines.
+      var key=(r.cat||'')+'|'+(r.he||'');
       (groups[key]=groups[key]||[]).push(r);
     });
     var del=[];
