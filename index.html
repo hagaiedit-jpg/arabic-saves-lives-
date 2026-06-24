@@ -3056,6 +3056,8 @@ function showLanding() {
         <div style="text-align:center;color:#7a9ab5;font-size:11px;margin-top:5px;">לאחר הייבוא הם יופיעו ברשימה תחת סינון "🔇 צריך הקלטה"</div>
         <button onclick="importBuiltinScenarios(this)" style="width:100%;padding:12px;margin-top:10px;background:linear-gradient(135deg,#1D9E75 0%,#0e5a3f 100%);border:none;border-radius:10px;color:#fff;font-size:13px;font-weight:800;cursor:pointer;font-family:inherit;">🕵️ ייבא את כל התרחישים המובנים לעריכה והקלטה</button>
         <div style="text-align:center;color:#7a9ab5;font-size:11px;margin-top:5px;">חקירה · הרחקה מהשטח · חיפוש בבית — לעריכת טקסט והקלטה כאן ברשימה</div>
+        <button onclick="dedupeScenarioRows(this)" style="width:100%;padding:11px;margin-top:10px;background:rgba(192,57,43,0.15);border:1px solid #c0392b;border-radius:10px;color:#ff8080;font-size:13px;font-weight:700;cursor:pointer;font-family:inherit;">🧹 נקה כפילויות בתרחישים (שומר הקלטות)</button>
+        <div style="text-align:center;color:#7a9ab5;font-size:11px;margin-top:5px;">מוחק רק עותקים ריקים כפולים — ההקלטות שלך נשמרות</div>
       </div>
       <div id="admin-list"></div>
     </div>
@@ -7791,20 +7793,56 @@ async function importBuiltinScenarios(btn){
   if(!confirm('להוסיף את כל התרחישים המובנים (חקירה, הרחקה מהשטח, חיפוש בבית) לרשימת העריכה? כך תוכלי לראות, לערוך, לתקן ולהקליט כל שורה כמו כל משפט אחר. (לא תיווצר כפילות אם כבר קיימים.)'))return;
   var old=btn.textContent; btn.disabled=true; btn.textContent='מוסיף...';
   try{
-    var existing=await sbFetch('/rest/v1/phrases?select=cat,tags&section=eq.scenario');
-    var have={}; (existing||[]).forEach(function(p){have[_scnStepKey(p)]=1;});
+    var existing=await sbFetch('/rest/v1/phrases?select=cat,tags,he&section=eq.scenario');
+    var haveStep={}, haveHe={};
+    (existing||[]).forEach(function(p){ haveStep[_scnStepKey(p)]=1; haveHe[(p.cat||'')+'|'+(p.he||'')]=1; });
     var added=0;
     for(var i=0;i<BUILTIN_SCENARIO_DATA.length;i++){
       var p=BUILTIN_SCENARIO_DATA[i];
-      if(have[_scnStepKey(p)])continue;
+      // Skip if this line already exists (by step OR by exact text) — never duplicate
+      if(haveStep[_scnStepKey(p)] || haveHe[(p.cat||'')+'|'+(p.he||'')]) continue;
       await sbFetch('/rest/v1/phrases','POST',{cat:p.cat,he:p.he,trans:p.trans,ar:p.ar,tags:p.tags,why:'',tone:'',audio_url:'',is_new:false,section:'scenario'});
-      have[_scnStepKey(p)]=1;
+      haveStep[_scnStepKey(p)]=1; haveHe[(p.cat||'')+'|'+(p.he||'')]=1;
       added++;
     }
     btn.textContent='✓ נוספו '+added;
     await loadData();
     renderAdminList();
     alert('✓ נוספו '+added+' שורות תרחיש לרשימת העריכה. אפשר עכשיו לערוך, לתקן ולהקליט אותן כאן. (אם 0 — כבר היו קיימות.)');
+  }catch(e){
+    alert('שגיאה: '+(e&&e.message?e.message:e));
+    btn.textContent=old;
+  }
+  btn.disabled=false;
+}
+
+// Remove duplicate scenario rows created by repeated imports — KEEPS rows that
+// have a recording and only deletes empty (no-audio) duplicates of the same line.
+async function dedupeScenarioRows(btn){
+  if(!confirm('לנקות כפילויות בתרחישים? יישמרו השורות שיש בהן הקלטה, וימחקו רק עותקים ריקים כפולים. ההקלטות שלך לא ייפגעו.'))return;
+  var old=btn.textContent; btn.disabled=true; btn.textContent='מנקה...';
+  try{
+    var rows=await sbFetch('/rest/v1/phrases?select=id,cat,tags,he,audio_url&section=eq.scenario&limit=5000');
+    var groups={};
+    (rows||[]).forEach(function(r){
+      var m=(r.tags||'').match(/step(\d+)/);
+      var key=(r.cat||'')+'|'+(m?('s'+m[1]):('h'+(r.he||'')));
+      (groups[key]=groups[key]||[]).push(r);
+    });
+    var del=[];
+    Object.keys(groups).forEach(function(k){
+      var g=groups[k]; if(g.length<2) return;
+      var keep=-1;
+      for(var i=0;i<g.length;i++){ if(g[i].audio_url){ keep=i; break; } } // prefer keeping a recorded row
+      if(keep===-1) keep=0;
+      for(var j=0;j<g.length;j++){ if(j!==keep && !g[j].audio_url) del.push(g[j].id); } // delete only empty copies
+    });
+    if(!del.length){ alert('לא נמצאו עותקים ריקים כפולים. הכל נקי.'); btn.textContent=old; btn.disabled=false; return; }
+    if(!confirm('יימחקו '+del.length+' עותקים ריקים כפולים (בלי הקלטה). להמשיך?')){ btn.textContent=old; btn.disabled=false; return; }
+    var done=0;
+    for(var d=0;d<del.length;d++){ try{ await sbFetch('/rest/v1/phrases?id=eq.'+encodeURIComponent(del[d]),'DELETE'); done++; }catch(e){} }
+    await loadData(); renderAdminList();
+    alert('✓ נמחקו '+done+' עותקים ריקים. ההקלטות נשמרו.');
   }catch(e){
     alert('שגיאה: '+(e&&e.message?e.message:e));
     btn.textContent=old;
