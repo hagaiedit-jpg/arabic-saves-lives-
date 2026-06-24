@@ -12914,24 +12914,23 @@ async function repairScenarioRecordings(btn){
   if(!confirm('לתקן ולסדר את כל התרחישים המובנים? כל הקלטה קיימת תחובר לשורה ולסדר הנכונים, והעותקים הריקים הכפולים יימחקו. ההקלטות לא ייפגעו.'))return;
   var old=btn.textContent; btn.disabled=true; btn.textContent='מתקן...';
   try{
-    // Map: exact Hebrew text -> correct {cat, tags} from the built-in scenarios
+    // Normalize Hebrew for matching: keep letters+digits only (ignore niqqud,
+    // punctuation, spaces) so small text differences still link a recording.
+    var norm=function(s){ return (s||'').replace(/[֑-ׇ]/g,'').replace(/[^א-ת0-9]/g,''); };
     var map={};
-    BUILTIN_SCENARIO_DATA.forEach(function(p){ map[(p.he||'').trim()]={cat:p.cat,tags:p.tags}; });
+    BUILTIN_SCENARIO_DATA.forEach(function(p){ map[norm(p.he)]={cat:p.cat,tags:p.tags}; });
     var rows=await sbFetch('/rest/v1/phrases?select=id,cat,tags,he,audio_url&section=eq.scenario&limit=8000');
     var byHe={};
-    (rows||[]).forEach(function(r){ var k=(r.he||'').trim(); if(map[k]){ (byHe[k]=byHe[k]||[]).push(r); } });
+    (rows||[]).forEach(function(r){ var k=norm(r.he); if(map[k]){ (byHe[k]=byHe[k]||[]).push(r); } });
     var patched=0, deleted=0;
-    for(var he in byHe){
-      var t=map[he]; var g=byHe[he];
-      // Keeper = a row that has a recording, else the first row
+    for(var k in byHe){
+      var t=map[k]; var g=byHe[k];
       var keep=null; for(var i=0;i<g.length;i++){ if(g[i].audio_url){ keep=g[i]; break; } }
       if(!keep) keep=g[0];
-      // Move keeper to the correct category + step
       if(keep.cat!==t.cat || (keep.tags||'')!==t.tags){
         await sbFetch('/rest/v1/phrases?id=eq.'+encodeURIComponent(keep.id),'PATCH',{cat:t.cat,tags:t.tags});
         patched++;
       }
-      // Delete the other copies of this exact line
       for(var j=0;j<g.length;j++){ if(g[j].id!==keep.id){ await sbFetch('/rest/v1/phrases?id=eq.'+encodeURIComponent(g[j].id),'DELETE'); deleted++; } }
     }
     await loadData(); renderAdminList();
@@ -12947,14 +12946,19 @@ async function repairScenarioRecordings(btn){
 // fix precisely (run it, screenshot the popup).
 async function diagHouseSearch(){
   try{
-    var rows=await sbFetch('/rest/v1/phrases?select=cat,audio_url&section=eq.scenario&limit=8000');
-    rows=rows||[];
-    var byCat={};
-    rows.forEach(function(r){ var c=r.cat||'(ריק)'; if(!byCat[c]) byCat[c]={n:0,a:0}; byCat[c].n++; if(r.audio_url) byCat[c].a++; });
-    var keys=Object.keys(byCat).sort(function(a,b){return byCat[b].a-byCat[a].a;});
-    var out=['סה"כ שורות תרחיש: '+rows.length,''];
-    keys.forEach(function(c){ if(byCat[c].a>0 || c.indexOf('חיפוש')!==-1) out.push(byCat[c].a+' 🎵 / '+byCat[c].n+' — '+c); });
-    out.push('','(מוצגות קטגוריות עם אודיו או "חיפוש")');
+    var cats=['חיפוש בבית — איפה בעל הבית','חיפוש בבית — מי בבית'];
+    var out=[];
+    for(var ci=0;ci<cats.length;ci++){
+      var rows=await sbFetch('/rest/v1/phrases?select=tags,audio_url&section=eq.scenario&cat=eq.'+encodeURIComponent(cats[ci]));
+      rows=rows||[];
+      var withA=[], noA=[];
+      rows.forEach(function(r){ var m=(r.tags||'').match(/step(\d+)/); var s=m?m[1]:'?'; if(r.audio_url) withA.push(+s); else noA.push(+s); });
+      withA.sort(function(a,b){return a-b;}); noA.sort(function(a,b){return a-b;});
+      out.push('▶ '+cats[ci]+' ('+rows.length+' שורות)');
+      out.push('🎵 מוקלט: '+(withA.length?withA.join(','):'—'));
+      out.push('🔇 בלי: '+(noA.length?noA.join(','):'—'));
+      out.push('');
+    }
     alert(out.join('\n'));
   }catch(e){ alert('שגיאה באבחון: '+(e&&e.message?e.message:e)); }
 }
