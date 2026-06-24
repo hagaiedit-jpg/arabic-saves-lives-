@@ -3060,6 +3060,7 @@ function showLanding() {
         <div style="text-align:center;color:#7a9ab5;font-size:11px;margin-top:5px;">מחבר כל הקלטה לשורה הנכונה לפי הטקסט</div>
         <button onclick="dedupeScenarioRows(this)" style="width:100%;padding:11px;margin-top:10px;background:rgba(192,57,43,0.15);border:1px solid #c0392b;border-radius:10px;color:#ff8080;font-size:13px;font-weight:700;cursor:pointer;font-family:inherit;">🧹 נקה כפילויות בתרחישים (שומר הקלטות)</button>
         <div style="text-align:center;color:#7a9ab5;font-size:11px;margin-top:5px;">מוחק רק עותקים ריקים כפולים — ההקלטות שלך נשמרות</div>
+        <button onclick="diagHouseSearch()" style="width:100%;padding:10px;margin-top:10px;background:#2A3D52;border:none;border-radius:10px;color:#E8D9B8;font-size:12px;font-weight:700;cursor:pointer;font-family:inherit;">🔎 בדוק מצב "חיפוש בבית" (שלחי לי צילום)</button>
       </div>
       <div id="admin-list"></div>
     </div>
@@ -12903,6 +12904,36 @@ async function recordResponse(idx){
   } catch(e) {
     alert('לא ניתן להקליט: ' + e.message);
   }
+}
+
+// Diagnostic: report the real DB state of the house-search scenarios so we can
+// fix precisely (run it, screenshot the popup).
+async function diagHouseSearch(){
+  try{
+    var cats=['חיפוש בבית — איפה בעל הבית','חיפוש בבית — מי בבית'];
+    var out=[];
+    for(var ci=0;ci<cats.length;ci++){
+      var rows=await sbFetch('/rest/v1/phrases?select=tags,he,audio_url&section=eq.scenario&cat=eq.'+encodeURIComponent(cats[ci]));
+      rows=rows||[];
+      var steps={}, dup=[], noAudioSteps=[], audioCount=0;
+      rows.forEach(function(r){
+        var m=(r.tags||'').match(/step(\d+)/); var s=m?m[1]:'?';
+        if(steps[s]) dup.push(s); steps[s]=(steps[s]||0)+1;
+        if(r.audio_url) audioCount++;
+      });
+      // steps with no audio
+      var stepAudio={};
+      rows.forEach(function(r){ var m=(r.tags||'').match(/step(\d+)/); var s=m?m[1]:'?'; if(r.audio_url) stepAudio[s]=1; });
+      Object.keys(steps).forEach(function(s){ if(!stepAudio[s]) noAudioSteps.push(s); });
+      out.push('▶ '+cats[ci]);
+      out.push('שורות: '+rows.length+' | עם אודיו: '+audioCount);
+      out.push('שלבים: '+Object.keys(steps).sort(function(a,b){return a-b;}).join(',')||'—');
+      out.push('כפולים: '+(dup.length?dup.join(','):'אין'));
+      out.push('בלי אודיו: '+(noAudioSteps.length?noAudioSteps.join(','):'אין'));
+      out.push('');
+    }
+    alert(out.join('\n'));
+  }catch(e){ alert('שגיאה באבחון: '+(e&&e.message?e.message:e)); }
 }
 
 async function saveEdit(advance){
