@@ -3054,8 +3054,8 @@ function showLanding() {
       <div style="margin-bottom:12px;">
         <button onclick="importTenPhrases(this)" style="width:100%;padding:12px;background:linear-gradient(135deg,#D4A24E 0%,#b88a3d 100%);border:none;border-radius:10px;color:#0E1B2E;font-size:13px;font-weight:800;cursor:pointer;font-family:inherit;">🎖️ ייבא את 10 משפטי החובה לרשימה (חד-פעמי)</button>
         <div style="text-align:center;color:#7a9ab5;font-size:11px;margin-top:5px;">לאחר הייבוא הם יופיעו ברשימה תחת סינון "🔇 צריך הקלטה"</div>
-        <button onclick="importBuiltinScenarios(this)" style="width:100%;padding:12px;margin-top:10px;background:linear-gradient(135deg,#1D9E75 0%,#0e5a3f 100%);border:none;border-radius:10px;color:#fff;font-size:13px;font-weight:800;cursor:pointer;font-family:inherit;">🕵️ ייבא את תרחישי "חקירה" ו"הרחקה מהשטח" לעריכה</button>
-        <div style="text-align:center;color:#7a9ab5;font-size:11px;margin-top:5px;">כדי לערוך, לתקן ולהקליט את שורות התרחישים כאן ברשימה</div>
+        <button onclick="importBuiltinScenarios(this)" style="width:100%;padding:12px;margin-top:10px;background:linear-gradient(135deg,#1D9E75 0%,#0e5a3f 100%);border:none;border-radius:10px;color:#fff;font-size:13px;font-weight:800;cursor:pointer;font-family:inherit;">🕵️ ייבא את כל התרחישים המובנים לעריכה והקלטה</button>
+        <div style="text-align:center;color:#7a9ab5;font-size:11px;margin-top:5px;">חקירה · הרחקה מהשטח · חיפוש בבית — לעריכת טקסט והקלטה כאן ברשימה</div>
       </div>
       <div id="admin-list"></div>
     </div>
@@ -7786,7 +7786,7 @@ async function importTenPhrases(btn){
 }
 
 async function importBuiltinScenarios(btn){
-  if(!confirm('להוסיף את התרחישים "חקירה" ו"הרחקה מהשטח" לרשימת העריכה? כך תוכלי לערוך, לתקן ולהקליט אותם כמו כל משפט אחר. (לא תיווצר כפילות אם כבר קיימים.)'))return;
+  if(!confirm('להוסיף את כל התרחישים המובנים (חקירה, הרחקה מהשטח, חיפוש בבית) לרשימת העריכה? כך תוכלי לראות, לערוך, לתקן ולהקליט כל שורה כמו כל משפט אחר. (לא תיווצר כפילות אם כבר קיימים.)'))return;
   var old=btn.textContent; btn.disabled=true; btn.textContent='מוסיף...';
   try{
     var existing=await sbFetch('/rest/v1/phrases?select=he,cat&section=eq.scenario');
