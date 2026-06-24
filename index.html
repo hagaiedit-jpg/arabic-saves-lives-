@@ -12933,6 +12933,18 @@ async function repairScenarioRecordings(btn){
       }
       for(var j=0;j<g.length;j++){ if(g[j].id!==keep.id){ await sbFetch('/rest/v1/phrases?id=eq.'+encodeURIComponent(g[j].id),'DELETE'); deleted++; } }
     }
+    // Final pass: at each step, if a recording exists, delete empty copies of
+    // that step (handles lines whose text you edited before recording).
+    var builtinCats={}; BUILTIN_SCENARIO_DATA.forEach(function(p){ builtinCats[p.cat]=1; });
+    var rows2=await sbFetch('/rest/v1/phrases?select=id,cat,tags,audio_url&section=eq.scenario&limit=8000');
+    var byStep={};
+    (rows2||[]).forEach(function(r){ if(!builtinCats[r.cat]) return; var m=(r.tags||'').match(/step(\d+)/); if(!m) return; var key=r.cat+'#'+m[1]; (byStep[key]=byStep[key]||[]).push(r); });
+    for(var sk in byStep){
+      var gg=byStep[sk]; if(gg.length<2) continue;
+      var hasAudio=gg.some(function(r){return r.audio_url;});
+      if(hasAudio){ for(var a=0;a<gg.length;a++){ if(!gg[a].audio_url){ await sbFetch('/rest/v1/phrases?id=eq.'+encodeURIComponent(gg[a].id),'DELETE'); deleted++; } } }
+      else { for(var b=1;b<gg.length;b++){ await sbFetch('/rest/v1/phrases?id=eq.'+encodeURIComponent(gg[b].id),'DELETE'); deleted++; } }
+    }
     await loadData(); renderAdminList();
     alert('✓ הושלם!\nסודרו/חוברו: '+patched+'\nעותקים ריקים שנמחקו: '+deleted+'\nההקלטות נשמרו.');
   }catch(e){
