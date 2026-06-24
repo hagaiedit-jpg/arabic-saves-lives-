@@ -3061,6 +3061,8 @@ function showLanding() {
         <button onclick="dedupeScenarioRows(this)" style="width:100%;padding:11px;margin-top:10px;background:rgba(192,57,43,0.15);border:1px solid #c0392b;border-radius:10px;color:#ff8080;font-size:13px;font-weight:700;cursor:pointer;font-family:inherit;">🧹 נקה כפילויות בתרחישים (שומר הקלטות)</button>
         <div style="text-align:center;color:#7a9ab5;font-size:11px;margin-top:5px;">מוחק רק עותקים ריקים כפולים — ההקלטות שלך נשמרות</div>
         <button onclick="diagHouseSearch()" style="width:100%;padding:10px;margin-top:10px;background:#2A3D52;border:none;border-radius:10px;color:#E8D9B8;font-size:12px;font-weight:700;cursor:pointer;font-family:inherit;">🔎 בדוק מצב "חיפוש בבית" (שלחי לי צילום)</button>
+        <button onclick="removeSearchLastLines(this)" style="width:100%;padding:11px;margin-top:10px;background:rgba(192,57,43,0.15);border:1px solid #c0392b;border-radius:10px;color:#ff8080;font-size:13px;font-weight:700;cursor:pointer;font-family:inherit;">🗑 מחק 2 שורות אחרונות ב"מי בבית"</button>
+        <div style="text-align:center;color:#7a9ab5;font-size:11px;margin-top:5px;">מסיר את "כמה זמן הם כבר כאן?" ו"הם כאן כבר שנתיים"</div>
       </div>
       <div id="admin-list"></div>
     </div>
@@ -7532,9 +7534,7 @@ var BUILTIN_SCENARIO_DATA = [
   {id:'bi-srchb-9',  section:'scenario', cat:'חיפוש בבית — מי בבית', tags:'step9', he:'טוב, אני רוצה לראות תעודת זהות. מי הילדים האלה למטה? אמרת שאין אף אחד בבית.', ar:'طيّب، بدّي أشوف هويتك. مين هدول الولاد تحت؟ انت قلت فيش حدا في البيت', trans:'טַיֵבּ, בִּדי אַשוּף הוּיתַכּ. מִין הַדוֹל (א)לְוְלַאד תַחְת? אִנְתֶ קֻלְת פִיש חַדַא פִי (א)לְבֵּית'},
   {id:'bi-srchb-10', section:'scenario', cat:'חיפוש בבית — מי בבית', tags:'step10 civilian', he:'אלה ילדי השכנים שמשחקים בחצר.', ar:'هدول ولاد الجيران بيلعبوا في الساحة', trans:'הַדוֹל וְלַאד (א)לְגִירַאן בִּילְעַבּוּ פִי (אל)סַאחָה'},
   {id:'bi-srchb-11', section:'scenario', cat:'חיפוש בבית — מי בבית', tags:'step11', he:'כולם שכנים?', ar:'كلهم جيران؟', trans:'כֻּלְהֻם גִירַאן?'},
-  {id:'bi-srchb-12', section:'scenario', cat:'חיפוש בבית — מי בבית', tags:'step12 civilian', he:'כן, אלה הילדים של אבו חסן.', ar:'اه، هدول ولاد أبو حسن', trans:'אַה, הַדוֹל וְלַאד אַבּו חַסַן'},
-  {id:'bi-srchb-13', section:'scenario', cat:'חיפוש בבית — מי בבית', tags:'step13', he:'כמה זמן הם כבר כאן?', ar:'قدّيش صار لهم هون؟', trans:'קַדֵיש צַאר לְהֻם הוֹן?'},
-  {id:'bi-srchb-14', section:'scenario', cat:'חיפוש בבית — מי בבית', tags:'step14 civilian', he:'הם כאן כבר שנתיים.', ar:'صار لهم هون سنتين', trans:'צַאר לְהֻם הוֹן סַנְתֵין'}
+  {id:'bi-srchb-12', section:'scenario', cat:'חיפוש בבית — מי בבית', tags:'step12 civilian', he:'כן, אלה הילדים של אבו חסן.', ar:'اه، هدول ولاد أبو حسن', trans:'אַה, הַדוֹל וְלַאד אַבּו חַסַן'}
 ];
 
 // Built-in customs topics (added in the same shape as server customs: he=title, why=body).
@@ -12956,6 +12956,26 @@ async function repairScenarioRecordings(btn){
 
 // Diagnostic: report the real DB state of the house-search scenarios so we can
 // fix precisely (run it, screenshot the popup).
+// Delete the last two lines (steps 13,14) of the "מי בבית" scenario from the DB.
+async function removeSearchLastLines(btn){
+  if(!confirm('למחוק את שתי השורות האחרונות בתרחיש "מי בבית" — "כמה זמן הם כבר כאן?" ו"הם כאן כבר שנתיים" (כולל ההקלטות שלהן)?'))return;
+  var old=btn.textContent; btn.disabled=true; btn.textContent='מוחק...';
+  try{
+    var rows=await sbFetch('/rest/v1/phrases?select=id,tags,he&section=eq.scenario&cat=eq.'+encodeURIComponent('חיפוש בבית — מי בבית'));
+    var del=0;
+    for(var i=0;i<(rows||[]).length;i++){
+      var r=rows[i]; var m=(r.tags||'').match(/step(\d+)/); var s=m?+m[1]:0;
+      var he=r.he||'';
+      if(s>=13 || he.indexOf('כמה זמן')!==-1 || he.indexOf('כבר שנתיים')!==-1 || he.indexOf('כבר שעתיים')!==-1){
+        try{ await sbFetch('/rest/v1/phrases?id=eq.'+encodeURIComponent(r.id),'DELETE'); del++; }catch(e){}
+      }
+    }
+    await loadData(); renderAdminList();
+    alert('✓ נמחקו '+del+' שורות. התרחיש מסתיים עכשיו ב"כן, אלה הילדים של אבו חסן".');
+  }catch(e){ alert('שגיאה: '+(e&&e.message?e.message:e)); btn.textContent=old; }
+  btn.disabled=false;
+}
+
 async function diagHouseSearch(){
   try{
     var cats=['חיפוש בבית — איפה בעל הבית','חיפוש בבית — מי בבית'];
