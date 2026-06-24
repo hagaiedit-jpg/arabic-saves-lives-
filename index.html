@@ -12911,28 +12911,14 @@ async function recordResponse(idx){
 // fix precisely (run it, screenshot the popup).
 async function diagHouseSearch(){
   try{
-    var cats=['חיפוש בבית — איפה בעל הבית','חיפוש בבית — מי בבית'];
-    var out=[];
-    for(var ci=0;ci<cats.length;ci++){
-      var rows=await sbFetch('/rest/v1/phrases?select=tags,he,audio_url&section=eq.scenario&cat=eq.'+encodeURIComponent(cats[ci]));
-      rows=rows||[];
-      var steps={}, dup=[], noAudioSteps=[], audioCount=0;
-      rows.forEach(function(r){
-        var m=(r.tags||'').match(/step(\d+)/); var s=m?m[1]:'?';
-        if(steps[s]) dup.push(s); steps[s]=(steps[s]||0)+1;
-        if(r.audio_url) audioCount++;
-      });
-      // steps with no audio
-      var stepAudio={};
-      rows.forEach(function(r){ var m=(r.tags||'').match(/step(\d+)/); var s=m?m[1]:'?'; if(r.audio_url) stepAudio[s]=1; });
-      Object.keys(steps).forEach(function(s){ if(!stepAudio[s]) noAudioSteps.push(s); });
-      out.push('▶ '+cats[ci]);
-      out.push('שורות: '+rows.length+' | עם אודיו: '+audioCount);
-      out.push('שלבים: '+Object.keys(steps).sort(function(a,b){return a-b;}).join(',')||'—');
-      out.push('כפולים: '+(dup.length?dup.join(','):'אין'));
-      out.push('בלי אודיו: '+(noAudioSteps.length?noAudioSteps.join(','):'אין'));
-      out.push('');
-    }
+    var rows=await sbFetch('/rest/v1/phrases?select=cat,audio_url&section=eq.scenario&limit=8000');
+    rows=rows||[];
+    var byCat={};
+    rows.forEach(function(r){ var c=r.cat||'(ריק)'; if(!byCat[c]) byCat[c]={n:0,a:0}; byCat[c].n++; if(r.audio_url) byCat[c].a++; });
+    var keys=Object.keys(byCat).sort(function(a,b){return byCat[b].a-byCat[a].a;});
+    var out=['סה"כ שורות תרחיש: '+rows.length,''];
+    keys.forEach(function(c){ if(byCat[c].a>0 || c.indexOf('חיפוש')!==-1) out.push(byCat[c].a+' 🎵 / '+byCat[c].n+' — '+c); });
+    out.push('','(מוצגות קטגוריות עם אודיו או "חיפוש")');
     alert(out.join('\n'));
   }catch(e){ alert('שגיאה באבחון: '+(e&&e.message?e.message:e)); }
 }
