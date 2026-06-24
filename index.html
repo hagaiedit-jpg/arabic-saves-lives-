@@ -3056,8 +3056,8 @@ function showLanding() {
         <div style="text-align:center;color:#7a9ab5;font-size:11px;margin-top:5px;">לאחר הייבוא הם יופיעו ברשימה תחת סינון "🔇 צריך הקלטה"</div>
         <button onclick="importBuiltinScenarios(this)" style="width:100%;padding:12px;margin-top:10px;background:linear-gradient(135deg,#1D9E75 0%,#0e5a3f 100%);border:none;border-radius:10px;color:#fff;font-size:13px;font-weight:800;cursor:pointer;font-family:inherit;">🕵️ ייבא את כל התרחישים המובנים לעריכה והקלטה</button>
         <div style="text-align:center;color:#7a9ab5;font-size:11px;margin-top:5px;">חקירה · הרחקה מהשטח · חיפוש בבית — לעריכת טקסט והקלטה כאן ברשימה</div>
-        <button onclick="fixHouseSearchOrder(this)" style="width:100%;padding:11px;margin-top:10px;background:rgba(212,162,78,0.15);border:1px solid #D4A24E;border-radius:10px;color:#E8D9B8;font-size:13px;font-weight:700;cursor:pointer;font-family:inherit;">🔧 סדר את שורות "חיפוש בבית" (שומר הקלטות)</button>
-        <div style="text-align:center;color:#7a9ab5;font-size:11px;margin-top:5px;">מחבר כל הקלטה לשורה הנכונה לפי הטקסט</div>
+        <button onclick="repairScenarioRecordings(this)" style="width:100%;padding:13px;margin-top:10px;background:linear-gradient(135deg,#1D9E75 0%,#0e5a3f 100%);border:none;border-radius:10px;color:#fff;font-size:13px;font-weight:800;cursor:pointer;font-family:inherit;">🔧 תקן והצמד הקלטות לתרחישים (בלי להקליט מחדש)</button>
+        <div style="text-align:center;color:#7a9ab5;font-size:11px;margin-top:5px;">מחבר כל הקלטה קיימת לשורה ולסדר הנכונים, ומוחק עותקים ריקים</div>
         <button onclick="dedupeScenarioRows(this)" style="width:100%;padding:11px;margin-top:10px;background:rgba(192,57,43,0.15);border:1px solid #c0392b;border-radius:10px;color:#ff8080;font-size:13px;font-weight:700;cursor:pointer;font-family:inherit;">🧹 נקה כפילויות בתרחישים (שומר הקלטות)</button>
         <div style="text-align:center;color:#7a9ab5;font-size:11px;margin-top:5px;">מוחק רק עותקים ריקים כפולים — ההקלטות שלך נשמרות</div>
         <button onclick="diagHouseSearch()" style="width:100%;padding:10px;margin-top:10px;background:#2A3D52;border:none;border-radius:10px;color:#E8D9B8;font-size:12px;font-weight:700;cursor:pointer;font-family:inherit;">🔎 בדוק מצב "חיפוש בבית" (שלחי לי צילום)</button>
@@ -12905,6 +12905,42 @@ async function recordResponse(idx){
   } catch(e) {
     alert('לא ניתן להקליט: ' + e.message);
   }
+}
+
+// One-click repair: match every scenario row to its built-in line BY TEXT,
+// keep the row that has a recording, move it to the correct category+step,
+// and delete the empty duplicate copies. No re-recording, no data loss.
+async function repairScenarioRecordings(btn){
+  if(!confirm('לתקן ולסדר את כל התרחישים המובנים? כל הקלטה קיימת תחובר לשורה ולסדר הנכונים, והעותקים הריקים הכפולים יימחקו. ההקלטות לא ייפגעו.'))return;
+  var old=btn.textContent; btn.disabled=true; btn.textContent='מתקן...';
+  try{
+    // Map: exact Hebrew text -> correct {cat, tags} from the built-in scenarios
+    var map={};
+    BUILTIN_SCENARIO_DATA.forEach(function(p){ map[(p.he||'').trim()]={cat:p.cat,tags:p.tags}; });
+    var rows=await sbFetch('/rest/v1/phrases?select=id,cat,tags,he,audio_url&section=eq.scenario&limit=8000');
+    var byHe={};
+    (rows||[]).forEach(function(r){ var k=(r.he||'').trim(); if(map[k]){ (byHe[k]=byHe[k]||[]).push(r); } });
+    var patched=0, deleted=0;
+    for(var he in byHe){
+      var t=map[he]; var g=byHe[he];
+      // Keeper = a row that has a recording, else the first row
+      var keep=null; for(var i=0;i<g.length;i++){ if(g[i].audio_url){ keep=g[i]; break; } }
+      if(!keep) keep=g[0];
+      // Move keeper to the correct category + step
+      if(keep.cat!==t.cat || (keep.tags||'')!==t.tags){
+        await sbFetch('/rest/v1/phrases?id=eq.'+encodeURIComponent(keep.id),'PATCH',{cat:t.cat,tags:t.tags});
+        patched++;
+      }
+      // Delete the other copies of this exact line
+      for(var j=0;j<g.length;j++){ if(g[j].id!==keep.id){ await sbFetch('/rest/v1/phrases?id=eq.'+encodeURIComponent(g[j].id),'DELETE'); deleted++; } }
+    }
+    await loadData(); renderAdminList();
+    alert('✓ הושלם!\nסודרו/חוברו: '+patched+'\nעותקים ריקים שנמחקו: '+deleted+'\nההקלטות נשמרו.');
+  }catch(e){
+    alert('שגיאה: '+(e&&e.message?e.message:e));
+    btn.textContent=old;
+  }
+  btn.disabled=false;
 }
 
 // Diagnostic: report the real DB state of the house-search scenarios so we can
