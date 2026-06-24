@@ -3060,7 +3060,8 @@ function showLanding() {
         <div style="text-align:center;color:#7a9ab5;font-size:11px;margin-top:5px;">מחבר כל הקלטה קיימת לשורה ולסדר הנכונים, ומוחק עותקים ריקים</div>
         <button onclick="dedupeScenarioRows(this)" style="width:100%;padding:11px;margin-top:10px;background:rgba(192,57,43,0.15);border:1px solid #c0392b;border-radius:10px;color:#ff8080;font-size:13px;font-weight:700;cursor:pointer;font-family:inherit;">🧹 נקה כפילויות בתרחישים (שומר הקלטות)</button>
         <div style="text-align:center;color:#7a9ab5;font-size:11px;margin-top:5px;">מוחק רק עותקים ריקים כפולים — ההקלטות שלך נשמרות</div>
-        <button onclick="diagHouseSearch()" style="width:100%;padding:10px;margin-top:10px;background:#2A3D52;border:none;border-radius:10px;color:#E8D9B8;font-size:12px;font-weight:700;cursor:pointer;font-family:inherit;">🔎 בדוק מצב "חיפוש בבית" (שלחי לי צילום)</button>
+        <button onclick="purgeHouseSearch(this)" style="width:100%;padding:11px;margin-top:10px;background:rgba(192,57,43,0.25);border:1px solid #c0392b;border-radius:10px;color:#ff8080;font-size:13px;font-weight:800;cursor:pointer;font-family:inherit;">🗑 מחק לגמרי את "חיפוש בבית" מהמסד</button>
+        <div style="text-align:center;color:#7a9ab5;font-size:11px;margin-top:5px;">מסיר את שני התרחישים וכל השורות שלהם מהמסד</div>
       </div>
       <div id="admin-list"></div>
     </div>
@@ -7473,7 +7474,7 @@ async function loadData(){
 // Civilian (speaker ב) lines are tagged 'civilian'; soldier (א) lines are not.
 function _scnStepKey(p){ var m=((p&&p.tags)||'').match(/step(\d+)/); return ((p&&p.cat)||'')+'#'+(m?m[1]:'?'); }
 // Recently-added scenarios — show a "חדש" badge on their cube until first opened.
-var NEW_SCENARIOS = ['חקירה','הרחקה מהשטח','חיפוש בבית — איפה בעל הבית','חיפוש בבית — מי בבית'];
+var NEW_SCENARIOS = ['חקירה','הרחקה מהשטח'];
 var BUILTIN_SCENARIO_DATA = [
   {id:'bi-harhaka-1',  section:'scenario', cat:'הרחקה מהשטח', tags:'step1',  he:'עצור במקום והרם ידיים!', ar:'اوقّف عندك وارفع إيديك لفوق!', trans:'וַקֵף עִנְדַכּ וַארְפַע אִידֵיכּ לַפוֹק'},
   {id:'bi-harhaka-2',  section:'scenario', cat:'הרחקה מהשטח', tags:'step2',  he:'מה אתה עושה כאן?', ar:'شو بتعمل هون؟', trans:'שוּ בְּתִעְמֵל הוֹן?'},
@@ -7501,40 +7502,7 @@ var BUILTIN_SCENARIO_DATA = [
   {id:'bi-haqira-9',  section:'scenario', cat:'חקירה', tags:'step9',  he:'אתה מכיר את האיש הזה?', ar:'انت بتعرفو هـ(ال)زلمة؟', trans:'אִנְתֶ בְּתִעְרְפוֹ הַ(אל)זַלַמֶה?'},
   {id:'bi-haqira-10', section:'scenario', cat:'חקירה', tags:'step10 civilian', he:'לא, אני לא מכיר אותו.', ar:'لا، ما بعرفو.', trans:'לַא, מַא בַּעְרְפוֹ.'},
   {id:'bi-haqira-11', section:'scenario', cat:'חקירה', tags:'step11', he:'אתה שקרן! ספר לי את האמת. אם לא בטובות — אז בדרך אחרת!', ar:'انت كذّاب! احكي لي (ال)صحيح. إذا مش بالمنيح — في غيرو!', trans:'אִנְתֶ כַּדַאב! אֶחְכִּי לִי (אל)צַחִיח. אִזַא מֻש בִּ(אל)מְנִיח — פִי עֵ׳ירוֹ!'},
-  {id:'bi-haqira-12', section:'scenario', cat:'חקירה', tags:'step12 civilian', he:'בחיי, אני לא מכיר אותו, אבל לפעמים הוא עובר כאן, לא תמיד.', ar:'والله أنا ما بعرفو، بس مرّات بيمرق من هون، مش دايماً.', trans:'וַאללַה אַנַא מַא בַּעְרְפוֹ, בַּס מַראת בְּיִמְרֻק מִן הוֹן, מֻש דַאיְמַן.'},
-
-  // שיחה 9 part 1: בית — חיפוש, "איפה בעל הבית" (soldier א ↔ resident ב). Arabic+Hebrew reconstructed from the transliteration; verify.
-  {id:'bi-srcha-1',  section:'scenario', cat:'חיפוש בבית — איפה בעל הבית', tags:'step1',  he:'פתחו את הדלת, אנחנו מהצבא. אנחנו רוצים לערוך חיפוש.', ar:'افتحوا الباب، احنا من الجيش. بدنا نعمل تفتيش', trans:'אִפְתַחוּ (אל)בַּאבּ, אִחְנַא מִן (אל)גֵיש. בִּדְנַא נִעְמַל תַפְתִיש'},
-  {id:'bi-srcha-2',  section:'scenario', cat:'חיפוש בבית — איפה בעל הבית', tags:'step2',  he:'איפה בעל הבית?', ar:'وين صاحب الدار؟', trans:'וֵין צַאחֶבּ (אל)דַאר?'},
-  {id:'bi-srcha-3',  section:'scenario', cat:'חיפוש בבית — איפה בעל הבית', tags:'step3 civilian', he:'הוא לא נמצא בבית.', ar:'مش موجود في البيت', trans:'מֻש מַוְגוּד פִי (אל)בֵּית'},
-  {id:'bi-srcha-4',  section:'scenario', cat:'חיפוש בבית — איפה בעל הבית', tags:'step4',  he:'איפה הוא?', ar:'وين هو؟', trans:'וֵין הוּ?'},
-  {id:'bi-srcha-5',  section:'scenario', cat:'חיפוש בבית — איפה בעל הבית', tags:'step5 civilian', he:'אני לא יודע, הוא לא אמר.', ar:'ما بعرفش، هو ما قال', trans:'בַּעְרְפֵש, הוּ מַא קַאל'},
-  {id:'bi-srcha-6',  section:'scenario', cat:'חיפוש בבית — איפה בעל הבית', tags:'step6',  he:'מתי הוא היה כאן?', ar:'ايمتى كان هون؟', trans:'אֵימְתַא כַּאן הוֹן?'},
-  {id:'bi-srcha-7',  section:'scenario', cat:'חיפוש בבית — איפה בעל הבית', tags:'step7 civilian', he:'היום בבוקר.', ar:'اليوم الصبح', trans:'אֵליוֹם (אל)צֻבֻּח'},
-  {id:'bi-srcha-8',  section:'scenario', cat:'חיפוש בבית — איפה בעל הבית', tags:'step8',  he:'מתי הוא עזב את הבית?', ar:'ايمتى ترك البيت؟', trans:'אֵימְתַא תַרַכּ (אל)בֵּית?'},
-  {id:'bi-srcha-9',  section:'scenario', cat:'חיפוש בבית — איפה בעל הבית', tags:'step9 civilian', he:'לפני שלוש שעות בערך.', ar:'قبل تلات ساعات هيك شي', trans:'קַבֵּל תְלַאת סַאעַאת הֵיכּ שִי'},
-  {id:'bi-srcha-10', section:'scenario', cat:'חיפוש בבית — איפה בעל הבית', tags:'step10', he:'לאן הוא הלך?', ar:'لوين راح؟', trans:'לַוֵין רַאח?'},
-  {id:'bi-srcha-11', section:'scenario', cat:'חיפוש בבית — איפה בעל הבית', tags:'step11 civilian', he:'אני לא יודע.', ar:'ما بعرفش', trans:'בַּעְרְפֵש'},
-  {id:'bi-srcha-12', section:'scenario', cat:'חיפוש בבית — איפה בעל הבית', tags:'step12', he:'מתי הוא יחזור?', ar:'ايمتى راح يرجّع؟', trans:'אֵימְתַא רַאח יִרְגַע?'},
-  {id:'bi-srcha-13', section:'scenario', cat:'חיפוש בבית — איפה בעל הבית', tags:'step13 civilian', he:'אני לא יודע, הוא לא אמר למה, לאן הוא הולך ומתי יחזור.', ar:'ما بعرفش، هو ما قال ليش لوين رايح وايمتى راجع', trans:'בַּעְרְפֵש, הוּ מַא קַאל לֵיש לַוֵין רַאיֵח וְאֵימְתַא רַאגֵע'},
-  {id:'bi-srcha-14', section:'scenario', cat:'חיפוש בבית — איפה בעל הבית', tags:'step14', he:'מי היה איתו?', ar:'مين كان معو؟', trans:'מִין כַּאן מַעוֹ?'},
-
-  // שיחה 9 part 2: בית — חיפוש, "מי נמצא בבית"
-  {id:'bi-srcha-15', section:'scenario', cat:'חיפוש בבית — איפה בעל הבית', tags:'step15 civilian', he:'אני לא יודע, לא ראיתי אותו כשיצא.', ar:'ما بعرفش، أنا ما شفتو لما طلع', trans:'בַּעְרְפֵש. אַנַא מַא שֻפְתוֹ לַמַא טִלֶע'},
-  {id:'bi-srchb-1',  section:'scenario', cat:'חיפוש בבית — מי בבית', tags:'step1', he:'יש בחורים בבית?', ar:'فيه شباب في البيت؟', trans:'פִיה שַבַּאבּ פִי (אל)בֵּית?'},
-  {id:'bi-srchb-2',  section:'scenario', cat:'חיפוש בבית — מי בבית', tags:'step2 civilian', he:'לא, אין אף אחד.', ar:'لا، فيش حد', trans:'לַא, פִיש חַד'},
-  {id:'bi-srchb-3',  section:'scenario', cat:'חיפוש בבית — מי בבית', tags:'step3', he:'אתה בטוח שאין אף אחד?', ar:'انت متأكّد إنّو فيش حد؟', trans:'אִנְתֶ מִתְאַכֵד אִנוֹ פִיש חַד?'},
-  {id:'bi-srchb-4',  section:'scenario', cat:'חיפוש בבית — מי בבית', tags:'step4 civilian', he:'כן, כולם יצאו לעבודה.', ar:'اه، كلهم طلعوا عالشغل', trans:'אַה, כֻּלְהֻם טִלְעוּ עַ(אל)שֻעֵל'},
-  {id:'bi-srchb-5',  section:'scenario', cat:'חיפוש בבית — מי בבית', tags:'step5', he:'ואתה מה אתה עושה כאן?', ar:'وانت شو بتعمل هون؟', trans:'וְאִנְתֶ שוּ בְּתִעְמַל הוֹן?'},
-  {id:'bi-srchb-6',  section:'scenario', cat:'חיפוש בבית — מי בבית', tags:'step6 civilian', he:'אני מחכה לבן דוד שלי שיבוא.', ar:'أنا بستنّى لابن عمي منشان يجي', trans:'אַנַא בַּסְתַנַא לַאבֵּן עַמי מִנְשַאן יִגי'},
-  {id:'bi-srchb-7',  section:'scenario', cat:'חיפוש בבית — מי בבית', tags:'step7', he:'מאיפה הוא?', ar:'من وين هو؟', trans:'מִן וֵין הוּ?'},
-  {id:'bi-srchb-8',  section:'scenario', cat:'חיפוש בבית — מי בבית', tags:'step8 civilian', he:'הוא מבּיר זית. הוא התקשר אליי הבוקר ואמר שהוא רוצה לבוא — לכן אני מחכה לו.', ar:'هو من بير زيت، هو الصبح ضرب لي تلفون. قال بدّو يجي عشان هيك بستنّاه', trans:'הוּ מִן בִּיר זֵית, הוּ (אל)צֻבֻּח צַרַבּ לִי תֵלֵפוֹן. קַאל בִּדוֹ יִגי עַשַאן הֵיכּ בַּסְתַנאה'},
-  {id:'bi-srchb-9',  section:'scenario', cat:'חיפוש בבית — מי בבית', tags:'step9', he:'טוב, אני רוצה לראות תעודת זהות. מי הילדים האלה למטה? אמרת שאין אף אחד בבית.', ar:'طيّب، بدّي أشوف هويتك. مين هدول الولاد تحت؟ انت قلت فيش حدا في البيت', trans:'טַיֵבּ, בִּדי אַשוּף הוּיתַכּ. מִין הַדוֹל (א)לְוְלַאד תַחְת? אִנְתֶ קֻלְת פִיש חַדַא פִי (א)לְבֵּית'},
-  {id:'bi-srchb-10', section:'scenario', cat:'חיפוש בבית — מי בבית', tags:'step10 civilian', he:'אלה ילדי השכנים שמשחקים בחצר.', ar:'هدول ولاد الجيران بيلعبوا في الساحة', trans:'הַדוֹל וְלַאד (א)לְגִירַאן בִּילְעַבּוּ פִי (אל)סַאחָה'},
-  {id:'bi-srchb-11', section:'scenario', cat:'חיפוש בבית — מי בבית', tags:'step11', he:'כולם שכנים?', ar:'كلهم جيران؟', trans:'כֻּלְהֻם גִירַאן?'},
-  {id:'bi-srchb-12', section:'scenario', cat:'חיפוש בבית — מי בבית', tags:'step12 civilian', he:'כן, אלה הילדים של אבו חסן.', ar:'اه، هدول ولاد أبو حسن', trans:'אַה, הַדוֹל וְלַאד אַבּו חַסַן'},
-  {id:'bi-srchb-13', section:'scenario', cat:'חיפוש בבית — מי בבית', tags:'step13', he:'כמה זמן הם כבר כאן?', ar:'قدّيش صار لهم هون؟', trans:'קַדֵיש צַאר לְהֻם הוֹן?'},
-  {id:'bi-srchb-14', section:'scenario', cat:'חיפוש בבית — מי בבית', tags:'step14 civilian', he:'הם כאן כבר שנתיים.', ar:'صار لهم هون سنتين', trans:'צַאר לְהֻם הוֹן סַנְתֵין'}
+  {id:'bi-haqira-12', section:'scenario', cat:'חקירה', tags:'step12 civilian', he:'בחיי, אני לא מכיר אותו, אבל לפעמים הוא עובר כאן, לא תמיד.', ar:'والله أنا ما بعرفو، بس مرّات بيمرق من هون، مش دايماً.', trans:'וַאללַה אַנַא מַא בַּעְרְפוֹ, בַּס מַראת בְּיִמְרֻק מִן הוֹן, מֻש דַאיְמַן.'}
 ];
 
 // Built-in customs topics (added in the same shape as server customs: he=title, why=body).
@@ -8682,9 +8650,7 @@ var SCN_CATEGORIES = [
       {id:'כניסה למבנה', icon:'🌅', title:'כניסה למבנה - חשד בטון'},
       {id:'זיכוי ובידוק', icon:'👋', title:'זיכוי ובידוק'},
       {id:'זיכוי מרחוק', icon:'📏', title:'זיכוי מרחוק'},
-      {id:'בידוק אישה', icon:'👩', title:'בידוק אישה'},
-      {id:'חיפוש בבית — איפה בעל הבית', icon:'🔍', title:'חיפוש בבית — איפה בעל הבית'},
-      {id:'חיפוש בבית — מי בבית', icon:'🏠', title:'חיפוש בבית — מי בבית'}
+      {id:'בידוק אישה', icon:'👩', title:'בידוק אישה'}
     ]
   },
   {
@@ -12909,6 +12875,23 @@ async function recordResponse(idx){
 
 // One-click repair: match every scenario row to its built-in line BY TEXT,
 // keep the row that has a recording, move it to the correct category+step,
+// Fully delete the two house-search scenarios (and all their rows) from the DB.
+async function purgeHouseSearch(btn){
+  if(!confirm('למחוק לגמרי את שני תרחישי "חיפוש בבית" וכל השורות/ההקלטות שלהם מהמסד? פעולה בלתי הפיכה.'))return;
+  var old=btn.textContent; btn.disabled=true; btn.textContent='מוחק...';
+  try{
+    var cats=['חיפוש בבית — איפה בעל הבית','חיפוש בבית — מי בבית'];
+    var done=0;
+    for(var ci=0;ci<cats.length;ci++){
+      var rows=await sbFetch('/rest/v1/phrases?select=id&section=eq.scenario&cat=eq.'+encodeURIComponent(cats[ci]));
+      for(var i=0;i<(rows||[]).length;i++){ try{ await sbFetch('/rest/v1/phrases?id=eq.'+encodeURIComponent(rows[i].id),'DELETE'); done++; }catch(e){} }
+    }
+    await loadData(); renderAdminList();
+    alert('✓ נמחקו '+done+' שורות. שני התרחישים הוסרו לגמרי.');
+  }catch(e){ alert('שגיאה: '+(e&&e.message?e.message:e)); btn.textContent=old; }
+  btn.disabled=false;
+}
+
 // and delete the empty duplicate copies. No re-recording, no data loss.
 async function repairScenarioRecordings(btn){
   if(!confirm('לתקן ולסדר את כל התרחישים המובנים? כל הקלטה קיימת תחובר לשורה ולסדר הנכונים, והעותקים הריקים הכפולים יימחקו. ההקלטות לא ייפגעו.'))return;
