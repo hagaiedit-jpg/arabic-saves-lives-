@@ -7467,6 +7467,8 @@ async function loadData(){
 // Built-in scenarios that don't come from the remote dataset.
 // Civilian (speaker ב) lines are tagged 'civilian'; soldier (א) lines are not.
 function _scnStepKey(p){ var m=((p&&p.tags)||'').match(/step(\d+)/); return ((p&&p.cat)||'')+'#'+(m?m[1]:'?'); }
+// Recently-added scenarios — show a "חדש" badge on their cube until first opened.
+var NEW_SCENARIOS = ['חקירה','הרחקה מהשטח','חיפוש בבית — איפה בעל הבית','חיפוש בבית — מי בבית'];
 var BUILTIN_SCENARIO_DATA = [
   {id:'bi-harhaka-1',  section:'scenario', cat:'הרחקה מהשטח', tags:'step1',  he:'עצור במקום והרם ידיים!', ar:'اوقّف عندك وارفع إيديك لفوق!', trans:'וַקֵף עִנְדַכּ וַארְפַע אִידֵיכּ לַפוֹק'},
   {id:'bi-harhaka-2',  section:'scenario', cat:'הרחקה מהשטח', tags:'step2',  he:'מה אתה עושה כאן?', ar:'شو بتعمل هون؟', trans:'שוּ בְּתִעְמֵל הוֹן?'},
@@ -7789,13 +7791,14 @@ async function importBuiltinScenarios(btn){
   if(!confirm('להוסיף את כל התרחישים המובנים (חקירה, הרחקה מהשטח, חיפוש בבית) לרשימת העריכה? כך תוכלי לראות, לערוך, לתקן ולהקליט כל שורה כמו כל משפט אחר. (לא תיווצר כפילות אם כבר קיימים.)'))return;
   var old=btn.textContent; btn.disabled=true; btn.textContent='מוסיף...';
   try{
-    var existing=await sbFetch('/rest/v1/phrases?select=he,cat&section=eq.scenario');
-    var have={}; (existing||[]).forEach(function(p){have[(p.cat||'')+'|'+(p.he||'')]=1;});
+    var existing=await sbFetch('/rest/v1/phrases?select=cat,tags&section=eq.scenario');
+    var have={}; (existing||[]).forEach(function(p){have[_scnStepKey(p)]=1;});
     var added=0;
     for(var i=0;i<BUILTIN_SCENARIO_DATA.length;i++){
       var p=BUILTIN_SCENARIO_DATA[i];
-      if(have[(p.cat||'')+'|'+(p.he||'')])continue;
+      if(have[_scnStepKey(p)])continue;
       await sbFetch('/rest/v1/phrases','POST',{cat:p.cat,he:p.he,trans:p.trans,ar:p.ar,tags:p.tags,why:'',tone:'',audio_url:'',is_new:false,section:'scenario'});
+      have[_scnStepKey(p)]=1;
       added++;
     }
     btn.textContent='✓ נוספו '+added;
@@ -8798,7 +8801,10 @@ function renderScnGrid(){
           var completed = {};
           try { completed = JSON.parse(localStorage.getItem('completed_scenarios') || '{}'); } catch(e){}
           var isCompleted = !!completed[s.id];
-          
+          // "New" badge for recently-added scenarios the soldier hasn't opened yet
+          var _scnSeen = {}; try { _scnSeen = JSON.parse(localStorage.getItem('scn_seen') || '{}'); } catch(e){}
+          var isNewScn = ready && (typeof NEW_SCENARIOS !== 'undefined') && NEW_SCENARIOS.indexOf(s.id) !== -1 && !_scnSeen[s.id];
+
           // LOORA-style card with gradient and better hierarchy
           var cardBg = ready ? 'linear-gradient(160deg,#1F3147 0%,#243a55 100%)' : 'rgba(31,49,71,0.4)';
           var cardBorder = isCompleted ? '#1D9E75' : (ready ? 'rgba(212,162,78,0.25)' : 'rgba(212,162,78,0.1)');
@@ -8810,6 +8816,9 @@ function renderScnGrid(){
           // Completion checkmark badge
           if (isCompleted) {
             html += '<div style="position:absolute;top:8px;left:8px;background:#1D9E75;color:#fff;border-radius:50%;width:22px;height:22px;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;box-shadow:0 2px 4px rgba(29,158,117,0.4);">✓</div>';
+          }
+          if (isNewScn) {
+            html += '<div style="position:absolute;top:8px;right:8px;background:#D4A24E;color:#0E1B2E;font-size:9px;font-weight:800;padding:1px 7px;border-radius:8px;line-height:1.5;">חדש</div>';
           }
           
           // Icon - bigger with subtle background container
@@ -9017,6 +9026,8 @@ function escapeHtmlSafe(str) {
 
 function scnOpen(scnId){
   try {
+    // Mark this scenario as seen (clears its "חדש" badge)
+    try { var _ss = JSON.parse(localStorage.getItem('scn_seen') || '{}'); _ss[scnId] = 1; localStorage.setItem('scn_seen', JSON.stringify(_ss)); } catch(e){}
     // Check if this is a broadcast scenario (announce section)
     var ANNOUNCE_SCN = ['כריזה לבית','כריזה לרכב','כריזה לקהל'];
     var sourceList = SCENARIO;
@@ -9884,20 +9895,19 @@ function scnPlayBubble(idx, btn){
 function scnPlayAll(){
   try {
     if (!_scnSteps || _scnSteps.length === 0) return;
-    // Stop any current audio
-    if (window._scnCurrentAudio) {
-      window._scnCurrentAudio.pause();
-      window._scnCurrentAudio = null;
-    }
+    // Reuse one Audio element, unlocked by this tap, so later lines aren't
+    // blocked by autoplay (the bug that stopped playback after ~2 lines).
+    if (!window._scnAllAudio) window._scnAllAudio = new Audio();
+    var a = window._scnAllAudio;
+    try { a.pause(); } catch(e){}
+    window._scnCurrentAudio = a;
     var idx = 0;
     var btn = document.getElementById('scn-playall-btn');
     var originalText = btn ? btn.innerHTML : '';
-    
+
     function playNext(){
       if (idx >= _scnSteps.length) {
-        // Done - launch confetti and mark complete
         if (btn) btn.innerHTML = originalText;
-        window._scnCurrentAudio = null;
         try {
           if (typeof launchConfetti === 'function') launchConfetti();
           var completed = JSON.parse(localStorage.getItem('completed_scenarios') || '{}');
@@ -9908,22 +9918,19 @@ function scnPlayAll(){
       }
       var step = _scnSteps[idx];
       idx++;
-      if (!step || !step.audio) {
-        // Skip this step
-        playNext();
-        return;
-      }
+      if (!step || !step.audio) { playNext(); return; }   // skip lines without a recording
       if (btn) btn.innerHTML = '⏸ משמיע ' + idx + '/' + _scnSteps.length;
       if (step.id && typeof trackLearned === 'function') trackLearned(step.id);
-      window._scnCurrentAudio = new Audio(step.audio);
-      window._scnCurrentAudio.onended = function(){
-        // Small pause between phrases
-        setTimeout(playNext, 400);
-      };
-      window._scnCurrentAudio.onerror = function(){
-        setTimeout(playNext, 200);
-      };
-      window._scnCurrentAudio.play();
+      a.onended = function(){ setTimeout(playNext, 400); };
+      a.onerror = function(){ setTimeout(playNext, 250); };
+      try { a.pause(); } catch(e){}
+      if (a.src !== step.audio) a.src = step.audio;
+      try { a.currentTime = 0; } catch(e){}
+      var tries = 0;
+      (function attempt(){
+        var p = a.play();
+        if (p && p.catch) p.catch(function(){ tries++; if (tries < 3) setTimeout(attempt, 150); else setTimeout(playNext, 250); });
+      })();
     }
     playNext();
   } catch(e) { console.warn('scnPlayAll error:', e); }
