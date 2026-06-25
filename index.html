@@ -11477,6 +11477,12 @@ function closePopup(){
     try { navToTab('dict'); return; } catch(e) { /* fall through */ }
   }
 
+  // If opened from a section the popup-router knows (heart, daily, fav, sem,
+  // ten, qk, dict) return there — not to the stale military category list.
+  if (window._popupSource && ['heart','daily','fav','sem','ten','qk','dict'].indexOf(window._popupSource)!==-1){
+    try { clsP(); return; } catch(e) { /* fall through */ }
+  }
+
   try {
     // Go back to category list if we have a current category, otherwise to categories grid
     if (typeof curC !== 'undefined' && curC) {
@@ -11713,6 +11719,7 @@ function renderPhraseResponses(p){
 }
 function opP(i){
   const p=DB[i];
+  window._popupSource='military';
   saveRecent(p.id);
   if (typeof trackLearned === 'function') trackLearned(p.id);
   if (typeof practiceReset === 'function') practiceReset();
