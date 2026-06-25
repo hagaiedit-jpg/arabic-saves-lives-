@@ -1306,6 +1306,20 @@ body.day-mode [style*="border:1px solid #2e4558"]{
   border-color:#e0d4b5 !important;
 }
 
+/* Daily challenge modal is an intentionally dark emergency overlay — keep its
+   dark theme (and readable light text) in day mode too. The ID scope outranks
+   the global inline-color flips above, so the sentence stays legible. */
+body.day-mode #emerg-challenge-overlay [style*="color:#E8D9B8"],
+body.day-mode #emerg-challenge-overlay [style*="color: #E8D9B8"]{ color:#E8D9B8 !important; }
+body.day-mode #emerg-challenge-overlay [style*="color:#fff"],
+body.day-mode #emerg-challenge-overlay [style*="color: #fff"]{ color:#fff !important; }
+body.day-mode #emerg-challenge-overlay [style*="color:#a0b8c8"],
+body.day-mode #emerg-challenge-overlay [style*="color: #a0b8c8"]{ color:#a0b8c8 !important; }
+body.day-mode #emerg-challenge-overlay [style*="color:#D4A24E"]{ color:#D4A24E !important; }
+body.day-mode #emerg-challenge-overlay [style*="color:#c0392b"]{ color:#e74c3c !important; }
+body.day-mode #emerg-challenge-overlay [style*="color:#1D9E75"]{ color:#1D9E75 !important; }
+body.day-mode #emerg-challenge-overlay [style*="background:#1F3147"]{ background:#1F3147 !important; }
+
 /* Continue card stays orange but with white text - already good */
 
 /* Stats progress bar background */
