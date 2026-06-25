@@ -12962,6 +12962,7 @@ async function renderAdminList(){
         <div style="display:flex;gap:6px;align-items:center;margin-top:6px;flex-wrap:wrap;">
           ${statusBadges}
           <div style="flex:1;"></div>
+          <button onclick="quickRecordIdx(${i})" style="padding:5px 10px;background:rgba(192,57,43,0.2);border:1px solid #c0392b;border-radius:6px;color:#ff9a8f;font-size:12px;cursor:pointer;font-family:inherit;">🎙 הקלט</button>
           <button onclick="openEditIdx(${i})" style="padding:5px 10px;background:#2A3D52;border:none;border-radius:6px;color:#E8D9B8;font-size:12px;cursor:pointer;font-family:inherit;">✏️ ערוך</button>
           <button onclick="delP('${p.id}')" style="padding:5px 10px;background:#3a1a1a;border:1px solid #5a2020;border-radius:6px;color:#ff8080;font-size:12px;cursor:pointer;font-family:inherit;">🗑</button>
         </div>
@@ -13033,6 +13034,18 @@ function openEditIdx(idx) {
   const p = window._adminItems && window._adminItems[idx];
   if (!p) { alert('שגיאה בטעינת הפריט'); return; }
   openEditRow(p);
+}
+// One-tap record from the list: open the editor and jump straight to the
+// recorder (scrolls it into view and focuses it) for any phrase — works the
+// same for proverbs, customs and every other section.
+function quickRecordIdx(idx) {
+  openEditIdx(idx);
+  setTimeout(function(){
+    try{
+      var b=document.getElementById('edit-rec');
+      if(b){ b.scrollIntoView({behavior:'smooth',block:'center'}); b.focus(); }
+    }catch(e){}
+  }, 250);
 }
 // Open the editor by phrase id, always loading the RAW DB row (not the in-memory
 // mapped object) so the why/cultural split and responses are preserved on save.
