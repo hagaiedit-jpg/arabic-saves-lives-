@@ -7833,7 +7833,7 @@ async function addConversation14(btn){
       var m=CONV14_MILITARY[j];
       var ex=await sbFetch('/rest/v1/phrases?select=he&section=eq.military&cat=eq.'+encodeURIComponent(m.cat)+'&he=eq.'+encodeURIComponent(m.he));
       if(ex&&ex.length)continue;
-      await sbFetch('/rest/v1/phrases','POST',{cat:m.cat,he:m.he,trans:m.trans,ar:m.ar,tags:'',why:'',tone:'',audio_url:'',is_new:false,section:'military'});
+      await sbFetch('/rest/v1/phrases','POST',{cat:m.cat,he:m.he,trans:m.trans,ar:m.ar,tags:'',why:'',tone:'',audio_url:'',is_new:true,section:'military'});
       milAdded++;
     }
     btn.textContent='✓ תרחיש +'+scnAdded+' · מבצעי +'+milAdded;
@@ -8885,14 +8885,24 @@ function renderScnGrid(){
           sourceList.filter(function(p){return p.cat === s.id;}) : [];
         if (phrases.length > 0) readyCount++;
       });
-      
+
+      // Does this category contain a recently-added scenario the soldier
+      // hasn't opened yet? If so, surface a "חדש" badge on the category header
+      // too — so it's findable before expanding the category.
+      var _scnSeenCat = {}; try { _scnSeenCat = JSON.parse(localStorage.getItem('scn_seen') || '{}'); } catch(e){}
+      var catHasNew = cat.scenarios.some(function(s){
+        return (typeof NEW_SCENARIOS !== 'undefined') && NEW_SCENARIOS.indexOf(s.id) !== -1 && !_scnSeenCat[s.id];
+      });
+
       // Category header (clickable to expand/collapse) - LOORA-style
       html += '<div style="background:linear-gradient(135deg,#18293E 0%,#1F3147 100%);border:1px solid rgba(212,162,78,0.2);border-radius:16px;margin-bottom:16px;overflow:hidden;box-shadow:0 2px 8px rgba(0,0,0,0.2);">';
       html += '<div onclick="scnToggleCat(\'' + cat.id + '\')" style="padding:16px 18px;cursor:pointer;display:flex;align-items:center;justify-content:space-between;">';
       html += '<div style="display:flex;align-items:center;gap:14px;">';
       html += '<div style="width:42px;height:42px;background:rgba(212,162,78,0.12);border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:22px;">' + cat.icon + '</div>';
       html += '<div>';
-      html += '<div style="color:#E8D9B8;font-size:15px;font-weight:700;letter-spacing:0.3px;">' + cat.title + '</div>';
+      html += '<div style="display:flex;align-items:center;gap:8px;"><div style="color:#E8D9B8;font-size:15px;font-weight:700;letter-spacing:0.3px;">' + cat.title + '</div>';
+      if (catHasNew) html += '<span style="background:#D4A24E;color:#0E1B2E;font-size:9px;font-weight:800;padding:1px 7px;border-radius:8px;line-height:1.5;">חדש</span>';
+      html += '</div>';
       html += '<div style="color:#7a9ab5;font-size:12px;margin-top:3px;">' + cat.scenarios.length + ' תרחישים';
       if (readyCount > 0) html += ' · <span style="color:#1D9E75;font-weight:600;">' + readyCount + ' מוכנים</span>';
       html += '</div>';
