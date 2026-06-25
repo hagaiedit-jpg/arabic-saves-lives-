@@ -3070,6 +3070,8 @@ function showLanding() {
         <div style="text-align:center;color:#7a9ab5;font-size:11px;margin-top:5px;">לאחר הייבוא הם יופיעו ברשימה תחת סינון "🔇 צריך הקלטה"</div>
         <button onclick="addConversation14(this)" style="width:100%;padding:12px;margin-top:10px;background:linear-gradient(135deg,#5a8dee 0%,#4574d4 100%);border:none;border-radius:10px;color:#fff;font-size:13px;font-weight:800;cursor:pointer;font-family:inherit;">🚨 הוסף תרחיש "מעצר נער חשוד בזריקת אבנים" (חד-פעמי)</button>
         <div style="text-align:center;color:#7a9ab5;font-size:11px;margin-top:5px;">תרחיש בן 9 שורות + 5 משפטים מבצעיים לקטגוריות הקיימות — אחר כך אפשר להקליט מהרשימות</div>
+        <button onclick="addPhrasebookBatch(this)" style="width:100%;padding:12px;margin-top:10px;background:linear-gradient(135deg,#1D9E75 0%,#147a59 100%);border:none;border-radius:10px;color:#fff;font-size:13px;font-weight:800;cursor:pointer;font-family:inherit;">📖 הוסף את משפטי הפנקס (מבצעי + יומיומי + תשובות) (חד-פעמי)</button>
+        <div style="text-align:center;color:#7a9ab5;font-size:11px;margin-top:5px;">17 מבצעיים + 8 יומיומיים. השאלות יקבלו תשובות אפשריות — יופיעו בטאב 🎤 הקלטת תשובות</div>
         <button onclick="removeSearchLastLines(this)" style="width:100%;padding:11px;margin-top:10px;background:rgba(192,57,43,0.15);border:1px solid #c0392b;border-radius:10px;color:#ff8080;font-size:13px;font-weight:700;cursor:pointer;font-family:inherit;">🗑 מחק 2 שורות אחרונות ב"מי בבית"</button>
         <div style="text-align:center;color:#7a9ab5;font-size:11px;margin-top:5px;">מסיר את "כמה זמן הם כבר כאן?" ו"הם כאן כבר שנתיים"</div>
       </div>
@@ -7853,6 +7855,113 @@ async function addConversation14(btn){
     btn.textContent='✓ תרחיש +'+scnAdded+' · מבצעי +'+milAdded;
     await loadData(); renderAdminList();
     alert('✓ נוספו '+scnAdded+' שורות תרחיש ו-'+milAdded+' משפטים מבצעיים. עכשיו אפשר לערוך ולהקליט מהרשימות (סינון "🔇 צריך הקלטה"). אם נוספו 0 — הם כבר היו קיימים.');
+  }catch(e){
+    alert('שגיאה: '+(e&&e.message?e.message:e));
+    btn.textContent=old;
+  }
+  btn.disabled=false;
+}
+
+// === פנקס שיחון: משפטים מבצעיים + יומיומיים + תשובות אפשריות ===
+// Single-source DB insert. Questions carry possible answers in `responses`,
+// which surface in the 🎤 answer-recording queue. All dedup by category+text.
+var PHRASEBOOK_DAILY = [
+  {cat:'עזרה וכיוונים', he:'אפשר לעלות על העגלה?', ar:'ممكن أطلع عالعربية؟', trans:'מֻמְכֶּן אֶטְלַע עַלעַרַבַּيّה?'},
+  {cat:'שוק ומסחר', he:'תן לי חצי ק"ג גרעינים שחורים, בשבילי ובשביל החבר\'ה.', ar:'عطيني نص كيلو بزر أسود إلي وللجماعة', trans:'עַטִינִי נֻצّ כִּילוֹ בַּזֶר אַסְוַד אִלִי וְלִאלגַ׳מַאעַה'},
+  {cat:'שוק ומסחר', he:'תן לי 2 אבטיחים ו-3 ק"ג תפוחי אדמה.', ar:'عطيني بطيختين وتلت كيلو بطاطا', trans:'עַטִינִי בַּטִّيחְ׳תֵין וּתְלַת כִּילוֹ בַּטַאטַא'},
+  {cat:'שוק ומסחר', he:'תן לי פיתה וגבינה לבנה.', ar:'عطيني بيتة وجبنة بيضة', trans:'עַטִינִי בִּיתַّה וְגִ׳בְּנֶה בֵּיצַ׳ה'},
+  {cat:'שוק ומסחר', he:'תן לי קופסת תה ושים לי הכל בשקית.', ar:'عطيني علبة شاي وحط لي الكل بكيس', trans:'עַטִינִי עֻלְבֶּת שַאי וְחֻטّ לִי אִלכֻּלّ בַּכִּיס'},
+  {cat:'שוק ומסחר', he:'לא תמצא כמוהו בשום מקום אחר.', ar:'ما بتلاقي مثله في أي مكان تاني', trans:'מַא בְּתְלַאקִי מִתְלֹה פִי אַيّ מַכַּאן תַّאנִי'},
+  {cat:'שוק ומסחר', he:'אני רוצה לקנות 2 ק"ג בצל וק"ג תפוחים מתוקים.', ar:'بدي أشتري تنين كيلو بصل وكيلو تفاح حلو', trans:'בִּדִّي אַשְתַרִי תְנֵין כִּילוֹ בַּצַל וְכִּילוֹ תֻפַّאח חֻלוּ'},
+  {cat:'שוק ומסחר', he:'בבקשה, קח את העודף!', ar:'تفضل، خد الباقي!', trans:'תְפַצַّל, חֻ׳ד אִלבַּאקִי!'}
+];
+var PHRASEBOOK_MILITARY = [
+  {cat:'בידוק וזיהוי', he:'מה שם הרחוב?', ar:'شو اسم الشارع؟', trans:'שוּ אִסֶם אִלשַّארֶע?', responses:[
+    {he:'רחוב סלאח א-דין', ar:'شارع صلاح الدين', trans:'שַّארֶע צַלַאח אִדִّין'},
+    {he:'אני לא יודע את השם', ar:'ما بعرف الاسم', trans:'מַא בַּעְרֶף אִלאִסֶם'},
+    {he:'אין שם, סמטה', ar:'ما إلو اسم، زاروب', trans:'מַא אִלוֹ אִסֶם, זַארוּבּ'}
+  ]},
+  {cat:'בידוק וזיהוי', he:'מה מספר הבית?', ar:'شو رقم البيت؟', trans:'שוּ רַקַם אִלבֵּית?', responses:[
+    {he:'מספר עשר', ar:'رقم عشرة', trans:'רַקַם עַשַרַה'},
+    {he:'אין מספר', ar:'ما في رقم', trans:'מַא פִי רַקַם'},
+    {he:'הבית השלישי', ar:'البيت التالت', trans:'אִלבֵּית אִתַّאלֶת'}
+  ]},
+  {cat:'בידוק וזיהוי', he:'ראית ארבעה אנשים חמושים?', ar:'شفت أربع أشخاص مسلّحين؟', trans:'שֻפְת אַרְבַּע אַשְחַ׳אץ מְסַלّחִ׳ין?', responses:[
+    {he:'לא ראיתי כלום', ar:'ما شفت إشي', trans:'מַא שֻפְת אִשִי'},
+    {he:'כן, רצו לשם', ar:'آه، ركضوا لهنيك', trans:'אה, רַכַّצוּ לַהֻנִיכּ'},
+    {he:'אני לא יודע', ar:'ما بعرف', trans:'מַא בַּעְרֶף'}
+  ]},
+  {cat:'בידוק וזיהוי', he:'מה אתה צוחק עליי?', ar:'شو إنت بتتمسخر عليّ؟', trans:'שוּ אִנְתֶ בְּתִתְמַסְחַ׳ר עַלַيّ?'},
+  {cat:'בידוק וזיהוי', he:'לאן הוא נעלם?', ar:'لوين اختفى؟', trans:'לַוֵין אִחְ׳תַפוֹ?', responses:[
+    {he:'אני לא יודע', ar:'ما بعرف', trans:'מַא בַּעְרֶף'},
+    {he:'יצא מזמן', ar:'طلع من زمان', trans:'טִלֶע מן זַמַאן'},
+    {he:'לא ראיתי אותו', ar:'ما شفته', trans:'מַא שֻפְתֹה'}
+  ]},
+  {cat:'שליטה בבית', he:'איפה אתה מחביא אותו?', ar:'وين بتخبّيه؟', trans:'וֵין בְּתְחַ׳בِّيה?', responses:[
+    {he:'אני לא מחביא אף אחד', ar:'ما بخبّي حدا', trans:'מַא בְּחַ׳בِّي חַדַא'},
+    {he:'אין כאן אף אחד', ar:'ما في حدا هون', trans:'מַא פִי חַדַא הוֹן'},
+    {he:'נשבע באלוהים, לא יודע', ar:'والله ما بعرف', trans:'וַאללה מַא בַּעְרֶף'}
+  ]},
+  {cat:'שליטה בבית', he:'יש מישהו בבית הזה?', ar:'في حدا بهالبيت؟', trans:'פִי חַדַא בְּהַאלבֵּית?', responses:[
+    {he:'כן, רק המשפחה', ar:'آه، بس العائلة', trans:'אה, בַּס אִלעַאאִלֶה'},
+    {he:'לא, אין אף אחד', ar:'لا، ما في حدا', trans:'לַא, מַא פִי חַדַא'},
+    {he:'רק אני והילדים', ar:'بس أنا والولاد', trans:'בַּס אַנַא וְאִלוְלַאד'}
+  ]},
+  {cat:'שליטה בבית', he:'אמור לי בבקשה איפה גר פלוני.', ar:'قل لي من فضلك وين ساكن؟', trans:'קֻלّ לִי מִן פַצְ׳לַכּ וֵין סַאכֶּן?', responses:[
+    {he:'שם, בבית הצהוב', ar:'هنيك، بالبيت الأصفر', trans:'הֻנִיכּ, בִּלבֵּית אִלאַצְפַר'},
+    {he:'לא מכיר אותו', ar:'ما بعرفه', trans:'מַא בַּערְפֹה'},
+    {he:'ליד המסגד', ar:'جنب الجامع', trans:'גַ׳נְבּ אִלגַ׳אמֶע'}
+  ]},
+  {cat:'שליטה בבית', he:'איפה המרתף שלכם?', ar:'وين العمبر تبعكم؟', trans:'וֵין אִלעַמְבַּר תַבַעְכֻּם?', responses:[
+    {he:'אין לנו מרתף', ar:'ما عنا عمبر', trans:'מַא עִנَّא עַמְבַּר'},
+    {he:'מתחת לבית', ar:'تحت البيت', trans:'תַחְת אִלבֵּית'},
+    {he:'מאחורה', ar:'ورا', trans:'וַרַא'}
+  ]},
+  {cat:'ניהול מרחב והוראות', he:'הישאר על הקו!', ar:'خلّيك عالخط!', trans:'חַ׳לّيכּ עַלחַ׳ט!'},
+  {cat:'ניהול מרחב והוראות', he:'בוא איתי, אני אראה לך!', ar:'تعال معي، أنا أفرجيك!', trans:'תַעַאל מַעִי, אַנַא אַפַרְגִ׳יכּ!'},
+  {cat:'מגע ראשוני', he:'כמה זמן אתה כבר לומד כאן?', ar:'قدّيش صار لك بتتعلّم هون؟', trans:'קַדّيש צַאר לַכּ בְּתִתְעַלّם הוֹן?', responses:[
+    {he:'שנתיים', ar:'سنتين', trans:'סַנְתֵין'},
+    {he:'מההתחלה', ar:'من البداية', trans:'מן אִלבִּדַאيֶה'},
+    {he:'כמה חודשים', ar:'كم شهر', trans:'כַּם שַהֶר'}
+  ]},
+  {cat:'מגע ראשוני', he:'אנחנו עושים סיורים, מעצרים, חיפושים וסריקות.', ar:'احنا بنعمل دوريات، اعتقالات، تفتيشات وتمشيطات', trans:'אִחְנַא בִּנְעַמֵל דַוְרִיّאת, אִעְתִקַאלַאת, תַפְתִישַאת וּתַמְשִיטַאת'},
+  {cat:'מגע ראשוני', he:'אתה רוצה לדעת איפה אני גר?', ar:'بدّك تعرف وين أنا ساكن؟', trans:'בִּדّכּ תִעְרֵף וֵין אַנַא סַאכֶּן?'},
+  {cat:'קהל ואירועים', he:'לאן נעלמו הילדים שזרקו את האבנים?', ar:'لوين اختفوا الولاد اللي رموا الحجار؟', trans:'לַוֵין אִחְ׳תַפוֹ אִלוְלַאד אִלّي רַמוּ אִלחְגַ׳אר?'},
+  {cat:'קהל ואירועים', he:'כשעברה המכונית ירו עלינו.', ar:'لمّا مرقت السيارة طحّوا علينا', trans:'לַמّא מַרְקַת אִלסַّيّארַה טַחّוּ עַלֵינַא'},
+  {cat:'קהל ואירועים', he:'מי מת, מה הסיבה?', ar:'مين مات، شو السبب؟', trans:'מִין מַאת, שוּ אִלסَّבַּב?', responses:[
+    {he:'חולה זקן', ar:'مريض كبير بالعمر', trans:'מַרִיצ׳ כְּבִּיר בִלעֻמֶר'},
+    {he:'תאונה', ar:'حادث', trans:'חַאדֶת'},
+    {he:'אני לא יודע', ar:'ما بعرف', trans:'מַא בַּעְרֶף'}
+  ]}
+];
+
+async function addPhrasebookBatch(btn){
+  if(!confirm('להוסיף לרשימות את כל משפטי הפנקס לעריכה והקלטה?\n• 8 משפטים יומיומיים (שוק/עזרה)\n• 17 משפטים מבצעיים (10 מהם עם תשובות אפשריות)\nפעולה חד-פעמית, ללא כפילות.'))return;
+  var old=btn.textContent; btn.disabled=true; btn.textContent='מוסיף...';
+  try{
+    var milHave={}, dayHave={};
+    var exMil=await sbFetch('/rest/v1/phrases?select=cat,he&section=eq.military');
+    (exMil||[]).forEach(function(p){ milHave[(p.cat||'')+'|'+(p.he||'')]=1; });
+    var exDay=await sbFetch('/rest/v1/phrases?select=cat,he&section=eq.daily');
+    (exDay||[]).forEach(function(p){ dayHave[(p.cat||'')+'|'+(p.he||'')]=1; });
+    var milAdded=0, dayAdded=0;
+    for(var i=0;i<PHRASEBOOK_MILITARY.length;i++){
+      var m=PHRASEBOOK_MILITARY[i];
+      if(milHave[(m.cat||'')+'|'+m.he])continue;
+      var body={cat:m.cat,he:m.he,trans:m.trans,ar:m.ar,tags:'',why:'',tone:'',audio_url:'',is_new:true,section:'military'};
+      if(m.responses&&m.responses.length){ body.responses=JSON.stringify(m.responses.map(function(r){return {he:r.he,trans:r.trans,ar:r.ar,audio_url:''};})); }
+      await sbFetch('/rest/v1/phrases','POST',body);
+      milHave[(m.cat||'')+'|'+m.he]=1; milAdded++;
+    }
+    for(var j=0;j<PHRASEBOOK_DAILY.length;j++){
+      var d=PHRASEBOOK_DAILY[j];
+      if(dayHave[(d.cat||'')+'|'+d.he])continue;
+      await sbFetch('/rest/v1/phrases','POST',{cat:d.cat,he:d.he,trans:d.trans,ar:d.ar,tags:'',why:'',tone:'',audio_url:'',is_new:true,section:'daily'});
+      dayHave[(d.cat||'')+'|'+d.he]=1; dayAdded++;
+    }
+    btn.textContent='✓ מבצעי +'+milAdded+' · יומיומי +'+dayAdded;
+    await loadData(); renderAdminList();
+    alert('✓ נוספו '+milAdded+' משפטים מבצעיים ו-'+dayAdded+' יומיומיים.\nהשאלות עם תשובות יופיעו גם בטאב 🎤 הקלטת תשובות.\n(אם נוספו 0 — הם כבר היו קיימים.)');
   }catch(e){
     alert('שגיאה: '+(e&&e.message?e.message:e));
     btn.textContent=old;
