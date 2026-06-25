@@ -3073,6 +3073,8 @@ function showLanding() {
         <div style="text-align:center;color:#7a9ab5;font-size:11px;margin-top:5px;">תרחיש בן 9 שורות + 5 משפטים מבצעיים לקטגוריות הקיימות — אחר כך אפשר להקליט מהרשימות</div>
         <button onclick="addPhrasebookBatch(this)" style="width:100%;padding:12px;margin-top:10px;background:linear-gradient(135deg,#1D9E75 0%,#147a59 100%);border:none;border-radius:10px;color:#fff;font-size:13px;font-weight:800;cursor:pointer;font-family:inherit;">📖 הוסף את משפטי הפנקס (מבצעי + יומיומי + תשובות) (חד-פעמי)</button>
         <div style="text-align:center;color:#7a9ab5;font-size:11px;margin-top:5px;">17 מבצעיים + 8 יומיומיים. השאלות יקבלו תשובות אפשריות — יופיעו בטאב 🎤 הקלטת תשובות</div>
+        <button onclick="addBuiltinCustomsToList(this)" style="width:100%;padding:12px;margin-top:10px;background:linear-gradient(135deg,#8e44ad 0%,#6c3483 100%);border:none;border-radius:10px;color:#fff;font-size:13px;font-weight:800;cursor:pointer;font-family:inherit;">🕌 הוסף את המנהגים לרשימות לעריכה (חד-פעמי)</button>
+        <div style="text-align:center;color:#7a9ab5;font-size:11px;margin-top:5px;">5 מנהגים (אדמה, משא ומתן, כבוד המבוגר, אישה, מסגד) — אחר כך אפשר לערוך אותם ברשימה תחת תווית "מנהגים"</div>
         <button onclick="removeSearchLastLines(this)" style="width:100%;padding:11px;margin-top:10px;background:rgba(192,57,43,0.15);border:1px solid #c0392b;border-radius:10px;color:#ff8080;font-size:13px;font-weight:700;cursor:pointer;font-family:inherit;">🗑 מחק 2 שורות אחרונות ב"מי בבית"</button>
         <div style="text-align:center;color:#7a9ab5;font-size:11px;margin-top:5px;">מסיר את "כמה זמן הם כבר כאן?" ו"הם כאן כבר שנתיים"</div>
       </div>
@@ -7626,7 +7628,16 @@ function populateFromData(data){
   DICT=data.filter(p=>p.section==='dictionary').map(mp);
   SEM=data.filter(p=>p.section==='semantic').map(p=>({...mp(p),risk:p.tone||'low',dict:p.ar,field:p.why}));
   CUS=data.filter(p=>p.section==='customs' || (p.section==='heart' && p.cat==='מנהגים')).map(mp);
-  try{ if(typeof BUILTIN_CUSTOMS!=='undefined' && BUILTIN_CUSTOMS.length){ CUS=CUS.concat(BUILTIN_CUSTOMS.map(mp)); } }catch(e){}
+  // Merge built-in customs, but skip any topic already promoted to the DB
+  // (matched by title text) so once inserted-for-editing the DB copy wins and
+  // there's no duplicate. Mirrors the scenario single-source approach.
+  try{
+    if(typeof BUILTIN_CUSTOMS!=='undefined' && BUILTIN_CUSTOMS.length){
+      var _normHeCus=function(s){ return String(s||'').replace(/[^֐-׿0-9A-Za-z]/g,''); };
+      var _seenCusHe={}; CUS.forEach(function(c){ _seenCusHe[_normHeCus(c.he)]=true; });
+      BUILTIN_CUSTOMS.forEach(function(b){ if(!_seenCusHe[_normHeCus(b.he)]){ CUS.push(mp(b)); _seenCusHe[_normHeCus(b.he)]=true; } });
+    }
+  }catch(e){}
   ARTS=data.filter(p=>p.section==='article').map(mp);
   INTEL=data.filter(p=>p.section==='intel_field').map(mp);
 }
@@ -8013,6 +8024,33 @@ async function addPhrasebookBatch(btn){
     btn.textContent='✓ מבצעי +'+milAdded+' · יומיומי +'+dayAdded;
     await loadData(); renderAdminList();
     alert('✓ נוספו '+milAdded+' משפטים מבצעיים ו-'+dayAdded+' יומיומיים.\nהשאלות עם תשובות יופיעו גם בטאב 🎤 הקלטת תשובות.\n(אם נוספו 0 — הם כבר היו קיימים.)');
+  }catch(e){
+    alert('שגיאה: '+(e&&e.message?e.message:e));
+    btn.textContent=old;
+  }
+  btn.disabled=false;
+}
+
+// Promote the built-in customs into the DB so they appear in the admin lists
+// and can be edited. Idempotent (dedup by title). Once in the DB the built-in
+// copy is suppressed at load time, so there is no duplicate in the display.
+async function addBuiltinCustomsToList(btn){
+  if(!confirm('להוסיף את המנהגים שהוספנו לרשימות העריכה? כך תוכלי לראות ולערוך כל אחד מהם. (לא תיווצר כפילות אם כבר קיימים.)'))return;
+  var old=btn.textContent; btn.disabled=true; btn.textContent='מוסיף...';
+  try{
+    function norm(s){ return String(s||'').replace(/[^֐-׿0-9A-Za-z]/g,''); }
+    var existing=await sbFetch('/rest/v1/phrases?select=he&section=eq.customs');
+    var have={}; (existing||[]).forEach(function(p){ have[norm(p.he)]=1; });
+    var added=0;
+    for(var i=0;i<BUILTIN_CUSTOMS.length;i++){
+      var c=BUILTIN_CUSTOMS[i];
+      if(have[norm(c.he)])continue;
+      await sbFetch('/rest/v1/phrases','POST',{cat:c.cat,he:c.he,trans:c.trans||'',ar:c.ar||'',tags:'',why:c.why||'',tone:'',audio_url:'',is_new:true,section:'customs'});
+      have[norm(c.he)]=1; added++;
+    }
+    btn.textContent='✓ נוספו '+added;
+    await loadData(); renderAdminList();
+    alert('✓ נוספו '+added+' מנהגים לרשימות העריכה. אפשר עכשיו לערוך אותם כאן (סינון לפי תווית "מנהגים"). אם נוספו 0 — הם כבר היו קיימים.');
   }catch(e){
     alert('שגיאה: '+(e&&e.message?e.message:e));
     btn.textContent=old;
