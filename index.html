@@ -2160,7 +2160,8 @@ function showLanding() {
           <div style="color:#7a9ab5;font-size:10.5px;line-height:1.4;">הספרייה המבצעית</div>
         </div>
 
-        <div onclick="navToTab('cus')" style="background:linear-gradient(160deg,#1F3147 0%,#243a55 100%);border:1px solid rgba(212,162,78,0.2);border-radius:14px;padding:14px 12px;cursor:pointer;box-shadow:0 2px 8px rgba(0,0,0,0.2);">
+        <div onclick="navToTab('cus')" style="position:relative;background:linear-gradient(160deg,#1F3147 0%,#243a55 100%);border:1px solid rgba(212,162,78,0.2);border-radius:14px;padding:14px 12px;cursor:pointer;box-shadow:0 2px 8px rgba(0,0,0,0.2);">
+          <div id="home-cus-new" style="display:none;position:absolute;top:8px;right:8px;background:#D4A24E;color:#0E1B2E;font-size:9px;font-weight:800;padding:1px 7px;border-radius:8px;line-height:1.5;">חדש</div>
           <div style="font-size:26px;margin-bottom:6px;line-height:1;">🕌</div>
           <div style="color:#E8D9B8;font-size:13px;font-weight:800;margin-bottom:2px;">תרבות ומנהגים</div>
           <div style="color:#7a9ab5;font-size:10.5px;line-height:1.4;">להבין את הצד השני</div>
@@ -5480,6 +5481,13 @@ function renderHome(){
   
   // Update emergency challenge badge
   try { updateEmergencyChallengeBadge(); } catch(e) {}
+
+  // "חדש" badge on the customs home cube — so new customs are visible
+  // one layer earlier, before entering the section.
+  try {
+    var cusNewEl = document.getElementById('home-cus-new');
+    if (cusNewEl) cusNewEl.style.display = (typeof CUS !== 'undefined' && CUS && CUS.some(function(c){ return c && c.isNew; })) ? 'block' : 'none';
+  } catch(e) {}
 
   try {
     var hour = new Date().getHours();
@@ -11182,6 +11190,16 @@ function openCustomsGroup(groupName){
     html += '<div class="card"><div class="che">' + c.he + '</div><div style="color:#a0b8c8;font-size:13.5px;line-height:1.85;margin-top:8px;">' + txt + '</div></div>';
   });
   document.getElementById('cuslist').innerHTML = html;
+  // Mark the customs in this group as seen — clears the "חדש" badge on this
+  // group cube and (once all new customs are seen) on the home cube.
+  try {
+    var seen = getSeenIds();
+    items.forEach(function(c){ if(c && c.id && c.isNew){ c.isNew=false; if(seen.indexOf(c.id)<0) seen.push(c.id); } });
+    localStorage.setItem('seen_ids', JSON.stringify(seen));
+    rCus();
+    var cusNewEl=document.getElementById('home-cus-new');
+    if(cusNewEl) cusNewEl.style.display = (CUS.some(function(c){return c&&c.isNew;}))?'block':'none';
+  } catch(e){}
 }
 
 // Keep old function for backward compat
