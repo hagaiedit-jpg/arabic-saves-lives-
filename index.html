@@ -3054,6 +3054,8 @@ function showLanding() {
       <div style="margin-bottom:12px;">
         <button onclick="importTenPhrases(this)" style="width:100%;padding:12px;background:linear-gradient(135deg,#D4A24E 0%,#b88a3d 100%);border:none;border-radius:10px;color:#0E1B2E;font-size:13px;font-weight:800;cursor:pointer;font-family:inherit;">🎖️ ייבא את 10 משפטי החובה לרשימה (חד-פעמי)</button>
         <div style="text-align:center;color:#7a9ab5;font-size:11px;margin-top:5px;">לאחר הייבוא הם יופיעו ברשימה תחת סינון "🔇 צריך הקלטה"</div>
+        <button onclick="addConversation14(this)" style="width:100%;padding:12px;margin-top:10px;background:linear-gradient(135deg,#5a8dee 0%,#4574d4 100%);border:none;border-radius:10px;color:#fff;font-size:13px;font-weight:800;cursor:pointer;font-family:inherit;">🚨 הוסף תרחיש "מעצר נער חשוד בזריקת אבנים" (חד-פעמי)</button>
+        <div style="text-align:center;color:#7a9ab5;font-size:11px;margin-top:5px;">תרחיש בן 9 שורות + 5 משפטים מבצעיים לקטגוריות הקיימות — אחר כך אפשר להקליט מהרשימות</div>
         <button onclick="removeSearchLastLines(this)" style="width:100%;padding:11px;margin-top:10px;background:rgba(192,57,43,0.15);border:1px solid #c0392b;border-radius:10px;color:#ff8080;font-size:13px;font-weight:700;cursor:pointer;font-family:inherit;">🗑 מחק 2 שורות אחרונות ב"מי בבית"</button>
         <div style="text-align:center;color:#7a9ab5;font-size:11px;margin-top:5px;">מסיר את "כמה זמן הם כבר כאן?" ו"הם כאן כבר שנתיים"</div>
       </div>
@@ -7468,7 +7470,7 @@ async function loadData(){
 // Civilian (speaker ב) lines are tagged 'civilian'; soldier (א) lines are not.
 function _scnStepKey(p){ var m=((p&&p.tags)||'').match(/step(\d+)/); return ((p&&p.cat)||'')+'#'+(m?m[1]:'?'); }
 // Recently-added scenarios — show a "חדש" badge on their cube until first opened.
-var NEW_SCENARIOS = ['חקירה','הרחקה מהשטח','חיפוש בבית — איפה בעל הבית','חיפוש בבית — מי בבית'];
+var NEW_SCENARIOS = ['חקירה','הרחקה מהשטח','חיפוש בבית — איפה בעל הבית','חיפוש בבית — מי בבית','מעצר נער חשוד'];
 var BUILTIN_SCENARIO_DATA = [
   {id:'bi-harhaka-1',  section:'scenario', cat:'הרחקה מהשטח', tags:'step1',  he:'עצור במקום והרם ידיים!', ar:'اوقّف عندك وارفع إيديك لفوق!', trans:'וַקֵף עִנְדַכּ וַארְפַע אִידֵיכּ לַפוֹק'},
   {id:'bi-harhaka-2',  section:'scenario', cat:'הרחקה מהשטח', tags:'step2',  he:'מה אתה עושה כאן?', ar:'شو بتعمل هون؟', trans:'שוּ בְּתִעְמֵל הוֹן?'},
@@ -7778,6 +7780,65 @@ async function importTenPhrases(btn){
     await loadData();
     renderAdminList();
     alert('✓ נוספו '+added+' משפטים לרשימה. אפשר להקליט אותם עכשיו (סינון "🔇 צריך הקלטה"). אם נוספו 0 — הם כבר היו קיימים.');
+  }catch(e){
+    alert('שגיאה: '+(e&&e.message?e.message:e));
+    btn.textContent=old;
+  }
+  btn.disabled=false;
+}
+
+// === שיחה 14: מעצר נער חשוד בזריקת אבנים ===
+// Single-source: lives in the DB only (NOT merged into BUILTIN_SCENARIO_DATA),
+// so there is no built-in+import duplication. One idempotent insert, then record.
+var CONV14_SCN_ID = 'מעצר נער חשוד';
+var CONV14_SCENARIO = [
+  {step:'step1', civ:false, he:'פתחו את הדלת, אנחנו מהצבא!', ar:'افتحوا الباب، احنا من الجيش!', trans:'אִפְתַחוּ (א)לְבַּאבּ, אִחְנַא מִן (א)לְגֵ׳יש!'},
+  {step:'step2', civ:true,  he:'מה אתם רוצים מאיתנו בלילה? מי אתם?', ar:'شو بدكم منّا بالليل؟ مين انتوا؟', trans:'שוּ בִּדְכֻּם מִנְנַא בִּללֵיל? מִין אִנְתוּ?'},
+  {step:'step3', civ:false, he:'יש לנו צו מעצר נגד הבן שלך — ניקח אותו לחקירה.', ar:'فيه عنّا أمر توقيف ضد ابنك، بدنا ناخذه عالتحقيق', trans:'פִיה עַנְנַא אַמֵר תַוְקִיף צִד אִבְּנַכּ, בִּדְנַא נַאח׳דֹה עַתַּחְקִיק'},
+  {step:'step4', civ:true,  he:'הבן שלי ישן בפנים, הוא לא עשה כלום.', ar:'ابني نايم جوّة، ما عمل إشي', trans:'אִבְּנִי נַאיֵם גֻ׳וּוַה, מַא עַמַל אִשִי'},
+  {step:'step5', civ:false, he:'הוא חשוד בזריקת אבנים על רכב.', ar:'هو متّهم برمي حجارة على سيّارة', trans:'הֻוֵה מֻתַהַם בִּרַמִי חְגַ׳ארַה עַלַא סַיַארַה'},
+  {step:'step6', civ:true,  he:'אדוני הקצין, בני חף מפשע, אל תיקחו אותו — אני מתחננת.', ar:'يا حضرة الضابط، ابني بريء، لا تاخذوه، دخيلك', trans:'יַא חַצְרֵת אצַّאבֵּט, אִבְּנִי בַּרִי, לַא תַאח׳דוּה, דַחִ׳ילַכּ'},
+  {step:'step7', civ:false, he:'יש עדים. אם הוא חף — יחזור הביתה. אל תפחדי.', ar:'فيه ناس شهدوا. إذا بريء راح يرجع، ما تخافي', trans:'פִיה נַאס שֵהְדוּ. אִזַא בַּרִי רַאח יִרְגַ׳ע, מַא תְח׳אפִי'},
+  {step:'step8', civ:false, he:'תעירי אותו, אנחנו ממהרים.', ar:'فيقيه، احنا مستعجلين', trans:'פַיְקִיה, אִחְנַא מִסְתַעְגִ׳לִין'},
+  {step:'step9', civ:false, he:'קח תעודת זהות ובוא איתנו לחקירה.', ar:'خذ هويتك وتعال معنا للتحقيق', trans:'ח׳ֻד הַוִיְתַכּ וּתַעַאל מַעַנַא לִתַחְקִיק'}
+];
+// Operational phrases extracted from the dialogue, added only to EXISTING מבצעי
+// categories (idempotent by Hebrew text — never duplicates an existing phrase).
+var CONV14_MILITARY = [
+  {cat:'שליטה בבית', he:'יש לנו צו מעצר נגד הבן שלך', ar:'فيه عنّا أمر توقيف ضد ابنك', trans:'פִיה עַנְנַא אַמֵר תַוְקִיף צִד אִבְּנַכּ'},
+  {cat:'שליטה בבית', he:'הוא חשוד בזריקת אבנים על רכב', ar:'هو متّهم برمي حجارة على سيّارة', trans:'הֻוֵה מֻתַהַם בִּרַמִי חְגַ׳ארַה עַלַא סַיַארַה'},
+  {cat:'שליטה בבית', he:'תעיר אותו, אנחנו ממהרים', ar:'فيقه، احنا مستعجلين', trans:'פַיְקֹה, אִחְנַא מִסְתַעְגִ׳לִין'},
+  {cat:'בידוק וזיהוי', he:'קח תעודת זהות ובוא איתנו לחקירה', ar:'خذ هويتك وتعال معنا للتحقيق', trans:'ח׳ֻד הַוִיְתַכּ וּתַעַאל מַעַנַא לִתַחְקִיק'},
+  {cat:'הרגעה ושכנוע', he:'אל תפחד, אם אתה חף מפשע תחזור הביתה', ar:'ما تخاف، إذا انت بريء راح ترجع عالبيت', trans:'מַא תְח׳אף, אִזַא אִנְתֶ בַּרִי רַאח תִרְגַ׳ע עַלְבֵּית'}
+];
+
+async function addConversation14(btn){
+  if(!confirm('להוסיף את "מעצר נער חשוד בזריקת אבנים" — תרחיש (9 שורות) + 5 משפטים מבצעיים לקטגוריות הקיימות? פעולה חד-פעמית, ללא כפילות.'))return;
+  var old=btn.textContent; btn.disabled=true; btn.textContent='מוסיף...';
+  try{
+    // Scenario rows — dedup by exact category + step number
+    var exScn=await sbFetch('/rest/v1/phrases?select=cat,tags&section=eq.scenario&cat=eq.'+encodeURIComponent(CONV14_SCN_ID));
+    var haveStep={}; (exScn||[]).forEach(function(p){ haveStep[_scnStepKey(p)]=1; });
+    var scnAdded=0;
+    for(var i=0;i<CONV14_SCENARIO.length;i++){
+      var s=CONV14_SCENARIO[i];
+      var key=CONV14_SCN_ID+'#'+s.step.replace('step','');
+      if(haveStep[key])continue;
+      await sbFetch('/rest/v1/phrases','POST',{cat:CONV14_SCN_ID,he:s.he,trans:s.trans,ar:s.ar,tags:s.step+(s.civ?' civilian':''),why:'',tone:'',audio_url:'',is_new:false,section:'scenario'});
+      haveStep[key]=1; scnAdded++;
+    }
+    // Military rows — dedup by exact Hebrew text within the category
+    var milAdded=0;
+    for(var j=0;j<CONV14_MILITARY.length;j++){
+      var m=CONV14_MILITARY[j];
+      var ex=await sbFetch('/rest/v1/phrases?select=he&section=eq.military&cat=eq.'+encodeURIComponent(m.cat)+'&he=eq.'+encodeURIComponent(m.he));
+      if(ex&&ex.length)continue;
+      await sbFetch('/rest/v1/phrases','POST',{cat:m.cat,he:m.he,trans:m.trans,ar:m.ar,tags:'',why:'',tone:'',audio_url:'',is_new:false,section:'military'});
+      milAdded++;
+    }
+    btn.textContent='✓ תרחיש +'+scnAdded+' · מבצעי +'+milAdded;
+    await loadData(); renderAdminList();
+    alert('✓ נוספו '+scnAdded+' שורות תרחיש ו-'+milAdded+' משפטים מבצעיים. עכשיו אפשר לערוך ולהקליט מהרשימות (סינון "🔇 צריך הקלטה"). אם נוספו 0 — הם כבר היו קיימים.');
   }catch(e){
     alert('שגיאה: '+(e&&e.message?e.message:e));
     btn.textContent=old;
@@ -8677,7 +8738,8 @@ var SCN_CATEGORIES = [
       {id:'זיכוי מרחוק', icon:'📏', title:'זיכוי מרחוק'},
       {id:'בידוק אישה', icon:'👩', title:'בידוק אישה'},
       {id:'חיפוש בבית — איפה בעל הבית', icon:'🔍', title:'חיפוש בבית — איפה בעל הבית'},
-      {id:'חיפוש בבית — מי בבית', icon:'🏠', title:'חיפוש בבית — מי בבית'}
+      {id:'חיפוש בבית — מי בבית', icon:'🏠', title:'חיפוש בבית — מי בבית'},
+      {id:'מעצר נער חשוד', icon:'🚨', title:'מעצר נער חשוד בזריקת אבנים'}
     ]
   },
   {
