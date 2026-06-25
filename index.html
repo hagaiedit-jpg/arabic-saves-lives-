@@ -11206,6 +11206,9 @@ function formatCustomsBody(txt){
   return s;
 }
 
+function _scrollToCusItem(idx){
+  try{ var el=document.getElementById('cus-item-'+idx); if(el) el.scrollIntoView({behavior:'smooth',block:'start'}); }catch(e){}
+}
 function openCustomsGroup(groupName){
   // Show all items that belong to this main group
   var items = CUS.filter(function(c){
@@ -11216,9 +11219,20 @@ function openCustomsGroup(groupName){
   document.getElementById('customs-list').style.display = 'block';
   document.getElementById('customs-list-title').textContent = groupName;
   var html = '';
-  items.forEach(function(c){
+  // Index of topics at the top — so with many items you see at a glance what's
+  // in the page and can jump straight to a topic.
+  if (items.length > 1) {
+    html += '<div style="background:#13263c;border:1px solid #2A3D52;border-radius:12px;padding:12px 14px;margin-bottom:14px;">';
+    html += '<div style="color:#D4A24E;font-size:12px;font-weight:800;margin-bottom:8px;">📋 מה יש בדף (' + items.length + ')</div>';
+    items.forEach(function(c, idx){
+      html += '<div onclick="_scrollToCusItem(' + idx + ')" style="color:#E8D9B8;font-size:13px;line-height:1.5;padding:6px 0;cursor:pointer;border-bottom:1px solid rgba(42,61,82,0.5);">'
+        + '<span style="color:#7a9ab5;">▪</span> ' + c.he + '</div>';
+    });
+    html += '</div>';
+  }
+  items.forEach(function(c, idx){
     var txt = formatCustomsBody(c.why || c.ar || '');
-    html += '<div class="card"><div class="che">' + c.he + '</div><div style="color:#a0b8c8;font-size:13.5px;line-height:1.85;margin-top:8px;">' + txt + '</div></div>';
+    html += '<div class="card" id="cus-item-' + idx + '" style="scroll-margin-top:70px;"><div class="che">' + c.he + '</div><div style="color:#a0b8c8;font-size:13.5px;line-height:1.85;margin-top:8px;">' + txt + '</div></div>';
   });
   document.getElementById('cuslist').innerHTML = html;
   // Mark the customs in this group as seen — clears the "חדש" badge on this
