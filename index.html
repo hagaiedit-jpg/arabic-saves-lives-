@@ -3217,6 +3217,9 @@ function showLanding() {
   </div>
 </div>
 
+<!-- Floating search button: one-tap access to the field reference from any screen -->
+<button id="fab-search" onclick="openGlobalSearch()" aria-label="חיפוש" style="position:fixed;bottom:20px;left:18px;z-index:900;width:54px;height:54px;border-radius:50%;border:none;background:linear-gradient(135deg,#D4A24E,#b88a3d);color:#0E1B2E;font-size:22px;cursor:pointer;box-shadow:0 4px 14px rgba(0,0,0,0.45);display:flex;align-items:center;justify-content:center;font-family:inherit;">🔍</button>
+
 <!-- Global search across all sections + dictionary -->
 <div id="gs-modal" class="force-dark" style="display:none;position:fixed;top:0;left:0;right:0;bottom:0;background:#0E1B2E;z-index:9998;direction:rtl;overflow-y:auto;">
   <div style="max-width:460px;margin:0 auto;padding:18px 16px 40px;">
@@ -7469,6 +7472,22 @@ function homePotdDismiss(){
 }
 
 async function loadData(){
+  // 1. Render instantly from cached content first — so the app opens with no
+  //    wait even on a slow/flaky field connection. Then refresh from network.
+  var renderedFromCache=false;
+  try {
+    var cached0=localStorage.getItem('cached_phrases');
+    if(cached0){
+      var cd0=JSON.parse(cached0);
+      if(Array.isArray(cd0) && cd0.length){
+        populateFromData(cd0); renderAllData(); renderedFromCache=true;
+        var b0=document.getElementById('status-badge');
+        if(b0){ b0.textContent='תוכן שמור · מעדכן…'; b0.style.background='#D4A24E'; }
+      }
+    }
+  } catch(err){ console.warn('instant cache render failed', err); }
+
+  // 2. Refresh from network in the background and update if it succeeds.
   try{
     const data=await sbFetch('/rest/v1/phrases?select=*&order=created_at.asc');
     if(!Array.isArray(data))return;
@@ -7484,22 +7503,24 @@ async function loadData(){
     if(typeof checkAchievements==='function')setTimeout(checkAchievements,1500);
   }catch(e){
     console.error('loadData failed:', e);
-    // Offline - fall back to cached content so the app still works in the field
-    var loaded=false;
-    try {
-      var cached=localStorage.getItem('cached_phrases');
-      if(cached){
-        var cd=JSON.parse(cached);
-        if(Array.isArray(cd) && cd.length){ populateFromData(cd); loaded=true; }
-      }
-    } catch(err){ console.warn('cache load failed', err); }
     var badge=document.getElementById('status-badge');
-    if(loaded){
+    if(renderedFromCache){
+      // Already showing cached content — just mark offline, no re-render needed.
       if(badge){ badge.textContent='אופליין · תוכן שמור'; badge.style.background='#D4A24E'; }
-      renderAllData();
     } else {
-      if(badge){ badge.textContent='אופליין'; badge.style.background='#7a9ab5'; }
-      bldCats();
+      // No cache was available — try once more, else show empty categories.
+      var loaded=false;
+      try {
+        var cached=localStorage.getItem('cached_phrases');
+        if(cached){ var cd=JSON.parse(cached); if(Array.isArray(cd) && cd.length){ populateFromData(cd); loaded=true; } }
+      } catch(err){ console.warn('cache load failed', err); }
+      if(loaded){
+        if(badge){ badge.textContent='אופליין · תוכן שמור'; badge.style.background='#D4A24E'; }
+        renderAllData();
+      } else {
+        if(badge){ badge.textContent='אופליין'; badge.style.background='#7a9ab5'; }
+        bldCats();
+      }
     }
   }
   try { refreshDictIndex(); } catch(e) {}
@@ -12401,20 +12422,25 @@ function closeGlobalSearch(){
   try{ var inp = document.getElementById('gs-input'); if(inp) _gsRecentAdd(inp.value); }catch(e){}
   var m = document.getElementById('gs-modal'); if(m) m.style.display = 'none';
 }
+// Niqqud/harakat-insensitive normalization so fast typing (without vowel
+// marks) still matches. Reuses dictNorm (strips Hebrew niqqud, Arabic harakat,
+// geresh and normalizes final letters).
+function _gsNorm(s){ return (typeof dictNorm==='function') ? dictNorm(s) : String(s||'').toLowerCase(); }
 function globalSearch(){
   var out = document.getElementById('gs-results'); if(!out) return;
   var inp = document.getElementById('gs-input');
-  var q = (inp && inp.value || '').trim().toLowerCase();
+  var rawQ = (inp && inp.value || '').trim();
+  var q = _gsNorm(rawQ);
   if(!q){ out.innerHTML = _gsEmptyHtml(); return; }
   var results = [];
   _gsSections().forEach(function(s){
     (s.arr||[]).forEach(function(p){
       if(!p) return;
-      var hay = ((p.he||'')+' '+(p.trans||'')+' '+(p.ar||'')+' '+(p.dict||'')+' '+(p.field||'')).toLowerCase();
+      var hay = _gsNorm((p.he||'')+' '+(p.trans||'')+' '+(p.ar||'')+' '+(p.dict||'')+' '+(p.field||''));
       if(hay.indexOf(q)!==-1) results.push({ p:p, label:s.label, icon:s.icon });
     });
   });
-  if(!results.length){ out.innerHTML='<div style="text-align:center;color:#7a9ab5;font-size:13px;padding:30px 10px;">לא נמצאו תוצאות ל"'+q+'".</div>'; return; }
+  if(!results.length){ out.innerHTML='<div style="text-align:center;color:#7a9ab5;font-size:13px;padding:30px 10px;">לא נמצאו תוצאות ל"'+rawQ+'".</div>'; return; }
   // Counts per section + filter chips
   var counts = {}; results.forEach(function(r){ counts[r.label]=(counts[r.label]||0)+1; });
   if(_gsFilter !== 'all' && !counts[_gsFilter]) _gsFilter = 'all';
