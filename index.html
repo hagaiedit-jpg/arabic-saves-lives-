@@ -3355,7 +3355,9 @@ async function adminLogin(email, password){
       try { sessionStorage.setItem('admin_at', d.access_token); sessionStorage.setItem('admin_rt', window._adminRefresh); } catch(e){}
       return true;
     }
-  } catch(e){}
+    // Surface the real reason (e.g. "Email not confirmed", "Invalid login credentials")
+    window._adminLoginError = (d && (d.error_description || d.msg || d.error || d.message)) || ('שגיאה ' + r.status);
+  } catch(e){ window._adminLoginError = (e && e.message) || 'שגיאת רשת'; }
   return false;
 }
 async function _adminRefreshToken(){
@@ -3389,7 +3391,11 @@ function promptAdminLogin(){
       window._adminAuth=true;
       alert('✓ התחברת כמנהל. הלשונית "ניהול" הופיעה.');
     } else {
-      alert('התחברות נכשלה. ודאי שמשתמש המנהל קיים ב-Supabase ושהמייל/הסיסמה נכונים.');
+      var why = window._adminLoginError || '';
+      var hint = /not confirmed|confirm/i.test(why) ? '\n\n➜ צריך לאשר את המשתמש: ב-Supabase → Authentication → Users → לחצי על המשתמש → "Confirm email" (או למחוק וליצור מחדש עם "Auto Confirm User" דלוק).'
+               : /invalid login|credentials/i.test(why) ? '\n\n➜ המייל או הסיסמה שגויים. בדקי שאין רווח/אות גדולה בטעות.'
+               : '';
+      alert('התחברות נכשלה.\nסיבה: ' + (why || 'לא ידועה') + hint);
     }
   });
 }
