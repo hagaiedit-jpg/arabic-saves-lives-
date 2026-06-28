@@ -3330,15 +3330,85 @@ try {
 let DB=[],DAILY=[],HEART=[],NAVY=[],ANNOUNCE=[],DICT=[],SEM=[],CUS=[],ARTS=[],SCENARIO=[];
 let sL='he',curC=null,curTab='lib',curDailyCat=null;
 
-async function sbFetch(path,method='GET',body=null){
-  const opts={method,headers:{'apikey':SUPA_KEY,'Authorization':'Bearer '+SUPA_KEY,'Content-Type':'application/json','Prefer':method==='POST'?'return=representation':''}};
-  if(body)opts.body=JSON.stringify(body);
-  // Use Promise.race for timeout (avoids AbortSignal browser issues)
-  const fetchPromise = fetch(SUPA_URL+path,opts);
-  const timeoutPromise = new Promise(function(_, reject){
-    setTimeout(function(){ reject(new Error('timeout - השרת לא מגיב')); }, 10000);
+// ===== Admin authentication (Supabase Auth) =====
+// Reads use the public key. Writes use the logged-in admin's token when
+// available, so Supabase RLS can verify it's really the admin. If no admin is
+// logged in, writes fall back to the public key — so nothing breaks before you
+// enable RLS; once RLS is on, unauthenticated writes are blocked server-side.
+function _adminTokenGet(){
+  if(window._adminToken) return window._adminToken;
+  try { return sessionStorage.getItem('admin_at') || ''; } catch(e){ return ''; }
+}
+function _sbAuthHeader(method){
+  var tok = (method && method!=='GET') ? _adminTokenGet() : '';
+  return 'Bearer ' + (tok || SUPA_KEY);
+}
+async function adminLogin(email, password){
+  try {
+    const r = await fetch(SUPA_URL+'/auth/v1/token?grant_type=password', {
+      method:'POST', headers:{'apikey':SUPA_KEY,'Content-Type':'application/json'},
+      body: JSON.stringify({ email: email, password: password })
+    });
+    const d = await r.json();
+    if(d && d.access_token){
+      window._adminToken = d.access_token; window._adminRefresh = d.refresh_token || '';
+      try { sessionStorage.setItem('admin_at', d.access_token); sessionStorage.setItem('admin_rt', window._adminRefresh); } catch(e){}
+      return true;
+    }
+  } catch(e){}
+  return false;
+}
+async function _adminRefreshToken(){
+  var rt = window._adminRefresh || (function(){ try{ return sessionStorage.getItem('admin_rt'); }catch(e){ return ''; } })();
+  if(!rt) return false;
+  try {
+    const r = await fetch(SUPA_URL+'/auth/v1/token?grant_type=refresh_token', {
+      method:'POST', headers:{'apikey':SUPA_KEY,'Content-Type':'application/json'},
+      body: JSON.stringify({ refresh_token: rt })
+    });
+    const d = await r.json();
+    if(d && d.access_token){
+      window._adminToken=d.access_token; window._adminRefresh=d.refresh_token||rt;
+      try{ sessionStorage.setItem('admin_at',d.access_token); sessionStorage.setItem('admin_rt',window._adminRefresh); }catch(e){}
+      return true;
+    }
+  } catch(e){}
+  return false;
+}
+function adminLogout(){
+  window._adminToken=''; window._adminRefresh=''; window._adminAuth=false;
+  try{ sessionStorage.removeItem('admin_at'); sessionStorage.removeItem('admin_rt'); }catch(e){}
+  var t=document.getElementById('admin-tab'); if(t) t.style.display='none';
+}
+function promptAdminLogin(){
+  var email = prompt('מייל מנהל:'); if(!email) return;
+  var pw = prompt('סיסמת ניהול:'); if(!pw) return;
+  adminLogin(email.trim(), pw).then(function(ok){
+    if(ok){
+      var at=document.getElementById('admin-tab'); if(at) at.style.display='block';
+      window._adminAuth=true;
+      alert('✓ התחברת כמנהל. הלשונית "ניהול" הופיעה.');
+    } else {
+      alert('התחברות נכשלה. ודאי שמשתמש המנהל קיים ב-Supabase ושהמייל/הסיסמה נכונים.');
+    }
   });
-  const res = await Promise.race([fetchPromise, timeoutPromise]);
+}
+
+async function sbFetch(path,method='GET',body=null){
+  async function doFetch(){
+    const opts={method,headers:{'apikey':SUPA_KEY,'Authorization':_sbAuthHeader(method),'Content-Type':'application/json','Prefer':method==='POST'?'return=representation':''}};
+    if(body)opts.body=JSON.stringify(body);
+    const fetchPromise = fetch(SUPA_URL+path,opts);
+    const timeoutPromise = new Promise(function(_, reject){
+      setTimeout(function(){ reject(new Error('timeout - השרת לא מגיב')); }, 10000);
+    });
+    return await Promise.race([fetchPromise, timeoutPromise]);
+  }
+  let res = await doFetch();
+  // If an admin write was rejected (e.g. token expired), refresh once and retry.
+  if(res && res.status===401 && method && method!=='GET' && _adminTokenGet()){
+    if(await _adminRefreshToken()) res = await doFetch();
+  }
   if(!res.ok)throw new Error(await res.text());
   const t=await res.text();
   return t?JSON.parse(t):null;
@@ -11458,17 +11528,13 @@ function ST(t,el){
   try { if(t==='lib' && typeof bldCats==='function') bldCats(); } catch(e){console.warn(e);}
   if(t==='adm'){
     if(!window._adminAuth){
-      const pw=prompt('סיסמת ניהול:');
-      if(pw!=='אני ואתה נשנה את העולם'){
-        alert('סיסמה שגויה');
-        // Return to previous tab
-        document.querySelectorAll('.tb-tab').forEach(x=>x.classList.remove('active'));
-        document.querySelectorAll('[id^="tab-"]').forEach(x=>x.className='scr');
-        document.getElementById('tab-lib').className='scr on';
-        document.querySelector('.tb-tab').classList.add('active');
-        return;
-      }
-      window._adminAuth=true;
+      // Admin tab only appears after a successful login; this is a safety guard.
+      document.querySelectorAll('.tb-tab').forEach(x=>x.classList.remove('active'));
+      document.querySelectorAll('[id^="tab-"]').forEach(x=>x.className='scr');
+      document.getElementById('tab-lib').className='scr on';
+      var _fb=document.querySelector('.tb-tab'); if(_fb) _fb.classList.add('active');
+      promptAdminLogin();
+      return;
     }
   }
 }
@@ -13692,21 +13758,22 @@ function searchHrt(){
     if(tapTimer) clearTimeout(tapTimer);
     
     tapTimer = setTimeout(() => {
-      if(tapCount >= 3){
-        const pw = prompt('סיסמת ניהול:');
-        if(pw === 'אני ואתה נשנה את העולם'){
-          document.getElementById('admin-tab').style.display = 'block';
-          window._adminAuth = true;
-          alert('✓ ניהול פעיל. הלשונית "ניהול" הופיעה.');
-        } else if(pw !== null) {
-          alert('סיסמה שגויה');
-        }
-      }
+      if(tapCount >= 3){ promptAdminLogin(); }
       tapCount = 0;
     }, 600);
   }
-  
+
   brand.addEventListener('click', handleTap);
+
+  // Restore an admin session within the same browser tab (token persists in
+  // sessionStorage; expired tokens are auto-refreshed on the next write).
+  try {
+    var _at = sessionStorage.getItem('admin_at');
+    if(_at){
+      window._adminToken=_at; window._adminRefresh=sessionStorage.getItem('admin_rt')||''; window._adminAuth=true;
+      var _tab=document.getElementById('admin-tab'); if(_tab) _tab.style.display='block';
+    }
+  } catch(e){}
 })();
 
 
@@ -14704,19 +14771,14 @@ function navToTab(tabId){
     try { if (tabId === 'scn') { if (typeof scnBack === 'function') scnBack(); if (typeof renderScnGrid === 'function') renderScnGrid(); } } catch(e){}
     try { if (tabId === 'flash' && typeof showFlashWelcome === 'function') showFlashWelcome(); } catch(e){}
     
-    // 7. Admin password check
+    // 7. Admin auth check (real Supabase Auth — admin tab appears only after login)
     if (tabId === 'adm' && !window._adminAuth) {
-      var pw = prompt('סיסמת ניהול:');
-      if (pw !== 'אני ואתה נשנה את העולם') {
-        alert('סיסמה שגויה');
-        // Go back to lib tab
-        var libTab = document.getElementById('tab-adm');
-        if (libTab) libTab.className = 'scr';
-        var libTarget = document.getElementById('tab-lib');
-        if (libTarget) libTarget.className = 'scr on';
-        return;
-      }
-      window._adminAuth = true;
+      var libTab = document.getElementById('tab-adm');
+      if (libTab) libTab.className = 'scr';
+      var libTarget = document.getElementById('tab-lib');
+      if (libTarget) libTarget.className = 'scr on';
+      promptAdminLogin();
+      return;
     }
     
     // 8. Scroll to top
