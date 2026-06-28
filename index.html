@@ -49,6 +49,10 @@ function createRecorder(stream) {
 <style>
 *{box-sizing:border-box;margin:0;padding:0;}
 body{background:#0E1B2E;direction:rtl;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;min-height:100vh;}
+/* Recording protection: block the easy download paths (long-press "save",
+   drag-to-save) on media and the play controls. Not bulletproof — true
+   protection needs signed expiring URLs — but stops casual downloading. */
+audio,video,.pbtn,.big-pbtn,.emerg-play-btn,.rec-btn{-webkit-touch-callout:none;-webkit-user-drag:none;user-drag:none;}
 .W{max-width:480px;margin:0 auto;min-height:100vh;box-sizing:border-box;}
 .topbar{
   background:linear-gradient(180deg,#18293E 0%,#16273B 100%);
@@ -3309,6 +3313,19 @@ window.showDebugErrors = showDebugErrors;
 const SUPA_URL='https://ukynfcwxsrzpuqecfjuz.supabase.co';
 const SUPA_KEY='sb_publishable_ugMP9beQh9-TJVGL3uzIAA_xhAgWJQP';
 const CLOUD='dvjuflgqs', PRESET='arabic_audio';
+
+// Recording protection (deterrent layer): block right-click "save audio as"
+// and drag-to-download on media. The audio is never exposed as a native
+// <audio controls> element (custom play buttons only), so there's no built-in
+// download button either. Real protection = signed expiring URLs (next step).
+try {
+  document.addEventListener('dragstart', function(e){
+    var t=e.target; if(t && (t.tagName==='AUDIO'||t.tagName==='VIDEO'||t.tagName==='IMG')) e.preventDefault();
+  });
+  document.addEventListener('contextmenu', function(e){
+    var t=e.target; if(t && (t.tagName==='AUDIO'||t.tagName==='VIDEO'||(t.closest && t.closest('.pbtn,.big-pbtn,.emerg-play-btn,.ww,.play-row')))) e.preventDefault();
+  });
+} catch(e) {}
 
 let DB=[],DAILY=[],HEART=[],NAVY=[],ANNOUNCE=[],DICT=[],SEM=[],CUS=[],ARTS=[],SCENARIO=[];
 let sL='he',curC=null,curTab='lib',curDailyCat=null;
