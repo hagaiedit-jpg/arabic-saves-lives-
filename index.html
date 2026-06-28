@@ -7929,7 +7929,7 @@ function openTenPhrase(i){
   if(!p)return;
   window._popupSource='ten';
   window._popupReturnTab='ten';
-  window._popupAudio=p.audio||'';
+  _setPopupAudio(p.audio||'');
   if(typeof setPopupLabel==='function')setPopupLabel('military');
   document.getElementById('phe').textContent=p.he;
   document.getElementById('parsm').textContent=p.ar;
@@ -8759,7 +8759,7 @@ if (typeof escapeHtml !== 'function') {
 
 function opAnnounce(i){
   const a=ANNOUNCE[i];
-  window._popupAudio = a.audio || '';
+  _setPopupAudio(a.audio || '');
   // Show announcement popup with text + translation toggle
   document.getElementById('phe').textContent=a.he;
   document.getElementById('parsm').textContent='';
@@ -8768,7 +8768,7 @@ function opAnnounce(i){
   document.getElementById('pwhyb').style.display=a.why?'block':'none';
   document.getElementById('ptone').textContent='';
   document.getElementById('ptoneb').style.display='none';
-  document.querySelectorAll('.pbtn').forEach(b=>b.setAttribute('data-audio',a.audio||''));
+  document.querySelectorAll('.pbtn').forEach(b=>b.setAttribute('data-audio',''));
   bldW();document.getElementById('wtime').textContent='0:00';
   shV('vpop');
 }
@@ -8787,7 +8787,7 @@ function opNavyP(i){
   document.getElementById('pwhyb').style.display=p.why?'block':'none';
   document.getElementById('ptone').textContent=p.tone||'';
   document.getElementById('ptoneb').style.display=p.tone?'block':'none';
-  document.querySelectorAll('.pbtn').forEach(b=>b.setAttribute('data-audio',p.audio||''));
+  document.querySelectorAll('.pbtn').forEach(b=>b.setAttribute('data-audio',''));
   updateFavBtn(p.id);
   
   renderPhraseResponses(p);
@@ -11146,11 +11146,11 @@ function showDictPopupFallback(he, ar) {
     if (toneBox) toneBox.style.display = 'none';
     
     // Set audio URL for the play buttons (.big-pbtn uses window._popupAudio)
-    window._popupAudio = phraseRef.audio || '';
+    _setPopupAudio(phraseRef.audio || '');
     
     // Also set data-audio attribute (legacy support)
     document.querySelectorAll('.pbtn, .big-pbtn').forEach(function(b){ 
-      b.setAttribute('data-audio', phraseRef.audio || ''); 
+      b.setAttribute('data-audio',''); 
     });
     
     // Hide responses (none in dict view)
@@ -11231,7 +11231,7 @@ function refreshDictIndex() {
 function opDictWord(i){
   const d=DICT[i];
   window._popupSource = 'dict';
-  window._popupAudio = d.audio || '';
+  _setPopupAudio(d.audio || '');
   setPopupLabel('dict');
   setPopupExtras(d);
   document.getElementById('phe').textContent=d.he;
@@ -11241,7 +11241,7 @@ function opDictWord(i){
   document.getElementById('pwhyb').style.display='none';
   document.getElementById('ptone').textContent='';
   document.getElementById('ptoneb').style.display='none';
-  document.querySelectorAll('.pbtn').forEach(b=>b.setAttribute('data-audio',d.audio||''));
+  document.querySelectorAll('.pbtn').forEach(b=>b.setAttribute('data-audio',''));
   bldW();document.getElementById('wtime').textContent='0:00';
   // Show from dict tab
   document.querySelectorAll('[id^="tab-"]').forEach(x=>x.className='scr');
@@ -11266,7 +11266,7 @@ function rSem(){
 function opSem(i){
   const s=SEM[i];
   window._popupSource = 'sem';
-  window._popupAudio = s.audio || '';
+  _setPopupAudio(s.audio || '');
   setPopupLabel('semantic');
   setPopupExtras(s);
   document.getElementById('phe').textContent=s.he;
@@ -11276,7 +11276,7 @@ function opSem(i){
   document.getElementById('pwhyb').style.display=(s.field||s.why)?'block':'none';
   document.getElementById('ptone').textContent='';
   document.getElementById('ptoneb').style.display='none';
-  document.querySelectorAll('.pbtn').forEach(b=>b.setAttribute('data-audio',s.audio||''));
+  document.querySelectorAll('.pbtn').forEach(b=>b.setAttribute('data-audio',''));
   bldW();document.getElementById('wtime').textContent='0:00';
   document.querySelectorAll('[id^="tab-"]').forEach(x=>x.className='scr');
   document.getElementById('tab-lib').className='scr on';
@@ -11494,9 +11494,9 @@ function opIntel(i){
     if (whyEl) whyEl.textContent = p.why || '';
     if (whyBox) whyBox.style.display = p.why ? 'block' : 'none';
     
-    window._popupAudio = p.audio || '';
+    _setPopupAudio(p.audio || '');
     document.querySelectorAll('.pbtn, .big-pbtn').forEach(function(b){
-      b.setAttribute('data-audio', p.audio || '');
+      b.setAttribute('data-audio','');
     });
     
     shV('vpop');
@@ -11836,7 +11836,7 @@ function opP(i){
   document.getElementById('ptrans').textContent=p.trans||'';document.getElementById('pwhy').textContent=p.why||'';
   document.getElementById('pwhyb').style.display=p.why?'block':'none';document.getElementById('ptone').textContent=p.tone||'';
   document.getElementById('ptoneb').style.display=p.tone?'block':'none';
-  document.querySelectorAll('.pbtn').forEach(b=>b.setAttribute('data-audio',p.audio||''));
+  document.querySelectorAll('.pbtn').forEach(b=>b.setAttribute('data-audio',''));
   updateFavBtn(p.id);
   renderPhraseResponses(p);
   bldW();document.getElementById('wtime').textContent='0:00';shV('vpop');
@@ -11852,7 +11852,7 @@ function opPop(i,section){
   document.getElementById('pwhy').textContent=p.why||p.tip||(p.when?'מתי: '+p.when:'');
   document.getElementById('pwhyb').style.display=(p.why||p.tip||p.when)?'block':'none';
   document.getElementById('ptone').textContent='';document.getElementById('ptoneb').style.display='none';
-  document.querySelectorAll('.pbtn').forEach(b=>b.setAttribute('data-audio',p.audio||''));
+  document.querySelectorAll('.pbtn').forEach(b=>b.setAttribute('data-audio',''));
   updateFavBtn(p.id);
   renderPhraseResponses(p);
   bldW();document.getElementById('wtime').textContent='0:00';
@@ -11906,6 +11906,29 @@ function backFromSearch(){
 }
 
 let pt=null,curAudio=null;
+
+// === Recording protection (client-side) ===
+// Set the popup's current recording AND prefetch it into an in-memory blob, so
+// playback uses a blob: URL instead of the real Cloudinary link — the link
+// isn't the audio src and isn't in the DOM, so it can't be copied/shared from
+// the page. Prefetching on open keeps play() inside the user gesture (mobile
+// autoplay-safe). Falls back to the direct URL if the fetch is blocked
+// (CORS/offline) so playback never breaks.
+function _setPopupAudio(url){
+  try { if(window._popupBlobUrl){ URL.revokeObjectURL(window._popupBlobUrl); } } catch(e){}
+  window._popupBlobUrl = '';
+  window._popupAudio = url || '';
+  if(url && url.indexOf('blob:')!==0){
+    try {
+      fetch(url).then(function(r){ return r && r.ok ? r.blob() : null; }).then(function(b){
+        if(b && window._popupAudio===url){ try { window._popupBlobUrl = URL.createObjectURL(b); } catch(e){} }
+      }).catch(function(){});
+    } catch(e){}
+  }
+}
+// The source to actually play: the blob if ready, else the direct URL.
+function _popupPlaySrc(){ return window._popupBlobUrl || window._popupAudio || ''; }
+
 // === Popup audio: slow / normal / loop ===
 var _audioPlaying = false;
 var _audioStopFlag = false;
@@ -11933,7 +11956,7 @@ function playPopupAudio(btn, mode) {
   
   function playOnce(onDone) {
     if (curAudio) { curAudio.pause(); curAudio = null; }
-    curAudio = new Audio(url);
+    curAudio = new Audio(_popupPlaySrc() || url);
     curAudio.playbackRate = (mode === 'slow') ? 0.7 : 1.0;
     curAudio.onended = function() {
       curAudio = null;
@@ -11989,7 +12012,7 @@ function resetPopupControls() {
 // Set category badge & cultural fact in popup
 function setPopupExtras(p) {
   // Store audio URL for repeat/loop buttons - always reflect the current phrase
-  window._popupAudio = (p && p.audio) ? p.audio : '';
+  _setPopupAudio((p && p.audio) ? p.audio : '');
   // Category badge
   var badge = document.getElementById('pcatbadge');
   if (badge) {
@@ -12039,8 +12062,8 @@ function play(btn,speed){
   if(pt)clearInterval(pt);
   
   const orig=btn.innerHTML;
-  const url=btn.getAttribute('data-audio')||'';
-  
+  const url=_popupPlaySrc()||btn.getAttribute('data-audio')||'';
+
   if(url){
     const audio=new Audio(url);
     if(speed==='slow')audio.playbackRate=0.7;
