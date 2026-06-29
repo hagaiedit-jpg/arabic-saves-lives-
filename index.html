@@ -566,7 +566,7 @@ body.day-mode .ct{border:1px solid #ebe0c5;}
 .pbg{background:rgba(0,0,0,0.65);min-height:100vh;display:flex;align-items:flex-start;justify-content:center;padding:12px;padding-top:16px;}
 .pop{position:relative;background:#fff;border-radius:18px;width:100%;max-width:440px;padding:18px 16px 14px;}
 .phe{color:#0E1B2E;font-size:18px;font-weight:500;text-align:center;margin-bottom:6px;line-height:1.4;}
-.parsm{color:#E8D9B8;font-size:22px;direction:rtl;font-family:Georgia,serif;text-align:center;margin-bottom:12px;font-weight:500;line-height:1.5;}
+.parsm{color:#15394f;font-size:22px;direction:rtl;font-family:Georgia,serif;text-align:center;margin-bottom:12px;font-weight:600;line-height:1.5;}
 .pbox{background:#0E1B2E;border-radius:12px;padding:16px 14px;margin-bottom:12px;text-align:center;}
 .ptrans{color:#fff;font-size:24px;font-weight:500;line-height:1.6;letter-spacing:0.03em;}
 .ww{display:flex;align-items:center;gap:8px;margin-bottom:10px;background:#f5f5f5;border-radius:10px;padding:8px 12px;}
@@ -3073,8 +3073,8 @@ function showLanding() {
       <div style="margin-bottom:12px;">
         <button onclick="addProverbs(this)" style="width:100%;padding:12px;background:linear-gradient(135deg,#c0392b 0%,#922d22 100%);border:none;border-radius:10px;color:#fff;font-size:13px;font-weight:800;cursor:pointer;font-family:inherit;">💬 הוסף 15 ביטויים ופתגמים לרשימות (חד-פעמי)</button>
         <div style="text-align:center;color:#7a9ab5;font-size:11px;margin-top:5px;">ייכנסו לקטגוריית "ביטויים ופתגמים" — אחר כך אפשר לערוך ולהקליט מהרשימה</div>
-        <button onclick="addFieldVocab(this)" style="width:100%;padding:12px;margin-top:10px;background:linear-gradient(135deg,#16a085 0%,#0e6b58 100%);border:none;border-radius:10px;color:#fff;font-size:13px;font-weight:800;cursor:pointer;font-family:inherit;">🗺️ הוסף שמות מקומות + זיהוי ערבית כתובה (חד-פעמי)</button>
-        <div style="text-align:center;color:#7a9ab5;font-size:11px;margin-top:5px;">2 קטגוריות חדשות במבצעי, עם תתי-נושאים — אחר כך אפשר לערוך ולהקליט מהרשימה</div>
+        <button onclick="addFieldVocab(this)" style="width:100%;padding:12px;margin-top:10px;background:linear-gradient(135deg,#16a085 0%,#0e6b58 100%);border:none;border-radius:10px;color:#fff;font-size:13px;font-weight:800;cursor:pointer;font-family:inherit;">🗺️ הוסף/עדכן שמות מקומות + זיהוי ערבית כתובה</button>
+        <div style="text-align:center;color:#7a9ab5;font-size:11px;margin-top:5px;">מוסיף חדשים וגם מתקן את ניקוד התעתיק בקיימים (ההקלטות נשמרות)</div>
       </div>
       <div id="admin-list"></div>
     </div>
@@ -8283,22 +8283,27 @@ var FIELD_VOCAB = [
 ];
 
 async function addFieldVocab(btn){
-  if(!confirm('להוסיף את "שמות מקומות וכיוונים" ו"זיהוי ערבית כתובה בשטח" לרשימות? פעולה חד-פעמית, ללא כפילות.'))return;
-  var old=btn.textContent; btn.disabled=true; btn.textContent='מוסיף...';
+  if(!confirm('להוסיף/לעדכן את "שמות מקומות וכיוונים" ו"זיהוי ערבית כתובה בשטח"? יתווספו חדשים, וגם יתוקן הניקוד בתעתיק של מה שכבר קיים (ההקלטות נשמרות).'))return;
+  var old=btn.textContent; btn.disabled=true; btn.textContent='מעדכן...';
   try{
-    function norm(s){ return String(s||'').replace(/[^֐-׿0-9A-Za-z]/g,''); }
-    var existing=await sbFetch('/rest/v1/phrases?select=cat,he&section=eq.military');
-    var have={}; (existing||[]).forEach(function(p){ have[(p.cat||'')+'|'+norm(p.he)]=1; });
-    var added=0;
+    var existing=await sbFetch('/rest/v1/phrases?select=id,cat,he,trans&section=eq.military');
+    var byKey={}; (existing||[]).forEach(function(p){ byKey[(p.cat||'')+'|'+(p.he||'')]=p; });
+    var added=0, updated=0;
     for(var i=0;i<FIELD_VOCAB.length;i++){
       var p=FIELD_VOCAB[i];
-      if(have[p.cat+'|'+norm(p.he)])continue;
-      await sbFetch('/rest/v1/phrases','POST',{cat:p.cat,he:p.he,trans:p.trans,ar:p.ar,tags:'',why:'',tone:'',audio_url:'',is_new:true,section:'military'});
-      have[p.cat+'|'+norm(p.he)]=1; added++;
+      var row=byKey[p.cat+'|'+p.he];
+      if(!row){
+        await sbFetch('/rest/v1/phrases','POST',{cat:p.cat,he:p.he,trans:p.trans,ar:p.ar,tags:'',why:'',tone:'',audio_url:'',is_new:true,section:'military'});
+        added++;
+      } else if((row.trans||'')!==p.trans){
+        // Update transliteration only (article hiriq / dagesh) — keep the recording.
+        await sbFetch('/rest/v1/phrases?id=eq.'+encodeURIComponent(row.id),'PATCH',{trans:p.trans});
+        updated++;
+      }
     }
-    btn.textContent='✓ נוספו '+added;
+    btn.textContent='✓ +'+added+' · עודכנו '+updated;
     await loadData(); renderAdminList();
-    alert('✓ נוספו '+added+' מילים לקטגוריות "שמות מקומות וכיוונים" ו"זיהוי ערבית כתובה בשטח". אפשר לערוך ולהקליט מהרשימות. אם נוספו 0 — הם כבר היו קיימים.');
+    alert('✓ נוספו '+added+' מילים, ועודכן הניקוד ב-'+updated+' קיימות (ללא פגיעה בהקלטות).');
   }catch(e){
     alert('שגיאה: '+(e&&e.message?e.message:e));
     btn.textContent=old;
@@ -12077,8 +12082,16 @@ function opP(i){
   if (typeof practiceReset === 'function') practiceReset();
   setPopupLabel('military');
   setPopupExtras(p);
-  document.getElementById('phe').textContent=p.he;document.getElementById('parsm').textContent=p.ar;
-  document.getElementById('ptrans').textContent=p.trans||'';document.getElementById('pwhy').textContent=p.why||'';
+  document.getElementById('phe').textContent=p.he;
+  // Recognition category: the written Arabic is the hero — show it big in the
+  // dark box, and move the transliteration to the secondary line.
+  var _readCat = (p.cat==='זיהוי ערבית כתובה בשטח');
+  var _parsmEl=document.getElementById('parsm'), _ptransEl=document.getElementById('ptrans');
+  _parsmEl.textContent = _readCat ? (p.trans||'') : (p.ar||'');
+  _ptransEl.textContent = _readCat ? (p.ar||'') : (p.trans||'');
+  _ptransEl.style.direction = _readCat ? 'rtl' : '';
+  _ptransEl.style.fontFamily = _readCat ? 'Georgia,serif' : '';
+  document.getElementById('pwhy').textContent=p.why||'';
   document.getElementById('pwhyb').style.display=p.why?'block':'none';document.getElementById('ptone').textContent=p.tone||'';
   document.getElementById('ptoneb').style.display=p.tone?'block':'none';
   document.querySelectorAll('.pbtn').forEach(b=>b.setAttribute('data-audio',''));
