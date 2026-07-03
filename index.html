@@ -7998,6 +7998,21 @@ var CONV14_SCENARIO = [
   {step:'step8', civ:false, he:'תעירי אותו, אנחנו ממהרים.', ar:'فيقيه، احنا مستعجلين', trans:'פַיְקִיה, אִחְנַא מִסְתַעְגִ׳לִין'},
   {step:'step9', civ:false, he:'קח תעודת זהות ובוא איתנו לחקירה.', ar:'خذ هويتك وتعال معنا للتحقيق', trans:'ח׳ֻד הַוִיְתַכּ וּתַעַאל מַעַנַא לִתַחְקִיק'}
 ];
+// Ship the מעצר-נער dialogue as built-in too, so its cube is always populated
+// (a recorded DB row overrides the built-in copy via the _scnStepKey merge).
+try {
+  if (typeof BUILTIN_SCENARIO_DATA !== 'undefined' && BUILTIN_SCENARIO_DATA.push) {
+    CONV14_SCENARIO.forEach(function(s, i){
+      BUILTIN_SCENARIO_DATA.push({
+        id: 'bi-conv14-' + i,
+        section: 'scenario',
+        cat: CONV14_SCN_ID,
+        tags: s.step + (s.civ ? ' civilian' : ''),
+        he: s.he, ar: s.ar, trans: s.trans
+      });
+    });
+  }
+} catch(e){ console.warn('conv14 builtin merge failed', e); }
 // Operational phrases extracted from the dialogue, added only to EXISTING מבצעי
 // categories (idempotent by Hebrew text — never duplicates an existing phrase).
 var CONV14_MILITARY = [
@@ -8056,6 +8071,24 @@ var ZIKUY_SCENARIOS = [
   {cat:'זיכוי ובידוק', step:'step22', x:'civilian', he:'תודה. יום טוב.', ar:'شكراً. نهارك سعيد.', trans:'שֻכְּרַן. נַהַארַכּ סַעִיד.'},
   {cat:'זיכוי ובידוק', step:'step23', he:'לך ישר, אל תעצור כאן.', ar:'روح دغري، ما توقّف هون.', trans:'רוּח דֻעְ׳רִי, מַא תְוַקֶּף הוֹן.'}
 ];
+
+// Also ship these as built-in scenarios (like every other scenario) so the cubes
+// are always populated and visible — even before the admin inserts them for
+// recording, and even on cached/offline data. Any DB row uploaded later (with a
+// recording) overrides the built-in copy via the _scnStepKey merge in populateFromData.
+try {
+  if (typeof BUILTIN_SCENARIO_DATA !== 'undefined' && BUILTIN_SCENARIO_DATA.push) {
+    ZIKUY_SCENARIOS.forEach(function(s, i){
+      BUILTIN_SCENARIO_DATA.push({
+        id: 'bi-zikuy-' + i,
+        section: 'scenario',
+        cat: s.cat,
+        tags: s.step + (s.x ? ' ' + s.x : ''),
+        he: s.he, ar: s.ar, trans: s.trans
+      });
+    });
+  }
+} catch(e){ console.warn('zikuy builtin merge failed', e); }
 
 async function addZikuyScenarios(btn){
   if(!confirm('להוסיף את התרחישים "זיכוי מרחוק" ו"זיכוי ובידוק" (פקודות בידוק וזיכוי)? פעולה חד-פעמית, ללא כפילות.'))return;
