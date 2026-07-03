@@ -3076,7 +3076,7 @@ function showLanding() {
         <button onclick="addFieldVocab(this)" style="width:100%;padding:12px;margin-top:10px;background:linear-gradient(135deg,#16a085 0%,#0e6b58 100%);border:none;border-radius:10px;color:#fff;font-size:13px;font-weight:800;cursor:pointer;font-family:inherit;">🗺️ הוסף/עדכן שמות מקומות + זיהוי ערבית כתובה</button>
         <div style="text-align:center;color:#7a9ab5;font-size:11px;margin-top:5px;">מוסיף חדשים וגם מתקן את ניקוד התעתיק בקיימים (ההקלטות נשמרות)</div>
         <button onclick="addZikuyScenarios(this)" style="width:100%;padding:12px;margin-top:10px;background:linear-gradient(135deg,#2c6fb0 0%,#1d4f80 100%);border:none;border-radius:10px;color:#fff;font-size:13px;font-weight:800;cursor:pointer;font-family:inherit;">👋 הוסף תרחישי "זיכוי מרחוק" + "זיכוי ובידוק" (חד-פעמי)</button>
-        <div style="text-align:center;color:#7a9ab5;font-size:11px;margin-top:5px;">17 פקודות בידוק וזיכוי — ייכנסו לתרחישים, אחר כך אפשר לערוך ולהקליט מהרשימה</div>
+        <div style="text-align:center;color:#7a9ab5;font-size:11px;margin-top:5px;">פקודות בידוק וזיכוי + כמה מקרים לדוגמה (מהסס, נמצא חפץ, מתנגד, אישה…) — אחר כך אפשר לערוך ולהקליט מהרשימה</div>
       </div>
       <div id="admin-list"></div>
     </div>
@@ -8011,6 +8011,7 @@ var CONV14_MILITARY = [
 // === זיכוי מרחוק + זיכוי ובידוק (single-source DB insert) ===
 // All soldier commands (no civilian bubbles).
 var ZIKUY_SCENARIOS = [
+  {cat:'זיכוי מרחוק', step:'step0', x:'divider', he:'מקרה א׳ — פקודות זיכוי בסיסיות', ar:'', trans:''},
   {cat:'זיכוי מרחוק', step:'step1', he:'עצור!', ar:'وقّف!', trans:'וַקֶּף!'},
   {cat:'זיכוי מרחוק', step:'step2', he:'הרם ידיים', ar:'ارفع إيديك', trans:'אִרְפַע אִידֵיכּ'},
   {cat:'זיכוי מרחוק', step:'step3', he:'הרם את החולצה', ar:'ارفع القميص / البلوزة', trans:'אִרְפַע אִלְקַמִיס / אִלְבְּלוּזַה'},
@@ -8019,6 +8020,18 @@ var ZIKUY_SCENARIOS = [
   {cat:'זיכוי מרחוק', step:'step6', he:'הסתובב עוד פעם', ar:'لفّ كمان مرّة', trans:'לִףּ כַּמַאן מַרַּה'},
   {cat:'זיכוי מרחוק', step:'step7', he:'סדר את עצמך', ar:'ظبّط حالك', trans:'זַבֶּט חַאלַכּ'},
   {cat:'זיכוי מרחוק', step:'step8', he:'הורד את הנעליים (לפי שיקול דעת בלבד — לא לאישה)', ar:'اشلح الكندرة', trans:'אִשְלַח אִלְכֹּנְדַרַה'},
+  {cat:'זיכוי מרחוק', step:'step9', x:'divider', he:'מקרה ב׳ — הנבדק מהסס ושואל', ar:'', trans:''},
+  {cat:'זיכוי מרחוק', step:'step10', he:'עצור! אל תתקרב!', ar:'وقّف! ما تقرّب!', trans:'וַקֶּף! מַא תְקַרֶּב!'},
+  {cat:'זיכוי מרחוק', step:'step11', x:'civilian', he:'מה קרה? אני לא עשיתי כלום.', ar:'شو صار؟ أنا ما عملت إشي.', trans:'שוּ צַאר? אַנַא מַא עְמֵלְת אִשִי.'},
+  {cat:'זיכוי מרחוק', step:'step12', he:'שתוק ותקשיב. הרם ידיים!', ar:'اسكت واسمع. ارفع إيديك!', trans:'אֻסְכֻּת וַאסְמַע. אִרְפַע אִידֵיכּ!'},
+  {cat:'זיכוי מרחוק', step:'step13', x:'civilian', he:'טוב, טוב, אני מרים.', ar:'طيّب، طيّب، بارفع.', trans:'טַיֶּב, טַיֶּב, בַּארְפַע.'},
+  {cat:'זיכוי מרחוק', step:'step14', he:'הסתובב לאט, אל תוריד ידיים.', ar:'لفّ شوي شوي، ما تنزّل إيديك.', trans:'לִףּ שְוַי שְוַי, מַא תְנַזֶּל אִידֵיכּ.'},
+  {cat:'זיכוי מרחוק', step:'step15', x:'divider', he:'מקרה ג׳ — אישה או קשיש (ריחוק וכבוד)', ar:'', trans:''},
+  {cat:'זיכוי מרחוק', step:'step16', he:'גברת, עצרי במקום בבקשה.', ar:'يا مدام، وقّفي مكانك من فضلك.', trans:'יַא מַדַאם, וַקּפִי מַכַּאנֵכּ מִן פַצְלֵכּ.'},
+  {cat:'זיכוי מרחוק', step:'step17', x:'civilian', he:'מה אתם רוצים ממני?', ar:'شو بدكم منّي؟', trans:'שוּ בִּדְכֹּם מִנּי?'},
+  {cat:'זיכוי מרחוק', step:'step18', he:'רק בדיקה קצרה. הרימי מעט את הידיים.', ar:'بس فحص قصير. ارفعي إيديك شوي.', trans:'בַּס פַחְץ קְצִיר. אִרְפְעִי אִידֵיכּ שְוַי.'},
+  {cat:'זיכוי מרחוק', step:'step19', he:'תודה, את יכולה ללכת.', ar:'شكراً، فيكي تروحي.', trans:'שֻכְּרַן, פִיכִּי תְרוּחִי.'},
+  {cat:'זיכוי ובידוק', step:'step0', x:'divider', he:'מקרה א׳ — בידוק גופני בסיסי', ar:'', trans:''},
   {cat:'זיכוי ובידוק', step:'step1', he:'שים ידיים על הקיר', ar:'حطّ إيديك على الحيط', trans:'חֹטּ אִידֵיכּ עַלַא אלְחֵיט'},
   {cat:'זיכוי ובידוק', step:'step2', he:'פתח ידיים מעט', ar:'افتح إيديك شوي', trans:'אִפְתַח אִידֵיכּ שְוַי'},
   {cat:'זיכוי ובידוק', step:'step3', he:'רגליים אחורה — פתח אותן', ar:'إجريك لورا، افتحهم', trans:'אִגְ׳רֵיכּ לַוַרַא, אִפְתַחְהֹם'},
@@ -8027,7 +8040,21 @@ var ZIKUY_SCENARIOS = [
   {cat:'זיכוי ובידוק', step:'step6', he:'שכב על הקרקע!', ar:'نام ع الأرض!', trans:'נַאם עַ אלְאַרְד׳!'},
   {cat:'זיכוי ובידוק', step:'step7', he:'כרע ברך!', ar:'اركع!', trans:'אִרְכַּע!'},
   {cat:'זיכוי ובידוק', step:'step8', he:'ידיים מאחורי הגב!', ar:'إيديك ورا ظهرك!', trans:'אִידֵיכּ וַרַא דַ׳הְרַכּ!'},
-  {cat:'זיכוי ובידוק', step:'step9', he:'דיברת — נגמר לך', ar:'حكيت، راحت عليك', trans:'חַכֵּית, רַאחַת עַלֵיכּ'}
+  {cat:'זיכוי ובידוק', step:'step9', he:'דיברת — נגמר לך', ar:'حكيت، راحت عليك', trans:'חַכֵּית, רַאחַת עַלֵיכּ'},
+  {cat:'זיכוי ובידוק', step:'step10', x:'divider', he:'מקרה ב׳ — נמצא חפץ חשוד', ar:'', trans:''},
+  {cat:'זיכוי ובידוק', step:'step11', he:'מה זה בכיס? תוציא אותו לאט!', ar:'شو هدا بالجيب؟ طلّعه شوي شوي!', trans:'שוּ הַדַא בִּלְגֵּיבּ? טַלּעֹה שְוַי שְוַי!'},
+  {cat:'זיכוי ובידוק', step:'step12', x:'civilian', he:'זה רק טלפון, אני נשבע.', ar:'هدا بس تلفون، والله.', trans:'הַדַא בַּס תַלַפוֹן, וַאללַה.'},
+  {cat:'זיכוי ובידוק', step:'step13', he:'שים אותו על הרצפה ותתרחק!', ar:'حطّه ع الأرض وابعد!', trans:'חֻטּה עַ (אִל)אַרְד׳ וַאבְּעֵד!'},
+  {cat:'זיכוי ובידוק', step:'step14', x:'civilian', he:'טוב, אני מניח אותו.', ar:'طيّب، بحطّه.', trans:'טַיֶּב, בַּחֻטּה.'},
+  {cat:'זיכוי ובידוק', step:'step15', x:'divider', he:'מקרה ג׳ — הנבדק מתנגד', ar:'', trans:''},
+  {cat:'זיכוי ובידוק', step:'step16', he:'אל תזוז! ידיים על הראש!', ar:'ما تتحرّك! إيديك ع راسك!', trans:'מַא תְתְחַרַּכּ! אִידֵיכּ עַ רַאסַכּ!'},
+  {cat:'זיכוי ובידוק', step:'step17', x:'civilian', he:'למה? מה עשיתי?!', ar:'ليش؟ شو عملت؟!', trans:'לֵיש? שוּ עְמֵלְת?!'},
+  {cat:'זיכוי ובידוק', step:'step18', he:'אני לא אחזור על זה! ברך על הקרקע!', ar:'مش رح أعيد! اركع ع الأرض!', trans:'מֻש רַח אַעִיד! אִרְכַּע עַ (אִל)אַרְד׳!'},
+  {cat:'זיכוי ובידוק', step:'step19', he:'אם תשתף פעולה זה ייגמר מהר.', ar:'إذا بتتعاون بيخلص بسرعة.', trans:'אִזַא בִּתְעַאוַן בִּיחְלַץ בְּסֻרְעַה.'},
+  {cat:'זיכוי ובידוק', step:'step20', x:'divider', he:'מקרה ד׳ — סיום ושחרור', ar:'', trans:''},
+  {cat:'זיכוי ובידוק', step:'step21', he:'הכל בסדר. אתה יכול ללכת.', ar:'كلّ إشي تمام. فيك تروح.', trans:'כֻּלּ אִשִי תַמַאם. פִיכּ תְרוּח.'},
+  {cat:'זיכוי ובידוק', step:'step22', x:'civilian', he:'תודה. יום טוב.', ar:'شكراً. نهارك سعيد.', trans:'שֻכְּרַן. נַהַארַכּ סַעִיד.'},
+  {cat:'זיכוי ובידוק', step:'step23', he:'לך ישר, אל תעצור כאן.', ar:'روح دغري، ما توقّف هون.', trans:'רוּח דֻעְ׳רִי, מַא תְוַקֶּף הוֹן.'}
 ];
 
 async function addZikuyScenarios(btn){
@@ -8041,7 +8068,7 @@ async function addZikuyScenarios(btn){
       var s=ZIKUY_SCENARIOS[i];
       var key=s.cat+'#'+s.step.replace('step','');
       if(have[key])continue;
-      await sbFetch('/rest/v1/phrases','POST',{cat:s.cat,he:s.he,trans:s.trans,ar:s.ar,tags:s.step,why:'',tone:'',audio_url:'',is_new:false,section:'scenario'});
+      await sbFetch('/rest/v1/phrases','POST',{cat:s.cat,he:s.he,trans:s.trans,ar:s.ar,tags:s.step+(s.x?' '+s.x:''),why:'',tone:'',audio_url:'',is_new:false,section:'scenario'});
       have[key]=1; added++;
     }
     btn.textContent='✓ נוספו '+added;
@@ -10464,8 +10491,12 @@ function scnSetMode(mode){
       if (nextRow) nextRow.style.display = 'block';
       if (progressEl) progressEl.style.display = 'block';
       
-      // Reset interactive index and recording
+      // Reset interactive index and recording (start on the first real step, skipping any leading case divider)
       window._scnInteractiveIdx = 0;
+      while (window._scnInteractiveIdx < _scnSteps.length - 1 &&
+             ((_scnSteps[window._scnInteractiveIdx].tags || '').toLowerCase().indexOf('divider') !== -1)) {
+        window._scnInteractiveIdx++;
+      }
       _scnRecBlob = null;
       _scnRecChunks = [];
     } else {
@@ -10493,6 +10524,11 @@ function scnNextStep(){
   try {
     if (typeof window._scnInteractiveIdx === 'undefined') window._scnInteractiveIdx = 0;
     window._scnInteractiveIdx++;
+    // Skip case-divider rows (no practice / no audio) when advancing
+    while (window._scnInteractiveIdx < _scnSteps.length &&
+           ((_scnSteps[window._scnInteractiveIdx].tags || '').toLowerCase().indexOf('divider') !== -1)) {
+      window._scnInteractiveIdx++;
+    }
     // Reset recording for new step
     _scnRecBlob = null;
     _scnRecChunks = [];
@@ -10525,21 +10561,28 @@ function renderScnChat(){
     if (!_scnSteps || _scnSteps.length === 0) return;
     var chatEl = document.getElementById('scn-chat');
     if (!chatEl) return;
-    
+
+    // Map each row to a 1-based "real step" number, ignoring case dividers,
+    // so counts/badges stay accurate when a scenario holds several dialogues.
+    var _isDivider = function(p){ return ((p.tags || '').toLowerCase().indexOf('divider') !== -1); };
+    var realNo = [], totalSteps = 0;
+    _scnSteps.forEach(function(p){ if (_isDivider(p)) { realNo.push(0); } else { totalSteps++; realNo.push(totalSteps); } });
+
     // Update header
-    document.getElementById('scn-progress').textContent = _scnSteps.length + ' שלבים בשיחה';
-    
+    document.getElementById('scn-progress').textContent = totalSteps + ' שלבים בשיחה';
+
     var mode = window._scnMode || 'continuous';
     var maxIdx = (mode === 'interactive') ? (window._scnInteractiveIdx || 0) : (_scnSteps.length - 1);
-    
+
     // Update interactive progress bar
     if (mode === 'interactive') {
       var counter = document.getElementById('scn-step-counter');
       var bar = document.getElementById('scn-step-bar');
-      if (counter) counter.textContent = 'שלב ' + (maxIdx + 1) + ' מתוך ' + _scnSteps.length;
-      if (bar) bar.style.width = (((maxIdx + 1) / _scnSteps.length) * 100) + '%';
+      var curNo = realNo[maxIdx] || 1;
+      if (counter) counter.textContent = 'שלב ' + curNo + ' מתוך ' + totalSteps;
+      if (bar) bar.style.width = ((curNo / totalSteps) * 100) + '%';
     }
-    
+
     var html = '';
     _scnSteps.forEach(function(p, idx){
       // In interactive mode, only show bubbles up to current index
@@ -10548,7 +10591,15 @@ function renderScnChat(){
       var isCivilian = tags.indexOf('civilian') !== -1;
       var isFSoldier = tags.indexOf('fsoldier') !== -1 || tags.indexOf('female') !== -1;
       var isCurrentInteractive = (mode === 'interactive' && idx === maxIdx);
-      
+
+      // Case divider — a labeled header that separates several example dialogues in one scenario
+      if (tags.indexOf('divider') !== -1) {
+        html += '<div style="text-align:center;margin:18px auto 12px;">';
+        html += '<span style="display:inline-block;background:linear-gradient(135deg,#D4A24E 0%,#b8862e 100%);color:#18293E;font-size:12.5px;font-weight:800;padding:6px 16px;border-radius:20px;box-shadow:0 2px 6px rgba(0,0,0,0.25);">' + (p.he || 'מקרה נוסף') + '</span>';
+        html += '</div>';
+        return;
+      }
+
       // WhatsApp-style: soldier (you) on right with orange, civilian on left with green
       if (isCivilian) {
         // Civilian bubble - left side, green like incoming WhatsApp
@@ -10560,7 +10611,7 @@ function renderScnChat(){
         if (p.ar) html += '<div class="scn-bubble-ar">' + p.ar + '</div>';
         html += '<div class="scn-bubble-footer">';
         html += '<button onclick="scnPlayBubble(' + idx + ',this)" class="scn-play-btn scn-play-civilian">▶ השמע</button>';
-        html += '<span class="scn-step-num">' + (idx + 1) + '/' + _scnSteps.length + '</span>';
+        html += '<span class="scn-step-num">' + realNo[idx] + '/' + totalSteps + '</span>';
         html += '</div>';
         html += '</div>';
         if (isCurrentInteractive) html += renderScnPractice(idx);
@@ -10575,7 +10626,7 @@ function renderScnChat(){
         if (p.ar) html += '<div class="scn-bubble-ar">' + p.ar + '</div>';
         html += '<div class="scn-bubble-footer">';
         html += '<button onclick="scnPlayBubble(' + idx + ',this)" class="scn-play-btn scn-play-fsoldier">▶ השמע</button>';
-        html += '<span class="scn-step-num">' + (idx + 1) + '/' + _scnSteps.length + '</span>';
+        html += '<span class="scn-step-num">' + realNo[idx] + '/' + totalSteps + '</span>';
         html += '</div>';
         html += '</div>';
         if (isCurrentInteractive) html += renderScnPractice(idx);
@@ -10590,7 +10641,7 @@ function renderScnChat(){
         if (p.ar) html += '<div class="scn-bubble-ar">' + p.ar + '</div>';
         html += '<div class="scn-bubble-footer">';
         html += '<button onclick="scnPlayBubble(' + idx + ',this)" class="scn-play-btn scn-play-soldier">▶ השמע</button>';
-        html += '<span class="scn-step-num">' + (idx + 1) + '/' + _scnSteps.length + '</span>';
+        html += '<span class="scn-step-num">' + realNo[idx] + '/' + totalSteps + '</span>';
         html += '</div>';
         html += '</div>';
         if (isCurrentInteractive) html += renderScnPractice(idx);
@@ -10605,7 +10656,7 @@ function renderScnChat(){
     var showDone = (mode !== 'interactive') || (maxIdx >= _scnSteps.length - 1);
     if (doneCard) {
       doneCard.style.display = showDone ? 'block' : 'none';
-      document.getElementById('scn-done-text').textContent = 'תרגלת ' + _scnSteps.length + ' משפטים בשיחה הזו';
+      document.getElementById('scn-done-text').textContent = 'תרגלת ' + totalSteps + ' משפטים בשיחה הזו';
     }
   } catch(e) { console.warn('renderScnChat error:', e); }
 }
