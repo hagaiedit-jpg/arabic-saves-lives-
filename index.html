@@ -3075,6 +3075,8 @@ function showLanding() {
         <div style="text-align:center;color:#7a9ab5;font-size:11px;margin-top:5px;">ייכנסו לקטגוריית "ביטויים ופתגמים" — אחר כך אפשר לערוך ולהקליט מהרשימה</div>
         <button onclick="addFieldVocab(this)" style="width:100%;padding:12px;margin-top:10px;background:linear-gradient(135deg,#16a085 0%,#0e6b58 100%);border:none;border-radius:10px;color:#fff;font-size:13px;font-weight:800;cursor:pointer;font-family:inherit;">🗺️ הוסף/עדכן שמות מקומות + זיהוי ערבית כתובה</button>
         <div style="text-align:center;color:#7a9ab5;font-size:11px;margin-top:5px;">מוסיף חדשים וגם מתקן את ניקוד התעתיק בקיימים (ההקלטות נשמרות)</div>
+        <button onclick="addZikuyScenarios(this)" style="width:100%;padding:12px;margin-top:10px;background:linear-gradient(135deg,#2c6fb0 0%,#1d4f80 100%);border:none;border-radius:10px;color:#fff;font-size:13px;font-weight:800;cursor:pointer;font-family:inherit;">👋 הוסף תרחישי "זיכוי מרחוק" + "זיכוי ובידוק" (חד-פעמי)</button>
+        <div style="text-align:center;color:#7a9ab5;font-size:11px;margin-top:5px;">17 פקודות בידוק וזיכוי — ייכנסו לתרחישים, אחר כך אפשר לערוך ולהקליט מהרשימה</div>
       </div>
       <div id="admin-list"></div>
     </div>
@@ -7606,7 +7608,7 @@ async function loadData(){
 // Civilian (speaker ב) lines are tagged 'civilian'; soldier (א) lines are not.
 function _scnStepKey(p){ var m=((p&&p.tags)||'').match(/step(\d+)/); return ((p&&p.cat)||'')+'#'+(m?m[1]:'?'); }
 // Recently-added scenarios — show a "חדש" badge on their cube until first opened.
-var NEW_SCENARIOS = ['חקירה','הרחקה מהשטח','חיפוש בבית — איפה בעל הבית','חיפוש בבית — מי בבית','מעצר נער חשוד'];
+var NEW_SCENARIOS = ['חקירה','הרחקה מהשטח','חיפוש בבית — איפה בעל הבית','חיפוש בבית — מי בבית','מעצר נער חשוד','זיכוי מרחוק','זיכוי ובידוק'];
 var BUILTIN_SCENARIO_DATA = [
   {id:'bi-harhaka-1',  section:'scenario', cat:'הרחקה מהשטח', tags:'step1',  he:'עצור במקום והרם ידיים!', ar:'اوقّف عندك وارفع إيديك لفوق!', trans:'וַקֵף עִנְדַכּ וַארְפַע אִידֵיכּ לַפוֹק'},
   {id:'bi-harhaka-2',  section:'scenario', cat:'הרחקה מהשטח', tags:'step2',  he:'מה אתה עושה כאן?', ar:'شو بتعمل هون؟', trans:'שוּ בְּתִעְמֵל הוֹן?'},
@@ -8005,6 +8007,52 @@ var CONV14_MILITARY = [
   {cat:'בידוק וזיהוי', he:'קח תעודת זהות ובוא איתנו לחקירה', ar:'خذ هويتك وتعال معنا للتحقيق', trans:'ח׳ֻד הַוִיְתַכּ וּתַעַאל מַעַנַא לִתַחְקִיק'},
   {cat:'הרגעה ושכנוע', he:'אל תפחד, אם אתה חף מפשע תחזור הביתה', ar:'ما تخاف، إذا انت بريء راح ترجع عالبيت', trans:'מַא תְח׳אף, אִזַא אִנְתֶ בַּרִי רַאח תִרְגַ׳ע עַלְבֵּית'}
 ];
+
+// === זיכוי מרחוק + זיכוי ובידוק (single-source DB insert) ===
+// All soldier commands (no civilian bubbles).
+var ZIKUY_SCENARIOS = [
+  {cat:'זיכוי מרחוק', step:'step1', he:'עצור!', ar:'وقّف!', trans:'וַקֶּף!'},
+  {cat:'זיכוי מרחוק', step:'step2', he:'הרם ידיים', ar:'ارفع إيديك', trans:'אִרְפַע אִידֵיכּ'},
+  {cat:'זיכוי מרחוק', step:'step3', he:'הרם את החולצה', ar:'ارفع القميص / البلوزة', trans:'אִרְפַע אִלְקַמִיס / אִלְבְּלוּזַה'},
+  {cat:'זיכוי מרחוק', step:'step4', he:'הורד את המכנסיים', ar:'اشلح البنطلون', trans:'אִשְלַח אִלְבַּנְטַלוֹן'},
+  {cat:'זיכוי מרחוק', step:'step5', he:'הסתובב', ar:'لفّ', trans:'לִףּ'},
+  {cat:'זיכוי מרחוק', step:'step6', he:'הסתובב עוד פעם', ar:'لفّ كمان مرّة', trans:'לִףּ כַּמַאן מַרַּה'},
+  {cat:'זיכוי מרחוק', step:'step7', he:'סדר את עצמך', ar:'ظبّط حالك', trans:'זַבֶּט חַאלַכּ'},
+  {cat:'זיכוי מרחוק', step:'step8', he:'הורד את הנעליים (לפי שיקול דעת בלבד — לא לאישה)', ar:'اشلح الكندرة', trans:'אִשְלַח אִלְכֹּנְדַרַה'},
+  {cat:'זיכוי ובידוק', step:'step1', he:'שים ידיים על הקיר', ar:'حطّ إيديك على الحيط', trans:'חֹטּ אִידֵיכּ עַלַא אלְחֵיט'},
+  {cat:'זיכוי ובידוק', step:'step2', he:'פתח ידיים מעט', ar:'افتح إيديك شوي', trans:'אִפְתַח אִידֵיכּ שְוַי'},
+  {cat:'זיכוי ובידוק', step:'step3', he:'רגליים אחורה — פתח אותן', ar:'إجريك لورا، افتحهم', trans:'אִגְ׳רֵיכּ לַוַרַא, אִפְתַחְהֹם'},
+  {cat:'זיכוי ובידוק', step:'step4', he:'יש עליך משהו? מה יש? בטוח?', ar:'في إشي عليك؟ شو في؟ متأكّد؟', trans:'פִי אִשִי עַלֵיכּ? שוּ פִי? מִתְאַכֶּד?'},
+  {cat:'זיכוי ובידוק', step:'step5', he:'תוציא הכל מהכיסים', ar:'طلّع كلّ إشي من جيوبك', trans:'טַלֶּע כֻּלּ אִשִי מִן גְ׳יוּבַּכּ'},
+  {cat:'זיכוי ובידוק', step:'step6', he:'שכב על הקרקע!', ar:'نام ع الأرض!', trans:'נַאם עַ אלְאַרְד׳!'},
+  {cat:'זיכוי ובידוק', step:'step7', he:'כרע ברך!', ar:'اركع!', trans:'אִרְכַּע!'},
+  {cat:'זיכוי ובידוק', step:'step8', he:'ידיים מאחורי הגב!', ar:'إيديك ورا ظهرك!', trans:'אִידֵיכּ וַרַא דַ׳הְרַכּ!'},
+  {cat:'זיכוי ובידוק', step:'step9', he:'דיברת — נגמר לך', ar:'حكيت، راحت عليك', trans:'חַכֵּית, רַאחַת עַלֵיכּ'}
+];
+
+async function addZikuyScenarios(btn){
+  if(!confirm('להוסיף את התרחישים "זיכוי מרחוק" ו"זיכוי ובידוק" (פקודות בידוק וזיכוי)? פעולה חד-פעמית, ללא כפילות.'))return;
+  var old=btn.textContent; btn.disabled=true; btn.textContent='מוסיף...';
+  try{
+    var ex=await sbFetch('/rest/v1/phrases?select=cat,tags&section=eq.scenario&or=(cat.eq.'+encodeURIComponent('זיכוי מרחוק')+',cat.eq.'+encodeURIComponent('זיכוי ובידוק')+')');
+    var have={}; (ex||[]).forEach(function(p){ have[_scnStepKey(p)]=1; });
+    var added=0;
+    for(var i=0;i<ZIKUY_SCENARIOS.length;i++){
+      var s=ZIKUY_SCENARIOS[i];
+      var key=s.cat+'#'+s.step.replace('step','');
+      if(have[key])continue;
+      await sbFetch('/rest/v1/phrases','POST',{cat:s.cat,he:s.he,trans:s.trans,ar:s.ar,tags:s.step,why:'',tone:'',audio_url:'',is_new:false,section:'scenario'});
+      have[key]=1; added++;
+    }
+    btn.textContent='✓ נוספו '+added;
+    await loadData(); renderAdminList();
+    alert('✓ נוספו '+added+' שלבים לתרחישים "זיכוי מרחוק" ו"זיכוי ובידוק". אפשר לערוך ולהקליט מהרשימות. אם 0 — כבר היו קיימים.');
+  }catch(e){
+    alert('שגיאה: '+(e&&e.message?e.message:e));
+    btn.textContent=old;
+  }
+  btn.disabled=false;
+}
 
 async function addConversation14(btn){
   if(!confirm('להוסיף את "מעצר נער חשוד בזריקת אבנים" — תרחיש (9 שורות) + 5 משפטים מבצעיים לקטגוריות הקיימות? פעולה חד-פעמית, ללא כפילות.'))return;
