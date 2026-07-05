@@ -3430,15 +3430,18 @@ async function sbFetch(path,method='GET',body=null){
 // Without this, a large table silently truncates — e.g. the newest recordings
 // fall past row 1000 and never load, so scenarios play no audio for them.
 async function sbFetchAllRows(baseQuery){
+  // This app is fed with new content continuously, so the table only grows.
+  // Page through in 1000-row batches with no practical ceiling — the guard is
+  // just a runaway backstop (500 pages = 500,000 rows), far above real size.
   var all=[], pageSize=1000, from=0, guard=0;
   for(;;){
     var sep = baseQuery.indexOf('?')===-1 ? '?' : '&';
     var page = await sbFetch(baseQuery + sep + 'limit=' + pageSize + '&offset=' + from);
     if(!Array.isArray(page) || page.length===0) break;
     all = all.concat(page);
-    if(page.length < pageSize) break;   // last page
+    if(page.length < pageSize) break;   // last page reached
     from += pageSize;
-    if(++guard > 40) break;             // hard safety stop (40k rows)
+    if(++guard > 500) break;            // safety backstop only (~500k rows)
   }
   return all;
 }
