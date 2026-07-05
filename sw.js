@@ -1,6 +1,6 @@
 /* Service worker for "ערבית מצילה חיים" — offline-first field use.
    Bump CACHE when shipping changes that must invalidate old caches. */
-const CACHE = 'asl-v13';
+const CACHE = 'asl-v14';
 const SHELL = ['./', './index.html', './manifest.json', './icon.svg'];
 
 self.addEventListener('install', function(e){

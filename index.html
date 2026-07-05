@@ -3078,7 +3078,7 @@ function showLanding() {
         <button onclick="addZikuyScenarios(this)" style="width:100%;padding:12px;margin-top:10px;background:linear-gradient(135deg,#2c6fb0 0%,#1d4f80 100%);border:none;border-radius:10px;color:#fff;font-size:13px;font-weight:800;cursor:pointer;font-family:inherit;">👋 הוסף תרחישי "זיכוי מרחוק" + "זיכוי ובידוק" (חד-פעמי)</button>
         <div style="text-align:center;color:#7a9ab5;font-size:11px;margin-top:5px;">פקודות בידוק וזיכוי + כמה מקרים לדוגמה (מהסס, נמצא חפץ, מתנגד, אישה…) — אחר כך אפשר לערוך ולהקליט מהרשימה</div>
         <button onclick="addHealthScenario(this)" style="width:100%;padding:12px;margin-top:10px;background:linear-gradient(135deg,#1f8a70 0%,#14624f 100%);border:none;border-radius:10px;color:#fff;font-size:13px;font-weight:800;cursor:pointer;font-family:inherit;">🩺 הוסף תרחיש "בירור מצב בריאותי של עצור" (חד-פעמי)</button>
-        <div style="text-align:center;color:#7a9ab5;font-size:11px;margin-top:5px;">6 שאלות רפואיות לעצור — ייכנסו לתרחישים תחת "תשאול וחקירת שטח", אחר כך אפשר לערוך ולהקליט מהרשימה</div>
+        <div style="text-align:center;color:#7a9ab5;font-size:11px;margin-top:5px;">6 שאלות רפואיות + תשובות לדוגמה של העצור — תחת "תשאול וחקירת שטח", אחר כך אפשר לערוך ולהקליט מהרשימה</div>
         <button onclick="cleanScenarioDupes(this)" style="width:100%;padding:12px;margin-top:10px;background:linear-gradient(135deg,#7a5230 0%,#5a3a20 100%);border:none;border-radius:10px;color:#fff;font-size:13px;font-weight:800;cursor:pointer;font-family:inherit;">🧹 נקה שורות כפולות בתרחישים</button>
         <div style="text-align:center;color:#7a9ab5;font-size:11px;margin-top:5px;">אם משפט מוקלט לא נשמע בתרחיש — מוחק כפילויות ריקות בלבד; שורה עם הקלטה לעולם לא נמחקת</div>
       </div>
@@ -8197,40 +8197,64 @@ async function cleanScenarioDupes(btn){
 
 // === בירור מצב בריאותי של עצור (health screening of a detainee) ===
 var HEALTH_SCN_ID = 'בירור מצב בריאותי';
+// Interleaved Q&A: the soldier asks (odd steps), the detainee answers
+// (even steps, civilian). Answers are representative examples so the soldier
+// learns to recognize a real reply.
 var HEALTH_SCENARIO = [
   {step:'step1', he:'אתה לוקח תרופות יומיות?', ar:'بتاخد أدوية يوميّة؟', trans:'בְּתַאחֹ׳ד אַדְוִיֶה יוֹמִיֶּה?'},
-  {step:'step2', he:'יש לך איזשהו סוג של אלרגיות? לחלב ולדברים כאלה?', ar:'فيه عندك أي نوع من الحساسيّات؟ للحليب وهيك شغلات؟', trans:'פִיה עִנְדַכּ אַיְ נוֹע מִן אִלְחַסַּאסִיַּאת? לַלְחַלִיבּ, וּהֶיכּ שַעְ׳לַאת?'},
-  {step:'step3', he:'יש לך קשיים רפואיים? פגיעות ראש ודברים כאלה?', ar:'فيه عندك صعوبات طبيّة؟ إصابات راس وإشي زيّ هيك؟', trans:'פִיה עִנְדַכּ סֻ׳עוּבַּאת טִבִּיֶּה? אִסַּ׳אבַּאת רַאס וּאִשִי זַיְּ הֶיכּ?'},
-  {step:'step4', he:'יש פגיעות מסוימות? כמו פגיעת ראש, דימום, שבר ודברים כאלה?', ar:'فيه أي إصابات معيّنة؟ زيّ إصابة راس، نزيف دموي، كسر وإشي زيّ هيك؟', trans:'פִיה אַיְ אִסַּ׳אבַּאת מֻעַיַּנֶה? זַיְּ אִסַּ׳אבֶּת רַאס, נַזִיף דַמַוִי, כַּסְר וּאִשִי זַיְּ הֶיכּ?'},
-  {step:'step5', he:'חום ב-24 השעות האחרונות? אם כן, צריך לבדוק דלקות.', ar:'سخونة في الأربع وعشرين ساعة الأخيرة؟ إذا فيه، لازم نفحص التهابات.', trans:'סְח׳וּנֶה פִי אִלְאַרְבַּע וּעִשְרִין סַאעַה אִלְאַחִ׳ירֶה? אִזַא פִיה, לַאזֶם נִפְחַס׳ אִלְתִהַאבַּאת.'},
-  {step:'step6', he:'יש עוד משהו שאתה רוצה לומר, שאנחנו צריכים לדעת לגבי הבריאות שלך?', ar:'في كمان إشي بدّك تحكي ولازم نعرفه بالنسبة لصحّتك؟', trans:'פִי כַּמַאן אִשִי בִּדַּכּ תִחְכִּי וּלַאזֶם נִעַרְפוֹ בִּ(אל)נִּסְבֶּה לַסַּ׳חְּתַכּ?'}
+  {step:'step2', civ:true, he:'כן, יש לי תרופה ללחץ דם.', ar:'اه، عندي دوا للضغط.', trans:'אַה, עִנְדִי דַוַא לַ(אִל)צַּעְ׳ט.'},
+  {step:'step3', he:'יש לך איזשהו סוג של אלרגיות? לחלב ולדברים כאלה?', ar:'فيه عندك أي نوع من الحساسيّات؟ للحليب وهيك شغلات؟', trans:'פִיה עִנְדַכּ אַיְ נוֹע מִן אִלְחַסַּאסִיַּאת? לַלְחַלִיבּ, וּהֶיכּ שַעְ׳לַאת?'},
+  {step:'step4', civ:true, he:'לא, אין לי אלרגיות.', ar:'لا، ما عندي حساسيّة.', trans:'לַא, מַא עִנְדִי חַסַּאסִיֶּה.'},
+  {step:'step5', he:'יש לך קשיים רפואיים? פגיעות ראש ודברים כאלה?', ar:'فيه عندك صعوبات طبيّة؟ إصابات راس وإشي زيّ هيك؟', trans:'פִיה עִנְדַכּ סֻ׳עוּבַּאת טִבִּיֶּה? אִסַּ׳אבַּאת רַאס וּאִשִי זַיְּ הֶיכּ?'},
+  {step:'step6', civ:true, he:'לא, אני בריא, אין בעיות.', ar:'لا، أنا منيح، ما في مشاكل.', trans:'לַא, אַנַא מְנִיח, מַא פִי מַשַאכֶּל.'},
+  {step:'step7', he:'יש פגיעות מסוימות? כמו פגיעת ראש, דימום, שבר ודברים כאלה?', ar:'فيه أي إصابات معيّنة؟ زيّ إصابة راس، نزيف دموي، كسر وإشي زيّ هيك؟', trans:'פִיה אַיְ אִסַּ׳אבַּאת מֻעַיַּנֶה? זַיְּ אִסַּ׳אבֶּת רַאס, נַזִיף דַמַוִי, כַּסְר וּאִשִי זַיְּ הֶיכּ?'},
+  {step:'step8', civ:true, he:'יש לי כאב בברך מפציעה ישנה.', ar:'عندي وجع بالركبة من إصابة قديمة.', trans:'עִנְדִי וַגַע בִּ(אִל)רֻכְּבֶּה מִן אִסַּאבֶּה קַדִימֶה.'},
+  {step:'step9', he:'חום ב-24 השעות האחרונות? אם כן, צריך לבדוק דלקות.', ar:'سخونة في الأربع وعشرين ساعة الأخيرة؟ إذا فيه، لازم نفحص التهابات.', trans:'סְח׳וּנֶה פִי אִלְאַרְבַּע וּעִשְרִין סַאעַה אִלְאַחִ׳ירֶה? אִזַא פִיה, לַאזֶם נִפְחַס׳ אִלְתִהַאבַּאת.'},
+  {step:'step10', civ:true, he:'לא, לא היה לי חום.', ar:'لا، ما كان عندي سخونة.', trans:'לַא, מַא כַּאן עִנְדִי סְח׳וּנֶה.'},
+  {step:'step11', he:'יש עוד משהו שאתה רוצה לומר, שאנחנו צריכים לדעת לגבי הבריאות שלך?', ar:'في كمان إشي بدّك تحكي ولازم نعرفه بالنسبة لصحّتك؟', trans:'פִי כַּמַאן אִשִי בִּדַּכּ תִחְכִּי וּלַאזֶם נִעַרְפוֹ בִּ(אל)נִּסְבֶּה לַסַּ׳חְּתַכּ?'},
+  {step:'step12', civ:true, he:'אני צריך את התרופה שלי, היא נשארה בבית.', ar:'بحتاج دوايي، ضل بالبيت.', trans:'בַּחְתַאג׳ דַוַאיִי, צַּ׳לּ בִּ(אִל)בֵּית.'}
 ];
 // Ship as built-in so the cube is always populated (a recorded DB row overrides it).
 try {
   if (typeof BUILTIN_SCENARIO_DATA !== 'undefined' && BUILTIN_SCENARIO_DATA.push) {
     HEALTH_SCENARIO.forEach(function(s, i){
-      BUILTIN_SCENARIO_DATA.push({ id:'bi-health-'+i, section:'scenario', cat:HEALTH_SCN_ID, tags:s.step, he:s.he, ar:s.ar, trans:s.trans });
+      BUILTIN_SCENARIO_DATA.push({ id:'bi-health-'+i, section:'scenario', cat:HEALTH_SCN_ID, tags:s.step+(s.civ?' civilian':''), he:s.he, ar:s.ar, trans:s.trans });
     });
   }
 } catch(e){ console.warn('health builtin merge failed', e); }
 
 async function addHealthScenario(btn){
-  if(!confirm('להוסיף את התרחיש "בירור מצב בריאותי של עצור" (6 שאלות)? פעולה חד-פעמית, ללא כפילות.'))return;
+  if(!confirm('להוסיף/לבנות את התרחיש "בירור מצב בריאותי של עצור" (6 שאלות + תשובות העצור)? פעולה חד-פעמית.'))return;
   var old=btn.textContent; btn.disabled=true; btn.textContent='מוסיף...';
   try{
-    var ex=await sbFetchAllRows('/rest/v1/phrases?select=cat,tags&section=eq.scenario&cat=eq.'+encodeURIComponent(HEALTH_SCN_ID));
-    var have={}; (ex||[]).forEach(function(p){ have[_scnStepKey(p)]=1; });
-    var added=0;
-    for(var i=0;i<HEALTH_SCENARIO.length;i++){
-      var s=HEALTH_SCENARIO[i];
-      var key=HEALTH_SCN_ID+'#'+s.step.replace('step','');
-      if(have[key])continue;
-      await sbFetch('/rest/v1/phrases','POST',{cat:HEALTH_SCN_ID,he:s.he,trans:s.trans,ar:s.ar,tags:s.step,why:'',tone:'',audio_url:'',is_new:false,section:'scenario'});
-      have[key]=1; added++;
+    var ex=await sbFetchAllRows('/rest/v1/phrases?select=id,tags,audio_url&section=eq.scenario&cat=eq.'+encodeURIComponent(HEALTH_SCN_ID));
+    var recorded=(ex||[]).filter(function(p){return !!p.audio_url;});
+    if(recorded.length){
+      // Recordings already exist — never destroy them. Fill only missing steps.
+      var have={}; (ex||[]).forEach(function(p){ have[_scnStepKey(p)]=1; });
+      var added=0;
+      for(var i=0;i<HEALTH_SCENARIO.length;i++){
+        var s=HEALTH_SCENARIO[i];
+        var key=HEALTH_SCN_ID+'#'+s.step.replace('step','');
+        if(have[key])continue;
+        await sbFetch('/rest/v1/phrases','POST',{cat:HEALTH_SCN_ID,he:s.he,trans:s.trans,ar:s.ar,tags:s.step+(s.civ?' civilian':''),why:'',tone:'',audio_url:'',is_new:false,section:'scenario'});
+        have[key]=1; added++;
+      }
+      await loadData(); renderAdminList();
+      alert('כבר קיימות הקלטות בתרחיש הזה, אז לא מחקתי כלום. הוספתי '+added+' שורות חסרות. אם הסדר יצא לא מדויק — פני אליי ואסדר ידנית בלי לאבד הקלטות.');
+      btn.textContent='✓'; btn.disabled=false; return;
     }
-    btn.textContent='✓ נוספו '+added;
+    // No recordings yet — rebuild cleanly (the step numbering changed to interleave answers).
+    for(var d=0; d<(ex||[]).length; d++){ await sbFetch('/rest/v1/phrases?id=eq.'+ex[d].id,'DELETE'); }
+    var addc=0;
+    for(var j=0;j<HEALTH_SCENARIO.length;j++){
+      var q=HEALTH_SCENARIO[j];
+      await sbFetch('/rest/v1/phrases','POST',{cat:HEALTH_SCN_ID,he:q.he,trans:q.trans,ar:q.ar,tags:q.step+(q.civ?' civilian':''),why:'',tone:'',audio_url:'',is_new:false,section:'scenario'});
+      addc++;
+    }
+    btn.textContent='✓ נוספו '+addc;
     await loadData(); renderAdminList();
-    alert('✓ נוספו '+added+' שאלות לתרחיש "בירור מצב בריאותי של עצור". אפשר לערוך ולהקליט מהרשימות. אם 0 — כבר היו קיימים.');
+    alert('✓ נבנה התרחיש "בירור מצב בריאותי של עצור" — '+addc+' שורות (שאלות + תשובות). אפשר לערוך ולהקליט מהרשימות.');
   }catch(e){
     alert('שגיאה: '+(e&&e.message?e.message:e));
     btn.textContent=old;
