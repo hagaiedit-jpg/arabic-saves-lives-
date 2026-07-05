@@ -3426,6 +3426,23 @@ async function sbFetch(path,method='GET',body=null){
   return t?JSON.parse(t):null;
 }
 
+// Fetch ALL rows for a query, paging past Supabase's 1000-row-per-request cap.
+// Without this, a large table silently truncates — e.g. the newest recordings
+// fall past row 1000 and never load, so scenarios play no audio for them.
+async function sbFetchAllRows(baseQuery){
+  var all=[], pageSize=1000, from=0, guard=0;
+  for(;;){
+    var sep = baseQuery.indexOf('?')===-1 ? '?' : '&';
+    var page = await sbFetch(baseQuery + sep + 'limit=' + pageSize + '&offset=' + from);
+    if(!Array.isArray(page) || page.length===0) break;
+    all = all.concat(page);
+    if(page.length < pageSize) break;   // last page
+    from += pageSize;
+    if(++guard > 40) break;             // hard safety stop (40k rows)
+  }
+  return all;
+}
+
 // Simple toast helper (non-blocking notifications)
 function showToast(msg, type){
   var el = document.getElementById('toast');
@@ -7568,7 +7585,7 @@ async function loadData(){
 
   // 2. Refresh from network in the background and update if it succeeds.
   try{
-    const data=await sbFetch('/rest/v1/phrases?select=*&order=created_at.asc');
+    const data=await sbFetchAllRows('/rest/v1/phrases?select=*&order=created_at.asc,id.asc');
     if(!Array.isArray(data))return;
     populateFromData(data);
     // Cache all content for offline use (field has no signal)
@@ -8142,7 +8159,7 @@ async function cleanScenarioDupes(btn){
   if(!confirm('לנקות שורות כפולות בתרחישים? יימחקו רק כפילויות ריקות (בלי הקלטה); שורה עם הקלטה לעולם לא נמחקת.'))return;
   var old=btn.textContent; btn.disabled=true; btn.textContent='בודק...';
   try{
-    var rows=await sbFetch('/rest/v1/phrases?select=id,cat,tags,audio_url,responses&section=eq.scenario&limit=4000');
+    var rows=await sbFetchAllRows('/rest/v1/phrases?select=id,cat,tags,audio_url,responses&section=eq.scenario');
     var groups={};
     (rows||[]).forEach(function(r){ var k=_scnStepKey(r); (groups[k]=groups[k]||[]).push(r); });
     var toDelete=[];
@@ -13474,7 +13491,7 @@ async function renderAdminList(){
   const el=document.getElementById('admin-list');
   el.innerHTML='<div class="loading">טוען...</div>';
   try{
-    const data=await sbFetch('/rest/v1/phrases?select=*&order=created_at.desc&limit=2000');
+    const data=await sbFetchAllRows('/rest/v1/phrases?select=*&order=created_at.desc,id.desc');
     if(!data||!data.length){el.innerHTML='<div class="empty">אין משפטים עדיין</div>';return;}
     window._adminItems=data;
     const sN={military:'מבצעי',daily:'יומיומי',heart:'פותחים לב',navy:'ימי',announce:'כריזה',dictionary:'מילון',semantic:'סמנטי',customs:'מנהגים',article:'מאמרים'};
