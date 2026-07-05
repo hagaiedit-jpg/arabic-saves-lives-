@@ -3077,6 +3077,8 @@ function showLanding() {
         <div style="text-align:center;color:#7a9ab5;font-size:11px;margin-top:5px;">מוסיף חדשים וגם מתקן את ניקוד התעתיק בקיימים (ההקלטות נשמרות)</div>
         <button onclick="addZikuyScenarios(this)" style="width:100%;padding:12px;margin-top:10px;background:linear-gradient(135deg,#2c6fb0 0%,#1d4f80 100%);border:none;border-radius:10px;color:#fff;font-size:13px;font-weight:800;cursor:pointer;font-family:inherit;">👋 הוסף תרחישי "זיכוי מרחוק" + "זיכוי ובידוק" (חד-פעמי)</button>
         <div style="text-align:center;color:#7a9ab5;font-size:11px;margin-top:5px;">פקודות בידוק וזיכוי + כמה מקרים לדוגמה (מהסס, נמצא חפץ, מתנגד, אישה…) — אחר כך אפשר לערוך ולהקליט מהרשימה</div>
+        <button onclick="addHealthScenario(this)" style="width:100%;padding:12px;margin-top:10px;background:linear-gradient(135deg,#1f8a70 0%,#14624f 100%);border:none;border-radius:10px;color:#fff;font-size:13px;font-weight:800;cursor:pointer;font-family:inherit;">🩺 הוסף תרחיש "בירור מצב בריאותי של עצור" (חד-פעמי)</button>
+        <div style="text-align:center;color:#7a9ab5;font-size:11px;margin-top:5px;">6 שאלות רפואיות לעצור — ייכנסו לתרחישים תחת "תשאול וחקירת שטח", אחר כך אפשר לערוך ולהקליט מהרשימה</div>
         <button onclick="cleanScenarioDupes(this)" style="width:100%;padding:12px;margin-top:10px;background:linear-gradient(135deg,#7a5230 0%,#5a3a20 100%);border:none;border-radius:10px;color:#fff;font-size:13px;font-weight:800;cursor:pointer;font-family:inherit;">🧹 נקה שורות כפולות בתרחישים</button>
         <div style="text-align:center;color:#7a9ab5;font-size:11px;margin-top:5px;">אם משפט מוקלט לא נשמע בתרחיש — מוחק כפילויות ריקות בלבד; שורה עם הקלטה לעולם לא נמחקת</div>
       </div>
@@ -7630,7 +7632,7 @@ async function loadData(){
 // Civilian (speaker ב) lines are tagged 'civilian'; soldier (א) lines are not.
 function _scnStepKey(p){ var m=((p&&p.tags)||'').match(/step(\d+)/); return ((p&&p.cat)||'')+'#'+(m?m[1]:'?'); }
 // Recently-added scenarios — show a "חדש" badge on their cube until first opened.
-var NEW_SCENARIOS = ['חקירה','הרחקה מהשטח','חיפוש בבית — איפה בעל הבית','חיפוש בבית — מי בבית','מעצר נער חשוד','זיכוי מרחוק','זיכוי ובידוק'];
+var NEW_SCENARIOS = ['חקירה','הרחקה מהשטח','חיפוש בבית — איפה בעל הבית','חיפוש בבית — מי בבית','מעצר נער חשוד','זיכוי מרחוק','זיכוי ובידוק','בירור מצב בריאותי'];
 var BUILTIN_SCENARIO_DATA = [
   {id:'bi-harhaka-1',  section:'scenario', cat:'הרחקה מהשטח', tags:'step1',  he:'עצור במקום והרם ידיים!', ar:'اوقّف عندك وارفع إيديك لفوق!', trans:'וַקֵף עִנְדַכּ וַארְפַע אִידֵיכּ לַפוֹק'},
   {id:'bi-harhaka-2',  section:'scenario', cat:'הרחקה מהשטח', tags:'step2',  he:'מה אתה עושה כאן?', ar:'شو بتعمل هون؟', trans:'שוּ בְּתִעְמֵל הוֹן?'},
@@ -8186,6 +8188,49 @@ async function cleanScenarioDupes(btn){
     }
     await loadData(); renderAdminList();
     alert('✓ נמחקו '+done+' שורות כפולות ריקות. ההקלטות נשמרו.');
+  }catch(e){
+    alert('שגיאה: '+(e&&e.message?e.message:e));
+    btn.textContent=old;
+  }
+  btn.disabled=false;
+}
+
+// === בירור מצב בריאותי של עצור (health screening of a detainee) ===
+var HEALTH_SCN_ID = 'בירור מצב בריאותי';
+var HEALTH_SCENARIO = [
+  {step:'step1', he:'אתה לוקח תרופות יומיות?', ar:'بتاخد أدوية يوميّة؟', trans:'בְּתַאחֹ׳ד אַדְוִיֶה יוֹמִיֶּה?'},
+  {step:'step2', he:'יש לך איזשהו סוג של אלרגיות? לחלב ולדברים כאלה?', ar:'فيه عندك أي نوع من الحساسيّات؟ للحليب وهيك شغلات؟', trans:'פִיה עִנְדַכּ אַיְ נוֹע מִן אִלְחַסַּאסִיַּאת? לַלְחַלִיבּ, וּהֶיכּ שַעְ׳לַאת?'},
+  {step:'step3', he:'יש לך קשיים רפואיים? פגיעות ראש ודברים כאלה?', ar:'فيه عندك صعوبات طبيّة؟ إصابات راس وإشي زيّ هيك؟', trans:'פִיה עִנְדַכּ סֻ׳עוּבַּאת טִבִּיֶּה? אִסַּ׳אבַּאת רַאס וּאִשִי זַיְּ הֶיכּ?'},
+  {step:'step4', he:'יש פגיעות מסוימות? כמו פגיעת ראש, דימום, שבר ודברים כאלה?', ar:'فيه أي إصابات معيّنة؟ زيّ إصابة راس، نزيف دموي، كسر وإشي زيّ هيك؟', trans:'פִיה אַיְ אִסַּ׳אבַּאת מֻעַיַּנֶה? זַיְּ אִסַּ׳אבֶּת רַאס, נַזִיף דַמַוִי, כַּסְר וּאִשִי זַיְּ הֶיכּ?'},
+  {step:'step5', he:'חום ב-24 השעות האחרונות? אם כן, צריך לבדוק דלקות.', ar:'سخونة في الأربع وعشرين ساعة الأخيرة؟ إذا فيه، لازم نفحص التهابات.', trans:'סְח׳וּנֶה פִי אִלְאַרְבַּע וּעִשְרִין סַאעַה אִלְאַחִ׳ירֶה? אִזַא פִיה, לַאזֶם נִפְחַס׳ אִלְתִהַאבַּאת.'},
+  {step:'step6', he:'יש עוד משהו שאתה רוצה לומר, שאנחנו צריכים לדעת לגבי הבריאות שלך?', ar:'في كمان إشي بدّك تحكي ولازم نعرفه بالنسبة لصحّتك؟', trans:'פִי כַּמַאן אִשִי בִּדַּכּ תִחְכִּי וּלַאזֶם נִעַרְפוֹ בִּ(אל)נִּסְבֶּה לַסַּ׳חְּתַכּ?'}
+];
+// Ship as built-in so the cube is always populated (a recorded DB row overrides it).
+try {
+  if (typeof BUILTIN_SCENARIO_DATA !== 'undefined' && BUILTIN_SCENARIO_DATA.push) {
+    HEALTH_SCENARIO.forEach(function(s, i){
+      BUILTIN_SCENARIO_DATA.push({ id:'bi-health-'+i, section:'scenario', cat:HEALTH_SCN_ID, tags:s.step, he:s.he, ar:s.ar, trans:s.trans });
+    });
+  }
+} catch(e){ console.warn('health builtin merge failed', e); }
+
+async function addHealthScenario(btn){
+  if(!confirm('להוסיף את התרחיש "בירור מצב בריאותי של עצור" (6 שאלות)? פעולה חד-פעמית, ללא כפילות.'))return;
+  var old=btn.textContent; btn.disabled=true; btn.textContent='מוסיף...';
+  try{
+    var ex=await sbFetchAllRows('/rest/v1/phrases?select=cat,tags&section=eq.scenario&cat=eq.'+encodeURIComponent(HEALTH_SCN_ID));
+    var have={}; (ex||[]).forEach(function(p){ have[_scnStepKey(p)]=1; });
+    var added=0;
+    for(var i=0;i<HEALTH_SCENARIO.length;i++){
+      var s=HEALTH_SCENARIO[i];
+      var key=HEALTH_SCN_ID+'#'+s.step.replace('step','');
+      if(have[key])continue;
+      await sbFetch('/rest/v1/phrases','POST',{cat:HEALTH_SCN_ID,he:s.he,trans:s.trans,ar:s.ar,tags:s.step,why:'',tone:'',audio_url:'',is_new:false,section:'scenario'});
+      have[key]=1; added++;
+    }
+    btn.textContent='✓ נוספו '+added;
+    await loadData(); renderAdminList();
+    alert('✓ נוספו '+added+' שאלות לתרחיש "בירור מצב בריאותי של עצור". אפשר לערוך ולהקליט מהרשימות. אם 0 — כבר היו קיימים.');
   }catch(e){
     alert('שגיאה: '+(e&&e.message?e.message:e));
     btn.textContent=old;
@@ -9426,7 +9471,8 @@ var SCN_CATEGORIES = [
       {id:'זיהוי שקרים', icon:'🕵️', title:'זיהוי שקרים'},
       {id:'איתור מבוקש', icon:'📍', title:'איתור מבוקש'},
       {id:'תפיסת מחבל ללא מתשאל', icon:'🎯', title:'תפיסת חשוד ללא מתורגמן'},
-      {id:'חקירה', icon:'🕵️‍♂️', title:'חקירה'}
+      {id:'חקירה', icon:'🕵️‍♂️', title:'חקירה'},
+      {id:'בירור מצב בריאותי', icon:'🩺', title:'בירור מצב בריאותי של עצור'}
     ]
   },
   {
@@ -9548,6 +9594,10 @@ var SCN_STORIES = {
   "חקירה": {
     "before": "מתשאל שלא תורגל זמן רב ושכח חלק מהשפה - לא מבין מה העצור אומר במהלך החיפוש. מעכב ולא מקצועי.",
     "source": "מתשאל, 2025"
+  },
+  "בירור מצב בריאותי": {
+    "before": "כשמעכבים עצור, האחריות למצבו הרפואי עלינו. בלי כמה שאלות בסיסיות בערבית אי אפשר לדעת על תרופה, אלרגיה או פציעה - וזה עלול להסתיים באירוע רפואי שאפשר היה למנוע.",
+    "source": "לוחם, 2025"
   },
   "חיפוש בבית": {
     "before": "כשעושים חיפוש ואתה לא מבין מה הדייר אומר, או שהשאלה שלך לא מובנת - זה מעכב את כל המשימה ומסכן את הכוח.",
