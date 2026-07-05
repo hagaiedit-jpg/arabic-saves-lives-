@@ -3077,6 +3077,8 @@ function showLanding() {
         <div style="text-align:center;color:#7a9ab5;font-size:11px;margin-top:5px;">מוסיף חדשים וגם מתקן את ניקוד התעתיק בקיימים (ההקלטות נשמרות)</div>
         <button onclick="addZikuyScenarios(this)" style="width:100%;padding:12px;margin-top:10px;background:linear-gradient(135deg,#2c6fb0 0%,#1d4f80 100%);border:none;border-radius:10px;color:#fff;font-size:13px;font-weight:800;cursor:pointer;font-family:inherit;">👋 הוסף תרחישי "זיכוי מרחוק" + "זיכוי ובידוק" (חד-פעמי)</button>
         <div style="text-align:center;color:#7a9ab5;font-size:11px;margin-top:5px;">פקודות בידוק וזיכוי + כמה מקרים לדוגמה (מהסס, נמצא חפץ, מתנגד, אישה…) — אחר כך אפשר לערוך ולהקליט מהרשימה</div>
+        <button onclick="cleanScenarioDupes(this)" style="width:100%;padding:12px;margin-top:10px;background:linear-gradient(135deg,#7a5230 0%,#5a3a20 100%);border:none;border-radius:10px;color:#fff;font-size:13px;font-weight:800;cursor:pointer;font-family:inherit;">🧹 נקה שורות כפולות בתרחישים</button>
+        <div style="text-align:center;color:#7a9ab5;font-size:11px;margin-top:5px;">אם משפט מוקלט לא נשמע בתרחיש — מוחק כפילויות ריקות בלבד; שורה עם הקלטה לעולם לא נמחקת</div>
       </div>
       <div id="admin-list"></div>
     </div>
@@ -7734,13 +7736,22 @@ function populateFromData(data){
   });
   NAVY=data.filter(p=>p.section==='navy').map(mp);
   ANNOUNCE=data.filter(p=>p.section==='announce').map(mp);
-  SCENARIO=data.filter(p=>p.section==='scenario').map(mp);
-  // Merge built-in scenarios, but skip any line already promoted to the DB
-  // (same category + step), so an uploaded recording replaces the built-in copy.
+  // Collapse duplicate scenario rows (same category + step) that can arise from
+  // more than one insert — always keep the copy that HAS a recording, so a
+  // recorded line never gets hidden behind an empty duplicate. Then merge built-in
+  // scenarios into any remaining gaps (an uploaded recording replaces the built-in).
+  var _scnRaw=data.filter(p=>p.section==='scenario').map(mp);
+  var _scnBest={}, _scnOrder=[];
+  _scnRaw.forEach(function(p){
+    var k=_scnStepKey(p);
+    var ex=_scnBest[k];
+    if(!ex){ _scnBest[k]=p; _scnOrder.push(k); }
+    else if((!ex.audio && p.audio) || (ex.audio===p.audio && !ex.responses && p.responses)){ _scnBest[k]=p; }
+  });
+  SCENARIO=_scnOrder.map(function(k){ return _scnBest[k]; });
   try{
     if(typeof BUILTIN_SCENARIO_DATA!=='undefined' && BUILTIN_SCENARIO_DATA.length){
-      var _seenScn={}; SCENARIO.forEach(function(p){ _seenScn[_scnStepKey(p)]=true; });
-      BUILTIN_SCENARIO_DATA.forEach(function(b){ var k=_scnStepKey(b); if(!_seenScn[k]){ SCENARIO.push(mp(b)); _seenScn[k]=true; } });
+      BUILTIN_SCENARIO_DATA.forEach(function(b){ var k=_scnStepKey(b); if(!_scnBest[k]){ var m=mp(b); SCENARIO.push(m); _scnBest[k]=m; } });
     }
   }catch(e){}
   DICT=data.filter(p=>p.section==='dictionary').map(mp);
@@ -8107,6 +8118,44 @@ async function addZikuyScenarios(btn){
     btn.textContent='✓ נוספו '+added;
     await loadData(); renderAdminList();
     alert('✓ נוספו '+added+' שלבים לתרחישים "זיכוי מרחוק" ו"זיכוי ובידוק". אפשר לערוך ולהקליט מהרשימות. אם 0 — כבר היו קיימים.');
+  }catch(e){
+    alert('שגיאה: '+(e&&e.message?e.message:e));
+    btn.textContent=old;
+  }
+  btn.disabled=false;
+}
+
+// Remove duplicate scenario rows (same category + step) that can accumulate from
+// repeated inserts. Keeps the copy that HAS a recording (or, if none, one copy);
+// only ever deletes EMPTY duplicates — never a recorded line.
+async function cleanScenarioDupes(btn){
+  if(!confirm('לנקות שורות כפולות בתרחישים? יימחקו רק כפילויות ריקות (בלי הקלטה); שורה עם הקלטה לעולם לא נמחקת.'))return;
+  var old=btn.textContent; btn.disabled=true; btn.textContent='בודק...';
+  try{
+    var rows=await sbFetch('/rest/v1/phrases?select=id,cat,tags,audio_url,responses&section=eq.scenario&limit=4000');
+    var groups={};
+    (rows||[]).forEach(function(r){ var k=_scnStepKey(r); (groups[k]=groups[k]||[]).push(r); });
+    var toDelete=[];
+    Object.keys(groups).forEach(function(k){
+      var g=groups[k]; if(g.length<2) return;
+      var withAudio=g.filter(function(r){ return !!r.audio_url; });
+      if(withAudio.length){
+        // keep every recorded copy; delete only the empty duplicates
+        g.forEach(function(r){ if(!r.audio_url) toDelete.push(r.id); });
+      } else {
+        // all empty — keep the first, delete the rest
+        g.slice(1).forEach(function(r){ toDelete.push(r.id); });
+      }
+    });
+    if(!toDelete.length){ alert('לא נמצאו כפילויות ריקות. הכל תקין.'); btn.textContent=old; btn.disabled=false; return; }
+    if(!confirm('נמצאו '+toDelete.length+' שורות כפולות ריקות. למחוק אותן?')){ btn.textContent=old; btn.disabled=false; return; }
+    var done=0;
+    for(var i=0;i<toDelete.length;i++){
+      await sbFetch('/rest/v1/phrases?id=eq.'+toDelete[i],'DELETE'); done++;
+      btn.textContent='מוחק '+done+'/'+toDelete.length;
+    }
+    await loadData(); renderAdminList();
+    alert('✓ נמחקו '+done+' שורות כפולות ריקות. ההקלטות נשמרו.');
   }catch(e){
     alert('שגיאה: '+(e&&e.message?e.message:e));
     btn.textContent=old;
