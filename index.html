@@ -7836,9 +7836,19 @@ async function spSave(phrase,section){
 }
 
 async function cloudUp(file){
-  const fd=new FormData();fd.append('file',file);fd.append('upload_preset',PRESET);fd.append('resource_type','video');
-  const r=await fetch(`https://api.cloudinary.com/v1_1/${CLOUD}/video/upload`,{method:'POST',body:fd});
-  const d=await r.json();return d.secure_url||null;
+  // Retry transient upload failures so a network hiccup doesn't silently lose a recording.
+  var lastErr=null;
+  for(var attempt=0;attempt<3;attempt++){
+    try{
+      const fd=new FormData();fd.append('file',file);fd.append('upload_preset',PRESET);fd.append('resource_type','video');
+      const r=await fetch(`https://api.cloudinary.com/v1_1/${CLOUD}/video/upload`,{method:'POST',body:fd});
+      const d=await r.json();
+      if(d && d.secure_url) return d.secure_url;
+      lastErr=new Error((d&&d.error&&d.error.message)||'העלאה נכשלה');
+    }catch(e){ lastErr=e; }
+    if(attempt<2) await new Promise(function(res){ setTimeout(res, 900*(attempt+1)); });
+  }
+  throw lastErr || new Error('העלאה נכשלה');
 }
 
 let mrec=null,rchunks=[],rfiles={};
@@ -14003,7 +14013,16 @@ async function saveEdit(advance){
     responses: responsesJson
   };
   
-  const au=await getAudio('edit',document.getElementById('edit-status'));if(au)updates.audio_url=au;
+  var _hadRec = !!rfiles['edit'];
+  const au=await getAudio('edit',document.getElementById('edit-status'));
+  if(au){ updates.audio_url=au; }
+  else if(_hadRec){
+    // A recording was waiting but its upload failed — do NOT save a "success"
+    // that silently drops the audio. Keep the clip in the form so she can retry.
+    btn.textContent=btnTxt;
+    alert('⚠️ ההקלטה לא הועלתה — כנראה תקלת רשת.\nלא שמרתי, כדי לא לאבד את ההקלטה.\nבדקי חיבור ולחצי שוב "שמור" (ההקלטה עדיין שמורה בטופס).');
+    return;
+  }
   try{
     await sbFetch('/rest/v1/phrases?id=eq.'+id,'PATCH',updates);
     await loadData();renderAdminList();
@@ -14233,14 +14252,14 @@ function searchHrt(){
 
   brand.addEventListener('click', handleTap);
 
-  // Restore an admin session within the same browser tab (token persists in
-  // sessionStorage; expired tokens are auto-refreshed on the next write).
+  // Require a fresh admin login on every app load / refresh. We deliberately do
+  // NOT restore a saved session — the admin tab stays hidden and locked until the
+  // password is entered again, so a refresh can never leave admin open.
   try {
-    var _at = sessionStorage.getItem('admin_at');
-    if(_at){
-      window._adminToken=_at; window._adminRefresh=sessionStorage.getItem('admin_rt')||''; window._adminAuth=true;
-      var _tab=document.getElementById('admin-tab'); if(_tab) _tab.style.display='block';
-    }
+    sessionStorage.removeItem('admin_at');
+    sessionStorage.removeItem('admin_rt');
+    window._adminToken=''; window._adminRefresh=''; window._adminAuth=false;
+    var _tab=document.getElementById('admin-tab'); if(_tab) _tab.style.display='none';
   } catch(e){}
 })();
 
