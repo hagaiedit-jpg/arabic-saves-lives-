@@ -3011,7 +3011,7 @@ function showLanding() {
     <!-- Add Heart -->
     <div id="at-ah" style="display:none;"><div class="acard">
       <div class="afl"><label>קטגוריה</label><select id="ahc">
-        <option>פתיחה וסגירת שיחה</option>
+        <option>ברכות ונימוסים</option>
         <option>ביטויים ופתגמים</option>
       </select></div>
       <div class="afl"><label>עברית *</label><input id="ahhe"/></div>
@@ -7799,10 +7799,26 @@ function populateFromData(data){
   DAILY=data.filter(p=>p.section==='daily').map(mp);
   HEART=data.filter(p=>p.section==='heart' && p.cat!=='מנהגים').map(p=>{
     var m=mp(p);
-    if(m.cat==='פתיחת שיח'||m.cat==='פתיחת שיחה'||m.cat==='סגירת שיח'||m.cat==='סגירת שיחה')m.cat='פתיחה וסגירת שיחה';
+    if(m.cat==='פתיחת שיח'||m.cat==='פתיחת שיחה'||m.cat==='סגירת שיח'||m.cat==='סגירת שיחה'||m.cat==='פתיחה וסגירת שיחה')m.cat='ברכות ונימוסים';
     else if(m.cat==='פתגמים'||m.cat==='ימי הולדת'||m.cat==='חגים'||m.cat==='חגים וימי הולדת')m.cat='ביטויים ופתגמים';
     return m;
   });
+  // The old "פתיחה וסגירת שיחה" cube folded into "ברכות ונימוסים" (mapping above).
+  // Hide old rows that duplicate a curated greeting (same Arabic) so each greeting
+  // shows once, in its paired card. Nothing is deleted from the DB — the old rows
+  // stay editable in the admin lists.
+  try{
+    if(typeof GREETINGS_DATA!=='undefined' && typeof _greetNorm==='function'){
+      var _gk={}; GREETINGS_DATA.forEach(function(p){ _gk[_greetNorm(p.he)+'|'+_greetNorm(p.ar)]=1; });
+      var _curAr={};
+      HEART.forEach(function(h){ if(h.cat==='ברכות ונימוסים' && _gk[_greetKey(h)]) _curAr[_greetNorm(h.ar)]=1; });
+      HEART=HEART.filter(function(h){
+        if(h.cat!=='ברכות ונימוסים') return true;
+        if(_gk[_greetKey(h)]) return true;
+        return !_curAr[_greetNorm(h.ar)];
+      });
+    }
+  }catch(e){}
   NAVY=data.filter(p=>p.section==='navy').map(mp);
   ANNOUNCE=data.filter(p=>p.section==='announce').map(mp);
   // Collapse duplicate scenario rows (same category + step) that can arise from
@@ -7953,8 +7969,7 @@ async function getAudio(p,stEl){
 const CATS=[{id:'עצירת תנועה ורכב',icon:'🚫'},{id:'ניהול מרחב והוראות',icon:'📍'},{id:'בידוק וזיהוי',icon:'🔍'},{id:'שליטה בבית',icon:'🏠'},{id:'הרגעה ושכנוע',icon:'✌️'},{id:'מגע ראשוני',icon:'🕵'},{id:'רפואה ועזרה ראשונה',icon:'🩹'},{id:'קהל ואירועים',icon:'👥'},{id:'ילדים ואוכלוסיות רגישות',icon:'👶'},{id:'לוח שנה ותרבות',icon:'📅'},{id:'שמות מקומות וכיוונים',icon:'🗺️'},{id:'זיהוי ערבית כתובה בשטח',icon:'📄'},{id:'כריזה',icon:'📢',special:'announce'},{id:'ימי',icon:'⚓',special:'navy'}];
 const DCATS=[{id:'שוק ומסחר',icon:'🛒'},{id:'מסעדה ואוכל',icon:'🍽️'},{id:'שיחת היכרות',icon:'🤝'},{id:'עזרה וכיוונים',icon:'🗺️'},{id:'ילדים ובית ספר',icon:'🎒'},{id:'שכנות וקהילה',icon:'🏘️'}];
 const HCATS=[
-  {id:'פתיחה וסגירת שיחה',icon:'👋'},
-  {id:'ברכות ונימוסים',icon:'🕊️'},
+  {id:'ברכות ונימוסים',icon:'👋'},
   {id:'ביטויים ופתגמים',icon:'📜'}
 ];
 
