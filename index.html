@@ -1336,6 +1336,38 @@ body.day-mode [style*="background:linear-gradient(135deg,#fff,#f5efe0)"]{
   border-color:rgba(168,82,0,0.25) !important;
 }
 
+/* ===== Day-mode readability pass (comprehensive) ===== */
+
+/* 1. Dictionary search results: dark cards were never flipped in the dict scope */
+body.day-mode #dict-results [style*="background:#0E1B2E"],
+body.day-mode #dict-results [style*="background:#0e1b2e"]{ background:#fff8e7 !important; border-color:rgba(212,134,46,0.3) !important; }
+body.day-mode #tab-dict [style*="background:rgba(255,255,255,0.05)"],
+body.day-mode #tab-dict [style*="background:rgba(255,255,255,0.03)"]{ background:rgba(0,0,0,0.04) !important; }
+
+/* 2. Edit-modal explanation preview ("כך זה ייראה בתצוגה"): JS toggles .style.display,
+   which reserializes the inline attribute so the substring flip stops matching.
+   id-based rules are immune to that. */
+body.day-mode #edit-why-preview-wrap{ background:#fff8e7 !important; border-color:rgba(212,134,46,0.4) !important; }
+body.day-mode #edit-why-preview,
+body.day-mode #edit-why-preview *{ color:#3a4a5c !important; }
+
+/* 3+4+5. Gold #FFD700 has no global flip on purpose (must stay light inside the
+   intentionally-dark force-dark drill/search modals). Flip it ONLY in the
+   light-background admin + edit scopes. */
+body.day-mode #edit-modal [style*="color:#FFD700"],
+body.day-mode #tab-adm [style*="color:#FFD700"]{ color:#8a6420 !important; }
+
+/* 6. Mint-green action text on pale-green chips -> readable green */
+body.day-mode #edit-modal [style*="color:#7eecc1"],
+body.day-mode #tab-adm [style*="color:#7eecc1"]{ color:#0e5a3f !important; }
+
+/* 7. Install banner "התקן" button was dark-on-dark */
+body.day-mode #install-banner [style*="background:#0E1B2E"]{ background:#fff !important; }
+body.day-mode #install-banner [style*="color:#E8D9B8"]{ color:#0e1b2e !important; }
+
+/* 8. Home phrase-of-the-day dismiss text a touch darker for contrast */
+body.day-mode #home-potd-card [style*="color:#5e7a92"]{ color:#5a6b80 !important; }
+
 
 /* === TARGETED FIX FOR DAY MODE ISSUES === */
 
