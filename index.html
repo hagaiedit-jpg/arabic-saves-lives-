@@ -3070,7 +3070,9 @@ function showLanding() {
       <button class="sbtn" onclick="addSem()">שמור</button>
     </div></div>
     <div id="at-al" style="display:none;">
-      <div style="margin-bottom:12px;">
+      <details style="margin-bottom:12px;">
+      <summary style="cursor:pointer;color:#7a9ab5;font-size:12.5px;font-weight:800;padding:10px 12px;background:rgba(122,154,181,0.12);border-radius:10px;list-style:none;">⚙️ כלים חד-פעמיים להוספת תוכן (לחצי לפתיחה)</summary>
+      <div style="margin-bottom:12px;margin-top:10px;">
         <button onclick="addProverbs(this)" style="width:100%;padding:12px;background:linear-gradient(135deg,#c0392b 0%,#922d22 100%);border:none;border-radius:10px;color:#fff;font-size:13px;font-weight:800;cursor:pointer;font-family:inherit;">💬 הוסף 15 ביטויים ופתגמים לרשימות (חד-פעמי)</button>
         <div style="text-align:center;color:#7a9ab5;font-size:11px;margin-top:5px;">ייכנסו לקטגוריית "ביטויים ופתגמים" — אחר כך אפשר לערוך ולהקליט מהרשימה</div>
         <button onclick="addGreetings(this)" style="width:100%;padding:12px;margin-top:10px;background:linear-gradient(135deg,#8e44ad 0%,#5e2d75 100%);border:none;border-radius:10px;color:#fff;font-size:13px;font-weight:800;cursor:pointer;font-family:inherit;">🕊️ הוסף ~100 ברכות ונימוסים (חד-פעמי)</button>
@@ -3084,6 +3086,7 @@ function showLanding() {
         <button onclick="cleanScenarioDupes(this)" style="width:100%;padding:12px;margin-top:10px;background:linear-gradient(135deg,#7a5230 0%,#5a3a20 100%);border:none;border-radius:10px;color:#fff;font-size:13px;font-weight:800;cursor:pointer;font-family:inherit;">🧹 נקה שורות כפולות בתרחישים</button>
         <div style="text-align:center;color:#7a9ab5;font-size:11px;margin-top:5px;">אם משפט מוקלט לא נשמע בתרחיש — מוחק כפילויות ריקות בלבד; שורה עם הקלטה לעולם לא נמחקת</div>
       </div>
+      </details>
       <div id="admin-list"></div>
     </div>
 
