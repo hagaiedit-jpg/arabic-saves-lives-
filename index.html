@@ -3115,8 +3115,8 @@ function showLanding() {
       <div style="margin-bottom:12px;margin-top:10px;">
         <button onclick="downloadBackup(this)" style="width:100%;padding:12px;background:linear-gradient(135deg,#34495e 0%,#22303e 100%);border:none;border-radius:10px;color:#fff;font-size:13px;font-weight:800;cursor:pointer;font-family:inherit;">⬇️ הורד גיבוי של כל התוכן (JSON)</button>
         <div style="text-align:center;color:#7a9ab5;font-size:11px;margin-top:5px;">קובץ עם כל המשפטים וקישורי ההקלטות — לשמור במחשב ליתר ביטחון</div>
-        <button onclick="addProverbs(this)" style="width:100%;padding:12px;margin-top:10px;background:linear-gradient(135deg,#c0392b 0%,#922d22 100%);border:none;border-radius:10px;color:#fff;font-size:13px;font-weight:800;cursor:pointer;font-family:inherit;">💬 הוסף 15 ביטויים ופתגמים לרשימות (חד-פעמי)</button>
-        <div style="text-align:center;color:#7a9ab5;font-size:11px;margin-top:5px;">ייכנסו לקטגוריית "ביטויים ופתגמים" — אחר כך אפשר לערוך ולהקליט מהרשימה</div>
+        <button onclick="addProverbs(this)" style="width:100%;padding:12px;margin-top:10px;background:linear-gradient(135deg,#c0392b 0%,#922d22 100%);border:none;border-radius:10px;color:#fff;font-size:13px;font-weight:800;cursor:pointer;font-family:inherit;">💬 הוסף ביטויים ופתגמים חסרים לרשימות</button>
+        <div style="text-align:center;color:#7a9ab5;font-size:11px;margin-top:5px;">מוסיף רק פתגמים שעוד לא קיימים לקטגוריית "ביטויים ופתגמים" — אחר כך אפשר לערוך ולהקליט מהרשימה</div>
         <button onclick="addGreetings(this)" style="width:100%;padding:12px;margin-top:10px;background:linear-gradient(135deg,#8e44ad 0%,#5e2d75 100%);border:none;border-radius:10px;color:#fff;font-size:13px;font-weight:800;cursor:pointer;font-family:inherit;">🕊️ הוסף ~100 ברכות ונימוסים (חד-פעמי)</button>
         <div style="text-align:center;color:#7a9ab5;font-size:11px;margin-top:5px;">שלום, ברכות, תודה, ניחומים, חגים ועוד — ייכנסו ל"פותחים לב" תחת "ברכות ונימוסים", אחר כך אפשר לערוך ולהקליט</div>
         <button onclick="addFieldVocab(this)" style="width:100%;padding:12px;margin-top:10px;background:linear-gradient(135deg,#16a085 0%,#0e6b58 100%);border:none;border-radius:10px;color:#fff;font-size:13px;font-weight:800;cursor:pointer;font-family:inherit;">🗺️ הוסף/עדכן שמות מקומות + זיהוי ערבית כתובה</button>
@@ -8509,15 +8509,23 @@ var PROVERBS_DATA = [
   {he:'כל דבר בזמנו יפֶה', ar:'كل شي بوقته حلو', trans:'כֻּלּ שִי בְּוַקְתֹה חִלוּ', why:'לכל דבר יש העיתוי הנכון.'},
   {he:'העין רואה והיד קצרה', ar:'العين بصيرة والايد قصيرة', trans:'אִלעֵין בַּצִירַה וְאִלאִיד קַצִירַה', why:'רוצים משהו אך אין יכולת להשיגו.'},
   {he:'החיפזון מן השטן, והמתינות מן הרחמן', ar:'العجلة من الشيطان والتأني من الرحمن', trans:'אִלעַגַ׳לַה מִן אִלשַּיְטַאן וְאִלתַּאַנּי מִן אִלרַּחְמַאן', why:'עדיף לפעול בשיקול דעת ולא בחיפזון.'},
-  {he:'בן אדם כמו גשר — עוברים עליו טובים ורעים', ar:'ابن آدم مثل الجسر بيمرق عليه منيح وعاطل', trans:'אִבְּן אַאדַם מִתֶל אִלגִ׳סְר בְּיִמְרֻק עַלֵיה מְנִיח וְעַאטֶל', why:'בחיים פוגשים אנשים טובים ורעים כאחד.'}
+  {he:'בן אדם כמו גשר — עוברים עליו טובים ורעים', ar:'ابن آدم مثل الجسر بيمرق عليه منيح وعاطل', trans:'אִבְּן אַאדַם מִתֶל אִלגִ׳סְר בְּיִמְרֻק עַלֵיה מְנִיח וְעַאטֶל', why:'בחיים פוגשים אנשים טובים ורעים כאחד.'},
+  {he:'רוצה לאכול ענבים או לריב עם השומר?', ar:'بدّك تاكل عنب ولّا تقاتل مع الناطور؟', trans:'בִּדַּכּ תַאכֹּל עִנְבּ וִלַּא תְקַאתֶל מַע אִ(ל)נַּאטוּר?', why:'להתעסק בעיקר או בטפל? מילולית: לאכול ענבים או לריב עם שומר הכרם.'},
+  {he:'לשונך היא סוסך — אם תשמור עליה תשמור עליך, ואם תבגוד בה תבגוד בך', ar:'لسانك حصانك، إن صنته صانك، وإن خنته خانك', trans:'לְסַאנַכּ חְסַ׳אנַכּ, אִן סִ׳נְתוֹ סַ׳אנַכּ, וּאִן חֻ׳נְתוֹ חַ׳אנַכּ', why:'היזהר בדבריך — חיים ומוות ביד הלשון.'},
+  {he:'אחרי שהשלג יימס — העמק ייראה', ar:'بعد ما يدوب الثلج بيبان المرج', trans:'בַּעֶד מַא יִדוּבּ אִ(ל)תַּלְג׳ בִּבַּאן אִלְמַרְג׳', why:'האמת סופה להתגלות.'},
+  {he:'אנו שייכים לאלוהים ואליו נשוב', ar:'إنا لله وإنا إليه راجعون', trans:'אִנַּא לִ(ל)לַּה וַאִנַּא אִלַיְהִ רַאגִ׳עוּן', why:'נאמר בעת צרה, מצוקה, מוות ואבל. מקורו בקוראן — סורת אלבקרה (2), פסוק 156.'},
+  {he:'כבד את הבריות — יכבדוך', ar:'احترم الناس بحترموك', trans:'אִחְתְרֶם אִ(ל)נַּאס בִּחְתִרְמוּכּ', why:'השווה בעברית: "איזהו המכובד? המכבד את הבריות" (משנה, אבות ד, א).'},
+  {he:'בקש את הדעת — ואפילו בסין', ar:'اطلب العلم ولو في الصين', trans:'אֻטְלֹבּ אִלְעִלְם וַלַוְ פִי אִ(ל)סִּ׳ין', why:'עשה כל מאמץ להרחיב את השכלתך — גם אם הידע רחוק.'},
+  {he:'הבדואי נקם את נקמתו אחרי ארבעים שנה, ואמר: מיהרתי', ar:'البدوي أخد تاره بعد أربعين سنة وقال استعجلت', trans:'אִלְבַּדַוִי אַחַ׳ד תַארוֹ בַּעֶד אַרְבַּעִין סַנֶה וּקַאל אִסְתַעְגַ׳לְת', why:'נקמת דם אינה נשכחת — גם אחרי שנים רבות.'},
+  {he:'אני נגד אחי; אני ואחי נגד בן דודי; אני ובן דודי נגד הזר', ar:'أنا على أخوي، وأنا وأخوي على ابن عمي، وأنا وابن عمي عالغريب', trans:'אַנַא עַלַא אַח׳וּי, וּאַנַא וּאַח׳וּי עַלַא אִבֶּן עַמִּי, וּאַנַא וּאִבֶּן עַמִּי עַ(אִל)עַ׳רִיבּ', why:'משל למעגלי הנאמנות בחברה הערבית — קודם המשפחה, אז החמולה, וכולם מול הזר.'}
 ];
 
 async function addProverbs(btn){
-  if(!confirm('להוסיף 15 ביטויים ופתגמים לרשימות העריכה (קטגוריית "ביטויים ופתגמים")? פעולה חד-פעמית, ללא כפילות.'))return;
+  if(!confirm('להוסיף את הביטויים והפתגמים החסרים לרשימות העריכה (קטגוריית "ביטויים ופתגמים")? מוסיף רק מה שעוד לא קיים.'))return;
   var old=btn.textContent; btn.disabled=true; btn.textContent='מוסיף...';
   try{
     function norm(s){ return String(s||'').replace(/[^֐-׿0-9A-Za-z]/g,''); }
-    var existing=await sbFetch('/rest/v1/phrases?select=he&section=eq.heart');
+    var existing=await sbFetchAllRows('/rest/v1/phrases?select=he&section=eq.heart');
     var have={}; (existing||[]).forEach(function(p){ have[norm(p.he)]=1; });
     var added=0;
     for(var i=0;i<PROVERBS_DATA.length;i++){
