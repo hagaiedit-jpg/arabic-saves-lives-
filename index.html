@@ -8688,6 +8688,29 @@ var GREET_PAIRS = [
   ['מזל טוב (ברכה)','مبروك','שאלוהים יברך אותך (תשובה ל־מזל טוב)','الله يبارك فيك']
 ];
 
+// "מה שלומך" questions ↔ the pool of possible answers: each question card gets a
+// RANDOM answer from the pool (reshuffled every visit), so the soldier meets all
+// the variants over time instead of memorizing one fixed reply.
+var GREET_QA_QUESTIONS=[
+  ['מה שלומך? (מה המצב?)','كيف الحال؟'],
+  ['מה שלומך? (איך הבריאות?)','كيف صحتك؟'],
+  ['מה חדש אצלך?','شو أخبارك؟'],
+  ['איך העולם מתנהג איתך? (מה נשמע?)','كيف الدنيا معك؟']
+];
+var GREET_QA_ANSWERS=[
+  ['תודה לאל (תשובה ל־מה נשמע)','الحمدلله'],
+  ['נודה לאל ונשבח אותו (תשובה)','نشكر الله ونحمده'],
+  ['הכל טוב / מצוין (תשובה)','تمام'],
+  ['הכל טוב על הצד הטוב ביותר (תשובה)','كله تمام على ما يرام'],
+  ['מעולה (מילולית: מעל הרוח)','فوق الريح'],
+  ['במיטבי (מצב רוח/מצב טוב)','في العلالي'],
+  ['ככה ככה... (לא משהו)','يعني...']
+];
+// Reply-to-reply chain: يا هلا → هلا هلا → (mood is good) هلا هلا هلا
+var GREET_CHAIN=[
+  ['יא הלא (ברכת שלום)','يا هلا','הלא הלא הלא (תשובה במצב רוח טוב)','هلا هلا هلا']
+];
+
 // Content key: Hebrew+Arabic letters only — immune to punctuation/diacritic edits.
 function _greetNorm(s){
   return String(s||'').replace(/[ً-ْٰـ]/g,'').replace(/[^א-תء-ي0-9A-Za-z]/g,'');
@@ -8698,13 +8721,31 @@ function _greetKey(h){ return _greetNorm(h.he)+'|'+_greetNorm(h.ar); }
 // which greeting shows which reply inline.
 function _buildGreetPairs(items){
   var byKey={}; items.forEach(function(h){ byKey[_greetKey(h)]=h; });
-  var reply={}, hidden={};
+  var reply={}, hidden={}, chain={}, rand={};
   GREET_PAIRS.forEach(function(p){
     var gk=_greetNorm(p[0])+'|'+_greetNorm(p[1]);
     var rk=_greetNorm(p[2])+'|'+_greetNorm(p[3]);
     if(byKey[gk] && byKey[rk]){ reply[gk]=byKey[rk]; hidden[rk]=1; }
   });
-  return {reply:reply, hidden:hidden};
+  // Reply-to-reply chain (e.g. הלא הלא הלא shown under יא הלא)
+  GREET_CHAIN.forEach(function(p){
+    var gk=_greetNorm(p[0])+'|'+_greetNorm(p[1]);
+    var ek=_greetNorm(p[2])+'|'+_greetNorm(p[3]);
+    if(byKey[gk] && byKey[ek]){ chain[gk]=byKey[ek]; hidden[ek]=1; }
+  });
+  // "מה שלומך" questions: shuffle the answer pool and deal one answer per question,
+  // so on every visit each question shows a different possible reply.
+  var pool=GREET_QA_ANSWERS.map(function(p){ return byKey[_greetNorm(p[0])+'|'+_greetNorm(p[1])]; }).filter(Boolean);
+  pool.forEach(function(a){ hidden[_greetKey(a)]=1; });
+  if(pool.length){
+    var shuf=pool.slice();
+    for(var i=shuf.length-1;i>0;i--){ var j=Math.floor(Math.random()*(i+1)); var t=shuf[i]; shuf[i]=shuf[j]; shuf[j]=t; }
+    GREET_QA_QUESTIONS.forEach(function(q,ix){
+      var qk=_greetNorm(q[0])+'|'+_greetNorm(q[1]);
+      if(byKey[qk]) rand[qk]=shuf[ix % shuf.length];
+    });
+  }
+  return {reply:reply, hidden:hidden, chain:chain, rand:rand};
 }
 
 // Inline play for a pair card — looks the row up by id so no audio URL sits in the DOM.
@@ -11681,22 +11722,27 @@ function opHC(cat){
     const i=HEART.indexOf(h);
     const k=_greetKey(h);
     if(_pairs.hidden[k]) return '';   // this reply is rendered inside its greeting card
-    const r=_pairs.reply[k];
+    const r=_pairs.reply[k]||_pairs.rand[k];
     if(r){
-      const ri=HEART.indexOf(r);
+      const mkAns=(it,label)=>{
+        const ii=HEART.indexOf(it);
+        return `<div class="pair-answer">
+          <div class="pair-answer-label">${label}</div>
+          <div onclick="opPop(${ii},'heart')" style="cursor:pointer;display:flex;align-items:center;gap:8px;justify-content:space-between;">
+            <div style="flex:1;"><div class="che">${it.he}</div><div class="car">${it.ar}</div></div>
+            ${it.audio?`<button class="pair-play keep-white" onclick="event.stopPropagation();hrtPlayById('${it.id}',this)">▶</button>`:''}
+          </div>
+        </div>`;
+      };
+      let ansHtml=mkAns(r, _pairs.reply[k]?'↩ כך עונים':'↩ תשובה אפשרית (מתחלפת בכל כניסה)');
+      if(_pairs.chain[k]) ansHtml+=mkAns(_pairs.chain[k],'↩ ואם מצב הרוח טוב');
       return `<div class="card">
         <div class="ctags"><span class="tag theart">❤️ פותח לב</span></div>
         <div onclick="opPop(${i},'heart')" style="cursor:pointer;display:flex;align-items:center;gap:8px;justify-content:space-between;">
           <div style="flex:1;"><div class="che">${h.he}</div><div class="car">${h.ar}</div></div>
           ${h.audio?`<button class="pair-play keep-white" onclick="event.stopPropagation();hrtPlayById('${h.id}',this)">▶</button>`:''}
         </div>
-        <div class="pair-answer">
-          <div class="pair-answer-label">↩ כך עונים</div>
-          <div onclick="opPop(${ri},'heart')" style="cursor:pointer;display:flex;align-items:center;gap:8px;justify-content:space-between;">
-            <div style="flex:1;"><div class="che">${r.he}</div><div class="car">${r.ar}</div></div>
-            ${r.audio?`<button class="pair-play keep-white" onclick="event.stopPropagation();hrtPlayById('${r.id}',this)">▶</button>`:''}
-          </div>
-        </div>
+        ${ansHtml}
       </div>`;
     }
     return `<div class="card" onclick="opPop(${i},'heart')">
