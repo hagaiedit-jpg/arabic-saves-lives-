@@ -1336,6 +1336,14 @@ body.day-mode [style*="background:linear-gradient(135deg,#fff,#f5efe0)"]{
   border-color:rgba(168,82,0,0.25) !important;
 }
 
+/* Greeting↔reply pair cards ("ברכות ונימוסים") */
+.pair-answer{margin-top:10px;padding-top:10px;border-top:1px dashed rgba(212,162,78,0.4);}
+.pair-answer-label{color:#1D9E75;font-size:11px;font-weight:800;margin-bottom:4px;}
+.pair-play{background:#1D9E75;border:none;color:#fff;border-radius:8px;padding:7px 13px;cursor:pointer;font-size:13px;flex-shrink:0;font-family:inherit;}
+body.day-mode .pair-answer{border-top-color:rgba(168,82,0,0.35);}
+body.day-mode .pair-answer-label{color:#0e5a3f;}
+body.day-mode .pair-play{background:#0e5a3f;}
+
 /* ===== Day-mode readability pass (comprehensive) ===== */
 
 /* 1. Dictionary search results: dark cards were never flipped in the dict scope */
@@ -3105,7 +3113,9 @@ function showLanding() {
       <details style="margin-bottom:12px;">
       <summary style="cursor:pointer;color:#7a9ab5;font-size:12.5px;font-weight:800;padding:10px 12px;background:rgba(122,154,181,0.12);border-radius:10px;list-style:none;">⚙️ כלים חד-פעמיים להוספת תוכן (לחצי לפתיחה)</summary>
       <div style="margin-bottom:12px;margin-top:10px;">
-        <button onclick="addProverbs(this)" style="width:100%;padding:12px;background:linear-gradient(135deg,#c0392b 0%,#922d22 100%);border:none;border-radius:10px;color:#fff;font-size:13px;font-weight:800;cursor:pointer;font-family:inherit;">💬 הוסף 15 ביטויים ופתגמים לרשימות (חד-פעמי)</button>
+        <button onclick="downloadBackup(this)" style="width:100%;padding:12px;background:linear-gradient(135deg,#34495e 0%,#22303e 100%);border:none;border-radius:10px;color:#fff;font-size:13px;font-weight:800;cursor:pointer;font-family:inherit;">⬇️ הורד גיבוי של כל התוכן (JSON)</button>
+        <div style="text-align:center;color:#7a9ab5;font-size:11px;margin-top:5px;">קובץ עם כל המשפטים וקישורי ההקלטות — לשמור במחשב ליתר ביטחון</div>
+        <button onclick="addProverbs(this)" style="width:100%;padding:12px;margin-top:10px;background:linear-gradient(135deg,#c0392b 0%,#922d22 100%);border:none;border-radius:10px;color:#fff;font-size:13px;font-weight:800;cursor:pointer;font-family:inherit;">💬 הוסף 15 ביטויים ופתגמים לרשימות (חד-פעמי)</button>
         <div style="text-align:center;color:#7a9ab5;font-size:11px;margin-top:5px;">ייכנסו לקטגוריית "ביטויים ופתגמים" — אחר כך אפשר לערוך ולהקליט מהרשימה</div>
         <button onclick="addGreetings(this)" style="width:100%;padding:12px;margin-top:10px;background:linear-gradient(135deg,#8e44ad 0%,#5e2d75 100%);border:none;border-radius:10px;color:#fff;font-size:13px;font-weight:800;cursor:pointer;font-family:inherit;">🕊️ הוסף ~100 ברכות ונימוסים (חד-פעמי)</button>
         <div style="text-align:center;color:#7a9ab5;font-size:11px;margin-top:5px;">שלום, ברכות, תודה, ניחומים, חגים ועוד — ייכנסו ל"פותחים לב" תחת "ברכות ונימוסים", אחר כך אפשר לערוך ולהקליט</div>
@@ -8646,6 +8656,88 @@ async function addGreetings(btn){
   btn.disabled=false;
 }
 
+// === צימוד ברכה ↔ תשובה ===
+// Each entry: [greeting-he, greeting-ar, reply-he, reply-ar]. Matching is done on
+// normalized he+ar content (diacritics/punctuation stripped), so the DB rows the
+// admin recorded are linked at render time — no schema change, no writes, and the
+// recordings on both rows stay exactly where they are.
+var GREET_PAIRS = [
+  ['שלום עליכם (ברכה)','السلام عليكم','ועליכם השלום ורחמת האל וברכתו (תשובה)','وعليكم السلام ورحمة الله وبركاته'],
+  ['מרחבא (ברכת שלום)','مرحبا','מרחבתיין (תשובה ל־מרחבא)','مرحبتين'],
+  ['יא הלא (ברכת שלום)','يا هلا','הלא הלא (תשובה ל־יא הלא)','هلا هلا'],
+  ['ברוכים הבאים (ברכה)','أهلا وسهلا','ברוך הבא גם אתה (תשובה)','أهلا فيك'],
+  ['שאלוהים ייתן לך בריאות (ברכה, למי שעובד/עמל)','يعطيك العافية','שאלוהים ייתן לך בריאות (תשובה)','الله يعافيك'],
+  ['בוקר טוב (מחצות עד 12 בצהריים)','صباح الخير','בוקר אור (תשובה ל־בוקר טוב)','صباح النور'],
+  ['ערב טוב (מ־12 בצהריים עד חצות)','مسا الخير','ערב אור (תשובה ל־ערב טוב)','مسا النور'],
+  ['לילה טוב (ברכה)','تصبح على خير','ואתה מטובו / מאנשי הטוב (תשובה ללילה טוב)','وإنت من أهله / وإنت من أهل الخير'],
+  ['שאלוהים ישמור אותך (ברכה)','الله يخليك','שאלוהים ישמור אותך עבורנו (תשובה)','الله يخلّي لنا ياك'],
+  ['שאלוהים ישמור אותך (ברכה)','الله يسلمك','שאלוהים ישמור אותך (תשובה)','الله يحفظك'],
+  ['תודה','شكرا','על לא דבר (תשובה ל־תודה)','عفوا'],
+  ['שארית ימיו בחייך / תיבדל לחיים (ברכה)','البقية في حياتك','חייך הנותרים (תשובה)','حياتك الباقية'],
+  ['כל שנה ואתם בטוב (ברכת חג / יום הולדת)','كل عام وانتو بخير','ואתם באלף טוב (תשובה)','وانتو بألف خير'],
+  ['הטרחנו אתכם','غلّبناكم','הטרחתך היא מנוחה עבורי (תשובה)','غلبتك راحة'],
+  ['שאלוהים יברך אותך (ברכה)','بارك الله فيك','שאלוהים יברך אותך (תשובה)','الله يبارك فيك'],
+  ['בבקשה / הואל נא (הזמנה להיכנס/לקחת/לשבת)','تفضّل','שאלוהים ירבה את טובך (תשובה ל־תפדל)','الله يزيد فضلك'],
+  ['שיחיה מי שראה אותך! (אחרי זמן רב)','عاش من شافك','חיית והתמדת (תשובה)','عشت ودمت'],
+  ['לבריאות (ברכה לאוכל)','صحّة','על לבך (תשובה ל־בתיאבון)','على قلبك'],
+  ['לבריאות! (למי ששתה מים/מיץ)','هنيّا','שאלוהים ינעים לך (תשובה)','الله يهنّيك'],
+  ['להתראות / לך לשלום (ברכה)','مع السلامة','שאלוהים ישמור אותך (תשובה)','الله يسلمك'],
+  ['להתראות / ברשותך (ברכה)','بخاطرك','אלוהים עמך (תשובה)','الله معك'],
+  ['לבריאות (למי שהסתפר)','نعيماً','שאלוהים ייטיב עמך (תשובה)','الله ينعم عليك'],
+  ['ברוך שובך בשלום (למחלים/חוזר מדרך)','الحمدلله عالسلامة','שאלוהים ישמור אותך (תשובה)','الله يسلمك'],
+  ['מזל טוב (ברכה)','مبروك','שאלוהים יברך אותך (תשובה ל־מזל טוב)','الله يبارك فيك']
+];
+
+// Content key: Hebrew+Arabic letters only — immune to punctuation/diacritic edits.
+function _greetNorm(s){
+  return String(s||'').replace(/[ً-ْٰـ]/g,'').replace(/[^א-תء-ي0-9A-Za-z]/g,'');
+}
+function _greetKey(h){ return _greetNorm(h.he)+'|'+_greetNorm(h.ar); }
+
+// For a rendered list: which rows are replies (hidden as standalone cards) and
+// which greeting shows which reply inline.
+function _buildGreetPairs(items){
+  var byKey={}; items.forEach(function(h){ byKey[_greetKey(h)]=h; });
+  var reply={}, hidden={};
+  GREET_PAIRS.forEach(function(p){
+    var gk=_greetNorm(p[0])+'|'+_greetNorm(p[1]);
+    var rk=_greetNorm(p[2])+'|'+_greetNorm(p[3]);
+    if(byKey[gk] && byKey[rk]){ reply[gk]=byKey[rk]; hidden[rk]=1; }
+  });
+  return {reply:reply, hidden:hidden};
+}
+
+// Inline play for a pair card — looks the row up by id so no audio URL sits in the DOM.
+function hrtPlayById(id, btn){
+  try{
+    var h=(HEART||[]).find(function(x){ return String(x.id)===String(id); });
+    if(!h||!h.audio){ alert('אין הקלטה למשפט זה עדיין'); return; }
+    if(!window._hrtPairAudio) window._hrtPairAudio=new Audio();
+    var a=window._hrtPairAudio;
+    try{ a.pause(); }catch(e){}
+    a.src=h.audio; try{ a.currentTime=0; }catch(e){}
+    if(btn){ var t=btn.textContent; btn.textContent='🔊'; a.onended=function(){ btn.textContent=t; }; }
+    a.play();
+    if(h.id && typeof trackLearned==='function') trackLearned(h.id);
+  }catch(e){ console.warn(e); }
+}
+
+// Download the whole phrases table as a JSON backup file (recordings stay on
+// Cloudinary; the JSON holds their URLs, so this is a full content backup).
+async function downloadBackup(btn){
+  var old=btn.textContent; btn.disabled=true; btn.textContent='מוריד...';
+  try{
+    var rows=await sbFetchAllRows('/rest/v1/phrases?select=*&order=created_at.asc,id.asc');
+    var blob=new Blob([JSON.stringify(rows,null,1)],{type:'application/json'});
+    var a=document.createElement('a');
+    a.href=URL.createObjectURL(blob);
+    a.download='arabic-app-backup-'+new Date().toISOString().slice(0,10)+'.json';
+    document.body.appendChild(a); a.click(); a.remove();
+    btn.textContent='✓ ירד גיבוי ('+rows.length+' שורות)';
+  }catch(e){ alert('שגיאה: '+(e&&e.message?e.message:e)); btn.textContent=old; }
+  btn.disabled=false;
+}
+
 // === אוצר מילים לשטח: שמות מקומות וכיוונים + זיהוי ערבית כתובה ===
 var FIELD_VOCAB = [
   // --- שמות מקומות וכיוונים ---
@@ -11564,6 +11656,16 @@ function rHrt(){
 function opHC(cat){
   document.getElementById('hltitle').textContent=cat;
   const items=HEART.filter(h=>h.cat===cat);
+  // Greetings: keep the curated order (greeting then its reply), not DB insert order
+  if(cat==='ברכות ונימוסים' && typeof GREETINGS_DATA!=='undefined'){
+    var _gOrd={}; GREETINGS_DATA.forEach(function(p,ix){ _gOrd[_greetNorm(p.he)+'|'+_greetNorm(p.ar)]=ix; });
+    items.sort(function(a,b){
+      var oa=_gOrd[_greetKey(a)], ob=_gOrd[_greetKey(b)];
+      return (oa===undefined?999:oa)-(ob===undefined?999:ob);
+    });
+  }
+  // Pair each greeting with its known reply so one card holds both
+  var _pairs=_buildGreetPairs(items);
   let learnCard='';
   if(items.length>0){
     learnCard=`<div onclick="startHeartLearn('${cat.replace(/'/g,"\\'")}')" style="background:linear-gradient(135deg,#1D9E75 0%,#0e5a3f 100%);border-radius:14px;padding:14px;margin-bottom:14px;cursor:pointer;box-shadow:0 4px 12px rgba(29,158,117,0.3);">
@@ -11577,6 +11679,26 @@ function opHC(cat){
   }
   document.getElementById('hlist').innerHTML=learnCard+(items.length?items.map((h)=>{
     const i=HEART.indexOf(h);
+    const k=_greetKey(h);
+    if(_pairs.hidden[k]) return '';   // this reply is rendered inside its greeting card
+    const r=_pairs.reply[k];
+    if(r){
+      const ri=HEART.indexOf(r);
+      return `<div class="card">
+        <div class="ctags"><span class="tag theart">❤️ פותח לב</span></div>
+        <div onclick="opPop(${i},'heart')" style="cursor:pointer;display:flex;align-items:center;gap:8px;justify-content:space-between;">
+          <div style="flex:1;"><div class="che">${h.he}</div><div class="car">${h.ar}</div></div>
+          ${h.audio?`<button class="pair-play keep-white" onclick="event.stopPropagation();hrtPlayById('${h.id}',this)">▶</button>`:''}
+        </div>
+        <div class="pair-answer">
+          <div class="pair-answer-label">↩ כך עונים</div>
+          <div onclick="opPop(${ri},'heart')" style="cursor:pointer;display:flex;align-items:center;gap:8px;justify-content:space-between;">
+            <div style="flex:1;"><div class="che">${r.he}</div><div class="car">${r.ar}</div></div>
+            ${r.audio?`<button class="pair-play keep-white" onclick="event.stopPropagation();hrtPlayById('${r.id}',this)">▶</button>`:''}
+          </div>
+        </div>
+      </div>`;
+    }
     return `<div class="card" onclick="opPop(${i},'heart')">
       <div class="ctags"><span class="tag theart">❤️ פותח לב</span></div>
       <div class="che">${h.he}</div><div class="car">${h.ar}</div>
