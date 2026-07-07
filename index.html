@@ -5493,28 +5493,58 @@ function updateEmergencyChallengeBadge() {
   } catch(e) {}
 }
 
+// === Shared quiz helpers ===
+// Text key that ignores niqqud, Arabic diacritics and punctuation — so two DB
+// rows of the SAME sentence (one with "!", one with vowel points) count as one.
+function _optKey(p){
+  return String(((p&&p.he)||'')+'|'+((p&&p.ar)||'')).toLowerCase()
+    .replace(/[֑-ׇ]/g,'').replace(/[ً-ْٰـ]/g,'')
+    .replace(/[^א-תء-ي0-9a-z]/g,'');
+}
+// Pick n distractors that are textually DISTINCT from the correct answer and
+// from each other. Without this, near-duplicate rows produced two identical
+// options in a drill — one marked right and one wrong.
+function pickDistinctDistractors(pool, correct, n){
+  var used={}; used[_optKey(correct)]=1;
+  var out=[];
+  var shuffled=(pool||[]).slice().sort(function(){ return Math.random()-0.5; });
+  for(var i=0;i<shuffled.length && out.length<n;i++){
+    var c=shuffled[i];
+    if(!c || String(c.id)===String(correct.id)) continue;
+    var k=_optKey(c);
+    if(used[k]) continue;
+    used[k]=1; out.push(c);
+  }
+  return out;
+}
+
 function pickEmergencyChallengeQuestion() {
   // Pick a random phrase with 'why' (situation) - emergency-focused
   if (!DB || DB.length === 0) return null;
-  
+
   // Prefer phrases from emergency-related categories
   var emergencyCats = ['עצירת תנועה', 'בידוק וזיהוי', 'מגע ראשוני', 'קהל ואזרחים', 'שליטה בבית'];
   var pool = DB.filter(function(p){
-    return p.he && p.ar && p.why && p.why.length > 8 && 
+    return p.he && p.ar && p.why && p.why.length > 8 &&
            emergencyCats.indexOf(p.cat) !== -1;
   });
-  
+
   if (pool.length < 4) {
     // Fallback to any with why
     pool = DB.filter(function(p){ return p.he && p.ar && p.why && p.why.length > 8; });
   }
   if (pool.length < 4) return null;
-  
+
   var shuffled = pool.slice().sort(function(){ return Math.random() - 0.5; });
   var correct = shuffled[0];
-  var distractors = shuffled.slice(1, 4);
+  var distractors = pickDistinctDistractors(pool, correct, 3);
+  if (distractors.length < 3) {
+    // Not enough distinct same-pool phrases — widen to the whole DB
+    distractors = pickDistinctDistractors(DB.filter(function(p){ return p.he && p.ar; }), correct, 3);
+  }
+  if (distractors.length < 3) return null;
   var options = distractors.concat([correct]).sort(function(){ return Math.random() - 0.5; });
-  
+
   return {
     phrase: correct,
     options: options,
@@ -6556,16 +6586,12 @@ function startFlashcardsWithPool(pool, title) {
         qType = 'hebrew';
       }
       
-      // Get 3 random distractors from all available phrases (not from pool only)
-      var others = allAvailable.filter(function(x){ 
-        return String(x.id) !== String(p.id); 
-      }).sort(function(){ 
-        return Math.random() - 0.5; 
-      }).slice(0, 3);
-      
+      // 3 distractors, textually distinct from the answer and each other
+      var others = pickDistinctDistractors(allAvailable, p, 3);
+
       // Combine with correct answer and shuffle
-      var options = others.concat([p]).sort(function(){ 
-        return Math.random() - 0.5; 
+      var options = others.concat([p]).sort(function(){
+        return Math.random() - 0.5;
       });
       
       return {
@@ -6887,13 +6913,14 @@ function startFieldMode() {
   
   // Generate question with 4 options (correct + 3 distractors from same category if possible)
   _fieldState.questions = selected.map(function(p){
-    var sameCat = DB.filter(function(x){ 
-      return x.cat === p.cat && String(x.id) !== String(p.id) && x.he; 
+    var sameCat = DB.filter(function(x){
+      return x.cat === p.cat && String(x.id) !== String(p.id) && x.he;
     });
-    var others = sameCat.length >= 3 ? sameCat : DB.filter(function(x){ 
-      return String(x.id) !== String(p.id) && x.he; 
-    });
-    others = others.sort(function(){ return Math.random() - 0.5; }).slice(0, 3);
+    // Textually distinct distractors — same category first, whole DB as fallback
+    var others = pickDistinctDistractors(sameCat, p, 3);
+    if (others.length < 3) {
+      others = pickDistinctDistractors(DB.filter(function(x){ return x.he && x.ar; }), p, 3);
+    }
     var options = others.concat([p]).sort(function(){ return Math.random() - 0.5; });
     return {
       phrase: p,
@@ -7266,9 +7293,7 @@ function flashStart(mode, qCountOverride){
   // Generate questions with type
   _flashState.questions = selected.map(function(p, i){
     var qType = (i % 2 === 0) ? 'audio' : 'hebrew';
-    var others = available.filter(function(x){ return String(x.id) !== String(p.id); })
-      .sort(function(){ return Math.random() - 0.5; })
-      .slice(0, 3);
+    var others = pickDistinctDistractors(available, p, 3);
     var options = others.concat([p]).sort(function(){ return Math.random() - 0.5; });
     return {
       phrase: p,
@@ -13319,9 +13344,13 @@ function lcRender(){
   document.getElementById('lc-score').textContent='שאלה '+(idx+1)+' מתוך '+total+' · '+window._lcCorrect+' נכונות';
   if(idx>=total){ lcFinish(); return; }
   var q=window._lcPool[idx];
+  // Options must be textually distinct (niqqud/punctuation-insensitive), so the
+  // same meaning never shows up twice — once "right" and once "wrong".
+  var _lcNorm=function(s){ return String(s||'').toLowerCase().replace(/[֑-ׇ]/g,'').replace(/[^א-תء-ي0-9a-z]/g,''); };
+  var seen={}; seen[_lcNorm(q.he)]=1;
   var opts=[q.he];
-  var others=_lcShuffle(window._lcAll.filter(function(r){return r.he!==q.he;}));
-  for(var k=0;k<others.length && opts.length<4;k++){ if(opts.indexOf(others[k].he)===-1) opts.push(others[k].he); }
+  var others=_lcShuffle(window._lcAll.filter(function(r){return _lcNorm(r.he)!==_lcNorm(q.he);}));
+  for(var k=0;k<others.length && opts.length<4;k++){ var nk=_lcNorm(others[k].he); if(!seen[nk]){ seen[nk]=1; opts.push(others[k].he); } }
   _lcShuffle(opts);
   var html='<div style="background:#18293E;border:1px solid #2A3D52;border-radius:14px;padding:16px;margin-bottom:14px;text-align:center;">';
   if(q.q) html+='<div style="color:#7a9ab5;font-size:11px;margin-bottom:8px;">השאלה ששאלת: '+q.q+'</div>';
