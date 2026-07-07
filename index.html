@@ -5519,19 +5519,18 @@ function pickDistinctDistractors(pool, correct, n){
 }
 
 function pickEmergencyChallengeQuestion() {
-  // Pick a random phrase with 'why' (situation) - emergency-focused
+  // The question is the Hebrew sentence itself, so any phrase qualifies —
+  // the note (why) is optional enrichment shown after answering.
   if (!DB || DB.length === 0) return null;
 
   // Prefer phrases from emergency-related categories
   var emergencyCats = ['עצירת תנועה', 'בידוק וזיהוי', 'מגע ראשוני', 'קהל ואזרחים', 'שליטה בבית'];
   var pool = DB.filter(function(p){
-    return p.he && p.ar && p.why && p.why.length > 8 &&
-           emergencyCats.indexOf(p.cat) !== -1;
+    return p.he && p.ar && emergencyCats.indexOf(p.cat) !== -1;
   });
 
   if (pool.length < 4) {
-    // Fallback to any with why
-    pool = DB.filter(function(p){ return p.he && p.ar && p.why && p.why.length > 8; });
+    pool = DB.filter(function(p){ return p.he && p.ar; });
   }
   if (pool.length < 4) return null;
 
@@ -5562,7 +5561,7 @@ function homeDailyChallenge() {
 function startEmergencyChallenge() {
   var question = pickEmergencyChallengeQuestion();
   if (!question) {
-    alert('צריך יותר משפטים במאגר עם תיאור סיטואציה');
+    alert('צריך יותר משפטים במאגר');
     return;
   }
   
@@ -5597,16 +5596,9 @@ function showEmergencyChallengeModal() {
   html += '<div style="color:#a0b8c8;font-size:10px;margin-top:4px;font-weight:700;letter-spacing:1px;">שניות</div>';
   html += '</div>';
   
-  // Context note (only when the phrase carries one — often a cultural tip,
-  // so it's framed as background, not as the question itself)
-  if (q.phrase.why) {
-    html += '<div style="background:linear-gradient(135deg,rgba(231,76,60,0.15) 0%,rgba(192,57,43,0.1) 100%);border:1px solid rgba(231,76,60,0.4);border-radius:12px;padding:12px;margin-bottom:14px;">';
-    html += '<div style="color:#e74c3c;font-size:10px;font-weight:800;letter-spacing:1px;margin-bottom:6px;">💡 טוב לדעת</div>';
-    html += '<div style="color:#E8D9B8;font-size:12px;line-height:1.4;">' + q.phrase.why + '</div>';
-    html += '</div>';
-  }
-
-  // The actual question: the Hebrew sentence to say in Arabic
+  // The question stands alone: the Hebrew sentence to say in Arabic. The
+  // phrase's note (cultural/pronunciation/usage) is NOT part of the question —
+  // it appears as enrichment in the feedback, after answering.
   html += '<div style="color:#D4A24E;font-size:11px;font-weight:700;margin-bottom:4px;text-align:center;">🎯 איך תגיד בערבית:</div>';
   html += '<div style="color:#fff;font-size:16px;font-weight:800;text-align:center;margin-bottom:10px;line-height:1.4;">«' + (q.phrase.he || '') + '»</div>';
   
@@ -5727,6 +5719,14 @@ function emergChallengeAnswer(selectedIdx) {
     html += '<div style="color:#E8D9B8;font-size:12px;text-align:center;font-family:Georgia,serif;margin-top:2px;">' + (q.phrase.ar || '') + '</div>';
     html += '<div style="color:#a0b8c8;font-size:10px;text-align:center;font-style:italic;margin-top:4px;">(' + (q.phrase.he || '') + ')</div>';
     html += '</div>';
+    // Learning note (cultural / pronunciation / usage) — shown only AFTER the
+    // answer, as enrichment. It is never part of the question itself.
+    if (q.phrase.why) {
+      html += '<div style="margin-top:10px;background:rgba(212,162,78,0.1);border:1px solid rgba(212,162,78,0.35);border-radius:8px;padding:10px;">';
+      html += '<div style="color:#D4A24E;font-size:10px;font-weight:800;margin-bottom:3px;">💡 טוב לדעת</div>';
+      html += '<div style="color:#E8D9B8;font-size:11.5px;line-height:1.5;">' + q.phrase.why + '</div>';
+      html += '</div>';
+    }
     html += '<button onclick="closeEmergChallenge()" style="background:#c0392b;border:none;color:#fff;border-radius:8px;padding:10px 22px;font-size:13px;font-weight:700;cursor:pointer;font-family:inherit;margin-top:12px;display:block;width:100%;">סגור ◀</button>';
     html += '</div>';
     feedbackEl.style.display = 'block';
@@ -6892,18 +6892,11 @@ function startFieldMode() {
     return;
   }
   
-  // Pick phrases that have a "why" (situation context)
-  var withSituation = DB.filter(function(p){
-    return p.he && p.ar && p.why && p.why.length > 8;
-  });
-  
+  // The question is the Hebrew sentence itself, so any phrase qualifies
+  var withSituation = DB.filter(function(p){ return p.he && p.ar; });
+
   if (withSituation.length < 8) {
-    // Fallback to phrases without why
-    withSituation = DB.filter(function(p){ return p.he && p.ar; });
-  }
-  
-  if (withSituation.length < 8) {
-    alert('צריך יותר משפטים במאגר עם תיאור סיטואציה.');
+    alert('צריך יותר משפטים במאגר.');
     return;
   }
   
@@ -6986,16 +6979,9 @@ function renderFieldQuestion(){
   html += '<div style="color:#a0b8c8;font-size:10px;margin-top:4px;font-weight:700;letter-spacing:1px;">שניות</div>';
   html += '</div>';
   
-  // Context note (only when the phrase carries one — often a cultural tip,
-  // so it's framed as background, not as the question itself)
-  if (q.phrase.why) {
-    html += '<div style="background:linear-gradient(135deg,rgba(192,57,43,0.15) 0%,rgba(146,45,34,0.1) 100%);border:1px solid rgba(192,57,43,0.4);border-radius:14px;padding:14px;margin-bottom:18px;">';
-    html += '<div style="color:#e74c3c;font-size:11px;font-weight:800;letter-spacing:1px;margin-bottom:6px;">💡 טוב לדעת</div>';
-    html += '<div style="color:#E8D9B8;font-size:13px;line-height:1.5;">' + q.phrase.why + '</div>';
-    html += '</div>';
-  }
-
-  // The actual question: the Hebrew sentence to say in Arabic
+  // The question stands alone: the Hebrew sentence to say in Arabic. The
+  // phrase's note (cultural/pronunciation/usage) is NOT part of the question —
+  // it appears as enrichment in the feedback, after answering.
   html += '<div style="color:#D4A24E;font-size:12px;font-weight:700;margin-bottom:4px;text-align:center;">🎯 איך תגיד בערבית:</div>';
   html += '<div style="color:#fff;font-size:17px;font-weight:800;text-align:center;margin-bottom:12px;line-height:1.4;">«' + (q.phrase.he || '') + '»</div>';
   
@@ -7129,6 +7115,13 @@ function fieldAnswer(selectedIdx){
     }
     if (q.phrase.he) {
       html += '<div style="color:#a0b8c8;font-size:11px;text-align:center;font-style:italic;">(' + q.phrase.he + ')</div>';
+    }
+    // Learning note — enrichment shown only after answering, never in the question
+    if (q.phrase.why) {
+      html += '<div style="margin-top:10px;background:rgba(212,162,78,0.1);border:1px solid rgba(212,162,78,0.35);border-radius:8px;padding:10px;">';
+      html += '<div style="color:#D4A24E;font-size:10px;font-weight:800;margin-bottom:3px;">💡 טוב לדעת</div>';
+      html += '<div style="color:#E8D9B8;font-size:12px;line-height:1.5;">' + q.phrase.why + '</div>';
+      html += '</div>';
     }
     html += '<button onclick="fieldNext()" style="background:#c0392b;border:none;color:#fff;border-radius:8px;padding:10px 22px;font-size:13px;font-weight:700;cursor:pointer;font-family:inherit;margin-top:12px;display:block;width:100%;">' + (_fieldState.current + 1 >= _fieldState.total ? '🏁 סיים' : 'הבא ◀') + '</button>';
     html += '</div>';
