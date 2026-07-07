@@ -3499,9 +3499,33 @@ async function sbFetchAllRows(baseQuery){
 // res.cloudinary.com responses cache-first, so a CORS fetch of each audio URL
 // stores it on the device — one tap before deployment and all audio plays in
 // the field with no signal.
+// The offline pack is a paid feature: unlocking requires an access code that is
+// distributed after purchase. Only a SHA-256 hash of the code lives in the source,
+// so the code can't be read from the page. Admins (logged in) are exempt.
+var _OFFLINE_CODE_HASHES = [
+  'b9ad92abd2c9c0e41e3542be1a362ce29d9b91dbbf08c304996bac091a78d84d'
+];
+async function _offlineUnlocked(){
+  try{
+    if(window._adminAuth) return true;
+    if(localStorage.getItem('offline_unlock_ok')==='1') return true;
+    var code=prompt('הורדת כל ההקלטות לאופליין זמינה לרוכשי הערכה.\nהזינו את קוד הגישה שקיבלתם:');
+    if(!code) return false;
+    var buf=new TextEncoder().encode(code.trim().normalize('NFC'));
+    var dig=await crypto.subtle.digest('SHA-256', buf);
+    var hex=Array.from(new Uint8Array(dig)).map(function(b){return b.toString(16).padStart(2,'0');}).join('');
+    if(_OFFLINE_CODE_HASHES.indexOf(hex)!==-1){
+      try{ localStorage.setItem('offline_unlock_ok','1'); }catch(e){}
+      return true;
+    }
+    alert('קוד שגוי. לקבלת קוד גישה — פנו אלינו דרך עמוד הערכה.');
+    return false;
+  }catch(e){ return false; }
+}
 async function downloadAllOffline(){
   try{
     if(window._offlineDlBusy) return;
+    if(!(await _offlineUnlocked())) return;
     if(!('serviceWorker' in navigator) || !navigator.serviceWorker.controller){
       alert('כדי להוריד לאופליין, סגרי ופתחי את האפליקציה פעם אחת ואז נסי שוב.');
       return;
@@ -10977,9 +11001,11 @@ function renderScnScore(){
 function scnRecPlay(){
   try {
     if (!_scnRecBlob) return;
+    _scnStopAll();
+    if (window._scnCurrentAudio) { try { window._scnCurrentAudio.pause(); } catch(e){} }
     var url = URL.createObjectURL(_scnRecBlob);
-    var audio = new Audio(url);
-    audio.play();
+    window._scnCurrentAudio = new Audio(url);
+    window._scnCurrentAudio.play();
   } catch(e) { console.warn(e); }
 }
 
@@ -11287,12 +11313,30 @@ function scnToggleRecord(idx, btn){
   } catch(e) { console.warn(e); }
 }
 
+// Stop a running "play all" chain (if any): invalidate pending callbacks,
+// silence the shared element, and restore the button label.
+function _scnStopAll(){
+  try{
+    window._scnPlayToken = (window._scnPlayToken||0) + 1;
+    if (window._scnAllAudio){ window._scnAllAudio.onended=null; window._scnAllAudio.onerror=null; try{ window._scnAllAudio.pause(); }catch(e){} }
+    window._scnAllPlaying = false;
+    var btn=document.getElementById('scn-playall-btn');
+    if(btn && window._scnPlayAllLabel) btn.innerHTML = window._scnPlayAllLabel;
+  }catch(e){}
+}
 function _scnPlayUrl(url, btn, revoke){
+  // Tapping the line that's already playing = stop it.
+  if (btn && btn.classList.contains('playing')) {
+    if (window._scnCurrentAudio) { try { window._scnCurrentAudio.pause(); } catch(e){} }
+    btn.classList.remove('playing'); btn.textContent = '▶ השמע';
+    return;
+  }
+  _scnStopAll();
   document.querySelectorAll('.scn-play-btn.playing').forEach(function(b){ b.classList.remove('playing'); b.textContent = '▶ השמע'; });
   if (window._scnCurrentAudio) { try { window._scnCurrentAudio.pause(); } catch(e){} }
   window._scnCurrentAudio = new Audio(url);
   if (btn) {
-    btn.classList.add('playing'); btn.textContent = '⏸ עוצר';
+    btn.classList.add('playing'); btn.textContent = '⏸ עצור';
     var reset = function(){ btn.classList.remove('playing'); btn.textContent = '▶ השמע'; if (revoke) { try { URL.revokeObjectURL(url); } catch(e){} } };
     window._scnCurrentAudio.onended = reset;
     window._scnCurrentAudio.onerror = reset;
@@ -11316,18 +11360,30 @@ function scnPlayBubble(idx, btn){
 function scnPlayAll(){
   try {
     if (!_scnSteps || _scnSteps.length === 0) return;
+    var btn = document.getElementById('scn-playall-btn');
+    // TOGGLE: tapping the button while it plays STOPS the playback
+    // (previously it restarted from the beginning — impossible to stop).
+    if (window._scnAllPlaying) { _scnStopAll(); return; }
+    // Remember the pristine label once, so stop always restores it correctly.
+    if (btn && !window._scnPlayAllLabel) window._scnPlayAllLabel = btn.innerHTML;
+    var originalText = window._scnPlayAllLabel || (btn ? btn.innerHTML : '');
+    // Silence any single-bubble audio before starting the chain
+    document.querySelectorAll('.scn-play-btn.playing').forEach(function(b){ b.classList.remove('playing'); b.textContent = '▶ השמע'; });
+    if (window._scnCurrentAudio) { try { window._scnCurrentAudio.pause(); } catch(e){} }
     // Reuse one Audio element, unlocked by this tap, so later lines aren't
     // blocked by autoplay (the bug that stopped playback after ~2 lines).
     if (!window._scnAllAudio) window._scnAllAudio = new Audio();
     var a = window._scnAllAudio;
     try { a.pause(); } catch(e){}
     window._scnCurrentAudio = a;
+    window._scnAllPlaying = true;
+    var token = window._scnPlayToken = (window._scnPlayToken||0) + 1;
     var idx = 0;
-    var btn = document.getElementById('scn-playall-btn');
-    var originalText = btn ? btn.innerHTML : '';
 
     function playNext(){
+      if (token !== window._scnPlayToken) return;   // stopped or restarted
       if (idx >= _scnSteps.length) {
+        window._scnAllPlaying = false;
         if (btn) btn.innerHTML = originalText;
         try {
           if (typeof launchConfetti === 'function') launchConfetti();
@@ -11340,17 +11396,18 @@ function scnPlayAll(){
       var step = _scnSteps[idx];
       idx++;
       if (!step || !step.audio) { playNext(); return; }   // skip lines without a recording
-      if (btn) btn.innerHTML = '⏸ משמיע ' + idx + '/' + _scnSteps.length;
+      if (btn) btn.innerHTML = '⏹ עצירה · משמיע ' + idx + '/' + _scnSteps.length;
       if (step.id && typeof trackLearned === 'function') trackLearned(step.id);
-      a.onended = function(){ setTimeout(playNext, 400); };
-      a.onerror = function(){ setTimeout(playNext, 250); };
+      a.onended = function(){ setTimeout(function(){ playNext(); }, 400); };
+      a.onerror = function(){ setTimeout(function(){ playNext(); }, 250); };
       try { a.pause(); } catch(e){}
       if (a.src !== step.audio) a.src = step.audio;
       try { a.currentTime = 0; } catch(e){}
       var tries = 0;
       (function attempt(){
+        if (token !== window._scnPlayToken) return;
         var p = a.play();
-        if (p && p.catch) p.catch(function(){ tries++; if (tries < 3) setTimeout(attempt, 150); else setTimeout(playNext, 250); });
+        if (p && p.catch) p.catch(function(){ tries++; if (tries < 3) setTimeout(attempt, 150); else setTimeout(function(){ playNext(); }, 250); });
       })();
     }
     playNext();
@@ -15587,7 +15644,7 @@ try { renderHome(); } catch(_){}
         <div class="help-row"><span class="help-icon">🔍</span><div class="help-txt"><strong>חיפוש בכל הערכה</strong><span class="help-desc">בראש מסך הבית — מוצא כל משפט בכל מדור</span></div></div>
         <div class="help-row"><span class="help-icon">🖨️</span><div class="help-txt"><strong>דף כיס להדפסה</strong><span class="help-desc">במסך חירום — גיבוי נייר/PDF לשטח</span></div></div>
         <div class="help-row"><span class="help-icon">🔔</span><div class="help-txt"><strong>תזכורת יומית</strong><span class="help-desc">בתפריט ☰ — תזכורת לתרגל בשעה שתבחר</span></div></div>
-        <div class="help-row"><span class="help-icon">📲</span><div class="help-txt"><strong>עובד אופליין</strong><span class="help-desc">התקינו למסך הבית; בתפריט ☰ יש "הורד הכל לאופליין" — כל ההקלטות יורדות מראש ועובדות בלי קליטה</span></div></div>
+        <div class="help-row"><span class="help-icon">📲</span><div class="help-txt"><strong>עובד אופליין</strong><span class="help-desc">התקינו למסך הבית; לרוכשי הערכה — "הורד הכל לאופליין" בתפריט ☰ מוריד את כל ההקלטות מראש לעבודה בלי קליטה</span></div></div>
       </div>
       <div class="help-section">
         <div class="help-title">סימונים במשפט</div>
@@ -15685,7 +15742,7 @@ try { renderHome(); } catch(_){}
       <div style="font-size:22px;">⬇️</div>
       <div style="flex:1;">
         <div style="color:#E8D9B8;font-size:12.5px;font-weight:700;">הורד הכל לאופליין</div>
-        <div id="offline-dl-status" style="color:#7a9ab5;font-size:11px;margin-top:2px;">מוריד את כל ההקלטות למכשיר — מומלץ בחיבור WiFi</div>
+        <div id="offline-dl-status" style="color:#7a9ab5;font-size:11px;margin-top:2px;">לרוכשי הערכה (קוד גישה) — כל ההקלטות יורדות למכשיר, מומלץ ב-WiFi</div>
       </div>
     </div>
     <div style="height:5px;background:rgba(255,255,255,0.08);border-radius:3px;margin-top:8px;overflow:hidden;"><div id="offline-dl-bar" style="height:100%;width:0%;background:#1D9E75;border-radius:3px;transition:width 0.2s;"></div></div>
