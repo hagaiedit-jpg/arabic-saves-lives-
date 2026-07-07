@@ -1,6 +1,9 @@
 /* Service worker for "ערבית מצילה חיים" — offline-first field use.
    Bump CACHE when shipping changes that must invalidate old caches. */
-const CACHE = 'asl-v21';
+const CACHE = 'asl-v22';
+// Recordings + fonts live in a separate cache that SURVIVES app updates —
+// otherwise every version bump would silently wipe the downloaded offline pack.
+const MEDIA = 'asl-media-v1';
 const SHELL = ['./', './index.html', './manifest.json', './icon.svg'];
 
 self.addEventListener('install', function(e){
@@ -11,15 +14,17 @@ self.addEventListener('install', function(e){
 self.addEventListener('activate', function(e){
   e.waitUntil(
     caches.keys().then(function(keys){
-      return Promise.all(keys.filter(function(k){ return k !== CACHE; }).map(function(k){ return caches.delete(k); }));
+      return Promise.all(keys.filter(function(k){ return k !== CACHE && k !== MEDIA; }).map(function(k){ return caches.delete(k); }));
     }).then(function(){ return self.clients.claim(); })
   );
 });
 
 function cacheFirst(req){
-  return caches.match(req).then(function(c){
+  // ignoreVary: an <audio> no-cors request must still hit a response cached via
+  // a CORS fetch of the same URL (the offline "download all" pack).
+  return caches.match(req, {ignoreVary:true}).then(function(c){
     return c || fetch(req).then(function(r){
-      if (r && r.ok) { var cl = r.clone(); caches.open(CACHE).then(function(ca){ ca.put(req, cl); }); }
+      if (r && r.ok) { var cl = r.clone(); caches.open(MEDIA).then(function(ca){ ca.put(req, cl); }); }
       return r;
     });
   });

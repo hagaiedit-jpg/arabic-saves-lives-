@@ -3495,6 +3495,63 @@ async function sbFetchAllRows(baseQuery){
   return all;
 }
 
+// Download every recording into the offline cache. The service worker caches
+// res.cloudinary.com responses cache-first, so a CORS fetch of each audio URL
+// stores it on the device — one tap before deployment and all audio plays in
+// the field with no signal.
+async function downloadAllOffline(){
+  try{
+    if(window._offlineDlBusy) return;
+    if(!('serviceWorker' in navigator) || !navigator.serviceWorker.controller){
+      alert('כדי להוריד לאופליין, סגרי ופתחי את האפליקציה פעם אחת ואז נסי שוב.');
+      return;
+    }
+    var urls={};
+    [DB,DAILY,HEART,NAVY,ANNOUNCE,SCENARIO,DICT,SEM,CUS,ARTS,INTEL].forEach(function(L){
+      (L||[]).forEach(function(p){
+        if(p&&p.audio) urls[p.audio]=1;
+        if(p&&Array.isArray(p.responses)) p.responses.forEach(function(r){ if(r&&r.audio_url) urls[r.audio_url]=1; });
+      });
+    });
+    var all=Object.keys(urls);
+    if(!all.length){ alert('אין הקלטות להורדה עדיין'); return; }
+    if(!confirm('להוריד '+all.length+' הקלטות לשימוש בלי קליטה? מומלץ בחיבור WiFi. אפשר להמשיך להשתמש בזמן ההורדה.')) return;
+    window._offlineDlBusy=true;
+    var status=document.getElementById('offline-dl-status');
+    var bar=document.getElementById('offline-dl-bar');
+    var done=0, fail=0, queue=all.slice();
+    async function worker(){
+      while(queue.length){
+        var u=queue.pop();
+        try{ var r=await fetch(u); if(!r||!r.ok) fail++; }catch(e){ fail++; }
+        done++;
+        if(status) status.textContent='מוריד '+done+'/'+all.length+(fail?' · '+fail+' נכשלו':'');
+        if(bar) bar.style.width=Math.round(done/all.length*100)+'%';
+      }
+    }
+    await Promise.all([worker(),worker(),worker(),worker(),worker()]);
+    window._offlineDlBusy=false;
+    var okCount=all.length-fail;
+    try{
+      localStorage.setItem('offline_pack_at', new Date().toLocaleDateString('he-IL'));
+      localStorage.setItem('offline_pack_n', String(okCount));
+    }catch(e){}
+    if(status) status.textContent='✓ '+okCount+' הקלטות זמינות אופליין'+(fail?' · '+fail+' נכשלו':'');
+    if(bar) bar.style.width='100%';
+    alert(fail
+      ? ('ירדו '+okCount+' הקלטות; '+fail+' נכשלו — כדאי ללחוץ שוב כשהחיבור יציב (מה שירד כבר לא יירד שוב).')
+      : ('✓ כל '+okCount+' ההקלטות ירדו למכשיר ויעבדו גם בלי קליטה.'));
+  }catch(e){ window._offlineDlBusy=false; alert('שגיאה: '+(e&&e.message?e.message:e)); }
+}
+// Show when the offline pack was last downloaded (menu subtitle)
+function _offlinePackInit(){
+  try{
+    var at=localStorage.getItem('offline_pack_at'), n=localStorage.getItem('offline_pack_n');
+    var status=document.getElementById('offline-dl-status');
+    if(status && at && n) status.textContent='✓ '+n+' הקלטות ירדו ב-'+at+' — לחצו לעדכון';
+  }catch(e){}
+}
+
 // Simple toast helper (non-blocking notifications)
 function showToast(msg, type){
   var el = document.getElementById('toast');
@@ -15530,7 +15587,7 @@ try { renderHome(); } catch(_){}
         <div class="help-row"><span class="help-icon">🔍</span><div class="help-txt"><strong>חיפוש בכל הערכה</strong><span class="help-desc">בראש מסך הבית — מוצא כל משפט בכל מדור</span></div></div>
         <div class="help-row"><span class="help-icon">🖨️</span><div class="help-txt"><strong>דף כיס להדפסה</strong><span class="help-desc">במסך חירום — גיבוי נייר/PDF לשטח</span></div></div>
         <div class="help-row"><span class="help-icon">🔔</span><div class="help-txt"><strong>תזכורת יומית</strong><span class="help-desc">בתפריט ☰ — תזכורת לתרגל בשעה שתבחר</span></div></div>
-        <div class="help-row"><span class="help-icon">📲</span><div class="help-txt"><strong>עובד אופליין</strong><span class="help-desc">אפשר להתקין למסך הבית ולהשתמש בלי קליטה</span></div></div>
+        <div class="help-row"><span class="help-icon">📲</span><div class="help-txt"><strong>עובד אופליין</strong><span class="help-desc">התקינו למסך הבית; בתפריט ☰ יש "הורד הכל לאופליין" — כל ההקלטות יורדות מראש ועובדות בלי קליטה</span></div></div>
       </div>
       <div class="help-section">
         <div class="help-title">סימונים במשפט</div>
@@ -15623,9 +15680,20 @@ try { renderHome(); } catch(_){}
       <div style="color:#D4A24E;font-size:11px;font-weight:600;">ניהול</div>
     </div>
   </div>
+  <div id="offline-pack-row" onclick="downloadAllOffline()" style="margin-top:10px;background:#1F3147;border:1px solid rgba(29,158,117,0.45);border-radius:10px;padding:12px;cursor:pointer;">
+    <div style="display:flex;align-items:center;gap:10px;">
+      <div style="font-size:22px;">⬇️</div>
+      <div style="flex:1;">
+        <div style="color:#E8D9B8;font-size:12.5px;font-weight:700;">הורד הכל לאופליין</div>
+        <div id="offline-dl-status" style="color:#7a9ab5;font-size:11px;margin-top:2px;">מוריד את כל ההקלטות למכשיר — מומלץ בחיבור WiFi</div>
+      </div>
+    </div>
+    <div style="height:5px;background:rgba(255,255,255,0.08);border-radius:3px;margin-top:8px;overflow:hidden;"><div id="offline-dl-bar" style="height:100%;width:0%;background:#1D9E75;border-radius:3px;transition:width 0.2s;"></div></div>
+  </div>
 </div>
 
 <script>
+try{ _offlinePackInit(); }catch(e){}
 // === Bottom Nav functions ===
 function toggleHeaderMenu(){
   try {
