@@ -5567,14 +5567,18 @@ function showEmergencyChallengeModal() {
   html += '<div style="color:#a0b8c8;font-size:10px;margin-top:4px;font-weight:700;letter-spacing:1px;">שניות</div>';
   html += '</div>';
   
-  // Situation
-  html += '<div style="background:linear-gradient(135deg,rgba(231,76,60,0.15) 0%,rgba(192,57,43,0.1) 100%);border:1px solid rgba(231,76,60,0.4);border-radius:12px;padding:12px;margin-bottom:14px;">';
-  html += '<div style="color:#e74c3c;font-size:10px;font-weight:800;letter-spacing:1px;margin-bottom:6px;">📍 הסיטואציה</div>';
-  html += '<div style="color:#E8D9B8;font-size:12px;line-height:1.4;">' + (q.phrase.why || 'מה תאמר?') + '</div>';
-  html += '</div>';
-  
-  // Question prompt
-  html += '<div style="color:#D4A24E;font-size:11px;font-weight:700;margin-bottom:6px;text-align:center;">🎯 מה תאמר?</div>';
+  // Context note (only when the phrase carries one — often a cultural tip,
+  // so it's framed as background, not as the question itself)
+  if (q.phrase.why) {
+    html += '<div style="background:linear-gradient(135deg,rgba(231,76,60,0.15) 0%,rgba(192,57,43,0.1) 100%);border:1px solid rgba(231,76,60,0.4);border-radius:12px;padding:12px;margin-bottom:14px;">';
+    html += '<div style="color:#e74c3c;font-size:10px;font-weight:800;letter-spacing:1px;margin-bottom:6px;">💡 טוב לדעת</div>';
+    html += '<div style="color:#E8D9B8;font-size:12px;line-height:1.4;">' + q.phrase.why + '</div>';
+    html += '</div>';
+  }
+
+  // The actual question: the Hebrew sentence to say in Arabic
+  html += '<div style="color:#D4A24E;font-size:11px;font-weight:700;margin-bottom:4px;text-align:center;">🎯 איך תגיד בערבית:</div>';
+  html += '<div style="color:#fff;font-size:16px;font-weight:800;text-align:center;margin-bottom:10px;line-height:1.4;">«' + (q.phrase.he || '') + '»</div>';
   
   // Options
   html += '<div id="emerg-options" style="display:grid;gap:6px;">';
@@ -6937,8 +6941,6 @@ function renderFieldQuestion(){
   var container = document.getElementById('field-question-container');
   if (!container) return;
   
-  var situation = q.phrase.why || 'מה תאמר במצב הזה?';
-  
   var html = '';
   // Progress bar
   html += '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;">';
@@ -6957,14 +6959,18 @@ function renderFieldQuestion(){
   html += '<div style="color:#a0b8c8;font-size:10px;margin-top:4px;font-weight:700;letter-spacing:1px;">שניות</div>';
   html += '</div>';
   
-  // Situation
-  html += '<div style="background:linear-gradient(135deg,rgba(192,57,43,0.15) 0%,rgba(146,45,34,0.1) 100%);border:1px solid rgba(192,57,43,0.4);border-radius:14px;padding:14px;margin-bottom:18px;">';
-  html += '<div style="color:#e74c3c;font-size:11px;font-weight:800;letter-spacing:1px;margin-bottom:6px;">📍 הסיטואציה</div>';
-  html += '<div style="color:#E8D9B8;font-size:13px;line-height:1.5;">' + situation + '</div>';
-  html += '</div>';
-  
-  // Question
-  html += '<div style="color:#D4A24E;font-size:12px;font-weight:700;margin-bottom:8px;text-align:center;">🎯 מה תאמר?</div>';
+  // Context note (only when the phrase carries one — often a cultural tip,
+  // so it's framed as background, not as the question itself)
+  if (q.phrase.why) {
+    html += '<div style="background:linear-gradient(135deg,rgba(192,57,43,0.15) 0%,rgba(146,45,34,0.1) 100%);border:1px solid rgba(192,57,43,0.4);border-radius:14px;padding:14px;margin-bottom:18px;">';
+    html += '<div style="color:#e74c3c;font-size:11px;font-weight:800;letter-spacing:1px;margin-bottom:6px;">💡 טוב לדעת</div>';
+    html += '<div style="color:#E8D9B8;font-size:13px;line-height:1.5;">' + q.phrase.why + '</div>';
+    html += '</div>';
+  }
+
+  // The actual question: the Hebrew sentence to say in Arabic
+  html += '<div style="color:#D4A24E;font-size:12px;font-weight:700;margin-bottom:4px;text-align:center;">🎯 איך תגיד בערבית:</div>';
+  html += '<div style="color:#fff;font-size:17px;font-weight:800;text-align:center;margin-bottom:12px;line-height:1.4;">«' + (q.phrase.he || '') + '»</div>';
   
   // 4 Options - show ARABIC + TRANSLITERATION (not Hebrew!)
   // The training is for Arabic, so options must be in Arabic
