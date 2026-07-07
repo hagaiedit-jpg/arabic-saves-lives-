@@ -8859,9 +8859,17 @@ function hrtPlayById(id, btn){
     if(!h||!h.audio){ alert('אין הקלטה למשפט זה עדיין'); return; }
     if(!window._hrtPairAudio) window._hrtPairAudio=new Audio();
     var a=window._hrtPairAudio;
+    // Tapping the button that's currently playing = stop
+    if(btn && btn===window._hrtPairBtn && !a.paused){
+      try{ a.pause(); }catch(e){}
+      btn.textContent='▶'; window._hrtPairBtn=null;
+      return;
+    }
     try{ a.pause(); }catch(e){}
+    if(window._hrtPairBtn){ try{ window._hrtPairBtn.textContent='▶'; }catch(e){} }
     a.src=h.audio; try{ a.currentTime=0; }catch(e){}
-    if(btn){ var t=btn.textContent; btn.textContent='🔊'; a.onended=function(){ btn.textContent=t; }; }
+    window._hrtPairBtn=btn||null;
+    if(btn){ btn.textContent='⏸'; a.onended=function(){ btn.textContent='▶'; window._hrtPairBtn=null; }; }
     a.play();
     if(h.id && typeof trackLearned==='function') trackLearned(h.id);
   }catch(e){ console.warn(e); }
@@ -11017,8 +11025,10 @@ function scnPlayOriginal() {
       console.warn('No original audio for this step');
       return;
     }
-    var audio = new Audio(stepData.audio);
-    audio.play().catch(function(err){
+    _scnStopAll();
+    if (window._scnCurrentAudio) { try { window._scnCurrentAudio.pause(); } catch(e){} }
+    window._scnCurrentAudio = new Audio(stepData.audio);
+    window._scnCurrentAudio.play().catch(function(err){
       console.warn('Play original failed:', err);
     });
   } catch(e) { console.warn('scnPlayOriginal error:', e); }
@@ -11038,13 +11048,16 @@ function scnRecCompare(idx){
       alert('הקלט את עצמך קודם');
       return;
     }
+    _scnStopAll();
+    if (window._scnCurrentAudio) { try { window._scnCurrentAudio.pause(); } catch(e){} }
     var prof = new Audio(audioUrl);
+    window._scnCurrentAudio = prof;
     prof.onended = function(){
       setTimeout(function(){
-        if (_scnRecBlob) {
+        if (_scnRecBlob && window._scnCurrentAudio === prof) {
           var url = URL.createObjectURL(_scnRecBlob);
-          var mine = new Audio(url);
-          mine.play();
+          window._scnCurrentAudio = new Audio(url);
+          window._scnCurrentAudio.play();
         }
       }, 400);
     };
@@ -11488,9 +11501,12 @@ function scnBack(){
   document.getElementById('scn-grid-view').style.display = 'block';
   document.getElementById('scn-dialogue-view').style.display = 'none';
   document.getElementById('scn-done-view').style.display = 'none';
-  // Stop any playing audio
+  // Fully cancel any playing audio INCLUDING a running play-all chain —
+  // a plain pause left the chain's pending timeout alive, so the scenario
+  // could resume talking after leaving the screen.
+  try { if (typeof _scnStopAll === 'function') _scnStopAll(); } catch(e){}
   if (window._scnCurrentAudio) {
-    window._scnCurrentAudio.pause();
+    try { window._scnCurrentAudio.pause(); } catch(e){}
     window._scnCurrentAudio = null;
   }
   // Hide done card and reset its state
@@ -11771,8 +11787,11 @@ function potdPlayAudio(){
   try {
     var p = getPhraseOfTheDay();
     if (!p || !p.audio) return;
-    var audio = new Audio(p.audio);
-    audio.play();
+    // Reuse one element: a second tap stops instead of stacking a second voice
+    if (window._potdAudio && !window._potdAudio.paused) { window._potdAudio.pause(); return; }
+    if (!window._potdAudio) window._potdAudio = new Audio();
+    window._potdAudio.src = p.audio;
+    window._potdAudio.play();
   } catch(e) { console.warn(e); }
 }
 
@@ -12525,6 +12544,7 @@ function opArt(i){
 function clsArt(){document.getElementById('artlv').style.display='block';document.getElementById('artfv').style.display='none';}
 
 function ST(t,el){
+  try { if (typeof stopAllAudio === 'function') stopAllAudio(); } catch(e) {}
   document.querySelectorAll('.tb-tab').forEach(function(x){x.classList.remove('active');});
   document.querySelectorAll('.tb-tab-sec').forEach(function(x){x.classList.remove('active');});
   if(el)el.classList.add('active');
@@ -12782,6 +12802,14 @@ function bldW(){const el=document.getElementById('wbars');el.innerHTML='';for(le
 function playResponseAudio(url, btn) {
   if (!url) return;
   try {
+    // Silence the popup's main audio so the two never talk over each other
+    try {
+      if (typeof _audioPlaying !== 'undefined' && _audioPlaying) {
+        _audioStopFlag = true; _audioPlaying = false;
+        document.querySelectorAll('.big-pbtn').forEach(function(b){ b.classList.remove('playing'); });
+      }
+      if (typeof curAudio !== 'undefined' && curAudio) { curAudio.pause(); }
+    } catch(e) {}
     // Clicking the button that is currently active -> toggle pause / resume
     if (window._responseAudio && window._responseBtn === btn) {
       if (!window._responseAudio.paused) {
@@ -12962,6 +12990,11 @@ function playPopupAudio(btn, mode) {
     document.querySelectorAll('.big-pbtn').forEach(function(b){b.classList.remove('playing');});
     _audioPlaying = false;
     return;
+  }
+  // Silence a playing response row so main + response never talk together
+  if (window._responseAudio) {
+    try { window._responseAudio.pause(); } catch(e) {}
+    if (window._responseBtn) window._responseBtn.textContent = '▶';
   }
   
   var url = window._popupAudio || '';
@@ -13915,7 +13948,15 @@ function renderRespRecList(){
 }
 function playQueueAudio(i){
   var row=window._respRecRows && window._respRecRows[i];
-  if(row && row.audio){ try{ new Audio(row.audio).play(); }catch(e){} }
+  if(!row || !row.audio) return;
+  try{
+    // Reuse one element: tapping again stops; repeated taps can't stack voices
+    if(!window._respQueueAudio) window._respQueueAudio=new Audio();
+    var a=window._respQueueAudio;
+    if(!a.paused && a.src===row.audio){ a.pause(); return; }
+    try{ a.pause(); }catch(e){}
+    a.src=row.audio; a.currentTime=0; a.play();
+  }catch(e){}
 }
 async function recordQueueItem(i){
   var row=window._respRecRows && window._respRecRows[i]; if(!row)return;
@@ -15126,8 +15167,10 @@ function emergSearch(){
 }
 
 function playEmergCard(url, btn) {
-  // Stop click propagation to parent (which would open popup)
-  if (event) event.stopPropagation();
+  // Stop click propagation to parent (which would open popup).
+  // `event` is the legacy window.event — undefined on Firefox, so guard it,
+  // otherwise the ReferenceError killed the play button there.
+  try { var ev = (typeof event !== 'undefined') ? event : window.event; if (ev) ev.stopPropagation(); } catch(e) {}
   if (!url) return;
   
   // If already playing this audio - stop
@@ -15772,12 +15815,37 @@ document.addEventListener('click', function(e){
   } catch(e) {}
 });
 
+// Pause every cached audio element + speech synthesis, and cancel the
+// scenario play-all chain. Called on every tab switch so audio started in
+// one screen never keeps talking under another (no two-voices-at-once).
+function stopAllAudio(){
+  try{
+    if (typeof _scnStopAll === 'function') _scnStopAll();
+    ['_flashAudio','_homePotdAudioObj','_hrtPairAudio','_scnCurrentAudio','_scnAllAudio',
+     '_potdAudio','_respQueueAudio','_responseAudio','_lcAudio','_ppAudio','_lmAudio',
+     '_gsAudio','_hrtAudio','_scnAllAudio','practiceCurrentAudio'].forEach(function(k){
+      var a=window[k]; if(a && typeof a.pause==='function'){ try{ a.pause(); }catch(e){} }
+    });
+    try{
+      if (typeof _audioPlaying !== 'undefined' && _audioPlaying) {
+        _audioStopFlag = true; _audioPlaying = false;
+        document.querySelectorAll('.big-pbtn').forEach(function(b){ b.classList.remove('playing'); });
+      }
+      if (typeof curAudio !== 'undefined' && curAudio) { curAudio.pause(); }
+    }catch(e){}
+    try{ if (window.speechSynthesis) speechSynthesis.cancel(); }catch(e){}
+    document.querySelectorAll('.scn-play-btn.playing').forEach(function(b){ b.classList.remove('playing'); b.textContent='▶ השמע'; });
+  }catch(e){}
+}
+
 function navToTab(tabId){
+  // Leaving a screen must never leave its audio talking
+  try { stopAllAudio(); } catch(e) {}
   // Update emergency challenge state when entering qk tab
-  if (typeof tab === 'string' && tab === 'qk') {
+  if (tabId === 'qk') {
     try { setTimeout(function(){ updateEmergencyChallengeBadge(); }, 50); } catch(e) {}
   }
-  
+
   // SIMPLE VERSION - minimal logic, maximum reliability
   try {
     // 1. Close more menu
