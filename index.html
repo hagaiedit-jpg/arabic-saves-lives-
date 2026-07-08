@@ -8052,21 +8052,57 @@ async function cloudUp(file){
 }
 
 let mrec=null,rchunks=[],rfiles={};
+
+// Floating "recording now" pill — always shows WHICH sentence the live mic
+// belongs to; tapping it scrolls back to the recording button.
+function showRecPill(label, btn){
+  var p=document.getElementById('rec-pill');
+  if(!p){
+    p=document.createElement('div');
+    p.id='rec-pill';
+    p.style.cssText='position:fixed;bottom:92px;left:50%;transform:translateX(-50%);z-index:99998;background:#c0392b;color:#fff;padding:10px 18px;border-radius:24px;font-size:12.5px;font-weight:800;box-shadow:0 4px 14px rgba(0,0,0,0.45);cursor:pointer;direction:rtl;max-width:88%;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-family:inherit;';
+    document.body.appendChild(p);
+  }
+  p.textContent='🔴 מקליטים: '+(label||'משפט')+' — לחצו למעבר';
+  p.onclick=function(){ if(btn&&btn.scrollIntoView){ btn.scrollIntoView({behavior:'smooth',block:'center'}); } };
+  p.style.display='block';
+}
+function hideRecPill(){ var p=document.getElementById('rec-pill'); if(p)p.style.display='none'; }
+
+// Stop every live recorder (CANCEL — nothing is saved/uploaded), so closing a
+// screen can never leave a hidden microphone running on an unknown sentence.
+function stopAllRecordings(){
+  try{ if(typeof mrec!=='undefined' && mrec && mrec.state==='recording'){ window._mrecCancel=true; mrec.stop(); } }catch(e){}
+  try{ if(window._queueRec && window._queueRec.state==='recording'){ window._queueRecCancel=true; window._queueRec.stop(); } }catch(e){}
+  try{ if(typeof _scnRec!=='undefined' && _scnRec && _scnRec.state==='recording'){ _scnRec.stop(); } }catch(e){}
+  try{ if(typeof practiceRec!=='undefined' && practiceRec && practiceRec.state==='recording'){ practiceRec.stop(); } }catch(e){}
+  try{ hideRecPill(); }catch(e){}
+}
+
 async function toggleRec(p){
   const btn=document.getElementById(p+'-rec');
-  if(mrec&&mrec.state==='recording'){mrec.stop();btn.textContent='🎙 הקלט';btn.className='rec-btn idle';return;}
+  if(mrec&&mrec.state==='recording'){mrec.stop();btn.textContent='🎙 הקלט';btn.className='rec-btn idle';hideRecPill();return;}
   try{
     const stream=await navigator.mediaDevices.getUserMedia({audio:true});
     rchunks=[];mrec=createRecorder(stream);
     mrec.ondataavailable=e=>{if(e.data.size>0)rchunks.push(e.data);};
     mrec.onstop=()=>{
+      stream.getTracks().forEach(t=>t.stop());
+      hideRecPill();
+      if(window._mrecCancel){
+        window._mrecCancel=false;
+        const st0=document.getElementById(p+'-status');if(st0)st0.textContent='ההקלטה בוטלה';
+        if(btn){btn.textContent='🎙 הקלט';btn.className='rec-btn idle';}
+        return;
+      }
       const blob=new Blob(rchunks,{type:(mrec && mrec.mimeType) || 'audio/webm'});
       rfiles[p]=new File([blob],'rec.webm',{type:'audio/webm'});
       const st=document.getElementById(p+'-status');if(st)st.textContent='✓ הוקלט';
-      stream.getTracks().forEach(t=>t.stop());
     };
     mrec.start();btn.textContent='⏹ עצור';btn.className='rec-btn recording';
     const st=document.getElementById(p+'-status');if(st)st.textContent='● מקליט...';
+    var lbl=(document.getElementById(p+'-he')||document.getElementById(p+'he')||{}).value||'';
+    showRecPill(String(lbl).trim().slice(0,40)||'משפט חדש', btn);
   }catch(e){alert('אנא אשרי גישה למיקרופון');}
 }
 function onFile(p){
@@ -13239,6 +13275,7 @@ function rNF(){
 }
 
 function aT(t,el){
+  try{ stopAllRecordings(); }catch(e){}
   document.querySelectorAll('.atab').forEach(b=>b.classList.remove('active'));
   // Allow programmatic jumps (shortcut buttons) — find the tab button when not passed
   if(!el) el=document.querySelector('.atab[onclick*="\''+t+'\'"]');
@@ -14016,17 +14053,30 @@ async function recordQueueItem(i){
   var btn=document.getElementById('qrec-btn-'+i);
   // Toggle: if this row is recording, stop it
   if(window._queueRec && window._queueRec.state==='recording' && window._queueRecIdx===i){ window._queueRec.stop(); return; }
-  if(window._queueRec && window._queueRec.state==='recording'){ alert('יש הקלטה פעילה — עצרי אותה קודם'); return; }
+  // A stale recording on ANOTHER row: cancel it (nothing saved) and continue —
+  // no more blocking alert that leaves the user hunting for the live mic.
+  if(window._queueRec && window._queueRec.state==='recording'){
+    window._queueRecCancel=true;
+    try{ window._queueRec.stop(); }catch(e){}
+  }
   try{
     var stream=await navigator.mediaDevices.getUserMedia({audio:true});
     var rec=createRecorder(stream); var chunks=[];
     window._queueRec=rec; window._queueRecIdx=i;
     if(statusEl){ statusEl.textContent='🔴 מקליט... לחץ לעצור'; statusEl.style.color='#e74c3c'; }
     if(btn) btn.textContent='⏹ עצור';
+    showRecPill((row.he||row.trans||'תשובה').slice(0,40), btn);
     rec.ondataavailable=function(ev){ if(ev.data && ev.data.size>0) chunks.push(ev.data); };
     rec.onstop=async function(){
       stream.getTracks().forEach(function(t){t.stop();});
+      hideRecPill();
       if(btn) btn.textContent='🎤 הקלט';
+      if(window._queueRecCancel){
+        window._queueRecCancel=false;
+        if(statusEl){ statusEl.textContent='ההקלטה בוטלה'; statusEl.style.color='#7a9ab5'; }
+        if(window._queueRec===rec){ window._queueRec=null; window._queueRecIdx=-1; }
+        return;
+      }
       if(statusEl){ statusEl.textContent='⏳ מעלה...'; statusEl.style.color='#FFD700'; }
       try{
         var file=new File(chunks,'rec.webm',{type:'audio/webm'});
@@ -14043,7 +14093,7 @@ async function recordQueueItem(i){
         if(statusEl){ statusEl.textContent='✗ שגיאה'; statusEl.style.color='#e74c3c'; }
         alert('שגיאה בשמירת ההקלטה: '+err.message);
       }
-      window._queueRec=null; window._queueRecIdx=-1;
+      if(window._queueRec===rec){ window._queueRec=null; window._queueRecIdx=-1; }
     };
     rec.start();
   }catch(err){
@@ -14719,7 +14769,7 @@ async function saveEdit(advance){
     }
   }catch(e){btn.textContent=btnTxt;alert('שגיאה: '+e.message);}
 }
-function closeEdit(){document.getElementById('edit-modal').style.display='none';delete rfiles['edit'];window._auditNavPos=-1;var nb=document.getElementById('edit-audit-nav');if(nb)nb.style.display='none';var sb=document.getElementById('edit-savenext-btn');if(sb)sb.style.display='none';}
+function closeEdit(){try{stopAllRecordings();}catch(e){}document.getElementById('edit-modal').style.display='none';delete rfiles['edit'];window._auditNavPos=-1;var nb=document.getElementById('edit-audit-nav');if(nb)nb.style.display='none';var sb=document.getElementById('edit-savenext-btn');if(sb)sb.style.display='none';}
 async function delP(id){
   if(!confirm('למחוק?'))return;
   try{await sbFetch('/rest/v1/phrases?id=eq.'+id,'DELETE');await loadData();renderAdminList();}catch(e){alert('שגיאה');}
@@ -15888,6 +15938,7 @@ document.addEventListener('click', function(e){
 // one screen never keeps talking under another (no two-voices-at-once).
 function stopAllAudio(){
   try{
+    if (typeof stopAllRecordings === 'function') stopAllRecordings();
     if (typeof _scnStopAll === 'function') _scnStopAll();
     ['_flashAudio','_homePotdAudioObj','_hrtPairAudio','_scnCurrentAudio','_scnAllAudio',
      '_potdAudio','_respQueueAudio','_responseAudio','_lcAudio','_ppAudio','_lmAudio',
