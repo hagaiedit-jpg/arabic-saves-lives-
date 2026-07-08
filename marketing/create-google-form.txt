@@ -1,0 +1,89 @@
+function createForm() {
+  var form = FormApp.create('שאלון לוחמים — ערבית מצילה חיים');
+  form.setDescription(
+    'היי! אני אדית — 31 שנים בחיל המודיעין, הכשרתי מתשאלים קרביים. ' +
+    'אני בונה ערכת מוכנות לשטח ללוחמים, והתשובות שלכם הן מה שקובע מה ייכנס אליה.\n' +
+    'הכל אנונימי — ציטוטים ישמשו רק בתור "לוחם, 2026". תודה ענקית! 🙏'
+  );
+
+  // ===== חלק א' — המציאות בשטח =====
+  form.addSectionHeaderItem().setTitle('חלק א׳ — המציאות שלך בשטח')
+      .setHelpText('אין תשובות נכונות — ספר בחופשיות, כמו לחבר.');
+
+  form.addParagraphTextItem()
+      .setTitle('ספר על פעם שעמדת מול אזרח דובר ערבית — מה קרה?');
+
+  form.addParagraphTextItem()
+      .setTitle('הייתה סיטואציה שבה לא הבנת מה נאמר? מה עשית ואיך זה הרגיש?');
+
+  form.addParagraphTextItem()
+      .setTitle('הייתה פעם שמילה אחת, טון או משפט — שינו את איך שהאירוע התפתח? ספר.');
+
+  form.addParagraphTextItem()
+      .setTitle('מה אתה שומע הכי הרבה בשטח מאזרחים? (שאלות, תחינות, צעקות, ברכות...)');
+
+  form.addParagraphTextItem()
+      .setTitle('⭐ איזו סיטואציה חוזרת על עצמה — ואין לך בשבילה מילים בערבית?');
+
+  // ===== חלק ב' — הפער =====
+  form.addSectionHeaderItem().setTitle('חלק ב׳ — מה לימדו אותך (ומה לא)');
+
+  form.addMultipleChoiceItem()
+      .setTitle('מה קיבלת לפני הגיוס או במסלול בנושא ערבית לשטח?')
+      .setChoiceValues(['שום דבר', 'שיעור בודד / הסבר קצר', 'הכשרה קצרה', 'הכשרה רצינית'])
+      .showOtherOption(true);
+
+  form.addParagraphTextItem()
+      .setTitle('מה היית רוצה שמישהו ילמד אותך לפני שהגעת לשטח?');
+
+  form.addParagraphTextItem()
+      .setTitle('אם אח שלך הקטן היה מתגייס מחר לקרבי — מה היית אומר לו ללמוד?');
+
+  // ===== חלק ג' — התנסות בערכה =====
+  form.addSectionHeaderItem().setTitle('חלק ג׳ — נסה את הערכה (2 דקות)')
+      .setHelpText('פתח בנייד: https://arabicsaveslives.hagaiedit.workers.dev — ' +
+                   'הסתובב חופשי, נסה תרחיש אחד (למשל "זיכוי ובידוק") והשמע כמה משפטים.');
+
+  form.addScaleItem()
+      .setTitle('כמה קל היה להתמצא בערכה?')
+      .setBounds(1, 5)
+      .setLabels('הלכתי לאיבוד', 'מצאתי הכל בקלות');
+
+  form.addMultipleChoiceItem()
+      .setTitle('התעתיק בעברית — הצלחת לקרוא ולהגות את המשפטים?')
+      .setChoiceValues(['כן, בקלות', 'רוב הזמן', 'התקשיתי']);
+
+  form.addParagraphTextItem()
+      .setTitle('התרחיש שניסית — נשמע כמו המציאות? מה חסר ומה מיותר?');
+
+  form.addCheckboxItem()
+      .setTitle('מתי בפועל היית משתמש בזה?')
+      .setChoiceValues(['בדרך הביתה / באוטובוס', 'בשמירה', 'לפני כניסה לשטח', 'לפני מחסום', 'לא הייתי משתמש'])
+      .showOtherOption(true);
+
+  form.addParagraphTextItem()
+      .setTitle('מה היית מוסיף שאין בערכה?');
+
+  form.addMultipleChoiceItem()
+      .setTitle('היית ממליץ עליה לחבר בפלוגה?')
+      .setChoiceValues(['בטוח', 'כנראה כן', 'לא']);
+
+  form.addParagraphTextItem()
+      .setTitle('אם כן — מה היית אומר לו עליה? (במילים שלך)');
+
+  form.addTextItem()
+      .setTitle('כמה לדעתך שווה דבר כזה בחודש? (בשקלים, הערכה חופשית)');
+
+  // ===== חלק ד' — פיילוט =====
+  form.addSectionHeaderItem().setTitle('חלק ד׳ — רוצה להשפיע יותר?');
+
+  form.addMultipleChoiceItem()
+      .setTitle('מוכן להשתתף בפיילוט? (שבוע שימוש + שיחת וואטסאפ קצרה)')
+      .setChoiceValues(['כן, דבר איתי!', 'לא הפעם']);
+
+  form.addTextItem().setTitle('שם (לא חובה)');
+  form.addTextItem().setTitle('טלפון / וואטסאפ (לא חובה — רק אם סימנת כן)');
+
+  Logger.log('קישור לשליחה למילוי: ' + form.getPublishedUrl());
+  Logger.log('קישור לעריכת הטופס: ' + form.getEditUrl());
+}
