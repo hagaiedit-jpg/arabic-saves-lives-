@@ -1344,6 +1344,14 @@ body.day-mode .pair-answer{border-top-color:rgba(168,82,0,0.35);}
 body.day-mode .pair-answer-label{color:#0e5a3f;}
 body.day-mode .pair-play{background:#0e5a3f;}
 
+/* Admin list cards: the search filter toggles el.style.display in JS, which
+   reserializes the inline style attribute — so [style*="background:#0E1B2E"]
+   substring rules silently stop matching and the cards stayed dark in day
+   mode. A class-based rule is immune to reserialization. */
+body.day-mode .admin-card{ background:#fff8e7 !important; border-color:rgba(212,134,46,0.35) !important; }
+body.day-mode .admin-card [style*="color:#fff"]{ color:#0e1b2e !important; }
+body.day-mode .admin-card [style*="color:#7a9ab5"]{ color:#5a6b80 !important; }
+
 /* ===== Day-mode readability pass (comprehensive) ===== */
 
 /* 1. Dictionary search results: dark cards were never flipped in the dict scope */
@@ -14198,7 +14206,7 @@ async function renderAdminList(){
       var dataSearch = _adminNorm((p.he||'') + ' ' + (p.ar||'') + ' ' + (p.trans||'') + ' ' + (p.cat||'') + ' ' + (p.tags||'') + ' ' + (p.why||'') + respText);
       var dHasAudio = hasAudio ? '1' : '0';
       var dHasResp = hasResponses ? '1' : '0';
-      html+=`<div data-search="${dataSearch.replace(/"/g, '&quot;')}" data-has-audio="${dHasAudio}" data-has-responses="${dHasResp}" style="background:#0E1B2E;border:1px solid #2A3D52;border-radius:10px;padding:12px;margin-bottom:8px;">
+      html+=`<div class="admin-card" data-search="${dataSearch.replace(/"/g, '&quot;')}" data-has-audio="${dHasAudio}" data-has-responses="${dHasResp}" style="background:#0E1B2E;border:1px solid #2A3D52;border-radius:10px;padding:12px;margin-bottom:8px;">
         <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:6px;">
           <div style="flex:1;">
             <div style="color:#fff;font-size:14px;font-weight:500;">${p.he||''}</div>
