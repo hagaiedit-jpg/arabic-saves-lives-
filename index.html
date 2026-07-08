@@ -3148,6 +3148,8 @@ function showLanding() {
         <button onclick="renderQuestionAudit()" style="width:100%;padding:12px;background:linear-gradient(135deg,#D4A24E 0%,#b88a3d 100%);border:none;border-radius:10px;color:#0E1B2E;font-size:13px;font-weight:800;cursor:pointer;font-family:inherit;">🔎 הרץ בדיקה</button>
         <button onclick="importAuditAnswers(this)" style="width:100%;margin-top:8px;padding:12px;background:rgba(29,158,117,0.18);border:1px dashed #1D9E75;border-radius:10px;color:#7eecc1;font-size:13px;font-weight:800;cursor:pointer;font-family:inherit;">⬇️ ייבא את התשובות המוכנות (חד-פעמי)</button>
         <div style="text-align:center;color:#7a9ab5;font-size:10.5px;margin-top:5px;">מתאים תשובות מוכנות לשאלות לפי הטקסט בעברית. מוסיף רק לשאלות שעדיין בלי תשובות (לא דורס קיים).</div>
+        <button onclick="aT('qrec')" style="width:100%;margin-top:10px;padding:14px;background:linear-gradient(135deg,#8e44ad 0%,#5e2d75 100%);border:none;border-radius:10px;color:#fff;font-size:14px;font-weight:800;cursor:pointer;font-family:inherit;">🎤 מעבר להקלטת השאלות והתשובות</button>
+        <div style="text-align:center;color:#7a9ab5;font-size:10.5px;margin-top:5px;">כל התשובות שיובאו מחכות שם להקלטה — שאלה אחרי שאלה, עם סימון מה כבר הוקלט</div>
       </div>
       <div id="audit-results" style="margin-top:6px;"></div>
     </div>
@@ -13237,7 +13239,10 @@ function rNF(){
 }
 
 function aT(t,el){
-  document.querySelectorAll('.atab').forEach(b=>b.classList.remove('active'));el.classList.add('active');
+  document.querySelectorAll('.atab').forEach(b=>b.classList.remove('active'));
+  // Allow programmatic jumps (shortcut buttons) — find the tab button when not passed
+  if(!el) el=document.querySelector('.atab[onclick*="\''+t+'\'"]');
+  if(el){ el.classList.add('active'); try{ el.scrollIntoView({behavior:'smooth',inline:'center',block:'nearest'}); }catch(e){} }
   ['ap','ad','ah','ak','an','adict','asem','al','audit','qrec','acat'].forEach(id=>document.getElementById('at-'+id).style.display='none');
   document.getElementById('at-'+t).style.display='block';
   if(t==='al')renderAdminList();if(t==='acat')renderCatList();if(t==='audit')renderQuestionAudit();if(t==='qrec')renderRespRecList();
