@@ -1344,6 +1344,10 @@ body.day-mode .pair-answer{border-top-color:rgba(168,82,0,0.35);}
 body.day-mode .pair-answer-label{color:#0e5a3f;}
 body.day-mode .pair-play{background:#0e5a3f;}
 
+/* One-time tools: a tool whose content is already fully in the DB */
+.tool-done{ background:linear-gradient(135deg,#1D9E75 0%,#0e5a3f 100%) !important; color:#fff !important; opacity:0.85; cursor:default !important; }
+body.day-mode .tool-done{ background:linear-gradient(135deg,#1D9E75 0%,#0e5a3f 100%) !important; color:#fff !important; }
+
 /* Admin list cards: the search filter toggles el.style.display in JS, which
    reserializes the inline style attribute — so [style*="background:#0E1B2E"]
    substring rules silently stop matching and the cards stayed dark in day
@@ -3118,24 +3122,25 @@ function showLanding() {
       <button class="sbtn" onclick="addSem()">שמור</button>
     </div></div>
     <div id="at-al" style="display:none;">
-      <details style="margin-bottom:12px;">
+      <details style="margin-bottom:12px;" ontoggle="if(this.open&&typeof checkOneTimeTools==='function')checkOneTimeTools()">
       <summary style="cursor:pointer;color:#7a9ab5;font-size:12.5px;font-weight:800;padding:10px 12px;background:rgba(122,154,181,0.12);border-radius:10px;list-style:none;">⚙️ כלים חד-פעמיים להוספת תוכן (לחצי לפתיחה)</summary>
+      <div id="tools-status" style="text-align:center;color:#D4A24E;font-size:12px;font-weight:700;margin-top:10px;"></div>
       <div style="margin-bottom:12px;margin-top:10px;">
         <button onclick="downloadBackup(this)" style="width:100%;padding:12px;background:linear-gradient(135deg,#34495e 0%,#22303e 100%);border:none;border-radius:10px;color:#fff;font-size:13px;font-weight:800;cursor:pointer;font-family:inherit;">⬇️ הורד גיבוי של כל התוכן (JSON)</button>
         <div style="text-align:center;color:#7a9ab5;font-size:11px;margin-top:5px;">קובץ עם כל המשפטים וקישורי ההקלטות — לשמור במחשב ליתר ביטחון</div>
-        <button onclick="addProverbs(this)" style="width:100%;padding:12px;margin-top:10px;background:linear-gradient(135deg,#c0392b 0%,#922d22 100%);border:none;border-radius:10px;color:#fff;font-size:13px;font-weight:800;cursor:pointer;font-family:inherit;">💬 הוסף ביטויים ופתגמים חסרים לרשימות</button>
+        <button id="tool-proverbs" onclick="addProverbs(this)" style="width:100%;padding:12px;margin-top:10px;background:linear-gradient(135deg,#c0392b 0%,#922d22 100%);border:none;border-radius:10px;color:#fff;font-size:13px;font-weight:800;cursor:pointer;font-family:inherit;">💬 הוסף ביטויים ופתגמים חסרים לרשימות</button>
         <div style="text-align:center;color:#7a9ab5;font-size:11px;margin-top:5px;">מוסיף רק פתגמים שעוד לא קיימים לקטגוריית "ביטויים ופתגמים" — אחר כך אפשר לערוך ולהקליט מהרשימה</div>
-        <button onclick="addGreetings(this)" style="width:100%;padding:12px;margin-top:10px;background:linear-gradient(135deg,#8e44ad 0%,#5e2d75 100%);border:none;border-radius:10px;color:#fff;font-size:13px;font-weight:800;cursor:pointer;font-family:inherit;">🕊️ הוסף ~100 ברכות ונימוסים (חד-פעמי)</button>
+        <button id="tool-greetings" onclick="addGreetings(this)" style="width:100%;padding:12px;margin-top:10px;background:linear-gradient(135deg,#8e44ad 0%,#5e2d75 100%);border:none;border-radius:10px;color:#fff;font-size:13px;font-weight:800;cursor:pointer;font-family:inherit;">🕊️ הוסף ~100 ברכות ונימוסים (חד-פעמי)</button>
         <div style="text-align:center;color:#7a9ab5;font-size:11px;margin-top:5px;">שלום, ברכות, תודה, ניחומים, חגים ועוד — ייכנסו ל"פותחים לב" תחת "ברכות ונימוסים", אחר כך אפשר לערוך ולהקליט</div>
-        <button onclick="addFieldVocab(this)" style="width:100%;padding:12px;margin-top:10px;background:linear-gradient(135deg,#16a085 0%,#0e6b58 100%);border:none;border-radius:10px;color:#fff;font-size:13px;font-weight:800;cursor:pointer;font-family:inherit;">🗺️ הוסף/עדכן שמות מקומות + זיהוי ערבית כתובה</button>
+        <button id="tool-fieldvocab" onclick="addFieldVocab(this)" style="width:100%;padding:12px;margin-top:10px;background:linear-gradient(135deg,#16a085 0%,#0e6b58 100%);border:none;border-radius:10px;color:#fff;font-size:13px;font-weight:800;cursor:pointer;font-family:inherit;">🗺️ הוסף/עדכן שמות מקומות + זיהוי ערבית כתובה</button>
         <div style="text-align:center;color:#7a9ab5;font-size:11px;margin-top:5px;">מוסיף חדשים וגם מתקן את ניקוד התעתיק בקיימים (ההקלטות נשמרות)</div>
-        <button onclick="addZikuyScenarios(this)" style="width:100%;padding:12px;margin-top:10px;background:linear-gradient(135deg,#2c6fb0 0%,#1d4f80 100%);border:none;border-radius:10px;color:#fff;font-size:13px;font-weight:800;cursor:pointer;font-family:inherit;">👋 הוסף תרחישי "זיכוי מרחוק" + "זיכוי ובידוק" (חד-פעמי)</button>
+        <button id="tool-zikuy" onclick="addZikuyScenarios(this)" style="width:100%;padding:12px;margin-top:10px;background:linear-gradient(135deg,#2c6fb0 0%,#1d4f80 100%);border:none;border-radius:10px;color:#fff;font-size:13px;font-weight:800;cursor:pointer;font-family:inherit;">👋 הוסף תרחישי "זיכוי מרחוק" + "זיכוי ובידוק" (חד-פעמי)</button>
         <div style="text-align:center;color:#7a9ab5;font-size:11px;margin-top:5px;">פקודות בידוק וזיכוי + כמה מקרים לדוגמה (מהסס, נמצא חפץ, מתנגד, אישה…) — אחר כך אפשר לערוך ולהקליט מהרשימה</div>
-        <button onclick="addHealthScenario(this)" style="width:100%;padding:12px;margin-top:10px;background:linear-gradient(135deg,#1f8a70 0%,#14624f 100%);border:none;border-radius:10px;color:#fff;font-size:13px;font-weight:800;cursor:pointer;font-family:inherit;">🩺 הוסף תרחיש "בירור מצב בריאותי של עצור" (חד-פעמי)</button>
+        <button id="tool-health" onclick="addHealthScenario(this)" style="width:100%;padding:12px;margin-top:10px;background:linear-gradient(135deg,#1f8a70 0%,#14624f 100%);border:none;border-radius:10px;color:#fff;font-size:13px;font-weight:800;cursor:pointer;font-family:inherit;">🩺 הוסף תרחיש "בירור מצב בריאותי של עצור" (חד-פעמי)</button>
         <div style="text-align:center;color:#7a9ab5;font-size:11px;margin-top:5px;">6 שאלות רפואיות + תשובות לדוגמה של העצור — תחת "תשאול וחקירת שטח", אחר כך אפשר לערוך ולהקליט מהרשימה</div>
-        <button onclick="addHumanScenario(this)" style="width:100%;padding:12px;margin-top:10px;background:linear-gradient(135deg,#b8672e 0%,#8a4a1e 100%);border:none;border-radius:10px;color:#fff;font-size:13px;font-weight:800;cursor:pointer;font-family:inherit;">🤲 הוסף תרחיש "סיוע הומניטרי — קשיש או נכה" (חד-פעמי)</button>
+        <button id="tool-human" onclick="addHumanScenario(this)" style="width:100%;padding:12px;margin-top:10px;background:linear-gradient(135deg,#b8672e 0%,#8a4a1e 100%);border:none;border-radius:10px;color:#fff;font-size:13px;font-weight:800;cursor:pointer;font-family:inherit;">🤲 הוסף תרחיש "סיוע הומניטרי — קשיש או נכה" (חד-פעמי)</button>
         <div style="text-align:center;color:#7a9ab5;font-size:11px;margin-top:5px;">מבוסס על סיפור אמיתי מסקר הלוחמים (חאן יונס) — 7 שלבים, תחת "מגע ראשוני וסריקות"</div>
-        <button onclick="addSurveyPack(this)" style="width:100%;padding:12px;margin-top:10px;background:linear-gradient(135deg,#3d6b9e 0%,#2a4a70 100%);border:none;border-radius:10px;color:#fff;font-size:13px;font-weight:800;cursor:pointer;font-family:inherit;">📋 הוסף 16 משפטים מתשובות הסקר (חד-פעמי)</button>
+        <button id="tool-surveypack" onclick="addSurveyPack(this)" style="width:100%;padding:12px;margin-top:10px;background:linear-gradient(135deg,#3d6b9e 0%,#2a4a70 100%);border:none;border-radius:10px;color:#fff;font-size:13px;font-weight:800;cursor:pointer;font-family:inherit;">📋 הוסף 16 משפטים מתשובות הסקר (חד-פעמי)</button>
         <div style="text-align:center;color:#7a9ab5;font-size:11px;margin-top:5px;">שליטה בשיחה, עימות עם הכחשה, וזיהוי תחינות נפוצות — ישירות ממה שהלוחמים כתבו</div>
         <button onclick="cleanScenarioDupes(this)" style="width:100%;padding:12px;margin-top:10px;background:linear-gradient(135deg,#7a5230 0%,#5a3a20 100%);border:none;border-radius:10px;color:#fff;font-size:13px;font-weight:800;cursor:pointer;font-family:inherit;">🧹 נקה שורות כפולות בתרחישים</button>
         <div style="text-align:center;color:#7a9ab5;font-size:11px;margin-top:5px;">אם משפט מוקלט לא נשמע בתרחיש — מוחק כפילויות ריקות בלבד; שורה עם הקלטה לעולם לא נמחקת</div>
@@ -8380,6 +8385,53 @@ async function addZikuyScenarios(btn){
     btn.textContent=old;
   }
   btn.disabled=false;
+}
+
+// === One-time tools status: checked against the LIVE DB every time the tools
+// drawer opens, so the admin always sees which insert was already done (✓,
+// locked) and which is still pending — no more guessing what was clicked. ===
+async function checkOneTimeTools(){
+  var sum=document.getElementById('tools-status');
+  if(sum) sum.textContent='⏳ בודק מול המאגר מה כבר בוצע...';
+  try{
+    var rows=await sbFetchAllRows('/rest/v1/phrases?select=he,cat,tags,section');
+    function norm(s){ return String(s||'').replace(/[^֐-׿0-9A-Za-z]/g,''); }
+    var heSet={}, scnSteps={};
+    rows.forEach(function(r){
+      heSet[(r.section||'')+'|'+norm(r.he)]=1;
+      if(r.section==='scenario') scnSteps[_scnStepKey(r)]=1;
+    });
+    function missHe(section, arr){ var m=0; arr.forEach(function(p){ if(!heSet[section+'|'+norm(p.he)]) m++; }); return m; }
+    function missSteps(cat, arr){ var m=0; arr.forEach(function(s){ if(!scnSteps[cat+'#'+String(s.step||'').replace('step','')]) m++; }); return m; }
+    var tools=[
+      ['tool-proverbs',  missHe('heart', PROVERBS_DATA)],
+      ['tool-greetings', missHe('heart', GREETINGS_DATA)],
+      ['tool-fieldvocab',missHe('military', FIELD_VOCAB)],
+      ['tool-zikuy',     missSteps('זיכוי מרחוק', ZIKUY_SCENARIOS.filter(function(z){return z.cat==='זיכוי מרחוק';}))
+                       + missSteps('זיכוי ובידוק', ZIKUY_SCENARIOS.filter(function(z){return z.cat==='זיכוי ובידוק';}))],
+      ['tool-health',    missSteps(HEALTH_SCN_ID, HEALTH_SCENARIO)],
+      ['tool-human',     missSteps(HUMAN_SCN_ID, HUMAN_SCENARIO)],
+      ['tool-surveypack',missHe('military', SURVEY_PACK)]
+    ];
+    var done=0;
+    tools.forEach(function(t){
+      var btn=document.getElementById(t[0]); if(!btn) return;
+      if(!btn.dataset.orig) btn.dataset.orig=btn.textContent;
+      if(t[1]===0){
+        done++;
+        btn.disabled=true;
+        btn.classList.add('tool-done');
+        btn.textContent='✓ בוצע · '+btn.dataset.orig;
+      }else{
+        btn.disabled=false;
+        btn.classList.remove('tool-done');
+        btn.textContent='⬜ '+btn.dataset.orig+' · חסרים '+t[1];
+      }
+    });
+    if(sum) sum.textContent='✓ בוצעו '+done+' מתוך '+tools.length+' — הירוקים כבר במאגר, אין צורך ללחוץ עליהם';
+  }catch(e){
+    if(sum) sum.textContent='לא הצלחתי לבדוק מול המאגר — בכל מקרה כל הכפתורים בטוחים ללחיצה חוזרת (בלי כפילויות)';
+  }
 }
 
 // Remove duplicate scenario rows (same category + step) that can accumulate from
