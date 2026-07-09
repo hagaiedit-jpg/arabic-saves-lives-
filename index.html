@@ -3133,6 +3133,10 @@ function showLanding() {
         <div style="text-align:center;color:#7a9ab5;font-size:11px;margin-top:5px;">פקודות בידוק וזיכוי + כמה מקרים לדוגמה (מהסס, נמצא חפץ, מתנגד, אישה…) — אחר כך אפשר לערוך ולהקליט מהרשימה</div>
         <button onclick="addHealthScenario(this)" style="width:100%;padding:12px;margin-top:10px;background:linear-gradient(135deg,#1f8a70 0%,#14624f 100%);border:none;border-radius:10px;color:#fff;font-size:13px;font-weight:800;cursor:pointer;font-family:inherit;">🩺 הוסף תרחיש "בירור מצב בריאותי של עצור" (חד-פעמי)</button>
         <div style="text-align:center;color:#7a9ab5;font-size:11px;margin-top:5px;">6 שאלות רפואיות + תשובות לדוגמה של העצור — תחת "תשאול וחקירת שטח", אחר כך אפשר לערוך ולהקליט מהרשימה</div>
+        <button onclick="addHumanScenario(this)" style="width:100%;padding:12px;margin-top:10px;background:linear-gradient(135deg,#b8672e 0%,#8a4a1e 100%);border:none;border-radius:10px;color:#fff;font-size:13px;font-weight:800;cursor:pointer;font-family:inherit;">🤲 הוסף תרחיש "סיוע הומניטרי — קשיש או נכה" (חד-פעמי)</button>
+        <div style="text-align:center;color:#7a9ab5;font-size:11px;margin-top:5px;">מבוסס על סיפור אמיתי מסקר הלוחמים (חאן יונס) — 7 שלבים, תחת "מגע ראשוני וסריקות"</div>
+        <button onclick="addSurveyPack(this)" style="width:100%;padding:12px;margin-top:10px;background:linear-gradient(135deg,#3d6b9e 0%,#2a4a70 100%);border:none;border-radius:10px;color:#fff;font-size:13px;font-weight:800;cursor:pointer;font-family:inherit;">📋 הוסף 16 משפטים מתשובות הסקר (חד-פעמי)</button>
+        <div style="text-align:center;color:#7a9ab5;font-size:11px;margin-top:5px;">שליטה בשיחה, עימות עם הכחשה, וזיהוי תחינות נפוצות — ישירות ממה שהלוחמים כתבו</div>
         <button onclick="cleanScenarioDupes(this)" style="width:100%;padding:12px;margin-top:10px;background:linear-gradient(135deg,#7a5230 0%,#5a3a20 100%);border:none;border-radius:10px;color:#fff;font-size:13px;font-weight:800;cursor:pointer;font-family:inherit;">🧹 נקה שורות כפולות בתרחישים</button>
         <div style="text-align:center;color:#7a9ab5;font-size:11px;margin-top:5px;">אם משפט מוקלט לא נשמע בתרחיש — מוחק כפילויות ריקות בלבד; שורה עם הקלטה לעולם לא נמחקת</div>
       </div>
@@ -7794,7 +7798,7 @@ async function loadData(){
 // Civilian (speaker ב) lines are tagged 'civilian'; soldier (א) lines are not.
 function _scnStepKey(p){ var m=((p&&p.tags)||'').match(/step(\d+)/); return ((p&&p.cat)||'')+'#'+(m?m[1]:'?'); }
 // Recently-added scenarios — show a "חדש" badge on their cube until first opened.
-var NEW_SCENARIOS = ['חקירה','הרחקה מהשטח','חיפוש בבית — איפה בעל הבית','חיפוש בבית — מי בבית','מעצר נער חשוד','זיכוי מרחוק','זיכוי ובידוק','בירור מצב בריאותי'];
+var NEW_SCENARIOS = ['חקירה','הרחקה מהשטח','חיפוש בבית — איפה בעל הבית','חיפוש בבית — מי בבית','מעצר נער חשוד','זיכוי מרחוק','זיכוי ובידוק','בירור מצב בריאותי','סיוע הומניטרי'];
 var BUILTIN_SCENARIO_DATA = [
   {id:'bi-harhaka-1',  section:'scenario', cat:'הרחקה מהשטח', tags:'step1',  he:'עצור במקום והרם ידיים!', ar:'اوقّف عندك وارفع إيديك لفوق!', trans:'וַקֵף עִנְדַכּ וַארְפַע אִידֵיכּ לַפוֹק'},
   {id:'bi-harhaka-2',  section:'scenario', cat:'הרחקה מהשטח', tags:'step2',  he:'מה אתה עושה כאן?', ar:'شو بتعمل هون؟', trans:'שוּ בְּתִעְמֵל הוֹן?'},
@@ -8326,7 +8330,14 @@ var ZIKUY_SCENARIOS = [
   {cat:'זיכוי ובידוק', step:'step20', x:'divider', he:'מקרה ד׳ — סיום ושחרור', ar:'', trans:''},
   {cat:'זיכוי ובידוק', step:'step21', he:'הכל בסדר. אתה יכול ללכת.', ar:'كلّ إشي تمام. فيك تروح.', trans:'כֻּלּ אִשִי תַמַאם. פִיכּ תְרוּח.'},
   {cat:'זיכוי ובידוק', step:'step22', x:'civilian', he:'תודה. יום טוב.', ar:'شكراً. نهارك سعيد.', trans:'שֻכְּרַן. נַהַארַכּ סַעִיד.'},
-  {cat:'זיכוי ובידוק', step:'step23', he:'לך ישר, אל תעצור כאן.', ar:'روح دغري، ما توقّف هون.', trans:'רוּח דֻעְ׳רִי, מַא תְוַקֶּף הוֹן.'}
+  {cat:'זיכוי ובידוק', step:'step23', he:'לך ישר, אל תעצור כאן.', ar:'روح دغري، ما توقّف هون.', trans:'רוּח דֻעְ׳רִי, מַא תְוַקֶּף הוֹן.'},
+  // Case from a real survey story: a simple check escalated because the
+  // soldiers didn't understand the man was only asking for privacy.
+  {cat:'זיכוי ובידוק', step:'step24', x:'divider', he:'מקרה ה׳ — הנבדק מבקש פרטיות (מסיפור אמיתי)', ar:'', trans:''},
+  {cat:'זיכוי ובידוק', step:'step25', x:'civilian', he:'בבקשה, לא כאן — המשפחה שלי רואה.', ar:'دخيلك، مش هون — عيلتي بتشوف.', trans:'דַחִ׳ילַכּ, מֻש הוֹן — עֵילְתִי בִּתְשוּף.'},
+  {cat:'זיכוי ובידוק', step:'step26', x:'civilian', he:'אפשר בצד?', ar:'ممكن على جنب؟', trans:'מֻמְכֶּן עַלַא גַ׳נְבּ?'},
+  {cat:'זיכוי ובידוק', step:'step27', he:'בסדר. בוא הצידה — לאט לאט.', ar:'طيب. تعال على جنب — شوي شوي.', trans:'טַיֶּבּ. תַעַאל עַלַא גַ׳נְבּ — שְוַי שְוַי.'},
+  {cat:'זיכוי ובידוק', step:'step28', he:'זה חייב לקרות עכשיו. תשתף פעולה — וזה נגמר מהר.', ar:'لازم هلّق. تعاون — وبيخلص بسرعة.', trans:'לַאזֶם הַלַּק. תְעַאוַן — וּבִּיחְ׳לַץ בְּסֻרְעַה.'}
 ];
 
 // Also ship these as built-in scenarios (like every other scenario) so the cubes
@@ -8473,6 +8484,90 @@ async function addHealthScenario(btn){
     alert('שגיאה: '+(e&&e.message?e.message:e));
     btn.textContent=old;
   }
+  btn.disabled=false;
+}
+
+// === סיוע הומניטרי — קשיש או נכה (from the Khan-Younis survey story) ===
+var HUMAN_SCN_ID = 'סיוע הומניטרי';
+var HUMAN_SCENARIO = [
+  {step:'step1', he:'אל תפחדי, באנו לעזור לך.', ar:'لا تخافي، إجينا نساعدك.', trans:'לַא תְחַ׳אפִי, אִגִ׳ינַא נְסַאעְדֵכּ.'},
+  {step:'step2', he:'את לבד? מי נשאר איתך?', ar:'إنتِ لحالك؟ مين ضل معك؟', trans:'אִנְתִ לַחַאלֵכּ? מִין צַ׳ל מַעֵכּ?'},
+  {step:'step3', civ:true, he:'אני לא יכולה ללכת, הרגליים חלשות.', ar:'ما بقدر أمشي، إجريي ضعيفات.', trans:'מַא בַּקְדַר אַמְשִי, אִגְ׳רַיִּי צַ׳עִיפַאת.'},
+  {step:'step4', he:'יש לך מים? אוכל? תרופות?', ar:'في عندك مي؟ أكل؟ أدوية؟', trans:'פִי עִנְדֵכּ מַי? אַכֶּל? אַדְוִיֶה?'},
+  {step:'step5', civ:true, he:'נגמרו המים, המשפחה עזבה.', ar:'خلصت المي، العيلة راحت.', trans:'חִ׳לְצַת אִלְמַי, אִלְעֵילֶה רַאחַת.'},
+  {step:'step6', he:'הצלב האדום יגיע לפנות אותך.', ar:'الصليب الأحمر رح ييجي ياخدك.', trans:'אִלצַּלִיבּ אִלְאַחְמַר רַח יִיגִ׳י יַאחְ׳דֵכּ.'},
+  {step:'step7', he:'שבי כאן. אנחנו איתך עד שיגיעו.', ar:'اقعدي هون. إحنا معك لما يوصلوا.', trans:'אֻקְעֻדִי הוֹן. אִחְנַא מַעֵכּ לַמַּא יוּצַלוּ.'}
+];
+try {
+  if (typeof BUILTIN_SCENARIO_DATA !== 'undefined' && BUILTIN_SCENARIO_DATA.push) {
+    HUMAN_SCENARIO.forEach(function(s, i){
+      BUILTIN_SCENARIO_DATA.push({ id:'bi-human-'+i, section:'scenario', cat:HUMAN_SCN_ID, tags:s.step+(s.civ?' civilian':''), he:s.he, ar:s.ar, trans:s.trans });
+    });
+  }
+} catch(e){ console.warn('human builtin merge failed', e); }
+
+async function addHumanScenario(btn){
+  if(!confirm('להוסיף את התרחיש "סיוע הומניטרי — קשיש או נכה" (7 שלבים)? פעולה חד-פעמית, ללא כפילות.'))return;
+  var old=btn.textContent; btn.disabled=true; btn.textContent='מוסיף...';
+  try{
+    var ex=await sbFetchAllRows('/rest/v1/phrases?select=cat,tags&section=eq.scenario&cat=eq.'+encodeURIComponent(HUMAN_SCN_ID));
+    var have={}; (ex||[]).forEach(function(p){ have[_scnStepKey(p)]=1; });
+    var added=0;
+    for(var i=0;i<HUMAN_SCENARIO.length;i++){
+      var s=HUMAN_SCENARIO[i];
+      var key=HUMAN_SCN_ID+'#'+s.step.replace('step','');
+      if(have[key])continue;
+      await sbFetch('/rest/v1/phrases','POST',{cat:HUMAN_SCN_ID,he:s.he,trans:s.trans,ar:s.ar,tags:s.step+(s.civ?' civilian':''),why:'',tone:'',audio_url:'',is_new:false,section:'scenario'});
+      have[key]=1; added++;
+    }
+    btn.textContent='✓ נוספו '+added;
+    await loadData(); renderAdminList();
+    alert('✓ נוספו '+added+' שלבים לתרחיש "סיוע הומניטרי". אפשר לערוך ולהקליט מהרשימות.');
+  }catch(e){ alert('שגיאה: '+(e&&e.message?e.message:e)); btn.textContent=old; }
+  btn.disabled=false;
+}
+
+// === Survey-driven phrase pack: conversation control, confronting denial,
+// and recognizing common pleas — built from the soldiers' survey answers ===
+var SURVEY_PACK = [
+  // שליטה בשיחה — "לא ידעתי לנהל איתו שיח"
+  {cat:'מגע ראשוני', he:'דבר לאט.', ar:'إحكي شوي شوي.', trans:'אִחְכִּי שְוַי שְוַי.', why:'מהסקר: "לא ידעתי לנהל איתו שיח" — משפט שליטה בסיסי בשיחה.'},
+  {cat:'מגע ראשוני', he:'תגיד עוד פעם.', ar:'قول كمان مرة.', trans:'קוּל כַּמַאן מַרַּה.', why:''},
+  {cat:'מגע ראשוני', he:'אני לא מבין אותך. תסביר פשוט.', ar:'مش فاهم عليك. فسّر ببساطة.', trans:'מֻש פַאהֶם עַלֵיכּ. פַסֶּר בְּבַּסַאטַה.', why:''},
+  {cat:'מגע ראשוני', he:'אחד אחד — לא כולם ביחד.', ar:'واحد واحد — مش كلكم مع بعض.', trans:'וַאחַד וַאחַד — מֻש כֻּלְּכֹּם מַעַ בַּעְץ׳.', why:''},
+  {cat:'מגע ראשוני', he:'תענה רק על מה שאני שואל.', ar:'جاوب بس على سؤالي.', trans:'גַ׳אוֶבּ בַּס עַלַא סֻאַאלִי.', why:''},
+  {cat:'מגע ראשוני', he:'סיימנו. אין לי עוד שאלות.', ar:'خلصنا. ما عندي أسئلة كمان.', trans:'חַ׳לַצְנַא. מַא עִנְדִי אַסְאִלֶה כַּמַאן.', why:'מהסקר: "כל פעם אני מבין כמה מילים ורק רוצה לצאת מהשיחה" — סיום שיחה בשליטה.'},
+  // עימות עם הכחשה — "אומרים שאין להם מושג כשאתה יודע שהם משקרים"
+  {cat:'בידוק וזיהוי', he:'אני יודע שאתה יודע.', ar:'أنا بعرف إنك بتعرف.', trans:'אַנַא בַּעְרֶף אִנַּכּ בְּתַעְרֶף.', why:'מהסקר: "אומרים שאין להם שום מושג כשאתה יודע שהם משקרים".'},
+  {cat:'בידוק וזיהוי', he:'אל תשקר לי.', ar:'ما تكذب عليّ.', trans:'מַא תִכְּדֶ׳בּ עַלַיּ.', why:''},
+  {cat:'בידוק וזיהוי', he:'ראו אותך שם.', ar:'شافوك هناك.', trans:'שַאפוּכּ הְנַאכּ.', why:''},
+  {cat:'בידוק וזיהוי', he:'יש לנו מידע. תחשוב טוב ותענה שוב.', ar:'في عنّا معلومات. فكّر منيح وجاوب كمان مرة.', trans:'פִי עִנַּא מַעְלוּמַאת. פַכֶּר מְנִיח וּגַ׳אוֶבּ כַּמַאן מַרַּה.', why:''},
+  {cat:'בידוק וזיהוי', he:'אם אתה דובר אמת — אין לך ממה לפחד.', ar:'إذا بتحكي الصح — ما في إشي تخاف منه.', trans:'אִזַא בְּתִחְכִּי אִלצַּח — מַא פִי אִשִי תְחַ׳אף מִנֹּה.', why:'ערוץ יציאה מכובד — נותן לנבדק דרך לשתף פעולה בלי עימות.'},
+  // מה תשמע בשטח — תחינות, תלונות והכחשות נפוצות (לזיהוי)
+  {cat:'מגע ראשוני', he:'תשמע: "דחילכ" — אנא ממך', ar:'دخيلك', trans:'דַחִ׳ילַכּ', why:'תחינה נפוצה מאוד. מהסקר: הלוחמים שומעים בעיקר "שאלות, תחינות, תלונות".'},
+  {cat:'מגע ראשוני', he:'תשמע: "בחיאת אללה" — בחיי אלוהים', ar:'بحياة الله', trans:'בִּחְיַאת אַללָּה', why:'שבועה/תחינה — האזרח מנסה לשכנע שהוא דובר אמת.'},
+  {cat:'מגע ראשוני', he:'תשמע: "חראם עליכ" — רחם / בושה לך', ar:'حرام عليك', trans:'חַרַאם עַלֵיכּ', why:'תלונה ובקשת רחמים — שכיח מאוד מול כוחות.'},
+  {cat:'מגע ראשוני', he:'תשמע: "ואללה מא בערף" — בחיי, אני לא יודע', ar:'والله ما بعرف', trans:'וַאללָּה מַא בַּעְרֶף', why:'ההכחשה הנפוצה ביותר בשטח — לא בהכרח אמת.'},
+  {cat:'מגע ראשוני', he:'תשמע: "מא ענא אשי" — אין לנו כלום', ar:'ما عنّا إشي', trans:'מַא עִנַּא אִשִי', why:'מהסקר: "אומרים שאין להם כלום ושבאנו סתם".'}
+];
+async function addSurveyPack(btn){
+  if(!confirm('להוסיף את חבילת משפטי הסקר (שליטה בשיחה, עימות עם הכחשה, זיהוי תחינות — 16 משפטים)? מוסיף רק מה שחסר.'))return;
+  var old=btn.textContent; btn.disabled=true; btn.textContent='מוסיף...';
+  try{
+    function norm(s){ return String(s||'').replace(/[^֐-׿0-9A-Za-z]/g,''); }
+    var existing=await sbFetchAllRows('/rest/v1/phrases?select=he&section=eq.military');
+    var have={}; (existing||[]).forEach(function(p){ have[norm(p.he)]=1; });
+    var added=0;
+    for(var i=0;i<SURVEY_PACK.length;i++){
+      var p=SURVEY_PACK[i];
+      if(have[norm(p.he)])continue;
+      await sbFetch('/rest/v1/phrases','POST',{cat:p.cat,he:p.he,trans:p.trans,ar:p.ar,tags:'',why:p.why||'',tone:'',audio_url:'',is_new:true,section:'military'});
+      have[norm(p.he)]=1; added++;
+    }
+    btn.textContent='✓ נוספו '+added;
+    await loadData(); renderAdminList();
+    alert('✓ נוספו '+added+' משפטים מחבילת הסקר (מגע ראשוני + בידוק וזיהוי). אפשר לערוך ולהקליט מהרשימות.');
+  }catch(e){ alert('שגיאה: '+(e&&e.message?e.message:e)); btn.textContent=old; }
   btn.disabled=false;
 }
 
@@ -9965,7 +10060,8 @@ var SCN_CATEGORIES = [
       {id:'בידוק אישה', icon:'👩', title:'בידוק אישה'},
       {id:'חיפוש בבית — איפה בעל הבית', icon:'🔍', title:'חיפוש בבית — איפה בעל הבית'},
       {id:'חיפוש בבית — מי בבית', icon:'🏠', title:'חיפוש בבית — מי בבית'},
-      {id:'מעצר נער חשוד', icon:'🚨', title:'מעצר נער חשוד בזריקת אבנים'}
+      {id:'מעצר נער חשוד', icon:'🚨', title:'מעצר נער חשוד בזריקת אבנים'},
+      {id:'סיוע הומניטרי', icon:'🤲', title:'סיוע הומניטרי — קשיש או נכה'}
     ]
   },
   {
@@ -10111,6 +10207,10 @@ var SCN_STORIES = {
     "before": "כשמעכבים עצור, האחריות למצבו הרפואי עלינו. בלי כמה שאלות בסיסיות בערבית אי אפשר לדעת על תרופה, אלרגיה או פציעה - וזה עלול להסתיים באירוע רפואי שאפשר היה למנוע.",
     "source": "לוחם, 2025"
   },
+  "סיוע הומניטרי": {
+    "before": "נכנסנו לבית ומצאנו שני אזרחים נכים שהמשפחה השאירה מאחור עם קצת מים. דיברתי עם הזקנה, עזרתי לה, ודאגנו שהצלב האדום יגיע לפנות אותם.",
+    "source": "לוחם, 2026 - מתוך סקר הלוחמים"
+  },
   "חיפוש בבית": {
     "before": "כשעושים חיפוש ואתה לא מבין מה הדייר אומר, או שהשאלה שלך לא מובנת - זה מעכב את כל המשימה ומסכן את הכוח.",
     "source": "לוחם, 2026"
@@ -10172,8 +10272,8 @@ var SCN_STORIES = {
     "source": "לוחם, 2025"
   },
   "זיכוי ובידוק": {
-    "before": "בבידוק וזיהוי, כשהנבדק לא מבין את ההוראות ואני לא מבין את התשובות - הכל נתקע והכוח חשוף.",
-    "source": "לוחם, 2026"
+    "before": "ביקשו מאדם לפשוט מכנסיים לבדיקה, בלי להבין מה הוא עונה. הוא רק ביקש שזה יהיה בצד, בגלל המשפחה שלו - וזה התפרש כחוסר שיתוף פעולה. אירוע פשוט הסלים למשהו מורכב ולא מועיל.",
+    "source": "לוחם, 2026 - מתוך סקר הלוחמים"
   },
   "זיכוי מרחוק": {
     "before": "כשאתה מזכה אדם מרחוק והוא לא מבין את ההוראה - הסיטואציה מסוכנת לשני הצדדים.",
