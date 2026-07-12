@@ -3203,7 +3203,7 @@ function showLanding() {
         <div style="text-align:center;color:#7a9ab5;font-size:11px;margin-top:5px;">בודקים ערבית, ממלאים תעתיק, ומאשרים כל משפט בנפרד — רק מה שאת מאשרת נכנס ל"מבצעי". שום דבר לא עולה אוטומטית.</div>
         <div id="fieldcmd-review" style="margin-top:10px;"></div>
         <button id="tool-dupcheck" onclick="openDupCheck(this)" style="width:100%;padding:12px;margin-top:10px;background:linear-gradient(135deg,#7a5230 0%,#5a3a20 100%);border:none;border-radius:10px;color:#fff;font-size:13px;font-weight:800;cursor:pointer;font-family:inherit;">🔁 בדיקת כפילויות וניקוי (לפני הקלטה)</button>
-        <div style="text-align:center;color:#7a9ab5;font-size:11px;margin-top:5px;">סורק את כל המשפטים ומוצא כפילויות (לפי ערבית ועברית). משאיר עותק אחד — עם עדיפות לזה שכבר מוקלט — ומאפשר למחוק את המיותרים.</div>
+        <div style="text-align:center;color:#7a9ab5;font-size:11px;margin-top:5px;">מוצא כפילויות <b>בתוך אותו סעיף בלבד</b> (לא בין מילון/תרחיש/מבצעי — שם לכל אחד תפקיד). משאיר עותק אחד, עם עדיפות לזה שכבר מוקלט.</div>
         <div id="dupcheck-panel" style="margin-top:10px;"></div>
         <button id="tool-zikuy" onclick="addZikuyScenarios(this)" style="width:100%;padding:12px;margin-top:10px;background:linear-gradient(135deg,#2c6fb0 0%,#1d4f80 100%);border:none;border-radius:10px;color:#fff;font-size:13px;font-weight:800;cursor:pointer;font-family:inherit;">👋 הוסף תרחישי "זיכוי מרחוק" + "זיכוי ובידוק" (חד-פעמי)</button>
         <div style="text-align:center;color:#7a9ab5;font-size:11px;margin-top:5px;">פקודות בידוק וזיכוי + כמה מקרים לדוגמה (מהסס, נמצא חפץ, מתנגד, אישה…) — אחר כך אפשר לערוך ולהקליט מהרשימה</div>
@@ -9198,11 +9198,15 @@ async function openDupCheck(btn){
     var parent=all.map(function(_,i){return i;});
     function find(x){ while(parent[x]!==x){ parent[x]=parent[parent[x]]; x=parent[x]; } return x; }
     function uni(a,b){ var ra=find(a), rb=find(b); if(ra!==rb) parent[ra]=rb; }
+    // Only phrases repeated WITHIN THE SAME SECTION are true duplicates. The same
+    // phrase in מילון / תרחיש / מבצעי each has its own role, so keys are scoped by
+    // section — cross-section repeats are never grouped and never flagged.
     var arMap={}, heMap={};
     all.forEach(function(p,i){
+      var sec=p.section||'';
       var a=na(firstAr(p.ar)), h=nh(p.he);
-      if(a){ if(arMap[a]!==undefined) uni(i,arMap[a]); else arMap[a]=i; }
-      if(h){ if(heMap[h]!==undefined) uni(i,heMap[h]); else heMap[h]=i; }
+      if(a){ var ka=sec+'|'+a; if(arMap[ka]!==undefined) uni(i,arMap[ka]); else arMap[ka]=i; }
+      if(h){ var kh=sec+'|'+h; if(heMap[kh]!==undefined) uni(i,heMap[kh]); else heMap[kh]=i; }
     });
     var comp={};
     all.forEach(function(p,i){ var r=find(i); (comp[r]=comp[r]||[]).push(p); });
@@ -9226,7 +9230,7 @@ function renderDupGroups(){
   var head='<div style="background:#18293E;border:1px solid #2A3D52;border-radius:10px;padding:10px;margin-bottom:8px;">'
     +'<div style="color:#E8D9B8;font-size:13px;font-weight:700;">🔁 בדיקת כפילויות</div>';
   if(!groups.length){ box.innerHTML=head+'<div style="color:#1D9E75;font-size:13px;margin-top:6px;">✓ לא נמצאו כפילויות — הכול נקי. אפשר להקליט.</div></div>'; return; }
-  head+='<div style="color:#7a9ab5;font-size:11px;margin-top:4px;">נמצאו '+groups.length+' קבוצות ('+totalDupes+' עותקים מיותרים). בכל קבוצה נשמר עותק אחד (עדיפות לזה שכבר מוקלט 🎵), והשאר מסומנים למחיקה. אפשר לשנות סימון. שום דבר לא נמחק עד שתלחצי.</div>'
+  head+='<div style="color:#7a9ab5;font-size:11px;margin-top:4px;">נמצאו '+groups.length+' קבוצות ('+totalDupes+' עותקים מיותרים) — כפילויות <b>באותו סעיף בלבד</b>. אותו משפט שקיים גם במילון וגם בתרחיש וגם במבצעי אינו נחשב כפילות (לכל אחד תפקיד במקומו). בכל קבוצה נשמר עותק אחד (עדיפות לזה שכבר מוקלט 🎵), והשאר מסומנים למחיקה. שום דבר לא נמחק עד שתלחצי.</div>'
     +'<button onclick="deleteDupSelected(this)" style="width:100%;margin-top:8px;padding:10px;background:#c0392b;border:none;border-radius:8px;color:#fff;font-size:13px;font-weight:700;cursor:pointer;font-family:inherit;">🗑 מחק את המסומנים</button></div>';
   var html=groups.map(function(g,gi){
     var keep=_dupKeeperIdx(g);
