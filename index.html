@@ -3193,6 +3193,8 @@ function showLanding() {
       <div style="margin-bottom:12px;margin-top:10px;">
         <button onclick="downloadBackup(this)" style="width:100%;padding:12px;background:linear-gradient(135deg,#34495e 0%,#22303e 100%);border:none;border-radius:10px;color:#fff;font-size:13px;font-weight:800;cursor:pointer;font-family:inherit;">⬇️ הורד גיבוי של כל התוכן (JSON)</button>
         <div style="text-align:center;color:#7a9ab5;font-size:11px;margin-top:5px;">קובץ עם כל המשפטים וקישורי ההקלטות — לשמור במחשב ליתר ביטחון</div>
+        <button onclick="exportPhrasesCSV(this)" style="width:100%;padding:12px;margin-top:10px;background:linear-gradient(135deg,#1D9E75 0%,#146b53 100%);border:none;border-radius:10px;color:#fff;font-size:13px;font-weight:800;cursor:pointer;font-family:inherit;">📄 ייצוא כל המשפטים (עברית + ערבית) לאקסל</button>
+        <div style="text-align:center;color:#7a9ab5;font-size:11px;margin-top:5px;">קובץ CSV שנפתח באקסל / גוגל־שיטס — עמודות: סעיף, קטגוריה, עברית, תעתיק, ערבית</div>
         <button id="tool-proverbs" onclick="addProverbs(this)" style="width:100%;padding:12px;margin-top:10px;background:linear-gradient(135deg,#c0392b 0%,#922d22 100%);border:none;border-radius:10px;color:#fff;font-size:13px;font-weight:800;cursor:pointer;font-family:inherit;">💬 הוסף ביטויים ופתגמים חסרים לרשימות</button>
         <div style="text-align:center;color:#7a9ab5;font-size:11px;margin-top:5px;">מוסיף רק פתגמים שעוד לא קיימים לקטגוריית "ביטויים ופתגמים" — אחר כך אפשר לערוך ולהקליט מהרשימה</div>
         <button id="tool-greetings" onclick="addGreetings(this)" style="width:100%;padding:12px;margin-top:10px;background:linear-gradient(135deg,#8e44ad 0%,#5e2d75 100%);border:none;border-radius:10px;color:#fff;font-size:13px;font-weight:800;cursor:pointer;font-family:inherit;">🕊️ הוסף ~100 ברכות ונימוסים (חד-פעמי)</button>
@@ -13610,6 +13612,33 @@ async function addCustoms(){
     try{ refreshOpenTabList(); }catch(e){}
     btn.textContent=old; alert('✓ נוסף!');
   }catch(e){ btn.textContent=old; alert('שגיאה: '+e.message); }
+}
+// Export every phrase (Hebrew + transliteration + Arabic) from all sections to a
+// CSV file that opens cleanly in Excel / Google Sheets (UTF-8 BOM for RTL text).
+function exportPhrasesCSV(btn){
+  try{
+    var SEC={military:'מבצעי',daily:'יומיומי',heart:'פותחים לב',navy:'ימי',announce:'כריזה',dictionary:'מילון',semantic:'סמנטי',customs:'מנהגים',scenario:'תרחיש',article:'מאמר'};
+    var groups=[['military',DB],['daily',DAILY],['heart',HEART],['navy',NAVY],['announce',ANNOUNCE],['dictionary',DICT],['semantic',SEM],['customs',CUS],['scenario',typeof SCENARIO!=='undefined'?SCENARIO:[]]];
+    var rows=[['סעיף','קטגוריה','עברית','תעתיק','ערבית']];
+    groups.forEach(function(g){
+      var name=SEC[g[0]]||g[0]; var arr=g[1]||[];
+      arr.forEach(function(p){
+        var he=(p.he||'').toString().trim();
+        var ar=(p.ar||'').toString().trim();
+        if(!he && !ar) return;
+        rows.push([name,(p.cat||'').toString().trim(),he,(p.trans||'').toString().trim(),ar]);
+      });
+    });
+    function esc(s){ s=String(s==null?'':s); return /[",\n\r]/.test(s)?('"'+s.replace(/"/g,'""')+'"'):s; }
+    var csv='﻿'+rows.map(function(r){return r.map(esc).join(',');}).join('\r\n');
+    var blob=new Blob([csv],{type:'text/csv;charset=utf-8;'});
+    var url=URL.createObjectURL(blob);
+    var a=document.createElement('a');
+    a.href=url; a.download='ערבית-מצילה-חיים-משפטים.csv';
+    document.body.appendChild(a); a.click(); document.body.removeChild(a);
+    setTimeout(function(){URL.revokeObjectURL(url);},1500);
+    alert('✓ יוצאו '+(rows.length-1)+' משפטים לקובץ CSV. הקובץ ירד למכשיר — נפתח באקסל / גוגל־שיטס.');
+  }catch(e){ alert('שגיאה בייצוא: '+(e&&e.message?e.message:e)); }
 }
 // Promote the built-in customs into the DB so every מנהג becomes editable/recordable.
 // Idempotent (dedup by title). Reuses the same insert the orphaned helper used.
