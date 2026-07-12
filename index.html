@@ -3199,8 +3199,9 @@ function showLanding() {
         <div style="text-align:center;color:#7a9ab5;font-size:11px;margin-top:5px;">שלום, ברכות, תודה, ניחומים, חגים ועוד — ייכנסו ל"פותחים לב" תחת "ברכות ונימוסים", אחר כך אפשר לערוך ולהקליט</div>
         <button id="tool-fieldvocab" onclick="addFieldVocab(this)" style="width:100%;padding:12px;margin-top:10px;background:linear-gradient(135deg,#16a085 0%,#0e6b58 100%);border:none;border-radius:10px;color:#fff;font-size:13px;font-weight:800;cursor:pointer;font-family:inherit;">🗺️ הוסף/עדכן שמות מקומות + זיהוי ערבית כתובה</button>
         <div style="text-align:center;color:#7a9ab5;font-size:11px;margin-top:5px;">מוסיף חדשים וגם מתקן את ניקוד התעתיק בקיימים (ההקלטות נשמרות)</div>
-        <button id="tool-fieldcmd" onclick="addFieldCommands(this)" style="width:100%;padding:12px;margin-top:10px;background:linear-gradient(135deg,#c0704e 0%,#8a4e34 100%);border:none;border-radius:10px;color:#fff;font-size:13px;font-weight:800;cursor:pointer;font-family:inherit;">🎯 הוסף משפטי פקודות שטח (עברית+ערבית) לפי קטגוריות</button>
-        <div style="text-align:center;color:#7a9ab5;font-size:11px;margin-top:5px;">פקודות עצירה, בידוק, רכב, בית, עזרה ראשונה ועוד — נכנסים ל"מבצעי" תחת הקטגוריה המתאימה, אחר כך אפשר לערוך ולהקליט</div>
+        <button id="tool-fieldcmd" onclick="openFieldCmdReview(this)" style="width:100%;padding:12px;margin-top:10px;background:linear-gradient(135deg,#c0704e 0%,#8a4e34 100%);border:none;border-radius:10px;color:#fff;font-size:13px;font-weight:800;cursor:pointer;font-family:inherit;">🎯 סקירה ואישור משפטי פקודות שטח (אחד-אחד)</button>
+        <div style="text-align:center;color:#7a9ab5;font-size:11px;margin-top:5px;">בודקים ערבית, ממלאים תעתיק, ומאשרים כל משפט בנפרד — רק מה שאת מאשרת נכנס ל"מבצעי". שום דבר לא עולה אוטומטית.</div>
+        <div id="fieldcmd-review" style="margin-top:10px;"></div>
         <button id="tool-zikuy" onclick="addZikuyScenarios(this)" style="width:100%;padding:12px;margin-top:10px;background:linear-gradient(135deg,#2c6fb0 0%,#1d4f80 100%);border:none;border-radius:10px;color:#fff;font-size:13px;font-weight:800;cursor:pointer;font-family:inherit;">👋 הוסף תרחישי "זיכוי מרחוק" + "זיכוי ובידוק" (חד-פעמי)</button>
         <div style="text-align:center;color:#7a9ab5;font-size:11px;margin-top:5px;">פקודות בידוק וזיכוי + כמה מקרים לדוגמה (מהסס, נמצא חפץ, מתנגד, אישה…) — אחר כך אפשר לערוך ולהקליט מהרשימה</div>
         <button id="tool-health" onclick="addHealthScenario(this)" style="width:100%;padding:12px;margin-top:10px;background:linear-gradient(135deg,#1f8a70 0%,#14624f 100%);border:none;border-radius:10px;color:#fff;font-size:13px;font-weight:800;cursor:pointer;font-family:inherit;">🩺 הוסף תרחיש "בירור מצב בריאותי של עצור" (חד-פעמי)</button>
@@ -9096,30 +9097,85 @@ var FIELD_COMMANDS_DATA=[
 ];
 
 // Field-command phrases (Hebrew+Arabic) from the owner's worksheet, categorised into
-// the military section. Idempotent: only inserts what isn't already there (by he/ar).
-async function addFieldCommands(btn){
-  if(!confirm('להוסיף את משפטי פקודות השטח לסעיף "מבצעי", לפי קטגוריות? מוסיף רק מה שעדיין חסר (בדיקה לפי עברית וערבית).'))return;
-  var old=btn.textContent; btn.disabled=true; btn.textContent='מוסיף...';
+// the military section. NOTHING is uploaded automatically — the owner reviews each
+// phrase (checks the Arabic, fills the transliteration) and approves it one by one.
+var _fieldCmdNorm={
+  he:function(s){ return String(s||'').replace(/[֑-ׇ]/g,'').replace(/[^א-ת0-9A-Za-z]/g,''); },
+  ar:function(s){ return String(s||'').replace(/[ً-ْٰـ]/g,'').replace(/[آأإا]/g,'ا').replace(/[ىي]/g,'ي').replace(/ة/g,'ه').replace(/[^ء-ي]/g,''); }
+};
+var _fieldCmdCats=['מצב מהיר','עצירת תנועה','ניהול מרחב','בידוק וזיהוי','שליטה בבית','הרגעה ושכנוע','מגע ראשוני','עזרה ראשונה','קהל ואזרחים','ילדים ואוכלוסיות רגישות','לוח שנה ותרבות'];
+function _fcEsc(s){ return String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+
+async function openFieldCmdReview(btn){
+  var box=document.getElementById('fieldcmd-review');
+  if(box.getAttribute('data-open')==='1'){ box.innerHTML=''; box.removeAttribute('data-open'); return; }
+  box.setAttribute('data-open','1');
+  box.innerHTML='<div style="color:#7a9ab5;font-size:12px;padding:8px;">טוען וממיין מה שכבר קיים…</div>';
   try{
-    function normHe(s){ return String(s||'').replace(/[֑-ׇ]/g,'').replace(/[^א-ת0-9A-Za-z]/g,''); }
-    function normAr(s){ return String(s||'').replace(/[ً-ْٰـ]/g,'').replace(/[آأإا]/g,'ا').replace(/[ىي]/g,'ي').replace(/ة/g,'ه').replace(/[^ء-ي]/g,''); }
     var existing=await sbFetchAllRows('/rest/v1/phrases?select=he,ar&section=eq.military');
     var haveHe={}, haveAr={};
-    (existing||[]).forEach(function(p){ var h=normHe(p.he); if(h)haveHe[h]=1; String(p.ar||'').split(/[\/،]/).forEach(function(v){ var a=normAr(v); if(a)haveAr[a]=1; }); });
-    var added=0, skipped=0;
+    (existing||[]).forEach(function(p){ var h=_fieldCmdNorm.he(p.he); if(h)haveHe[h]=1; String(p.ar||'').split(/[\/،]/).forEach(function(v){ var a=_fieldCmdNorm.ar(v); if(a)haveAr[a]=1; }); });
+    var seenHe={}, seenAr={}, pending=[];
     for(var i=0;i<FIELD_COMMANDS_DATA.length;i++){
       var p=FIELD_COMMANDS_DATA[i];
-      var h=normHe(p.he), a=normAr((String(p.ar||'').split(/[\/،]/)[0]||''));
-      if((h&&haveHe[h])||(a&&haveAr[a])){ skipped++; continue; }
-      await sbFetch('/rest/v1/phrases','POST',{cat:p.cat,he:p.he,trans:'',ar:p.ar,tags:'',why:'',tone:'',audio_url:'',is_new:true,section:'military'});
-      if(h)haveHe[h]=1; if(a)haveAr[a]=1; added++;
+      var h=_fieldCmdNorm.he(p.he), a=_fieldCmdNorm.ar(String(p.ar||'').split(/[\/،]/)[0]||'');
+      if((h&&haveHe[h])||(a&&haveAr[a])) continue;      // already in app
+      if((h&&seenHe[h])||(a&&seenAr[a])) continue;       // duplicate within the sheet
+      if(h)seenHe[h]=1; if(a)seenAr[a]=1;
+      pending.push(p);
     }
-    btn.textContent='✓ נוספו '+added;
-    await loadData(); renderAdminList();
+    window._fieldCmdPending=pending;
+    renderFieldCmdReview();
+  }catch(e){ box.innerHTML='<div style="color:#ff8080;font-size:12px;padding:8px;">שגיאה: '+_fcEsc(e.message)+'</div>'; }
+}
+
+function renderFieldCmdReview(){
+  var box=document.getElementById('fieldcmd-review');
+  var pend=window._fieldCmdPending||[];
+  var remaining=pend.filter(function(p){ return !p._done; });
+  var head='<div style="background:#18293E;border:1px solid #2A3D52;border-radius:10px;padding:10px;margin-bottom:8px;">'
+    +'<div style="color:#E8D9B8;font-size:13px;font-weight:700;">🎯 סקירה ואישור — נשארו '+remaining.length+' לבדיקה</div>'
+    +'<div style="color:#7a9ab5;font-size:11px;margin-top:4px;">בדקי את הערבית, מלאי תעתיק, ולחצי ✓ אשר. רק מה שתאשרי ייכנס. אין תעתיק = לא נכנס.</div></div>';
+  if(!remaining.length){ box.innerHTML=head+'<div style="color:#1D9E75;font-size:13px;padding:8px;">✓ סיימת! אין עוד משפטים ממתינים.</div>'; return; }
+  var rows=remaining.map(function(p){
+    var idx=pend.indexOf(p);
+    var opts=_fieldCmdCats.map(function(c){ return '<option'+(c===p.cat?' selected':'')+'>'+_fcEsc(c)+'</option>'; }).join('');
+    return '<div id="fc-row-'+idx+'" style="background:#0E1B2E;border:1px solid #2A3D52;border-radius:10px;padding:10px;margin-bottom:8px;">'
+      +'<div style="color:#fff;font-size:14px;font-weight:600;margin-bottom:6px;">'+_fcEsc(p.he)+'</div>'
+      +'<div style="display:grid;gap:6px;">'
+      +'<label style="color:#7a9ab5;font-size:11px;">ערבית'
+        +'<textarea id="fc-ar-'+idx+'" style="width:100%;font-family:Georgia,serif;font-size:18px;background:#18293E;border:1px solid #2A3D52;border-radius:8px;color:#fff;padding:8px;direction:rtl;">'+_fcEsc(p.ar)+'</textarea></label>'
+      +'<label style="color:#7a9ab5;font-size:11px;">תעתיק (חובה — כתבי איך זה נשמע בעברית)'
+        +'<input id="fc-tr-'+idx+'" placeholder="לדוגמה: וַקֶּף שְוַי" style="width:100%;font-size:15px;background:#18293E;border:1px solid #D4A24E;border-radius:8px;color:#fff;padding:9px;direction:rtl;"></label>'
+      +'<label style="color:#7a9ab5;font-size:11px;">קטגוריה<select id="fc-cat-'+idx+'" style="width:100%;font-size:14px;background:#18293E;border:1px solid #2A3D52;border-radius:8px;color:#fff;padding:9px;">'+opts+'</select></label>'
+      +'</div>'
+      +'<div style="display:flex;gap:8px;margin-top:8px;">'
+      +'<button onclick="approveFieldCmd('+idx+',this)" style="flex:1;padding:10px;background:#1D9E75;border:none;border-radius:8px;color:#fff;font-size:13px;font-weight:700;cursor:pointer;font-family:inherit;">✓ אשר והוסף</button>'
+      +'<button onclick="skipFieldCmd('+idx+')" style="padding:10px 14px;background:#2A3D52;border:none;border-radius:8px;color:#E8D9B8;font-size:13px;cursor:pointer;font-family:inherit;">דלגי</button>'
+      +'</div></div>';
+  }).join('');
+  box.innerHTML=head+rows;
+}
+
+async function approveFieldCmd(idx,btn){
+  var pend=window._fieldCmdPending||[]; var p=pend[idx]; if(!p) return;
+  var ar=(document.getElementById('fc-ar-'+idx).value||'').trim();
+  var tr=(document.getElementById('fc-tr-'+idx).value||'').trim();
+  var cat=document.getElementById('fc-cat-'+idx).value;
+  if(!ar){ alert('אין ערבית — לא ניתן להוסיף.'); return; }
+  if(!tr){ alert('יש למלא תעתיק לפני האישור (כדי לוודא שבדקת אותו).'); return; }
+  var old=btn.textContent; btn.disabled=true; btn.textContent='מוסיף...';
+  try{
+    var s=await spSave({cat:cat,he:p.he,trans:tr,ar:ar,why:'',tone:'',audio:''},'military');
+    var phrase={cat:cat,he:p.he,trans:tr,ar:ar,why:'',tone:'',audio:''}; if(s&&s[0])phrase.id=s[0].id; phrase.isNew=true; phrase.section='military';
+    DB.push(phrase);
+    p._done=true;
     try{ if(typeof refreshOpenTabList==='function') refreshOpenTabList(); }catch(e){}
-    alert('✓ נוספו '+added+' משפטים ל"מבצעי" לפי קטגוריות ('+skipped+' כבר היו קיימים). עכשיו אפשר לערוך ולהקליט מטאב "מבצעי".');
-  }catch(e){ alert('שגיאה: '+(e&&e.message?e.message:e)); btn.textContent=old; }
-  btn.disabled=false;
+    renderFieldCmdReview();
+  }catch(e){ btn.disabled=false; btn.textContent=old; alert('שגיאה: '+(e&&e.message?e.message:e)); }
+}
+function skipFieldCmd(idx){
+  var pend=window._fieldCmdPending||[]; if(pend[idx]){ pend[idx]._done=true; renderFieldCmdReview(); }
 }
 
 
