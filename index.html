@@ -3202,6 +3202,9 @@ function showLanding() {
         <button id="tool-fieldcmd" onclick="openFieldCmdReview(this)" style="width:100%;padding:12px;margin-top:10px;background:linear-gradient(135deg,#c0704e 0%,#8a4e34 100%);border:none;border-radius:10px;color:#fff;font-size:13px;font-weight:800;cursor:pointer;font-family:inherit;">🎯 סקירה ואישור משפטי פקודות שטח (אחד-אחד)</button>
         <div style="text-align:center;color:#7a9ab5;font-size:11px;margin-top:5px;">בודקים ערבית, ממלאים תעתיק, ומאשרים כל משפט בנפרד — רק מה שאת מאשרת נכנס ל"מבצעי". שום דבר לא עולה אוטומטית.</div>
         <div id="fieldcmd-review" style="margin-top:10px;"></div>
+        <button id="tool-dupcheck" onclick="openDupCheck(this)" style="width:100%;padding:12px;margin-top:10px;background:linear-gradient(135deg,#7a5230 0%,#5a3a20 100%);border:none;border-radius:10px;color:#fff;font-size:13px;font-weight:800;cursor:pointer;font-family:inherit;">🔁 בדיקת כפילויות וניקוי (לפני הקלטה)</button>
+        <div style="text-align:center;color:#7a9ab5;font-size:11px;margin-top:5px;">סורק את כל המשפטים ומוצא כפילויות (לפי ערבית ועברית). משאיר עותק אחד — עם עדיפות לזה שכבר מוקלט — ומאפשר למחוק את המיותרים.</div>
+        <div id="dupcheck-panel" style="margin-top:10px;"></div>
         <button id="tool-zikuy" onclick="addZikuyScenarios(this)" style="width:100%;padding:12px;margin-top:10px;background:linear-gradient(135deg,#2c6fb0 0%,#1d4f80 100%);border:none;border-radius:10px;color:#fff;font-size:13px;font-weight:800;cursor:pointer;font-family:inherit;">👋 הוסף תרחישי "זיכוי מרחוק" + "זיכוי ובידוק" (חד-פעמי)</button>
         <div style="text-align:center;color:#7a9ab5;font-size:11px;margin-top:5px;">פקודות בידוק וזיכוי + כמה מקרים לדוגמה (מהסס, נמצא חפץ, מתנגד, אישה…) — אחר כך אפשר לערוך ולהקליט מהרשימה</div>
         <button id="tool-health" onclick="addHealthScenario(this)" style="width:100%;padding:12px;margin-top:10px;background:linear-gradient(135deg,#1f8a70 0%,#14624f 100%);border:none;border-radius:10px;color:#fff;font-size:13px;font-weight:800;cursor:pointer;font-family:inherit;">🩺 הוסף תרחיש "בירור מצב בריאותי של עצור" (חד-פעמי)</button>
@@ -9176,6 +9179,90 @@ async function approveFieldCmd(idx,btn){
 }
 function skipFieldCmd(idx){
   var pend=window._fieldCmdPending||[]; if(pend[idx]){ pend[idx]._done=true; renderFieldCmdReview(); }
+}
+
+// === Duplicate check & cleanup (run before recording) ===============================
+// Finds phrases that repeat (same Arabic OR same Hebrew, ignoring vowel marks), keeps
+// one copy per group — preferring the one that already has a recording so audio is
+// never lost — and lets the owner delete the extras. Nothing is deleted without a click.
+var _dupSecName={military:'מבצעי',daily:'יומיומי',heart:'פותחים לב',navy:'ימי',announce:'כריזה',dictionary:'מילון',semantic:'סמנטי',customs:'מנהגים',scenario:'תרחיש',article:'מאמר'};
+async function openDupCheck(btn){
+  var box=document.getElementById('dupcheck-panel');
+  if(box.getAttribute('data-open')==='1'){ box.innerHTML=''; box.removeAttribute('data-open'); return; }
+  box.setAttribute('data-open','1');
+  box.innerHTML='<div style="color:#7a9ab5;font-size:12px;padding:8px;">בודק כפילויות…</div>';
+  try{
+    var all=await sbFetchAllRows('/rest/v1/phrases?select=id,he,ar,trans,section,cat,audio_url&order=created_at.asc');
+    var na=_fieldCmdNorm.ar, nh=_fieldCmdNorm.he;
+    function firstAr(s){ return String(s||'').split(/[\/،]/)[0]||''; }
+    var parent=all.map(function(_,i){return i;});
+    function find(x){ while(parent[x]!==x){ parent[x]=parent[parent[x]]; x=parent[x]; } return x; }
+    function uni(a,b){ var ra=find(a), rb=find(b); if(ra!==rb) parent[ra]=rb; }
+    var arMap={}, heMap={};
+    all.forEach(function(p,i){
+      var a=na(firstAr(p.ar)), h=nh(p.he);
+      if(a){ if(arMap[a]!==undefined) uni(i,arMap[a]); else arMap[a]=i; }
+      if(h){ if(heMap[h]!==undefined) uni(i,heMap[h]); else heMap[h]=i; }
+    });
+    var comp={};
+    all.forEach(function(p,i){ var r=find(i); (comp[r]=comp[r]||[]).push(p); });
+    var groups=Object.keys(comp).map(function(k){return comp[k];}).filter(function(g){return g.length>1;});
+    window._dupGroups=groups;
+    renderDupGroups();
+  }catch(e){ box.innerHTML='<div style="color:#ff8080;font-size:12px;padding:8px;">שגיאה: '+_fcEsc(e.message)+'</div>'; }
+}
+function _dupKeeperIdx(g){
+  var best=0, bestScore=-1;
+  for(var i=0;i<g.length;i++){
+    var s=(g[i].audio_url?4:0)+((g[i].trans&&String(g[i].trans).trim())?1:0);
+    if(s>bestScore){ bestScore=s; best=i; }
+  }
+  return best;
+}
+function renderDupGroups(){
+  var box=document.getElementById('dupcheck-panel');
+  var groups=window._dupGroups||[];
+  var totalDupes=groups.reduce(function(a,g){return a+(g.length-1);},0);
+  var head='<div style="background:#18293E;border:1px solid #2A3D52;border-radius:10px;padding:10px;margin-bottom:8px;">'
+    +'<div style="color:#E8D9B8;font-size:13px;font-weight:700;">🔁 בדיקת כפילויות</div>';
+  if(!groups.length){ box.innerHTML=head+'<div style="color:#1D9E75;font-size:13px;margin-top:6px;">✓ לא נמצאו כפילויות — הכול נקי. אפשר להקליט.</div></div>'; return; }
+  head+='<div style="color:#7a9ab5;font-size:11px;margin-top:4px;">נמצאו '+groups.length+' קבוצות ('+totalDupes+' עותקים מיותרים). בכל קבוצה נשמר עותק אחד (עדיפות לזה שכבר מוקלט 🎵), והשאר מסומנים למחיקה. אפשר לשנות סימון. שום דבר לא נמחק עד שתלחצי.</div>'
+    +'<button onclick="deleteDupSelected(this)" style="width:100%;margin-top:8px;padding:10px;background:#c0392b;border:none;border-radius:8px;color:#fff;font-size:13px;font-weight:700;cursor:pointer;font-family:inherit;">🗑 מחק את המסומנים</button></div>';
+  var html=groups.map(function(g,gi){
+    var keep=_dupKeeperIdx(g);
+    var rows=g.map(function(p,i){
+      var isKeep=(i===keep);
+      var mic=p.audio_url?'🎵':'🔇';
+      return '<label style="display:flex;gap:8px;align-items:flex-start;padding:6px;border-radius:6px;background:'+(isKeep?'rgba(29,158,117,0.10)':'rgba(192,57,43,0.08)')+';margin-bottom:4px;cursor:pointer;">'
+        +'<input type="checkbox" class="dupdel" data-grp="'+gi+'" value="'+_fcEsc(p.id)+'" '+(isKeep?'':'checked')+' style="margin-top:3px;">'
+        +'<div style="flex:1;min-width:0;">'
+        +'<div style="color:#E8D9B8;font-size:12px;">'+_fcEsc(p.he)+' '+mic+(isKeep?' <span style="color:#1D9E75;">(נשמר)</span>':'')+'</div>'
+        +'<div style="color:#7a9ab5;font-size:10px;">'+_fcEsc(_dupSecName[p.section]||p.section)+' · '+_fcEsc(p.cat||'')+' · '+_fcEsc(p.ar||'')+'</div>'
+        +'</div></label>';
+    }).join('');
+    return '<div style="border:1px solid #2A3D52;border-radius:8px;padding:8px;margin-bottom:8px;"><div style="color:#D4A24E;font-size:11px;margin-bottom:4px;">קבוצה '+(gi+1)+' — '+g.length+' עותקים</div>'+rows+'</div>';
+  }).join('');
+  box.innerHTML=head+html;
+}
+async function deleteDupSelected(btn){
+  var panel=document.getElementById('dupcheck-panel');
+  var checked=panel.querySelectorAll('.dupdel:checked');
+  if(!checked.length){ alert('לא סומן שום עותק למחיקה.'); return; }
+  // Safety: never let a whole group be deleted — at least one copy must remain.
+  var groups=window._dupGroups||[];
+  var checkedByGrp={};
+  checked.forEach(function(b){ var g=b.getAttribute('data-grp'); checkedByGrp[g]=(checkedByGrp[g]||0)+1; });
+  for(var gi in checkedByGrp){ if(checkedByGrp[gi]>=groups[gi].length){ alert('בקבוצה '+(Number(gi)+1)+' סימנת למחיקה את כל העותקים. יש להשאיר לפחות אחד. בטלי סימון של אחד מהם.'); return; } }
+  if(!confirm('למחוק '+checked.length+' עותקים כפולים? העותק שנשמר בכל קבוצה יישאר.'))return;
+  var old=btn.textContent; btn.disabled=true; btn.textContent='מוחק...';
+  var ids=[]; checked.forEach(function(b){ ids.push(b.value); });
+  try{
+    for(var i=0;i<ids.length;i++){ await sbFetch('/rest/v1/phrases?id=eq.'+encodeURIComponent(ids[i]),'DELETE'); }
+    await loadData(); try{ renderAdminList(); }catch(e){} try{ if(typeof refreshOpenTabList==='function') refreshOpenTabList(); }catch(e){}
+    alert('✓ נמחקו '+ids.length+' עותקים כפולים.');
+    panel.removeAttribute('data-open');
+    openDupCheck(document.getElementById('tool-dupcheck'));  // re-scan to show the clean result
+  }catch(e){ btn.disabled=false; btn.textContent=old; alert('שגיאה במחיקה: '+(e&&e.message?e.message:e)); }
 }
 
 
