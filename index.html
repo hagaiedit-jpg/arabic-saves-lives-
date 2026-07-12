@@ -2965,6 +2965,7 @@ function showLanding() {
       <button class="atab" onclick="aT('an',this)">+ ימי</button>
       <button class="atab" onclick="aT('adict',this)">+ מילון</button>
       <button class="atab" onclick="aT('asem',this)">+ סמנטי</button>
+      <button class="atab" onclick="aT('ac',this)">+ מנהגים</button>
       <button class="atab" onclick="aT('al',this)">📋 רשימה</button>
       <button class="atab" onclick="aT('audit',this)">🔎 שאלות בלי תשובות</button>
       <button class="atab" onclick="aT('qrec',this)">🎤 הקלטת תשובות</button>
@@ -3155,6 +3156,35 @@ function showLanding() {
         <div id="asem-status" style="color:#1D9E75;font-size:12px;margin-top:5px;"></div>
       </div>
       <button class="sbtn" onclick="addSem()">שמור</button>
+    </div></div>
+
+    <!-- Add / edit Customs (מנהגים) -->
+    <div id="at-ac" style="display:none;"><div class="acard">
+      <div style="margin-bottom:16px;padding-bottom:16px;border-bottom:1px solid #2A3D52;">
+        <div style="color:#E8D9B8;font-size:13px;font-weight:700;margin-bottom:10px;">📋 פריטים קיימים (מנהגים)</div>
+        <div id="ac-builtin-note" style="display:none;background:rgba(212,162,78,0.1);border:1px solid #D4A24E;border-radius:8px;padding:10px;margin-bottom:10px;">
+          <div style="color:#E8D9B8;font-size:12px;line-height:1.5;margin-bottom:8px;">🔒 חלק מהמנהגים מובנים באפליקציה. כדי לערוך אותם צריך קודם להוסיף אותם לרשימת העריכה (פעולה חד-פעמית, בלי כפילויות).</div>
+          <button onclick="enableCustomsEditing(this)" style="width:100%;padding:10px;background:#D4A24E;border:none;border-radius:8px;color:#0E1B2E;font-size:13px;font-weight:700;cursor:pointer;font-family:inherit;">📥 אפשר עריכה של המנהגים המובנים</button>
+        </div>
+        <div id="list-ac" class="tablist" style="max-height:220px;overflow-y:auto;"></div>
+      </div>
+      <div style="color:#E8D9B8;font-size:13px;font-weight:700;margin-bottom:10px;">➕ הוסף מנהג חדש</div>
+      <div class="afl"><label>קטגוריה</label><select id="acc">
+        <option>תרבות והתנהגות</option><option>דת ואסלאם</option><option>משפחה ונישואים</option>
+      </select></div>
+      <div class="afl"><label>שם המנהג *</label><input id="ache" placeholder="לדוגמה: 🖤 בית עזא — ניחום אבלים"/></div>
+      <div class="afl"><label>תעתיק</label><input id="actr" placeholder="עַטַّ׳ם אַללָّה אַגְ׳רְכֹّם"/></div>
+      <div class="afl"><label>ערבית</label><textarea id="acar" style="font-family:Georgia,serif;font-size:18px;" placeholder="عظّم الله أجركم"></textarea></div>
+      <div class="afl"><label>הסבר / טיפ ללוחם *</label><textarea id="acwy" placeholder="מה חשוב שהלוחם יידע וכיצד לפעול..."></textarea></div>
+      <div class="afl"><label>הקלטה</label>
+        <div style="display:flex;gap:6px;flex-wrap:wrap;">
+          <button class="rec-btn idle" id="ac-rec" onclick="toggleRec('ac')">🎙 הקלט</button>
+          <input type="file" id="ac-file" accept="audio/*" style="display:none;" onchange="onFile('ac')"/>
+          <button type="button" onclick="document.getElementById('ac-file').click()" style="flex:1;padding:11px;background:#2A3D52;border:none;border-radius:8px;color:#E8D9B8;font-size:13px;cursor:pointer;font-family:inherit;">📁 קובץ</button>
+        </div>
+        <div id="ac-status" style="color:#1D9E75;font-size:12px;margin-top:5px;"></div>
+      </div>
+      <button class="sbtn" onclick="addCustoms()">שמור</button>
     </div></div>
     <div id="at-al" style="display:none;">
       <details style="margin-bottom:12px;" ontoggle="if(this.open&&typeof checkOneTimeTools==='function')checkOneTimeTools()">
@@ -13492,7 +13522,7 @@ function aT(t,el){
   // Allow programmatic jumps (shortcut buttons) — find the tab button when not passed
   if(!el) el=document.querySelector('.atab[onclick*="\''+t+'\'"]');
   if(el){ el.classList.add('active'); try{ el.scrollIntoView({behavior:'smooth',inline:'center',block:'nearest'}); }catch(e){} }
-  ['ap','ad','ah','ak','an','adict','asem','al','audit','qrec','acat'].forEach(id=>document.getElementById('at-'+id).style.display='none');
+  ['ap','ad','ah','ak','an','adict','asem','ac','al','audit','qrec','acat'].forEach(id=>document.getElementById('at-'+id).style.display='none');
   document.getElementById('at-'+t).style.display='block';
   if(t==='al')renderAdminList();if(t==='acat')renderCatList();if(t==='audit')renderQuestionAudit();if(t==='qrec')renderRespRecList();
   try{ renderTabList(t); }catch(e){ console.warn('renderTabList',e); }
@@ -13509,30 +13539,44 @@ var TAB_LIST_CFG = {
   ak:   {arr:function(){return ANNOUNCE;},   sub:function(p){return p.cat;}},
   an:   {arr:function(){return NAVY;},       sub:function(p){return p.cat;}},
   adict:{arr:function(){return DICT;},       sub:function(p){return p.trans;}},
-  asem: {arr:function(){return SEM;},        sub:function(p){return p.trans;}}
+  asem: {arr:function(){return SEM;},        sub:function(p){return p.trans;}},
+  ac:   {arr:function(){return CUS;},        sub:function(p){return p.cat;}}
 };
 function _tabEsc(s){ return String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
 function renderTabList(t){
   var cfg=TAB_LIST_CFG[t]; if(!cfg) return;
   var el=document.getElementById('list-'+t); if(!el) return;
   var arr=cfg.arr()||[];
-  if(!arr.length){ el.innerHTML='<div style="color:#7a9ab5;font-size:12px;padding:8px;">אין פריטים עדיין</div>'; return; }
-  var html='';
-  for(var i=0;i<arr.length;i++){
-    var p=arr[i];
-    var id=String(p.id||'').replace(/'/g,"\\'");
-    var sub=_tabEsc(cfg.sub(p)||'');
-    var mic=(p.audio||p.audio_url)?'<span title="יש הקלטה" style="color:#1D9E75;">🎵</span>':'<span title="אין הקלטה" style="color:#e07a5f;">🔇</span>';
-    html+='<div style="padding:8px;border-bottom:1px solid #1a2a3a;display:flex;justify-content:space-between;align-items:center;gap:8px;">'
-      +'<div style="flex:1;min-width:0;cursor:pointer;" onclick="openEditById(\''+id+'\')">'
-      +'<div style="color:#E8D9B8;font-size:12px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">'+_tabEsc(p.he)+'</div>'
-      +'<div style="color:#7a9ab5;font-size:10px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">'+sub+' '+mic+'</div>'
-      +'</div>'
-      +'<button onclick="openEditById(\''+id+'\')" title="ערוך" style="padding:5px 9px;background:#2A3D52;border:none;border-radius:6px;color:#E8D9B8;font-size:12px;cursor:pointer;font-family:inherit;">✏️</button>'
-      +'<button onclick="quickRecordById(\''+id+'\')" title="הקלט" style="padding:5px 9px;background:#3a2a1a;border:none;border-radius:6px;color:#E8D9B8;font-size:12px;cursor:pointer;font-family:inherit;">🎤</button>'
-      +'</div>';
+  // Customs may contain built-in topics (id starts "bi-") that live in the code,
+  // not the DB — they must be promoted to the DB before they can be edited.
+  var anyBuiltin=false;
+  if(!arr.length){ el.innerHTML='<div style="color:#7a9ab5;font-size:12px;padding:8px;">אין פריטים עדיין</div>'; }
+  else{
+    var html='';
+    for(var i=0;i<arr.length;i++){
+      var p=arr[i];
+      var id=String(p.id||'').replace(/'/g,"\\'");
+      var isBuiltin=/^bi-/.test(String(p.id||''));
+      if(isBuiltin)anyBuiltin=true;
+      var sub=_tabEsc(cfg.sub(p)||'');
+      var mic=(p.audio||p.audio_url)?'<span title="יש הקלטה" style="color:#1D9E75;">🎵</span>':'<span title="אין הקלטה" style="color:#e07a5f;">🔇</span>';
+      var lock=isBuiltin?' <span title="מנהג מובנה — צריך לאפשר עריכה" style="color:#D4A24E;">🔒</span>':'';
+      var openCall=isBuiltin?'enableCustomsEditing()':'openEditById(\''+id+'\')';
+      var recBtn=isBuiltin?'':'<button onclick="quickRecordById(\''+id+'\')" title="הקלט" style="padding:5px 9px;background:#3a2a1a;border:none;border-radius:6px;color:#E8D9B8;font-size:12px;cursor:pointer;font-family:inherit;">🎤</button>';
+      html+='<div style="padding:8px;border-bottom:1px solid #1a2a3a;display:flex;justify-content:space-between;align-items:center;gap:8px;">'
+        +'<div style="flex:1;min-width:0;cursor:pointer;" onclick="'+openCall+'">'
+        +'<div style="color:#E8D9B8;font-size:12px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">'+_tabEsc(p.he)+lock+'</div>'
+        +'<div style="color:#7a9ab5;font-size:10px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">'+sub+' '+mic+'</div>'
+        +'</div>'
+        +'<button onclick="'+openCall+'" title="ערוך" style="padding:5px 9px;background:#2A3D52;border:none;border-radius:6px;color:#E8D9B8;font-size:12px;cursor:pointer;font-family:inherit;">✏️</button>'
+        +recBtn
+        +'</div>';
+    }
+    el.innerHTML=html;
   }
-  el.innerHTML=html;
+  // Show the "enable editing" note only when built-in customs still need promoting.
+  var note=document.getElementById('ac-builtin-note');
+  if(note) note.style.display=(t==='ac' && anyBuiltin)?'block':'none';
 }
 // Open the editor by id and jump straight to the recorder (mirrors quickRecordIdx,
 // but works from the per-tab list where we have the id, not the _adminItems index).
@@ -13550,6 +13594,48 @@ function refreshOpenTabList(){
       if(sec && sec.style.display!=='none'){ renderTabList(t); }
     }
   }catch(e){}
+}
+// Save a new custom (מנהג) and show it in the customs list immediately.
+async function addCustoms(){
+  var he=document.getElementById('ache').value.trim();
+  var why=document.getElementById('acwy').value.trim();
+  if(!he||!why){ alert('חובה: שם המנהג והסבר/טיפ ללוחם'); return; }
+  var btn=document.querySelector('#at-ac .sbtn'); var old=btn.textContent; btn.textContent='שומר...';
+  var phrase={cat:document.getElementById('acc').value,he:he,trans:document.getElementById('actr').value.trim(),ar:document.getElementById('acar').value.trim(),why:why,tone:'',audio:''};
+  try{
+    var au=await getAudio('ac',document.getElementById('ac-status')); if(au)phrase.audio=au;
+    var s=await spSave(phrase,'customs'); if(s&&s[0])phrase.id=s[0].id; phrase.isNew=true; phrase.section='customs';
+    CUS.push(phrase);
+    ['ache','acar','actr','acwy'].forEach(function(id){document.getElementById(id).value='';});
+    try{ refreshOpenTabList(); }catch(e){}
+    btn.textContent=old; alert('✓ נוסף!');
+  }catch(e){ btn.textContent=old; alert('שגיאה: '+e.message); }
+}
+// Promote the built-in customs into the DB so every מנהג becomes editable/recordable.
+// Idempotent (dedup by title). Reuses the same insert the orphaned helper used.
+async function enableCustomsEditing(btn){
+  if(!confirm('להוסיף את המנהגים המובנים לרשימת העריכה? כך תוכלי לראות, לערוך ולהקליט כל אחד מהם. (לא תיווצר כפילות אם כבר קיימים.)'))return;
+  var old=btn?btn.textContent:''; if(btn){btn.disabled=true;btn.textContent='מוסיף...';}
+  try{
+    var norm=function(s){ return String(s||'').replace(/[^֐-׿0-9A-Za-z]/g,''); };
+    var existing=await sbFetch('/rest/v1/phrases?select=he&section=eq.customs');
+    var have={}; (existing||[]).forEach(function(p){ have[norm(p.he)]=1; });
+    var added=0;
+    for(var i=0;i<BUILTIN_CUSTOMS.length;i++){
+      var c=BUILTIN_CUSTOMS[i];
+      if(have[norm(c.he)])continue;
+      await sbFetch('/rest/v1/phrases','POST',{cat:c.cat,he:c.he,trans:c.trans||'',ar:c.ar||'',tags:'',why:c.why||'',tone:'',audio_url:'',is_new:true,section:'customs'});
+      have[norm(c.he)]=1; added++;
+    }
+    await loadData();
+    try{ renderAdminList(); }catch(e){}
+    try{ refreshOpenTabList(); }catch(e){}
+    if(btn){btn.disabled=false;btn.textContent=old;}
+    alert('✓ נוספו '+added+' מנהגים לעריכה. עכשיו אפשר לערוך ולהקליט כל אחד מהם כאן. אם נוספו 0 — הם כבר היו קיימים.');
+  }catch(e){
+    if(btn){btn.disabled=false;btn.textContent=old;}
+    alert('שגיאה: '+(e&&e.message?e.message:e));
+  }
 }
 
 // Audit: find questions (Hebrew/Arabic text containing "?") that have no possible answers.
