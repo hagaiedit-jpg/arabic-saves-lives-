@@ -12,8 +12,7 @@
 <link rel="apple-touch-icon" href="./icon.svg">
 <link rel="icon" href="./icon.svg" type="image/svg+xml">
 <title>ערבית מצילה חיים</title>
-<!-- Google Analytics -->
-<script async src="https://www.googletagmanager.com/gtag/js?id=G-G91ERLFQ16"></script>
+<!-- Google Analytics — loaded only AFTER explicit user consent (see consent banner) -->
 <script>
 
 // === MediaRecorder format helper - works on iPhone, Android, Desktop ===
@@ -40,10 +39,20 @@ function createRecorder(stream) {
   }
 }
 
+  // Analytics is consent-gated for privacy compliance (GDPR / חוק הגנת הפרטיות).
+  // Google Analytics is NOT loaded until the user explicitly accepts.
   window.dataLayer = window.dataLayer || [];
   function gtag(){dataLayer.push(arguments);}
-  gtag('js', new Date());
-  gtag('config', 'G-G91ERLFQ16');
+  window.GA_ID = 'G-G91ERLFQ16';
+  window.loadAnalytics = function(){
+    if (window._gaLoaded) return; window._gaLoaded = true;
+    var s = document.createElement('script'); s.async = true;
+    s.src = 'https://www.googletagmanager.com/gtag/js?id=' + window.GA_ID;
+    document.head.appendChild(s);
+    gtag('js', new Date());
+    gtag('config', window.GA_ID, { anonymize_ip: true });
+  };
+  try { if (localStorage.getItem('analyticsConsent') === 'granted') window.loadAnalytics(); } catch(e) {}
 </script>
 
 <style>
@@ -2095,6 +2104,15 @@ function showLanding() {
     <button onclick="showHelp();document.getElementById('header-menu').style.display='none';" style="display:flex;align-items:center;gap:10px;width:100%;background:transparent;border:none;color:#E8D9B8;padding:10px 12px;text-align:right;cursor:pointer;font-family:inherit;font-size:14px;border-radius:8px;">
       <span style="font-size:18px;">❓</span>
       <span>עזרה ומקרא</span>
+    </button>
+    <div style="height:1px;background:#2e4558;margin:6px 4px;"></div>
+    <button onclick="openLegal('privacy');document.getElementById('header-menu').style.display='none';" style="display:flex;align-items:center;gap:10px;width:100%;background:transparent;border:none;color:#E8D9B8;padding:10px 12px;text-align:right;cursor:pointer;font-family:inherit;font-size:14px;border-radius:8px;">
+      <span style="font-size:18px;">🔒</span>
+      <span>מדיניות פרטיות</span>
+    </button>
+    <button onclick="openLegal('terms');document.getElementById('header-menu').style.display='none';" style="display:flex;align-items:center;gap:10px;width:100%;background:transparent;border:none;color:#E8D9B8;padding:10px 12px;text-align:right;cursor:pointer;font-family:inherit;font-size:14px;border-radius:8px;">
+      <span style="font-size:18px;">📄</span>
+      <span>תנאי שימוש</span>
     </button>
   </div>
   <div class="tb-tabs" style="display:none;">
@@ -16834,6 +16852,72 @@ if ('serviceWorker' in navigator) {
     navigator.serviceWorker.register('./sw.js').catch(function(e){ console.warn('SW registration failed', e); });
   });
 }
+</script>
+
+<!-- ===== Cookie / analytics consent banner ===== -->
+<div id="consent-banner" style="display:none;position:fixed;left:0;right:0;bottom:0;z-index:10000;background:#0E1B2E;border-top:2px solid #D4A24E;padding:16px;direction:rtl;box-shadow:0 -6px 24px rgba(0,0,0,0.4);">
+  <div style="max-width:640px;margin:0 auto;display:flex;flex-direction:column;gap:12px;">
+    <div style="color:#E8D9B8;font-size:13.5px;line-height:1.6;">
+      אנחנו משתמשים ב־Google Analytics כדי להבין איך משפרים את האפליקציה. הנתונים אנונימיים.
+      אפשר להשתמש באפליקציה במלואה גם בלי לאשר. <a href="#" onclick="openLegal('privacy');return false;" style="color:#D4A24E;text-decoration:underline;">מדיניות הפרטיות</a>
+    </div>
+    <div style="display:flex;gap:10px;flex-wrap:wrap;">
+      <button onclick="setAnalyticsConsent(true)" style="flex:1;min-width:130px;padding:11px;background:#1D9E75;border:none;border-radius:9px;color:#fff;font-size:14px;font-weight:700;cursor:pointer;font-family:inherit;">מאשר/ת</button>
+      <button onclick="setAnalyticsConsent(false)" style="flex:1;min-width:130px;padding:11px;background:#2A3D52;border:none;border-radius:9px;color:#E8D9B8;font-size:14px;font-weight:600;cursor:pointer;font-family:inherit;">לא, תודה</button>
+    </div>
+  </div>
+</div>
+
+<!-- ===== Legal modal (privacy policy + terms of use) ===== -->
+<div id="legal-modal" style="display:none;position:fixed;inset:0;z-index:10001;background:rgba(0,0,0,0.85);align-items:center;justify-content:center;padding:16px;direction:rtl;">
+  <div style="background:#0E1B2E;border:1px solid #2A3D52;border-radius:16px;width:100%;max-width:560px;max-height:88vh;display:flex;flex-direction:column;">
+    <div style="display:flex;align-items:center;justify-content:space-between;padding:16px 18px;border-bottom:1px solid #2A3D52;">
+      <div style="display:flex;gap:8px;">
+        <button id="legal-tab-privacy" onclick="switchLegal('privacy')" style="padding:7px 12px;border:none;border-radius:8px;font-size:13px;font-weight:700;cursor:pointer;font-family:inherit;">🔒 פרטיות</button>
+        <button id="legal-tab-terms" onclick="switchLegal('terms')" style="padding:7px 12px;border:none;border-radius:8px;font-size:13px;font-weight:700;cursor:pointer;font-family:inherit;">📄 תנאי שימוש</button>
+      </div>
+      <button onclick="closeLegal()" style="background:transparent;border:none;color:#E8D9B8;font-size:22px;cursor:pointer;line-height:1;">×</button>
+    </div>
+    <div id="legal-body" style="padding:18px 20px;overflow-y:auto;color:#cfe0ee;font-size:13.5px;line-height:1.75;"></div>
+  </div>
+</div>
+
+<script>
+// ===== Consent =====
+function setAnalyticsConsent(granted){
+  try { localStorage.setItem('analyticsConsent', granted ? 'granted' : 'denied'); } catch(e) {}
+  var b = document.getElementById('consent-banner'); if (b) b.style.display = 'none';
+  if (granted && typeof window.loadAnalytics === 'function') window.loadAnalytics();
+}
+(function initConsent(){
+  try {
+    var c = localStorage.getItem('analyticsConsent');
+    if (c !== 'granted' && c !== 'denied') {
+      var show = function(){ var b = document.getElementById('consent-banner'); if (b) b.style.display = 'block'; };
+      if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', show); else show();
+    }
+  } catch(e) {}
+})();
+
+// ===== Legal content (DRAFT — pending legal review) =====
+var LEGAL_CONTENT = {
+  privacy: "<div style=\"background:rgba(212,162,78,0.12);border:1px solid #D4A24E;border-radius:8px;padding:10px;font-size:12.5px;color:#E8D9B8;margin-bottom:14px;\">⚠️ טיוטה — ממתינה לבדיקת עורך/ת דין. יש להשלים את הפרטים המסומנים ב־[…] ולאשר לפני פרסום.</div>\n<div style=\"color:#E8D9B8;font-size:18px;font-weight:800;margin:0 0 4px;\">מדיניות פרטיות</div>\n<div style=\"color:#7a9ab5;font-size:12px;margin-bottom:10px;\">עודכן לאחרונה: [תאריך] · אפליקציית \"ערבית מצילה חיים\"</div>\n\n<div style=\"color:#D4A24E;font-size:15px;font-weight:700;margin:16px 0 6px;\">1. כללי</div>\n<p>אנו מכבדים את פרטיותך. מסמך זה מסביר אילו נתונים האפליקציה אוספת, כיצד נעשה בהם שימוש, ומהן זכויותיך. השימוש באפליקציה מהווה הסכמה למדיניות זו.</p>\n\n<div style=\"color:#D4A24E;font-size:15px;font-weight:700;margin:16px 0 6px;\">2. אילו נתונים נאספים</div>\n<ul>\n<li><strong>נתונים על המכשיר בלבד:</strong> התקדמות הלמידה, מועדפים, רצף תרגול והעדפות תצוגה (ערכת נושא, גודל טקסט) נשמרים מקומית בדפדפן שלך (localStorage) ואינם נשלחים אלינו.</li>\n<li><strong>נתוני שימוש (Google Analytics):</strong> רק לאחר אישורך המפורש, אנו אוספים נתוני שימוש אנונימיים (עמודים, פעולות כלליות) עם הסתרת כתובת ה־IP. אפשר להשתמש באפליקציה במלואה גם ללא אישור.</li>\n<li><strong>מיקרופון:</strong> הרשאת המיקרופון משמשת אך ורק להקלטת אודיו של משפטים (בעיקר בממשק הניהול). ההקלטות נשמרות בשירות אחסון ענן (Cloudinary).</li>\n<li><strong>תוכן:</strong> המשפטים, התרגומים וההקלטות מאוחסנים בשירות מסד נתונים (Supabase).</li>\n</ul>\n<p>איננו אוספים שם, כתובת או פרטים מזהים ממשתמשים רגילים, ואין צורך בחשבון כדי להשתמש באפליקציה.</p>\n\n<div style=\"color:#D4A24E;font-size:15px;font-weight:700;margin:16px 0 6px;\">3. שירותי צד שלישי</div>\n<p>אנו נעזרים בספקים הבאים, שלכל אחד מדיניות פרטיות משלו: Google Analytics (ניתוח שימוש), Supabase (אחסון תוכן), Cloudinary (אחסון הקלטות), Cloudflare (אירוח והפצה).</p>\n\n<div style=\"color:#D4A24E;font-size:15px;font-weight:700;margin:16px 0 6px;\">4. עוגיות ואחסון מקומי</div>\n<p>האפליקציה משתמשת באחסון מקומי בדפדפן לשמירת העדפות והתקדמות. Google Analytics עשוי להשתמש בעוגיות — רק לאחר אישורך.</p>\n\n<div style=\"color:#D4A24E;font-size:15px;font-weight:700;margin:16px 0 6px;\">5. זכויותיך</div>\n<ul>\n<li>ניתן למחוק את הנתונים המקומיים בכל עת דרך ניקוי נתוני האתר בדפדפן.</li>\n<li>ניתן לבטל את ההסכמה לניתוח השימוש בכל עת (ניקוי נתוני האתר יאפס את הבחירה).</li>\n<li>בהתאם לחוק הגנת הפרטיות ולתקנות ה־GDPR, ניתן לפנות אלינו לבקשת עיון או מחיקה.</li>\n</ul>\n\n<div style=\"color:#D4A24E;font-size:15px;font-weight:700;margin:16px 0 6px;\">6. אבטחה</div>\n<p>אנו נוקטים באמצעים סבירים לשמירת המידע. עם זאת, אף מערכת אינה מאובטחת ב־100%.</p>\n\n<div style=\"color:#D4A24E;font-size:15px;font-weight:700;margin:16px 0 6px;\">7. קטינים</div>\n<p>האפליקציה מיועדת למבוגרים בהקשר של תקשורת בשטח, ואינה פונה לקטינים.</p>\n\n<div style=\"color:#D4A24E;font-size:15px;font-weight:700;margin:16px 0 6px;\">8. שינויים</div>\n<p>נעדכן מדיניות זו מעת לעת. המשך השימוש לאחר עדכון מהווה הסכמה לגרסה המעודכנת.</p>\n\n<div style=\"color:#D4A24E;font-size:15px;font-weight:700;margin:16px 0 6px;\">9. יצירת קשר</div>\n<p>לשאלות בנושא פרטיות: [שם בעל/ת האפליקציה] · hagaiedit@gmail.com</p>",
+  terms: "<div style=\"background:rgba(212,162,78,0.12);border:1px solid #D4A24E;border-radius:8px;padding:10px;font-size:12.5px;color:#E8D9B8;margin-bottom:14px;\">⚠️ טיוטה — ממתינה לבדיקת עורך/ת דין. יש להשלים את הפרטים המסומנים ב־[…] ולאשר לפני פרסום.</div>\n<div style=\"color:#E8D9B8;font-size:18px;font-weight:800;margin:0 0 4px;\">תנאי שימוש</div>\n<div style=\"color:#7a9ab5;font-size:12px;margin-bottom:10px;\">עודכן לאחרונה: [תאריך] · אפליקציית \"ערבית מצילה חיים\"</div>\n\n<div style=\"color:#D4A24E;font-size:15px;font-weight:700;margin:16px 0 6px;\">1. קבלת התנאים</div>\n<p>השימוש באפליקציה מהווה הסכמה לתנאים אלה. אם אינך מסכים/ה — אין להשתמש באפליקציה.</p>\n\n<div style=\"color:#D4A24E;font-size:15px;font-weight:700;margin:16px 0 6px;\">2. מהות השירות</div>\n<p>האפליקציה היא כלי עזר ללימוד ערבית מדוברת לצורך תקשורת בשטח ומניעת הסלמה. היא כוללת משפטים, תרגומים, תעתיקים, הקלטות ותכני תרבות.</p>\n\n<div style=\"color:#D4A24E;font-size:15px;font-weight:700;margin:16px 0 6px;\">3. הגבלת אחריות ודיוק</div>\n<ul>\n<li>התכנים, התרגומים והתעתיקים ניתנים <strong>\"כפי שהם\" (AS IS)</strong>, וייתכנו בהם אי־דיוקים, שגיאות או חוסרים.</li>\n<li>האפליקציה <strong>אינה תחליף</strong> להכשרה רשמית, לשיקול דעת מבצעי, או להנחיות של הגורמים המוסמכים.</li>\n<li>ההסתמכות על התכנים היא באחריות המשתמש/ת בלבד. איננו אחראים לכל נזק ישיר או עקיף הנובע מהשימוש.</li>\n</ul>\n\n<div style=\"color:#D4A24E;font-size:15px;font-weight:700;margin:16px 0 6px;\">4. שימוש מותר</div>\n<p>מותר להשתמש באפליקציה לשימוש אישי ולימודי. אין להעתיק, למכור, להפיץ מחדש או לבצע שימוש מסחרי בתכנים ללא אישור בכתב מבעל/ת הזכויות.</p>\n\n<div style=\"color:#D4A24E;font-size:15px;font-weight:700;margin:16px 0 6px;\">5. קניין רוחני</div>\n<p>כל הזכויות בתכנים, בעיצוב ובקוד שמורות ל־[שם בעל/ת הזכויות]. סימני מסחר ותכנים של צד שלישי שייכים לבעליהם.</p>\n\n<div style=\"color:#D4A24E;font-size:15px;font-weight:700;margin:16px 0 6px;\">6. זמינות השירות</div>\n<p>אנו שואפים לזמינות רציפה, אך ייתכנו הפסקות, תקלות או שינויים ללא הודעה מוקדמת.</p>\n\n<div style=\"color:#D4A24E;font-size:15px;font-weight:700;margin:16px 0 6px;\">7. שינויים בתנאים</div>\n<p>נוכל לעדכן תנאים אלה מעת לעת. המשך השימוש לאחר עדכון מהווה הסכמה.</p>\n\n<div style=\"color:#D4A24E;font-size:15px;font-weight:700;margin:16px 0 6px;\">8. דין וסמכות שיפוט</div>\n<p>על תנאים אלה יחולו דיני מדינת ישראל, וסמכות השיפוט הבלעדית נתונה לבתי המשפט המוסמכים ב־[עיר].</p>\n\n<div style=\"color:#D4A24E;font-size:15px;font-weight:700;margin:16px 0 6px;\">9. יצירת קשר</div>\n<p>לשאלות: [שם בעל/ת האפליקציה] · hagaiedit@gmail.com</p>"
+};
+function openLegal(which){
+  document.getElementById('legal-modal').style.display = 'flex';
+  switchLegal(which || 'privacy');
+}
+function switchLegal(which){
+  document.getElementById('legal-body').innerHTML = LEGAL_CONTENT[which] || '';
+  document.getElementById('legal-body').scrollTop = 0;
+  var pv = document.getElementById('legal-tab-privacy'), tm = document.getElementById('legal-tab-terms');
+  var on = 'background:#D4A24E;color:#0E1B2E;', off = 'background:#2A3D52;color:#E8D9B8;';
+  pv.style.cssText = 'padding:7px 12px;border:none;border-radius:8px;font-size:13px;font-weight:700;cursor:pointer;font-family:inherit;' + (which==='privacy'?on:off);
+  tm.style.cssText = 'padding:7px 12px;border:none;border-radius:8px;font-size:13px;font-weight:700;cursor:pointer;font-family:inherit;' + (which==='terms'?on:off);
+}
+function closeLegal(){ document.getElementById('legal-modal').style.display = 'none'; }
+document.getElementById('legal-modal').addEventListener('click', function(e){ if (e.target === this) closeLegal(); });
 </script>
 </body>
 </html>
