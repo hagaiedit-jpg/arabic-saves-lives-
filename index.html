@@ -14057,6 +14057,45 @@ async function addCustoms(){
 }
 // Promote the built-in customs into the DB so every מנהג becomes editable/recordable.
 // Idempotent (dedup by title). Reuses the same insert the orphaned helper used.
+// Auto-promote ALL built-in content (scenarios + customs) into the editable DB
+// so anything shipped in code becomes editable + recordable with NO manual step.
+// Runs once per session, only ADDS missing rows (never edits/deletes existing),
+// and is duplicate-safe. Called automatically when the admin list opens.
+async function autoSyncBuiltins(){
+  if(window._builtinsSynced) return;
+  window._builtinsSynced = true; // guard immediately against re-entry
+  try{
+    var addedScn=0, addedCus=0;
+    // --- scenarios (keyed by category#stepNumber) ---
+    if(typeof BUILTIN_SCENARIO_DATA!=='undefined' && BUILTIN_SCENARIO_DATA.length){
+      var exScn=await sbFetchAllRows('/rest/v1/phrases?select=id,cat,tags&section=eq.scenario');
+      var haveScn={}; (exScn||[]).forEach(function(p){ haveScn[_scnStepKey(p)]=1; });
+      for(var i=0;i<BUILTIN_SCENARIO_DATA.length;i++){
+        var b=BUILTIN_SCENARIO_DATA[i]; var k=_scnStepKey(b);
+        if(haveScn[k])continue;
+        await sbFetch('/rest/v1/phrases','POST',{cat:b.cat,he:b.he,trans:b.trans||'',ar:b.ar||'',tags:b.tags||'',why:b.why||'',tone:'',audio_url:'',is_new:false,section:'scenario'});
+        haveScn[k]=1; addedScn++;
+      }
+    }
+    // --- customs (keyed by normalized Hebrew title) ---
+    if(typeof BUILTIN_CUSTOMS!=='undefined' && BUILTIN_CUSTOMS.length){
+      var norm=function(s){ return String(s||'').replace(/[^֐-׿0-9A-Za-z]/g,''); };
+      var exCus=await sbFetch('/rest/v1/phrases?select=he&section=eq.customs');
+      var haveCus={}; (exCus||[]).forEach(function(p){ haveCus[norm(p.he)]=1; });
+      for(var j=0;j<BUILTIN_CUSTOMS.length;j++){
+        var c=BUILTIN_CUSTOMS[j]; if(haveCus[norm(c.he)])continue;
+        await sbFetch('/rest/v1/phrases','POST',{cat:c.cat,he:c.he,trans:c.trans||'',ar:c.ar||'',tags:'',why:c.why||'',tone:'',audio_url:'',is_new:true,section:'customs'});
+        haveCus[norm(c.he)]=1; addedCus++;
+      }
+    }
+    window._autoSyncAdded = addedScn+addedCus;
+    if(addedScn+addedCus>0){ await loadData(); }
+  }catch(e){
+    window._builtinsSynced=false; // let it retry next time on failure
+    console.warn('autoSyncBuiltins failed', e);
+  }
+}
+
 async function enableCustomsEditing(btn){
   if(!confirm('להוסיף את המנהגים המובנים לרשימת העריכה? כך תוכלי לראות, לערוך ולהקליט כל אחד מהם. (לא תיווצר כפילות אם כבר קיימים.)'))return;
   var old=btn?btn.textContent:''; if(btn){btn.disabled=true;btn.textContent='מוסיף...';}
@@ -14987,6 +15026,8 @@ async function renderAdminList(){
   const el=document.getElementById('admin-list');
   el.innerHTML='<div class="loading">טוען...</div>';
   try{
+    // Make sure everything shipped in code is available for editing/recording — automatic, once per session.
+    try{ await autoSyncBuiltins(); }catch(e){ console.warn('autoSync skipped', e); }
     const data=await sbFetchAllRows('/rest/v1/phrases?select=*&order=created_at.desc,id.desc');
     if(!data||!data.length){el.innerHTML='<div class="empty">אין משפטים עדיין</div>';return;}
     window._adminItems=data;
@@ -15018,6 +15059,10 @@ async function renderAdminList(){
       + '</div>';
     
     let html=filterBar;
+    if (window._autoSyncAdded > 0) {
+      html += '<div style="background:rgba(29,158,117,0.15);border:1px solid #1D9E75;border-radius:10px;padding:10px 12px;margin-bottom:10px;color:#8fe0c2;font-size:12px;font-weight:600;text-align:center;">✓ '+window._autoSyncAdded+' שורות חדשות סונכרנו אוטומטית לרשימה — אפשר לערוך ולהקליט אותן כאן</div>';
+      window._autoSyncAdded = 0;
+    }
     if (filteredItems.length === 0) {
       html += '<div class="empty">אין משפטים תואמים לסינון</div>';
       el.innerHTML = html;
