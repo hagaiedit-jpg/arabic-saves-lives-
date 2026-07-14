@@ -7834,6 +7834,113 @@ function homePotdDismiss(){
   if (c) c.style.display = 'none';
 }
 
+// Built-in field-interrogation questions (verified by the expert), shown as תשאול categories.
+var BUILTIN_TASHAUL=[
+  {id:'bi-tash-0', section:'military', cat:'תשאול: פרטים אישיים', he:'רווק או נשוי?', ar:'عزّابي والا متزوّج؟', trans:'עַזַּאבִּי וִאלַּא מִתְזַוֵּג׳?'},
+  {id:'bi-tash-1', section:'military', cat:'תשאול: פרטים אישיים', he:'מה הכינוי שלך? אבו מה? (על שם הבן הבכור)', ar:'أبو إيش بقولوا لك؟', trans:'אַבּוּ אֵש בִּקוּלוּ-לַכּ?'},
+  {id:'bi-tash-2', section:'military', cat:'תשאול: פרטים אישיים', he:'בנים ובנות', ar:'اولاد وبنات', trans:'אוְלַאד וּבַּנַאת'},
+  {id:'bi-tash-3', section:'military', cat:'תשאול: פרטים אישיים', he:'בני כמה הם?', ar:'قدّيش عمرهم؟', trans:'קַדֵּיש עֻמְרְהֹם?'},
+  {id:'bi-tash-4', section:'military', cat:'תשאול: משפחה', he:'איך קוראים לאבא שלך?', ar:'شو اسم الوالد؟', trans:'שוּ אִסֶם אִלוַאלֶד?'},
+  {id:'bi-tash-5', section:'military', cat:'תשאול: משפחה', he:'איך קוראים לאמא שלך?', ar:'شو اسم الوالدة؟', trans:'שוּ אִסֶם אִלוַאלְדֶה?'},
+  {id:'bi-tash-6', section:'military', cat:'תשאול: משפחה', he:'מקווה שהם בחיים / בריאים?', ar:'إن شاء الله طيّبين؟', trans:'אִנְשַאללָּה טַיְּבִּין?'},
+  {id:'bi-tash-7', section:'military', cat:'תשאול: משפחה', he:'מי הם אחיך / אחיותיך?', ar:'مين إخواتك / خواتك؟', trans:'מִין אִחְוַתַכּ / חַ׳וַאתַכּ?'},
+  {id:'bi-tash-8', section:'military', cat:'תשאול: משפחה', he:'מה שמותיהם?', ar:'شو أساميهم؟', trans:'שוּ אַסַאמִיהֹם?'},
+  {id:'bi-tash-9', section:'military', cat:'תשאול: משפחה', he:'היכן הם גרים?', ar:'وين ساكنين؟', trans:'וֵין סַאכְּנִין?'},
+  {id:'bi-tash-10', section:'military', cat:'תשאול: משפחה', he:'יש ביניהם נשואים / נשואות?', ar:'فيه منهم متزوّجين / متزوّجات؟', trans:'פִיה מִנְהֹם מִתְזַוְּגִ׳ין / מִתְזַוְּגַ׳את?'},
+  {id:'bi-tash-11', section:'military', cat:'תשאול: כתובת ובית', he:'היכן אתה גר?', ar:'وين ساكن؟', trans:'וֵין סַאכֶּן?'},
+  {id:'bi-tash-12', section:'military', cat:'תשאול: כתובת ובית', he:'מה שם השכונה?', ar:'شو اسم الحيّ / الحارة؟', trans:'שוּ אִסֶם אִלחַיּ / אִלחַארַה?'},
+  {id:'bi-tash-13', section:'military', cat:'תשאול: כתובת ובית', he:'בית קרקע?', ar:'أرضي؟', trans:'אַרְדִ׳י?'},
+  {id:'bi-tash-14', section:'military', cat:'תשאול: כתובת ובית', he:'בניין?', ar:'عمارة؟', trans:'עִמַארַה?'},
+  {id:'bi-tash-15', section:'military', cat:'תשאול: כתובת ובית', he:'איזו קומה?', ar:'أيّ طابق؟', trans:'אַיּ טַאבֶּק?'},
+  {id:'bi-tash-16', section:'military', cat:'תשאול: כתובת ובית', he:'כמה קומות יש בבניין?', ar:'كم طابق فيه في العمارة؟', trans:'כַּם טַאבֶּק פִיה פִי אִלעִמַארַה?'},
+  {id:'bi-tash-17', section:'military', cat:'תשאול: כתובת ובית', he:'תתאר לי את הבית', ar:'اوصف لي البيت', trans:'אִוְצֶף לִי אִלבֵּית'},
+  {id:'bi-tash-18', section:'military', cat:'תשאול: כתובת ובית', he:'מי גר איתך בבית?', ar:'مين ساكن معك في البيت؟', trans:'מִין סַאכֶּן מַעַאכּ פִי אִלבֵּית?'},
+  {id:'bi-tash-19', section:'military', cat:'תשאול: כתובת ובית', he:'הבית בבעלותך או שוכר?', ar:'إنت صاحب البيت والا ساكن بالأجار؟', trans:'אִנְתֶ צַאחֶבּ אִלבֵּית וִאלַּא סַאכֶּן בִּלאַגַ׳אר?'},
+  {id:'bi-tash-20', section:'military', cat:'תשאול: כתובת ובית', he:'מי בעל הבית? (ממי אתה שוכר)', ar:'عند مين ساكن بالأجار؟', trans:'עִנְד מִין סַאכֶּן בִּאלאַגַ׳אר?'},
+  {id:'bi-tash-21', section:'military', cat:'תשאול: כתובת ובית', he:'תתאר לי את הבית מבפנים ומבחוץ', ar:'اوصف لي البيت من جوّه ومن برّه', trans:'אִוְצֶף לִי אִלבֵּית מִן גֻ׳וַּה וּמִן בַּרַּה'},
+  {id:'bi-tash-22', section:'military', cat:'תשאול: כתובת ובית', he:'מה יש ליד הבית?', ar:'شو فيه جنب البيت؟', trans:'שוּ פִיה גַ׳נְבּ אִלבֵּית?'},
+  {id:'bi-tash-23', section:'military', cat:'תשאול: כתובת ובית', he:'ציין מקומות מוכרים (ציוני דרך)', ar:'أعطيني محلّات معروفة', trans:'אַעְטִינִי מַחַלַּאת מַעְרוּפֶה'},
+  {id:'bi-tash-24', section:'military', cat:'תשאול: עבודה', he:'מה שם מקום העבודה?', ar:'شو اسم المحلّ؟', trans:'שוּ אִסֶם אִלמַחַל?'},
+  {id:'bi-tash-25', section:'military', cat:'תשאול: עבודה', he:'מה שם המעסיק / המנהל?', ar:'شو اسم المعلّم؟', trans:'שוּ אִסֶם אִלמְעַלֶּם?'},
+  {id:'bi-tash-26', section:'military', cat:'תשאול: עבודה', he:'מה מספר הטלפון שלו?', ar:'شو رقم تلفونه؟', trans:'שוּ רַקַם תַלַפוֹנוֹ?'},
+  {id:'bi-tash-27', section:'military', cat:'תשאול: עבודה', he:'מה הכתובת של מקום העבודה?', ar:'شو عنوان المحلّ؟', trans:'שוּ עֻנְוַאן אִלמַחַל?'},
+  {id:'bi-tash-28', section:'military', cat:'תשאול: עבודה', he:'כמה זמן אתה עובד שם?', ar:'قدّيش صار لك بتشتغل بالمحلّ؟', trans:'קַדֵּיש צַאר-לַכּ בְּתִשְתְעֶ׳ל בִּאלמַחַל?'},
+  {id:'bi-tash-29', section:'military', cat:'תשאול: עבודה', he:'מה שעות העבודה במקום?', ar:'شو ساعات العمل بالمحلّ؟', trans:'שוּ סַאעַאת אִלעַמַל בִּלמַחַל?'},
+  {id:'bi-tash-30', section:'military', cat:'תשאול: עבודה', he:'כמה אתה מרוויח?', ar:'قدّيش بتربح؟', trans:'קַדֵּיש בְּתִרְבַּח?'},
+  {id:'bi-tash-31', section:'military', cat:'תשאול: עבודה', he:'את מי אתה מפרנס?', ar:'على مين بتصرف؟', trans:'עַלַא מִין בְּתֻצְרֻף?'},
+  {id:'bi-tash-32', section:'military', cat:'תשאול: אמצעי תקשורת', he:'מה מספר הטלפון שלך?', ar:'شو رقم تلفونك؟', trans:'שוּ רַקַם תַלַפוֹנַכּ?'},
+  {id:'bi-tash-33', section:'military', cat:'תשאול: אמצעי תקשורת', he:'נייד או נייח?', ar:'موبايل والا أرضي؟', trans:'מוֹבַּאיֶל וִאלַּא אַרְדִ׳י?'},
+  {id:'bi-tash-34', section:'military', cat:'תשאול: אמצעי תקשורת', he:'מה כתובת האימייל שלך?', ar:'شو الإيميل؟', trans:'שוּ אִלאִימֵייל?'},
+  {id:'bi-tash-35', section:'military', cat:'תשאול: אמצעי תקשורת', he:'כמה זמן יש לך את הסים?', ar:'قدّيش صار لك مع الشريحة؟', trans:'קַדֵּיש צַאר-לַכּ מַעַ אִלשַרִיחַה?'},
+  {id:'bi-tash-36', section:'military', cat:'תשאול: אמצעי תקשורת', he:'על שם מי הוא רשום?', ar:'على اسم مين مسجّلة؟', trans:'עַלַא אִסֶם מִין מְסַגַּ׳לֶה?'},
+  {id:'bi-tash-37', section:'military', cat:'תשאול: השכלה', he:'כמה שנות לימוד יש לך?', ar:'كم سنة درست في المدرسة؟', trans:'כַּם סַנֶה דַרַסֶת פִי אִלמַדְרַסֶה?'},
+  {id:'bi-tash-38', section:'military', cat:'תשאול: השכלה', he:'באוניברסיטה?', ar:'في الجامعة؟', trans:'פִי אִלגַ׳אמְעַה?'},
+  {id:'bi-tash-39', section:'military', cat:'תשאול: השכלה', he:'מה שם המוסד?', ar:'شو اسم المحلّ؟', trans:'שוּ אִסֶם אִלמַחַל?'},
+  {id:'bi-tash-40', section:'military', cat:'תשאול: השכלה', he:'איזו תעודה יש ברשותך?', ar:'أيّ شهادة معك؟', trans:'אַיּ שַהַאדֶה מַעַכּ?'},
+  {id:'bi-tash-41', section:'military', cat:'תשאול: בריאות', he:'אתה נוטל תרופות באופן קבוע?', ar:'بتاخذ أدوية؟', trans:'בְּתַאחֹ׳ד אַדְוִיֶה?'},
+  {id:'bi-tash-42', section:'military', cat:'תשאול: בריאות', he:'איזה סוג תרופות?', ar:'شو نوعها؟', trans:'שוּ נוֹעְהַא?'},
+  {id:'bi-tash-43', section:'military', cat:'תשאול: בריאות', he:'יש לך מרשם?', ar:'فيه عندك روشتّة؟', trans:'פִיה עִנְדַכּ רוֹשֵטַּה?'},
+  {id:'bi-tash-44', section:'military', cat:'תשאול: בריאות', he:'אתה משתמש בכדורים?', ar:'بتستعمل حبوب؟', trans:'בְּתִסְתַעְמֶל חְבּוּבּ?'},
+  {id:'bi-tash-45', section:'military', cat:'תשאול: בריאות', he:'מקבל זריקות?', ar:'بتاخذ إبر؟', trans:'בְּתַאחֹ׳ד אִבַּר?'},
+  {id:'bi-tash-46', section:'military', cat:'תשאול: בריאות', he:'עברת ניתוח בבית חולים?', ar:'عملت عمليّات في المستشفى؟', trans:'עְמִלְת עַמַלִיַּאת פִי אִלמֻסְתַשְפַא?'},
+  {id:'bi-tash-47', section:'military', cat:'תשאול: חברים', he:'מי החברים שלך?', ar:'مين أصحابك؟', trans:'מִין אַצְחַאבַּכּ?'},
+  {id:'bi-tash-48', section:'military', cat:'תשאול: חברים', he:'היכן הם גרים?', ar:'وين ساكنين؟', trans:'וֵין סַאכְּנִין?'},
+  {id:'bi-tash-49', section:'military', cat:'תשאול: חברים', he:'במה הם עובדים?', ar:'شو بيشتغلوا؟', trans:'שוּ בְּיִשְתְעֶ׳לוּ?'},
+  {id:'bi-tash-50', section:'military', cat:'תשאול: חברים', he:'תן לי את מספרי הטלפון שלהם', ar:'أعطيني أرقام تلفوناتهم', trans:'אַעְטִינִי אַרְקַאם תַלַפוֹנַאתְהֹם'},
+  {id:'bi-tash-51', section:'military', cat:'תשאול: תיאור אדם', he:'תתאר לי אותו', ar:'اوصف لي إيّاه', trans:'אִוְצֶף לִי אִיַּאה'},
+  {id:'bi-tash-52', section:'military', cat:'תשאול: תיאור אדם', he:'מה הגובה שלו?', ar:'إيش طوله؟', trans:'אֵש טוּלוֹ?'},
+  {id:'bi-tash-53', section:'military', cat:'תשאול: תיאור אדם', he:'גבוה?', ar:'طويل؟', trans:'טַוִיל?'},
+  {id:'bi-tash-54', section:'military', cat:'תשאול: תיאור אדם', he:'נמוך?', ar:'قصير؟', trans:'קַצִיר?'},
+  {id:'bi-tash-55', section:'military', cat:'תשאול: תיאור אדם', he:'מה מבנה הגוף שלו?', ar:'كيف جسمه؟', trans:'כִּיף גִ׳סְמוֹ?'},
+  {id:'bi-tash-56', section:'military', cat:'תשאול: תיאור אדם', he:'רזה?', ar:'ضعيف؟', trans:'צְ׳עִיף?'},
+  {id:'bi-tash-57', section:'military', cat:'תשאול: תיאור אדם', he:'שמן / מלא?', ar:'ناصح؟', trans:'נַאצֶח?'},
+  {id:'bi-tash-58', section:'military', cat:'תשאול: תיאור אדם', he:'איך השיער שלו?', ar:'كيف شعره؟', trans:'כִּיף שַעְרוֹ?'},
+  {id:'bi-tash-59', section:'military', cat:'תשאול: תיאור אדם', he:'יש עליו סימנים כלשהם?', ar:'فيه عليه علامات؟', trans:'פִיה עַלֵיה עַלַאמַאת?'},
+  {id:'bi-tash-60', section:'military', cat:'תשאול: תיאור אדם', he:'קעקוע? (ושם)', ar:'وشم؟', trans:'וִשַם?'},
+  {id:'bi-tash-61', section:'military', cat:'תשאול: תיאור אדם', he:'סימנים על הגוף שלו?', ar:'علامات على جسمه؟', trans:'עַלַאמַאת עַלַא גִ׳סְמוֹ?'},
+  {id:'bi-tash-62', section:'military', cat:'תשאול: תיאור אדם', he:'צולע?', ar:'بيعرج؟', trans:'בְּיִעְרֹג׳?'},
+  {id:'bi-tash-63', section:'military', cat:'תשאול: שאלות על האירוע', he:'מה קרה בדיוק, בתאריך... בשעה...?', ar:'إيش صار بالضبط في تاريخ... في ساعة...؟', trans:'אֵש צַאר באל זַבֶּט פִי תַארִיח׳... פִי סַאעַה...?'},
+  {id:'bi-tash-64', section:'military', cat:'תשאול: שאלות על האירוע', he:'מה אתה יודע על העניין?', ar:'شو بتعرف عن الموضوع؟', trans:'שוּ בְּתִעְרַף עַן אִלמַוְצ׳וּע?'},
+  {id:'bi-tash-65', section:'military', cat:'תשאול: שאלות על האירוע', he:'ספר לי רק מה שראית', ar:'احكي لي بس اللي شفته', trans:'אִחְכִּי לִי בַּס אֶלִּי שֻפְתוֹ'},
+  {id:'bi-tash-66', section:'military', cat:'תשאול: שאלות על האירוע', he:'תפרט לי', ar:'فسّر لي بالتفصيل', trans:'פַסֶּר לִי בֶּאִלתַפַצִיל'},
+  {id:'bi-tash-67', section:'military', cat:'תשאול: שאלות על האירוע', he:'תסביר לי יותר', ar:'فهّمني أكثر', trans:'פַהֶּמְנִי אַכְּתַר'},
+  {id:'bi-tash-68', section:'military', cat:'תשאול: שאלות על האירוע', he:'איפה היית?', ar:'وين كنت؟', trans:'וֵין כֻּנֶת?'},
+  {id:'bi-tash-69', section:'military', cat:'תשאול: שאלות על האירוע', he:'מתי הגעת?', ar:'إيمتى وصلت؟', trans:'אֵימְתַא וְצִלְת?'},
+  {id:'bi-tash-70', section:'military', cat:'תשאול: שאלות על האירוע', he:'מתי חזרת הביתה?', ar:'إيمتى روّحت؟', trans:'אֵימְתַא רַוַּחֶת?'},
+  {id:'bi-tash-71', section:'military', cat:'תשאול: שאלות על האירוע', he:'למה הגעת לשם?', ar:'ليش وصلت لهناك؟', trans:'לֵיש וְצִלְת לַהֻנַאכּ?'},
+  {id:'bi-tash-72', section:'military', cat:'תשאול: שאלות על האירוע', he:'מי היה איתך?', ar:'مين كان معك؟', trans:'מִין כַּאן מַעַכּ?'},
+  {id:'bi-tash-73', section:'military', cat:'תשאול: שאלות על האירוע', he:'את מי ראית?', ar:'مين شفت؟', trans:'מִין שֻפְת?'},
+  {id:'bi-tash-74', section:'military', cat:'תשאול: שאלות על האירוע', he:'מי ראה אותך?', ar:'مين شافك؟', trans:'מִין שַאפַכּ?'},
+  {id:'bi-tash-75', section:'military', cat:'תשאול: שאלות על האירוע', he:'כמה זמן אתה מכיר אותו?', ar:'قدّيش صار لك بتعرفه؟', trans:'קַדֵּיש צַאר לַכּ בְּתִעְרַפוֹ?'},
+  {id:'bi-tash-76', section:'military', cat:'תשאול: שאלות על האירוע', he:'מה עשית שם?', ar:'شو عملت هناك؟', trans:'שוּ עְמִלְת הֻנַאכּ?'},
+  {id:'bi-tash-77', section:'military', cat:'תשאול: שאלות על האירוע', he:'מה היה המרחק בינך לבין...?', ar:'قدّيش كانت المسافة بينك وبين...؟', trans:'קַדֵּיש כַּאנַת אִלמַסַאפֶה בֵּינַכּ וּבֵּין...?'},
+  {id:'bi-tash-78', section:'military', cat:'תשאול: שאלות על האירוע', he:'מי נמצא בתמונה?', ar:'مين موجود في الصورة؟', trans:'מִין מַוְג׳וּד פִי אִלצוּרַה?'},
+  {id:'bi-tash-79', section:'military', cat:'תשאול: שאלות על האירוע', he:'מה שמת על הראש שלך?', ar:'شو حطّيت على راسك؟', trans:'שוּ חַטֵּית עַלַא רַאסַכּ?'},
+  {id:'bi-tash-80', section:'military', cat:'תשאול: שאלות על האירוע', he:'מאיפה אתה יודע?', ar:'شو عرّفك؟', trans:'שוּ עַרַּפַכּ?'},
+  {id:'bi-tash-81', section:'military', cat:'תשאול: שאלות על האירוע', he:'עם מי הלכת? ובמה?', ar:'مع مين رحت؟ وبإيش؟', trans:'מַעַ מִין רֻחְת? וּבְּאֵש?'},
+  {id:'bi-tash-82', section:'military', cat:'תשאול: שאלות על האירוע', he:'עם מי חזרת? ואיך?', ar:'مع مين رجعت؟ وكيف؟', trans:'מַעַ מִין רְגִ׳עְת? וּכִּיף?'},
+  {id:'bi-tash-83', section:'military', cat:'תשאול: שאלות על האירוע', he:'מה זה?', ar:'إيش هذا؟', trans:'אֵיש הַאדַא?'},
+  {id:'bi-tash-84', section:'military', cat:'תשאול: שאלות על האירוע', he:'מה אתה עושה עם זה?', ar:'إيش بتعمل مع هذا؟', trans:'אֵש בְּתִעְמֶל מַע הַאדַא?'},
+  {id:'bi-tash-85', section:'military', cat:'תשאול: שאלות על האירוע', he:'מהיכן הבאת אותו?', ar:'من وين جبته؟', trans:'מִן וֵין גִ׳יבְּתוֹ?'},
+  {id:'bi-tash-86', section:'military', cat:'תשאול: שאלות על האירוע', he:'מי נתן לך אותו?', ar:'مين جاب لك إيّاه؟', trans:'מִין גַ׳אבּ-לַכּ אִיַּאה?'},
+  {id:'bi-tash-87', section:'military', cat:'תשאול: שאלות על האירוע', he:'מה יש עליך?', ar:'إيش فيه معك؟', trans:'אֵיש פִיה מַעַכּ?'},
+  {id:'bi-tash-88', section:'military', cat:'תשאול: שאלות על האירוע', he:'יש עליך משהו שאסור שיהיה עליך?', ar:'فيه عليك إشي ممنوع يكون عليك؟', trans:'פִיה עַלֵיכּ אִשִי מַמְנוּע יְכּוּן עַלֵיכּ?'},
+  {id:'bi-tash-89', section:'military', cat:'תשאול: שאלות על האירוע', he:'יש לך משהו בכיס?', ar:'فيه إشي بجيبتك؟', trans:'פִיה אִשִי בְּגֵ׳יבְּתַכּ?'},
+  {id:'bi-tash-90', section:'military', cat:'תשאול: שאלות על האירוע', he:'מה הייתה השעה?', ar:'قدّيش كانت الساعة؟', trans:'קַדֵּיש כַּאנַת אִלסַאעַה?'},
+  {id:'bi-tash-91', section:'military', cat:'תשאול: שאלות על האירוע', he:'אתה גנבת?', ar:'إنت سرقت؟', trans:'אִנְתֶ סַרַקְת?'},
+  {id:'bi-tash-92', section:'military', cat:'תשאול: שאלות על האירוע', he:'הצתת?', ar:'ولّعت؟', trans:'וַלַּעְת?'},
+  {id:'bi-tash-93', section:'military', cat:'תשאול: שאלות על האירוע', he:'פרצת?', ar:'اقتحمت؟', trans:'אֶקְתַחַמְת?'},
+  {id:'bi-tash-94', section:'military', cat:'תשאול: שאלות על האירוע', he:'הרבצת?', ar:'ضربت؟', trans:'צַ׳רַבְּת?'},
+  {id:'bi-tash-95', section:'military', cat:'תשאול: שאלות על האירוע', he:'מתי עשית את זה לפני כן?', ar:'إيمتى عملتها قبل هيك؟', trans:'אֵימְתַא עְמִלְתְהַא קַבְּל הֵיכּ?'},
+  {id:'bi-tash-96', section:'military', cat:'תשאול: שאלות על האירוע', he:'למה / מדוע?', ar:'ليش؟', trans:'לֵיש?'},
+  {id:'bi-tash-97', section:'military', cat:'תשאול: שאלות על האירוע', he:'לא הבנת?', ar:'ما فهمتش؟', trans:'מַא פְהִמְתֶש?'},
+  {id:'bi-tash-98', section:'military', cat:'תשאול: שאלות על האירוע', he:'איך עשית את זה?', ar:'كيف عملتها؟', trans:'כִּיף עֶמִלְתְהַא?'},
+  {id:'bi-tash-99', section:'military', cat:'תשאול: שאלות על האירוע', he:'במה השתמשת?', ar:'إيش استعملت؟', trans:'אֵיש אִסְתַעְמַלְת?'},
+  {id:'bi-tash-100', section:'military', cat:'תשאול: שאלות על האירוע', he:'מי עזר לך?', ar:'مين ساعدك؟', trans:'מִין סַאעַדַכּ?'},
+  {id:'bi-tash-101', section:'military', cat:'תשאול: שאלות על האירוע', he:'מי הביא לך את...?', ar:'مين جاب لك الـ...؟', trans:'מִין גַ׳אבּ לַכּ אִל..?'},
+  {id:'bi-tash-102', section:'military', cat:'תשאול: שאלות על האירוע', he:'תחזור שוב פעם', ar:'عيد كمان مرّة', trans:'עִיד כַּמַאן מַרַּה'}
+];
+
 async function loadData(){
   // 1. Render instantly from cached content first — so the app opens with no
   //    wait even on a slow/flaky field connection. Then refresh from network.
@@ -8022,6 +8129,13 @@ try{
 // Populate all section arrays from a raw phrases array (used for both live and cached data)
 function populateFromData(data){
   DB=data.filter(p=>p.section==='military').map(mp);
+  try{
+    if(typeof BUILTIN_TASHAUL!=='undefined' && BUILTIN_TASHAUL.length){
+      var _normHeT=function(s){return String(s||'').replace(/[^֐-׿0-9A-Za-z]/g,'');};
+      var _seenT={}; DB.forEach(function(p){ _seenT[(p.cat||'')+'|'+_normHeT(p.he)]=true; });
+      BUILTIN_TASHAUL.forEach(function(b){ var k=b.cat+'|'+_normHeT(b.he); if(!_seenT[k]){ DB.push(mp(b)); _seenT[k]=true; } });
+    }
+  }catch(e){}
   DAILY=data.filter(p=>p.section==='daily').map(mp);
   HEART=data.filter(p=>p.section==='heart' && p.cat!=='מנהגים').map(p=>{
     var m=mp(p);
@@ -8228,7 +8342,17 @@ async function getAudio(p,stEl){
 }
 
 // CATS
-const CATS=[{id:'עצירת תנועה ורכב',icon:'🚫'},{id:'ניהול מרחב והוראות',icon:'📍'},{id:'בידוק וזיהוי',icon:'🔍'},{id:'שליטה בבית',icon:'🏠'},{id:'הרגעה ושכנוע',icon:'✌️'},{id:'מגע ראשוני',icon:'🕵'},{id:'רפואה ועזרה ראשונה',icon:'🩹'},{id:'קהל ואירועים',icon:'👥'},{id:'ילדים ואוכלוסיות רגישות',icon:'👶'},{id:'לוח שנה ותרבות',icon:'📅'},{id:'שמות מקומות וכיוונים',icon:'🗺️'},{id:'זיהוי ערבית כתובה בשטח',icon:'📄'},{id:'כריזה',icon:'📢',special:'announce'},{id:'ימי',icon:'⚓',special:'navy'}];
+const CATS=[{id:'עצירת תנועה ורכב',icon:'🚫'},{id:'ניהול מרחב והוראות',icon:'📍'},{id:'בידוק וזיהוי',icon:'🔍'},{id:'שליטה בבית',icon:'🏠'},{id:'הרגעה ושכנוע',icon:'✌️'},{id:'מגע ראשוני',icon:'🕵'},{id:'רפואה ועזרה ראשונה',icon:'🩹'},{id:'קהל ואירועים',icon:'👥'},{id:'ילדים ואוכלוסיות רגישות',icon:'👶'},{id:'לוח שנה ותרבות',icon:'📅'},{id:'שמות מקומות וכיוונים',icon:'🗺️'},{id:'זיהוי ערבית כתובה בשטח',icon:'📄'},  {id:'תשאול: פרטים אישיים',icon:'🕵️'},
+  {id:'תשאול: משפחה',icon:'🕵️'},
+  {id:'תשאול: כתובת ובית',icon:'🕵️'},
+  {id:'תשאול: עבודה',icon:'🕵️'},
+  {id:'תשאול: אמצעי תקשורת',icon:'🕵️'},
+  {id:'תשאול: השכלה',icon:'🕵️'},
+  {id:'תשאול: בריאות',icon:'🕵️'},
+  {id:'תשאול: חברים',icon:'🕵️'},
+  {id:'תשאול: תיאור אדם',icon:'🕵️'},
+  {id:'תשאול: שאלות על האירוע',icon:'🕵️'},
+{id:'כריזה',icon:'📢',special:'announce'},{id:'ימי',icon:'⚓',special:'navy'}];
 const DCATS=[{id:'שוק ומסחר',icon:'🛒'},{id:'מסעדה ואוכל',icon:'🍽️'},{id:'שיחת היכרות',icon:'🤝'},{id:'עזרה וכיוונים',icon:'🗺️'},{id:'ילדים ובית ספר',icon:'🎒'},{id:'שכנות וקהילה',icon:'🏘️'}];
 const HCATS=[
   {id:'ברכות ונימוסים',icon:'👋'},
@@ -14088,8 +14212,21 @@ async function autoSyncBuiltins(){
         haveCus[norm(c.he)]=1; addedCus++;
       }
     }
-    window._autoSyncAdded = addedScn+addedCus;
-    if(addedScn+addedCus>0){ await loadData(); }
+    // --- tashaul (field interrogation questions) keyed by cat+normalized Hebrew ---
+    var addedT=0;
+    if(typeof BUILTIN_TASHAUL!=='undefined' && BUILTIN_TASHAUL.length){
+      var normT=function(s){ return String(s||'').replace(/[^֐-׿0-9A-Za-z]/g,''); };
+      var exT=await sbFetchAllRows('/rest/v1/phrases?select=cat,he&section=eq.military');
+      var haveT={}; (exT||[]).forEach(function(p){ haveT[(p.cat||'')+'|'+normT(p.he)]=1; });
+      for(var t=0;t<BUILTIN_TASHAUL.length;t++){
+        var bt=BUILTIN_TASHAUL[t]; var kt=bt.cat+'|'+normT(bt.he);
+        if(haveT[kt])continue;
+        await sbFetch('/rest/v1/phrases','POST',{cat:bt.cat,he:bt.he,trans:bt.trans||'',ar:bt.ar||'',tags:'',why:'',tone:'',audio_url:'',is_new:true,section:'military'});
+        haveT[kt]=1; addedT++;
+      }
+    }
+    window._autoSyncAdded = addedScn+addedCus+addedT;
+    if(addedScn+addedCus+addedT>0){ await loadData(); }
   }catch(e){
     window._builtinsSynced=false; // let it retry next time on failure
     console.warn('autoSyncBuiltins failed', e);
