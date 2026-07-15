@@ -14134,6 +14134,12 @@ function _tabEsc(s){ return String(s==null?'':s).replace(/&/g,'&amp;').replace(/
 function renderTabList(t){
   var cfg=TAB_LIST_CFG[t]; if(!cfg) return;
   var el=document.getElementById('list-'+t); if(!el) return;
+  // Auto-promote all built-in content (scenarios/customs/interrogation) to the DB
+  // the moment ANY admin list opens — so items become editable + recordable here,
+  // not only from the main management list. Refresh this list once it's done.
+  try{ if(typeof autoSyncBuiltins==='function' && !window._builtinsSynced){
+    autoSyncBuiltins().then(function(){ try{ if(window._autoSyncAdded>0){ var sec=document.getElementById('at-'+t); if(sec && sec.style.display!=='none') renderTabList(t); } }catch(e){} });
+  } }catch(e){}
   var arr=cfg.arr()||[];
   // Customs may contain built-in topics (id starts "bi-") that live in the code,
   // not the DB — they must be promoted to the DB before they can be edited.
@@ -14148,8 +14154,8 @@ function renderTabList(t){
       if(isBuiltin)anyBuiltin=true;
       var sub=_tabEsc(cfg.sub(p)||'');
       var mic=(p.audio||p.audio_url)?'<span title="יש הקלטה" style="color:#1D9E75;">🎵</span>':'<span title="אין הקלטה" style="color:#e07a5f;">🔇</span>';
-      var lock=isBuiltin?' <span title="מנהג מובנה — צריך לאפשר עריכה" style="color:#D4A24E;">🔒</span>':'';
-      var openCall=isBuiltin?'enableCustomsEditing()':'openEditById(\''+id+'\')';
+      var lock=isBuiltin?' <span title="פריט מובנה — לחצי כדי לאפשר עריכה והקלטה" style="color:#D4A24E;">🔒</span>':'';
+      var openCall=isBuiltin?'promoteBuiltinsAndRefresh()':'openEditById(\''+id+'\')';
       var recBtn=isBuiltin?'':'<button onclick="quickRecordById(\''+id+'\')" title="הקלט" style="padding:5px 9px;background:#3a2a1a;border:none;border-radius:6px;color:#E8D9B8;font-size:12px;cursor:pointer;font-family:inherit;">🎤</button>';
       html+='<div style="padding:8px;border-bottom:1px solid #1a2a3a;display:flex;justify-content:space-between;align-items:center;gap:8px;">'
         +'<div style="flex:1;min-width:0;cursor:pointer;" onclick="'+openCall+'">'
@@ -14165,6 +14171,18 @@ function renderTabList(t){
   // Show the "enable editing" note only when built-in customs still need promoting.
   var note=document.getElementById('ac-builtin-note');
   if(note) note.style.display=(t==='ac' && anyBuiltin)?'block':'none';
+}
+// Clicking a locked (built-in) row promotes ALL built-in content to the DB so it
+// becomes editable + recordable, then refreshes the lists. Covers scenarios,
+// customs AND the interrogation questions (not only customs like the old flow).
+async function promoteBuiltinsAndRefresh(){
+  try{
+    window._builtinsSynced=false; // force a fresh sync pass
+    if(typeof autoSyncBuiltins==='function') await autoSyncBuiltins();
+    try{ refreshOpenTabList(); }catch(e){}
+    try{ renderAdminList(); }catch(e){}
+    alert('✓ הפריטים המובנים נוספו לרשימה — עכשיו אפשר לערוך ולהקליט כל אחד מהם. (אם היו כבר קיימים, שום דבר לא נכפל.)');
+  }catch(e){ alert('שגיאה: '+(e&&e.message?e.message:e)); }
 }
 // Open the editor by id and jump straight to the recorder (mirrors quickRecordIdx,
 // but works from the per-tab list where we have the id, not the _adminItems index).
