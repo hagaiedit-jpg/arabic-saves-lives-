@@ -14623,12 +14623,95 @@ function closeGlobalSearch(){
 // marks) still matches. Reuses dictNorm (strips Hebrew niqqud, Arabic harakat,
 // geresh and normalizes final letters).
 function _gsNorm(s){ return (typeof dictNorm==='function') ? dictNorm(s) : String(s||'').toLowerCase(); }
+// ===== Smart "jump to category/scenario" for global search =====
+// As the kit grows, typing a place/situation (מחסום, חיפוש בבית, חיפוש ברכב,
+// תשאול...) surfaces the matching category/scenario at the top so the soldier
+// jumps straight there instead of scrolling phrase-by-phrase. Synonyms below map
+// common field words to related destinations even when the exact word differs.
+var _gsSyn=[
+  ['מחסום','מחסומים','ציר','צירים','חסימה','עוצר'],
+  ['רכב','אוטו','מכונית','רכבים','נהג','סיארה'],
+  ['בית','בתים','דלת','דירה','מבנה','חצר'],
+  ['חיפוש','בידוק','בדיקה','סריקה','זיהוי'],
+  ['תשאול','חקירה','תחקיר','שאלות','חוקר'],
+  ['פצוע','פציעה','רפואה','דם','כאב','חובש','עזרה'],
+  ['קהל','המון','הפגנה','אירוע','התפרעות'],
+  ['ילד','ילדים','אישה','נשים','קשיש','נכה']
+];
+// Strip a single leading Hebrew prefix (ב/ה/ו/כ/ל/מ/ש) when a real word remains,
+// so "במחסום"/"ברכב"/"לבית" still match מחסום/רכב/בית.
+function _gsPrefixStrip(w){ return (w.length>=4 && 'בהוכלמש'.indexOf(w[0])!==-1) ? w.slice(1) : w; }
+function _gsExpandWord(w){
+  var out=[];
+  [w, _gsPrefixStrip(w)].forEach(function(x){
+    if(!x) return;
+    if(out.indexOf(x)===-1) out.push(x);
+    _gsSyn.forEach(function(g){ var gn=g.map(_gsNorm); if(gn.indexOf(x)!==-1){ gn.forEach(function(t){ if(out.indexOf(t)===-1) out.push(t); }); } });
+  });
+  return out;
+}
+// Expand a full (possibly multi-word) query into all match terms.
+function _gsExpand(rawQ){
+  var words=String(rawQ||'').split(/\s+/).map(_gsNorm).filter(function(w){ return w.length>=2; });
+  var out=[];
+  words.forEach(function(w){ _gsExpandWord(w).forEach(function(t){ if(out.indexOf(t)===-1) out.push(t); }); });
+  return out;
+}
+function _gsDestinations(){
+  var d=[];
+  try{ if(typeof SCN_CATEGORIES!=='undefined') SCN_CATEGORIES.forEach(function(cat){ (cat.scenarios||[]).forEach(function(s){
+    d.push({name:s.title||s.id, icon:s.icon||'💬', tag:'תרחיש', kw:_gsNorm((s.title||'')+' '+(s.id||'')+' '+(cat.title||'')), kind:'scn', id:s.id});
+  }); }); }catch(e){}
+  try{ if(typeof CATS!=='undefined') CATS.forEach(function(c){ if(c.special) return;
+    d.push({name:c.id, icon:c.icon||'📂', tag:'קטגוריה', kw:_gsNorm(c.id), kind:'cat', id:c.id});
+  }); }catch(e){}
+  try{ d.push({name:'תשאול ימי', icon:'⚓', tag:'מדור', kw:_gsNorm('ימי תשאול ימי כלי שיט סיפון עצירת כלי שיט'), kind:'navy', id:'ימי'}); }catch(e){}
+  try{ d.push({name:'מנהגים ותרבות', icon:'🕌', tag:'מדור', kw:_gsNorm('מנהגים תרבות דת אסלאם'), kind:'tab', id:'cus'}); }catch(e){}
+  return d;
+}
+function gsGoIdx(i){
+  var t=(window._gsDest||[])[i]; if(!t) return;
+  try{ closeGlobalSearch(); }catch(e){}
+  setTimeout(function(){ try{
+    if(t.kind==='scn'){ if(typeof navToTab==='function') navToTab('scn'); if(typeof scnOpen==='function') scnOpen(t.id); }
+    else if(t.kind==='cat'){ if(typeof opC==='function') opC(t.id,''); }
+    else if(t.kind==='navy'){ if(typeof opC==='function') opC('ימי','navy'); }
+    else if(t.kind==='tab'){ if(typeof navToTab==='function') navToTab(t.id); }
+  }catch(e){} }, 70);
+}
+function _gsDestHtml(q){
+  var terms=_gsExpand(q).filter(Boolean);
+  var all=_gsDestinations();
+  var seen={}, dests=[];
+  all.forEach(function(t){
+    var hit=terms.some(function(term){ return term.length>=3 && t.kw.indexOf(term)!==-1; });
+    if(hit && !seen[t.kind+'|'+t.id]){ seen[t.kind+'|'+t.id]=true; dests.push(t); }
+  });
+  window._gsDest=dests;
+  if(!dests.length) return '';
+  var capped=dests.slice(0,8);
+  var h='<div style="color:#D4A24E;font-size:12px;font-weight:800;margin:2px 0 8px;">⚡ קפיצה מהירה</div>';
+  capped.forEach(function(t,i){
+    h+='<div onclick="gsGoIdx('+i+')" style="background:linear-gradient(135deg,#243a55,#1F3147);border:1px solid #D4A24E;border-radius:10px;padding:11px 12px;margin-bottom:7px;display:flex;align-items:center;gap:10px;cursor:pointer;">'
+      +'<div style="font-size:20px;flex-shrink:0;">'+t.icon+'</div>'
+      +'<div style="flex:1;min-width:0;"><div style="color:#fff;font-size:14px;font-weight:700;">'+t.name+'</div>'
+      +'<div style="color:#9fb2c6;font-size:11px;">'+t.tag+'</div></div>'
+      +'<div style="color:#D4A24E;font-size:18px;flex-shrink:0;">‹</div></div>';
+  });
+  if(dests.length>capped.length) h+='<div style="color:#7a9ab5;font-size:11px;margin-bottom:8px;">ועוד '+(dests.length-capped.length)+'...</div>';
+  h+='<div style="height:1px;background:#2A3D52;margin:6px 0 12px;"></div>';
+  return h;
+}
+
 function globalSearch(){
   var out = document.getElementById('gs-results'); if(!out) return;
   var inp = document.getElementById('gs-input');
   var rawQ = (inp && inp.value || '').trim();
   var q = _gsNorm(rawQ);
-  if(!q){ out.innerHTML = _gsEmptyHtml(); return; }
+  if(!q){ window._gsDest=[]; out.innerHTML = _gsEmptyHtml(); return; }
+  // 1) Jump-to destinations (categories / scenarios / sections) at the top.
+  var destHtml = _gsDestHtml(rawQ);
+  // 2) Phrase-level matches (existing behavior).
   var results = [];
   _gsSections().forEach(function(s){
     (s.arr||[]).forEach(function(p){
@@ -14637,31 +14720,33 @@ function globalSearch(){
       if(hay.indexOf(q)!==-1) results.push({ p:p, label:s.label, icon:s.icon });
     });
   });
-  if(!results.length){ out.innerHTML='<div style="text-align:center;color:#7a9ab5;font-size:13px;padding:30px 10px;">לא נמצאו תוצאות ל"'+rawQ+'".</div>'; return; }
-  // Counts per section + filter chips
-  var counts = {}; results.forEach(function(r){ counts[r.label]=(counts[r.label]||0)+1; });
-  if(_gsFilter !== 'all' && !counts[_gsFilter]) _gsFilter = 'all';
-  var shown = results.filter(function(r){ return _gsFilter==='all' || r.label===_gsFilter; });
-  var chips = '<div style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:10px;">';
-  chips += '<button onclick="setGsFilter(\'all\')" style="'+_gsChipStyle(_gsFilter==='all')+'">הכל ('+results.length+')</button>';
-  _gsSections().forEach(function(s){ if(counts[s.label]) chips += '<button onclick="setGsFilter(\''+s.label.replace(/'/g,"\\'")+'\')" style="'+_gsChipStyle(_gsFilter===s.label)+'">'+s.icon+' '+s.label+' ('+counts[s.label]+')</button>'; });
-  chips += '</div>';
-  var capped = shown.slice(0, 80);
-  var h = chips;
-  h += '<div style="color:#7a9ab5;font-size:11px;margin-bottom:10px;">'+shown.length+' תוצאות'+(shown.length>80?' (מוצגות 80 הראשונות)':'')+'</div>';
-  capped.forEach(function(r){
-    var p = r.p;
-    h += '<div style="background:#18293E;border:1px solid #2A3D52;border-radius:10px;padding:10px 12px;margin-bottom:8px;display:flex;align-items:center;gap:8px;">';
-    h += '<div style="flex:1;min-width:0;">';
-    h += '<div style="display:flex;align-items:center;gap:6px;margin-bottom:3px;"><span style="font-size:11px;background:#1F3147;border:1px solid #2A3D52;border-radius:6px;padding:1px 6px;color:#a0b8c8;">'+r.icon+' '+r.label+'</span></div>';
-    if(p.he) h += '<div style="color:#E8D9B8;font-size:14px;font-weight:600;">'+p.he+'</div>';
-    if(p.trans) h += '<div style="color:#a0b8c8;font-size:12px;">'+p.trans+'</div>';
-    var arTxt = p.ar || p.dict || '';
-    if(arTxt) h += '<div style="color:#FFD700;font-size:15px;font-family:Georgia,serif;direction:rtl;">'+arTxt+'</div>';
-    h += '</div>';
-    if(p.audio) h += '<button onclick="gsPlay(\''+String(p.audio).replace(/'/g,"\\'")+'\',this)" style="background:rgba(212,162,78,0.15);border:1px solid #D4A24E;color:#D4A24E;width:40px;height:40px;border-radius:50%;font-size:15px;cursor:pointer;font-family:inherit;flex-shrink:0;">▶</button>';
-    h += '</div>';
-  });
+  if(!destHtml && !results.length){ out.innerHTML='<div style="text-align:center;color:#7a9ab5;font-size:13px;padding:30px 10px;">לא נמצאו תוצאות ל"'+rawQ+'".</div>'; return; }
+  var h = destHtml;
+  if(results.length){
+    var counts = {}; results.forEach(function(r){ counts[r.label]=(counts[r.label]||0)+1; });
+    if(_gsFilter !== 'all' && !counts[_gsFilter]) _gsFilter = 'all';
+    var shown = results.filter(function(r){ return _gsFilter==='all' || r.label===_gsFilter; });
+    var chips = '<div style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:10px;">';
+    chips += '<button onclick="setGsFilter(\'all\')" style="'+_gsChipStyle(_gsFilter==='all')+'">הכל ('+results.length+')</button>';
+    _gsSections().forEach(function(s){ if(counts[s.label]) chips += '<button onclick="setGsFilter(\''+s.label.replace(/'/g,"\\'")+'\')" style="'+_gsChipStyle(_gsFilter===s.label)+'">'+s.icon+' '+s.label+' ('+counts[s.label]+')</button>'; });
+    chips += '</div>';
+    var capped = shown.slice(0, 80);
+    h += chips;
+    h += '<div style="color:#7a9ab5;font-size:11px;margin-bottom:10px;">'+shown.length+' תוצאות'+(shown.length>80?' (מוצגות 80 הראשונות)':'')+'</div>';
+    capped.forEach(function(r){
+      var p = r.p;
+      h += '<div style="background:#18293E;border:1px solid #2A3D52;border-radius:10px;padding:10px 12px;margin-bottom:8px;display:flex;align-items:center;gap:8px;">';
+      h += '<div style="flex:1;min-width:0;">';
+      h += '<div style="display:flex;align-items:center;gap:6px;margin-bottom:3px;"><span style="font-size:11px;background:#1F3147;border:1px solid #2A3D52;border-radius:6px;padding:1px 6px;color:#a0b8c8;">'+r.icon+' '+r.label+'</span></div>';
+      if(p.he) h += '<div style="color:#E8D9B8;font-size:14px;font-weight:600;">'+p.he+'</div>';
+      if(p.trans) h += '<div style="color:#a0b8c8;font-size:12px;">'+p.trans+'</div>';
+      var arTxt = p.ar || p.dict || '';
+      if(arTxt) h += '<div style="color:#FFD700;font-size:15px;font-family:Georgia,serif;direction:rtl;">'+arTxt+'</div>';
+      h += '</div>';
+      if(p.audio) h += '<button onclick="gsPlay(\''+String(p.audio).replace(/'/g,"\\'")+'\',this)" style="background:rgba(212,162,78,0.15);border:1px solid #D4A24E;color:#D4A24E;width:40px;height:40px;border-radius:50%;font-size:15px;cursor:pointer;font-family:inherit;flex-shrink:0;">▶</button>';
+      h += '</div>';
+    });
+  }
   out.innerHTML = h;
 }
 function gsPlay(url, btn){
