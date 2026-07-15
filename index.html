@@ -2158,7 +2158,7 @@ function showLanding() {
   <div style="padding:20px 16px 16px;">
 
     <!-- Global search across the whole app -->
-    <div onclick="openGlobalSearch()" style="background:#1F3147;border:1px solid #2A3D52;border-radius:12px;padding:11px 12px;margin-bottom:16px;display:flex;align-items:center;gap:8px;cursor:pointer;">
+    <div onclick="openGlobalSearch()" style="background:#1F3147;border:1px solid #2A3D52;border-radius:12px;padding:11px 12px;margin-bottom:16px;display:flex;align-items:center;gap:8px;cursor:pointer;user-select:none;-webkit-user-select:none;-webkit-touch-callout:none;">
       <span style="color:#D4A24E;font-size:18px;">🔍</span>
       <span style="flex:1;color:#7a9ab5;font-size:14px;">חיפוש בכל הערכה...</span>
     </div>
@@ -3409,6 +3409,7 @@ function showLanding() {
       <div style="flex:1;background:#1F3147;border:1px solid #2A3D52;border-radius:12px;padding:10px;display:flex;align-items:center;gap:8px;">
         <span style="color:#D4A24E;font-size:18px;">🔍</span>
         <input id="gs-input" placeholder="חיפוש בכל המדורים והמילון..." oninput="globalSearch()" autocomplete="off" style="flex:1;background:transparent;border:none;color:#E8D9B8;font-size:16px;font-family:inherit;outline:none;direction:rtl;text-align:right;"/>
+        <button id="gs-voice" onclick="gsVoice()" title="חיפוש קולי — דבר במקום להקליד" style="background:rgba(212,162,78,0.18);border:1px solid #D4A24E;color:#D4A24E;width:34px;height:34px;border-radius:50%;cursor:pointer;font-size:16px;flex-shrink:0;">🎤</button>
         <button onclick="document.getElementById('gs-input').value='';globalSearch()" style="background:rgba(255,255,255,0.1);border:none;color:#E8D9B8;width:28px;height:28px;border-radius:50%;cursor:pointer;font-size:16px;flex-shrink:0;">×</button>
       </div>
       <button onclick="closeGlobalSearch()" style="background:#2A3D52;border:none;color:#E8D9B8;width:40px;height:40px;border-radius:10px;font-size:16px;cursor:pointer;font-family:inherit;flex-shrink:0;">✕</button>
@@ -14616,7 +14617,7 @@ function _gsShortcutHtml(){
   var h='<div style="color:#D4A24E;font-size:11px;font-weight:800;margin:2px 2px 8px;">⚡ קיצורי דרך</div><div style="display:flex;flex-wrap:wrap;gap:8px;margin-bottom:16px;">';
   _gsShortcuts.forEach(function(q){
     var safe=String(q).replace(/'/g,"\\'");
-    h+='<button onclick="gsUseRecent(\''+safe+'\')" style="background:linear-gradient(135deg,#243a55,#1F3147);border:1px solid #D4A24E;border-radius:14px;padding:7px 14px;color:#E8D9B8;font-size:13px;font-weight:600;cursor:pointer;font-family:inherit;">'+q+'</button>';
+    h+='<button onclick="gsUseRecent(\''+safe+'\')" style="background:#18293E;border:1px solid #D4A24E;border-radius:14px;padding:7px 14px;color:#E8D9B8;font-size:13px;font-weight:600;cursor:pointer;font-family:inherit;">'+q+'</button>';
   });
   h+='</div>'; return h;
 }
@@ -14721,14 +14722,29 @@ function _gsExpand(rawQ){
 }
 function _gsDestinations(){
   var d=[];
+  // Scenarios (each scenario, tagged by its tile so a tile word matches all its scenarios)
   try{ if(typeof SCN_CATEGORIES!=='undefined') SCN_CATEGORIES.forEach(function(cat){ (cat.scenarios||[]).forEach(function(s){
     d.push({name:s.title||s.id, icon:s.icon||'💬', tag:'תרחיש', kw:_gsNorm((s.title||'')+' '+(s.id||'')+' '+(cat.title||'')), kind:'scn', id:s.id});
   }); }); }catch(e){}
+  // Field / operational categories
   try{ if(typeof CATS!=='undefined') CATS.forEach(function(c){ if(c.special) return;
-    d.push({name:c.id, icon:c.icon||'📂', tag:'קטגוריה', kw:_gsNorm(c.id), kind:'cat', id:c.id});
+    d.push({name:c.id, icon:c.icon||'📂', tag:'מבצעי', kw:_gsNorm(c.id), kind:'cat', id:c.id});
   }); }catch(e){}
-  try{ d.push({name:'תשאול ימי', icon:'⚓', tag:'מדור', kw:_gsNorm('ימי תשאול ימי כלי שיט סיפון עצירת כלי שיט'), kind:'navy', id:'ימי'}); }catch(e){}
+  // Daily-life categories
+  try{ if(typeof DCATS!=='undefined') DCATS.forEach(function(c){
+    d.push({name:c.id, icon:c.icon||'☕', tag:'יומיומי', kw:_gsNorm(c.id+' יומיומי'), kind:'daily', id:c.id});
+  }); }catch(e){}
+  // "פותחים לב" categories (greetings, proverbs)
+  try{ if(typeof HCATS!=='undefined') HCATS.forEach(function(c){
+    d.push({name:c.id, icon:c.icon||'💛', tag:'פותחים לב', kw:_gsNorm(c.id+' פותחים לב'), kind:'heart', id:c.id});
+  }); }catch(e){}
+  // Naval-questioning sub-categories (תשאול ימי, עצירת כלי שיט…)
+  try{ if(typeof NAVY!=='undefined'){ var nc=[]; NAVY.forEach(function(a){ if(a && a.cat && nc.indexOf(a.cat)===-1) nc.push(a.cat); });
+    nc.forEach(function(c){ d.push({name:c, icon:'⚓', tag:'תשאול ימי', kw:_gsNorm(c+' ימי תשאול ימי'), kind:'navy', id:c}); });
+  } }catch(e){}
+  // Sections / tabs
   try{ d.push({name:'מנהגים ותרבות', icon:'🕌', tag:'מדור', kw:_gsNorm('מנהגים תרבות דת אסלאם'), kind:'tab', id:'cus'}); }catch(e){}
+  try{ d.push({name:'מילון', icon:'📖', tag:'מדור', kw:_gsNorm('מילון מילים תרגום ערבית כתובה'), kind:'tab', id:'dict'}); }catch(e){}
   return d;
 }
 function gsGoIdx(i){
@@ -14737,9 +14753,27 @@ function gsGoIdx(i){
   setTimeout(function(){ try{
     if(t.kind==='scn'){ if(typeof navToTab==='function') navToTab('scn'); if(typeof scnOpen==='function') scnOpen(t.id); }
     else if(t.kind==='cat'){ if(typeof opC==='function') opC(t.id,''); }
-    else if(t.kind==='navy'){ if(typeof opC==='function') opC('ימי','navy'); }
+    else if(t.kind==='daily'){ if(typeof opDC==='function') opDC(t.id); }
+    else if(t.kind==='heart'){ if(typeof opHC==='function') opHC(t.id); }
+    else if(t.kind==='navy'){ if(typeof opC==='function') opC('ימי','navy'); try{ var ix=(window._navyCats||[]).indexOf(t.id); if(ix>=0 && typeof opNavyListIdx==='function') setTimeout(function(){ opNavyListIdx(ix); }, 90); }catch(e){} }
     else if(t.kind==='tab'){ if(typeof navToTab==='function') navToTab(t.id); }
   }catch(e){} }, 70);
+}
+// Voice search — speak instead of type (great with gloves in the field).
+function gsVoice(){
+  var SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+  var btn = document.getElementById('gs-voice');
+  if(!SR){ alert('חיפוש קולי נתמך ב-Chrome ובאנדרואיד. באייפון (Safari) התכונה עדיין מוגבלת — אפשר להקליד רגיל.'); return; }
+  try{
+    if(window._gsRec){ try{ window._gsRec.stop(); }catch(e){} window._gsRec=null; if(btn){ btn.textContent='🎤'; btn.style.background='rgba(212,162,78,0.18)'; } return; }
+    var r=new SR(); window._gsRec=r; r.lang='he-IL'; r.interimResults=false; r.maxAlternatives=1;
+    if(btn){ btn.textContent='🔴'; btn.style.background='rgba(231,76,60,0.28)'; }
+    var inp=document.getElementById('gs-input'); if(inp) inp.setAttribute('placeholder','🎤 מקשיב... דבר עכשיו');
+    r.onresult=function(e){ try{ var t=(e.results[0][0].transcript||'').trim(); if(inp){ inp.value=t; globalSearch(); } }catch(_){}};
+    var reset=function(){ if(btn){ btn.textContent='🎤'; btn.style.background='rgba(212,162,78,0.18)'; } if(inp) inp.setAttribute('placeholder','חיפוש בכל המדורים והמילון...'); window._gsRec=null; };
+    r.onerror=reset; r.onend=reset;
+    r.start();
+  }catch(e){ if(btn) btn.textContent='🎤'; window._gsRec=null; alert('לא ניתן להפעיל חיפוש קולי במכשיר הזה.'); }
 }
 function _gsDestHtml(q){
   var terms=_gsExpand(q).filter(Boolean);
@@ -14754,10 +14788,10 @@ function _gsDestHtml(q){
   var capped=dests.slice(0,8);
   var h='<div style="color:#D4A24E;font-size:12px;font-weight:800;margin:2px 0 8px;">⚡ קפיצה מהירה</div>';
   capped.forEach(function(t,i){
-    h+='<div onclick="gsGoIdx('+i+')" style="background:linear-gradient(135deg,#243a55,#1F3147);border:1px solid #D4A24E;border-radius:10px;padding:11px 12px;margin-bottom:7px;display:flex;align-items:center;gap:10px;cursor:pointer;">'
+    h+='<div onclick="gsGoIdx('+i+')" style="background:#18293E;border:1px solid #D4A24E;border-radius:10px;padding:11px 12px;margin-bottom:7px;display:flex;align-items:center;gap:10px;cursor:pointer;user-select:none;-webkit-user-select:none;-webkit-touch-callout:none;">'
       +'<div style="font-size:20px;flex-shrink:0;">'+t.icon+'</div>'
-      +'<div style="flex:1;min-width:0;"><div style="color:#fff;font-size:14px;font-weight:700;">'+t.name+'</div>'
-      +'<div style="color:#9fb2c6;font-size:11px;">'+t.tag+'</div></div>'
+      +'<div style="flex:1;min-width:0;"><div style="color:#E8D9B8;font-size:14px;font-weight:700;">'+t.name+'</div>'
+      +'<div style="color:#a0b8c8;font-size:11px;">'+t.tag+'</div></div>'
       +'<div style="color:#D4A24E;font-size:18px;flex-shrink:0;">‹</div></div>';
   });
   if(dests.length>capped.length) h+='<div style="color:#7a9ab5;font-size:11px;margin-bottom:8px;">ועוד '+(dests.length-capped.length)+'...</div>';
