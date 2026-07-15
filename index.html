@@ -2158,9 +2158,12 @@ function showLanding() {
   <div style="padding:20px 16px 16px;">
 
     <!-- Global search across the whole app -->
-    <div onclick="openGlobalSearch()" style="background:#1F3147;border:1px solid #2A3D52;border-radius:12px;padding:11px 12px;margin-bottom:16px;display:flex;align-items:center;gap:8px;cursor:pointer;user-select:none;-webkit-user-select:none;-webkit-touch-callout:none;">
-      <span style="color:#D4A24E;font-size:18px;">🔍</span>
-      <span style="flex:1;color:#7a9ab5;font-size:14px;">חיפוש בכל הערכה...</span>
+    <div style="display:flex;align-items:center;gap:8px;margin-bottom:16px;">
+      <div onclick="openGlobalSearch()" style="flex:1;background:#1F3147;border:1px solid #2A3D52;border-radius:12px;padding:11px 12px;display:flex;align-items:center;gap:8px;cursor:pointer;user-select:none;-webkit-user-select:none;-webkit-touch-callout:none;">
+        <span style="color:#D4A24E;font-size:18px;">🔍</span>
+        <span style="flex:1;color:#7a9ab5;font-size:14px;">חיפוש בכל הערכה...</span>
+      </div>
+      <button onclick="gsHomeVoice()" title="חיפוש קולי" style="background:rgba(212,162,78,0.18);border:1px solid #D4A24E;color:#D4A24E;width:44px;height:44px;border-radius:12px;cursor:pointer;font-size:19px;flex-shrink:0;">🎤</button>
     </div>
 
     <!-- Welcome -->
@@ -2522,6 +2525,7 @@ function showLanding() {
       <div style="background:#1F3147;border:2px solid #c0392b;border-radius:12px;padding:10px;margin-bottom:14px;display:flex;align-items:center;gap:8px;">
         <span style="color:#e74c3c;font-size:18px;">⚡</span>
         <input id="emerg-search" placeholder="חיפוש מהיר: עצור, תעודה, ידיים..." oninput="emergSearch()" autocomplete="off" style="flex:1;background:transparent;border:none;color:#E8D9B8;font-size:16px;font-family:inherit;outline:none;direction:rtl;text-align:right;"/>
+        <button onclick="voiceSearch('emerg-search',this)" title="חיפוש קולי" style="background:rgba(212,162,78,0.18);border:1px solid #D4A24E;color:#D4A24E;width:32px;height:32px;border-radius:50%;cursor:pointer;font-size:15px;flex-shrink:0;">🎤</button>
         <button onclick="document.getElementById('emerg-search').value='';emergSearch()" style="background:rgba(255,255,255,0.1);border:none;color:#E8D9B8;width:28px;height:28px;border-radius:50%;cursor:pointer;font-size:16px;flex-shrink:0;">×</button>
       </div>
       <div id="emerg-search-results" style="display:none;margin-bottom:8px;"></div>
@@ -2709,6 +2713,7 @@ function showLanding() {
     <div class="si">
       <span style="color:#aaa;font-size:15px;">🔍</span>
       <input id="day-search" placeholder="חיפוש..." oninput="searchDay()"/>
+      <button onclick="voiceSearch('day-search',this)" title="חיפוש קולי" style="background:rgba(212,162,78,0.18);border:1px solid #D4A24E;color:#D4A24E;width:30px;height:30px;border-radius:50%;cursor:pointer;font-size:14px;flex-shrink:0;">🎤</button>
       <button class="sx" onclick="document.getElementById('day-search').value='';searchDay()">×</button>
     </div>
   </div>
@@ -2739,6 +2744,7 @@ function showLanding() {
     <div class="si">
       <span style="color:#aaa;font-size:15px;">🔍</span>
       <input id="hrt-search" placeholder="חיפוש..." oninput="searchHrt()"/>
+      <button onclick="voiceSearch('hrt-search',this)" title="חיפוש קולי" style="background:rgba(212,162,78,0.18);border:1px solid #D4A24E;color:#D4A24E;width:30px;height:30px;border-radius:50%;cursor:pointer;font-size:14px;flex-shrink:0;">🎤</button>
       <button class="sx" onclick="document.getElementById('hrt-search').value='';searchHrt()">×</button>
     </div>
   </div>
@@ -2762,6 +2768,7 @@ function showLanding() {
     <div style="background:#1F3147;border:1px solid #2A3D52;border-radius:12px;padding:10px;margin-bottom:14px;display:flex;align-items:center;gap:8px;">
       <span style="color:#D4A24E;font-size:18px;">🔍</span>
       <input id="dict-search" placeholder="חפש מילה בעברית, ערבית או תעתיק..." oninput="searchDict()" style="flex:1;background:transparent;border:none;color:#E8D9B8;font-size:15px;font-family:inherit;outline:none;direction:rtl;text-align:right;"/>
+      <button onclick="voiceSearch('dict-search',this)" title="חיפוש קולי" style="background:rgba(212,162,78,0.18);border:1px solid #D4A24E;color:#D4A24E;width:32px;height:32px;border-radius:50%;cursor:pointer;font-size:15px;flex-shrink:0;">🎤</button>
       <button onclick="document.getElementById('dict-search').value='';searchDict()" style="background:rgba(255,255,255,0.1);border:none;color:#E8D9B8;width:28px;height:28px;border-radius:50%;cursor:pointer;font-size:16px;">×</button>
     </div>
     <div id="dict-results"></div>
@@ -2921,6 +2928,7 @@ function showLanding() {
     <div style="background:#1F3147;border:1px solid #2A3D52;border-radius:12px;padding:10px;margin-bottom:16px;display:flex;align-items:center;gap:8px;">
       <span style="color:#D4A24E;font-size:18px;">🔍</span>
       <input id="scn-search" placeholder="חפש תרחיש: מחסום, בית, פצוע..." oninput="scnSearch()" style="flex:1;background:transparent;border:none;color:#E8D9B8;font-size:15px;font-family:inherit;outline:none;direction:rtl;text-align:right;"/>
+      <button onclick="voiceSearch('scn-search',this)" title="חיפוש קולי" style="background:rgba(212,162,78,0.18);border:1px solid #D4A24E;color:#D4A24E;width:32px;height:32px;border-radius:50%;cursor:pointer;font-size:15px;flex-shrink:0;">🎤</button>
       <button onclick="document.getElementById('scn-search').value='';scnSearch()" style="background:rgba(255,255,255,0.1);border:none;color:#E8D9B8;width:28px;height:28px;border-radius:50%;cursor:pointer;font-size:16px;">×</button>
     </div>
     <div onclick="navToTab('train')" style="background:linear-gradient(135deg,#D4A24E 0%,#a85200 100%);border-radius:14px;padding:14px;margin-bottom:16px;cursor:pointer;box-shadow:0 4px 12px rgba(212,134,46,0.3);display:flex;align-items:center;gap:12px;">
@@ -3409,6 +3417,7 @@ function showLanding() {
       <div style="flex:1;background:#1F3147;border:1px solid #2A3D52;border-radius:12px;padding:10px;display:flex;align-items:center;gap:8px;">
         <span style="color:#D4A24E;font-size:18px;">🔍</span>
         <input id="gs-input" placeholder="חיפוש בכל המדורים והמילון..." oninput="globalSearch()" autocomplete="off" style="flex:1;background:transparent;border:none;color:#E8D9B8;font-size:16px;font-family:inherit;outline:none;direction:rtl;text-align:right;"/>
+        <button class="voice-lang-toggle" onclick="voiceLangToggle()" title="שפת החיפוש הקולי — עברית / ערבית" style="background:#2A3D52;border:1px solid #D4A24E;color:#D4A24E;min-width:30px;height:34px;border-radius:8px;cursor:pointer;font-size:12px;font-weight:800;flex-shrink:0;padding:0 6px;">עב</button>
         <button id="gs-voice" onclick="gsVoice()" title="חיפוש קולי — דבר במקום להקליד" style="background:rgba(212,162,78,0.18);border:1px solid #D4A24E;color:#D4A24E;width:34px;height:34px;border-radius:50%;cursor:pointer;font-size:16px;flex-shrink:0;">🎤</button>
         <button onclick="document.getElementById('gs-input').value='';globalSearch()" style="background:rgba(255,255,255,0.1);border:none;color:#E8D9B8;width:28px;height:28px;border-radius:50%;cursor:pointer;font-size:16px;flex-shrink:0;">×</button>
       </div>
@@ -14790,22 +14799,44 @@ function gsGoIdx(i){
     else if(t.kind==='tab'){ if(typeof navToTab==='function') navToTab(t.id); }
   }catch(e){} }, 70);
 }
-// Voice search — speak instead of type (great with gloves in the field).
-function gsVoice(){
-  var SR = window.SpeechRecognition || window.webkitSpeechRecognition;
-  var btn = document.getElementById('gs-voice');
-  if(!SR){ alert('חיפוש קולי נתמך ב-Chrome ובאנדרואיד. באייפון (Safari) התכונה עדיין מוגבלת — אפשר להקליד רגיל.'); return; }
-  try{
-    if(window._gsRec){ try{ window._gsRec.stop(); }catch(e){} window._gsRec=null; if(btn){ btn.textContent='🎤'; btn.style.background='rgba(212,162,78,0.18)'; } return; }
-    var r=new SR(); window._gsRec=r; r.lang='he-IL'; r.interimResults=false; r.maxAlternatives=1;
-    if(btn){ btn.textContent='🔴'; btn.style.background='rgba(231,76,60,0.28)'; }
-    var inp=document.getElementById('gs-input'); if(inp) inp.setAttribute('placeholder','🎤 מקשיב... דבר עכשיו');
-    r.onresult=function(e){ try{ var t=(e.results[0][0].transcript||'').trim(); if(inp){ inp.value=t; globalSearch(); } }catch(_){}};
-    var reset=function(){ if(btn){ btn.textContent='🎤'; btn.style.background='rgba(212,162,78,0.18)'; } if(inp) inp.setAttribute('placeholder','חיפוש בכל המדורים והמילון...'); window._gsRec=null; };
-    r.onerror=reset; r.onend=reset;
-    r.start();
-  }catch(e){ if(btn) btn.textContent='🎤'; window._gsRec=null; alert('לא ניתן להפעיל חיפוש קולי במכשיר הזה.'); }
+// ===== Universal voice search — attach a mic to ANY search box =====
+// Speak instead of type; the soldier gets an answer fastest. Supports Hebrew AND
+// Arabic (toggle). Fills the target input and triggers its normal search handler.
+// Web Speech API is NOT supported on iPhone Safari (Apple limitation) — we say so.
+window._voiceLang = window._voiceLang || 'he-IL';
+function voiceSupported(){ return !!(window.SpeechRecognition || window.webkitSpeechRecognition); }
+function voiceLangToggle(){
+  window._voiceLang = (window._voiceLang==='ar-SA') ? 'he-IL' : 'ar-SA';
+  var lbl = (window._voiceLang==='ar-SA') ? 'ער' : 'עב';
+  try{ document.querySelectorAll('.voice-lang-toggle').forEach(function(b){ b.textContent=lbl; }); }catch(e){}
 }
+function voiceSearch(inputId, btn){
+  var inp = document.getElementById(inputId); if(!inp) return;
+  var SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+  if(!SR){
+    // iPhone/Safari has no in-page speech API — but the KEYBOARD'S OWN dictation
+    // mic works everywhere. Open the keyboard and point the soldier to it.
+    try{ inp.focus(); inp.click(); }catch(e){}
+    alert('🎤 באייפון: הקישי על תיבת החיפוש, ואז על כפתור המיקרופון שבמקלדת (ליד מקש הרווח) ודברי — זה עובד בעברית ובערבית. (המיקרופון שבתוך האפליקציה נתמך באנדרואיד ובמחשב.)');
+    return;
+  }
+  try{
+    if(window._voiceRec){ try{ window._voiceRec.stop(); }catch(e){} window._voiceRec=null; if(btn){ btn.textContent='🎤'; btn.style.background=''; } return; }
+    var r=new SR(); window._voiceRec=r; r.lang=window._voiceLang||'he-IL'; r.interimResults=false; r.maxAlternatives=1; r.continuous=false;
+    var oldPh=inp.getAttribute('placeholder')||'';
+    if(btn){ btn.textContent='🔴'; btn.style.background='rgba(231,76,60,0.28)'; }
+    inp.setAttribute('placeholder','🎤 מקשיב... דבר/י עכשיו');
+    var done=false;
+    r.onresult=function(e){ try{ done=true; var t=(e.results[0][0].transcript||'').trim(); inp.value=t; inp.dispatchEvent(new Event('input',{bubbles:true})); try{ inp.focus(); }catch(_){}} catch(_){}};
+    var reset=function(){ if(btn){ btn.textContent='🎤'; btn.style.background=''; } inp.setAttribute('placeholder',oldPh); window._voiceRec=null; };
+    r.onerror=function(ev){ reset(); if(!done && ev && ev.error==='not-allowed'){ alert('אין הרשאה למיקרופון. אשרי גישה למיקרופון בהגדרות הדפדפן ונסי שוב.'); } };
+    r.onend=reset;
+    r.start();
+  }catch(e){ if(btn){ btn.textContent='🎤'; btn.style.background=''; } window._voiceRec=null; alert('לא ניתן להפעיל חיפוש קולי במכשיר הזה.'); }
+}
+// Back-compat + home shortcut: open the global search and immediately start listening.
+function gsVoice(){ voiceSearch('gs-input', document.getElementById('gs-voice')); }
+function gsHomeVoice(){ try{ openGlobalSearch(); }catch(e){} setTimeout(function(){ try{ voiceSearch('gs-input', document.getElementById('gs-voice')); }catch(e){} }, 300); }
 function _gsDestHtml(q){
   var terms=_gsExpand(q).filter(Boolean);
   var all=_gsDestinations();

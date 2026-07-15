@@ -1,6 +1,6 @@
 /* Service worker for "ערבית מצילה חיים" — offline-first field use.
    Bump CACHE when shipping changes that must invalidate old caches. */
-const CACHE = 'asl-v57';
+const CACHE = 'asl-v58';
 // Recordings + fonts live in a separate cache that SURVIVES app updates —
 // otherwise every version bump would silently wipe the downloaded offline pack.
 const MEDIA = 'asl-media-v1';
