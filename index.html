@@ -14591,9 +14591,52 @@ function _gsRecentAdd(q){
 function _gsChipStyle(active){
   return 'background:'+(active?'#D4A24E':'#18293E')+';border:1px solid '+(active?'#D4A24E':'#2A3D52')+';color:'+(active?'#0E1B2E':'#a0b8c8')+';border-radius:14px;padding:5px 11px;font-size:11px;font-weight:700;cursor:pointer;font-family:inherit;white-space:nowrap;';
 }
+// One-tap field shortcuts shown on the empty search screen.
+var _gsShortcuts=['מחסום','חיפוש בבית','חיפוש ברכב','פצוע','תשאול','מבוקש','קהל','ילדים'];
+function _gsShortcutHtml(){
+  var h='<div style="color:#D4A24E;font-size:11px;font-weight:800;margin:2px 2px 8px;">⚡ קיצורי דרך</div><div style="display:flex;flex-wrap:wrap;gap:8px;margin-bottom:16px;">';
+  _gsShortcuts.forEach(function(q){
+    var safe=String(q).replace(/'/g,"\\'");
+    h+='<button onclick="gsUseRecent(\''+safe+'\')" style="background:linear-gradient(135deg,#243a55,#1F3147);border:1px solid #D4A24E;border-radius:14px;padding:7px 14px;color:#E8D9B8;font-size:13px;font-weight:600;cursor:pointer;font-family:inherit;">'+q+'</button>';
+  });
+  h+='</div>'; return h;
+}
+// "Did you mean" — closest known term by edit distance, built from shortcuts,
+// synonyms and every category/scenario name (so it grows with the kit).
+var _gsVocabCache=null;
+function _gsVocab(){
+  if(_gsVocabCache) return _gsVocabCache;
+  var seen={}, out=[];
+  function add(disp){ var n=_gsNorm(disp); if(n && n.length>=3 && !seen[n]){ seen[n]=1; out.push({n:n,disp:disp}); } }
+  try{ _gsShortcuts.forEach(function(s){ s.split(/\s+/).forEach(add); }); }catch(e){}
+  try{ _gsSyn.forEach(function(g){ g.forEach(add); }); }catch(e){}
+  try{ _gsDestinations().forEach(function(d){ String(d.name||'').split(/\s+/).forEach(add); }); }catch(e){}
+  _gsVocabCache=out; return out;
+}
+function _gsLev(a,b){
+  var m=a.length,n=b.length; if(!m) return n; if(!n) return m;
+  var d=[]; for(var i=0;i<=m;i++){ d[i]=[i]; } for(var j=0;j<=n;j++){ d[0][j]=j; }
+  for(i=1;i<=m;i++){ for(j=1;j<=n;j++){ var c=a[i-1]===b[j-1]?0:1; d[i][j]=Math.min(d[i-1][j]+1,d[i][j-1]+1,d[i-1][j-1]+c); } }
+  return d[m][n];
+}
+function _gsSuggest(rawQ){
+  var words=String(rawQ||'').split(/\s+/).map(_gsNorm).filter(function(w){ return w.length>=3; });
+  if(!words.length) return '';
+  var vocab=_gsVocab(), best=null, bestD=99;
+  words.forEach(function(w){
+    vocab.forEach(function(v){
+      if(Math.abs(v.n.length-w.length)>2) return;
+      var dist=_gsLev(w,v.n);
+      var lim=Math.min(2, Math.floor(v.n.length/3)+1);
+      if(dist>0 && dist<=lim && dist<bestD){ bestD=dist; best=v.disp; }
+    });
+  });
+  return best||'';
+}
 function _gsEmptyHtml(){
   var rec = _gsRecentGet();
-  var h = '<div style="text-align:center;color:#7a9ab5;font-size:13px;padding:24px 10px 14px;">הקלד מילה בעברית, ערבית או תעתיק כדי לחפש בכל הערכה.</div>';
+  var h = '<div style="text-align:center;color:#7a9ab5;font-size:13px;padding:20px 10px 16px;">הקלד מילה בעברית, ערבית או תעתיק — או בחר קיצור דרך.</div>';
+  h += _gsShortcutHtml();
   if (rec.length) {
     h += '<div style="color:#7a9ab5;font-size:11px;margin:0 2px 8px;">🕘 חיפושים אחרונים</div><div style="display:flex;flex-wrap:wrap;gap:8px;">';
     rec.forEach(function(q){
@@ -14720,7 +14763,12 @@ function globalSearch(){
       if(hay.indexOf(q)!==-1) results.push({ p:p, label:s.label, icon:s.icon });
     });
   });
-  if(!destHtml && !results.length){ out.innerHTML='<div style="text-align:center;color:#7a9ab5;font-size:13px;padding:30px 10px;">לא נמצאו תוצאות ל"'+rawQ+'".</div>'; return; }
+  if(!destHtml && !results.length){
+    var sug=_gsSuggest(rawQ);
+    var nh='<div style="text-align:center;color:#7a9ab5;font-size:13px;padding:26px 10px 8px;">לא נמצאו תוצאות ל"'+rawQ+'".</div>';
+    if(sug){ nh+='<div style="text-align:center;padding:4px 10px 20px;color:#a0b8c8;font-size:13px;">האם התכוונת ל־ <button onclick="gsUseRecent(\''+String(sug).replace(/'/g,"\\'")+'\')" style="background:rgba(212,162,78,0.15);border:1px solid #D4A24E;border-radius:12px;padding:6px 14px;color:#D4A24E;font-size:14px;font-weight:700;cursor:pointer;font-family:inherit;">'+sug+' ‹</button> ?</div>'; }
+    out.innerHTML=nh; return;
+  }
   var h = destHtml;
   if(results.length){
     var counts = {}; results.forEach(function(r){ counts[r.label]=(counts[r.label]||0)+1; });
