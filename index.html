@@ -10107,16 +10107,29 @@ const CATEGORY_INFO = {
 function getPhraseSubcat(phrase, cat) {
   const info = CATEGORY_INFO[cat];
   if (!info || !info.subcats) return null;
-  
-  const text = ((phrase.he || '') + ' ' + (phrase.trans || '')).toLowerCase();
-  for (const [subcat, keywords] of Object.entries(info.subcats)) {
-    for (const kw of keywords) {
-      if (text.includes(kw.toLowerCase())) {
-        return subcat;
-      }
-    }
+  const he = (phrase.he || '');
+  const text = (he + ' ' + (phrase.trans || '')).toLowerCase();
+  const entries = Object.entries(info.subcats);
+  // 1) Score-based match — the sub-topic with the STRONGEST keyword overlap wins
+  //    (longer keywords weigh more), instead of just the first keyword that hits.
+  let best = null, bestScore = 0;
+  for (const [subcat, keywords] of entries) {
+    let score = 0;
+    for (const kw of keywords) { const k = kw.toLowerCase(); if (k && text.includes(k)) score += Math.max(2, k.length); }
+    if (score > bestScore) { bestScore = score; best = subcat; }
   }
-  return null;
+  if (best) return best;
+  // 2) Smart fallback so fewer items fall into "נוספים": route a leftover phrase by
+  //    whether it's a QUESTION (→ the info/identification sub-topic) or a COMMAND
+  //    (→ the orders/handling sub-topic). Only routes when a fitting sub-topic exists.
+  const isQ = he.indexOf('?') !== -1
+    || (phrase.ar && String(phrase.ar).indexOf('؟') !== -1)
+    || /(^|\s)(מי|מה|מהיכן|איפה|לאן|מאיפה|כמה|מתי|למה|מדוע|האם|איזה|איזו|של מי)(\s|\?|$)/.test(he);
+  const names = entries.map(e => e[0]);
+  const findBy = (re) => names.find(n => re.test(n));
+  if (isQ) { const q = findBy(/תשאול|שאל|מידע|זיהוי|אבחון|בדיקת מצב|בירור/); if (q) return q; }
+  else { const c = findBy(/פקוד|הורא|עציר|מיקום|כניס|ניהול|הרגע|פנייה/); if (c) return c; }
+  return null; // genuinely miscellaneous — stays under "נוספים"
 }
 
 
