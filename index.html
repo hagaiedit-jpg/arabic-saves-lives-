@@ -3267,8 +3267,8 @@ function showLanding() {
         <div style="text-align:center;color:#7a9ab5;font-size:11px;margin-top:5px;">7 תורות — חייל מול אזרח, איתור וזיהוי פעיל מבוקש (שמות בדויים). אחרי ההוספה אפשר <b>לערוך, לתקן את הערבית ולהקליט</b> כל שורה (חיפוש: "מבוקש")</div>
         <button id="tool-carann" onclick="addCarAnnScenario(this)" style="width:100%;padding:12px;margin-top:10px;background:linear-gradient(135deg,#2c7a8a 0%,#1d5560 100%);border:none;border-radius:10px;color:#fff;font-size:13px;font-weight:800;cursor:pointer;font-family:inherit;">📢 הוסף תרחיש "כריזה לרכב — בידוק מלא" לעריכה (חד-פעמי)</button>
         <div style="text-align:center;color:#7a9ab5;font-size:11px;margin-top:5px;">16 שלבים — כריזת בידוק מלאה לרכב במחסום (חלק א'). אחרי ההוספה אפשר <b>לערוך, לתקן את הערבית ולהקליט</b> כל שורה (חיפוש: "כריזה" או "רכב")</div>
-        <button id="tool-dictcp" onclick="addDictCheckpoint(this)" style="width:100%;padding:12px;margin-top:10px;background:linear-gradient(135deg,#3a8a6e 0%,#22604a 100%);border:none;border-radius:10px;color:#fff;font-size:13px;font-weight:800;cursor:pointer;font-family:inherit;">📖 הוסף מילון "צ׳ק פוסט ומחסום" לעריכה (חד-פעמי)</button>
-        <div style="text-align:center;color:#7a9ab5;font-size:11px;margin-top:5px;">64 מילים מבצעיות למילון (פיילוט). כל מילה ניתנת לחיפוש בכל הערכה ובמילון, ואפשר <b>לערוך את הערבית ולהקליט</b> כל אחת</div>
+        <button id="tool-dictcp" onclick="addDictCheckpoint(this)" style="width:100%;padding:12px;margin-top:10px;background:linear-gradient(135deg,#3a8a6e 0%,#22604a 100%);border:none;border-radius:10px;color:#fff;font-size:13px;font-weight:800;cursor:pointer;font-family:inherit;">📖 הוסף מילון מבצעי (כל הנושאים) לעריכה (חד-פעמי)</button>
+        <div style="text-align:center;color:#7a9ab5;font-size:11px;margin-top:5px;">מילות המילון המבצעי — צ׳ק פוסט ומחסום, איתור מבוקש, אמל״ח. כל מילה ניתנת לחיפוש בכל הערכה ובמילון, ואפשר <b>לערוך את הערבית ולהקליט</b> כל אחת</div>
         <button id="tool-recwork" onclick="renderRecordWorklist(this)" style="width:100%;padding:12px;margin-top:10px;background:linear-gradient(135deg,#8e6db0 0%,#5e4080 100%);border:none;border-radius:10px;color:#fff;font-size:13px;font-weight:800;cursor:pointer;font-family:inherit;">🎙️ רשימת הקלטה — רק מילים שעדיין 🔇</button>
         <div style="text-align:center;color:#7a9ab5;font-size:11px;margin-top:5px;">מציג רק את מילות המילון שאין להן עדיין הקלטה בהקשר — כדי שתקליטי רק את מה שחסר באמת (השאר כבר נשמע בתוך משפטים מוקלטים)</div>
         <div id="recwork-panel" style="margin-top:10px;"></div>
@@ -8112,10 +8112,62 @@ var BUILTIN_DICT = [
   {section:'dictionary', cat:CPDICT_CAT, he:'כסף', ar:'مصاري', trans:'מַצַארִי'},
   {section:'dictionary', cat:CPDICT_CAT, he:'מניעה ביטחונית', ar:'منع أمني', trans:'מַנְע אַמְנִי'},
   {section:'dictionary', cat:CPDICT_CAT, he:'הקלות', ar:'تسهيلات', trans:'תַסְהִילַאת'},
-  {section:'dictionary', cat:CPDICT_CAT, he:'תור', ar:'دور (ج) أدوار', trans:'דוֹר (ר) אַדְוַאר'}
+  {section:'dictionary', cat:CPDICT_CAT, he:'תור', ar:'دور (ج) أدوار', trans:'דוֹר (ר) אַדְוַאר'},
+  {section:'dictionary', cat:'איתור מבוקש', he:'הסגרה', ar:'تسليم', trans:'תַסְלִים'},
+  {section:'dictionary', cat:'איתור מבוקש', he:'מוקף', ar:'محوّط (ج) محوّطين', trans:'מְחַוַּט (ר) ין'},
+  {section:'dictionary', cat:'איתור מבוקש', he:'צוות התקיפה', ar:'طاقم الهجوم', trans:'טַאקַם אִלְהֻגׄום'},
+  {section:'dictionary', cat:'איתור מבוקש', he:'סגר', ar:'طوق / إغلاق', trans:'טוֹק / אִעׄלַאק'},
+  {section:'dictionary', cat:'איתור מבוקש', he:'עוצר', ar:'منع التجوّل', trans:'מַנְע אִלתַגׄוֻּל'},
+  {section:'dictionary', cat:'איתור מבוקש', he:'מחבל', ar:'مخرّب (ج) مخرّبين', trans:'מֻחַׄרֵּבּ (ר) ין'},
+  {section:'dictionary', cat:'איתור מבוקש', he:'חשוד', ar:'مشبوه (ج) مشبوهين', trans:'מַשְבּוּה (ר) ין'},
+  {section:'dictionary', cat:'איתור מבוקש', he:'מבוקש', ar:'مطلوب (ج) مطلوبين', trans:'מַטְלוּבּ (ר) ין'},
+  {section:'dictionary', cat:'איתור מבוקש', he:'פעיל', ar:'نشيط (ج) نشطاء', trans:'נַשִיט (ר) נֻשַטַאא'},
+  {section:'dictionary', cat:'איתור מבוקש', he:'משת"פ (משתף פעולה)', ar:'عميل (ج) عملاء', trans:'עַמִיל (ר) עֻמַלַאא'},
+  {section:'dictionary', cat:'איתור מבוקש', he:'תושבים', ar:'أهالي', trans:'אַהַאלִי'},
+  {section:'dictionary', cat:'איתור מבוקש', he:'קבוצה, חוליה', ar:'مجموعة (ج) مجموعات', trans:'מַגׄמוּעַה (ר) את'},
+  {section:'dictionary', cat:'איתור מבוקש', he:'ארגון', ar:'منظّمة (ج) منظّمات / تنظيم (ج) تنظيمات', trans:'מֻנַזַּמֵה (ר) את / תַנְזׄים (ר) את'},
+  {section:'dictionary', cat:'איתור מבוקש', he:'מנגנון', ar:'جهاز (ج) أجهزة', trans:'גׄהַאז (ר) אַגׄהִזֵה'},
+  {section:'dictionary', cat:'איתור מבוקש', he:'צד', ar:'جهة (ج) جهات', trans:'גׄהַה (ר) את'},
+  {section:'dictionary', cat:'איתור מבוקש', he:'ביטחון', ar:'أمن', trans:'אַמְן'},
+  {section:'dictionary', cat:'איתור מבוקש', he:'פת"ח', ar:'حركة تحرير فلسطين', trans:'חַרַכַּת תַחְרִיר פִלַסְטִין'},
+  {section:'dictionary', cat:'איתור מבוקש', he:'חמא"ס', ar:'حركة المقاومة الإسلاميّة', trans:'חַרַכַּה אִלְמֻקַאוַמַה אִלְאִסְלַאמִיֵה'},
+  {section:'dictionary', cat:'איתור מבוקש', he:'ההתנגדות / חמא"ס', ar:'المقاومة', trans:'אִלְמֻקַאוַמֵה'},
+  {section:'dictionary', cat:'איתור מבוקש', he:'קשר', ar:'علاقة (ج) علاقات', trans:'עַלַאקַה (ר) את'},
+  {section:'dictionary', cat:'איתור מבוקש', he:'ביחס ל...', ar:'بالنسبة لـ', trans:'בִּאלנִּסְבֵּה לַ'},
+  {section:'dictionary', cat:'איתור מבוקש', he:'שיחה', ar:'محادثة (ج) محادثات', trans:'מֻחַאדַסֵה (ר) את'},
+  {section:'dictionary', cat:'איתור מבוקש', he:'מידע', ar:'معلومات', trans:'מַעְלוּמַאת'},
+  {section:'dictionary', cat:'איתור מבוקש', he:'מעצר', ar:'اعتقال (ج) اعتقالات', trans:'אִעְתִקַאל (ר) את'},
+  {section:'dictionary', cat:'איתור מבוקש', he:'חקירה', ar:'تحقيق (ج) تحقيقات', trans:'תַחְקִיק (ר) את'},
+  {section:'dictionary', cat:'איתור מבוקש', he:'גוף, חפץ', ar:'جسم (ج) أجسام', trans:'גׄסֵם (ר) אַגׄסַאם'},
+  {section:'dictionary', cat:'איתור מבוקש', he:'חפץ', ar:'غرض (ج) أغراض', trans:'עַׄרְד (ר) אַעׄרַאד'},
+  {section:'dictionary', cat:'איתור מבוקש', he:'חלק', ar:'قسم (ج) أقسام', trans:'קִסֵם (ר) אַקְסַאם'},
+  {section:'dictionary', cat:'אמל"ח', he:'אקדח', ar:'فرد (ج) فرود', trans:'פַרְד (ר) פְרוּד'},
+  {section:'dictionary', cat:'אמל"ח', he:'אקדח (תופי)', ar:'مسدّس (ج) مسدّسات', trans:'מְסַדַּס (ר) מְסַדַּסַאת'},
+  {section:'dictionary', cat:'אמל"ח', he:'אש חיה', ar:'رصاص حي', trans:'רַסַאס חַי'},
+  {section:'dictionary', cat:'אמל"ח', he:'בקבוק תבערה', ar:'قنينة مولوتوف / مولوتوف (ج) مولوتوفات', trans:'קַנִינֵת מוֹלוֹתוֹפ / מוֹלוֹתוֹפ (ר) את'},
+  {section:'dictionary', cat:'אמל"ח', he:'חבית', ar:'برميل (ج) براميل', trans:'בַּרְמִיל (ר) בַּרַאמִיל'},
+  {section:'dictionary', cat:'אמל"ח', he:'חגורת נפץ', ar:'حزام ناسف', trans:'חְזַאם נַאסֵף'},
+  {section:'dictionary', cat:'אמל"ח', he:'טיל', ar:'صاروخ (ج) صواريخ', trans:'סַארוּח (ר) סַוַארִיח'},
+  {section:'dictionary', cat:'אמל"ח', he:'כדור (קליע)', ar:'رصاصة (ج) رصاص', trans:'רְסַאסַה (ר) רְסַאס'},
+  {section:'dictionary', cat:'אמל"ח', he:'כדור גומי', ar:'عيار مطاطي (ج) عيارات مطاطيّة', trans:'עִיַאר מַטַאטִי (ר) עִיַארַאת מַטַאטִיֶה'},
+  {section:'dictionary', cat:'אמל"ח', he:'מזל"ט', ar:'زنّانة (ج) زنّانات', trans:'זַנַּאנֵה (ר) את'},
+  {section:'dictionary', cat:'אמל"ח', he:'מטוס', ar:'طيّارة (ج) طيّارات', trans:'טַיַּארַה (ר) את'},
+  {section:'dictionary', cat:'אמל"ח', he:'מטען', ar:'عبوّة (ج) عبوّات', trans:'עֻבֻּוַּה (ר) עֻבֻּוַּאת'},
+  {section:'dictionary', cat:'אמל"ח', he:'מטען מאולתר', ar:'عبوّة شعبيّة', trans:'עֻבְּוֶּה שַעְבִּיֶה'},
+  {section:'dictionary', cat:'אמל"ח', he:'מטען צינור', ar:'كوع (ج) كواع', trans:'כּוּע (ר) כְּוַאע'},
+  {section:'dictionary', cat:'אמל"ח', he:'מנהרה', ar:'نفق (ج) أنفاق', trans:'נַפַק (ר) אַנְפַאק'},
+  {section:'dictionary', cat:'אמל"ח', he:'מרגמה', ar:'قذيفة (ج) قذائف', trans:'קַדׄיפֵה (ר) קַדַׄאאֵף'},
+  {section:'dictionary', cat:'אמל"ח', he:'נשק חם', ar:'سلاح ناري', trans:'סְלַאח נַארִי'},
+  {section:'dictionary', cat:'אמל"ח', he:'סחורה', ar:'بضاعة', trans:'בְּדַאעַה'},
+  {section:'dictionary', cat:'אמל"ח', he:'סכין', ar:'سكّينة (ج) سكاكين', trans:'סִכִּינֵה (ר) סַכַּאכִּין'},
+  {section:'dictionary', cat:'אמל"ח', he:'סכין קצבים', ar:'ساطور (ج) سواطير', trans:'סַאטוּר (ר) סַוַאטִיר'},
+  {section:'dictionary', cat:'אמל"ח', he:'סמים', ar:'مخدّرات', trans:'מֻחַׄדַּרַאת'},
+  {section:'dictionary', cat:'אמל"ח', he:'ספינה', ar:'سفينة (ج) سفن / قارب (ج) قوارب', trans:'סַפִינֵה (ר) סֻפֻן / קַארֵבּ (ר) קַוַארֵבּ'},
+  {section:'dictionary', cat:'אמל"ח', he:'רובה', ar:'بارودة (ج) بواريد', trans:'בַּארוּדֵה (ר) בַּוַארִיד'},
+  {section:'dictionary', cat:'אמל"ח', he:'רימון יד', ar:'قنبلة يدويّة', trans:'קֻנְבֻּלֵה יַדַוִיֶה'},
 ];
 async function addDictCheckpoint(btn){
-  if(!confirm('להוסיף את מילון "צ׳ק פוסט ומחסום" ('+BUILTIN_DICT.length+' מילים) לרשימת העריכה וההקלטה? פעולה חד-פעמית, ללא כפילות.'))return;
+  if(!confirm('להוסיף את המילון המבצעי — כל הנושאים ('+BUILTIN_DICT.length+' מילים) — לרשימת העריכה וההקלטה? פעולה חד-פעמית, ללא כפילות.'))return;
   var old=btn.textContent; btn.disabled=true; btn.textContent='מוסיף...';
   try{
     var norm=function(s){ return String(s||'').replace(/[^֐-׿0-9A-Za-z]/g,''); };
@@ -8129,7 +8181,7 @@ async function addDictCheckpoint(btn){
     }
     await loadData(); try{ renderAdminList(); }catch(e){}
     btn.textContent='✓ נוספו '+added;
-    alert('✓ מילון "צ׳ק פוסט ומחסום" נוסף — '+added+' מילים. עכשיו אפשר לחפש, לערוך ולהקליט כל מילה. אם נוספו 0 — כבר היו קיימות.');
+    alert('✓ המילון המבצעי נוסף — '+added+' מילים חדשות. עכשיו אפשר לחפש, לערוך ולהקליט כל מילה. אם נוספו 0 — כבר היו קיימות.');
   }catch(e){ alert('שגיאה: '+(e&&e.message?e.message:e)); btn.textContent=old; }
   btn.disabled=false;
 }
