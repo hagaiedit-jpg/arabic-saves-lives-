@@ -8159,6 +8159,8 @@ function renderRecordWorklist(btn){
     h+='<div style="text-align:center;color:#7eecc1;font-size:14px;font-weight:800;padding:16px;">🎉 אין מילים שממתינות להקלטה!</div>';
     panel.innerHTML=h; return;
   }
+  h+='<button onclick="startRecQueue()" style="width:100%;padding:12px;margin-bottom:10px;background:linear-gradient(135deg,#1D9E75 0%,#0e5a3f 100%);border:none;border-radius:10px;color:#fff;font-size:14px;font-weight:800;cursor:pointer;font-family:inherit;">▶️ התחל תור הקלטה רציף ('+pending.length+') — בלי גלילה</button>';
+  h+='<div style="text-align:center;color:#7a9ab5;font-size:11px;margin-bottom:10px;">כל מילה שתקליטי ותשמרי — יורדת מהתור, והמילה הבאה נפתחת אוטומטית</div>';
   h+='<div style="color:#e8b96a;font-size:12.5px;font-weight:800;margin-bottom:8px;">🔇 '+pending.length+' מילים ממתינות להקלטה:</div>';
   pending.forEach(function(d){
     h+='<div style="background:#0E1B2E;border:1px solid #2A3D52;border-radius:9px;padding:9px 11px;margin-bottom:7px;display:flex;align-items:center;gap:8px;">'
@@ -8171,6 +8173,33 @@ function renderRecordWorklist(btn){
       +'</div>';
   });
   panel.innerHTML=h;
+}
+// Build the ordered list of dictionary-word ids that still need a recording
+// (no own audio, and no recorded sentence contains the word). Sets it as the
+// active editor queue (_auditNav) so save-and-next walks through them.
+function _rebuildRecNav(){
+  try{ if(typeof buildSmartDictIndex==='function') buildSmartDictIndex(); }catch(e){}
+  var idx=window.SMART_DICT_INDEX||{};
+  var norm=(typeof dictNorm==='function')?dictNorm:function(s){return String(s||'').toLowerCase();};
+  function tok(t){ return String(t||'').split(/[\s.,!?;:()\[\]،؟\/]+/).map(function(w){return w.trim();}).filter(function(w){return w.length>=2;}); }
+  function wc(w){ var k=norm(w); return k.length>=2 && idx[k] && idx[k].hasAudio; }
+  var dict=(typeof DICT!=='undefined'&&DICT)?DICT:[];
+  var ids=[];
+  dict.forEach(function(d){
+    if(!d.id || d.audio) return;
+    var cov=false; [d.he,d.trans,d.ar].forEach(function(t){ tok(t).forEach(function(w){ if(wc(w)) cov=true; }); });
+    if(!cov) ids.push(String(d.id));
+  });
+  window._auditNav=ids;
+  return ids;
+}
+// Start a continuous recording queue: opens the first un-recorded word in the
+// editor; each "save & next" advances automatically with no scrolling.
+function startRecQueue(){
+  var ids=_rebuildRecNav();
+  if(!ids.length){ alert('🎉 אין מילים שממתינות להקלטה — הכול מכוסה!'); return; }
+  window._navMode='rec'; window._auditNavPos=0;
+  try{ openEditById(ids[0]); }catch(e){ alert('שגיאה: '+(e&&e.message?e.message:e)); }
 }
 
 var BUILTIN_SCENARIO_DATA = [
@@ -14699,6 +14728,7 @@ function renderQuestionAudit(){
   }
   var totalQuestions = 0, totalMissing = 0, html = '';
   window._auditNav = []; // ordered ids of missing questions, for prev/next navigation in the editor
+  window._navMode = 'audit'; // editor queue mode (audit vs recording); recording queue sets 'rec'
   var copyLines = []; // plain-text list of remaining questions, for export
   sections.forEach(function(s){
     if(!Array.isArray(s.arr) || !s.arr.length) return;
@@ -16059,8 +16089,9 @@ function openEditRow(p) {
     var navBtn = document.getElementById('edit-savenext-btn');
     if (navIdx >= 0) {
       navBar.style.display = 'flex';
-      if (navBtn) navBtn.style.display = 'block';
-      document.getElementById('edit-audit-pos').textContent = 'שאלה ' + (navIdx + 1) + ' מתוך ' + window._auditNav.length;
+      if (navBtn){ navBtn.style.display = 'block'; navBtn.textContent = (window._navMode==='rec') ? '💾 שמור והמשך למילה הבאה ›' : '💾 שמור ולשאלה הבאה ›'; }
+      var _navUnit = (window._navMode==='rec') ? 'מילה' : 'שאלה';
+      document.getElementById('edit-audit-pos').textContent = _navUnit + ' ' + (navIdx + 1) + ' מתוך ' + window._auditNav.length;
     } else {
       navBar.style.display = 'none';
       if (navBtn) navBtn.style.display = 'none';
@@ -16347,13 +16378,15 @@ async function saveEdit(advance){
     await sbFetch('/rest/v1/phrases?id=eq.'+id,'PATCH',updates);
     await loadData();renderAdminList();
     try{ refreshOpenTabList(); }catch(e){}
-    if(typeof renderQuestionAudit==='function')renderQuestionAudit(); // rebuilds _auditNav without the just-fixed item
+    // Rebuild the active queue without the just-saved item (audit vs recording mode).
+    if(window._navMode==='rec'){ try{ _rebuildRecNav(); }catch(e){} }
+    else if(typeof renderQuestionAudit==='function'){ renderQuestionAudit(); }
     btn.textContent=btnTxt;
     if(advance && Array.isArray(window._auditNav)){
-      // The saved item dropped out of the list, so the same index now points to the next question.
+      // The saved item dropped out of the list, so the same index now points to the next.
       var pos=(typeof window._auditNavPos==='number')?window._auditNavPos:0;
       if(pos < window._auditNav.length){ openEditById(window._auditNav[pos]); }
-      else { closeEdit(); alert('🎉 סיימת! אין עוד שאלות בלי תשובות בקטגוריות שנבחרו.'); }
+      else { closeEdit(); alert(window._navMode==='rec' ? '🎉 סיימת! הקלטת את כל המילים בתור.' : '🎉 סיימת! אין עוד שאלות בלי תשובות בקטגוריות שנבחרו.'); }
     } else {
       closeEdit();alert('✓ נשמר!');
     }
