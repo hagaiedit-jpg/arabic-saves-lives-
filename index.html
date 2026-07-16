@@ -3265,6 +3265,8 @@ function showLanding() {
         <div style="text-align:center;color:#7a9ab5;font-size:11px;margin-top:5px;">5 שלבים — כריזה מבצעית להוצאת מבוקש מהבית (שמות בדויים). אחרי ההוספה אפשר <b>לערוך, לתקן את הערבית ולהקליט</b> כל שורה (חיפוש: "מבוקש")</div>
         <button id="tool-wint" onclick="addWantedIntScenario(this)" style="width:100%;padding:12px;margin-top:10px;background:linear-gradient(135deg,#5b6db0 0%,#3a4a80 100%);border:none;border-radius:10px;color:#fff;font-size:13px;font-weight:800;cursor:pointer;font-family:inherit;">🔎 הוסף תרחיש "תשאול — זיהוי מבוקש" לעריכה (חד-פעמי)</button>
         <div style="text-align:center;color:#7a9ab5;font-size:11px;margin-top:5px;">7 תורות — חייל מול אזרח, איתור וזיהוי פעיל מבוקש (שמות בדויים). אחרי ההוספה אפשר <b>לערוך, לתקן את הערבית ולהקליט</b> כל שורה (חיפוש: "מבוקש")</div>
+        <button id="tool-carann" onclick="addCarAnnScenario(this)" style="width:100%;padding:12px;margin-top:10px;background:linear-gradient(135deg,#2c7a8a 0%,#1d5560 100%);border:none;border-radius:10px;color:#fff;font-size:13px;font-weight:800;cursor:pointer;font-family:inherit;">📢 הוסף תרחיש "כריזה לרכב — בידוק מלא" לעריכה (חד-פעמי)</button>
+        <div style="text-align:center;color:#7a9ab5;font-size:11px;margin-top:5px;">16 שלבים — כריזת בידוק מלאה לרכב במחסום (חלק א'). אחרי ההוספה אפשר <b>לערוך, לתקן את הערבית ולהקליט</b> כל שורה (חיפוש: "כריזה" או "רכב")</div>
         <button id="tool-surveypack" onclick="addSurveyPack(this)" style="width:100%;padding:12px;margin-top:10px;background:linear-gradient(135deg,#3d6b9e 0%,#2a4a70 100%);border:none;border-radius:10px;color:#fff;font-size:13px;font-weight:800;cursor:pointer;font-family:inherit;">📋 הוסף 16 משפטים מתשובות הסקר (חד-פעמי)</button>
         <div style="text-align:center;color:#7a9ab5;font-size:11px;margin-top:5px;">שליטה בשיחה, עימות עם הכחשה, וזיהוי תחינות נפוצות — ישירות ממה שהלוחמים כתבו</div>
         <button onclick="cleanScenarioDupes(this)" style="width:100%;padding:12px;margin-top:10px;background:linear-gradient(135deg,#7a5230 0%,#5a3a20 100%);border:none;border-radius:10px;color:#fff;font-size:13px;font-weight:800;cursor:pointer;font-family:inherit;">🧹 נקה שורות כפולות בתרחישים</button>
@@ -8037,7 +8039,7 @@ async function loadData(){
 // Civilian (speaker ב) lines are tagged 'civilian'; soldier (א) lines are not.
 function _scnStepKey(p){ var m=((p&&p.tags)||'').match(/step(\d+)/); return ((p&&p.cat)||'')+'#'+(m?m[1]:'?'); }
 // Recently-added scenarios — show a "חדש" badge on their cube until first opened.
-var NEW_SCENARIOS = ['כריזה למבוקש','תשאול זיהוי מבוקש','ביטול דוח תנועה','עמידה מול תחינות במחסום','חקירה','הרחקה מהשטח','חיפוש בבית — איפה בעל הבית','חיפוש בבית — מי בבית','מעצר נער חשוד','זיכוי מרחוק','זיכוי ובידוק','בירור מצב בריאותי','סיוע הומניטרי'];
+var NEW_SCENARIOS = ['כריזה לרכב בידוק','כריזה למבוקש','תשאול זיהוי מבוקש','ביטול דוח תנועה','עמידה מול תחינות במחסום','חקירה','הרחקה מהשטח','חיפוש בבית — איפה בעל הבית','חיפוש בבית — מי בבית','מעצר נער חשוד','זיכוי מרחוק','זיכוי ובידוק','בירור מצב בריאותי','סיוע הומניטרי'];
 var BUILTIN_SCENARIO_DATA = [
   {id:'bi-harhaka-1',  section:'scenario', cat:'הרחקה מהשטח', tags:'step1',  he:'עצור במקום והרם ידיים!', ar:'اوقّف عندك وارفع إيديك لفوق!', trans:'וַקֵף עִנְדַכּ וַארְפַע אִידֵיכּ לַפוֹק'},
   {id:'bi-harhaka-2',  section:'scenario', cat:'הרחקה מהשטח', tags:'step2',  he:'מה אתה עושה כאן?', ar:'شو بتعمل هون؟', trans:'שוּ בְּתִעְמֵל הוֹן?'},
@@ -8676,6 +8678,7 @@ async function checkOneTimeTools(){
       ['tool-ticket',    missSteps(TICKET_SCN_ID, TICKET_SCENARIO)],
       ['tool-wcall',     missSteps(WCALL_SCN_ID, WCALL_SCENARIO)],
       ['tool-wint',      missSteps(WINT_SCN_ID, WINT_SCENARIO)],
+      ['tool-carann',    missSteps(CARANN_SCN_ID, CARANN_SCENARIO)],
       ['tool-surveypack',missHe('military', SURVEY_PACK)]
     ];
     var done=0;
@@ -9024,6 +9027,55 @@ async function addWantedIntScenario(btn){
     await loadData(); try{ renderAdminList(); }catch(e){}
     btn.textContent='✓ נוספו '+added;
     alert('✓ "תשאול — זיהוי מבוקש" נוסף לרשימת העריכה — '+added+' שורות. עכשיו אפשר לערוך, לתקן ולהקליט כל שורה (חיפוש: "מבוקש"). אם נוספו 0 — כבר היו קיימות.');
+  }catch(e){ alert('שגיאה: '+(e&&e.message?e.message:e)); btn.textContent=old; }
+  btn.disabled=false;
+}
+
+// === כריזה לרכב — בידוק מלא במחסום (חלק א') — כריזה מבצעית, כל השורות בפי הלוחם ===
+// תעתיק סופק ואומת ע"י המומחית; ערבית/עברית אושרו. built-in ומסונכרן ל-DB לעריכה/הקלטה.
+var CARANN_SCN_ID = 'כריזה לרכב בידוק';
+var CARANN_SCENARIO = [
+  {step:'step1', he:'היי, נהג הפיג׳ו הלבנה, כאן צה"ל.', ar:'يا شوفير سيّارة البيجو البيضا، هون جيش الدفاع.', trans:'יא שופֵיר סַיַארת אִלבִּיג׳ו אִלבֵּיד׳א, הוֹן גֵ׳יש אִלדִפַאע.', why:'הצבע/הדגם דוגמה — הלוחם משבץ את הרכב בפועל'},
+  {step:'step2', he:'עצור את הרכב מיד!', ar:'وقّف السيّارة فورا !', trans:'וַקֶּף אִלסַיַארַה פַוְרַן!!!'},
+  {step:'step3', he:'כבה את המנוע.', ar:'اطفي الموتور.', trans:'אִטְפִי אִלמוֹתוֹר.'},
+  {step:'step4', he:'הדלק את האור הפנימי בתוך הרכב.', ar:'اضوي الضو الداخلي داخل السيّارة.', trans:'אִדְ׳וִי אִלדַ׳ו אִלדַאחִ׳לִי דַאחֵ׳ל אִלסַיַארַה.'},
+  {step:'step5', he:'פתח את דלת הנהג וצא ממנה עם תעודת הזהות, כשידיך מורמות מעל הראש.', ar:'افتح باب الشوفير واطلع منه مع هويّتك وإنت رافع إيديك فوق راسك.', trans:'אִפְתַח בַּאבּ אִלשּוּפֵיר וַאִטְלַע מִנוֹ מַע הַוִיתַכּ וֻאִנְתֶ רַאפֶע אִידֵיכּ פוֹק רַאסַכּ.'},
+  {step:'step6', he:'קח איתך גם את מפתח הרכב.', ar:'خُد معك مفتاح السيّارة كمان.', trans:'חֻ׳ד מַעַכּ מֻפְתַאח אִלסַיַארַה כַּמַאן.'},
+  {step:'step7', he:'לך ופתח את תא המטען.', ar:'روح وافتح البجاز.', trans:'רוּח וֻאִפְתַח אִלבַּגַאז׳.'},
+  {step:'step8', he:'פתחת אותו?', ar:'فتحته؟', trans:'פַתַחְתוֹ?', why:'שאלת וידוא וזירוז'},
+  {step:'step9', he:'השאר את מפתח הרכב על המשטח/הגג ולך לכיוון חזית הרכב.', ar:'خلّي مفتاح السيّارة عالسطح وامشي باتّجاه وجه السيّارة.', trans:'חַ׳לִי מֻפְתַאח אִלסַיַארַה עַאלסַטֶח וֻאִמְשִי בִּאִתִגַ׳אה וַגְ׳ה אִלסַיַארַה.'},
+  {step:'step10', he:'הגעת?', ar:'وصلت؟', trans:'וְצ׳לְת?', why:'שאלת וידוא וזירוז'},
+  {step:'step11', he:'הרם את החולצה שלך.', ar:'ارفع بلوزتك.', trans:'אִרְפַע בְּלוּזְתַכּ.'},
+  {step:'step12', he:'הסתובב.', ar:'دور.', trans:'דור.'},
+  {step:'step13', he:'הסתובב עוד פעם.', ar:'دور كمان مرّة.', trans:'דור כַּמַאן מַרה.'},
+  {step:'step14', he:'הורד את המכנסיים שלך.', ar:'اشلح بنطلونك.', trans:'אִשְלַח בַּנְטַלוֹנַכּ.'},
+  {step:'step15', he:'הרם/הפשל אותם.', ar:'ارفعه.', trans:'אִרפַעוֹ.'},
+  {step:'step16', he:'לך לכיוון החיילים.', ar:'امشي باتّجاه الجنود.', trans:'אִמְשִי בִּאִתִגַ׳אה אִלגֻ׳נוּד.'}
+];
+try {
+  if (typeof BUILTIN_SCENARIO_DATA !== 'undefined' && BUILTIN_SCENARIO_DATA.push) {
+    CARANN_SCENARIO.forEach(function(s, i){
+      BUILTIN_SCENARIO_DATA.push({ id:'bi-carann-'+i, section:'scenario', cat:CARANN_SCN_ID, tags:s.step, he:s.he, ar:s.ar, trans:s.trans, why:s.why||'' });
+    });
+  }
+} catch(e){ console.warn('carann builtin merge failed', e); }
+
+async function addCarAnnScenario(btn){
+  if(!confirm('להוסיף את התרחיש "כריזה לרכב — בידוק מלא במחסום" (16 שלבים) לרשימת העריכה וההקלטה? פעולה חד-פעמית, ללא כפילות.'))return;
+  var old=btn.textContent; btn.disabled=true; btn.textContent='מוסיף...';
+  try{
+    var ex=await sbFetchAllRows('/rest/v1/phrases?select=id,tags,audio_url&section=eq.scenario&cat=eq.'+encodeURIComponent(CARANN_SCN_ID));
+    var have={}; (ex||[]).forEach(function(p){ have[_scnStepKey(p)]=1; });
+    var added=0;
+    for(var i=0;i<CARANN_SCENARIO.length;i++){
+      var s=CARANN_SCENARIO[i]; var key=CARANN_SCN_ID+'#'+s.step.replace('step','');
+      if(have[key])continue;
+      await sbFetch('/rest/v1/phrases','POST',{cat:CARANN_SCN_ID,he:s.he,trans:s.trans,ar:s.ar,tags:s.step,why:s.why||'',tone:'',audio_url:'',is_new:false,section:'scenario'});
+      have[key]=1; added++;
+    }
+    await loadData(); try{ renderAdminList(); }catch(e){}
+    btn.textContent='✓ נוספו '+added;
+    alert('✓ "כריזה לרכב — בידוק מלא במחסום" נוסף לרשימת העריכה — '+added+' שורות. עכשיו אפשר לערוך, לתקן ולהקליט כל שורה (חיפוש: "כריזה" או "רכב"). אם נוספו 0 — כבר היו קיימות.');
   }catch(e){ alert('שגיאה: '+(e&&e.message?e.message:e)); btn.textContent=old; }
   btn.disabled=false;
 }
@@ -10982,6 +11034,7 @@ var SCN_CATEGORIES = [
     id:'cat3', icon:'🚗', title:'שליטה בצירים ומחסומים',
     scenarios:[
       {id:'כריזה לרכב', icon:'📢', title:'כריזה לרכב'},
+      {id:'כריזה לרכב בידוק', icon:'📢', title:'כריזה לרכב — בידוק מלא'},
       {id:'דיאלוג במחסום', icon:'💬', title:'דיאלוג במחסום'},
       {id:'רועה צאן', icon:'🚜', title:'רועה צאן בציר'},
       {id:'עצירת רכב מחסום', icon:'🚗', title:'עצירת רכב במחסום'},
