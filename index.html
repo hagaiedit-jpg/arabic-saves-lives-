@@ -3267,6 +3267,8 @@ function showLanding() {
         <div style="text-align:center;color:#7a9ab5;font-size:11px;margin-top:5px;">7 תורות — חייל מול אזרח, איתור וזיהוי פעיל מבוקש (שמות בדויים). אחרי ההוספה אפשר <b>לערוך, לתקן את הערבית ולהקליט</b> כל שורה (חיפוש: "מבוקש")</div>
         <button id="tool-carann" onclick="addCarAnnScenario(this)" style="width:100%;padding:12px;margin-top:10px;background:linear-gradient(135deg,#2c7a8a 0%,#1d5560 100%);border:none;border-radius:10px;color:#fff;font-size:13px;font-weight:800;cursor:pointer;font-family:inherit;">📢 הוסף תרחיש "כריזה לרכב — בידוק מלא" לעריכה (חד-פעמי)</button>
         <div style="text-align:center;color:#7a9ab5;font-size:11px;margin-top:5px;">16 שלבים — כריזת בידוק מלאה לרכב במחסום (חלק א'). אחרי ההוספה אפשר <b>לערוך, לתקן את הערבית ולהקליט</b> כל שורה (חיפוש: "כריזה" או "רכב")</div>
+        <button id="tool-dictcp" onclick="addDictCheckpoint(this)" style="width:100%;padding:12px;margin-top:10px;background:linear-gradient(135deg,#3a8a6e 0%,#22604a 100%);border:none;border-radius:10px;color:#fff;font-size:13px;font-weight:800;cursor:pointer;font-family:inherit;">📖 הוסף מילון "צ׳ק פוסט ומחסום" לעריכה (חד-פעמי)</button>
+        <div style="text-align:center;color:#7a9ab5;font-size:11px;margin-top:5px;">64 מילים מבצעיות למילון (פיילוט). כל מילה ניתנת לחיפוש בכל הערכה ובמילון, ואפשר <b>לערוך את הערבית ולהקליט</b> כל אחת</div>
         <button id="tool-surveypack" onclick="addSurveyPack(this)" style="width:100%;padding:12px;margin-top:10px;background:linear-gradient(135deg,#3d6b9e 0%,#2a4a70 100%);border:none;border-radius:10px;color:#fff;font-size:13px;font-weight:800;cursor:pointer;font-family:inherit;">📋 הוסף 16 משפטים מתשובות הסקר (חד-פעמי)</button>
         <div style="text-align:center;color:#7a9ab5;font-size:11px;margin-top:5px;">שליטה בשיחה, עימות עם הכחשה, וזיהוי תחינות נפוצות — ישירות ממה שהלוחמים כתבו</div>
         <button onclick="cleanScenarioDupes(this)" style="width:100%;padding:12px;margin-top:10px;background:linear-gradient(135deg,#7a5230 0%,#5a3a20 100%);border:none;border-radius:10px;color:#fff;font-size:13px;font-weight:800;cursor:pointer;font-family:inherit;">🧹 נקה שורות כפולות בתרחישים</button>
@@ -8040,6 +8042,95 @@ async function loadData(){
 function _scnStepKey(p){ var m=((p&&p.tags)||'').match(/step(\d+)/); return ((p&&p.cat)||'')+'#'+(m?m[1]:'?'); }
 // Recently-added scenarios — show a "חדש" badge on their cube until first opened.
 var NEW_SCENARIOS = ['כריזה לרכב בידוק','כריזה למבוקש','תשאול זיהוי מבוקש','ביטול דוח תנועה','עמידה מול תחינות במחסום','חקירה','הרחקה מהשטח','חיפוש בבית — איפה בעל הבית','חיפוש בבית — מי בבית','מעצר נער חשוד','זיכוי מרחוק','זיכוי ובידוק','בירור מצב בריאותי','סיוע הומניטרי'];
+// === מילון מבצעי: צ'ק פוסט ומחסום (פיילוט) — עברית+תעתיק אומתו ע"י המומחית; ערבית אושרה ===
+// נכנס ל-DICT (המילון החכם סורק אותו) ומסונכרן ל-DB לעריכה/הקלטה.
+var CPDICT_CAT = 'צ׳ק פוסט ומחסום';
+var BUILTIN_DICT = [
+  {section:'dictionary', cat:CPDICT_CAT, he:'נהג', ar:'شوفير (ج) شوفيريّة', trans:'שוּפֵיר (ר) שוּפִירִיֵה'},
+  {section:'dictionary', cat:CPDICT_CAT, he:'נוסע', ar:'راكب (ج) ركّاب', trans:'רַאכֵּבּ (ר) רֻכַּאבּ'},
+  {section:'dictionary', cat:CPDICT_CAT, he:'מכונית', ar:'سيّارة (ج) سيّارات', trans:'סַיַּארַה (ר) את'},
+  {section:'dictionary', cat:CPDICT_CAT, he:'מונית', ar:'سيّارة أجرة / تكسي', trans:'סַיַּארֵת אֻגְ׳רַה / תַכְּסִי'},
+  {section:'dictionary', cat:CPDICT_CAT, he:'אוטובוס', ar:'باص (ج) باصات', trans:'בַּאסּ (ר) את'},
+  {section:'dictionary', cat:CPDICT_CAT, he:'סוג', ar:'نوع (ج) أنواع', trans:'נוֹע (ר) אַנְוַאע'},
+  {section:'dictionary', cat:CPDICT_CAT, he:'מיד', ar:'فوراً / قوام / على طول', trans:'פַוְרַן / קַוַאם / עַלַא טוּל'},
+  {section:'dictionary', cat:CPDICT_CAT, he:'מנוע', ar:'موتور', trans:'מוֹתוֹר'},
+  {section:'dictionary', cat:CPDICT_CAT, he:'מכסה המנוע', ar:'غطا الموتور', trans:'עַ׳טַא אִלְמוֹתוֹר'},
+  {section:'dictionary', cat:CPDICT_CAT, he:'גג', ar:'سطح (ج) سطوح', trans:'סַטְח (ר) סְטוּח'},
+  {section:'dictionary', cat:CPDICT_CAT, he:'אור', ar:'ضو (ج) ضوايا', trans:'דַ׳וֹ (ר) דַ׳וַאיַא'},
+  {section:'dictionary', cat:CPDICT_CAT, he:'בפנים', ar:'جوّه', trans:'גֻ׳וַּה'},
+  {section:'dictionary', cat:CPDICT_CAT, he:'בחוץ', ar:'برّة', trans:'בַּרַּה'},
+  {section:'dictionary', cat:CPDICT_CAT, he:'מחוץ ל...', ar:'لبرّة من / برّات', trans:'לַבַּרַּה מִן / בַּרַּאת'},
+  {section:'dictionary', cat:CPDICT_CAT, he:'דלת', ar:'باب (ج) أبواب', trans:'בַּאבּ (ר) אַבְּוַאבּ'},
+  {section:'dictionary', cat:CPDICT_CAT, he:'תעודת זהות', ar:'هويّة (ج) هويّات', trans:'הַוִיֵה (ר) את'},
+  {section:'dictionary', cat:CPDICT_CAT, he:'רישיון נהיגה', ar:'رخصة سواقة', trans:'רֻחְ׳סֵת סְוַאקַה'},
+  {section:'dictionary', cat:CPDICT_CAT, he:'היתר', ar:'تصريح (ج) تصاريح', trans:'תַצְרִיח (ר) תַצַארִיח'},
+  {section:'dictionary', cat:CPDICT_CAT, he:'דרכון', ar:'جواز سفر (ج) جوازات سفر', trans:'גַ׳וַאז סַפַר (ר) גַ׳וַאזַאת סַפַר'},
+  {section:'dictionary', cat:CPDICT_CAT, he:'למעלה', ar:'لفوق', trans:'לַפוֹק'},
+  {section:'dictionary', cat:CPDICT_CAT, he:'למטה', ar:'لتحت', trans:'לַתַחְת'},
+  {section:'dictionary', cat:CPDICT_CAT, he:'לפנים, קדימה', ar:'لقدّام', trans:'לַקֻדַּאם'},
+  {section:'dictionary', cat:CPDICT_CAT, he:'לאחור, אחורה', ar:'لورا', trans:'לַוַרַא'},
+  {section:'dictionary', cat:CPDICT_CAT, he:'כיוון, צד', ar:'طرف (ج) أطراف', trans:'טַרַף (ר) אַטְרַאף'},
+  {section:'dictionary', cat:CPDICT_CAT, he:'ליד', ar:'جمب / جنب', trans:'גַ׳מְבּ / גַ׳נְבּ'},
+  {section:'dictionary', cat:CPDICT_CAT, he:'מפתח', ar:'مفتاح (ج) مفاتيح', trans:'מִפְתַאח (ר) מַפַאתִיח'},
+  {section:'dictionary', cat:CPDICT_CAT, he:'טי-שירט', ar:'بلوزة (ج) بلوزات', trans:'בְּלוּזֵה (ר) את'},
+  {section:'dictionary', cat:CPDICT_CAT, he:'חולצה מכופתרת', ar:'قميص (ج) قمصان', trans:'קַמִיצ (ר) קֻמְצַאן'},
+  {section:'dictionary', cat:CPDICT_CAT, he:'מכנס', ar:'بنطلون (ج) بناطلين', trans:'בַּנְטַלוֹן (ר) בַּנַאטְלִין'},
+  {section:'dictionary', cat:CPDICT_CAT, he:'מחסום', ar:'حاجز (ج) حواجز', trans:'חַאגֵ׳ז (ר) חַוַאגֵ׳ז'},
+  {section:'dictionary', cat:CPDICT_CAT, he:'מעבר', ar:'عبور', trans:'עֻבּוּר'},
+  {section:'dictionary', cat:CPDICT_CAT, he:'כניסה', ar:'دخول', trans:'דֻחוּל'},
+  {section:'dictionary', cat:CPDICT_CAT, he:'יציאה', ar:'خروج', trans:'חֻ׳רוּג׳'},
+  {section:'dictionary', cat:CPDICT_CAT, he:'שטח, אזור', ar:'منطقة (ج) مناطق', trans:'מַנְטִקַה (ר) מַנַאטֵק'},
+  {section:'dictionary', cat:CPDICT_CAT, he:'דרך', ar:'طريق (ج) طرق', trans:'טַרִיק (ר) טֻרֻק'},
+  {section:'dictionary', cat:CPDICT_CAT, he:'הר', ar:'جبل (ج) جبال', trans:'גַ׳בֵּל (ר) גְ׳בַּאל'},
+  {section:'dictionary', cat:CPDICT_CAT, he:'צומת', ar:'مفرق (ج) مفارق', trans:'מַפְרַק (ר) מַפַארֵק'},
+  {section:'dictionary', cat:CPDICT_CAT, he:'עזרה', ar:'مساعدة (ج) مساعدات', trans:'מֻסַאעַדֵה (ר) את'},
+  {section:'dictionary', cat:CPDICT_CAT, he:'בקשה', ar:'طلب (ج) طلبات', trans:'טַלַבּ (ר) טַלַבַּאת'},
+  {section:'dictionary', cat:CPDICT_CAT, he:'שאלה', ar:'سؤال (ج) أسئلة', trans:'סֻאאַל (ר) אַסְאִלֵה'},
+  {section:'dictionary', cat:CPDICT_CAT, he:'תשובה', ar:'جواب (ج) أجوبة', trans:'גַ׳וַאבּ (ר) אַגְ׳וִבֵּה'},
+  {section:'dictionary', cat:CPDICT_CAT, he:'חיובי', ar:'إيجابي', trans:'אִגַ׳אבִּי'},
+  {section:'dictionary', cat:CPDICT_CAT, he:'שלילי', ar:'سلبي', trans:'סַלְבִּי'},
+  {section:'dictionary', cat:CPDICT_CAT, he:'חייב', ar:'مجبور (ج) مجبورين', trans:'מַגְ׳בּוּר (ר) ין'},
+  {section:'dictionary', cat:CPDICT_CAT, he:'דחוף', ar:'ضروري', trans:'דַ׳רוּרִי'},
+  {section:'dictionary', cat:CPDICT_CAT, he:'ממהר', ar:'مستعجل', trans:'מִסְתַעְגֵ׳ל'},
+  {section:'dictionary', cat:CPDICT_CAT, he:'טיול, נסיעה', ar:'رحلة (ج) رحلات', trans:'רִחְלֵה (ר) את'},
+  {section:'dictionary', cat:CPDICT_CAT, he:'ביקור', ar:'زيارة (ج) زيارات', trans:'זִיַארַה (ר) את'},
+  {section:'dictionary', cat:CPDICT_CAT, he:'כיס', ar:'جيب / جيبة (ج) جياب', trans:'גֵ׳יבּ / גֵ׳יבֵּה (ר) גְ׳יַאבּ'},
+  {section:'dictionary', cat:CPDICT_CAT, he:'תיק', ar:'شنطة (ج) شنطات', trans:'שַנְטַה (ר) שַנטאת'},
+  {section:'dictionary', cat:CPDICT_CAT, he:'הראה לי אותה', ar:'فرجيني إيّاها', trans:'פַרְגִ׳ינִי אִיַאהַא'},
+  {section:'dictionary', cat:CPDICT_CAT, he:'בתוקף', ar:'ساري المفعول', trans:'סַארִי אִלְמַפְעוּל'},
+  {section:'dictionary', cat:CPDICT_CAT, he:'המנהל האזרחי', ar:'الإدارة المدنيّة', trans:'אִלְאִדַארַה אִלְמַדַנִיֵה'},
+  {section:'dictionary', cat:CPDICT_CAT, he:'משרד התיאום והקישור (מתק)', ar:'مكتب الارتباط', trans:'מַכְּתַבּ אִלְאִרְתִבַּאט'},
+  {section:'dictionary', cat:CPDICT_CAT, he:'משרד', ar:'مكتب (ج) مكاتب', trans:'מַכְּתַבּ (ר) מַכַּאתֵבּ'},
+  {section:'dictionary', cat:CPDICT_CAT, he:'מכתב', ar:'مكتوب (ج) مكاتيب', trans:'מַכְּתוּבּ (ר) מַכַּאתִיבּ'},
+  {section:'dictionary', cat:CPDICT_CAT, he:'נושא', ar:'موضوع (ج) مواضيع', trans:'מַוְדוּע (ר) מַוַאדִיע'},
+  {section:'dictionary', cat:CPDICT_CAT, he:'פרט', ar:'تفصيل (ج) تفاصيل', trans:'תַפְצִיל (ר) תַפַאצִיל'},
+  {section:'dictionary', cat:CPDICT_CAT, he:'סיבה', ar:'سبب (ج) أسباب', trans:'סַבַּבּ (ר) אַסְבַּאבּ'},
+  {section:'dictionary', cat:CPDICT_CAT, he:'עבודה', ar:'شغل (ج) أشغال', trans:'שֻעֻ׳ל (ר) אַשְעַ׳אל'},
+  {section:'dictionary', cat:CPDICT_CAT, he:'כסף', ar:'مصاري', trans:'מַצַארִי'},
+  {section:'dictionary', cat:CPDICT_CAT, he:'מניעה ביטחונית', ar:'منع أمني', trans:'מַנְע אַמְנִי'},
+  {section:'dictionary', cat:CPDICT_CAT, he:'הקלות', ar:'تسهيلات', trans:'תַסְהִילַאת'},
+  {section:'dictionary', cat:CPDICT_CAT, he:'תור', ar:'دور (ج) أدوار', trans:'דוֹר (ר) אַדְוַאר'}
+];
+async function addDictCheckpoint(btn){
+  if(!confirm('להוסיף את מילון "צ׳ק פוסט ומחסום" ('+BUILTIN_DICT.length+' מילים) לרשימת העריכה וההקלטה? פעולה חד-פעמית, ללא כפילות.'))return;
+  var old=btn.textContent; btn.disabled=true; btn.textContent='מוסיף...';
+  try{
+    var norm=function(s){ return String(s||'').replace(/[^֐-׿0-9A-Za-z]/g,''); };
+    var ex=await sbFetchAllRows('/rest/v1/phrases?select=he&section=eq.dictionary');
+    var have={}; (ex||[]).forEach(function(p){ have[norm(p.he)]=1; });
+    var added=0;
+    for(var i=0;i<BUILTIN_DICT.length;i++){
+      var b=BUILTIN_DICT[i]; if(have[norm(b.he)])continue;
+      await sbFetch('/rest/v1/phrases','POST',{cat:b.cat,he:b.he,trans:b.trans||'',ar:b.ar||'',tags:'',why:'',tone:'',audio_url:'',is_new:true,section:'dictionary'});
+      have[norm(b.he)]=1; added++;
+    }
+    await loadData(); try{ renderAdminList(); }catch(e){}
+    btn.textContent='✓ נוספו '+added;
+    alert('✓ מילון "צ׳ק פוסט ומחסום" נוסף — '+added+' מילים. עכשיו אפשר לחפש, לערוך ולהקליט כל מילה. אם נוספו 0 — כבר היו קיימות.');
+  }catch(e){ alert('שגיאה: '+(e&&e.message?e.message:e)); btn.textContent=old; }
+  btn.disabled=false;
+}
+
 var BUILTIN_SCENARIO_DATA = [
   {id:'bi-harhaka-1',  section:'scenario', cat:'הרחקה מהשטח', tags:'step1',  he:'עצור במקום והרם ידיים!', ar:'اوقّف عندك وارفع إيديك لفوق!', trans:'וַקֵף עִנְדַכּ וַארְפַע אִידֵיכּ לַפוֹק'},
   {id:'bi-harhaka-2',  section:'scenario', cat:'הרחקה מהשטח', tags:'step2',  he:'מה אתה עושה כאן?', ar:'شو بتعمل هون؟', trans:'שוּ בְּתִעְמֵל הוֹן?'},
@@ -8218,6 +8309,15 @@ function populateFromData(data){
     }
   }catch(e){}
   DICT=data.filter(p=>p.section==='dictionary').map(mp);
+  // Merge built-in operational dictionary words (skip any already promoted to the
+  // DB, matched by Hebrew) so they feed the smart dictionary index + global search.
+  try{
+    if(typeof BUILTIN_DICT!=='undefined' && BUILTIN_DICT.length){
+      var _normHeDict=function(s){ return String(s||'').replace(/[^֐-׿0-9A-Za-z]/g,''); };
+      var _seenDict={}; DICT.forEach(function(d){ _seenDict[_normHeDict(d.he)]=true; });
+      BUILTIN_DICT.forEach(function(b){ if(!_seenDict[_normHeDict(b.he)]){ DICT.push(mp(b)); _seenDict[_normHeDict(b.he)]=true; } });
+    }
+  }catch(e){}
   SEM=data.filter(p=>p.section==='semantic').map(p=>({...mp(p),risk:p.tone||'low',dict:p.ar,field:p.why}));
   CUS=data.filter(p=>p.section==='customs' || (p.section==='heart' && p.cat==='מנהגים')).map(mp);
   // Merge built-in customs, but skip any topic already promoted to the DB
@@ -8679,6 +8779,7 @@ async function checkOneTimeTools(){
       ['tool-wcall',     missSteps(WCALL_SCN_ID, WCALL_SCENARIO)],
       ['tool-wint',      missSteps(WINT_SCN_ID, WINT_SCENARIO)],
       ['tool-carann',    missSteps(CARANN_SCN_ID, CARANN_SCENARIO)],
+      ['tool-dictcp',    missHe('dictionary', BUILTIN_DICT)],
       ['tool-surveypack',missHe('military', SURVEY_PACK)]
     ];
     var done=0;
@@ -14483,8 +14584,20 @@ async function autoSyncBuiltins(){
         haveT[kt]=1; addedT++;
       }
     }
-    window._autoSyncAdded = addedScn+addedCus+addedT;
-    if(addedScn+addedCus+addedT>0){ await loadData(); }
+    // --- dictionary (operational vocabulary) keyed by normalized Hebrew ---
+    var addedD=0;
+    if(typeof BUILTIN_DICT!=='undefined' && BUILTIN_DICT.length){
+      var normD=function(s){ return String(s||'').replace(/[^֐-׿0-9A-Za-z]/g,''); };
+      var exD=await sbFetchAllRows('/rest/v1/phrases?select=he&section=eq.dictionary');
+      var haveD={}; (exD||[]).forEach(function(p){ haveD[normD(p.he)]=1; });
+      for(var d=0;d<BUILTIN_DICT.length;d++){
+        var bd=BUILTIN_DICT[d]; if(haveD[normD(bd.he)])continue;
+        await sbFetch('/rest/v1/phrases','POST',{cat:bd.cat,he:bd.he,trans:bd.trans||'',ar:bd.ar||'',tags:'',why:'',tone:'',audio_url:'',is_new:true,section:'dictionary'});
+        haveD[normD(bd.he)]=1; addedD++;
+      }
+    }
+    window._autoSyncAdded = addedScn+addedCus+addedT+addedD;
+    if(addedScn+addedCus+addedT+addedD>0){ await loadData(); }
   }catch(e){
     window._builtinsSynced=false; // let it retry next time on failure
     console.warn('autoSyncBuiltins failed', e);
