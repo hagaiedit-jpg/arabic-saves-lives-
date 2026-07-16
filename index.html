@@ -3269,6 +3269,9 @@ function showLanding() {
         <div style="text-align:center;color:#7a9ab5;font-size:11px;margin-top:5px;">16 שלבים — כריזת בידוק מלאה לרכב במחסום (חלק א'). אחרי ההוספה אפשר <b>לערוך, לתקן את הערבית ולהקליט</b> כל שורה (חיפוש: "כריזה" או "רכב")</div>
         <button id="tool-dictcp" onclick="addDictCheckpoint(this)" style="width:100%;padding:12px;margin-top:10px;background:linear-gradient(135deg,#3a8a6e 0%,#22604a 100%);border:none;border-radius:10px;color:#fff;font-size:13px;font-weight:800;cursor:pointer;font-family:inherit;">📖 הוסף מילון "צ׳ק פוסט ומחסום" לעריכה (חד-פעמי)</button>
         <div style="text-align:center;color:#7a9ab5;font-size:11px;margin-top:5px;">64 מילים מבצעיות למילון (פיילוט). כל מילה ניתנת לחיפוש בכל הערכה ובמילון, ואפשר <b>לערוך את הערבית ולהקליט</b> כל אחת</div>
+        <button id="tool-recwork" onclick="renderRecordWorklist(this)" style="width:100%;padding:12px;margin-top:10px;background:linear-gradient(135deg,#8e6db0 0%,#5e4080 100%);border:none;border-radius:10px;color:#fff;font-size:13px;font-weight:800;cursor:pointer;font-family:inherit;">🎙️ רשימת הקלטה — רק מילים שעדיין 🔇</button>
+        <div style="text-align:center;color:#7a9ab5;font-size:11px;margin-top:5px;">מציג רק את מילות המילון שאין להן עדיין הקלטה בהקשר — כדי שתקליטי רק את מה שחסר באמת (השאר כבר נשמע בתוך משפטים מוקלטים)</div>
+        <div id="recwork-panel" style="margin-top:10px;"></div>
         <button id="tool-surveypack" onclick="addSurveyPack(this)" style="width:100%;padding:12px;margin-top:10px;background:linear-gradient(135deg,#3d6b9e 0%,#2a4a70 100%);border:none;border-radius:10px;color:#fff;font-size:13px;font-weight:800;cursor:pointer;font-family:inherit;">📋 הוסף 16 משפטים מתשובות הסקר (חד-פעמי)</button>
         <div style="text-align:center;color:#7a9ab5;font-size:11px;margin-top:5px;">שליטה בשיחה, עימות עם הכחשה, וזיהוי תחינות נפוצות — ישירות ממה שהלוחמים כתבו</div>
         <button onclick="cleanScenarioDupes(this)" style="width:100%;padding:12px;margin-top:10px;background:linear-gradient(135deg,#7a5230 0%,#5a3a20 100%);border:none;border-radius:10px;color:#fff;font-size:13px;font-weight:800;cursor:pointer;font-family:inherit;">🧹 נקה שורות כפולות בתרחישים</button>
@@ -8129,6 +8132,45 @@ async function addDictCheckpoint(btn){
     alert('✓ מילון "צ׳ק פוסט ומחסום" נוסף — '+added+' מילים. עכשיו אפשר לחפש, לערוך ולהקליט כל מילה. אם נוספו 0 — כבר היו קיימות.');
   }catch(e){ alert('שגיאה: '+(e&&e.message?e.message:e)); btn.textContent=old; }
   btn.disabled=false;
+}
+
+// Recording worklist: list only the dictionary words that have NO recorded
+// context anywhere (own recording OR a recorded sentence containing the word).
+// Lets Edith record only what's actually missing instead of every word.
+function renderRecordWorklist(btn){
+  var panel=document.getElementById('recwork-panel'); if(!panel)return;
+  try{ if(typeof buildSmartDictIndex==='function') buildSmartDictIndex(); }catch(e){}
+  var idx=window.SMART_DICT_INDEX||{};
+  var norm=(typeof dictNorm==='function')?dictNorm:function(s){return String(s||'').toLowerCase();};
+  function tokens(t){ return String(t||'').split(/[\s.,!?;:()\[\]،؟\/]+/).map(function(w){return w.trim();}).filter(function(w){return w.length>=2;}); }
+  function wordHasCtx(w){ var k=norm(w); return k.length>=2 && idx[k] && idx[k].hasAudio; }
+  var dict=(typeof DICT!=='undefined'&&DICT)?DICT:[];
+  var pending=[], covered=0;
+  dict.forEach(function(d){
+    if(d.audio){ covered++; return; }                       // has its own recording
+    var isCov=false;
+    [d.he,d.trans,d.ar].forEach(function(t){ tokens(t).forEach(function(w){ if(wordHasCtx(w)) isCov=true; }); });
+    if(isCov){ covered++; } else { pending.push(d); }
+  });
+  var total=dict.length;
+  var h='<div style="background:rgba(29,158,117,0.12);border:1px solid rgba(29,158,117,0.4);border-radius:10px;padding:10px 12px;margin-bottom:10px;color:#7eecc1;font-size:12.5px;font-weight:700;">'
+    +'✓ '+covered+' מתוך '+total+' מילים כבר נשמעות בהקשר מוקלט — לא צריך להקליט אותן.</div>';
+  if(!pending.length){
+    h+='<div style="text-align:center;color:#7eecc1;font-size:14px;font-weight:800;padding:16px;">🎉 אין מילים שממתינות להקלטה!</div>';
+    panel.innerHTML=h; return;
+  }
+  h+='<div style="color:#e8b96a;font-size:12.5px;font-weight:800;margin-bottom:8px;">🔇 '+pending.length+' מילים ממתינות להקלטה:</div>';
+  pending.forEach(function(d){
+    h+='<div style="background:#0E1B2E;border:1px solid #2A3D52;border-radius:9px;padding:9px 11px;margin-bottom:7px;display:flex;align-items:center;gap:8px;">'
+      +'<div style="flex:1;min-width:0;">'
+      +'<div style="color:#E8D9B8;font-size:13px;font-weight:700;">'+escapeHtmlDict(d.he||'')+'</div>'
+      +(d.trans?'<div style="color:#D4A24E;font-size:12px;">'+escapeHtmlDict(d.trans)+'</div>':'')
+      +(d.ar?'<div style="color:#9fb2c6;font-size:13px;direction:rtl;font-family:Georgia,serif;">'+escapeHtmlDict(d.ar)+'</div>':'')
+      +'</div>'
+      +(d.id?'<button onclick="quickRecordById('+JSON.stringify(String(d.id))+')" style="flex-shrink:0;background:rgba(212,162,78,0.15);border:1px solid #D4A24E;color:#D4A24E;border-radius:8px;padding:8px 12px;font-size:12px;font-weight:800;cursor:pointer;font-family:inherit;">🎤 הקלט</button>':'<span style="flex-shrink:0;color:#7a9ab5;font-size:10px;">הוסף קודם למאגר</span>')
+      +'</div>';
+  });
+  panel.innerHTML=h;
 }
 
 var BUILTIN_SCENARIO_DATA = [
