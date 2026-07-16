@@ -3259,6 +3259,8 @@ function showLanding() {
         <div style="text-align:center;color:#7a9ab5;font-size:11px;margin-top:5px;">מבוסס על סיפור אמיתי מסקר הלוחמים (חאן יונס) — 7 שלבים, תחת "מגע ראשוני וסריקות"</div>
         <button id="tool-plea" onclick="addPleaScenario(this)" style="width:100%;padding:12px;margin-top:10px;background:linear-gradient(135deg,#a8555c 0%,#7a3a40 100%);border:none;border-radius:10px;color:#fff;font-size:13px;font-weight:800;cursor:pointer;font-family:inherit;">🚧 הוסף תרחיש "עמידה מול תחינות במחסום" לעריכה (חד-פעמי)</button>
         <div style="text-align:center;color:#7a9ab5;font-size:11px;margin-top:5px;">9 תחינות של אזרח + תגובות סמכותיות של הלוחם. אחרי ההוספה אפשר <b>לערוך, לתקן את הערבית ולהקליט</b> כל שורה מרשימת הניהול (חיפוש: "מחסום")</div>
+        <button id="tool-ticket" onclick="addTicketScenario(this)" style="width:100%;padding:12px;margin-top:10px;background:linear-gradient(135deg,#c08a2e 0%,#8a611e 100%);border:none;border-radius:10px;color:#fff;font-size:13px;font-weight:800;cursor:pointer;font-family:inherit;">🎫 הוסף תרחיש "בקשה לביטול דוח תנועה" לעריכה (חד-פעמי)</button>
+        <div style="text-align:center;color:#7a9ab5;font-size:11px;margin-top:5px;">18 שלבים — אזרח מבקש לבטל דוח והשוטר עומד בנימוס ובתקיפות. אחרי ההוספה אפשר <b>לערוך, לתקן את הערבית ולהקליט</b> כל שורה מרשימת הניהול (חיפוש: "דוח" או "מחסום")</div>
         <button id="tool-surveypack" onclick="addSurveyPack(this)" style="width:100%;padding:12px;margin-top:10px;background:linear-gradient(135deg,#3d6b9e 0%,#2a4a70 100%);border:none;border-radius:10px;color:#fff;font-size:13px;font-weight:800;cursor:pointer;font-family:inherit;">📋 הוסף 16 משפטים מתשובות הסקר (חד-פעמי)</button>
         <div style="text-align:center;color:#7a9ab5;font-size:11px;margin-top:5px;">שליטה בשיחה, עימות עם הכחשה, וזיהוי תחינות נפוצות — ישירות ממה שהלוחמים כתבו</div>
         <button onclick="cleanScenarioDupes(this)" style="width:100%;padding:12px;margin-top:10px;background:linear-gradient(135deg,#7a5230 0%,#5a3a20 100%);border:none;border-radius:10px;color:#fff;font-size:13px;font-weight:800;cursor:pointer;font-family:inherit;">🧹 נקה שורות כפולות בתרחישים</button>
@@ -8666,6 +8668,8 @@ async function checkOneTimeTools(){
                        + missSteps('זיכוי ובידוק', ZIKUY_SCENARIOS.filter(function(z){return z.cat==='זיכוי ובידוק';}))],
       ['tool-health',    missSteps(HEALTH_SCN_ID, HEALTH_SCENARIO)],
       ['tool-human',     missSteps(HUMAN_SCN_ID, HUMAN_SCENARIO)],
+      ['tool-plea',      missSteps(PLEA_SCN_ID, PLEA_SCENARIO)],
+      ['tool-ticket',    missSteps(TICKET_SCN_ID, TICKET_SCENARIO)],
       ['tool-surveypack',missHe('military', SURVEY_PACK)]
     ];
     var done=0;
@@ -8918,6 +8922,27 @@ try {
     });
   }
 } catch(e){ console.warn('ticket builtin merge failed', e); }
+
+async function addTicketScenario(btn){
+  if(!confirm('להוסיף את התרחיש "בקשה לביטול דוח תנועה" (18 שלבים) לרשימת העריכה וההקלטה? כך תוכלי לערוך, לתקן ולהקליט כל שורה. פעולה חד-פעמית, ללא כפילות.'))return;
+  var old=btn.textContent; btn.disabled=true; btn.textContent='מוסיף...';
+  try{
+    var ex=await sbFetchAllRows('/rest/v1/phrases?select=id,tags,audio_url&section=eq.scenario&cat=eq.'+encodeURIComponent(TICKET_SCN_ID));
+    var have={}; (ex||[]).forEach(function(p){ have[_scnStepKey(p)]=1; });
+    var added=0;
+    for(var i=0;i<TICKET_SCENARIO.length;i++){
+      var s=TICKET_SCENARIO[i];
+      var key=TICKET_SCN_ID+'#'+s.step.replace('step','');
+      if(have[key])continue;
+      await sbFetch('/rest/v1/phrases','POST',{cat:TICKET_SCN_ID,he:s.he,trans:s.trans,ar:s.ar,tags:s.step+(s.civ?' civilian':''),why:'',tone:'',audio_url:'',is_new:false,section:'scenario'});
+      have[key]=1; added++;
+    }
+    await loadData(); try{ renderAdminList(); }catch(e){}
+    btn.textContent='✓ נוספו '+added;
+    alert('✓ התרחיש "בקשה לביטול דוח תנועה" נוסף לרשימת העריכה — '+added+' שורות. עכשיו אפשר לערוך, לתקן את הערבית ולהקליט כל שורה מרשימת התרחישים בניהול (חיפוש: "דוח" או "מחסום"). אם נוספו 0 — הן כבר היו קיימות.');
+  }catch(e){ alert('שגיאה: '+(e&&e.message?e.message:e)); btn.textContent=old; }
+  btn.disabled=false;
+}
 
 // === Survey-driven phrase pack: conversation control, confronting denial,
 // and recognizing common pleas — built from the soldiers' survey answers ===
