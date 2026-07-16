@@ -13223,11 +13223,15 @@ function buildSmartDictIndex() {
     });
   });
   
-  // Convert displayWords Set to Array
+  // Convert displayWords Set to Array; surface RECORDED sentences first so a word
+  // that lives inside an already-recorded phrase is heard in context — no need to
+  // record the word on its own.
   Object.keys(index).forEach(function(key){
     index[key].displayWords = Array.from(index[key].displayWords);
+    index[key].phrases.sort(function(a,b){ return (b.audio?1:0)-(a.audio?1:0); });
+    index[key].hasAudio = index[key].phrases.some(function(p){ return !!p.audio; });
   });
-  
+
   SMART_DICT_INDEX = index;
   console.log('Smart dictionary built:', Object.keys(index).length, 'unique words');
   return index;
@@ -13307,7 +13311,11 @@ function searchDict(){
     // Word header
     html += '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;padding-bottom:8px;border-bottom:1px solid #2A3D52;">';
     html += '<div style="font-size:18px;font-weight:700;color:#D4A24E;">' + escapeHtmlDict(displayWord) + '</div>';
+    html += '<div style="display:flex;align-items:center;gap:6px;">';
+    var _cov = match.hasAudio;
+    html += '<div style="font-size:10px;font-weight:700;padding:3px 8px;border-radius:6px;' + (_cov ? 'color:#7eecc1;background:rgba(29,158,117,0.15);border:1px solid rgba(29,158,117,0.4);' : 'color:#e8b96a;background:rgba(212,162,78,0.12);border:1px solid rgba(212,162,78,0.35);') + '">' + (_cov ? '🎤 נשמע בהקשר' : '🔇 טרם הוקלט') + '</div>';
     html += '<div style="font-size:11px;color:#7a9ab5;background:rgba(255,255,255,0.05);padding:3px 8px;border-radius:6px;">' + match.phrases.length + ' משפטים</div>';
+    html += '</div>';
     html += '</div>';
     
     if (altForms.length > 0) {
