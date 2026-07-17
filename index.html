@@ -1,9 +1,6 @@
 <!DOCTYPE html>
 <html lang="he" dir="rtl">
 <head>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Hebrew:wght@400;500;600;700;800&family=Heebo:wght@400;500;700;800&display=swap" rel="stylesheet">
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
 <meta name="apple-mobile-web-app-capable" content="yes">
@@ -14,6 +11,29 @@
 <title>ערבית מצילה חיים</title>
 <!-- Google Analytics — loaded only AFTER explicit user consent (see consent banner) -->
 <script>
+// === SECURITY MODE ==========================================================
+// When ON, the app makes ZERO third-party network calls: no Google Analytics
+// and no Google Fonts (falls back to the system Hebrew stack: Arial Hebrew /
+// David). This is the build a security/defense body can inspect and approve.
+// Default OFF → the public app behaves EXACTLY as before (nothing changes).
+// Turn on with ?secure=1 in the URL, or localStorage.setItem('secureMode','1').
+window.SECURE_MODE = (function(){ try{
+  if(localStorage.getItem('secureMode')==='1') return true;
+  if(String(location.search).indexOf('secure=1')!==-1) return true;
+}catch(e){} return false; })();
+// Load Google Fonts via JS ONLY when not in secure mode (default path → same as
+// the old static <link> tags, just injected a few ms later; system Hebrew fonts
+// render meanwhile so there is no functional difference).
+if(!window.SECURE_MODE){
+  try{
+    ['https://fonts.googleapis.com','https://fonts.gstatic.com'].forEach(function(h,i){
+      var l=document.createElement('link'); l.rel='preconnect'; l.href=h; if(i) l.crossOrigin=''; document.head.appendChild(l);
+    });
+    var _fl=document.createElement('link'); _fl.rel='stylesheet';
+    _fl.href='https://fonts.googleapis.com/css2?family=Noto+Sans+Hebrew:wght@400;500;600;700;800&family=Heebo:wght@400;500;700;800&display=swap';
+    document.head.appendChild(_fl);
+  }catch(e){}
+}
 
 // === MediaRecorder format helper - works on iPhone, Android, Desktop ===
 function getBestRecordMime() {
@@ -65,6 +85,7 @@ function _cldAudio(url){
   function gtag(){dataLayer.push(arguments);}
   window.GA_ID = 'G-G91ERLFQ16';
   window.loadAnalytics = function(){
+    if (window.SECURE_MODE) return; // secure build: never contact Google, even with consent
     if (window._gaLoaded) return; window._gaLoaded = true;
     var s = document.createElement('script'); s.async = true;
     s.src = 'https://www.googletagmanager.com/gtag/js?id=' + window.GA_ID;
