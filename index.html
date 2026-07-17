@@ -2147,6 +2147,11 @@ function showLanding() {
       <span>עזרה ומקרא</span>
     </button>
     <div style="height:1px;background:#2e4558;margin:6px 4px;"></div>
+    <button onclick="toggleSecureMode();" style="display:flex;align-items:center;gap:10px;width:100%;background:transparent;border:none;color:#E8D9B8;padding:10px 12px;text-align:right;cursor:pointer;font-family:inherit;font-size:14px;border-radius:8px;">
+      <span style="font-size:18px;">🛡️</span>
+      <span>מצב מאובטח <span id="secureModeState" style="font-size:11px;font-weight:700;padding:1px 7px;border-radius:999px;margin-inline-start:4px;">כבוי</span></span>
+    </button>
+    <div style="height:1px;background:#2e4558;margin:6px 4px;"></div>
     <button onclick="openLegal('privacy');document.getElementById('header-menu').style.display='none';" style="display:flex;align-items:center;gap:10px;width:100%;background:transparent;border:none;color:#E8D9B8;padding:10px 12px;text-align:right;cursor:pointer;font-family:inherit;font-size:14px;border-radius:8px;">
       <span style="font-size:18px;">🔒</span>
       <span>מדיניות פרטיות</span>
@@ -17609,11 +17614,34 @@ try { renderHome(); } catch(_){}
 <script>
 try{ _offlinePackInit(); }catch(e){}
 // === Bottom Nav functions ===
+function _refreshSecureModeChip(){
+  try{
+    var chip=document.getElementById('secureModeState'); if(!chip) return;
+    var on = window.SECURE_MODE || (function(){try{return localStorage.getItem('secureMode')==='1';}catch(e){return false;}})();
+    chip.textContent = on ? 'פעיל' : 'כבוי';
+    chip.style.background = on ? 'rgba(29,158,117,0.2)' : 'rgba(122,154,181,0.15)';
+    chip.style.color = on ? '#7eecc1' : '#9fb2c6';
+  }catch(e){}
+}
+// Toggle the zero-third-party "secure mode". A reload is required because the
+// Google Analytics / Google Fonts decision is made once at page load.
+function toggleSecureMode(){
+  var on=false; try{ on=localStorage.getItem('secureMode')==='1'; }catch(e){}
+  if(!on){
+    if(!confirm('להפעיל מצב מאובטח?\n\nהאפליקציה תפסיק לפנות לכל שירות חיצוני (Google Analytics ו-Google Fonts) — אפס קריאות רשת לגורמי צד-שלישי. מתאים להדגמה מול גוף ביטחוני.\n\nהאפליקציה תיטען מחדש. אפשר לכבות בכל רגע.')) return;
+  } else {
+    if(!confirm('לכבות מצב מאובטח ולחזור למצב הרגיל? האפליקציה תיטען מחדש.')) return;
+  }
+  try{ localStorage.setItem('secureMode', on?'0':'1'); }catch(e){}
+  location.reload();
+}
 function toggleHeaderMenu(){
   try {
     var menu = document.getElementById('header-menu');
     if (!menu) return;
-    menu.style.display = (menu.style.display === 'none' || !menu.style.display) ? 'block' : 'none';
+    var opening = (menu.style.display === 'none' || !menu.style.display);
+    menu.style.display = opening ? 'block' : 'none';
+    if (opening) _refreshSecureModeChip();
   } catch(e) { console.warn('toggleHeaderMenu error:', e); }
 }
 
