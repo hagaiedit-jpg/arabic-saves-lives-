@@ -3259,6 +3259,16 @@ function showLanding() {
       <button class="sbtn" onclick="addCustoms()">שמור</button>
     </div></div>
     <div id="at-al" style="display:none;">
+      <div id="backup-card" style="background:linear-gradient(135deg,#173a2e 0%,#14302a 100%);border:1px solid #2f7d63;border-radius:12px;padding:14px;margin-bottom:14px;">
+        <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px;">
+          <span style="font-size:20px;">🛟</span>
+          <span style="color:#fff;font-size:15px;font-weight:800;">גיבוי תוכן</span>
+          <span id="backup-state" style="margin-inline-start:auto;font-size:11px;font-weight:700;padding:2px 9px;border-radius:999px;background:rgba(122,154,181,0.15);color:#9fb2c6;">—</span>
+        </div>
+        <div style="color:#a9c7bd;font-size:11.5px;line-height:1.6;margin-bottom:10px;">מוריד קובץ JSON עם <b>כל התוכן מכל המדורים</b> + קישורי ההקלטות. שמרי אותו במקום בטוח (מייל/ענן אישי). מומלץ פעם בשבוע.</div>
+        <button onclick="downloadBackup(this)" style="width:100%;padding:13px;background:#1D9E75;border:none;border-radius:10px;color:#fff;font-size:14px;font-weight:800;cursor:pointer;font-family:inherit;">⬇️ גבה עכשיו — כל התוכן</button>
+        <div id="backup-nudge" style="display:none;text-align:center;color:#e8b96a;font-size:12px;font-weight:700;margin-top:9px;"></div>
+      </div>
       <details style="margin-bottom:12px;" ontoggle="if(this.open&&typeof checkOneTimeTools==='function')checkOneTimeTools()">
       <summary style="cursor:pointer;color:#7a9ab5;font-size:12.5px;font-weight:800;padding:10px 12px;background:rgba(122,154,181,0.12);border-radius:10px;list-style:none;">⚙️ כלים חד-פעמיים להוספת תוכן (לחצי לפתיחה)</summary>
       <div id="tools-status" style="text-align:center;color:#D4A24E;font-size:12px;font-weight:700;margin-top:10px;"></div>
@@ -10484,14 +10494,36 @@ async function downloadBackup(btn){
   var old=btn.textContent; btn.disabled=true; btn.textContent='מוריד...';
   try{
     var rows=await sbFetchAllRows('/rest/v1/phrases?select=*&order=created_at.asc,id.asc');
+    if(!rows||!rows.length){ alert('לא נמצא תוכן לגיבוי — ייתכן שאין כרגע חיבור ל-backend. נסי שוב כשיש רשת.'); btn.textContent=old; btn.disabled=false; return; }
     var blob=new Blob([JSON.stringify(rows,null,1)],{type:'application/json'});
     var a=document.createElement('a');
     a.href=URL.createObjectURL(blob);
     a.download='arabic-app-backup-'+new Date().toISOString().slice(0,10)+'.json';
     document.body.appendChild(a); a.click(); a.remove();
+    try{ localStorage.setItem('lastBackupAt', String(Date.now())); localStorage.setItem('lastBackupN', String(rows.length)); }catch(e){}
+    var bySec={}; rows.forEach(function(r){ var s=r.section||'?'; bySec[s]=(bySec[s]||0)+1; });
+    try{ _refreshBackupState(); }catch(e){}
     btn.textContent='✓ ירד גיבוי ('+rows.length+' שורות)';
+    alert('✓ הגיבוי ירד — '+rows.length+' פריטים מכל המדורים.\nשמרי את הקובץ במקום בטוח (מייל לעצמך / ענן אישי).');
   }catch(e){ alert('שגיאה: '+(e&&e.message?e.message:e)); btn.textContent=old; }
   btn.disabled=false;
+}
+// Reflect how long since the last backup; nudge if never / over 30 days.
+function _refreshBackupState(){
+  var el=document.getElementById('backup-state'); var nudge=document.getElementById('backup-nudge');
+  if(!el) return;
+  var last=0; try{ last=parseInt(localStorage.getItem('lastBackupAt')||'0',10)||0; }catch(e){}
+  if(!last){
+    el.textContent='מעולם לא גובה'; el.style.background='rgba(192,57,43,0.25)'; el.style.color='#ff9a8f';
+    if(nudge){ nudge.style.display='block'; nudge.textContent='⚠️ עדיין לא גיבית — מומלץ לגבות עכשיו'; }
+    return;
+  }
+  var days=Math.floor((Date.now()-last)/86400000);
+  el.textContent = days<=0 ? 'גובה היום' : ('גובה לפני '+days+' ימים');
+  var stale = days>=30;
+  el.style.background = stale?'rgba(224,166,78,0.22)':'rgba(29,158,117,0.2)';
+  el.style.color = stale?'#e8b96a':'#7eecc1';
+  if(nudge){ if(stale){ nudge.style.display='block'; nudge.textContent='⚠️ עברו '+days+' ימים מהגיבוי האחרון — כדאי לגבות שוב'; } else { nudge.style.display='none'; } }
 }
 
 // === אוצר מילים לשטח: שמות מקומות וכיוונים + זיהוי ערבית כתובה ===
@@ -16134,6 +16166,7 @@ async function addDictWord(){
 // Admin list
 async function renderAdminList(){
   const el=document.getElementById('admin-list');
+  try{ _refreshBackupState(); }catch(e){}
   el.innerHTML='<div class="loading">טוען...</div>';
   try{
     // Make sure everything shipped in code is available for editing/recording — automatic, once per session.
