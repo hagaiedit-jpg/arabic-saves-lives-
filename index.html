@@ -21,6 +21,12 @@ window.SECURE_MODE = (function(){ try{
   if(localStorage.getItem('secureMode')==='1') return true;
   if(String(location.search).indexOf('secure=1')!==-1) return true;
 }catch(e){} return false; })();
+// Commerce login (phone/OTP) — DORMANT by default so the live app is unchanged.
+// Enable with ?login=1 or localStorage.setItem('commerceLogin','1') for integration/testing.
+window.COMMERCE_LOGIN = (function(){ try{
+  if(localStorage.getItem('commerceLogin')==='1') return true;
+  if(String(location.search).indexOf('login=1')!==-1) return true;
+}catch(e){} return false; })();
 // Load Google Fonts via JS ONLY when not in secure mode (default path → same as
 // the old static <link> tags, just injected a few ms later; system Hebrew fonts
 // render meanwhile so there is no functional difference).
@@ -18332,6 +18338,118 @@ function switchLegal(which){
 }
 function closeLegal(){ document.getElementById('legal-modal').style.display = 'none'; }
 document.getElementById('legal-modal').addEventListener('click', function(e){ if (e.target === this) closeLegal(); });
+</script>
+
+<!-- ===== Commerce login (phone/OTP) — dormant unless window.COMMERCE_LOGIN ===== -->
+<div id="cl-overlay" style="display:none;position:fixed;inset:0;z-index:11000;background:rgba(9,17,29,.97);direction:rtl;overflow-y:auto;padding:24px 16px;">
+  <div style="max-width:380px;margin:6vh auto 0;background:linear-gradient(180deg,#1c2f47,#152539);border:1px solid #2a3d54;border-radius:16px;padding:22px;box-shadow:0 12px 40px rgba(0,0,0,.5);">
+    <div style="text-align:center;margin-bottom:16px;">
+      <div style="font-size:34px;">🔐</div>
+      <div style="color:#fff;font-size:20px;font-weight:800;margin-top:4px;">התחברות לערכה</div>
+      <div id="cl-sub" style="color:#9fb2c6;font-size:13px;margin-top:4px;">נשלח לך קוד ב-SMS לאימות המספר</div>
+    </div>
+    <!-- step 1: phone -->
+    <div id="cl-step-phone">
+      <label style="display:block;color:#7a9ab5;font-size:11px;margin-bottom:4px;">מספר טלפון</label>
+      <input id="cl-phone" type="tel" inputmode="tel" placeholder="050-000-0000" autocomplete="tel"
+        style="width:100%;background:#0E1B2E;border:1px solid #2A3D52;border-radius:10px;color:#E8D9B8;font-family:inherit;padding:13px;font-size:16px;direction:ltr;text-align:center;">
+      <button id="cl-send-btn" onclick="clSendCode()" style="width:100%;margin-top:12px;padding:13px;background:#1D9E75;border:none;border-radius:10px;color:#fff;font-size:15px;font-weight:800;cursor:pointer;font-family:inherit;">שלח לי קוד</button>
+    </div>
+    <!-- step 2: code -->
+    <div id="cl-step-code" style="display:none;">
+      <label style="display:block;color:#7a9ab5;font-size:11px;margin-bottom:4px;">הקוד שקיבלת ב-SMS</label>
+      <input id="cl-code" type="text" inputmode="numeric" maxlength="6" placeholder="______"
+        style="width:100%;background:#0E1B2E;border:1px solid #2A3D52;border-radius:10px;color:#E8D9B8;font-family:inherit;padding:13px;font-size:22px;letter-spacing:8px;direction:ltr;text-align:center;">
+      <button id="cl-verify-btn" onclick="clVerify()" style="width:100%;margin-top:12px;padding:13px;background:#D4A24E;border:none;border-radius:10px;color:#0E1B2E;font-size:15px;font-weight:800;cursor:pointer;font-family:inherit;">אמת והתחבר</button>
+      <div style="text-align:center;margin-top:10px;"><button onclick="clBackToPhone()" style="background:none;border:none;color:#7a9ab5;font-size:12px;cursor:pointer;font-family:inherit;text-decoration:underline;">‹ שינוי מספר / שליחת קוד מחדש</button></div>
+    </div>
+    <div id="cl-status" style="text-align:center;color:#ff9a8f;font-size:12.5px;margin-top:12px;min-height:16px;"></div>
+  </div>
+</div>
+<script>
+// Commerce login via Supabase Auth REST (phone OTP) — same fetch style as adminLogin.
+function _clStatus(m,ok){ var e=document.getElementById('cl-status'); if(e){ e.textContent=m||''; e.style.color=ok?'#7eecc1':'#ff9a8f'; } }
+function clNormalizePhone(v){
+  v=String(v||'').replace(/[^\d+]/g,'');
+  if(v.charAt(0)==='+') return v;
+  if(v.slice(0,3)==='972') return '+'+v;
+  if(v.charAt(0)==='0') return '+972'+v.slice(1);   // Israeli local -> E.164
+  return '+972'+v;
+}
+window._clPhone='';
+async function clSendCode(){
+  var raw=document.getElementById('cl-phone').value;
+  var phone=clNormalizePhone(raw);
+  if(phone.length<11){ _clStatus('מספר טלפון לא תקין'); return; }
+  var btn=document.getElementById('cl-send-btn'), old=btn.textContent; btn.disabled=true; btn.textContent='שולח...'; _clStatus('');
+  try{
+    var r=await fetch(SUPA_URL+'/auth/v1/otp',{method:'POST',headers:{'apikey':SUPA_KEY,'Content-Type':'application/json'},body:JSON.stringify({phone:phone})});
+    if(!r.ok){ var e=await r.json().catch(function(){return{};}); throw new Error(e.msg||e.error_description||('שגיאה '+r.status)); }
+    window._clPhone=phone;
+    document.getElementById('cl-step-phone').style.display='none';
+    document.getElementById('cl-step-code').style.display='block';
+    document.getElementById('cl-sub').textContent='שלחנו קוד ל-'+phone;
+    _clStatus('הקוד נשלח ✓',true);
+    setTimeout(function(){ var c=document.getElementById('cl-code'); if(c)c.focus(); },100);
+  }catch(err){ _clStatus(err.message||'לא הצלחנו לשלוח קוד'); }
+  btn.disabled=false; btn.textContent=old;
+}
+function clBackToPhone(){
+  document.getElementById('cl-step-code').style.display='none';
+  document.getElementById('cl-step-phone').style.display='block';
+  document.getElementById('cl-sub').textContent='נשלח לך קוד ב-SMS לאימות המספר';
+  _clStatus('');
+}
+async function clVerify(){
+  var token=(document.getElementById('cl-code').value||'').trim();
+  if(token.length<4){ _clStatus('הזיני את הקוד המלא'); return; }
+  var btn=document.getElementById('cl-verify-btn'), old=btn.textContent; btn.disabled=true; btn.textContent='מאמת...'; _clStatus('');
+  try{
+    var r=await fetch(SUPA_URL+'/auth/v1/verify',{method:'POST',headers:{'apikey':SUPA_KEY,'Content-Type':'application/json'},body:JSON.stringify({type:'sms',phone:window._clPhone,token:token})});
+    var d=await r.json().catch(function(){return{};});
+    if(!r.ok || !d.access_token){ throw new Error(d.msg||d.error_description||'קוד שגוי או שפג תוקפו'); }
+    clStoreSession(d);
+    _clStatus('התחברת בהצלחה ✓',true);
+    setTimeout(clCloseAfterLogin,500);
+  }catch(err){ _clStatus(err.message||'האימות נכשל'); }
+  btn.disabled=false; btn.textContent=old;
+}
+function clStoreSession(d){
+  try{
+    localStorage.setItem('cl_at', d.access_token||'');
+    localStorage.setItem('cl_rt', d.refresh_token||'');
+    localStorage.setItem('cl_user', JSON.stringify(d.user||{}));
+  }catch(e){}
+  window._clUser=d.user||null;
+}
+function clSession(){
+  try{ var at=localStorage.getItem('cl_at'); if(!at) return null; return {access_token:at, user:JSON.parse(localStorage.getItem('cl_user')||'null')}; }catch(e){ return null; }
+}
+function clLogout(){ try{ ['cl_at','cl_rt','cl_user'].forEach(function(k){localStorage.removeItem(k);}); }catch(e){} window._clUser=null; }
+// Check subscription status against the (future) subscriptions table, using the user's token.
+// Returns false gracefully until the commercial backend is deployed.
+async function clSubscribed(){
+  var s=clSession(); if(!s) return false;
+  try{
+    var r=await fetch(SUPA_URL+'/rest/v1/subscriptions?select=status,current_period_end',{headers:{'apikey':SUPA_KEY,'Authorization':'Bearer '+s.access_token}});
+    if(!r.ok) return false;
+    var rows=await r.json(); if(!Array.isArray(rows)||!rows.length) return false;
+    var x=rows[0];
+    if(['active','trialing'].indexOf(x.status)===-1) return false;
+    if(x.current_period_end && new Date(x.current_period_end) < new Date()) return false;
+    return true;
+  }catch(e){ return false; }
+}
+function clOpen(){ var o=document.getElementById('cl-overlay'); if(o) o.style.display='block'; }
+function clCloseAfterLogin(){ var o=document.getElementById('cl-overlay'); if(o) o.style.display='none'; }
+// Init: only when the feature is enabled. If already logged in, stay closed; else show login.
+(function(){
+  try{
+    if(!window.COMMERCE_LOGIN) return;   // dormant -> live app untouched
+    if(clSession()){ window._clUser=clSession().user; return; }
+    clOpen();
+  }catch(e){ console.warn('commerce login init', e); }
+})();
 </script>
 </body>
 </html>
