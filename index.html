@@ -3266,8 +3266,17 @@ function showLanding() {
           <span id="backup-state" style="margin-inline-start:auto;font-size:11px;font-weight:700;padding:2px 9px;border-radius:999px;background:rgba(122,154,181,0.15);color:#9fb2c6;">—</span>
         </div>
         <div style="color:#a9c7bd;font-size:11.5px;line-height:1.6;margin-bottom:10px;">מוריד קובץ JSON עם <b>כל התוכן מכל המדורים</b> + קישורי ההקלטות. שמרי אותו במקום בטוח (מייל/ענן אישי). מומלץ פעם בשבוע.</div>
-        <button onclick="downloadBackup(this)" style="width:100%;padding:13px;background:#1D9E75;border:none;border-radius:10px;color:#fff;font-size:14px;font-weight:800;cursor:pointer;font-family:inherit;">⬇️ גבה עכשיו — כל התוכן</button>
+        <button onclick="downloadBackup(this)" style="width:100%;padding:13px;background:#1D9E75;border:none;border-radius:10px;color:#fff;font-size:14px;font-weight:800;cursor:pointer;font-family:inherit;">⬇️ גבה עכשיו — כל התוכן (טקסט)</button>
         <div id="backup-nudge" style="display:none;text-align:center;color:#e8b96a;font-size:12px;font-weight:700;margin-top:9px;"></div>
+        <div style="height:1px;background:rgba(255,255,255,0.12);margin:14px 0 12px;"></div>
+        <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px;">
+          <span style="font-size:18px;">🎧</span>
+          <span style="color:#fff;font-size:14px;font-weight:800;">גיבוי הקלטות</span>
+          <span id="audiobk-state" style="margin-inline-start:auto;font-size:11px;font-weight:700;padding:2px 9px;border-radius:999px;background:rgba(122,154,181,0.15);color:#9fb2c6;">—</span>
+        </div>
+        <div style="color:#a9c7bd;font-size:11.5px;line-height:1.6;margin-bottom:8px;">מוריד את <b>קבצי ההקלטות עצמם</b> (לא רק קישורים) לקובץ ZIP + index.csv. <b>מומלץ במחשב עם WiFi</b> — יכול להיות גדול.</div>
+        <button onclick="downloadAudioBackup(this)" style="width:100%;padding:12px;background:#2c7a8a;border:none;border-radius:10px;color:#fff;font-size:13.5px;font-weight:800;cursor:pointer;font-family:inherit;">🎧 גבה את כל ההקלטות (ZIP)</button>
+        <div id="audiobk-status" style="text-align:center;color:#9fb2c6;font-size:11.5px;margin-top:8px;"></div>
       </div>
       <details style="margin-bottom:12px;" ontoggle="if(this.open&&typeof checkOneTimeTools==='function')checkOneTimeTools()">
       <summary style="cursor:pointer;color:#7a9ab5;font-size:12.5px;font-weight:800;padding:10px 12px;background:rgba(122,154,181,0.12);border-radius:10px;list-style:none;">⚙️ כלים חד-פעמיים להוספת תוכן (לחצי לפתיחה)</summary>
@@ -10524,6 +10533,85 @@ function _refreshBackupState(){
   el.style.background = stale?'rgba(224,166,78,0.22)':'rgba(29,158,117,0.2)';
   el.style.color = stale?'#e8b96a':'#7eecc1';
   if(nudge){ if(stale){ nudge.style.display='block'; nudge.textContent='⚠️ עברו '+days+' ימים מהגיבוי האחרון — כדאי לגבות שוב'; } else { nudge.style.display='none'; } }
+  // audio-backup chip
+  var ae=document.getElementById('audiobk-state');
+  if(ae){
+    var la=0; try{ la=parseInt(localStorage.getItem('lastAudioBackupAt')||'0',10)||0; }catch(e){}
+    if(!la){ ae.textContent='מעולם לא גובה'; ae.style.background='rgba(192,57,43,0.25)'; ae.style.color='#ff9a8f'; }
+    else { var ad=Math.floor((Date.now()-la)/86400000); ae.textContent = ad<=0?'גובה היום':('גובה לפני '+ad+' ימים'); var ast=ad>=30; ae.style.background=ast?'rgba(224,166,78,0.22)':'rgba(29,158,117,0.2)'; ae.style.color=ast?'#e8b96a':'#7eecc1'; }
+  }
+}
+// --- Store-only ZIP writer (no external libs) for the recordings backup ---
+function _crc32(bytes){
+  var table=_crc32.t||(_crc32.t=(function(){var t=[],c;for(var n=0;n<256;n++){c=n;for(var k=0;k<8;k++)c=(c&1)?(0xEDB88320^(c>>>1)):(c>>>1);t[n]=c>>>0;}return t;})());
+  var crc=0xFFFFFFFF;
+  for(var i=0;i<bytes.length;i++) crc=(crc>>>8)^table[(crc^bytes[i])&0xFF];
+  return (crc^0xFFFFFFFF)>>>0;
+}
+function _makeZip(files){
+  var enc=new TextEncoder(), chunks=[], central=[], offset=0;
+  function u16(v){ return [v&0xFF,(v>>>8)&0xFF]; }
+  function u32(v){ return [v&0xFF,(v>>>8)&0xFF,(v>>>16)&0xFF,(v>>>24)&0xFF]; }
+  files.forEach(function(f){
+    var name=enc.encode(f.name), data=f.data, crc=_crc32(data);
+    var lh=[].concat(u32(0x04034b50),u16(20),u16(0x0800),u16(0),u16(0),u16(0),u32(crc),u32(data.length),u32(data.length),u16(name.length),u16(0));
+    chunks.push(new Uint8Array(lh),name,data);
+    var cd=[].concat(u32(0x02014b50),u16(20),u16(20),u16(0x0800),u16(0),u16(0),u16(0),u32(crc),u32(data.length),u32(data.length),u16(name.length),u16(0),u16(0),u16(0),u16(0),u32(0),u32(offset));
+    central.push({head:new Uint8Array(cd),name:name});
+    offset+=lh.length+name.length+data.length;
+  });
+  var cdSize=0, out=chunks.slice();
+  central.forEach(function(c){ out.push(c.head,c.name); cdSize+=c.head.length+c.name.length; });
+  var eocd=[].concat(u32(0x06054b50),u16(0),u16(0),u16(central.length),u16(central.length),u32(cdSize),u32(offset),u16(0));
+  out.push(new Uint8Array(eocd));
+  var total=out.reduce(function(a,b){return a+b.length;},0), buf=new Uint8Array(total), pos=0;
+  out.forEach(function(u){ buf.set(u,pos); pos+=u.length; });
+  return buf;
+}
+function _audioExt(u){ u=String(u||'').toLowerCase(); if(u.indexOf('.webm')>-1)return'webm'; if(u.indexOf('.ogg')>-1)return'ogg'; if(u.indexOf('.wav')>-1)return'wav'; if(u.indexOf('.m4a')>-1||u.indexOf('/f_mp4/')>-1||u.indexOf('.mp4')>-1)return'm4a'; return'mp3'; }
+function _csvCell(s){ return '"'+String(s==null?'':s).replace(/"/g,'""')+'"'; }
+// Download EVERY recording (the audio files themselves, not just links) as one ZIP + index.csv.
+async function downloadAudioBackup(btn){
+  if(window._audioBkBusy) return;
+  var old=btn.textContent, status=document.getElementById('audiobk-status');
+  try{
+    var seen={}, items=[];
+    [['מבצעי','DB'],['יומיומי','DAILY'],['פותחים לב','HEART'],['ימי','NAVY'],['כריזה','ANNOUNCE'],['תרחיש','SCENARIO'],['מילון','DICT'],['סמנטי','SEM'],['מנהגים','CUS'],['מאמרים','ARTS'],['מודיעין','INTEL']].forEach(function(pair){
+      var L; try{ L=eval(pair[1]); }catch(e){ L=null; } if(!L)return;
+      L.forEach(function(p){
+        if(p&&p.audio&&!seen[p.audio]){ seen[p.audio]=1; items.push({url:p.audio,section:pair[0],he:p.he||'',ar:p.ar||''}); }
+        if(p&&Array.isArray(p.responses)) p.responses.forEach(function(r){ var u=r&&(r.audio_url||r.audio); if(u&&!seen[u]){ seen[u]=1; items.push({url:u,section:pair[0],he:(p.he||'')+' [תשובה]',ar:r.ar||''}); } });
+      });
+    });
+    if(!items.length){ alert('אין הקלטות לגיבוי עדיין.'); return; }
+    if(!confirm('לגבות '+items.length+' הקלטות לקובץ ZIP אחד?\n\nמומלץ לעשות זאת במחשב עם WiFi — הקובץ יכול להיות גדול. השאירי את החלון פתוח עד הסיום.')) return;
+    window._audioBkBusy=true; btn.disabled=true;
+    var files=[], csv=['file,section,he,ar,url'], done=0, fail=0, bytes=0, idx=0;
+    async function work(){
+      while(idx<items.length){
+        var my=idx++, it=items[my], name=String(my+1).padStart(4,'0')+'.'+_audioExt(it.url);
+        try{ var r=await fetch(it.url); if(!r||!r.ok) throw 0; var u8=new Uint8Array(await r.arrayBuffer());
+          files.push({name:name,data:u8}); bytes+=u8.length;
+          csv.push([name,_csvCell(it.section),_csvCell(it.he),_csvCell(it.ar),_csvCell(it.url)].join(','));
+        }catch(e){ fail++; }
+        done++;
+        if(status) status.textContent='מוריד '+done+'/'+items.length+' · '+(bytes/1048576).toFixed(1)+'MB'+(fail?' · '+fail+' נכשלו':'');
+      }
+    }
+    await Promise.all([work(),work(),work()]);
+    if(!files.length){ window._audioBkBusy=false; btn.disabled=false; alert('לא הצלחתי להוריד הקלטות — כנראה תקלת רשת. נסי שוב עם חיבור יציב.'); return; }
+    files.push({name:'index.csv', data:new TextEncoder().encode('﻿'+csv.join('\n'))});
+    if(status) status.textContent='בונה קובץ ZIP...';
+    var blob=new Blob([_makeZip(files)],{type:'application/zip'});
+    var a=document.createElement('a'); a.href=URL.createObjectURL(blob);
+    a.download='asl-recordings-backup-'+new Date().toISOString().slice(0,10)+'.zip';
+    document.body.appendChild(a); a.click(); a.remove();
+    try{ localStorage.setItem('lastAudioBackupAt', String(Date.now())); }catch(e){}
+    try{ _refreshBackupState(); }catch(e){}
+    if(status) status.textContent='✓ ירדו '+(files.length-1)+' הקלטות · '+(bytes/1048576).toFixed(1)+'MB'+(fail?' · '+fail+' נכשלו':'');
+    window._audioBkBusy=false; btn.disabled=false; btn.textContent=old;
+    alert('✓ גיבוי ההקלטות ירד — '+(files.length-1)+' קבצים ('+(bytes/1048576).toFixed(1)+'MB)'+(fail?('; '+fail+' נכשלו — כדאי לנסות שוב'):'')+'.\nבתוך ה-ZIP יש גם index.csv שמסביר כל הקלטה. שמרי את הקובץ בענן/מייל.');
+  }catch(e){ window._audioBkBusy=false; btn.disabled=false; btn.textContent=old; alert('שגיאה: '+(e&&e.message?e.message:e)); }
 }
 
 // === אוצר מילים לשטח: שמות מקומות וכיוונים + זיהוי ערבית כתובה ===
