@@ -27,6 +27,27 @@ window.COMMERCE_LOGIN = (function(){ try{
   if(localStorage.getItem('commerceLogin')==='1') return true;
   if(String(location.search).indexOf('login=1')!==-1) return true;
 }catch(e){} return false; })();
+// === Client error log: ring buffer in localStorage ('err_log', max 50) =======
+// Captures window errors + unhandled promise rejections so field failures can
+// be diagnosed after the fact (admin → "🚨 יומן שגיאות"). Registered this early
+// so everything below is covered. Never throws.
+(function(){
+  function push(entry){
+    try{
+      var log=JSON.parse(localStorage.getItem('err_log')||'[]');
+      entry.t=new Date().toISOString();
+      log.push(entry);
+      if(log.length>50) log=log.slice(-50);
+      localStorage.setItem('err_log', JSON.stringify(log));
+    }catch(e){}
+  }
+  window.addEventListener('error', function(ev){
+    try{ push({type:'error', msg:String((ev&&ev.message)||''), src:((ev&&ev.filename)||'')+':'+((ev&&ev.lineno)||0), stack:(ev&&ev.error&&ev.error.stack)?String(ev.error.stack).slice(0,600):''}); }catch(e){}
+  });
+  window.addEventListener('unhandledrejection', function(ev){
+    try{ var r=ev&&ev.reason; push({type:'promise', msg:(r&&r.message)?String(r.message).slice(0,300):String(r).slice(0,300), stack:(r&&r.stack)?String(r.stack).slice(0,600):''}); }catch(e){}
+  });
+})();
 // Load Google Fonts via JS ONLY when not in secure mode (default path → same as
 // the old static <link> tags, just injected a few ms later; system Hebrew fonts
 // render meanwhile so there is no functional difference).
@@ -3284,6 +3305,14 @@ function showLanding() {
         <button onclick="downloadAudioBackup(this)" style="width:100%;padding:12px;background:#2c7a8a;border:none;border-radius:10px;color:#fff;font-size:13.5px;font-weight:800;cursor:pointer;font-family:inherit;">🎧 גבה את כל ההקלטות (ZIP)</button>
         <div id="audiobk-status" style="text-align:center;color:#9fb2c6;font-size:11.5px;margin-top:8px;"></div>
       </div>
+      <details style="margin-bottom:12px;" ontoggle="if(this.open&&typeof renderErrLog==='function')renderErrLog()">
+        <summary style="cursor:pointer;color:#7a9ab5;font-size:12.5px;font-weight:800;padding:10px 12px;background:rgba(192,57,43,0.10);border-radius:10px;list-style:none;">🚨 יומן שגיאות (<span id="errlog-count">0</span>) — לאבחון תקלות</summary>
+        <div id="errlog-list" style="margin-top:10px;max-height:280px;overflow-y:auto;"></div>
+        <div style="display:flex;gap:8px;margin-top:8px;">
+          <button onclick="downloadErrLog()" style="flex:1;padding:10px;background:#2A3D52;border:none;border-radius:8px;color:#E8D9B8;font-size:12px;font-weight:700;cursor:pointer;font-family:inherit;">⬇️ הורד יומן</button>
+          <button onclick="clearErrLog()" style="flex:1;padding:10px;background:#3a2020;border:1px solid #5a2a2a;border-radius:8px;color:#ff9a8f;font-size:12px;font-weight:700;cursor:pointer;font-family:inherit;">🗑️ נקה</button>
+        </div>
+      </details>
       <details style="margin-bottom:12px;" ontoggle="if(this.open&&typeof checkOneTimeTools==='function')checkOneTimeTools()">
       <summary style="cursor:pointer;color:#7a9ab5;font-size:12.5px;font-weight:800;padding:10px 12px;background:rgba(122,154,181,0.12);border-radius:10px;list-style:none;">⚙️ כלים חד-פעמיים להוספת תוכן (לחצי לפתיחה)</summary>
       <div id="tools-status" style="text-align:center;color:#D4A24E;font-size:12px;font-weight:700;margin-top:10px;"></div>
@@ -10631,6 +10660,29 @@ function _makeZip(files){
   out.forEach(function(u){ buf.set(u,pos); pos+=u.length; });
   return buf;
 }
+// --- Client error-log viewer (data captured by the early ring-buffer hook) ---
+function _errLogGet(){ try{ return JSON.parse(localStorage.getItem('err_log')||'[]'); }catch(e){ return []; } }
+function renderErrLog(){
+  var el=document.getElementById('errlog-list'); if(!el) return;
+  var log=_errLogGet().slice().reverse();
+  var cnt=document.getElementById('errlog-count'); if(cnt) cnt.textContent=String(log.length);
+  if(!log.length){ el.innerHTML='<div style="text-align:center;color:#7eecc1;font-size:12.5px;padding:12px;">אין שגיאות רשומות 🎉</div>'; return; }
+  el.innerHTML=log.map(function(e){
+    return '<div style="background:#0E1B2E;border:1px solid #2A3D52;border-radius:8px;padding:8px 10px;margin-bottom:6px;direction:ltr;text-align:left;">'
+      +'<div style="color:#7a9ab5;font-size:10px;">'+escapeHtmlDict(e.t||'')+' · '+escapeHtmlDict(e.type||'')+'</div>'
+      +'<div style="color:#ff9a8f;font-size:12px;word-break:break-word;">'+escapeHtmlDict(e.msg||'')+'</div>'
+      +(e.src?'<div style="color:#7a9ab5;font-size:10px;word-break:break-all;">'+escapeHtmlDict(e.src)+'</div>':'')
+      +'</div>';
+  }).join('');
+}
+function downloadErrLog(){
+  var blob=new Blob([JSON.stringify(_errLogGet(),null,1)],{type:'application/json'});
+  var a=document.createElement('a'); a.href=URL.createObjectURL(blob);
+  a.download='asl-error-log-'+new Date().toISOString().slice(0,10)+'.json';
+  document.body.appendChild(a); a.click(); a.remove();
+}
+function clearErrLog(){ try{ localStorage.removeItem('err_log'); }catch(e){} renderErrLog(); }
+
 function _audioExt(u){ u=String(u||'').toLowerCase(); if(u.indexOf('.webm')>-1)return'webm'; if(u.indexOf('.ogg')>-1)return'ogg'; if(u.indexOf('.wav')>-1)return'wav'; if(u.indexOf('.m4a')>-1||u.indexOf('/f_mp4/')>-1||u.indexOf('.mp4')>-1)return'm4a'; return'mp3'; }
 function _csvCell(s){ return '"'+String(s==null?'':s).replace(/"/g,'""')+'"'; }
 // Download EVERY recording (the audio files themselves, not just links) as one ZIP + index.csv.
