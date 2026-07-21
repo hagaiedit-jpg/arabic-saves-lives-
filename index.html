@@ -18409,6 +18409,7 @@ async function clVerify(){
     var d=await r.json().catch(function(){return{};});
     if(!r.ok || !d.access_token){ throw new Error(d.msg||d.error_description||'קוד שגוי או שפג תוקפו'); }
     clStoreSession(d);
+    try{ clRefreshEntitlement(); }catch(e){}
     _clStatus('התחברת בהצלחה ✓',true);
     setTimeout(clCloseAfterLogin,500);
   }catch(err){ _clStatus(err.message||'האימות נכשל'); }
@@ -18442,11 +18443,50 @@ async function clSubscribed(){
 }
 function clOpen(){ var o=document.getElementById('cl-overlay'); if(o) o.style.display='block'; }
 function clCloseAfterLogin(){ var o=document.getElementById('cl-overlay'); if(o) o.style.display='none'; }
-// Init: only when the feature is enabled. If already logged in, stay closed; else show login.
+
+// ===== Offline entitlement enforcement =====================================
+// Premium access is granted when a subscription check succeeded recently.
+// Offline, access stays valid within a grace window; a transient/server error
+// keeps grace; a definitive "not subscribed" revokes and clears premium cache.
+var CL_GRACE_MS = 14*86400000;      // offline grace window (14 days)
+var CL_REVALIDATE_MS = 3*86400000;  // re-check online when older than 3 days
+function clSetEntitlement(ok){ try{ localStorage.setItem('cl_ent', JSON.stringify({ok:!!ok, at:Date.now()})); }catch(e){} }
+function clHasAccess(){
+  try{ var e=JSON.parse(localStorage.getItem('cl_ent')||'null'); return !!(e && e.ok && (Date.now()-e.at) < CL_GRACE_MS); }catch(e){ return false; }
+}
+function clEntitlementAgeDays(){ try{ var e=JSON.parse(localStorage.getItem('cl_ent')||'null'); return e? Math.floor((Date.now()-e.at)/86400000): null; }catch(e){ return null; } }
+function clClearPremiumCache(){
+  // Best-effort revoke: drop entitlement + offline-pack markers so premium
+  // content is re-fetched (and gated by RLS once live). Extend to clear the
+  // premium media cache when signed-audio caching is wired.
+  try{ localStorage.removeItem('cl_ent'); }catch(e){}
+  try{ localStorage.removeItem('offline_pack_at'); localStorage.removeItem('offline_pack_n'); }catch(e){}
+}
+async function clRefreshEntitlement(){
+  var s=clSession(); if(!s){ try{localStorage.removeItem('cl_ent');}catch(e){} return false; }
+  try{
+    var r=await fetch(SUPA_URL+'/rest/v1/subscriptions?select=status,current_period_end',{headers:{'apikey':SUPA_KEY,'Authorization':'Bearer '+s.access_token}});
+    if(!r.ok) return clHasAccess();               // transient/server error -> keep grace
+    var rows=await r.json(), ok=false;
+    if(Array.isArray(rows) && rows.length){ var x=rows[0]; ok=['active','trialing'].indexOf(x.status)!==-1 && (!x.current_period_end || new Date(x.current_period_end) > new Date()); }
+    clSetEntitlement(ok);
+    if(!ok) clClearPremiumCache();                // definitive "no" -> revoke
+    return ok;
+  }catch(e){ return clHasAccess(); }              // offline -> keep grace
+}
+
+// Init: only when the feature is enabled. If already logged in, stay closed
+// and revalidate entitlement in the background; else show login.
 (function(){
   try{
     if(!window.COMMERCE_LOGIN) return;   // dormant -> live app untouched
-    if(clSession()){ window._clUser=clSession().user; return; }
+    var sess=clSession();
+    if(sess){
+      window._clUser=sess.user;
+      var stale=true; try{ var e=JSON.parse(localStorage.getItem('cl_ent')||'null'); stale=!e || (Date.now()-e.at)>CL_REVALIDATE_MS; }catch(_){}
+      if(stale) clRefreshEntitlement();
+      return;
+    }
     clOpen();
   }catch(e){ console.warn('commerce login init', e); }
 })();
