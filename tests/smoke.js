@@ -112,6 +112,20 @@ async function main() {
     // ZIP writer sanity: header bytes PK\x03\x04
     const zipOk = await p.evaluate(() => { const z = _makeZip([{ name: 'a.txt', data: new TextEncoder().encode('hi') }]); return z[0] === 0x50 && z[1] === 0x4b && z[2] === 3 && z[3] === 4; });
     check('_makeZip מפיק ZIP תקין (PK header)', zipOk);
+    // Every scenario category in the data must be VISIBLE in the grid —
+    // either listed in SCN_CATEGORIES or rendered by the auto fallback group.
+    const scnVis = await p.evaluate(() => {
+      const cats = {}; (SCENARIO || []).forEach(x => { if (x.cat) cats[x.cat] = 1; });
+      // expand every group (incl. the auto fallback) so cube titles render
+      window._scnExpandedCats = window._scnExpandedCats || {};
+      SCN_CATEGORIES.forEach(c => { window._scnExpandedCats[c.id] = true; });
+      window._scnExpandedCats['cat-extra'] = true;
+      renderScnGrid();
+      const gridHtml = document.getElementById('scn-grid') ? document.getElementById('scn-grid').innerHTML : '';
+      const missing = Object.keys(cats).filter(c => gridHtml.indexOf(c.replace(/"/g, '&quot;')) === -1 && gridHtml.indexOf(c) === -1);
+      return { total: Object.keys(cats).length, missing };
+    });
+    check('כל קטגוריות התרחישים מוצגות ברשת (' + scnVis.total + ')', scnVis.missing.length === 0, scnVis.missing.join(','));
     await p.close();
   }
 

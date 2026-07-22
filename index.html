@@ -11874,7 +11874,9 @@ var SCN_CATEGORIES = [
       {id:'חיפוש בבית — מי בבית', icon:'🏠', title:'חיפוש בבית — מי בבית'},
       {id:'מעצר נער חשוד', icon:'🚨', title:'מעצר נער חשוד בזריקת אבנים'},
       {id:'סיוע הומניטרי', icon:'🤲', title:'סיוע הומניטרי — קשיש או נכה'},
-      {id:'כריזה למבוקש', icon:'📢', title:'כריזה למבוקש לצאת מהבית'}
+      {id:'כריזה למבוקש', icon:'📢', title:'כריזה למבוקש לצאת מהבית'},
+      {id:'כריזה: פינוי חמושים ממבנה', icon:'📢', title:'כריזה — פינוי חמושים ממבנה'},
+      {id:'כריזה: ריכוז גברים בבית ספר', icon:'📢', title:'כריזה — ריכוז גברים בבית ספר'}
     ]
   },
   {
@@ -11914,7 +11916,9 @@ var SCN_CATEGORIES = [
       {id:'עוצר', icon:'🚫', title:'הטלת/הסרת עוצר'},
       {id:'הרחקה מהשטח', icon:'🚷', title:'הרחקה מהשטח'},
       {id:'עמידה מול תחינות במחסום', icon:'🙏', title:'עמידה מול תחינות במחסום'},
-      {id:'ביטול דוח תנועה', icon:'🎫', title:'בקשה לביטול דוח תנועה'}
+      {id:'ביטול דוח תנועה', icon:'🎫', title:'בקשה לביטול דוח תנועה'},
+      {id:'נוהל עצירה מדורג', icon:'🛑', title:'נוהל עצירה מדורג — קריאות אזהרה'},
+      {id:'זיכוי שטח פתוח והרחקת רועי צאן', icon:'🐑', title:'זיכוי שטח פתוח והרחקת רועי צאן'}
     ]
   },
   {
@@ -12149,8 +12153,19 @@ function renderScnGrid(){
     if (!el) return;
     
     var html = '';
-    
-    SCN_CATEGORIES.forEach(function(cat){
+
+    // Safety net: any scenario category present in the DATA but missing from
+    // SCN_CATEGORIES still gets a cube (auto "תרחישים נוספים" group) — new
+    // content must never load invisibly again.
+    var _listed={}; SCN_CATEGORIES.forEach(function(c){ (c.scenarios||[]).forEach(function(s){ _listed[s.id]=1; }); });
+    var _extraOrder=[]; var _extraSeen={};
+    try{ (typeof SCENARIO!=='undefined'?SCENARIO:[]).forEach(function(p){ if(p&&p.cat&&!_listed[p.cat]&&!_extraSeen[p.cat]){ _extraSeen[p.cat]=1; _extraOrder.push(p.cat); } }); }catch(e){}
+    var _cats = _extraOrder.length
+      ? SCN_CATEGORIES.concat([{id:'cat-extra', icon:'🆕', title:'תרחישים נוספים',
+          scenarios:_extraOrder.map(function(c){ return {id:c, icon:'🎬', title:c}; })}])
+      : SCN_CATEGORIES;
+
+    _cats.forEach(function(cat){
       var isExpanded = _scnExpandedCats[cat.id] === true;
       
       // Count scenarios with content in this category
