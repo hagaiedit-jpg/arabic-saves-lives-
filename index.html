@@ -3349,6 +3349,8 @@ function showLanding() {
         <div style="text-align:center;color:#7a9ab5;font-size:11px;margin-top:5px;">16 שלבים — כריזת בידוק מלאה לרכב במחסום (חלק א'). אחרי ההוספה אפשר <b>לערוך, לתקן את הערבית ולהקליט</b> כל שורה (חיפוש: "כריזה" או "רכב")</div>
         <button id="tool-dictcp" onclick="addDictCheckpoint(this)" style="width:100%;padding:12px;margin-top:10px;background:linear-gradient(135deg,#3a8a6e 0%,#22604a 100%);border:none;border-radius:10px;color:#fff;font-size:13px;font-weight:800;cursor:pointer;font-family:inherit;">📖 הוסף מילון מבצעי (כל הנושאים) לעריכה (חד-פעמי)</button>
         <div style="text-align:center;color:#7a9ab5;font-size:11px;margin-top:5px;">מילות המילון המבצעי — צ׳ק פוסט ומחסום, איתור מבוקש, אמל״ח. כל מילה ניתנת לחיפוש בכל הערכה ובמילון, ואפשר <b>לערוך את הערבית ולהקליט</b> כל אחת</div>
+        <button id="tool-movesent" onclick="migrateDictSentences(this)" style="width:100%;padding:12px;margin-top:10px;background:linear-gradient(135deg,#b06d40 0%,#7d4a28 100%);border:none;border-radius:10px;color:#fff;font-size:13px;font-weight:800;cursor:pointer;font-family:inherit;">🔀 איחוד משפטים שעברו מהמילון למבצעי (חד-פעמי)</button>
+        <div style="text-align:center;color:#7a9ab5;font-size:11px;margin-top:5px;">מעביר את המשפטים המוקלטים שלך מ"מילון" לקטגוריות מבצעי/יומיומי <b>עם ההקלטות</b>, ומוחק כפילויות לא מוקלטות — כדי שלא תקליטי פעמיים</div>
         <button id="tool-recwork" onclick="renderRecordWorklist(this)" style="width:100%;padding:12px;margin-top:10px;background:linear-gradient(135deg,#8e6db0 0%,#5e4080 100%);border:none;border-radius:10px;color:#fff;font-size:13px;font-weight:800;cursor:pointer;font-family:inherit;">🎙️ רשימת הקלטה — רק מילים שעדיין 🔇</button>
         <div style="text-align:center;color:#7a9ab5;font-size:11px;margin-top:5px;">מציג רק את מילות המילון שאין להן עדיין הקלטה בהקשר — כדי שתקליטי רק את מה שחסר באמת (השאר כבר נשמע בתוך משפטים מוקלטים)</div>
         <div id="recwork-panel" style="margin-top:10px;"></div>
@@ -8081,6 +8083,7 @@ var BUILTIN_TASHAUL=[
   {section:'military', cat:'ניהול מרחב והוראות', he:'תהיה בשקט עכשיו', ar:'كون ساكت هلّق', trans:'כוּן סַאכֵּת הַלַّק'},
   {section:'military', cat:'ניהול מרחב והוראות', he:'אל תתעסק איתי', ar:'لا تتعامل معي', trans:'לַא תִתְעַאמַל מַעִי'},
   {section:'military', cat:'הרגעה ושכנוע', he:'תשלוט בעצבים שלך', ar:'امسك أعصابك', trans:'אִמְסֵכּ אַעְצַאבַּכּ'},
+  {section:'military', cat:'ניהול מרחב והוראות', he:'קח את הצאן שלך ותתרחק מהגדר.', ar:'خذ الغنم تبعك وابعد عن الجدار.', trans:'חֻ׳ד׳ אִלְעַ׳נַם תַבַּעַכּ וּאִבְּעֵד עַן אִלְגִ׳דָאר.'},
 ];
 // משפטי יומיום מאומתים — נמזגים ל-DAILY ומסונכרנים ל-DB (אותו דפוס כמו המילון)
 var BUILTIN_DAILY=[
@@ -8599,6 +8602,52 @@ async function addDictCheckpoint(btn){
     await loadData(); try{ renderAdminList(); }catch(e){}
     btn.textContent='✓ נוספו '+added;
     alert('✓ המילון המבצעי נוסף — '+added+' מילים חדשות. עכשיו אפשר לחפש, לערוך ולהקליט כל מילה. אם נוספו 0 — כבר היו קיימות.');
+  }catch(e){ alert('שגיאה: '+(e&&e.message?e.message:e)); btn.textContent=old; }
+  btn.disabled=false;
+}
+
+// One-time migration: sentences that were first synced under section
+// 'dictionary' (temp groups) and later re-homed in code to מבצעי/יומיומי.
+// Moves the RECORDED backend row to its target section+cat (keeping the
+// audio) and deletes unrecorded duplicates — so nothing is recorded twice.
+async function migrateDictSentences(btn){
+  var MAP=[];
+  try{
+    (BUILTIN_TASHAUL||[]).forEach(function(b){ if(!b.id) MAP.push({he:b.he,section:'military',cat:b.cat}); });
+    (typeof BUILTIN_DAILY!=='undefined'?BUILTIN_DAILY:[]).forEach(function(b){ MAP.push({he:b.he,section:'daily',cat:b.cat}); });
+  }catch(e){}
+  if(!MAP.length){ alert('אין משפטים להעברה.'); return; }
+  if(!confirm('לאחד את המשפטים שהועברו מהמילון למבצעי/יומיומי?\n\nההקלטות שלך יישמרו ויעברו יחד עם המשפט; עותקים כפולים (לא מוקלטים) יימחקו. פעולה חד-פעמית ובטוחה.')) return;
+  var old=btn.textContent; btn.disabled=true; btn.textContent='מעביר...';
+  try{
+    var norm=function(s){ return String(s||'').replace(/[^֐-׿0-9A-Za-z]/g,''); };
+    var TEMP=['יומיום ותרבות','מחסום ותשאול','איתור מבוקש ואמל״ח','רפואה והרגעה'];
+    var all=await sbFetchAllRows('/rest/v1/phrases?select=id,he,cat,section,audio_url');
+    var moved=0, removed=0;
+    for(var i=0;i<MAP.length;i++){
+      var m=MAP[i], k=norm(m.he);
+      var rows=(all||[]).filter(function(r){ return norm(r.he)===k && (
+        (r.section==='dictionary' && TEMP.indexOf(r.cat)!==-1) ||
+        (r.section===m.section && r.cat===m.cat) ); });
+      if(!rows.length) continue;
+      // winner: prefer a recorded row (her original dictionary copy first)
+      var rec=rows.filter(function(r){ return r.audio_url; });
+      var winner = rec.find(function(r){ return r.section==='dictionary'; }) || rec[0]
+                || rows.find(function(r){ return r.section==='dictionary'; }) || rows[0];
+      if(winner.section!==m.section || winner.cat!==m.cat){
+        await sbFetch('/rest/v1/phrases?id=eq.'+winner.id,'PATCH',{section:m.section,cat:m.cat});
+        moved++;
+      }
+      for(var j=0;j<rows.length;j++){
+        var r=rows[j]; if(r.id===winner.id) continue;
+        if(r.audio_url && !winner.audio_url) continue;   // never lose a recording
+        await sbFetch('/rest/v1/phrases?id=eq.'+r.id,'DELETE');
+        removed++;
+      }
+    }
+    await loadData(); try{ renderAdminList(); }catch(e){}
+    btn.textContent='✓ הועברו '+moved+' · הוסרו '+removed;
+    alert('✓ סיום: '+moved+' משפטים אוחדו במבצעי/יומיומי (ההקלטות נשמרו), '+removed+' כפילויות הוסרו.\nאין צורך להקליט שוב אף משפט.');
   }catch(e){ alert('שגיאה: '+(e&&e.message?e.message:e)); btn.textContent=old; }
   btn.disabled=false;
 }
