@@ -8652,6 +8652,24 @@ async function migrateDictSentences(btn){
   btn.disabled=false;
 }
 
+// Is this dictionary row already heard inside a recorded sentence anywhere?
+// (Same coverage rule as the recording worklist / dictionary badge.)
+function _dictRowCovered(p){
+  try{
+    if(!window.SMART_DICT_INDEX && typeof buildSmartDictIndex==='function') buildSmartDictIndex();
+    var idx=window.SMART_DICT_INDEX||{};
+    var norm=(typeof dictNorm==='function')?dictNorm:function(s){return String(s||'').toLowerCase();};
+    var cov=false;
+    [p.he,p.trans,p.ar].forEach(function(t){
+      String(t||'').split(/[\s.,!?;:()\[\]،؟\/]+/).forEach(function(w){
+        w=w.trim(); if(w.length<2||cov) return;
+        var k=norm(w); if(k.length>=2 && idx[k] && idx[k].hasAudio) cov=true;
+      });
+    });
+    return cov;
+  }catch(e){ return false; }
+}
+
 // Recording worklist: list only the dictionary words that have NO recorded
 // context anywhere (own recording OR a recorded sentence containing the word).
 // Lets Edith record only what's actually missing instead of every word.
@@ -16496,7 +16514,7 @@ async function renderAdminList(){
     
     // Count stats
     var totalCount = data.length;
-    var noAudioCount = data.filter(p => !p.audio_url).length;
+    var noAudioCount = data.filter(p => !p.audio_url && !(p.section==='dictionary' && _dictRowCovered(p))).length;
     var hasRespCount = data.filter(p => p.responses && p.responses.length > 5).length;
     
     // Note: search filtering done via instant DOM filter in onAdminSearch
@@ -16535,6 +16553,9 @@ async function renderAdminList(){
       
       // Status indicators
       var hasAudio = !!p.audio_url;
+      // A dictionary word heard inside an already-recorded sentence does NOT
+      // need its own recording — show it as covered, not as pending work.
+      var isCovered = !hasAudio && p.section==='dictionary' && _dictRowCovered(p);
       var hasResponses = p.responses && p.responses.length > 5;
       var respCount = 0;
       if (hasResponses) {
@@ -16545,6 +16566,8 @@ async function renderAdminList(){
       // Audio status
       if (hasAudio) {
         statusBadges += '<span style="font-size:11px;color:#1D9E75;background:rgba(29,158,117,0.15);padding:2px 7px;border-radius:7px;">🎵 הקלטה</span>';
+      } else if (isCovered) {
+        statusBadges += '<span style="font-size:11px;color:#2c7a8a;background:rgba(44,122,138,0.15);padding:2px 7px;border-radius:7px;font-weight:600;">🎤 נשמע בהקשר — אין צורך להקליט</span>';
       } else {
         statusBadges += '<span style="font-size:11px;color:#e74c3c;background:rgba(231,76,60,0.15);padding:2px 7px;border-radius:7px;font-weight:600;">🔇 בלי הקלטה</span>';
       }
@@ -16558,7 +16581,7 @@ async function renderAdminList(){
       var respText='';
       try{ if(p.responses){ JSON.parse(p.responses).forEach(function(r){ respText+=' '+(r.he||'')+' '+(r.trans||'')+' '+(r.ar||''); }); } }catch(e){}
       var dataSearch = _adminNorm((p.he||'') + ' ' + (p.ar||'') + ' ' + (p.trans||'') + ' ' + (p.cat||'') + ' ' + (p.tags||'') + ' ' + (p.why||'') + respText);
-      var dHasAudio = hasAudio ? '1' : '0';
+      var dHasAudio = (hasAudio || isCovered) ? '1' : '0'; // covered words leave the "needs recording" queue
       var dHasResp = hasResponses ? '1' : '0';
       html+=`<div class="admin-card" data-search="${dataSearch.replace(/"/g, '&quot;')}" data-has-audio="${dHasAudio}" data-has-responses="${dHasResp}" style="background:#0E1B2E;border:1px solid #2A3D52;border-radius:10px;padding:12px;margin-bottom:8px;">
         <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:6px;">
