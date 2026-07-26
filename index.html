@@ -9005,8 +9005,18 @@ function populateFromData(data){
   try{
     if(typeof BUILTIN_TASHAUL!=='undefined' && BUILTIN_TASHAUL.length){
       var _normHeT=function(s){return String(s||'').replace(/[^֐-׿0-9A-Za-z]/g,'');};
-      var _seenT={}; DB.forEach(function(p){ _seenT[(p.cat||'')+'|'+_normHeT(p.he)]=true; });
-      BUILTIN_TASHAUL.forEach(function(b){ var k=b.cat+'|'+_normHeT(b.he); if(!_seenT[k]){ DB.push(mp(b)); _seenT[k]=true; } });
+      var _seenT={}, _dbCatsT={};
+      DB.forEach(function(p){ _seenT[(p.cat||'')+'|'+_normHeT(p.he)]=true; _dbCatsT[p.cat||'']=true; });
+      // Categories the user curates live in the DB (edits + recordings). Once the DB
+      // holds ANY rows for them, the DB is the source of truth — do NOT let the
+      // hard-coded originals re-appear and shadow her edited/recorded copies (editing
+      // the Hebrew text changes the dedup key, so the original would otherwise return).
+      // If the DB failed to load (empty), the built-ins still show as an offline fallback.
+      var _dbOwnedT=(typeof DB_OWNED_CATS!=='undefined')?DB_OWNED_CATS:{};
+      BUILTIN_TASHAUL.forEach(function(b){
+        if(_dbOwnedT[b.cat] && _dbCatsT[b.cat]) return;
+        var k=b.cat+'|'+_normHeT(b.he); if(!_seenT[k]){ DB.push(mp(b)); _seenT[k]=true; }
+      });
     }
   }catch(e){}
   DAILY=data.filter(p=>p.section==='daily').map(mp);
@@ -9247,6 +9257,11 @@ const HCATS=[
   {id:'ברכות ונימוסים',icon:'👋'},
   {id:'ביטויים ופתגמים',icon:'📜'}
 ];
+// Categories the user actively curates (edits + records) in the DB. For these, once
+// the DB holds any rows, the DB is the source of truth: the hard-coded BUILTIN copies
+// are neither shown (loadData merge) nor re-synced (autoSyncBuiltins), so edits and
+// recordings never get shadowed by the shipped originals.
+const DB_OWNED_CATS={'זיהוי איום — מה שומעים בשטח':1,'נשמע מאיים — אבל תמים':1};
 
 // === 10 essential phrases every recruit must know before combat service ===
 const TEN_PHRASES=[
@@ -15498,12 +15513,16 @@ async function autoSyncBuiltins(){
     if(typeof BUILTIN_TASHAUL!=='undefined' && BUILTIN_TASHAUL.length){
       var normT=function(s){ return String(s||'').replace(/[^֐-׿0-9A-Za-z]/g,''); };
       var exT=await sbFetchAllRows('/rest/v1/phrases?select=cat,he&section=eq.military');
-      var haveT={}; (exT||[]).forEach(function(p){ haveT[(p.cat||'')+'|'+normT(p.he)]=1; });
+      var haveT={}, catCntT={}; (exT||[]).forEach(function(p){ haveT[(p.cat||'')+'|'+normT(p.he)]=1; catCntT[p.cat||'']=(catCntT[p.cat||'']||0)+1; });
+      var _ownedT=(typeof DB_OWNED_CATS!=='undefined')?DB_OWNED_CATS:{};
       for(var t=0;t<BUILTIN_TASHAUL.length;t++){
-        var bt=BUILTIN_TASHAUL[t]; var kt=bt.cat+'|'+normT(bt.he);
+        var bt=BUILTIN_TASHAUL[t];
+        // DB owns curated categories once seeded — never re-add originals over edits.
+        if(_ownedT[bt.cat] && catCntT[bt.cat])continue;
+        var kt=bt.cat+'|'+normT(bt.he);
         if(haveT[kt])continue;
-        await sbFetch('/rest/v1/phrases','POST',{cat:bt.cat,he:bt.he,trans:bt.trans||'',ar:bt.ar||'',tags:'',why:'',tone:'',audio_url:'',is_new:true,section:'military'});
-        haveT[kt]=1; addedT++;
+        await sbFetch('/rest/v1/phrases','POST',{cat:bt.cat,he:bt.he,trans:bt.trans||'',ar:bt.ar||'',tags:'',why:bt.why||'',tone:'',audio_url:'',is_new:true,section:'military'});
+        haveT[kt]=1; catCntT[bt.cat]=(catCntT[bt.cat]||0)+1; addedT++;
       }
     }
     // --- built-in daily sentences keyed by normalized Hebrew ---
