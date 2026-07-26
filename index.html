@@ -17427,19 +17427,41 @@ async function saveEdit(advance){
     } else {
       await sbFetch('/rest/v1/phrases?id=eq.'+id,'PATCH',updates);
     }
+    // VERIFY the write actually landed by reading the row back. Catches silent
+    // no-ops (wrong id, RLS/auth drops) that otherwise show "✓ נשמר" but persist
+    // nothing — the exact failure the user is hitting with recordings.
+    var _verifyMsg='';
+    try{
+      if(id){
+        var _vr=await sbFetch('/rest/v1/phrases?id=eq.'+encodeURIComponent(id)+'&select=he,audio_url');
+        var _vrow=_vr&&_vr[0];
+        if(!_vrow){ _verifyMsg='\n\n⚠️ השורה לא נמצאה במאגר אחרי השמירה (id לא תואם).'; }
+        else{
+          if(_hadRec){
+            if(au && !_vrow.audio_url) _verifyMsg='\n\n⚠️ ההקלטה הועלתה אבל לא נכתבה למאגר — ההרשאות (התחברות אדמין) חוסמות את הכתיבה.';
+            else if(au && _vrow.audio_url) _verifyMsg='\n\n🎵 ההקלטה אומתה במאגר ✓';
+          }
+          if(_vrow.he!==updates.he) _verifyMsg+='\n\n⚠️ הטקסט לא התעדכן במאגר (id='+id+') — הכתיבה לא נשמרה.';
+        }
+      }
+    }catch(_ve){ _verifyMsg='\n\n(לא הצלחתי לאמת מול המאגר: '+(_ve&&_ve.message?_ve.message:_ve)+')'; }
     await loadData();renderAdminList();
     try{ refreshOpenTabList(); }catch(e){}
     // Rebuild the active queue without the just-saved item (audit vs recording mode).
     if(window._navMode==='rec'){ try{ _rebuildRecNav(); }catch(e){} }
     else if(typeof renderQuestionAudit==='function'){ renderQuestionAudit(); }
     btn.textContent=btnTxt;
+    if(_verifyMsg.indexOf('⚠️')!==-1){
+      // Something didn't persist — tell her loudly instead of a false "saved".
+      alert('נשמר חלקית / בעיה:'+_verifyMsg);
+    }
     if(advance && Array.isArray(window._auditNav)){
       // The saved item dropped out of the list, so the same index now points to the next.
       var pos=(typeof window._auditNavPos==='number')?window._auditNavPos:0;
       if(pos < window._auditNav.length){ openEditById(window._auditNav[pos]); }
       else { closeEdit(); alert(window._navMode==='rec' ? '🎉 סיימת! הקלטת את כל המילים בתור.' : '🎉 סיימת! אין עוד שאלות בלי תשובות בקטגוריות שנבחרו.'); }
-    } else {
-      closeEdit();alert('✓ נשמר!');
+    } else if(_verifyMsg.indexOf('⚠️')===-1){
+      closeEdit();alert('✓ נשמר!'+_verifyMsg);
     }
   }catch(e){btn.textContent=btnTxt;alert('שגיאה: '+e.message);}
 }
@@ -18801,7 +18823,7 @@ window.addEventListener('load', function(){
 <script>
 // Version stamp — shown in the admin panel so we can confirm which build is live
 // on a device (stale service-worker caches were causing "my changes don't show").
-window.APP_VERSION = 'v103';
+window.APP_VERSION = 'v104';
 
 // Register the service worker for full offline use in the field, WITH update
 // detection: when a new version installs, offer a one-tap refresh instead of the
