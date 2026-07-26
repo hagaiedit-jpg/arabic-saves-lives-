@@ -9009,13 +9009,16 @@ function populateFromData(data){
     if(typeof BUILTIN_TASHAUL!=='undefined' && BUILTIN_TASHAUL.length){
       var _normHeT=function(s){return String(s||'').replace(/[^֐-׿0-9A-Za-z]/g,'');};
       var _normArT=function(s){return String(s||'').replace(/[^؀-ۿ0-9A-Za-z]/g,'');};
-      var _seenHeT={}, _seenArT={};
-      DB.forEach(function(p){ _seenHeT[(p.cat||'')+'|'+_normHeT(p.he)]=true; var a=_normArT(p.ar); if(a) _seenArT[(p.cat||'')+'|'+a]=true; });
+      var _seenHeT={}, _seenArT={}, _dbCatsT={};
+      DB.forEach(function(p){ _seenHeT[(p.cat||'')+'|'+_normHeT(p.he)]=true; var a=_normArT(p.ar); if(a) _seenArT[(p.cat||'')+'|'+a]=true; _dbCatsT[p.cat||'']=true; });
+      var _ownedT=(typeof DB_OWNED_CATS!=='undefined')?DB_OWNED_CATS:{};
       // A built-in is "already covered" by a DB row (which the user may have EDITED and
       // RECORDED) when they share the same category AND the same Hebrew OR the same
-      // Arabic. Matching on either field means editing just one of them no longer
-      // resurrects the shipped original as a duplicate card without audio.
+      // Arabic. For hand-curated categories (DB_OWNED_CATS) the DB is authoritative once
+      // it has any rows — the built-in is dropped even if BOTH fields were edited, so the
+      // shipped original can never shadow her edited+recorded card in the operational grid.
       BUILTIN_TASHAUL.forEach(function(b){
+        if(_ownedT[b.cat] && _dbCatsT[b.cat]) return;
         var kh=(b.cat||'')+'|'+_normHeT(b.he), na=_normArT(b.ar), ka=(b.cat||'')+'|'+na;
         if(_seenHeT[kh] || (na && _seenArT[ka])) return;
         DB.push(mp(b)); _seenHeT[kh]=true; if(na) _seenArT[ka]=true;
@@ -9253,6 +9256,12 @@ async function getAudio(p,stEl){
 }
 
 // CATS
+// Categories the user hand-curates directly in the DB (she edits the text AND records
+// audio). For these, once the DB holds rows, the DB is the SOLE source of truth — the
+// shipped BUILTIN_TASHAUL copies are fully suppressed (not merged, not re-synced), so an
+// original never shadows her edited+recorded version in the operational cards. If the DB
+// is empty (offline / failed load) the built-ins still appear as a fallback.
+const DB_OWNED_CATS={'זיהוי איום — מה שומעים בשטח':1,'נשמע מאיים — אבל תמים':1};
 const CATS=[{id:'עצירת תנועה ורכב',icon:'🚫'},{id:'ניהול מרחב והוראות',icon:'📍'},{id:'בידוק וזיהוי',icon:'🔍'},{id:'שליטה בבית',icon:'🏠'},{id:'הרגעה ושכנוע',icon:'✌️'},{id:'מגע ראשוני',icon:'🕵'},{id:'רפואה ועזרה ראשונה',icon:'🩹'},{id:'קהל ואירועים',icon:'👥'},{id:'ילדים ואוכלוסיות רגישות',icon:'👶'},{id:'לוח שנה ותרבות',icon:'📅'},{id:'שמות מקומות וכיוונים',icon:'🗺️'},{id:'זיהוי ערבית כתובה בשטח',icon:'📄'},{id:'זיהוי איום — מה שומעים בשטח',icon:'👂'},{id:'נשמע מאיים — אבל תמים',icon:'🕊️'},  {id:'תשאול: פרטים אישיים',icon:'🕵️'},
   {id:'תשאול: משפחה',icon:'🕵️'},
   {id:'תשאול: כתובת ובית',icon:'🕵️'},
@@ -9619,7 +9628,7 @@ async function fixThreatBenignCats(btn){
       +'• כפילויות ריקות למחיקה: '+toDelete.length+'\n\n';
     if(withAudio===0){
       msg+='⚠️ אין אף הקלטה במאגר בשתי הקטגוריות. זה אומר שההקלטות לא נשמרו ל-Supabase '
-         +'(כנראה עדיין רצה אצלך גרסת קוד ישנה — ראי "גרסת קוד" למטה: צריך להיות v100 ומעלה).\n\n';
+         +'(כנראה עדיין רצה אצלך גרסת קוד ישנה — ראי "גרסת קוד" למטה: צריך להיות v101 ומעלה).\n\n';
     }
     if(!toDelete.length){
       alert(msg+'אין כפילויות ריקות למחוק. '+(withAudio>0?'ההקלטות הקיימות תקינות.':''));
@@ -9629,7 +9638,7 @@ async function fixThreatBenignCats(btn){
     var done=0;
     for(var i=0;i<toDelete.length;i++){ await sbFetch('/rest/v1/phrases?id=eq.'+encodeURIComponent(toDelete[i]),'DELETE'); done++; btn.textContent='מוחק '+done+'/'+toDelete.length; }
     await loadData(); try{ renderAdminList(); }catch(e){}
-    alert('✓ נמחקו '+done+' כפילויות ריקות. ההקלטות נשמרו. אם עדיין רואים משפט בלי הקלטה — ייתכן שההקלטה עצמה לא נשמרה (בדקי שגרסת הקוד היא v100+).');
+    alert('✓ נמחקו '+done+' כפילויות ריקות. ההקלטות נשמרו. אם עדיין רואים משפט בלי הקלטה — ייתכן שההקלטה עצמה לא נשמרה (בדקי שגרסת הקוד היא v101+).');
   }catch(e){ alert('שגיאה: '+(e&&e.message?e.message:e)); }
   btn.textContent=old; btn.disabled=false;
 }
@@ -15575,15 +15584,19 @@ async function autoSyncBuiltins(){
       var normT=function(s){ return String(s||'').replace(/[^֐-׿0-9A-Za-z]/g,''); };
       var normArT=function(s){ return String(s||'').replace(/[^؀-ۿ0-9A-Za-z]/g,''); };
       var exT=await sbFetchAllRows('/rest/v1/phrases?select=cat,he,ar&section=eq.military');
-      var haveHeT={}, haveArT={}; (exT||[]).forEach(function(p){ haveHeT[(p.cat||'')+'|'+normT(p.he)]=1; var a=normArT(p.ar); if(a) haveArT[(p.cat||'')+'|'+a]=1; });
+      var haveHeT={}, haveArT={}, catCntT={}; (exT||[]).forEach(function(p){ haveHeT[(p.cat||'')+'|'+normT(p.he)]=1; var a=normArT(p.ar); if(a) haveArT[(p.cat||'')+'|'+a]=1; catCntT[p.cat||'']=(catCntT[p.cat||'']||0)+1; });
+      var _ownedST=(typeof DB_OWNED_CATS!=='undefined')?DB_OWNED_CATS:{};
       for(var t=0;t<BUILTIN_TASHAUL.length;t++){
         var bt=BUILTIN_TASHAUL[t];
-        // Skip if a DB row already matches by Hebrew OR by Arabic — so an original is
-        // never re-inserted as a ghost after the user edits one of the two fields.
+        // For hand-curated categories the DB owns the content once seeded — never
+        // re-insert an original over the user's edited rows.
+        if(_ownedST[bt.cat] && catCntT[bt.cat])continue;
+        // Otherwise skip if a DB row already matches by Hebrew OR by Arabic — so an
+        // original is never re-inserted as a ghost after the user edits one field.
         var kh=bt.cat+'|'+normT(bt.he), na=normArT(bt.ar), ka=bt.cat+'|'+na;
         if(haveHeT[kh] || (na && haveArT[ka]))continue;
         await sbFetch('/rest/v1/phrases','POST',{cat:bt.cat,he:bt.he,trans:bt.trans||'',ar:bt.ar||'',tags:'',why:bt.why||'',tone:'',audio_url:'',is_new:true,section:'military'});
-        haveHeT[kh]=1; if(na) haveArT[ka]=1; addedT++;
+        haveHeT[kh]=1; if(na) haveArT[ka]=1; catCntT[bt.cat]=(catCntT[bt.cat]||0)+1; addedT++;
       }
     }
     // --- built-in daily sentences keyed by normalized Hebrew ---
@@ -18708,7 +18721,7 @@ window.addEventListener('load', function(){
 <script>
 // Version stamp — shown in the admin panel so we can confirm which build is live
 // on a device (stale service-worker caches were causing "my changes don't show").
-window.APP_VERSION = 'v100';
+window.APP_VERSION = 'v101';
 
 // Register the service worker for full offline use in the field, WITH update
 // detection: when a new version installs, offer a one-tap refresh instead of the
