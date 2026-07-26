@@ -9605,6 +9605,13 @@ async function fixThreatBenignCats(btn){
     }
     var total=rows.length;
     var withAudio=rows.filter(function(x){ return !!x.audio_url; }).length;
+    // Compare against the IN-MEMORY list the operational (מבצעי) cards actually read
+    // from (window.DB after loadData's merge). If Supabase has audio but DB doesn't,
+    // the problem is the merge/cache, not the recordings.
+    var memRows=(typeof DB!=='undefined'&&DB)?DB.filter(function(p){ return CATS2.indexOf(p.cat)!==-1; }):[];
+    var memTotal=memRows.length;
+    var memAudio=memRows.filter(function(p){ return !!(p.audio||p.audio_url); }).length;
+    var cacheAt=''; try{ cacheAt=localStorage.getItem('cached_phrases_at')||'—'; }catch(e){}
     // group by cat|normHe
     var groups={};
     rows.forEach(function(x){ var k=(x.cat||'')+'|'+normHe(x.he); (groups[k]=groups[k]||[]).push(x); });
@@ -9620,15 +9627,33 @@ async function fixThreatBenignCats(btn){
         g.slice(1).forEach(function(x){ toDelete.push(x.id); });
       }
     });
-    var msg='📊 מצב שתי הקטגוריות במאגר:\n\n'
+    var msg='📊 גרסה: '+(window.APP_VERSION||'?')+'\n\n'
+      +'— מה שיש ב-Supabase (מקור אמת) —\n'
       +'• סה"כ שורות: '+total+'\n'
       +'• עם הקלטה: '+withAudio+'\n'
-      +'• בלי הקלטה: '+(total-withAudio)+'\n'
-      +'• קבוצות עם כפילות: '+dupGroups+'\n'
+      +'• בלי הקלטה: '+(total-withAudio)+'\n\n'
+      +'— מה שכרטיסיות מבצעי מציגות (זיכרון DB) —\n'
+      +'• שורות בזיכרון: '+memTotal+'\n'
+      +'• עם הקלטה בזיכרון: '+memAudio+'\n'
+      +'• מטמון עודכן: '+cacheAt+'\n\n'
       +'• כפילויות ריקות למחיקה: '+toDelete.length+'\n\n';
-    if(withAudio===0){
-      msg+='⚠️ אין אף הקלטה במאגר בשתי הקטגוריות. זה אומר שההקלטות לא נשמרו ל-Supabase '
-         +'(כנראה עדיין רצה אצלך גרסת קוד ישנה — ראי "גרסת קוד" למטה: צריך להיות v101 ומעלה).\n\n';
+    if(withAudio>0 && memAudio===0){
+      msg+='🎯 מצאתי! ב-Supabase יש '+withAudio+' הקלטות, אבל בזיכרון שכרטיסיות מבצעי קוראות ממנו יש 0. '
+         +'הבעיה היא שהמבצעי טוען נתונים ישנים מהמטמון ולא מתרענן. לחצי "אישור" ואני ארענן עכשיו בכוח.\n\n';
+    } else if(withAudio===0){
+      msg+='⚠️ אין אף הקלטה ב-Supabase. ההקלטות לא נשמרו (גרסת קוד צריכה להיות v102+).\n\n';
+    }
+    // If the operational cards' in-memory data is stale vs the DB, force a clean reload
+    // of the content (clears the cached snapshot the cards were rendering from).
+    if(withAudio>0 && memAudio<withAudio){
+      try{ localStorage.removeItem('cached_phrases'); localStorage.removeItem('cached_phrases_at'); }catch(e){}
+      alert(msg+'מרענן את התוכן במבצעי עכשיו...');
+      try{ await loadData(); }catch(e){}
+      try{ if(typeof renderAllData==='function') renderAllData(); }catch(e){}
+      var mem2=(typeof DB!=='undefined'&&DB)?DB.filter(function(p){ return CATS2.indexOf(p.cat)!==-1 && (p.audio||p.audio_url); }).length:0;
+      alert('✓ רועננן. עכשיו בזיכרון יש '+mem2+' הקלטות (מתוך '+withAudio+' ב-Supabase). '
+        +(mem2>=withAudio?'צאי למבצעי ובדקי — ההקלטות אמורות להופיע.':'עדיין יש פער — צלמי לי את המסך הזה.'));
+      btn.textContent=old; btn.disabled=false; return;
     }
     if(!toDelete.length){
       alert(msg+'אין כפילויות ריקות למחוק. '+(withAudio>0?'ההקלטות הקיימות תקינות.':''));
@@ -9638,7 +9663,7 @@ async function fixThreatBenignCats(btn){
     var done=0;
     for(var i=0;i<toDelete.length;i++){ await sbFetch('/rest/v1/phrases?id=eq.'+encodeURIComponent(toDelete[i]),'DELETE'); done++; btn.textContent='מוחק '+done+'/'+toDelete.length; }
     await loadData(); try{ renderAdminList(); }catch(e){}
-    alert('✓ נמחקו '+done+' כפילויות ריקות. ההקלטות נשמרו. אם עדיין רואים משפט בלי הקלטה — ייתכן שההקלטה עצמה לא נשמרה (בדקי שגרסת הקוד היא v101+).');
+    alert('✓ נמחקו '+done+' כפילויות ריקות. ההקלטות נשמרו. אם עדיין רואים משפט בלי הקלטה — ייתכן שההקלטה עצמה לא נשמרה (בדקי שגרסת הקוד היא v102+).');
   }catch(e){ alert('שגיאה: '+(e&&e.message?e.message:e)); }
   btn.textContent=old; btn.disabled=false;
 }
@@ -18721,7 +18746,7 @@ window.addEventListener('load', function(){
 <script>
 // Version stamp — shown in the admin panel so we can confirm which build is live
 // on a device (stale service-worker caches were causing "my changes don't show").
-window.APP_VERSION = 'v101';
+window.APP_VERSION = 'v102';
 
 // Register the service worker for full offline use in the field, WITH update
 // detection: when a new version installs, offer a one-tap refresh instead of the
