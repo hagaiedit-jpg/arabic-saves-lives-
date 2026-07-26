@@ -3358,6 +3358,9 @@ function showLanding() {
         <div style="text-align:center;color:#7a9ab5;font-size:11px;margin-top:5px;">שליטה בשיחה, עימות עם הכחשה, וזיהוי תחינות נפוצות — ישירות ממה שהלוחמים כתבו</div>
         <button onclick="cleanScenarioDupes(this)" style="width:100%;padding:12px;margin-top:10px;background:linear-gradient(135deg,#7a5230 0%,#5a3a20 100%);border:none;border-radius:10px;color:#fff;font-size:13px;font-weight:800;cursor:pointer;font-family:inherit;">🧹 נקה שורות כפולות בתרחישים</button>
         <div style="text-align:center;color:#7a9ab5;font-size:11px;margin-top:5px;">אם משפט מוקלט לא נשמע בתרחיש — מוחק כפילויות ריקות בלבד; שורה עם הקלטה לעולם לא נמחקת</div>
+        <button onclick="fixThreatBenignCats(this)" style="width:100%;padding:12px;margin-top:10px;background:linear-gradient(135deg,#c0392b 0%,#7d2018 100%);border:none;border-radius:10px;color:#fff;font-size:13px;font-weight:800;cursor:pointer;font-family:inherit;">🩺 בדיקה + ניקוי: "זיהוי איום" ו"נשמע מאיים אבל תמים"</button>
+        <div style="text-align:center;color:#7a9ab5;font-size:11px;margin-top:5px;">בודק כמה שורות והקלטות קיימות בשתי הקטגוריות האלה, ומוחק רק כפילויות ריקות (בלי הקלטה) — הקלטות ועריכות לעולם לא נמחקות</div>
+        <div style="text-align:center;color:#556;font-size:10px;margin-top:8px;">גרסת קוד: <b id="admin-version-stamp">—</b></div>
       </div>
       </details>
       <div id="admin-list"></div>
@@ -9568,6 +9571,60 @@ async function checkOneTimeTools(){
 // Remove duplicate scenario rows (same category + step) that can accumulate from
 // repeated inserts. Keeps the copy that HAS a recording (or, if none, one copy);
 // only ever deletes EMPTY duplicates — never a recorded line.
+// Diagnose + clean the two hand-curated threat categories. Reports exactly what is
+// in the DB (so we can see the truth instead of guessing), then removes only the
+// audio-less, response-less duplicates within each normalized-Hebrew group — a row
+// that has a recording or answers is NEVER deleted.
+async function fixThreatBenignCats(btn){
+  var CATS2=['זיהוי איום — מה שומעים בשטח','נשמע מאיים — אבל תמים'];
+  var old=btn.textContent; btn.disabled=true; btn.textContent='בודק...';
+  try{
+    var normHe=function(s){ return String(s||'').replace(/[^֐-׿0-9A-Za-z]/g,''); };
+    var rows=[];
+    for(var ci=0;ci<CATS2.length;ci++){
+      var r=await sbFetchAllRows('/rest/v1/phrases?select=id,cat,he,audio_url,responses&section=eq.military&cat=eq.'+encodeURIComponent(CATS2[ci]));
+      (r||[]).forEach(function(x){ rows.push(x); });
+    }
+    var total=rows.length;
+    var withAudio=rows.filter(function(x){ return !!x.audio_url; }).length;
+    // group by cat|normHe
+    var groups={};
+    rows.forEach(function(x){ var k=(x.cat||'')+'|'+normHe(x.he); (groups[k]=groups[k]||[]).push(x); });
+    var dupGroups=0, toDelete=[];
+    Object.keys(groups).forEach(function(k){
+      var g=groups[k]; if(g.length<2) return; dupGroups++;
+      var hasRec=g.some(function(x){ return x.audio_url || (x.responses && x.responses.length>5); });
+      if(hasRec){
+        // keep every row that has audio/responses; delete the empty duplicates
+        g.forEach(function(x){ if(!(x.audio_url || (x.responses && x.responses.length>5))) toDelete.push(x.id); });
+      } else {
+        // all empty — keep the first, delete the rest
+        g.slice(1).forEach(function(x){ toDelete.push(x.id); });
+      }
+    });
+    var msg='📊 מצב שתי הקטגוריות במאגר:\n\n'
+      +'• סה"כ שורות: '+total+'\n'
+      +'• עם הקלטה: '+withAudio+'\n'
+      +'• בלי הקלטה: '+(total-withAudio)+'\n'
+      +'• קבוצות עם כפילות: '+dupGroups+'\n'
+      +'• כפילויות ריקות למחיקה: '+toDelete.length+'\n\n';
+    if(withAudio===0){
+      msg+='⚠️ אין אף הקלטה במאגר בשתי הקטגוריות. זה אומר שההקלטות לא נשמרו ל-Supabase '
+         +'(כנראה עדיין רצה אצלך גרסת קוד ישנה — ראי "גרסת קוד" למטה: צריך להיות v99 ומעלה).\n\n';
+    }
+    if(!toDelete.length){
+      alert(msg+'אין כפילויות ריקות למחוק. '+(withAudio>0?'ההקלטות הקיימות תקינות.':''));
+      btn.textContent=old; btn.disabled=false; return;
+    }
+    if(!confirm(msg+'למחוק את '+toDelete.length+' הכפילויות הריקות? (הקלטות לא נמחקות)')){ btn.textContent=old; btn.disabled=false; return; }
+    var done=0;
+    for(var i=0;i<toDelete.length;i++){ await sbFetch('/rest/v1/phrases?id=eq.'+encodeURIComponent(toDelete[i]),'DELETE'); done++; btn.textContent='מוחק '+done+'/'+toDelete.length; }
+    await loadData(); try{ renderAdminList(); }catch(e){}
+    alert('✓ נמחקו '+done+' כפילויות ריקות. ההקלטות נשמרו. אם עדיין רואים משפט בלי הקלטה — ייתכן שההקלטה עצמה לא נשמרה (בדקי שגרסת הקוד היא v99+).');
+  }catch(e){ alert('שגיאה: '+(e&&e.message?e.message:e)); }
+  btn.textContent=old; btn.disabled=false;
+}
+
 async function cleanScenarioDupes(btn){
   if(!confirm('לנקות שורות כפולות בתרחישים? יימחקו רק כפילויות ריקות (בלי הקלטה); שורה עם הקלטה לעולם לא נמחקת.'))return;
   var old=btn.textContent; btn.disabled=true; btn.textContent='בודק...';
@@ -16669,6 +16726,7 @@ async function addDictWord(){
 // Admin list
 async function renderAdminList(){
   const el=document.getElementById('admin-list');
+  try{ var _vs=document.getElementById('admin-version-stamp'); if(_vs) _vs.textContent=(window.APP_VERSION||'?'); }catch(e){}
   try{ _refreshBackupState(); }catch(e){}
   el.innerHTML='<div class="loading">טוען...</div>';
   try{
@@ -18637,11 +18695,45 @@ window.addEventListener('load', function(){
 </script>
 
 <script>
-// Register the service worker for full offline use in the field
+// Version stamp — shown in the admin panel so we can confirm which build is live
+// on a device (stale service-worker caches were causing "my changes don't show").
+window.APP_VERSION = 'v99';
+
+// Register the service worker for full offline use in the field, WITH update
+// detection: when a new version installs, offer a one-tap refresh instead of the
+// user having to close every tab (impossible on mobile). The SW itself calls
+// skipWaiting()+clients.claim(), so a reload is all that's needed to get fresh code.
 if ('serviceWorker' in navigator) {
-  window.addEventListener('load', function(){
-    navigator.serviceWorker.register('./sw.js').catch(function(e){ console.warn('SW registration failed', e); });
+  var _swReloaded = false;
+  navigator.serviceWorker.addEventListener('controllerchange', function(){
+    // A new SW took control. Reload ONCE (unless actively recording) to load the
+    // fresh index.html via the network-first navigate handler.
+    if (_swReloaded) return; _swReloaded = true;
+    try { if (typeof mrec !== 'undefined' && mrec && mrec.state === 'recording') { showUpdateBanner(); return; } } catch(e){}
+    location.reload();
   });
+  window.addEventListener('load', function(){
+    navigator.serviceWorker.register('./sw.js').then(function(reg){
+      // Periodically ask the browser to check for a new sw.js (defeats HTTP caching).
+      try { setInterval(function(){ reg.update().catch(function(){}); }, 60*60*1000); } catch(e){}
+      reg.addEventListener('updatefound', function(){
+        var nw = reg.installing;
+        if (!nw) return;
+        nw.addEventListener('statechange', function(){
+          // New worker installed while an old one still controls the page → show banner.
+          if (nw.state === 'installed' && navigator.serviceWorker.controller) { showUpdateBanner(); }
+        });
+      });
+    }).catch(function(e){ console.warn('SW registration failed', e); });
+  });
+}
+function showUpdateBanner(){
+  if (document.getElementById('update-banner')) return;
+  var b = document.createElement('div');
+  b.id = 'update-banner';
+  b.style.cssText = 'position:fixed;left:0;right:0;bottom:0;z-index:100000;background:#1D9E75;color:#fff;padding:14px 16px;direction:rtl;text-align:center;font-family:inherit;box-shadow:0 -6px 24px rgba(0,0,0,0.4);font-size:14px;';
+  b.innerHTML = '✨ יש גרסה חדשה עם השיפורים האחרונים. <button onclick="location.reload()" style="margin-right:8px;background:#fff;color:#1D9E75;border:none;border-radius:8px;padding:8px 16px;font-size:14px;font-weight:800;cursor:pointer;font-family:inherit;">רענני עכשיו</button>';
+  document.body.appendChild(b);
 }
 </script>
 
