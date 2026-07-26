@@ -3360,6 +3360,8 @@ function showLanding() {
         <div style="text-align:center;color:#7a9ab5;font-size:11px;margin-top:5px;">אם משפט מוקלט לא נשמע בתרחיש — מוחק כפילויות ריקות בלבד; שורה עם הקלטה לעולם לא נמחקת</div>
         <button onclick="fixThreatBenignCats(this)" style="width:100%;padding:12px;margin-top:10px;background:linear-gradient(135deg,#c0392b 0%,#7d2018 100%);border:none;border-radius:10px;color:#fff;font-size:13px;font-weight:800;cursor:pointer;font-family:inherit;">🩺 בדיקה + ניקוי: "זיהוי איום" ו"נשמע מאיים אבל תמים"</button>
         <div style="text-align:center;color:#7a9ab5;font-size:11px;margin-top:5px;">בודק כמה שורות והקלטות קיימות בשתי הקטגוריות האלה, ומוחק רק כפילויות ריקות (בלי הקלטה) — הקלטות ועריכות לעולם לא נמחקות</div>
+        <button onclick="testRecordingPipeline(this)" style="width:100%;padding:12px;margin-top:10px;background:linear-gradient(135deg,#2980b9 0%,#1a5a86 100%);border:none;border-radius:10px;color:#fff;font-size:13px;font-weight:800;cursor:pointer;font-family:inherit;">🎤 בדיקת צינור ההקלטה (העלאה + שמירה)</button>
+        <div style="text-align:center;color:#7a9ab5;font-size:11px;margin-top:5px;">בודק בנפרד: (1) האם העלאת אודיו ל-Cloudinary עובדת, (2) האם כתיבה ל-Supabase נשמרת. מדווח בדיוק איפה זה נשבר.</div>
         <div style="text-align:center;color:#556;font-size:10px;margin-top:8px;">גרסת קוד: <b id="admin-version-stamp">—</b></div>
       </div>
       </details>
@@ -9593,6 +9595,59 @@ async function checkOneTimeTools(){
 // in the DB (so we can see the truth instead of guessing), then removes only the
 // audio-less, response-less duplicates within each normalized-Hebrew group — a row
 // that has a recording or answers is NEVER deleted.
+// Build a tiny valid WAV blob (0.2s tone) so we can test the upload pipeline
+// without needing microphone permission.
+function _tinyWavBlob(){
+  var sr=8000, n=Math.floor(sr*0.2), buf=new ArrayBuffer(44+n*2), v=new DataView(buf);
+  function ws(o,s){ for(var i=0;i<s.length;i++) v.setUint8(o+i,s.charCodeAt(i)); }
+  ws(0,'RIFF'); v.setUint32(4,36+n*2,true); ws(8,'WAVE'); ws(12,'fmt ');
+  v.setUint32(16,16,true); v.setUint16(20,1,true); v.setUint16(22,1,true);
+  v.setUint32(24,sr,true); v.setUint32(28,sr*2,true); v.setUint16(32,2,true); v.setUint16(34,16,true);
+  ws(36,'data'); v.setUint32(40,n*2,true);
+  for(var i=0;i<n;i++){ v.setInt16(44+i*2, Math.round(Math.sin(i*0.12)*2500), true); }
+  return new Blob([buf],{type:'audio/wav'});
+}
+// Isolate the recording-save pipeline: test (1) Cloudinary upload and (2) Supabase
+// write+persist, separately, and report exactly which step fails. Uses the first row
+// of the threat category as the write target, then reverts it so nothing is changed.
+async function testRecordingPipeline(btn){
+  var old=btn.textContent; btn.disabled=true; btn.textContent='בודק...';
+  var report='🎤 בדיקת צינור ההקלטה — גרסה '+(window.APP_VERSION||'?')+'\n\n';
+  var uploadUrl='';
+  // STEP 1: Cloudinary upload
+  try{
+    btn.textContent='מעלה ל-Cloudinary...';
+    var blob=_tinyWavBlob();
+    uploadUrl=await cloudUp(blob);
+    if(uploadUrl){ report+='✅ שלב 1 — העלאה ל-Cloudinary: הצליחה\n('+uploadUrl.slice(0,48)+'...)\n\n'; }
+    else { report+='❌ שלב 1 — העלאה ל-Cloudinary: נכשלה (החזירה ריק)\n\n'; }
+  }catch(e){
+    report+='❌ שלב 1 — העלאה ל-Cloudinary נכשלה:\n'+(e&&e.message?e.message:e)+'\n\n➡️ זו הבעיה: ההקלטות לא נשמרות כי ההעלאה נכשלת (רשת/הגדרות Cloudinary).';
+    alert(report); btn.textContent=old; btn.disabled=false; return;
+  }
+  // STEP 2: Supabase write + verify persistence
+  try{
+    btn.textContent='כותב ל-Supabase...';
+    var rows=await sbFetchAllRows('/rest/v1/phrases?select=id,audio_url&section=eq.military&cat=eq.'+encodeURIComponent('זיהוי איום — מה שומעים בשטח'));
+    if(!rows||!rows.length){ report+='⚠️ שלב 2 — אין שורות בקטגוריה לבדוק עליהן.'; alert(report); btn.textContent=old; btn.disabled=false; return; }
+    var target=rows[0]; var origAudio=target.audio_url||'';
+    await sbFetch('/rest/v1/phrases?id=eq.'+encodeURIComponent(target.id),'PATCH',{audio_url:uploadUrl});
+    // Re-fetch to confirm it actually persisted (RLS/auth can silently drop writes)
+    var check=await sbFetch('/rest/v1/phrases?id=eq.'+encodeURIComponent(target.id)+'&select=audio_url');
+    var saved=(check&&check[0]&&check[0].audio_url)||'';
+    if(saved===uploadUrl){
+      report+='✅ שלב 2 — כתיבה ל-Supabase ואימות: הצליחה\n\n🎉 שני השלבים עובדים! הצינור תקין.\nאם ההקלטות שלך עדיין לא נשמרות — כנראה הן נכשלות בזמן אמת בגלל רשת חלשה בדיוק ברגע ההעלאה. נסי להקליט שוב עם חיבור יציב.';
+    } else {
+      report+='❌ שלב 2 — כתיבה ל-Supabase לא נשמרה!\nכתבתי אבל בקריאה חוזרת audio_url עדיין: "'+(saved||'ריק')+'"\n\n➡️ זו הבעיה: ההרשאות (RLS/התחברות אדמין) חוסמות את הכתיבה בשקט. צריך לתקן את ההרשאות.';
+    }
+    // revert the target so we don't leave a test tone on a real phrase
+    try{ await sbFetch('/rest/v1/phrases?id=eq.'+encodeURIComponent(target.id),'PATCH',{audio_url:origAudio}); }catch(e){}
+  }catch(e){
+    report+='❌ שלב 2 — כתיבה ל-Supabase נכשלה:\n'+(e&&e.message?e.message:e)+'\n\n➡️ זו הבעיה: הכתיבה למאגר נכשלת (הרשאות/התחברות).';
+  }
+  alert(report); btn.textContent=old; btn.disabled=false;
+}
+
 async function fixThreatBenignCats(btn){
   var CATS2=['זיהוי איום — מה שומעים בשטח','נשמע מאיים — אבל תמים'];
   var old=btn.textContent; btn.disabled=true; btn.textContent='בודק...';
@@ -18746,7 +18801,7 @@ window.addEventListener('load', function(){
 <script>
 // Version stamp — shown in the admin panel so we can confirm which build is live
 // on a device (stale service-worker caches were causing "my changes don't show").
-window.APP_VERSION = 'v102';
+window.APP_VERSION = 'v103';
 
 // Register the service worker for full offline use in the field, WITH update
 // detection: when a new version installs, offer a one-tap refresh instead of the
