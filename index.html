@@ -9005,17 +9005,17 @@ function populateFromData(data){
   try{
     if(typeof BUILTIN_TASHAUL!=='undefined' && BUILTIN_TASHAUL.length){
       var _normHeT=function(s){return String(s||'').replace(/[^֐-׿0-9A-Za-z]/g,'');};
-      var _seenT={}, _dbCatsT={};
-      DB.forEach(function(p){ _seenT[(p.cat||'')+'|'+_normHeT(p.he)]=true; _dbCatsT[p.cat||'']=true; });
-      // Categories the user curates live in the DB (edits + recordings). Once the DB
-      // holds ANY rows for them, the DB is the source of truth — do NOT let the
-      // hard-coded originals re-appear and shadow her edited/recorded copies (editing
-      // the Hebrew text changes the dedup key, so the original would otherwise return).
-      // If the DB failed to load (empty), the built-ins still show as an offline fallback.
-      var _dbOwnedT=(typeof DB_OWNED_CATS!=='undefined')?DB_OWNED_CATS:{};
+      var _normArT=function(s){return String(s||'').replace(/[^؀-ۿ0-9A-Za-z]/g,'');};
+      var _seenHeT={}, _seenArT={};
+      DB.forEach(function(p){ _seenHeT[(p.cat||'')+'|'+_normHeT(p.he)]=true; var a=_normArT(p.ar); if(a) _seenArT[(p.cat||'')+'|'+a]=true; });
+      // A built-in is "already covered" by a DB row (which the user may have EDITED and
+      // RECORDED) when they share the same category AND the same Hebrew OR the same
+      // Arabic. Matching on either field means editing just one of them no longer
+      // resurrects the shipped original as a duplicate card without audio.
       BUILTIN_TASHAUL.forEach(function(b){
-        if(_dbOwnedT[b.cat] && _dbCatsT[b.cat]) return;
-        var k=b.cat+'|'+_normHeT(b.he); if(!_seenT[k]){ DB.push(mp(b)); _seenT[k]=true; }
+        var kh=(b.cat||'')+'|'+_normHeT(b.he), na=_normArT(b.ar), ka=(b.cat||'')+'|'+na;
+        if(_seenHeT[kh] || (na && _seenArT[ka])) return;
+        DB.push(mp(b)); _seenHeT[kh]=true; if(na) _seenArT[ka]=true;
       });
     }
   }catch(e){}
@@ -9257,11 +9257,6 @@ const HCATS=[
   {id:'ברכות ונימוסים',icon:'👋'},
   {id:'ביטויים ופתגמים',icon:'📜'}
 ];
-// Categories the user actively curates (edits + records) in the DB. For these, once
-// the DB holds any rows, the DB is the source of truth: the hard-coded BUILTIN copies
-// are neither shown (loadData merge) nor re-synced (autoSyncBuiltins), so edits and
-// recordings never get shadowed by the shipped originals.
-const DB_OWNED_CATS={'זיהוי איום — מה שומעים בשטח':1,'נשמע מאיים — אבל תמים':1};
 
 // === 10 essential phrases every recruit must know before combat service ===
 const TEN_PHRASES=[
@@ -15512,17 +15507,17 @@ async function autoSyncBuiltins(){
     var addedT=0;
     if(typeof BUILTIN_TASHAUL!=='undefined' && BUILTIN_TASHAUL.length){
       var normT=function(s){ return String(s||'').replace(/[^֐-׿0-9A-Za-z]/g,''); };
-      var exT=await sbFetchAllRows('/rest/v1/phrases?select=cat,he&section=eq.military');
-      var haveT={}, catCntT={}; (exT||[]).forEach(function(p){ haveT[(p.cat||'')+'|'+normT(p.he)]=1; catCntT[p.cat||'']=(catCntT[p.cat||'']||0)+1; });
-      var _ownedT=(typeof DB_OWNED_CATS!=='undefined')?DB_OWNED_CATS:{};
+      var normArT=function(s){ return String(s||'').replace(/[^؀-ۿ0-9A-Za-z]/g,''); };
+      var exT=await sbFetchAllRows('/rest/v1/phrases?select=cat,he,ar&section=eq.military');
+      var haveHeT={}, haveArT={}; (exT||[]).forEach(function(p){ haveHeT[(p.cat||'')+'|'+normT(p.he)]=1; var a=normArT(p.ar); if(a) haveArT[(p.cat||'')+'|'+a]=1; });
       for(var t=0;t<BUILTIN_TASHAUL.length;t++){
         var bt=BUILTIN_TASHAUL[t];
-        // DB owns curated categories once seeded — never re-add originals over edits.
-        if(_ownedT[bt.cat] && catCntT[bt.cat])continue;
-        var kt=bt.cat+'|'+normT(bt.he);
-        if(haveT[kt])continue;
+        // Skip if a DB row already matches by Hebrew OR by Arabic — so an original is
+        // never re-inserted as a ghost after the user edits one of the two fields.
+        var kh=bt.cat+'|'+normT(bt.he), na=normArT(bt.ar), ka=bt.cat+'|'+na;
+        if(haveHeT[kh] || (na && haveArT[ka]))continue;
         await sbFetch('/rest/v1/phrases','POST',{cat:bt.cat,he:bt.he,trans:bt.trans||'',ar:bt.ar||'',tags:'',why:bt.why||'',tone:'',audio_url:'',is_new:true,section:'military'});
-        haveT[kt]=1; catCntT[bt.cat]=(catCntT[bt.cat]||0)+1; addedT++;
+        haveHeT[kh]=1; if(na) haveArT[ka]=1; addedT++;
       }
     }
     // --- built-in daily sentences keyed by normalized Hebrew ---
@@ -16895,6 +16890,10 @@ function _updateWhyPreview(){
 function openEditRow(p) {
   try {
     document.getElementById('edit-id').value = p.id || '';
+    // Remember the section (+ original identity) so that saving a phrase that has
+    // no DB id yet (an un-synced built-in) can INSERT a proper row instead of
+    // silently PATCHing nothing.
+    window._editSection = p.section || 'military';
     document.getElementById('edit-he').value = p.he || '';
     document.getElementById('edit-trans').value = p.trans || '';
     document.getElementById('edit-ar').value = p.ar || '';
@@ -16992,6 +16991,7 @@ function auditNavStep(d){
 }
 
 function openEdit(id,he,trans,ar,why,tone,audioUrl){
+  window._editSection=window._editSection||'military';
   document.getElementById('edit-id').value=id;document.getElementById('edit-he').value=he;
   document.getElementById('edit-trans').value=trans;document.getElementById('edit-ar').value=ar;
   document.getElementById('edit-why').value=why;document.getElementById('edit-tone').value=tone;
@@ -17255,7 +17255,16 @@ async function saveEdit(advance){
     return;
   }
   try{
-    await sbFetch('/rest/v1/phrases?id=eq.'+id,'PATCH',updates);
+    if(!id){
+      // No DB id — this phrase exists only as a hard-coded built-in that was never
+      // synced. PATCH would match nothing and silently drop the edit + recording.
+      // Insert it as a real row instead, so the edit and audio actually persist.
+      var _sec=(window._editSection||'military');
+      var _insRow={cat:updates.cat,he:updates.he,trans:updates.trans,ar:updates.ar,why:updates.why,tone:updates.tone,tags:updates.tags,audio_url:updates.audio_url||'',responses:updates.responses,is_new:true,section:_sec};
+      await sbFetch('/rest/v1/phrases','POST',_insRow);
+    } else {
+      await sbFetch('/rest/v1/phrases?id=eq.'+id,'PATCH',updates);
+    }
     await loadData();renderAdminList();
     try{ refreshOpenTabList(); }catch(e){}
     // Rebuild the active queue without the just-saved item (audit vs recording mode).
