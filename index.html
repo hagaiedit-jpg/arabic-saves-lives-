@@ -9225,6 +9225,15 @@ async function toggleRec(p){
       }
       rfiles[p]=_recFile(rchunks, mrec);
       const st=document.getElementById(p+'-status');if(st)st.textContent='✓ הוקלט';
+      // Quick-record (🎙 from the admin list / worklist): don't make her hunt for a
+      // separate "save" button — upload and persist the recording right away. This
+      // was the cause of "I recorded everything but it all shows as un-recorded":
+      // the clip stayed only in the form and was lost when the modal closed.
+      if(p==='edit' && window._quickRecAutoSave){
+        window._quickRecAutoSave=false;
+        if(st) st.textContent='⏳ מעלה ושומרת...';
+        try{ if(typeof saveEdit==='function') saveEdit(false); }catch(e){ if(st) st.textContent='✗ שגיאה בשמירה'; }
+      }
     };
     mrec.start();btn.textContent='⏹ עצור';btn.className='rec-btn recording';
     const st=document.getElementById(p+'-status');if(st)st.textContent='● מקליט...';
@@ -9610,7 +9619,7 @@ async function fixThreatBenignCats(btn){
       +'• כפילויות ריקות למחיקה: '+toDelete.length+'\n\n';
     if(withAudio===0){
       msg+='⚠️ אין אף הקלטה במאגר בשתי הקטגוריות. זה אומר שההקלטות לא נשמרו ל-Supabase '
-         +'(כנראה עדיין רצה אצלך גרסת קוד ישנה — ראי "גרסת קוד" למטה: צריך להיות v99 ומעלה).\n\n';
+         +'(כנראה עדיין רצה אצלך גרסת קוד ישנה — ראי "גרסת קוד" למטה: צריך להיות v100 ומעלה).\n\n';
     }
     if(!toDelete.length){
       alert(msg+'אין כפילויות ריקות למחוק. '+(withAudio>0?'ההקלטות הקיימות תקינות.':''));
@@ -9620,7 +9629,7 @@ async function fixThreatBenignCats(btn){
     var done=0;
     for(var i=0;i<toDelete.length;i++){ await sbFetch('/rest/v1/phrases?id=eq.'+encodeURIComponent(toDelete[i]),'DELETE'); done++; btn.textContent='מוחק '+done+'/'+toDelete.length; }
     await loadData(); try{ renderAdminList(); }catch(e){}
-    alert('✓ נמחקו '+done+' כפילויות ריקות. ההקלטות נשמרו. אם עדיין רואים משפט בלי הקלטה — ייתכן שההקלטה עצמה לא נשמרה (בדקי שגרסת הקוד היא v99+).');
+    alert('✓ נמחקו '+done+' כפילויות ריקות. ההקלטות נשמרו. אם עדיין רואים משפט בלי הקלטה — ייתכן שההקלטה עצמה לא נשמרה (בדקי שגרסת הקוד היא v100+).');
   }catch(e){ alert('שגיאה: '+(e&&e.message?e.message:e)); }
   btn.textContent=old; btn.disabled=false;
 }
@@ -15499,7 +15508,7 @@ async function promoteBuiltinsAndRefresh(){
 function quickRecordById(id){
   try{ openEditById(id); }catch(e){}
   setTimeout(function(){
-    try{ var b=document.getElementById('edit-rec'); if(b){ b.scrollIntoView({behavior:'smooth',block:'center'}); b.focus(); } }catch(e){}
+    try{ window._quickRecAutoSave = true; var b=document.getElementById('edit-rec'); if(b){ b.scrollIntoView({behavior:'smooth',block:'center'}); b.focus(); } }catch(e){}
   }, 350);
 }
 // Re-render whichever tab list is currently open (call after add/edit/delete).
@@ -16916,6 +16925,7 @@ function quickRecordIdx(idx) {
   openEditIdx(idx);
   setTimeout(function(){
     try{
+      window._quickRecAutoSave = true; // stop-recording will upload + save automatically
       var b=document.getElementById('edit-rec');
       if(b){ b.scrollIntoView({behavior:'smooth',block:'center'}); b.focus(); }
     }catch(e){}
@@ -16952,6 +16962,7 @@ function openEditRow(p) {
     // no DB id yet (an un-synced built-in) can INSERT a proper row instead of
     // silently PATCHing nothing.
     window._editSection = p.section || 'military';
+    window._quickRecAutoSave = false; // normal edit: never auto-save; quick-record re-arms this
     document.getElementById('edit-he').value = p.he || '';
     document.getElementById('edit-trans').value = p.trans || '';
     document.getElementById('edit-ar').value = p.ar || '';
@@ -18697,7 +18708,7 @@ window.addEventListener('load', function(){
 <script>
 // Version stamp — shown in the admin panel so we can confirm which build is live
 // on a device (stale service-worker caches were causing "my changes don't show").
-window.APP_VERSION = 'v99';
+window.APP_VERSION = 'v100';
 
 // Register the service worker for full offline use in the field, WITH update
 // detection: when a new version installs, offer a one-tap refresh instead of the
