@@ -9305,7 +9305,7 @@ async function getAudio(p,stEl){
 // (The two threat categories 'זיהוי איום — מה שומעים בשטח' and 'נשמע מאיים — אבל תמים'
 //  were removed from the operational grid at the user's request.)
 const DB_OWNED_CATS={};
-const CATS=[{id:'עצירת תנועה ורכב',icon:'🚫'},{id:'ניהול מרחב והוראות',icon:'📍'},{id:'בידוק וזיהוי',icon:'🔍'},{id:'שליטה בבית',icon:'🏠'},{id:'הרגעה ושכנוע',icon:'✌️'},{id:'מגע ראשוני',icon:'🕵'},{id:'רפואה ועזרה ראשונה',icon:'🩹'},{id:'קהל ואירועים',icon:'👥'},{id:'ילדים ואוכלוסיות רגישות',icon:'👶'},{id:'לוח שנה ותרבות',icon:'📅'},{id:'שמות מקומות וכיוונים',icon:'🗺️'},{id:'זיהוי ערבית כתובה בשטח',icon:'📄'},  {id:'תשאול: פרטים אישיים',icon:'🕵️'},
+const CATS=[{id:'יסודות: כינויי גוף', icon:'👤'},{id:'יסודות: שייכות', icon:'🔑'},{id:'יסודות: מילות שאלה', icon:'❓'},{id:'יסודות: שלילה', icon:'🚫'},{id:'יסודות: נטיית פעלים', icon:'🔤'},{id:'עצירת תנועה ורכב',icon:'🚫'},{id:'ניהול מרחב והוראות',icon:'📍'},{id:'בידוק וזיהוי',icon:'🔍'},{id:'שליטה בבית',icon:'🏠'},{id:'הרגעה ושכנוע',icon:'✌️'},{id:'מגע ראשוני',icon:'🕵'},{id:'רפואה ועזרה ראשונה',icon:'🩹'},{id:'קהל ואירועים',icon:'👥'},{id:'ילדים ואוכלוסיות רגישות',icon:'👶'},{id:'לוח שנה ותרבות',icon:'📅'},{id:'שמות מקומות וכיוונים',icon:'🗺️'},{id:'זיהוי ערבית כתובה בשטח',icon:'📄'},  {id:'תשאול: פרטים אישיים',icon:'🕵️'},
   {id:'תשאול: משפחה',icon:'🕵️'},
   {id:'תשאול: כתובת ובית',icon:'🕵️'},
   {id:'תשאול: עבודה',icon:'🕵️'},
@@ -9315,7 +9315,7 @@ const CATS=[{id:'עצירת תנועה ורכב',icon:'🚫'},{id:'ניהול מ
   {id:'תשאול: חברים',icon:'🕵️'},
   {id:'תשאול: תיאור אדם',icon:'🕵️'},
   {id:'תשאול: שאלות על האירוע',icon:'🕵️'},
-{id:'יסודות: כינויי גוף', icon:'👤'},{id:'יסודות: שייכות', icon:'🔑'},{id:'יסודות: מילות שאלה', icon:'❓'},{id:'יסודות: שלילה', icon:'🚫'},{id:'יסודות: נטיית פעלים', icon:'🔤'},{id:'כריזה',icon:'📢',special:'announce'},{id:'ימי',icon:'⚓',special:'navy'}];
+{id:'כריזה',icon:'📢',special:'announce'},{id:'ימי',icon:'⚓',special:'navy'}];
 const DCATS=[{id:'שוק ומסחר',icon:'🛒'},{id:'מסעדה ואוכל',icon:'🍽️'},{id:'שיחת היכרות',icon:'🤝'},{id:'עזרה וכיוונים',icon:'🗺️'},{id:'ילדים ובית ספר',icon:'🎒'},{id:'שכנות וקהילה',icon:'🏘️'}];
 const HCATS=[
   {id:'ברכות ונימוסים',icon:'👋'},
@@ -18874,7 +18874,7 @@ window.addEventListener('load', function(){
 <script>
 // Version stamp — shown in the admin panel so we can confirm which build is live
 // on a device (stale service-worker caches were causing "my changes don't show").
-window.APP_VERSION = 'v108';
+window.APP_VERSION = 'v109';
 
 // Register the service worker for full offline use in the field, WITH update
 // detection: when a new version installs, offer a one-tap refresh instead of the
