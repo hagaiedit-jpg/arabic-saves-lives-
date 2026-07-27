@@ -8622,6 +8622,31 @@ var BUILTIN_DICT = [
   {section:'dictionary', cat:'מזג אוויר וטבע', he:'אש', ar:'نار', trans:'נַאר'},
   {section:'dictionary', cat:'מזג אוויר וטבע', he:'עפר', ar:'تراب', trans:'תֻרַאבּ'},
   {section:'dictionary', cat:'מזג אוויר וטבע', he:'חושך', ar:'عتمة / ضلام', trans:'עַתְמֵה / ד׳לַאם'},
+  {section:'dictionary', cat:'כיוונים', he:'מצפן', ar:'بوصلة', trans:'בּוֹצְלֶה'},
+  {section:'dictionary', cat:'כיוונים', he:'מפה טופוגרפית', ar:'خريطة طوبوغرافية', trans:'חַ׳רִיטַה טוֹפּוֹעְ׳רַאפִיּה'},
+  {section:'dictionary', cat:'כיוונים', he:'מרחק', ar:'مسافة', trans:'מַסַאפֶה'},
+  {section:'dictionary', cat:'כיוונים', he:'ציר', ar:'محور', trans:'מִחְוַר'},
+  {section:'dictionary', cat:'מקומות', he:'סמטה', ar:'زاروب', trans:'זַארוּבּ'},
+  {section:'dictionary', cat:'מקומות', he:'בית משפט', ar:'محكمة', trans:'מַחְכַּמֶה'},
+  {section:'dictionary', cat:'מקומות', he:'רחוב', ar:'شارع', trans:'שַארֶע'},
+  {section:'dictionary', cat:'מקומות', he:'בניין', ar:'عمارة', trans:'עִמַארַה'},
+  {section:'dictionary', cat:'מקומות', he:'דירה', ar:'دار', trans:'דַאר'},
+  {section:'dictionary', cat:'מקומות', he:'בסיס', ar:'معسكر', trans:'מַעְסְכַּר'},
+  {section:'dictionary', cat:'מקומות', he:'מגרש משחקים', ar:'ملعب', trans:'מַלְעַבּ'},
+  {section:'dictionary', cat:'מקומות', he:'רחבה', ar:'ساحة', trans:'סַאחַה'},
+  {section:'dictionary', cat:'מקומות', he:'נמל', ar:'ميناء', trans:'מִינַא'},
+  {section:'dictionary', cat:'מקומות', he:'אזור תעשייה', ar:'منطقة صناعية', trans:'מַנְטַקַה צִנַאעִיֶּה'},
+  {section:'dictionary', cat:'מקומות', he:'פרדס', ar:'بيّارة', trans:'בַּיּארַה'},
+  {section:'dictionary', cat:'מקומות', he:'גן ילדים', ar:'روضة', trans:'רודַ׳ה'},
+  {section:'dictionary', cat:'מקומות', he:'תחנת משטרה', ar:'محطة شرطة', trans:'מַחַטּת שֻרְטַה'},
+  {section:'dictionary', cat:'מקומות', he:'משאית', ar:'شاحنة', trans:'שַאחְנֶה'},
+  {section:'dictionary', cat:'מקומות', he:'אופנוע', ar:'درّاجة ناريّة', trans:'דַרּאגֶׄה נַארִיֶּה'},
+  {section:'dictionary', cat:'מקומות', he:'מכולה', ar:'حاوية', trans:'חַאוִיֶּה'},
+  {section:'dictionary', cat:'מקומות', he:'תמרור', ar:'إشارة', trans:'אִשַארַה'},
+  {section:'dictionary', cat:'מקומות', he:'שלט', ar:'يافطة', trans:'יַאפְטַה'},
+  {section:'dictionary', cat:'מזג אוויר וטבע', he:'צאן', ar:'غنم', trans:'עַ׳נַם'},
+  {section:'dictionary', cat:'מזג אוויר וטבע', he:'רועה צאן', ar:'راعي', trans:'רַאעִי'},
+  {section:'dictionary', cat:'מזג אוויר וטבע', he:'לול', ar:'خمّ', trans:'חַ׳ם'},
 ];
 async function addDictCheckpoint(btn){
   if(!confirm('להוסיף את המילון המבצעי — כל הנושאים ('+BUILTIN_DICT.length+' מילים) — לרשימת העריכה וההקלטה? פעולה חד-פעמית, ללא כפילות.'))return;
@@ -18791,7 +18816,7 @@ window.addEventListener('load', function(){
 <script>
 // Version stamp — shown in the admin panel so we can confirm which build is live
 // on a device (stale service-worker caches were causing "my changes don't show").
-window.APP_VERSION = 'v106';
+window.APP_VERSION = 'v107';
 
 // Register the service worker for full offline use in the field, WITH update
 // detection: when a new version installs, offer a one-tap refresh instead of the
