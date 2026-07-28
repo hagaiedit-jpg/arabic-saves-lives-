@@ -15115,6 +15115,18 @@ function goB(tab){
     document.getElementById('hrt-grid-view').style.display='block';
     document.getElementById('hrt-list-view').style.display='none';
   } else {
+    // Foundations context: "back" should follow the way in, not dump to the
+    // operational grid. A grammar sub-category returns to the gate; the gate
+    // itself was opened from the "עוד" menu, so it returns home.
+    if(curC && curC.indexOf('יסודות:')===0){
+      opC('יסודות השפה','foundations');
+      return;
+    }
+    if(curC==='יסודות השפה'){
+      curC=null;document.getElementById('sinp').value='';shV('vcats');
+      navToTab('home');
+      return;
+    }
     curC=null;document.getElementById('sinp').value='';shV('vcats');
   }
 }
@@ -18973,7 +18985,7 @@ window.addEventListener('load', function(){
 <script>
 // Version stamp — shown in the admin panel so we can confirm which build is live
 // on a device (stale service-worker caches were causing "my changes don't show").
-window.APP_VERSION = 'v115';
+window.APP_VERSION = 'v116';
 
 // Register the service worker for full offline use in the field, WITH update
 // detection: when a new version installs, offer a one-tap refresh instead of the
