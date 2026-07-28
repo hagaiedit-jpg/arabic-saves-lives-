@@ -8176,18 +8176,6 @@ var BUILTIN_TASHAUL=[
   {section:'military', cat:'יסודות: נטיית פעלים', he:'חפשי! (ציווי, נקבה)', ar:'فتّشي!', trans:'פַתְּשִי!'},
   {section:'military', cat:'יסודות: נטיית פעלים', he:'אני מחפש (הווה)', ar:'بافتّش', trans:'בַּאפַתֶּש'},
   {section:'military', cat:'יסודות: נטיית פעלים', he:'הוא חיפש (עבר)', ar:'فتّش', trans:'פַתַּש'},
-  {section:'military', cat:'יסודות: חודשי השנה', he:'ינואר', ar:'كانون الثاني', trans:'כַּאנוּן אִלתַּאנִי'},
-  {section:'military', cat:'יסודות: חודשי השנה', he:'פברואר', ar:'شباط', trans:'שְבַּאט'},
-  {section:'military', cat:'יסודות: חודשי השנה', he:'מרץ', ar:'آذار', trans:'אַדַאר'},
-  {section:'military', cat:'יסודות: חודשי השנה', he:'אפריל', ar:'نيسان', trans:'נִיסַאן'},
-  {section:'military', cat:'יסודות: חודשי השנה', he:'מאי', ar:'أيّار', trans:'אַיּאר'},
-  {section:'military', cat:'יסודות: חודשי השנה', he:'יוני', ar:'حزيران', trans:'חַזִירַאן'},
-  {section:'military', cat:'יסודות: חודשי השנה', he:'יולי', ar:'تمّوز', trans:'תַמּוּז'},
-  {section:'military', cat:'יסודות: חודשי השנה', he:'אוגוסט', ar:'آب', trans:'אַבּ'},
-  {section:'military', cat:'יסודות: חודשי השנה', he:'ספטמבר', ar:'أيلول', trans:'אַילוּל'},
-  {section:'military', cat:'יסודות: חודשי השנה', he:'אוקטובר', ar:'تشرين الأوّل', trans:'תִשְרִין אִלאַוּל'},
-  {section:'military', cat:'יסודות: חודשי השנה', he:'נובמבר', ar:'تشرين الثاني', trans:'תִשְרִין אִלתַּאנִי'},
-  {section:'military', cat:'יסודות: חודשי השנה', he:'דצמבר', ar:'كانون الأوّل', trans:'כַּאנוּן אִלאַּל'},
   {section:'military', cat:'יסודות: מילות קישור', he:'אשר / מי ש.. / מה ש..', ar:'اللي', trans:'אִלִּי'},
   {section:'military', cat:'יסודות: מילות קישור', he:'כל עוד', ar:'طالما / ما دام', trans:'טַאלַמַא / מַא דַאם'},
   {section:'military', cat:'יסודות: מילות קישור', he:'כאשר', ar:'لمّا', trans:'לַמּא'},
@@ -8776,6 +8764,18 @@ var BUILTIN_DICT = [
   {section:'dictionary', cat:'מקומות', he:'תעלה', ar:'قناة', trans:'קַנַאה'},
   {section:'dictionary', cat:'מקומות', he:'אדמה / קרקע', ar:'أرض', trans:'אַרְד׳'},
   {section:'dictionary', cat:'מקומות', he:'שמים', ar:'سما', trans:'סַמַא'},
+  {section:'dictionary', cat:'זמן ותאריכים', he:'ינואר', ar:'كانون الثاني', trans:'כַּאנוּן אִלתַּאנִי'},
+  {section:'dictionary', cat:'זמן ותאריכים', he:'פברואר', ar:'شباط', trans:'שְבַּאט'},
+  {section:'dictionary', cat:'זמן ותאריכים', he:'מרץ', ar:'آذار', trans:'אַדַאר'},
+  {section:'dictionary', cat:'זמן ותאריכים', he:'אפריל', ar:'نيسان', trans:'נִיסַאן'},
+  {section:'dictionary', cat:'זמן ותאריכים', he:'מאי', ar:'أيّار', trans:'אַיּאר'},
+  {section:'dictionary', cat:'זמן ותאריכים', he:'יוני', ar:'حزيران', trans:'חַזִירַאן'},
+  {section:'dictionary', cat:'זמן ותאריכים', he:'יולי', ar:'تمّوز', trans:'תַמּוּז'},
+  {section:'dictionary', cat:'זמן ותאריכים', he:'אוגוסט', ar:'آب', trans:'אַבּ'},
+  {section:'dictionary', cat:'זמן ותאריכים', he:'ספטמבר', ar:'أيلول', trans:'אַילוּל'},
+  {section:'dictionary', cat:'זמן ותאריכים', he:'אוקטובר', ar:'تشرين الأوّل', trans:'תִשְרִין אִלאַוּל'},
+  {section:'dictionary', cat:'זמן ותאריכים', he:'נובמבר', ar:'تشرين الثاني', trans:'תִשְרִין אִלתַּאנִי'},
+  {section:'dictionary', cat:'זמן ותאריכים', he:'דצמבר', ar:'كانون الأوّل', trans:'כַּאנוּן אִלאַּל'},
 ];
 async function addDictCheckpoint(btn){
   if(!confirm('להוסיף את המילון המבצעי — כל הנושאים ('+BUILTIN_DICT.length+' מילים) — לרשימת העריכה וההקלטה? פעולה חד-פעמית, ללא כפילות.'))return;
@@ -9380,9 +9380,6 @@ const FOUNDATION_GROUPS=[
     {id:'יסודות: מילות שאלה', icon:'❓'},
     {id:'יסודות: שלילה', icon:'🚫'},
     {id:'יסודות: נטיית פעלים', icon:'🔤'},
-  ]},
-  {title:'אוצר מילים בסיסי', items:[
-    {id:'יסודות: חודשי השנה', icon:'📅'},
     {id:'יסודות: מילות קישור', icon:'🔗'},
   ]},
 ];
@@ -18976,7 +18973,7 @@ window.addEventListener('load', function(){
 <script>
 // Version stamp — shown in the admin panel so we can confirm which build is live
 // on a device (stale service-worker caches were causing "my changes don't show").
-window.APP_VERSION = 'v113';
+window.APP_VERSION = 'v114';
 
 // Register the service worker for full offline use in the field, WITH update
 // detection: when a new version installs, offer a one-tap refresh instead of the
