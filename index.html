@@ -9388,7 +9388,7 @@ const FOUNDATION_GROUPS=[
   ]},
 ];
 const FOUNDATION_CATS = FOUNDATION_GROUPS.reduce(function(a,g){ return a.concat(g.items.map(function(x){return x.id;})); }, []);
-const CATS=[{id:'יסודות השפה', icon:'🎓', special:'foundations'},{id:'עצירת תנועה ורכב',icon:'🚫'},{id:'ניהול מרחב והוראות',icon:'📍'},{id:'בידוק וזיהוי',icon:'🔍'},{id:'שליטה בבית',icon:'🏠'},{id:'הרגעה ושכנוע',icon:'✌️'},{id:'מגע ראשוני',icon:'🕵'},{id:'רפואה ועזרה ראשונה',icon:'🩹'},{id:'קהל ואירועים',icon:'👥'},{id:'ילדים ואוכלוסיות רגישות',icon:'👶'},{id:'לוח שנה ותרבות',icon:'📅'},{id:'שמות מקומות וכיוונים',icon:'🗺️'},{id:'זיהוי ערבית כתובה בשטח',icon:'📄'},  {id:'תשאול: פרטים אישיים',icon:'🕵️'},
+const CATS=[{id:'עצירת תנועה ורכב',icon:'🚫'},{id:'ניהול מרחב והוראות',icon:'📍'},{id:'בידוק וזיהוי',icon:'🔍'},{id:'שליטה בבית',icon:'🏠'},{id:'הרגעה ושכנוע',icon:'✌️'},{id:'מגע ראשוני',icon:'🕵'},{id:'רפואה ועזרה ראשונה',icon:'🩹'},{id:'קהל ואירועים',icon:'👥'},{id:'ילדים ואוכלוסיות רגישות',icon:'👶'},{id:'לוח שנה ותרבות',icon:'📅'},{id:'שמות מקומות וכיוונים',icon:'🗺️'},{id:'זיהוי ערבית כתובה בשטח',icon:'📄'},  {id:'תשאול: פרטים אישיים',icon:'🕵️'},
   {id:'תשאול: משפחה',icon:'🕵️'},
   {id:'תשאול: כתובת ובית',icon:'🕵️'},
   {id:'תשאול: עבודה',icon:'🕵️'},
@@ -11778,6 +11778,13 @@ function opC(cat,special){
   shV('vlist');
 }
 
+// Open the "יסודות השפה" gate from the "עוד" menu: go to the library screen and
+// render the foundation sub-menu (grammar + basic vocabulary).
+function openFoundations(){
+  try{ var mm=document.getElementById('more-menu'); if(mm) mm.style.display='none'; }catch(e){}
+  try{ navToTab('lib'); }catch(e){}
+  setTimeout(function(){ try{ opC('יסודות השפה','foundations'); }catch(e){} }, 60);
+}
 function startCatLearn(cat, phrasesOverride){
   try {
     if (!Array.isArray(phrasesOverride) && !DB) {
@@ -18703,6 +18710,10 @@ try { renderHome(); } catch(_){}
 <div id="more-menu" style="display:none;position:fixed;bottom:80px;left:50%;transform:translateX(-50%);width:calc(100% - 16px);max-width:464px;box-sizing:border-box;background:#18293E;border:1px solid #2e4558;border-radius:14px;padding:12px;z-index:99;box-shadow:0 -4px 20px rgba(0,0,0,0.6);direction:rtl;">
   <div style="text-align:center;color:#D4A24E;font-size:12px;font-weight:700;letter-spacing:1px;margin-bottom:10px;">תפריט נוסף</div>
   <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;">
+    <div onclick="openFoundations()" style="background:linear-gradient(135deg,rgba(127,208,255,0.2),rgba(127,208,255,0.05));border:1px solid rgba(127,208,255,0.45);border-radius:10px;padding:14px 6px;text-align:center;cursor:pointer;">
+      <div style="font-size:22px;margin-bottom:4px;">🎓</div>
+      <div style="color:#7fd0ff;font-size:11px;font-weight:700;">יסודות השפה</div>
+    </div>
     <div onclick="document.getElementById('more-menu').style.display='none';navToTab('train')" style="background:linear-gradient(135deg,rgba(212,162,78,0.22),rgba(212,162,78,0.06));border:1px solid rgba(212,162,78,0.45);border-radius:10px;padding:14px 6px;text-align:center;cursor:pointer;">
       <div style="font-size:22px;margin-bottom:4px;">🎯</div>
       <div style="color:#D4A24E;font-size:11px;font-weight:700;">תרגול</div>
@@ -18970,7 +18981,7 @@ window.addEventListener('load', function(){
 <script>
 // Version stamp — shown in the admin panel so we can confirm which build is live
 // on a device (stale service-worker caches were causing "my changes don't show").
-window.APP_VERSION = 'v111';
+window.APP_VERSION = 'v112';
 
 // Register the service worker for full offline use in the field, WITH update
 // detection: when a new version installs, offer a one-tap refresh instead of the
