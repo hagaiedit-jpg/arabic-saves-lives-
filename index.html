@@ -8906,8 +8906,9 @@ async function auditRecordings(btn){
   var panel=document.getElementById('audit-rec-panel'); if(!panel) return;
   var old=btn.textContent; btn.disabled=true; btn.textContent='בודק…';
   try{
-    var rows=await sbFetchAllRows('/rest/v1/phrases?select=id,he,ar,cat,section,audio_url');
-    rows=(rows||[]).filter(function(r){ return r && r.he && AUDIT_SECMAP[r.section]; });
+    var allRows=await sbFetchAllRows('/rest/v1/phrases?select=id,he,ar,cat,section,audio_url');
+    allRows=allRows||[];
+    var rows=allRows.filter(function(r){ return r && r.he && AUDIT_SECMAP[r.section]; });
     // Group by section + normalized Hebrew (this is how the app dedups content).
     var groups={};
     rows.forEach(function(r){
@@ -8932,13 +8933,15 @@ async function auditRecordings(btn){
       }
     });
     window._auditShadow=shadowEmpties;
-    // Index every recorded sentence (norm text + display) so a "missing" row can be
-    // matched against a near-identical recording it's really a duplicate of.
+    // Index every recorded sentence — across ALL sections, including dictionary,
+    // which the audit itself doesn't score. That way a "missing" military row can
+    // be matched to a recording that actually landed somewhere else (e.g. the same
+    // word recorded in the dictionary), instead of looking un-recorded.
     var recIndex=[];
-    Object.keys(groups).forEach(function(k){
-      var g=groups[k];
-      if(g.some(function(r){ return r.audio_url; })){
-        recIndex.push({norm:_auditNorm(g[0].he), he:g[0].he, sec:g[0].section});
+    var SEC_LABEL={military:'מבצעי',daily:'יומיומי',heart:'פותחים לב',announce:'כריזה',navy:'ימי',scenario:'תרחישים',dictionary:'מילון'};
+    allRows.forEach(function(r){
+      if(r && r.he && r.audio_url){
+        recIndex.push({norm:_auditNorm(r.he), he:r.he, sec:r.section});
       }
     });
     // ---- write-permission self-test (the "why don't my recordings save?" check) ----
@@ -8999,8 +9002,10 @@ async function auditRecordings(btn){
             if(dist<bestDist){ bestDist=dist; twin=rec; }
             if(dist===0) break;
           }
-          var maxL=Math.max(mn.length, twin?twin.norm.length:0)||1;
-          var isTwin = twin && (bestDist<=2 || bestDist/maxL<=0.18);
+          // Length-aware threshold: short words (months, topography terms) need a
+          // near-exact match or we'd falsely pair unrelated 2–3 letter words.
+          var thr = mn.length<=4 ? 1 : (mn.length<=8 ? 2 : Math.ceil(mn.length*0.18));
+          var isTwin = twin && bestDist<=thr;
           h+='<div style="padding:6px 8px;border-bottom:1px solid #1a2a3a;">'
             +'<div style="display:flex;justify-content:space-between;align-items:center;gap:8px;">'
             +'<div style="flex:1;min-width:0;color:#E8D9B8;font-size:12px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">'+_tabEsc(r.he)+'</div>'
@@ -9008,7 +9013,7 @@ async function auditRecordings(btn){
             +'</div>';
           if(isTwin){
             h+='<div style="display:flex;justify-content:space-between;align-items:center;gap:8px;margin-top:5px;padding:5px 7px;background:#1c2f22;border:1px solid #2f7d54;border-radius:6px;">'
-              +'<div style="flex:1;min-width:0;color:#a8e6cf;font-size:11px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">🔎 כבר מוקלט כ: '+_tabEsc(twin.he)+(twin.sec!==sec?(' · '+AUDIT_SECMAP[twin.sec]):'')+'</div>'
+              +'<div style="flex:1;min-width:0;color:#a8e6cf;font-size:11px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">🔎 כבר מוקלט כ: '+_tabEsc(twin.he)+(twin.sec!==sec?(' · '+(SEC_LABEL[twin.sec]||twin.sec)):'')+'</div>'
               +'<button onclick="auditDelEmpty(\''+id+'\',this)" title="מחק כפילות ריקה" style="flex-shrink:0;padding:5px 9px;background:#3a1f1f;border:1px solid #c0392b;border-radius:6px;color:#ff9a8a;font-size:11px;cursor:pointer;font-family:inherit;">🗑️ מחק כפילות</button>'
               +'</div>';
           }
@@ -19189,7 +19194,7 @@ window.addEventListener('load', function(){
 <script>
 // Version stamp — shown in the admin panel so we can confirm which build is live
 // on a device (stale service-worker caches were causing "my changes don't show").
-window.APP_VERSION = 'v120';
+window.APP_VERSION = 'v121';
 
 // Register the service worker for full offline use in the field, WITH update
 // detection: when a new version installs, offer a one-tap refresh instead of the
