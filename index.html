@@ -3328,6 +3328,9 @@ function showLanding() {
         <button id="tool-fieldcmd" onclick="openFieldCmdReview(this)" style="width:100%;padding:12px;margin-top:10px;background:linear-gradient(135deg,#c0704e 0%,#8a4e34 100%);border:none;border-radius:10px;color:#fff;font-size:13px;font-weight:800;cursor:pointer;font-family:inherit;">🎯 סקירה ואישור משפטי פקודות שטח (אחד-אחד)</button>
         <div style="text-align:center;color:#7a9ab5;font-size:11px;margin-top:5px;">בודקים ערבית, ממלאים תעתיק, ומאשרים כל משפט בנפרד — רק מה שאת מאשרת נכנס ל"מבצעי". שום דבר לא עולה אוטומטית.</div>
         <div id="fieldcmd-review" style="margin-top:10px;"></div>
+        <button id="tool-auditrec" onclick="auditRecordings(this)" style="width:100%;padding:12px;margin-top:10px;background:linear-gradient(135deg,#1f8a70 0%,#0e5a48 100%);border:none;border-radius:10px;color:#fff;font-size:13px;font-weight:800;cursor:pointer;font-family:inherit;">🎙️ ביקורת הקלטות — יישור קו (כל המשפטים)</button>
+        <div style="text-align:center;color:#7a9ab5;font-size:11px;margin-top:5px;">בודק שכל משפט שהעלינו מוקלט. מוצא משפטים <b>שכבר הקלטת אך מסומנים כלא-מוקלטים</b> (כפילות ריקה מסתירה את ההקלטה) ומתקן בלחיצה — בלי לאבד הקלטות. בנוסף מציג רשימת מה שבאמת חסר, לפי קטגוריה, עם כפתור הקלטה.</div>
+        <div id="audit-rec-panel" style="margin-top:10px;"></div>
         <button id="tool-dupcheck" onclick="openDupCheck(this)" style="width:100%;padding:12px;margin-top:10px;background:linear-gradient(135deg,#7a5230 0%,#5a3a20 100%);border:none;border-radius:10px;color:#fff;font-size:13px;font-weight:800;cursor:pointer;font-family:inherit;">🔁 בדיקת כפילויות וניקוי (לפני הקלטה)</button>
         <div style="text-align:center;color:#7a9ab5;font-size:11px;margin-top:5px;">מוצא כפילויות <b>בתוך אותו סעיף בלבד</b> (לא בין מילון/תרחיש/מבצעי — שם לכל אחד תפקיד). משאיר עותק אחד, עם עדיפות לזה שכבר מוקלט.</div>
         <div id="dupcheck-panel" style="margin-top:10px;"></div>
@@ -8841,6 +8844,120 @@ async function migrateDictSentences(btn){
     alert('✓ סיום: '+moved+' משפטים אוחדו במבצעי/יומיומי (ההקלטות נשמרו), '+removed+' כפילויות הוסרו.\nאין צורך להקליט שוב אף משפט.');
   }catch(e){ alert('שגיאה: '+(e&&e.message?e.message:e)); btn.textContent=old; }
   btn.disabled=false;
+}
+
+// === Recording audit — "יישור קו" =========================================
+// Goal: every sentence we uploaded should have a recording, and anything Edith
+// already recorded must show as recorded. The #1 reason a recorded sentence
+// shows 🔇 is a DUPLICATE row: the recording landed on one copy while an empty
+// twin (same section+text) also exists — and the empty one shadows it in the UI.
+// This tool (a) finds those and offers a safe fix (delete only the empty twin,
+// never a recording), and (b) reports what's genuinely still missing, per
+// category, as a record-straight-from-here worklist.
+var AUDIT_SECMAP = {military:'מבצעי', daily:'יומיומי', heart:'פותחים לב', announce:'כריזה', navy:'ימי', scenario:'תרחישים'};
+function _auditNorm(s){ return String(s||'').replace(/[^֐-׿0-9A-Za-z]/g,''); }
+async function auditRecordings(btn){
+  var panel=document.getElementById('audit-rec-panel'); if(!panel) return;
+  var old=btn.textContent; btn.disabled=true; btn.textContent='בודק…';
+  try{
+    var rows=await sbFetchAllRows('/rest/v1/phrases?select=id,he,ar,cat,section,audio_url');
+    rows=(rows||[]).filter(function(r){ return r && r.he && AUDIT_SECMAP[r.section]; });
+    // Group by section + normalized Hebrew (this is how the app dedups content).
+    var groups={};
+    rows.forEach(function(r){
+      var k=r.section+'|'+_auditNorm(r.he);
+      (groups[k]=groups[k]||[]).push(r);
+    });
+    var perSec={};   // section -> {total, recorded, missingItems:[]}
+    var shadowEmpties=[];   // empty rows whose sentence IS recorded elsewhere
+    Object.keys(groups).forEach(function(k){
+      var g=groups[k], sec=g[0].section;
+      var recRows=g.filter(function(r){ return r.audio_url; });
+      var emptyRows=g.filter(function(r){ return !r.audio_url; });
+      var s=perSec[sec]=perSec[sec]||{total:0,recorded:0,missingItems:[]};
+      s.total++;
+      if(recRows.length){
+        s.recorded++;
+        // recorded exists, but empty twins still sit in the DB → they shadow it
+        emptyRows.forEach(function(r){ shadowEmpties.push(r); });
+      } else {
+        // genuinely no recording anywhere for this sentence
+        s.missingItems.push(g[0]);
+      }
+    });
+    window._auditShadow=shadowEmpties;
+    // ---- build report ----
+    var totT=0, totR=0;
+    Object.keys(perSec).forEach(function(sec){ totT+=perSec[sec].total; totR+=perSec[sec].recorded; });
+    var h='';
+    h+='<div style="background:#14263b;border:1px solid #2A3D52;border-radius:10px;padding:12px;margin-bottom:10px;">';
+    h+='<div style="color:#E8D9B8;font-size:14px;font-weight:800;margin-bottom:8px;">📊 סיכום — '+totR+' מתוך '+totT+' משפטים מוקלטים</div>';
+    Object.keys(AUDIT_SECMAP).forEach(function(sec){
+      var s=perSec[sec]; if(!s) return;
+      var miss=s.total-s.recorded;
+      var col=miss===0?'#1D9E75':'#e07a5f';
+      h+='<div style="display:flex;justify-content:space-between;font-size:12px;color:#a0b8c8;padding:3px 0;border-bottom:1px solid #1a2a3a;">'
+        +'<span>'+AUDIT_SECMAP[sec]+'</span>'
+        +'<span style="color:'+col+';font-weight:700;">'+s.recorded+'/'+s.total+(miss?(' · חסרים '+miss):' ✓')+'</span></div>';
+    });
+    h+='</div>';
+    // shadow-duplicate fix box
+    if(shadowEmpties.length){
+      h+='<div style="background:#3a1f1f;border:1px solid #e07a5f;border-radius:10px;padding:12px;margin-bottom:10px;">'
+        +'<div style="color:#ffcaba;font-size:12.5px;line-height:1.6;margin-bottom:8px;">⚠️ נמצאו <b>'+shadowEmpties.length+'</b> כפילויות ריקות שמסתירות הקלטות קיימות — כלומר משפטים שכבר <b>הקלטת</b> אך מסומנים כלא-מוקלטים. אפשר לתקן בלחיצה: אמחק רק את העותק הריק, ההקלטה תישאר.</div>'
+        +'<button onclick="fixShadowRecordings(this)" style="width:100%;padding:11px;background:linear-gradient(135deg,#c0392b 0%,#8a2820 100%);border:none;border-radius:8px;color:#fff;font-size:13px;font-weight:800;cursor:pointer;font-family:inherit;">🔧 תקן — מחק '+shadowEmpties.length+' כפילויות ריקות</button></div>';
+    } else {
+      h+='<div style="background:#16302a;border:1px solid #1D9E75;border-radius:10px;padding:10px;margin-bottom:10px;color:#a8e6cf;font-size:12px;">✓ אין כפילויות ריקות — כל מה שהקלטת אכן מסומן כמוקלט.</div>';
+    }
+    // missing worklist, grouped by section+cat, record straight from here
+    var anyMiss=false;
+    Object.keys(AUDIT_SECMAP).forEach(function(sec){
+      var s=perSec[sec]; if(!s||!s.missingItems.length) return;
+      anyMiss=true;
+      var byCat={};
+      s.missingItems.forEach(function(r){ (byCat[r.cat||'—']=byCat[r.cat||'—']||[]).push(r); });
+      h+='<details style="margin-bottom:8px;"><summary style="cursor:pointer;color:#D4A24E;font-size:13px;font-weight:800;padding:6px 0;">'
+        +AUDIT_SECMAP[sec]+' — '+s.missingItems.length+' משפטים להקלטה</summary>';
+      Object.keys(byCat).forEach(function(cat){
+        h+='<div style="color:#7a9ab5;font-size:11px;font-weight:700;margin:6px 2px 3px;">'+_tabEsc(cat)+' ('+byCat[cat].length+')</div>';
+        byCat[cat].forEach(function(r){
+          var id=String(r.id||'').replace(/'/g,"\\'");
+          h+='<div style="display:flex;justify-content:space-between;align-items:center;gap:8px;padding:6px 8px;border-bottom:1px solid #1a2a3a;">'
+            +'<div style="flex:1;min-width:0;color:#E8D9B8;font-size:12px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">'+_tabEsc(r.he)+'</div>'
+            +'<button onclick="quickRecordById(\''+id+'\')" title="הקלט" style="flex-shrink:0;padding:5px 10px;background:#3a2a1a;border:1px solid #D4A24E;border-radius:6px;color:#D4A24E;font-size:12px;cursor:pointer;font-family:inherit;">🎤 הקלט</button>'
+            +'</div>';
+        });
+      });
+      h+='</details>';
+    });
+    if(!anyMiss){ h+='<div style="background:#16302a;border:1px solid #1D9E75;border-radius:10px;padding:12px;color:#a8e6cf;font-size:13px;font-weight:700;text-align:center;">🎉 כל המשפטים שהעלינו מוקלטים!</div>'; }
+    panel.innerHTML=h;
+    btn.textContent='✓ בוצעה בדיקה';
+  }catch(e){
+    panel.innerHTML='<div style="color:#e07a5f;font-size:12px;padding:8px;">שגיאה בבדיקה: '+(e&&e.message?e.message:e)+'</div>';
+    btn.textContent=old;
+  }
+  btn.disabled=false;
+}
+// Delete the empty duplicate rows that shadow an existing recording. Only rows
+// whose sentence is recorded elsewhere are touched — a recording is never lost.
+async function fixShadowRecordings(btn){
+  var list=window._auditShadow||[];
+  if(!list.length){ alert('אין מה לתקן.'); return; }
+  if(!confirm('למחוק '+list.length+' עותקים ריקים כפולים? ההקלטות עצמן יישארו — רק הכפילות הריקה שמסתירה אותן תימחק.')) return;
+  var old=btn.textContent; btn.disabled=true;
+  var done=0, fail=0;
+  for(var i=0;i<list.length;i++){
+    btn.textContent='מתקן '+(i+1)+'/'+list.length+'…';
+    try{ await sbFetch('/rest/v1/phrases?id=eq.'+encodeURIComponent(list[i].id),'DELETE'); done++; }
+    catch(e){ fail++; }
+  }
+  try{ await loadData(); }catch(e){}
+  try{ renderAdminList(); }catch(e){}
+  window._auditShadow=[];
+  btn.disabled=false;
+  alert('✓ תוקנו '+done+' כפילויות'+(fail?(' · '+fail+' נכשלו'):'')+'.\nהמשפטים האלה יופיעו עכשיו כמוקלטים 🎵. מומלץ להריץ שוב "ביקורת הקלטות" כדי לאמת.');
+  try{ var ab=document.getElementById('tool-auditrec'); if(ab) auditRecordings(ab); }catch(e){}
 }
 
 // Is this dictionary row already heard inside a recorded sentence anywhere?
@@ -18985,7 +19102,7 @@ window.addEventListener('load', function(){
 <script>
 // Version stamp — shown in the admin panel so we can confirm which build is live
 // on a device (stale service-worker caches were causing "my changes don't show").
-window.APP_VERSION = 'v117';
+window.APP_VERSION = 'v118';
 
 // Register the service worker for full offline use in the field, WITH update
 // detection: when a new version installs, offer a one-tap refresh instead of the
