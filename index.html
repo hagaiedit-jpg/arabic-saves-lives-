@@ -8855,7 +8855,35 @@ async function migrateDictSentences(btn){
 // never a recording), and (b) reports what's genuinely still missing, per
 // category, as a record-straight-from-here worklist.
 var AUDIT_SECMAP = {military:'מבצעי', daily:'יומיומי', heart:'פותחים לב', announce:'כריזה', navy:'ימי', scenario:'תרחישים'};
-function _auditNorm(s){ return String(s||'').replace(/[^֐-׿0-9A-Za-z]/g,''); }
+function _auditNorm(s){
+  return String(s||'')
+    .replace(/[֑-ׇ׳״]/g,'')  // drop niqqud, cantillation, maqaf, geresh/gershayim
+    .replace(/[^֐-׿0-9A-Za-z]/g,'')              // keep only Hebrew letters / digits / Latin
+    .replace(/ך/g,'כ').replace(/ם/g,'מ').replace(/ן/g,'נ').replace(/ף/g,'פ').replace(/ץ/g,'צ'); // final → base form
+}
+// Edit distance, for spotting near-identical sentences (e.g. כתיב מלא/חסר) that
+// differ by a letter or two and so slip past exact-match grouping.
+function _auditLev(a,b){
+  var m=a.length,n=b.length; if(!m)return n; if(!n)return m;
+  var d=[]; for(var j=0;j<=n;j++) d[j]=j;
+  for(var i=1;i<=m;i++){ var prev=d[0]; d[0]=i;
+    for(var j2=1;j2<=n;j2++){ var t=d[j2]; d[j2]=Math.min(d[j2]+1, d[j2-1]+1, prev+(a.charAt(i-1)===b.charAt(j2-1)?0:1)); prev=t; }
+  }
+  return d[n];
+}
+// Delete a single empty row that duplicates an already-recorded near-twin.
+async function auditDelEmpty(id, btn){
+  if(!confirm('למחוק את השורה הריקה הזו? ההקלטה של המשפט הדומה תישאר — רק הכפילות הריקה תימחק.')) return;
+  btn.disabled=true; var ot=btn.textContent; btn.textContent='מוחק…';
+  try{
+    var chk=await sbFetch('/rest/v1/phrases?id=eq.'+encodeURIComponent(id)+'&select=audio_url');
+    if(chk && chk[0] && chk[0].audio_url){ alert('לשורה הזו דווקא יש הקלטה — לא נמחק.'); btn.disabled=false; btn.textContent=ot; return; }
+    await sbFetch('/rest/v1/phrases?id=eq.'+encodeURIComponent(id),'DELETE');
+    var row=btn.parentNode; if(row){ row.style.opacity='0.35'; }
+    btn.textContent='✓ נמחק';
+    try{ await loadData(); }catch(e){}
+  }catch(e){ alert('שגיאה במחיקה: '+(e&&e.message?e.message:e)); btn.disabled=false; btn.textContent=ot; }
+}
 // Live write-permission test: flip a harmless flag on one real row, verify it
 // landed, then restore it. This is THE check for "I recorded but nothing saved":
 // if writes are blocked (logged out / RLS / expired token), audio_url PATCHes are
@@ -8904,6 +8932,15 @@ async function auditRecordings(btn){
       }
     });
     window._auditShadow=shadowEmpties;
+    // Index every recorded sentence (norm text + display) so a "missing" row can be
+    // matched against a near-identical recording it's really a duplicate of.
+    var recIndex=[];
+    Object.keys(groups).forEach(function(k){
+      var g=groups[k];
+      if(g.some(function(r){ return r.audio_url; })){
+        recIndex.push({norm:_auditNorm(g[0].he), he:g[0].he, sec:g[0].section});
+      }
+    });
     // ---- write-permission self-test (the "why don't my recordings save?" check) ----
     btn.textContent='בודק הרשאות כתיבה…';
     var wt=await _auditWriteTest(rows[0]);
@@ -8952,10 +8989,30 @@ async function auditRecordings(btn){
         h+='<div style="color:#7a9ab5;font-size:11px;font-weight:700;margin:6px 2px 3px;">'+_tabEsc(cat)+' ('+byCat[cat].length+')</div>';
         byCat[cat].forEach(function(r){
           var id=String(r.id||'').replace(/'/g,"\\'");
-          h+='<div style="display:flex;justify-content:space-between;align-items:center;gap:8px;padding:6px 8px;border-bottom:1px solid #1a2a3a;">'
+          // Look for an already-recorded sentence that is nearly identical to this
+          // one (differs by a letter or two — spelling variant / stray character).
+          var mn=_auditNorm(r.he), twin=null, bestDist=99;
+          for(var ri=0; ri<recIndex.length; ri++){
+            var rec=recIndex[ri]; if(!rec.norm) continue;
+            if(Math.abs(rec.norm.length-mn.length)>2) continue;
+            var dist=_auditLev(mn, rec.norm);
+            if(dist<bestDist){ bestDist=dist; twin=rec; }
+            if(dist===0) break;
+          }
+          var maxL=Math.max(mn.length, twin?twin.norm.length:0)||1;
+          var isTwin = twin && (bestDist<=2 || bestDist/maxL<=0.18);
+          h+='<div style="padding:6px 8px;border-bottom:1px solid #1a2a3a;">'
+            +'<div style="display:flex;justify-content:space-between;align-items:center;gap:8px;">'
             +'<div style="flex:1;min-width:0;color:#E8D9B8;font-size:12px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">'+_tabEsc(r.he)+'</div>'
             +'<button onclick="quickRecordById(\''+id+'\')" title="הקלט" style="flex-shrink:0;padding:5px 10px;background:#3a2a1a;border:1px solid #D4A24E;border-radius:6px;color:#D4A24E;font-size:12px;cursor:pointer;font-family:inherit;">🎤 הקלט</button>'
             +'</div>';
+          if(isTwin){
+            h+='<div style="display:flex;justify-content:space-between;align-items:center;gap:8px;margin-top:5px;padding:5px 7px;background:#1c2f22;border:1px solid #2f7d54;border-radius:6px;">'
+              +'<div style="flex:1;min-width:0;color:#a8e6cf;font-size:11px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">🔎 כבר מוקלט כ: '+_tabEsc(twin.he)+(twin.sec!==sec?(' · '+AUDIT_SECMAP[twin.sec]):'')+'</div>'
+              +'<button onclick="auditDelEmpty(\''+id+'\',this)" title="מחק כפילות ריקה" style="flex-shrink:0;padding:5px 9px;background:#3a1f1f;border:1px solid #c0392b;border-radius:6px;color:#ff9a8a;font-size:11px;cursor:pointer;font-family:inherit;">🗑️ מחק כפילות</button>'
+              +'</div>';
+          }
+          h+='</div>';
         });
       });
       h+='</details>';
@@ -19132,7 +19189,7 @@ window.addEventListener('load', function(){
 <script>
 // Version stamp — shown in the admin panel so we can confirm which build is live
 // on a device (stale service-worker caches were causing "my changes don't show").
-window.APP_VERSION = 'v119';
+window.APP_VERSION = 'v120';
 
 // Register the service worker for full offline use in the field, WITH update
 // detection: when a new version installs, offer a one-tap refresh instead of the
