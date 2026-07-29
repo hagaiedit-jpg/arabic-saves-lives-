@@ -8829,13 +8829,13 @@ async function migrateDictSentences(btn){
       var winner = rec.find(function(r){ return r.section==='dictionary'; }) || rec[0]
                 || rows.find(function(r){ return r.section==='dictionary'; }) || rows[0];
       if(winner.section!==m.section || winner.cat!==m.cat){
-        await sbFetch('/rest/v1/phrases?id=eq.'+winner.id,'PATCH',{section:m.section,cat:m.cat});
+        await sbFetch('/rest/v1/phrases?id=eq.'+encodeURIComponent(winner.id),'PATCH',{section:m.section,cat:m.cat});
         moved++;
       }
       for(var j=0;j<rows.length;j++){
         var r=rows[j]; if(r.id===winner.id) continue;
         if(r.audio_url && !winner.audio_url) continue;   // never lose a recording
-        await sbFetch('/rest/v1/phrases?id=eq.'+r.id,'DELETE');
+        await sbFetch('/rest/v1/phrases?id=eq.'+encodeURIComponent(r.id),'DELETE');
         removed++;
       }
     }
@@ -10075,7 +10075,7 @@ async function cleanScenarioDupes(btn){
     if(!confirm('נמצאו '+toDelete.length+' שורות כפולות ריקות. למחוק אותן?')){ btn.textContent=old; btn.disabled=false; return; }
     var done=0;
     for(var i=0;i<toDelete.length;i++){
-      await sbFetch('/rest/v1/phrases?id=eq.'+toDelete[i],'DELETE'); done++;
+      await sbFetch('/rest/v1/phrases?id=eq.'+encodeURIComponent(toDelete[i]),'DELETE'); done++;
       btn.textContent='מוחק '+done+'/'+toDelete.length;
     }
     await loadData(); renderAdminList();
@@ -10137,7 +10137,7 @@ async function addHealthScenario(btn){
       btn.textContent='✓'; btn.disabled=false; return;
     }
     // No recordings yet — rebuild cleanly (the step numbering changed to interleave answers).
-    for(var d=0; d<(ex||[]).length; d++){ await sbFetch('/rest/v1/phrases?id=eq.'+ex[d].id,'DELETE'); }
+    for(var d=0; d<(ex||[]).length; d++){ await sbFetch('/rest/v1/phrases?id=eq.'+encodeURIComponent(ex[d].id),'DELETE'); }
     var addc=0;
     for(var j=0;j<HEALTH_SCENARIO.length;j++){
       var q=HEALTH_SCENARIO[j];
@@ -16972,7 +16972,7 @@ async function importAuditAnswers(btn){
       if(Array.isArray(ph.responses) && ph.responses.length){ skipped.push(ph.he); continue; }
       try{
         var resp=entry.responses.map(function(r){ return {he:r.he, trans:r.trans, ar:r.ar, audio_url:''}; });
-        await sbFetch('/rest/v1/phrases?id=eq.'+ph.id,'PATCH',{responses:JSON.stringify(resp)});
+        await sbFetch('/rest/v1/phrases?id=eq.'+encodeURIComponent(ph.id),'PATCH',{responses:JSON.stringify(resp)});
         matched.push(ph.he);
       }catch(err){ errors.push(ph.he+': '+err.message); }
     }
@@ -17080,7 +17080,7 @@ async function recordQueueItem(i){
         var p=findPhraseById(row.pid);
         if(!p || !Array.isArray(p.responses) || !p.responses[row.ri]) throw new Error('התשובה לא נמצאה במאגר');
         p.responses[row.ri].audio_url=url;
-        await sbFetch('/rest/v1/phrases?id=eq.'+row.pid,'PATCH',{responses:JSON.stringify(p.responses)});
+        await sbFetch('/rest/v1/phrases?id=eq.'+encodeURIComponent(row.pid),'PATCH',{responses:JSON.stringify(p.responses)});
         row.audio=url;
         if(statusEl){ statusEl.textContent='✓ הוקלט ונשמר'; statusEl.style.color='#1D9E75'; }
         renderRespRecList();
@@ -17400,7 +17400,7 @@ function quickRecordIdx(idx) {
 async function openEditById(id){
   try{
     var p = (window._adminItems||[]).find(function(x){return String(x.id)===String(id);});
-    if(!p){ var rows = await sbFetch('/rest/v1/phrases?id=eq.'+id+'&select=*'); p = rows && rows[0]; }
+    if(!p){ var rows = await sbFetch('/rest/v1/phrases?id=eq.'+encodeURIComponent(id)+'&select=*'); p = rows && rows[0]; }
     if(!p){ alert('הביטוי לא נמצא'); return; }
     openEditRow(p);
   }catch(e){ alert('שגיאה: '+e.message); }
@@ -17796,7 +17796,7 @@ async function saveEdit(advance){
       var _insRow={cat:updates.cat,he:updates.he,trans:updates.trans,ar:updates.ar,why:updates.why,tone:updates.tone,tags:updates.tags,audio_url:updates.audio_url||'',responses:updates.responses,is_new:true,section:_sec};
       await sbFetch('/rest/v1/phrases','POST',_insRow);
     } else {
-      await sbFetch('/rest/v1/phrases?id=eq.'+id,'PATCH',updates);
+      await sbFetch('/rest/v1/phrases?id=eq.'+encodeURIComponent(id),'PATCH',updates);
     }
     // VERIFY the write actually landed by reading the row back. Catches silent
     // no-ops (wrong id, RLS/auth drops) that otherwise show "✓ נשמר" but persist
@@ -17839,7 +17839,7 @@ async function saveEdit(advance){
 function closeEdit(){try{stopAllRecordings();}catch(e){}document.getElementById('edit-modal').style.display='none';delete rfiles['edit'];window._auditNavPos=-1;var nb=document.getElementById('edit-audit-nav');if(nb)nb.style.display='none';var sb=document.getElementById('edit-savenext-btn');if(sb)sb.style.display='none';}
 async function delP(id){
   if(!confirm('למחוק?'))return;
-  try{await sbFetch('/rest/v1/phrases?id=eq.'+id,'DELETE');await loadData();renderAdminList();try{refreshOpenTabList();}catch(e){}}catch(e){alert('שגיאה');}
+  try{await sbFetch('/rest/v1/phrases?id=eq.'+encodeURIComponent(id),'DELETE');await loadData();renderAdminList();try{refreshOpenTabList();}catch(e){}}catch(e){alert('שגיאה');}
 }
 
 // Categories
@@ -19194,7 +19194,7 @@ window.addEventListener('load', function(){
 <script>
 // Version stamp — shown in the admin panel so we can confirm which build is live
 // on a device (stale service-worker caches were causing "my changes don't show").
-window.APP_VERSION = 'v121';
+window.APP_VERSION = 'v122';
 
 // Register the service worker for full offline use in the field, WITH update
 // detection: when a new version installs, offer a one-tap refresh instead of the
