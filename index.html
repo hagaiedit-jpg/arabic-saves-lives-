@@ -8856,6 +8856,24 @@ async function migrateDictSentences(btn){
 // category, as a record-straight-from-here worklist.
 var AUDIT_SECMAP = {military:'מבצעי', daily:'יומיומי', heart:'פותחים לב', announce:'כריזה', navy:'ימי', scenario:'תרחישים'};
 function _auditNorm(s){ return String(s||'').replace(/[^֐-׿0-9A-Za-z]/g,''); }
+// Live write-permission test: flip a harmless flag on one real row, verify it
+// landed, then restore it. This is THE check for "I recorded but nothing saved":
+// if writes are blocked (logged out / RLS / expired token), audio_url PATCHes are
+// silently dropped and recordings never persist. Returns {ok, reason}.
+async function _auditWriteTest(sampleRow){
+  if(!sampleRow || !sampleRow.id) return {ok:null, reason:'אין שורה לבדיקה'};
+  var id=sampleRow.id;
+  try{
+    var cur=await sbFetch('/rest/v1/phrases?id=eq.'+encodeURIComponent(id)+'&select=is_new');
+    var orig=!!(cur && cur[0] && cur[0].is_new);
+    await sbFetch('/rest/v1/phrases?id=eq.'+encodeURIComponent(id),'PATCH',{is_new:!orig});
+    var chk=await sbFetch('/rest/v1/phrases?id=eq.'+encodeURIComponent(id)+'&select=is_new');
+    var now=!!(chk && chk[0] && chk[0].is_new);
+    try{ await sbFetch('/rest/v1/phrases?id=eq.'+encodeURIComponent(id),'PATCH',{is_new:orig}); }catch(e){}
+    if(now!==orig) return {ok:true};
+    return {ok:false, reason:'הכתיבה לא נשמרה (השורה לא השתנתה) — הרשאות חוסמות'};
+  }catch(e){ return {ok:false, reason:(e && e.message) ? e.message : String(e)}; }
+}
 async function auditRecordings(btn){
   var panel=document.getElementById('audit-rec-panel'); if(!panel) return;
   var old=btn.textContent; btn.disabled=true; btn.textContent='בודק…';
@@ -8886,10 +8904,22 @@ async function auditRecordings(btn){
       }
     });
     window._auditShadow=shadowEmpties;
+    // ---- write-permission self-test (the "why don't my recordings save?" check) ----
+    btn.textContent='בודק הרשאות כתיבה…';
+    var wt=await _auditWriteTest(rows[0]);
     // ---- build report ----
     var totT=0, totR=0;
     Object.keys(perSec).forEach(function(sec){ totT+=perSec[sec].total; totR+=perSec[sec].recorded; });
     var h='';
+    if(wt.ok===true){
+      h+='<div style="background:#16302a;border:1px solid #1D9E75;border-radius:10px;padding:10px 12px;margin-bottom:10px;color:#a8e6cf;font-size:12.5px;font-weight:700;">✅ כתיבה למאגר עובדת — הקלטות חדשות יישמרו כמו שצריך.</div>';
+    } else if(wt.ok===false){
+      h+='<div style="background:#3a1416;border:2px solid #c0392b;border-radius:10px;padding:12px;margin-bottom:10px;">'
+        +'<div style="color:#ff9a8a;font-size:13.5px;font-weight:800;margin-bottom:6px;">❌ כתיבה למאגר חסומה — זו הסיבה שההקלטות לא נשמרות!</div>'
+        +'<div style="color:#ffd8cf;font-size:12px;line-height:1.6;margin-bottom:8px;">כל עוד זה חסום, כל הקלטה חדשה תעלה אך <b>לא תיצמד למשפט</b>. סיבה: '+_tabEsc(wt.reason||'')+'</div>'
+        +'<div style="color:#ffd8cf;font-size:12px;line-height:1.6;">➜ הפתרון: <b>להתחבר מחדש כמנהל</b> (5 לחיצות על הכותרת → מייל וסיסמה), ואז להריץ את הביקורת שוב. אם עדיין חסום — צריך לבדוק הרשאות (RLS) ב-Supabase.</div>'
+        +'</div>';
+    }
     h+='<div style="background:#14263b;border:1px solid #2A3D52;border-radius:10px;padding:12px;margin-bottom:10px;">';
     h+='<div style="color:#E8D9B8;font-size:14px;font-weight:800;margin-bottom:8px;">📊 סיכום — '+totR+' מתוך '+totT+' משפטים מוקלטים</div>';
     Object.keys(AUDIT_SECMAP).forEach(function(sec){
@@ -19102,7 +19132,7 @@ window.addEventListener('load', function(){
 <script>
 // Version stamp — shown in the admin panel so we can confirm which build is live
 // on a device (stale service-worker caches were causing "my changes don't show").
-window.APP_VERSION = 'v118';
+window.APP_VERSION = 'v119';
 
 // Register the service worker for full offline use in the field, WITH update
 // detection: when a new version installs, offer a one-tap refresh instead of the
