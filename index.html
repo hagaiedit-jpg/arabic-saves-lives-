@@ -8933,12 +8933,12 @@ async function auditRecordings(btn){
       }
     });
     window._auditShadow=shadowEmpties;
-    // Index every recorded sentence — across ALL sections, including dictionary,
-    // which the audit itself doesn't score. That way a "missing" military row can
-    // be matched to a recording that actually landed somewhere else (e.g. the same
-    // word recorded in the dictionary), instead of looking un-recorded.
+    // Index recorded sentences PER SECTION only. The same word can legitimately live
+    // in the dictionary AND in an operational section — those are separate entries,
+    // each needing its own recording, NOT duplicates. So a "missing" row is only ever
+    // matched to a near-identical recording inside its OWN section (a real spelling
+    // duplicate, e.g. כתיב מלא/חסר), never across sections.
     var recIndex=[];
-    var SEC_LABEL={military:'מבצעי',daily:'יומיומי',heart:'פותחים לב',announce:'כריזה',navy:'ימי',scenario:'תרחישים',dictionary:'מילון'};
     allRows.forEach(function(r){
       if(r && r.he && r.audio_url){
         recIndex.push({norm:_auditNorm(r.he), he:r.he, sec:r.section});
@@ -8997,6 +8997,7 @@ async function auditRecordings(btn){
           var mn=_auditNorm(r.he), twin=null, bestDist=99;
           for(var ri=0; ri<recIndex.length; ri++){
             var rec=recIndex[ri]; if(!rec.norm) continue;
+            if(rec.sec!==sec) continue;   // same-section only — cross-section is NOT a duplicate
             if(Math.abs(rec.norm.length-mn.length)>2) continue;
             var dist=_auditLev(mn, rec.norm);
             if(dist<bestDist){ bestDist=dist; twin=rec; }
@@ -9013,7 +9014,7 @@ async function auditRecordings(btn){
             +'</div>';
           if(isTwin){
             h+='<div style="display:flex;justify-content:space-between;align-items:center;gap:8px;margin-top:5px;padding:5px 7px;background:#1c2f22;border:1px solid #2f7d54;border-radius:6px;">'
-              +'<div style="flex:1;min-width:0;color:#a8e6cf;font-size:11px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">🔎 כבר מוקלט כ: '+_tabEsc(twin.he)+(twin.sec!==sec?(' · '+(SEC_LABEL[twin.sec]||twin.sec)):'')+'</div>'
+              +'<div style="flex:1;min-width:0;color:#a8e6cf;font-size:11px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">🔎 כבר מוקלט כ: '+_tabEsc(twin.he)+'</div>'
               +'<button onclick="auditDelEmpty(\''+id+'\',this)" title="מחק כפילות ריקה" style="flex-shrink:0;padding:5px 9px;background:#3a1f1f;border:1px solid #c0392b;border-radius:6px;color:#ff9a8a;font-size:11px;cursor:pointer;font-family:inherit;">🗑️ מחק כפילות</button>'
               +'</div>';
           }
@@ -19194,7 +19195,7 @@ window.addEventListener('load', function(){
 <script>
 // Version stamp — shown in the admin panel so we can confirm which build is live
 // on a device (stale service-worker caches were causing "my changes don't show").
-window.APP_VERSION = 'v122';
+window.APP_VERSION = 'v123';
 
 // Register the service worker for full offline use in the field, WITH update
 // detection: when a new version installs, offer a one-tap refresh instead of the
