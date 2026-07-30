@@ -8994,7 +8994,9 @@ async function auditRecordings(btn){
     // scenario library (text only — audio must be re-recorded). Always available.
     h+='<div style="background:#132a3a;border:1px solid #2A3D52;border-radius:10px;padding:12px;margin-bottom:10px;">'
       +'<div style="color:#cfe0ee;font-size:12px;line-height:1.6;margin-bottom:8px;">🎬 חסרים שלבים בתרחיש? אפשר לשחזר את כל השלבים המובנים שנמחקו בטעות. הפעולה <b>רק מוסיפה</b> שלבים חסרים — לא מוחקת ולא משנה כלום קיים.</div>'
-      +'<button onclick="restoreBuiltinScenarios(this)" style="width:100%;padding:11px;background:linear-gradient(135deg,#2f6d8a 0%,#25566e 100%);border:none;border-radius:8px;color:#fff;font-size:13px;font-weight:800;cursor:pointer;font-family:inherit;">🎬 שחזר שלבי תרחישים שנמחקו</button></div>';
+      +'<button onclick="restoreBuiltinScenarios(this)" style="width:100%;padding:11px;background:linear-gradient(135deg,#2f6d8a 0%,#25566e 100%);border:none;border-radius:8px;color:#fff;font-size:13px;font-weight:800;cursor:pointer;font-family:inherit;">🎬 שחזר שלבי תרחישים שנמחקו</button>'
+      +'<div style="color:#cfe0ee;font-size:12px;line-height:1.6;margin:10px 0 8px;">🔗 שלב מופיע פעמיים (הקלטת אותו שוב)? האיחוד משאיר לכל שלב שורה אחת עם ההקלטה — ואז החלפת הקלטה תמיד תתפוס.</div>'
+      +'<button onclick="mergeScenarioDuplicates(this)" style="width:100%;padding:11px;background:linear-gradient(135deg,#7a5cc0 0%,#5e46a0 100%);border:none;border-radius:8px;color:#fff;font-size:13px;font-weight:800;cursor:pointer;font-family:inherit;">🔗 אחד כפילויות בתרחישים</button></div>';
     // missing worklist, grouped by section+cat, record straight from here
     var anyMiss=false;
     Object.keys(AUDIT_SECMAP).forEach(function(sec){
@@ -9104,6 +9106,45 @@ async function restoreBuiltinScenarios(btn){
       : ('כל השלבים המובנים כבר קיימים — לא חסר דבר לשחזר.'+(fail?(' ('+fail+' נכשלו)'):'')));
     try{ var ab=document.getElementById('tool-auditrec'); if(ab) auditRecordings(ab); }catch(e){}
   }catch(e){ btn.disabled=false; btn.textContent=old; alert('שגיאה בשחזור: '+(e&&e.message?e.message:e)); }
+}
+
+// Merge duplicate rows of the SAME scenario step into one, so re-recording a step
+// always replaces predictably. "Same step" = same scenario (separator-insensitive)
+// AND identical step tag (so a soldier line and a civilian reply are never merged).
+// Keeps a row that has audio; deletes only the extra identical copies. A unique
+// recording (different step) is never touched.
+async function mergeScenarioDuplicates(btn){
+  if(!confirm('לאחד כפילויות בתרחישים?\nלכל שלב תישאר שורה אחת (עם ההקלטה שלה). רק עותקים כפולים של אותו שלב בדיוק יימחקו — שום שלב ייחודי לא ייפגע.\n\nאחרי זה הקלטה חוזרת של שלב תמיד תתחלף כמו שצריך.')) return;
+  var old=btn.textContent; btn.disabled=true;
+  try{
+    var rows=await sbFetchAllRows('/rest/v1/phrases?select=id,cat,tags,he,audio_url&section=eq.scenario');
+    var groups={};
+    (rows||[]).forEach(function(r){
+      var tg=String(r.tags||'').replace(/\s+/g,' ').trim();
+      if(!/step\d+/.test(tg)) return;            // only step-tagged rows — never risk untagged content
+      var key=_scnCatNorm(r.cat)+'|'+tg;         // same scenario (dash-insensitive) + identical step tag
+      (groups[key]=groups[key]||[]).push(r);
+    });
+    var del=[], dupSteps=0;
+    Object.keys(groups).forEach(function(k){
+      var g=groups[k]; if(g.length<2) return; dupSteps++;
+      var rec=g.filter(function(r){ return r.audio_url; });
+      var winner = rec[0] || g[0];               // keep a recorded copy if any exists
+      g.forEach(function(r){ if(r.id!==winner.id) del.push(r); });
+    });
+    if(!del.length){ alert('אין כפילויות לאיחוד — כל שלב כבר מופיע פעם אחת. הכול מסודר. 👍'); btn.disabled=false; btn.textContent=old; return; }
+    if(!confirm('נמצאו '+dupSteps+' שלבים עם עותק כפול. יימחקו '+del.length+' עותקים מיותרים (ההקלטה של כל שלב תישאר). להמשיך?')){ btn.disabled=false; btn.textContent=old; return; }
+    var done=0, fail=0;
+    for(var i=0;i<del.length;i++){
+      btn.textContent='מאחד '+(i+1)+'/'+del.length+'…';
+      try{ await sbFetch('/rest/v1/phrases?id=eq.'+encodeURIComponent(del[i].id),'DELETE'); done++; }catch(e){ fail++; }
+    }
+    try{ await loadData(); }catch(e){}
+    try{ renderAdminList(); }catch(e){}
+    btn.disabled=false; btn.textContent=old;
+    alert('✓ אוחדו '+done+' כפילויות'+(fail?(' · '+fail+' נכשלו'):'')+'.\nעכשיו לכל שלב יש שורה אחת. אם שלב נשמע לא טוב — הקליטי אותו שוב מהרשימה, וזה יתחלף כמו שצריך. ✅');
+    try{ var ab=document.getElementById('tool-auditrec'); if(ab) auditRecordings(ab); }catch(e){}
+  }catch(e){ btn.disabled=false; btn.textContent=old; alert('שגיאה באיחוד: '+(e&&e.message?e.message:e)); }
 }
 
 // Is this dictionary row already heard inside a recorded sentence anywhere?
@@ -12861,8 +12902,11 @@ function _scnCatEq(a,b){ return _scnCatNorm(a)===_scnCatNorm(b); }
 function _scnDedupeSteps(steps){
   var by={}, order=[];
   (steps||[]).forEach(function(p){
-    var m=String(p&&p.tags||'').match(/step(\d+)/);
-    var key = m ? ('s'+m[1]) : ('t'+_scnCatNorm(p&&p.he));  // by step number, else by text
+    // Key by the FULL step tag (e.g. "step3" vs "step3 civilian" stay separate — a
+    // soldier line and a civilian reply are different steps). Only true duplicates —
+    // identical step tag — collapse. Untagged rows fall back to their text.
+    var tg=String(p&&p.tags||'').replace(/\s+/g,' ').trim();
+    var key = /step\d+/.test(tg) ? ('T'+tg) : ('X'+_scnCatNorm(p&&p.he));
     if(!(key in by)){ by[key]=p; order.push(key); return; }
     var cur=by[key];
     if((p&&(p.audio||p.audio_url)) && !(cur&&(cur.audio||cur.audio_url))) by[key]=p; // keep the recorded one
@@ -19270,7 +19314,7 @@ window.addEventListener('load', function(){
 <script>
 // Version stamp — shown in the admin panel so we can confirm which build is live
 // on a device (stale service-worker caches were causing "my changes don't show").
-window.APP_VERSION = 'v126';
+window.APP_VERSION = 'v127';
 
 // Register the service worker for full offline use in the field, WITH update
 // detection: when a new version installs, offer a one-tap refresh instead of the
