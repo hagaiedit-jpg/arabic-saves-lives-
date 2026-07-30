@@ -8909,10 +8909,20 @@ async function auditRecordings(btn){
     var allRows=await sbFetchAllRows('/rest/v1/phrases?select=id,he,ar,cat,section,audio_url');
     allRows=allRows||[];
     var rows=allRows.filter(function(r){ return r && r.he && AUDIT_SECMAP[r.section]; });
-    // Group by section + normalized Hebrew (this is how the app dedups content).
+    // Grouping key = CONTEXT, not just text. The same word in a different place is a
+    // different item, never a duplicate (Edith's rule): so the key includes the
+    // category. Scenarios go further — every step is its own unique item (keyed by
+    // its step number / id), so a phrase that legitimately recurs across steps is
+    // NEVER collapsed and NEVER offered for deletion.
     var groups={};
     rows.forEach(function(r){
-      var k=r.section+'|'+_auditNorm(r.he);
+      var k;
+      if(r.section==='scenario'){
+        var mm=String(r.tags||'').match(/step(\d+)/);
+        k=r.section+'|'+(r.cat||'')+'|'+(mm?('step'+mm[1]):('id'+(r.id!=null?r.id:_auditNorm(r.he))));
+      } else {
+        k=r.section+'|'+(r.cat||'')+'|'+_auditNorm(r.he);
+      }
       (groups[k]=groups[k]||[]).push(r);
     });
     var perSec={};   // section -> {total, recorded, missingItems:[]}
@@ -8925,10 +8935,11 @@ async function auditRecordings(btn){
       s.total++;
       if(recRows.length){
         s.recorded++;
-        // recorded exists, but empty twins still sit in the DB → they shadow it
-        emptyRows.forEach(function(r){ shadowEmpties.push(r); });
+        // A recorded copy exists; empty twins in the SAME context shadow it. NEVER
+        // treat scenario rows as shadow duplicates — each step must be preserved.
+        if(sec!=='scenario') emptyRows.forEach(function(r){ shadowEmpties.push(r); });
       } else {
-        // genuinely no recording anywhere for this sentence
+        // genuinely no recording anywhere for this item
         s.missingItems.push(g[0]);
       }
     });
@@ -8979,6 +8990,11 @@ async function auditRecordings(btn){
     } else {
       h+='<div style="background:#16302a;border:1px solid #1D9E75;border-radius:10px;padding:10px;margin-bottom:10px;color:#a8e6cf;font-size:12px;">✓ אין כפילויות ריקות — כל מה שהקלטת אכן מסומן כמוקלט.</div>';
     }
+    // Scenario recovery: steps deleted by mistake can be re-added from the built-in
+    // scenario library (text only — audio must be re-recorded). Always available.
+    h+='<div style="background:#132a3a;border:1px solid #2A3D52;border-radius:10px;padding:12px;margin-bottom:10px;">'
+      +'<div style="color:#cfe0ee;font-size:12px;line-height:1.6;margin-bottom:8px;">🎬 חסרים שלבים בתרחיש? אפשר לשחזר את כל השלבים המובנים שנמחקו בטעות. הפעולה <b>רק מוסיפה</b> שלבים חסרים — לא מוחקת ולא משנה כלום קיים.</div>'
+      +'<button onclick="restoreBuiltinScenarios(this)" style="width:100%;padding:11px;background:linear-gradient(135deg,#2f6d8a 0%,#25566e 100%);border:none;border-radius:8px;color:#fff;font-size:13px;font-weight:800;cursor:pointer;font-family:inherit;">🎬 שחזר שלבי תרחישים שנמחקו</button></div>';
     // missing worklist, grouped by section+cat, record straight from here
     var anyMiss=false;
     Object.keys(AUDIT_SECMAP).forEach(function(sec){
@@ -8995,13 +9011,17 @@ async function auditRecordings(btn){
           // Look for an already-recorded sentence that is nearly identical to this
           // one (differs by a letter or two — spelling variant / stray character).
           var mn=_auditNorm(r.he), twin=null, bestDist=99;
-          for(var ri=0; ri<recIndex.length; ri++){
-            var rec=recIndex[ri]; if(!rec.norm) continue;
-            if(rec.sec!==sec) continue;   // same-section only — cross-section is NOT a duplicate
-            if(Math.abs(rec.norm.length-mn.length)>2) continue;
-            var dist=_auditLev(mn, rec.norm);
-            if(dist<bestDist){ bestDist=dist; twin=rec; }
-            if(dist===0) break;
+          // Scenarios: never offer a "duplicate" — a recurring line across steps is
+          // legitimate and must stay. Only non-scenario sections get twin detection.
+          if(sec!=='scenario'){
+            for(var ri=0; ri<recIndex.length; ri++){
+              var rec=recIndex[ri]; if(!rec.norm) continue;
+              if(rec.sec!==sec) continue;   // same-section only — cross-section is NOT a duplicate
+              if(Math.abs(rec.norm.length-mn.length)>2) continue;
+              var dist=_auditLev(mn, rec.norm);
+              if(dist<bestDist){ bestDist=dist; twin=rec; }
+              if(dist===0) break;
+            }
           }
           // Length-aware threshold: short words (months, topography terms) need a
           // near-exact match or we'd falsely pair unrelated 2–3 letter words.
@@ -9036,6 +9056,9 @@ async function auditRecordings(btn){
 // whose sentence is recorded elsewhere are touched — a recording is never lost.
 async function fixShadowRecordings(btn){
   var list=window._auditShadow||[];
+  // Hard safety net: never delete a scenario row here, whatever is in the list.
+  // Scenario steps are unique content, not duplicates.
+  list=list.filter(function(r){ return r && r.section!=='scenario'; });
   if(!list.length){ alert('אין מה לתקן.'); return; }
   if(!confirm('למחוק '+list.length+' עותקים ריקים כפולים? ההקלטות עצמן יישארו — רק הכפילות הריקה שמסתירה אותן תימחק.')) return;
   var old=btn.textContent; btn.disabled=true;
@@ -9051,6 +9074,36 @@ async function fixShadowRecordings(btn){
   btn.disabled=false;
   alert('✓ תוקנו '+done+' כפילויות'+(fail?(' · '+fail+' נכשלו'):'')+'.\nהמשפטים האלה יופיעו עכשיו כמוקלטים 🎵. מומלץ להריץ שוב "ביקורת הקלטות" כדי לאמת.');
   try{ var ab=document.getElementById('tool-auditrec'); if(ab) auditRecordings(ab); }catch(e){}
+}
+
+// Restore scenario steps that were deleted by mistake. Re-adds any built-in step
+// (keyed by category#stepNumber) that is missing from the DB. ADD-ONLY: it never
+// deletes or edits an existing row, so recordings and edits are never touched.
+async function restoreBuiltinScenarios(btn){
+  if(typeof BUILTIN_SCENARIO_DATA==='undefined' || !BUILTIN_SCENARIO_DATA.length){ alert('אין נתוני תרחישים מובנים לשחזור.'); return; }
+  if(!confirm('לשחזר שלבי תרחישים שנמחקו?\nהפעולה רק מוסיפה שלבים חסרים — לא מוחקת ולא משנה כלום קיים.\n(הטקסט יחזור; את השמע צריך יהיה להקליט מחדש.)')) return;
+  var old=btn.textContent; btn.disabled=true;
+  var added=0, fail=0;
+  try{
+    var ex=await sbFetchAllRows('/rest/v1/phrases?select=id,cat,tags&section=eq.scenario');
+    var have={}; (ex||[]).forEach(function(p){ have[_scnStepKey(p)]=1; });
+    for(var i=0;i<BUILTIN_SCENARIO_DATA.length;i++){
+      var b=BUILTIN_SCENARIO_DATA[i]; var k=_scnStepKey(b);
+      btn.textContent='משחזר '+(i+1)+'/'+BUILTIN_SCENARIO_DATA.length+'…';
+      if(have[k]) continue;
+      try{
+        await sbFetch('/rest/v1/phrases','POST',{cat:b.cat,he:b.he,trans:b.trans||'',ar:b.ar||'',tags:b.tags||'',why:b.why||'',tone:'',audio_url:'',is_new:false,section:'scenario'});
+        have[k]=1; added++;
+      }catch(e){ fail++; }
+    }
+    try{ await loadData(); }catch(e){}
+    try{ renderAdminList(); }catch(e){}
+    btn.disabled=false; btn.textContent=old;
+    alert(added
+      ? ('✓ שוחזרו '+added+' שלבים בתרחישים'+(fail?(' · '+fail+' נכשלו'):'')+'.\nהטקסט חזר — כעת צריך להקליט אותם מחדש (השמע לא נשמר בעת המחיקה).')
+      : ('כל השלבים המובנים כבר קיימים — לא חסר דבר לשחזר.'+(fail?(' ('+fail+' נכשלו)'):'')));
+    try{ var ab=document.getElementById('tool-auditrec'); if(ab) auditRecordings(ab); }catch(e){}
+  }catch(e){ btn.disabled=false; btn.textContent=old; alert('שגיאה בשחזור: '+(e&&e.message?e.message:e)); }
 }
 
 // Is this dictionary row already heard inside a recorded sentence anywhere?
@@ -19195,7 +19248,7 @@ window.addEventListener('load', function(){
 <script>
 // Version stamp — shown in the admin panel so we can confirm which build is live
 // on a device (stale service-worker caches were causing "my changes don't show").
-window.APP_VERSION = 'v123';
+window.APP_VERSION = 'v124';
 
 // Register the service worker for full offline use in the field, WITH update
 // detection: when a new version installs, offer a one-tap refresh instead of the
