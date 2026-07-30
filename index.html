@@ -12854,6 +12854,21 @@ var _scnIdx = 0;         // current step index
 // variant collapses into the single correct scenario.
 function _scnCatNorm(s){ return String(s||'').replace(/[—–\-]/g,' ').replace(/\s+/g,' ').trim(); }
 function _scnCatEq(a,b){ return _scnCatNorm(a)===_scnCatNorm(b); }
+// DISPLAY-ONLY dedup: the same step can exist as two rows (a category-name variant,
+// or a line re-recorded because it once showed as "missing"). Collapse rows that
+// represent the SAME step so each step shows ONCE — preferring the copy that has
+// audio. The database is NOT touched; nothing is deleted, so it's fully reversible.
+function _scnDedupeSteps(steps){
+  var by={}, order=[];
+  (steps||[]).forEach(function(p){
+    var m=String(p&&p.tags||'').match(/step(\d+)/);
+    var key = m ? ('s'+m[1]) : ('t'+_scnCatNorm(p&&p.he));  // by step number, else by text
+    if(!(key in by)){ by[key]=p; order.push(key); return; }
+    var cur=by[key];
+    if((p&&(p.audio||p.audio_url)) && !(cur&&(cur.audio||cur.audio_url))) by[key]=p; // keep the recorded one
+  });
+  return order.map(function(k){ return by[k]; });
+}
 function renderScnGrid(){
   try {
     var el = document.getElementById('scn-grid');
@@ -12884,7 +12899,7 @@ function renderScnGrid(){
           sourceList = ANNOUNCE;
         }
         var phrases = (typeof sourceList !== 'undefined' && sourceList) ?
-          sourceList.filter(function(p){return _scnCatEq(p.cat, s.id);}) : [];
+          _scnDedupeSteps(sourceList.filter(function(p){return _scnCatEq(p.cat, s.id);})) : [];
         if (phrases.length > 0) readyCount++;
       });
 
@@ -12928,7 +12943,7 @@ function renderScnGrid(){
             sourceList = ANNOUNCE;
           }
           var phrases = (typeof sourceList !== 'undefined' && sourceList) ?
-            sourceList.filter(function(p){return _scnCatEq(p.cat, s.id);}) : [];
+            _scnDedupeSteps(sourceList.filter(function(p){return _scnCatEq(p.cat, s.id);})) : [];
           var ready = phrases.length > 0;
           var bg = ready ? '#1F3147' : 'rgba(31,49,71,0.5)';
           var opacity = ready ? '1' : '0.6';
@@ -13029,7 +13044,7 @@ function scnSearch(){
     matches.forEach(function(s){
       var sourceList = SCENARIO;
       if (ANNOUNCE_SCN_LIST.indexOf(s.id) !== -1 && typeof ANNOUNCE !== 'undefined' && ANNOUNCE) sourceList = ANNOUNCE;
-      var phrases = (typeof sourceList !== 'undefined' && sourceList) ? sourceList.filter(function(p){return _scnCatEq(p.cat, s.id);}) : [];
+      var phrases = (typeof sourceList !== 'undefined' && sourceList) ? _scnDedupeSteps(sourceList.filter(function(p){return _scnCatEq(p.cat, s.id);})) : [];
       var ready = phrases.length > 0;
       var isCompleted = !!completed[s.id];
       var cardBg = ready ? 'linear-gradient(160deg,#1F3147 0%,#243a55 100%)' : 'rgba(31,49,71,0.4)';
@@ -13173,7 +13188,7 @@ function scnOpen(scnId){
       sourceList = ANNOUNCE;
     }
     if (typeof sourceList === 'undefined' || !sourceList) return;
-    var steps = sourceList.filter(function(p){return _scnCatEq(p.cat, scnId);});
+    var steps = _scnDedupeSteps(sourceList.filter(function(p){return _scnCatEq(p.cat, scnId);}));
     
     steps.sort(function(a, b){
       var aMatch = (a.tags || '').match(/step(\d+)/);
@@ -19255,7 +19270,7 @@ window.addEventListener('load', function(){
 <script>
 // Version stamp — shown in the admin panel so we can confirm which build is live
 // on a device (stale service-worker caches were causing "my changes don't show").
-window.APP_VERSION = 'v125';
+window.APP_VERSION = 'v126';
 
 // Register the service worker for full offline use in the field, WITH update
 // detection: when a new version installs, offer a one-tap refresh instead of the
