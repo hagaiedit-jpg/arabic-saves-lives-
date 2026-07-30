@@ -12847,6 +12847,13 @@ var _scnCurrent = null;  // current scenario id
 var _scnSteps = [];      // current scenario steps array
 var _scnIdx = 0;         // current step index
 
+// Scenario category matching is separator-insensitive: the same scenario name may
+// be stored with an em-dash "—", a hyphen "-", an en-dash "–", or no separator at
+// all. Treating those as different names split one scenario into several partial
+// cards (and stray "תרחישים נוספים" cubes). Normalize before comparing so every
+// variant collapses into the single correct scenario.
+function _scnCatNorm(s){ return String(s||'').replace(/[—–\-]/g,' ').replace(/\s+/g,' ').trim(); }
+function _scnCatEq(a,b){ return _scnCatNorm(a)===_scnCatNorm(b); }
 function renderScnGrid(){
   try {
     var el = document.getElementById('scn-grid');
@@ -12857,9 +12864,9 @@ function renderScnGrid(){
     // Safety net: any scenario category present in the DATA but missing from
     // SCN_CATEGORIES still gets a cube (auto "תרחישים נוספים" group) — new
     // content must never load invisibly again.
-    var _listed={}; SCN_CATEGORIES.forEach(function(c){ (c.scenarios||[]).forEach(function(s){ _listed[s.id]=1; }); });
+    var _listed={}; SCN_CATEGORIES.forEach(function(c){ (c.scenarios||[]).forEach(function(s){ _listed[_scnCatNorm(s.id)]=1; }); });
     var _extraOrder=[]; var _extraSeen={};
-    try{ (typeof SCENARIO!=='undefined'?SCENARIO:[]).forEach(function(p){ if(p&&p.cat&&!_listed[p.cat]&&!_extraSeen[p.cat]){ _extraSeen[p.cat]=1; _extraOrder.push(p.cat); } }); }catch(e){}
+    try{ (typeof SCENARIO!=='undefined'?SCENARIO:[]).forEach(function(p){ var nk=p&&p.cat?_scnCatNorm(p.cat):''; if(nk&&!_listed[nk]&&!_extraSeen[nk]){ _extraSeen[nk]=1; _extraOrder.push(p.cat); } }); }catch(e){}
     var _cats = _extraOrder.length
       ? SCN_CATEGORIES.concat([{id:'cat-extra', icon:'🆕', title:'תרחישים נוספים',
           scenarios:_extraOrder.map(function(c){ return {id:c, icon:'🎬', title:c}; })}])
@@ -12877,7 +12884,7 @@ function renderScnGrid(){
           sourceList = ANNOUNCE;
         }
         var phrases = (typeof sourceList !== 'undefined' && sourceList) ?
-          sourceList.filter(function(p){return p.cat === s.id;}) : [];
+          sourceList.filter(function(p){return _scnCatEq(p.cat, s.id);}) : [];
         if (phrases.length > 0) readyCount++;
       });
 
@@ -12921,7 +12928,7 @@ function renderScnGrid(){
             sourceList = ANNOUNCE;
           }
           var phrases = (typeof sourceList !== 'undefined' && sourceList) ?
-            sourceList.filter(function(p){return p.cat === s.id;}) : [];
+            sourceList.filter(function(p){return _scnCatEq(p.cat, s.id);}) : [];
           var ready = phrases.length > 0;
           var bg = ready ? '#1F3147' : 'rgba(31,49,71,0.5)';
           var opacity = ready ? '1' : '0.6';
@@ -13022,7 +13029,7 @@ function scnSearch(){
     matches.forEach(function(s){
       var sourceList = SCENARIO;
       if (ANNOUNCE_SCN_LIST.indexOf(s.id) !== -1 && typeof ANNOUNCE !== 'undefined' && ANNOUNCE) sourceList = ANNOUNCE;
-      var phrases = (typeof sourceList !== 'undefined' && sourceList) ? sourceList.filter(function(p){return p.cat === s.id;}) : [];
+      var phrases = (typeof sourceList !== 'undefined' && sourceList) ? sourceList.filter(function(p){return _scnCatEq(p.cat, s.id);}) : [];
       var ready = phrases.length > 0;
       var isCompleted = !!completed[s.id];
       var cardBg = ready ? 'linear-gradient(160deg,#1F3147 0%,#243a55 100%)' : 'rgba(31,49,71,0.4)';
@@ -13166,7 +13173,7 @@ function scnOpen(scnId){
       sourceList = ANNOUNCE;
     }
     if (typeof sourceList === 'undefined' || !sourceList) return;
-    var steps = sourceList.filter(function(p){return p.cat === scnId;});
+    var steps = sourceList.filter(function(p){return _scnCatEq(p.cat, scnId);});
     
     steps.sort(function(a, b){
       var aMatch = (a.tags || '').match(/step(\d+)/);
@@ -19248,7 +19255,7 @@ window.addEventListener('load', function(){
 <script>
 // Version stamp — shown in the admin panel so we can confirm which build is live
 // on a device (stale service-worker caches were causing "my changes don't show").
-window.APP_VERSION = 'v124';
+window.APP_VERSION = 'v125';
 
 // Register the service worker for full offline use in the field, WITH update
 // detection: when a new version installs, offer a one-tap refresh instead of the
