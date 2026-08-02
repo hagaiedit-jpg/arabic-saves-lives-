@@ -35,3 +35,15 @@ console.log('checked '+i+' scripts, '+bad+' errors');
 1. שינוי קוד → בדיקת syntax → `node tests/smoke.js` (הכול ירוק).
 2. העלאת `CACHE` ב-`sw.js` (אחרת משתמשים יקבלו גרסה ישנה מהמטמון).
 3. דחיפה ל-`main` (= דיפלוי אוטומטי ב-Cloudflare; אין staging).
+
+## audit_regression.js
+
+Locks in the recordings/scenarios cleanup so it can't silently break again:
+`node tests/audit_regression.js` (needs Playwright, like smoke.js).
+
+Covers: scenarios never treated as duplicates, separator-insensitive step
+keys, display collapse of variant duplicates, safe merge, shared audio
+(record once → plays everywhere), no fuzzy near-dup matching, permanent
+delete via blocklist, orphan-foundation hiding, covered-elsewhere counting,
+scenario-header exclusion, dup-check recording protection, and text-id
+URL-encoding. Run it before every deploy alongside smoke.js.
