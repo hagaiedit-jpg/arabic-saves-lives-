@@ -18423,6 +18423,59 @@ function _emergPhrasesForCat(emergCat){
   return out;
 }
 
+// Admin-approved critical emergency set (per Edith, 2026). One-click marking below
+// stars (⭐/@gold) the matching DB phrases so חירום shows exactly this set.
+var RECOMMENDED_EMERG = [
+  {c:'orders', he:'עצור!'}, {c:'orders', he:'אל תזוז!'}, {c:'orders', he:'תישאר כאן, אסור לזוז!'},
+  {c:'orders', he:'ידיים למעלה!'}, {c:'orders', he:'ידיים על הראש'}, {c:'orders', he:'זרוק את הסכין / את הנשק!'},
+  {c:'orders', he:'תסתובב לאט'}, {c:'orders', he:'בוא הנה'}, {c:'orders', he:'כרע ברך'}, {c:'orders', he:'שתוק ותקשיב'},
+  {c:'check', he:'תן לי תעודת זהות'}, {c:'check', he:'מה השם שלך?'}, {c:'check', he:'מאיפה באת?'},
+  {c:'check', he:'לאן אתה הולך?'}, {c:'check', he:'איפה אתה גר?'}, {c:'check', he:'הרם את החולצה'},
+  {c:'check', he:'מה יש בכיס? תוציא לאט'},
+  {c:'vehicle', he:'עצור את הרכב, כבה מנוע'}, {c:'vehicle', he:'ידיים על ההגה'}, {c:'vehicle', he:'תן לי רישיון'},
+  {c:'vehicle', he:'פתח חלון'}, {c:'vehicle', he:'צא מהרכב לאט'}, {c:'vehicle', he:'פתח את תא המטען'},
+  {c:'vehicle', he:'כמה אנשים ברכב?'},
+  {c:'medical', he:'יש פצוע?'}, {c:'medical', he:'אתה פצוע?'}, {c:'medical', he:'איפה כואב?'},
+  {c:'medical', he:'יש קושי לנשום?'}, {c:'medical', he:'יש לך אלרגיה?'}, {c:'medical', he:'אתה לוקח תרופות?'},
+  {c:'medical', he:'אל תפחד, באנו לעזור'}, {c:'medical', he:'צריך אמבולנס?'}
+];
+function _recNorm(s){ return String(s||'').replace(/[֑-ׇ׳״]/g,'').replace(/[^֐-׿A-Za-z0-9]/g,''); }
+// One-click: star (⭐/@gold) every DB phrase that matches the approved set, in its
+// emergency category. Reports how many were marked and which are still missing.
+async function markRecommendedEmergency(btn){
+  if(!confirm('לסמן ⭐ אוטומטית את סט החירום המומלץ?\nהפעולה מסמנת משפטים קיימים בלבד — לא מוחקת ולא משנה טקסט.')) return;
+  var old=btn.textContent; btn.disabled=true; btn.textContent='מסמן…';
+  try{
+    var all=await sbFetchAllRows('/rest/v1/phrases?select=id,he,cat,section,tags');
+    var byCat={}; EMERG_CATS.forEach(function(ec){ byCat[ec.key]=ec.cats; });
+    var marked=0, already=0, missing=[];
+    for(var i=0;i<RECOMMENDED_EMERG.length;i++){
+      var rec=RECOMMENDED_EMERG[i]; var cats=byCat[rec.c]||[]; var target=_recNorm(rec.he);
+      var hits=(all||[]).filter(function(p){
+        if(_recNorm(p.he)!==target) return false;
+        var pc=(p.cat||'').trim();
+        for(var k=0;k<cats.length;k++){ if(pc===cats[k]||pc.indexOf(cats[k])!==-1) return true; }
+        return false;
+      });
+      if(!hits.length){ missing.push(rec.he); continue; }
+      for(var j=0;j<hits.length;j++){
+        var p=hits[j];
+        if(isGoldPhrase(p)){ already++; continue; }
+        var tags=String(p.tags||'').split(/\s+/).filter(function(t){return t && t.toLowerCase()!=='@gold';}); tags.push('@gold');
+        btn.textContent='מסמן '+(marked+1)+'…';
+        try{ await sbFetch('/rest/v1/phrases?id=eq.'+encodeURIComponent(p.id),'PATCH',{tags:tags.join(' ').trim()}); p.tags=tags.join(' '); marked++; }catch(e){}
+      }
+    }
+    try{ await loadData(); }catch(e){}
+    try{ if(typeof rQK==='function') rQK(); }catch(e){}
+    btn.disabled=false; btn.textContent=old;
+    var msg='✓ סומנו '+marked+' משפטים לחירום'+(already?(' · '+already+' כבר היו מסומנים'):'')+'.';
+    if(missing.length){ msg+='\n\n❌ חסרים במאגר ('+missing.length+') — צריך להוסיף אותם קודם:\n• '+missing.join('\n• ')+'\n\nשלחי לי אותם עם הערבית ואוסיף.'; }
+    else { msg+='\n\n🎉 כל סט החירום המומלץ קיים ומסומן!'; }
+    alert(msg);
+  }catch(e){ btn.disabled=false; btn.textContent=old; alert('שגיאה: '+(e&&e.message?e.message:e)); }
+}
+
 function rQK(){
   // Always show home grid (with 4 cubes)
   var home=document.getElementById('emerg-home');
@@ -18453,6 +18506,15 @@ function rQK(){
     h+='</div>';
   }
   grid.innerHTML=h;
+  // Admin-only: one-click marking of the approved critical set.
+  var rec=document.getElementById('emerg-recmark');
+  if(!rec){ rec=document.createElement('div'); rec.id='emerg-recmark'; grid.parentNode.insertBefore(rec, grid.nextSibling); }
+  if(window._adminAuth){
+    rec.style.display='block';
+    rec.innerHTML='<div style="background:#14263b;border:1px solid #2A3D52;border-radius:10px;padding:11px;margin-top:12px;">'
+      +'<div style="color:#a0b8c8;font-size:11.5px;line-height:1.55;margin-bottom:8px;">✨ סמני בלחיצה אחת את <b>סט החירום המומלץ</b> — הכלי יסמן ⭐ את המשפטים הקיימים ויגיד לך מה עוד חסר להוסיף.</div>'
+      +'<button onclick="markRecommendedEmergency(this)" style="width:100%;padding:10px;background:linear-gradient(135deg,#D4A24E 0%,#b8862f 100%);border:none;border-radius:8px;color:#0E1B2E;font-size:13px;font-weight:800;cursor:pointer;font-family:inherit;">✨ סמן אוטומטית את סט החירום המומלץ</button></div>';
+  } else { rec.style.display='none'; }
 }
 
 function openEmergCat(key){
@@ -19467,7 +19529,7 @@ window.addEventListener('load', function(){
 <script>
 // Version stamp — shown in the admin panel so we can confirm which build is live
 // on a device (stale service-worker caches were causing "my changes don't show").
-window.APP_VERSION = 'v140';
+window.APP_VERSION = 'v141';
 
 // Register the service worker for full offline use in the field, WITH update
 // detection: when a new version installs, offer a one-tap refresh instead of the

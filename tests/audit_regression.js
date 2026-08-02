@@ -276,6 +276,26 @@ async function main() {
     await p.close();
   }
 
+  // 14 — one-click "mark recommended emergency set" stars matching phrases (@gold)
+  //      in their emergency category and reports the rest as missing
+  {
+    const cap = {};
+    const p = await load([
+      { id: 'a', he: 'עצור!', cat: 'הוראות מיידיות', section: 'military', tags: '' },
+      { id: 'b', he: 'צריך אמבולנס?', cat: 'רפואה ועזרה', section: 'military', tags: '' },
+      { id: 'z', he: 'שלום', cat: 'ברכה', section: 'military', tags: '' },
+    ], cap);
+    const rep = await p.evaluate(async () => {
+      window.confirm = () => true; var m = null; window.alert = x => { m = x; };
+      await markRecommendedEmergency({ textContent: '', disabled: false });
+      return m;
+    });
+    const gold = cap.patch.filter(x => /@gold/.test(x.body || '')).map(x => decodeURIComponent(x.url).replace(/.*id=eq\./, ''));
+    check('חירום: סימון אוטומטי מסמן ⭐ משפטים מהסט המאושר', gold.indexOf('a') !== -1 && gold.indexOf('b') !== -1 && gold.indexOf('z') === -1);
+    check('חירום: סימון אוטומטי מדווח מה חסר להוסיף', /חסרים/.test(rep || ''));
+    await p.close();
+  }
+
   await browser.close();
   console.log('\n========================================');
   if (fail === 0) console.log('✅ כל ' + pass + ' בדיקות הרגרסיה עברו');
