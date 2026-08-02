@@ -8954,6 +8954,9 @@ async function auditRecordings(btn){
       // dictionary. So they should never appear as "missing".
       if(r.section==='military' && /^יסודות:/.test((r.cat||'').trim())
          && typeof FOUNDATION_CATS!=='undefined' && FOUNDATION_CATS.indexOf((r.cat||'').trim())===-1) return false;
+      // Scenario DIVIDERS ("מקרה א׳ — …") are section headers, not spoken lines —
+      // they have no Arabic and a 'divider' tag. Never ask to record them.
+      if(r.section==='scenario' && /\bdivider\b/.test(String(r.tags||''))) return false;
       return true;
     });
     // Grouping key = CONTEXT, not just text. The same word in a different place is a
@@ -9520,7 +9523,10 @@ function populateFromData(data){
   var _scnRaw=data.filter(p=>p.section==='scenario').map(mp);
   var _scnBest={}, _scnOrder=[];
   _scnRaw.forEach(function(p){
-    var k=_scnStepKey(p);
+    // Separator-insensitive key: rows stored under a hyphen/em-dash variant of the
+    // same scenario collapse into ONE step (keeping the recorded copy), so the view
+    // shows each step once — no more duplicated / "un-aligned" steps after a load.
+    var k=_scnStepKeyN(p);
     var ex=_scnBest[k];
     if(!ex){ _scnBest[k]=p; _scnOrder.push(k); }
     else if((!ex.audio && p.audio) || (ex.audio===p.audio && !ex.responses && p.responses)){ _scnBest[k]=p; }
@@ -9528,7 +9534,7 @@ function populateFromData(data){
   SCENARIO=_scnOrder.map(function(k){ return _scnBest[k]; });
   try{
     if(typeof BUILTIN_SCENARIO_DATA!=='undefined' && BUILTIN_SCENARIO_DATA.length){
-      BUILTIN_SCENARIO_DATA.forEach(function(b){ var k=_scnStepKey(b); if(!_scnBest[k]){ var m=mp(b); SCENARIO.push(m); _scnBest[k]=m; } });
+      BUILTIN_SCENARIO_DATA.forEach(function(b){ var k=_scnStepKeyN(b); if(!_scnBest[k]){ var m=mp(b); SCENARIO.push(m); _scnBest[k]=m; } });
     }
   }catch(e){}
   DICT=data.filter(p=>p.section==='dictionary').map(mp);
@@ -19358,7 +19364,7 @@ window.addEventListener('load', function(){
 <script>
 // Version stamp — shown in the admin panel so we can confirm which build is live
 // on a device (stale service-worker caches were causing "my changes don't show").
-window.APP_VERSION = 'v132';
+window.APP_VERSION = 'v133';
 
 // Register the service worker for full offline use in the field, WITH update
 // detection: when a new version installs, offer a one-tap refresh instead of the
