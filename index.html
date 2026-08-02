@@ -11168,15 +11168,20 @@ function renderDupGroups(){
   var head='<div style="background:#18293E;border:1px solid #2A3D52;border-radius:10px;padding:10px;margin-bottom:8px;">'
     +'<div style="color:#E8D9B8;font-size:13px;font-weight:700;">🔁 בדיקת כפילויות</div>';
   if(!groups.length){ box.innerHTML=head+'<div style="color:#1D9E75;font-size:13px;margin-top:6px;">✓ לא נמצאו כפילויות — הכול נקי. אפשר להקליט.</div></div>'; return; }
-  head+='<div style="color:#7a9ab5;font-size:11px;margin-top:4px;">נמצאו '+groups.length+' קבוצות ('+totalDupes+' עותקים מיותרים) — כפילויות <b>באותו סעיף בלבד</b>. אותו משפט שקיים גם במילון וגם בתרחיש וגם במבצעי אינו נחשב כפילות (לכל אחד תפקיד במקומו). בכל קבוצה נשמר עותק אחד (עדיפות לזה שכבר מוקלט 🎵), והשאר מסומנים למחיקה. שום דבר לא נמחק עד שתלחצי.</div>'
+  head+='<div style="color:#7a9ab5;font-size:11px;margin-top:4px;">נמצאו '+groups.length+' קבוצות ('+totalDupes+' עותקים מיותרים) — כפילויות <b>באותו סעיף בלבד</b>. אותו משפט שקיים גם במילון וגם בתרחיש וגם במבצעי אינו נחשב כפילות (לכל אחד תפקיד במקומו). בכל קבוצה נשמר עותק אחד (עדיפות למוקלט 🎵). <b>מסומנים אוטומטית למחיקה רק עותקים ריקים (🔇) — עותקים מוקלטים מוגנים</b> ולא יימחקו אלא אם תסמני אותם בעצמך. שום דבר לא נמחק עד שתלחצי.</div>'
     +'<button onclick="deleteDupSelected(this)" style="width:100%;margin-top:8px;padding:10px;background:#c0392b;border:none;border-radius:8px;color:#fff;font-size:13px;font-weight:700;cursor:pointer;font-family:inherit;">🗑 מחק את המסומנים</button></div>';
   var html=groups.map(function(g,gi){
     var keep=_dupKeeperIdx(g);
     var rows=g.map(function(p,i){
       var isKeep=(i===keep);
       var mic=p.audio_url?'🎵':'🔇';
-      return '<label style="display:flex;gap:8px;align-items:flex-start;padding:6px;border-radius:6px;background:'+(isKeep?'rgba(29,158,117,0.10)':'rgba(192,57,43,0.08)')+';margin-bottom:4px;cursor:pointer;">'
-        +'<input type="checkbox" class="dupdel" data-grp="'+gi+'" value="'+_fcEsc(p.id)+'" '+(isKeep?'':'checked')+' style="margin-top:3px;">'
+      // SAFE DEFAULT: pre-check for deletion ONLY empty copies (no recording). A copy
+      // that HAS a recording is never auto-marked — she must tick it herself if she
+      // really wants to remove it. So one click can never delete a recording by accident.
+      var autoCheck = (!isKeep && !p.audio_url);
+      var bg = isKeep ? 'rgba(29,158,117,0.10)' : (p.audio_url ? 'rgba(212,162,78,0.10)' : 'rgba(192,57,43,0.08)');
+      return '<label style="display:flex;gap:8px;align-items:flex-start;padding:6px;border-radius:6px;background:'+bg+';margin-bottom:4px;cursor:pointer;">'
+        +'<input type="checkbox" class="dupdel" data-grp="'+gi+'" value="'+_fcEsc(p.id)+'" '+(autoCheck?'checked':'')+' style="margin-top:3px;">'
         +'<div style="flex:1;min-width:0;">'
         +'<div style="color:#E8D9B8;font-size:12px;">'+_fcEsc(p.he)+' '+mic+(isKeep?' <span style="color:#1D9E75;">(נשמר)</span>':'')+'</div>'
         +'<div style="color:#7a9ab5;font-size:10px;">'+_fcEsc(_dupSecName[p.section]||p.section)+' · '+_fcEsc(p.cat||'')+' · '+_fcEsc(p.ar||'')+'</div>'
@@ -19394,7 +19399,7 @@ window.addEventListener('load', function(){
 <script>
 // Version stamp — shown in the admin panel so we can confirm which build is live
 // on a device (stale service-worker caches were causing "my changes don't show").
-window.APP_VERSION = 'v135';
+window.APP_VERSION = 'v136';
 
 // Register the service worker for full offline use in the field, WITH update
 // detection: when a new version installs, offer a one-tap refresh instead of the
