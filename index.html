@@ -16307,8 +16307,24 @@ async function autoSyncBuiltins(){
         haveD[normD(bd.he)]=1; addedD++;
       }
     }
-    window._autoSyncAdded = addedScn+addedCus+addedT+addedD+addedDay;
-    if(addedScn+addedCus+addedT+addedD+addedDay>0){ await loadData(); }
+    // --- 10 essential phrases: turn them into real DB rows so they show in the
+    // audit and can be recorded. Without this they only ever borrow audio from a
+    // matching recording elsewhere, so a uniquely-worded one (e.g. "תן תעודה")
+    // stays silent with no way to record it. ---
+    var addedTen=0;
+    if(typeof TEN_PHRASES!=='undefined' && TEN_PHRASES.length && typeof TEN_CAT!=='undefined'){
+      var normTen=function(s){ return String(s||'').replace(/[^֐-׿0-9A-Za-z]/g,''); };
+      var exTen=await sbFetch('/rest/v1/phrases?select=he&section=eq.military&cat=eq.'+encodeURIComponent(TEN_CAT));
+      var haveTen={}; (exTen||[]).forEach(function(p){ haveTen[normTen(p.he)]=1; });
+      for(var tp=0;tp<TEN_PHRASES.length;tp++){
+        var tph=TEN_PHRASES[tp]; if(haveTen[normTen(tph.he)])continue;
+        if(_delBlockList().indexOf(_delBlockKey('military',TEN_CAT,tph.he))!==-1)continue;
+        await sbFetch('/rest/v1/phrases','POST',{cat:TEN_CAT,he:tph.he,trans:tph.trans||'',ar:tph.ar||'',tags:'',why:'',tone:'',audio_url:'',is_new:false,section:'military'});
+        haveTen[normTen(tph.he)]=1; addedTen++;
+      }
+    }
+    window._autoSyncAdded = addedScn+addedCus+addedT+addedD+addedDay+addedTen;
+    if(addedScn+addedCus+addedT+addedD+addedDay+addedTen>0){ await loadData(); }
   }catch(e){
     window._builtinsSynced=false; // let it retry next time on failure
     console.warn('autoSyncBuiltins failed', e);
@@ -19553,7 +19569,7 @@ window.addEventListener('load', function(){
 <script>
 // Version stamp — shown in the admin panel so we can confirm which build is live
 // on a device (stale service-worker caches were causing "my changes don't show").
-window.APP_VERSION = 'v142';
+window.APP_VERSION = 'v143';
 
 // Register the service worker for full offline use in the field, WITH update
 // detection: when a new version installs, offer a one-tap refresh instead of the
