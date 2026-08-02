@@ -11539,16 +11539,16 @@ function _refreshBackupState(){
   }
   var days=Math.floor((Date.now()-last)/86400000);
   el.textContent = days<=0 ? 'גובה היום' : ('גובה לפני '+days+' ימים');
-  var stale = days>=30;
+  var stale = days>=7;   // weekly, matching the card's recommendation
   el.style.background = stale?'rgba(224,166,78,0.22)':'rgba(29,158,117,0.2)';
   el.style.color = stale?'#e8b96a':'#7eecc1';
-  if(nudge){ if(stale){ nudge.style.display='block'; nudge.textContent='⚠️ עברו '+days+' ימים מהגיבוי האחרון — כדאי לגבות שוב'; } else { nudge.style.display='none'; } }
+  if(nudge){ if(stale){ nudge.style.display='block'; nudge.textContent='⚠️ עברו '+days+' ימים מהגיבוי האחרון — כדאי לגבות שוב (מומלץ פעם בשבוע)'; } else { nudge.style.display='none'; } }
   // audio-backup chip
   var ae=document.getElementById('audiobk-state');
   if(ae){
     var la=0; try{ la=parseInt(localStorage.getItem('lastAudioBackupAt')||'0',10)||0; }catch(e){}
     if(!la){ ae.textContent='מעולם לא גובה'; ae.style.background='rgba(192,57,43,0.25)'; ae.style.color='#ff9a8f'; }
-    else { var ad=Math.floor((Date.now()-la)/86400000); ae.textContent = ad<=0?'גובה היום':('גובה לפני '+ad+' ימים'); var ast=ad>=30; ae.style.background=ast?'rgba(224,166,78,0.22)':'rgba(29,158,117,0.2)'; ae.style.color=ast?'#e8b96a':'#7eecc1'; }
+    else { var ad=Math.floor((Date.now()-la)/86400000); ae.textContent = ad<=0?'גובה היום':('גובה לפני '+ad+' ימים'); var ast=ad>=7; ae.style.background=ast?'rgba(224,166,78,0.22)':'rgba(29,158,117,0.2)'; ae.style.color=ast?'#e8b96a':'#7eecc1'; }
   }
 }
 // --- Store-only ZIP writer (no external libs) for the recordings backup ---
@@ -19399,7 +19399,7 @@ window.addEventListener('load', function(){
 <script>
 // Version stamp — shown in the admin panel so we can confirm which build is live
 // on a device (stale service-worker caches were causing "my changes don't show").
-window.APP_VERSION = 'v136';
+window.APP_VERSION = 'v137';
 
 // Register the service worker for full offline use in the field, WITH update
 // detection: when a new version installs, offer a one-tap refresh instead of the
