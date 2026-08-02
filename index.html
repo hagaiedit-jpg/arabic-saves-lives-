@@ -8954,9 +8954,9 @@ async function auditRecordings(btn){
       // dictionary. So they should never appear as "missing".
       if(r.section==='military' && /^יסודות:/.test((r.cat||'').trim())
          && typeof FOUNDATION_CATS!=='undefined' && FOUNDATION_CATS.indexOf((r.cat||'').trim())===-1) return false;
-      // Scenario DIVIDERS ("מקרה א׳ — …") are section headers, not spoken lines —
-      // they have no Arabic and a 'divider' tag. Never ask to record them.
-      if(r.section==='scenario' && /\bdivider\b/.test(String(r.tags||''))) return false;
+      // Scenario headers/titles ("מקרה א׳ — …") are not spoken lines — they have no
+      // Arabic to say (and often a 'divider' tag). Never ask to record them.
+      if(r.section==='scenario' && (/\bdivider\b/.test(String(r.tags||'')) || !String(r.ar||'').trim())) return false;
       return true;
     });
     // Grouping key = CONTEXT, not just text. The same word in a different place is a
@@ -8975,6 +8975,10 @@ async function auditRecordings(btn){
       }
       (groups[k]=groups[k]||[]).push(r);
     });
+    // Every phrase recorded ANYWHERE (exact spelling) — shared audio plays it across
+    // sections, so a row with no own recording is still covered if this set has it.
+    var recNormSet={};
+    allRows.forEach(function(r){ if(r && r.he && r.audio_url){ var n=_auditNorm(r.he); if(n) recNormSet[n]=true; } });
     var perSec={};   // section -> {total, recorded, missingItems:[]}
     var shadowEmpties=[];   // empty rows whose sentence IS recorded elsewhere
     Object.keys(groups).forEach(function(k){
@@ -8988,6 +8992,10 @@ async function auditRecordings(btn){
         // A recorded copy exists; empty twins in the SAME context shadow it. NEVER
         // treat scenario rows as shadow duplicates — each step must be preserved.
         if(sec!=='scenario') emptyRows.forEach(function(r){ shadowEmpties.push(r); });
+      } else if(recNormSet[_auditNorm(g[0].he)]){
+        // No own recording, but the EXACT same phrase is recorded elsewhere — shared
+        // audio plays it here, so it's covered, not a gap to record.
+        s.recorded++;
       } else {
         // genuinely no recording anywhere for this item
         s.missingItems.push(g[0]);
@@ -19386,7 +19394,7 @@ window.addEventListener('load', function(){
 <script>
 // Version stamp — shown in the admin panel so we can confirm which build is live
 // on a device (stale service-worker caches were causing "my changes don't show").
-window.APP_VERSION = 'v134';
+window.APP_VERSION = 'v135';
 
 // Register the service worker for full offline use in the field, WITH update
 // detection: when a new version installs, offer a one-tap refresh instead of the
