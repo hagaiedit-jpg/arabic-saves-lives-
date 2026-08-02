@@ -8944,7 +8944,16 @@ async function auditRecordings(btn){
   try{
     var allRows=await sbFetchAllRows('/rest/v1/phrases?select=id,he,ar,cat,section,audio_url');
     allRows=allRows||[];
-    var rows=allRows.filter(function(r){ return r && r.he && AUDIT_SECMAP[r.section]; });
+    var rows=allRows.filter(function(r){
+      if(!(r && r.he && AUDIT_SECMAP[r.section])) return false;
+      // Skip ORPHAN foundation categories — 'יסודות: …' rows that aren't in the real
+      // foundation menu (FOUNDATION_CATS) are shown nowhere in the app (e.g. months,
+      // topography). Recording them is pointless; the real vocabulary is in the
+      // dictionary. So they should never appear as "missing".
+      if(r.section==='military' && /^יסודות:/.test((r.cat||'').trim())
+         && typeof FOUNDATION_CATS!=='undefined' && FOUNDATION_CATS.indexOf((r.cat||'').trim())===-1) return false;
+      return true;
+    });
     // Grouping key = CONTEXT, not just text. The same word in a different place is a
     // different item, never a duplicate (Edith's rule): so the key includes the
     // category. Scenarios go further — every step is its own unique item (keyed by
@@ -19340,7 +19349,7 @@ window.addEventListener('load', function(){
 <script>
 // Version stamp — shown in the admin panel so we can confirm which build is live
 // on a device (stale service-worker caches were causing "my changes don't show").
-window.APP_VERSION = 'v130';
+window.APP_VERSION = 'v131';
 
 // Register the service worker for full offline use in the field, WITH update
 // detection: when a new version installs, offer a one-tap refresh instead of the
