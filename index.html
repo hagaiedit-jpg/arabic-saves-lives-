@@ -9037,35 +9037,17 @@ async function auditRecordings(btn){
           var id=String(r.id||'').replace(/'/g,"\\'");
           // Look for an already-recorded sentence that is nearly identical to this
           // one (differs by a letter or two — spelling variant / stray character).
-          var mn=_auditNorm(r.he), twin=null, bestDist=99;
-          // Scenarios: never offer a "duplicate" — a recurring line across steps is
-          // legitimate and must stay. Only non-scenario sections get twin detection.
-          if(sec!=='scenario'){
-            for(var ri=0; ri<recIndex.length; ri++){
-              var rec=recIndex[ri]; if(!rec.norm) continue;
-              if(rec.sec!==sec) continue;   // same-section only — cross-section is NOT a duplicate
-              if(Math.abs(rec.norm.length-mn.length)>2) continue;
-              var dist=_auditLev(mn, rec.norm);
-              if(dist<bestDist){ bestDist=dist; twin=rec; }
-              if(dist===0) break;
-            }
-          }
-          // Length-aware threshold: short words (months, topography terms) need a
-          // near-exact match or we'd falsely pair unrelated 2–3 letter words.
-          var thr = mn.length<=4 ? 1 : (mn.length<=8 ? 2 : Math.ceil(mn.length*0.18));
-          var isTwin = twin && bestDist<=thr;
+          // NOTE: fuzzy "near-duplicate" matching was removed — it wrongly paired
+          // distinct words (e.g. "למה?" with "כמה?") and risked deleting real
+          // content. Each missing sentence stands on its own: record it, or delete
+          // it for good. True same-category duplicates are handled by the shadow-
+          // empties fixer (exact-text match only).
           h+='<div style="padding:6px 8px;border-bottom:1px solid #1a2a3a;">'
             +'<div style="display:flex;justify-content:space-between;align-items:center;gap:6px;">'
             +'<div style="flex:1;min-width:0;color:#E8D9B8;font-size:12px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">'+_tabEsc(r.he)+'</div>'
             +'<button onclick="quickRecordById(\''+id+'\')" title="הקלט" style="flex-shrink:0;padding:5px 10px;background:#3a2a1a;border:1px solid #D4A24E;border-radius:6px;color:#D4A24E;font-size:12px;cursor:pointer;font-family:inherit;">🎤 הקלט</button>'
             +(sec!=='scenario' ? '<button onclick="auditHardDelete(\''+id+'\',this)" title="מחק לגמרי מהמאגר" style="flex-shrink:0;padding:5px 8px;background:#2a1414;border:1px solid #a83232;border-radius:6px;color:#ff9a8a;font-size:12px;cursor:pointer;font-family:inherit;">🗑️</button>' : '')
             +'</div>';
-          if(isTwin){
-            h+='<div style="display:flex;justify-content:space-between;align-items:center;gap:8px;margin-top:5px;padding:5px 7px;background:#1c2f22;border:1px solid #2f7d54;border-radius:6px;">'
-              +'<div style="flex:1;min-width:0;color:#a8e6cf;font-size:11px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">🔎 כבר מוקלט כ: '+_tabEsc(twin.he)+'</div>'
-              +'<button onclick="auditDelEmpty(\''+id+'\',this)" title="מחק כפילות ריקה" style="flex-shrink:0;padding:5px 9px;background:#3a1f1f;border:1px solid #c0392b;border-radius:6px;color:#ff9a8a;font-size:11px;cursor:pointer;font-family:inherit;">🗑️ מחק כפילות</button>'
-              +'</div>';
-          }
           h+='</div>';
         });
       });
@@ -19345,7 +19327,7 @@ window.addEventListener('load', function(){
 <script>
 // Version stamp — shown in the admin panel so we can confirm which build is live
 // on a device (stale service-worker caches were causing "my changes don't show").
-window.APP_VERSION = 'v128';
+window.APP_VERSION = 'v129';
 
 // Register the service worker for full offline use in the field, WITH update
 // detection: when a new version installs, offer a one-tap refresh instead of the
