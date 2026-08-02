@@ -8286,6 +8286,17 @@ async function loadData(){
 // Built-in scenarios that don't come from the remote dataset.
 // Civilian (speaker ב) lines are tagged 'civilian'; soldier (א) lines are not.
 function _scnStepKey(p){ var m=((p&&p.tags)||'').match(/step(\d+)/); return ((p&&p.cat)||'')+'#'+(m?m[1]:'?'); }
+// Separator-insensitive step key: a scenario stored under a hyphen/em-dash/spacing
+// variant of its name still matches, so auto-sync/restore recognise the step as
+// already present and don't re-create a duplicate on every load. Also keys by the
+// FULL step tag so "step3" and "step3 civilian" stay distinct.
+function _scnStepKeyN(p){
+  var tg=String((p&&p.tags)||'').replace(/\s+/g,' ').trim();
+  var m=tg.match(/step\d+.*$/i);                 // "step3" or "step3 civilian"
+  var stepPart = m ? m[0] : '?';
+  var catN = (typeof _scnCatNorm==='function') ? _scnCatNorm(p&&p.cat) : ((p&&p.cat)||'');
+  return catN+'#'+stepPart;
+}
 // Recently-added scenarios — show a "חדש" badge on their cube until first opened.
 var NEW_SCENARIOS = ['כריזה לרכב בידוק','כריזה למבוקש','תשאול זיהוי מבוקש','ביטול דוח תנועה','עמידה מול תחינות במחסום','חקירה','הרחקה מהשטח','חיפוש בבית — איפה בעל הבית','חיפוש בבית — מי בבית','מעצר נער חשוד','זיכוי מרחוק','זיכוי ובידוק','בירור מצב בריאותי','סיוע הומניטרי','כריזה: פינוי חמושים ממבנה','כריזה: ריכוז גברים בבית ספר','זיכוי שטח פתוח והרחקת רועי צאן','נוהל עצירה מדורג','לחץ ושכנוע בתשאול הורה','דיאלוג תשאול — יחסים בין ארגונים','מעצר מבוקש ופתיחת חקירה','בירור עבודה והיתר — כיסוי עיתונאי','כריזת עוצר'];
 // === מילון מבצעי: צ'ק פוסט ומחסום (פיילוט) — עברית+תעתיק אומתו ע"י המומחית; ערבית אושרה ===
@@ -9096,9 +9107,9 @@ async function restoreBuiltinScenarios(btn){
   var added=0, fail=0;
   try{
     var ex=await sbFetchAllRows('/rest/v1/phrases?select=id,cat,tags&section=eq.scenario');
-    var have={}; (ex||[]).forEach(function(p){ have[_scnStepKey(p)]=1; });
+    var have={}; (ex||[]).forEach(function(p){ have[_scnStepKeyN(p)]=1; });
     for(var i=0;i<BUILTIN_SCENARIO_DATA.length;i++){
-      var b=BUILTIN_SCENARIO_DATA[i]; var k=_scnStepKey(b);
+      var b=BUILTIN_SCENARIO_DATA[i]; var k=_scnStepKeyN(b);
       btn.textContent='משחזר '+(i+1)+'/'+BUILTIN_SCENARIO_DATA.length+'…';
       if(have[k]) continue;
       try{
@@ -16130,9 +16141,11 @@ async function autoSyncBuiltins(){
     // --- scenarios (keyed by category#stepNumber) ---
     if(typeof BUILTIN_SCENARIO_DATA!=='undefined' && BUILTIN_SCENARIO_DATA.length){
       var exScn=await sbFetchAllRows('/rest/v1/phrases?select=id,cat,tags&section=eq.scenario');
-      var haveScn={}; (exScn||[]).forEach(function(p){ haveScn[_scnStepKey(p)]=1; });
+      // Separator-insensitive keys so a step already present under any name variant
+      // is NOT re-added (that re-created duplicates on every load).
+      var haveScn={}; (exScn||[]).forEach(function(p){ haveScn[_scnStepKeyN(p)]=1; });
       for(var i=0;i<BUILTIN_SCENARIO_DATA.length;i++){
-        var b=BUILTIN_SCENARIO_DATA[i]; var k=_scnStepKey(b);
+        var b=BUILTIN_SCENARIO_DATA[i]; var k=_scnStepKeyN(b);
         if(haveScn[k])continue;
         await sbFetch('/rest/v1/phrases','POST',{cat:b.cat,he:b.he,trans:b.trans||'',ar:b.ar||'',tags:b.tags||'',why:b.why||'',tone:'',audio_url:'',is_new:false,section:'scenario'});
         haveScn[k]=1; addedScn++;
@@ -19327,7 +19340,7 @@ window.addEventListener('load', function(){
 <script>
 // Version stamp — shown in the admin panel so we can confirm which build is live
 // on a device (stale service-worker caches were causing "my changes don't show").
-window.APP_VERSION = 'v129';
+window.APP_VERSION = 'v130';
 
 // Register the service worker for full offline use in the field, WITH update
 // detection: when a new version installs, offer a one-tap refresh instead of the
