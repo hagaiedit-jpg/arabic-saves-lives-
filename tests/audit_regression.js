@@ -252,6 +252,30 @@ async function main() {
     await p.close();
   }
 
+  // 13 — emergency tab is ⭐-curated: soldiers see only starred phrases; admin edit
+  //      mode shows all with toggles (restores the precise, hand-picked חירום set)
+  {
+    const p = await load([
+      { id: 'g1', he: 'עצור!', ar: 'وقف', cat: 'הוראות מיידיות', section: 'military', audio_url: '', tags: '@gold' },
+      { id: 'g2', he: 'ידיים למעלה!', ar: 'إيديك لفوق', cat: 'הוראות מיידיות', section: 'military', audio_url: '', tags: '@gold' },
+      { id: 'n1', he: 'למה אתה עומד באמצע הדרך?', ar: 'x', cat: 'הוראות מיידיות', section: 'military', audio_url: '' },
+      { id: 'n2', he: 'תהיה בשקט עכשיו', ar: 'x', cat: 'הוראות מיידיות', section: 'military', audio_url: '' },
+    ]);
+    const r = await p.evaluate(() => {
+      var ec = { key: 'orders', cats: ['הוראות מיידיות', 'הוראות'] };
+      var curated = _emergPhrasesForCat(ec), all = _emergAllForCat(ec);
+      window._adminAuth = false; window._emergEditMode = false; openEmergCat('orders');
+      var soldier = (document.getElementById('emerg-items').innerHTML.match(/emerg-card-he/g) || []).length;
+      window._adminAuth = true; window._emergEditMode = true; openEmergCat('orders');
+      var editHtml = document.getElementById('emerg-items').innerHTML;
+      return { curated: curated.length, curatedFlag: curated._curated, allCount: all.length, soldier: soldier,
+        edit: (editHtml.match(/emerg-card-he/g) || []).length, toggles: (editHtml.match(/toggleEmergGold/g) || []).length };
+    });
+    check('חירום: חייל רואה רק משפטים מסומנים (⭐)', r.soldier === r.curated && r.curated === 2 && r.curatedFlag === true);
+    check('חירום: מצב עריכה מציג הכל עם כפתורי ⭐', r.edit === r.allCount && r.toggles === r.edit && r.allCount >= 2);
+    await p.close();
+  }
+
   await browser.close();
   console.log('\n========================================');
   if (fail === 0) console.log('✅ כל ' + pass + ' בדיקות הרגרסיה עברו');

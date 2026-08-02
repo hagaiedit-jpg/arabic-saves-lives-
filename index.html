@@ -18371,8 +18371,8 @@ function sortPhrasesByScenario(phrases){
   });
 }
 
-function _emergPhrasesForCat(emergCat){
-  // Auto-fill: include every phrase in the category (no manual ⭐ gating).
+// All phrases in an emergency category (unfiltered by ⭐), sorted by encounter stage.
+function _emergAllForCat(emergCat){
   var matches = DB.filter(function(p){
     if(!visibleToRole(p))return false;
     var pcat=(p.cat||'').trim();
@@ -18381,20 +18381,26 @@ function _emergPhrasesForCat(emergCat){
     }
     return false;
   });
-
-  // Sort: gold phrases pinned to the top, then by real-encounter scenario stage
   matches.sort(function(a, b){
-    var ga = isGoldPhrase(a) ? 0 : 1;
-    var gb = isGoldPhrase(b) ? 0 : 1;
-    if (ga !== gb) return ga - gb;
     var oa = _getScenarioOrder(a, emergCat.key);
     var ob = _getScenarioOrder(b, emergCat.key);
     if (oa !== ob) return oa - ob;
-    // Tiebreak: alphabetical by Hebrew
     return (a.he||'').localeCompare(b.he||'', 'he');
   });
-
-  return matches.slice(0, 30);
+  return matches;
+}
+function _emergPhrasesForCat(emergCat){
+  var matches = _emergAllForCat(emergCat);
+  // CURATED emergency (restores the original ⭐ design): if ANY phrase in this
+  // category is starred (⭐/@gold), show ONLY the starred ones — the precise,
+  // hand-picked critical set. If none are starred yet, fall back to all so the
+  // screen is never empty, and the view prompts the admin to star the critical
+  // ones. Marking ⭐ instantly removes the rest from חירום.
+  var gold = matches.filter(isGoldPhrase);
+  var out = (gold.length ? gold : matches).slice(0, 30);
+  out._curated = gold.length > 0;     // renderer shows the right hint
+  out._total = matches.length;        // how many exist in the category overall
+  return out;
 }
 
 function rQK(){
@@ -18434,33 +18440,75 @@ function openEmergCat(key){
   for(var i=0;i<EMERG_CATS.length;i++){if(EMERG_CATS[i].key===key){ec=EMERG_CATS[i];break;}}
   if(!ec)return;
   
-  var items=_emergPhrasesForCat(ec);
-  
+  window._emergCurKey = key;
+  var editing = !!(window._adminAuth && window._emergEditMode);
+  var items = editing ? _emergAllForCat(ec) : _emergPhrasesForCat(ec);
+
   document.getElementById('emerg-home').style.display='none';
   document.getElementById('emerg-list').style.display='block';
   document.getElementById('emerg-list-title').textContent=ec.emoji+' '+ec.name;
-  
+
   var el=document.getElementById('emerg-items');
+  var h='';
+  // Admin-only curation bar: switch between the soldier view (only ⭐ phrases) and
+  // an edit view (all phrases, tap ⭐ to include/exclude from חירום).
+  if(window._adminAuth) h += _emergCurationBar(ec, items, editing);
+
   if(!items.length){
-    el.innerHTML='<div class="empty">אין עדיין משפטים בקטגוריה זו.<br>הוסף משפטים בקטגוריה המתאימה בספרייה והם יופיעו כאן אוטומטית.</div>';
+    el.innerHTML = h + '<div class="empty">אין עדיין משפטים בקטגוריה זו.<br>הוסף משפטים בקטגוריה המתאימה בספרייה והם יופיעו כאן.</div>';
     return;
   }
-  
-  var h='';
-  for(var j=0;j<items.length;j++){ h+=_emergCardHTML(items[j]); }
+  for(var j=0;j<items.length;j++){ h+=_emergCardHTML(items[j], editing, key); }
   el.innerHTML=h;
 }
 
-// Build a single emergency phrase card (shared by category view and quick search)
-function _emergCardHTML(p){
+// Admin curation bar shown above the emergency list.
+function _emergCurationBar(ec, items, editing){
+  if(editing){
+    return '<div style="background:#2a2410;border:1px solid #D4A24E;border-radius:10px;padding:10px 12px;margin-bottom:10px;">'
+      +'<div style="color:#E8D9B8;font-size:12px;line-height:1.6;margin-bottom:8px;">✏️ <b>מצב עריכת חירום.</b> סמני ⭐ ליד <b>משפטי החירום הקריטיים בלבד</b>. מה שלא מסומן — לא יופיע לחיילים בחירום (אבל יישאר בספרייה).</div>'
+      +'<button onclick="toggleEmergEdit(\''+ec.key+'\')" style="width:100%;padding:10px;background:#1D9E75;border:none;border-radius:8px;color:#fff;font-size:13px;font-weight:800;cursor:pointer;font-family:inherit;">✓ סיימתי לסמן</button></div>';
+  }
+  var curated = items._curated;
+  var msg = curated
+    ? ('מוצגים רק משפטי החירום שסימנת (⭐) — '+items.length+' משפטים.')
+    : ('⚠️ הקטגוריה מציגה את כל '+ (items._total||items.length) +' המשפטים כי עוד לא סימנת חירום. לחצי "ערוך חירום" וסמני רק את הקריטיים.');
+  return '<div style="background:#14263b;border:1px solid #2A3D52;border-radius:10px;padding:9px 12px;margin-bottom:10px;">'
+    +'<div style="color:#a0b8c8;font-size:11.5px;line-height:1.5;margin-bottom:8px;">'+msg+'</div>'
+    +'<button onclick="toggleEmergEdit(\''+ec.key+'\')" style="width:100%;padding:9px;background:#3a2a1a;border:1px solid #D4A24E;border-radius:8px;color:#D4A24E;font-size:12.5px;font-weight:800;cursor:pointer;font-family:inherit;">✏️ ערוך חירום — בחרי אילו משפטים יופיעו</button></div>';
+}
+function toggleEmergEdit(key){ window._emergEditMode = !window._emergEditMode; openEmergCat(key); }
+// Toggle a phrase's ⭐/@gold flag (add/remove from the curated חירום set).
+async function toggleEmergGold(id, key){
+  var p = DB.find(function(x){ return String(x.id)===String(id); });
+  if(!p){ return; }
+  var was = isGoldPhrase(p);
+  var tags = String(p.tags||'').split(/\s+/).filter(function(t){ return t && t.toLowerCase()!=='@gold'; });
+  if(!was) tags.push('@gold');
+  var newTags = tags.join(' ').trim();
+  try{
+    await sbFetch('/rest/v1/phrases?id=eq.'+encodeURIComponent(id),'PATCH',{tags:newTags});
+    p.tags = newTags;                 // update in-memory so re-render reflects it
+    openEmergCat(key);
+  }catch(e){ alert('שגיאה בסימון: '+(e&&e.message?e.message:e)); }
+}
+
+// Build a single emergency phrase card (shared by category view and quick search).
+// `editing` (admin) adds a ⭐ toggle to include/exclude the phrase from חירום.
+function _emergCardHTML(p, editing, key){
   var idx=DB.findIndex(function(x){return x.id===p.id;});
   if(idx<0)idx=DB.indexOf(p);
+  var g=isGoldPhrase(p);
   var h='<div class="emerg-card">';
   h+='<div class="emerg-card-content" onclick="opP('+idx+')">';
-  h+='<div class="emerg-card-he">'+(isGoldPhrase(p)?'⭐ ':'')+p.he+'</div>';
+  h+='<div class="emerg-card-he">'+(g?'⭐ ':'')+p.he+'</div>';
   if(p.trans)h+='<div class="emerg-card-trans">'+p.trans+'</div>';
   if(p.ar)h+='<div class="emerg-card-ar">'+p.ar+'</div>';
   h+='</div>';
+  if(editing){
+    var sid=String(p.id||'').replace(/'/g,"\\'");
+    h+='<button class="emerg-play-btn" onclick="event.stopPropagation();toggleEmergGold(\''+sid+'\',\''+String(key||'').replace(/'/g,"\\'")+'\')" title="'+(g?'הסר מחירום':'סמן לחירום')+'" style="background:'+(g?'rgba(212,162,78,0.25)':'transparent')+';border:1px solid #D4A24E;color:#D4A24E;">'+(g?'⭐':'☆')+'</button>';
+  }
   h+='<button class="emerg-play-btn" onclick="playEmergCard(\''+(p.audio||'')+'\',this)" '+(p.audio?'':'disabled')+'>▶</button>';
   h+='</div>';
   return h;
@@ -19399,7 +19447,7 @@ window.addEventListener('load', function(){
 <script>
 // Version stamp — shown in the admin panel so we can confirm which build is live
 // on a device (stale service-worker caches were causing "my changes don't show").
-window.APP_VERSION = 'v137';
+window.APP_VERSION = 'v138';
 
 // Register the service worker for full offline use in the field, WITH update
 // detection: when a new version installs, offer a one-tap refresh instead of the
