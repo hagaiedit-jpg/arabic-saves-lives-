@@ -9561,6 +9561,28 @@ function populateFromData(data){
   }catch(e){}
   ARTS=data.filter(p=>p.section==='article').map(mp);
   INTEL=data.filter(p=>p.section==='intel_field').map(mp);
+  // "Record once, plays everywhere": share a recording across every place the EXACT
+  // same phrase appears. Non-destructive — fills the in-memory .audio for playback
+  // only; the database rows are untouched.
+  try{ applySharedAudio(); }catch(e){}
+}
+// Build an index of normalized-Hebrew -> a recording, from every loaded section,
+// then give any copy that has no recording of its own the shared one. Exact text
+// only (same spelling), so distinct words never borrow each other's audio.
+function applySharedAudio(){
+  var arrays=[typeof DB!=='undefined'?DB:null, typeof DAILY!=='undefined'?DAILY:null,
+    typeof HEART!=='undefined'?HEART:null, typeof SEM!=='undefined'?SEM:null,
+    typeof DICT!=='undefined'?DICT:null, typeof CUS!=='undefined'?CUS:null,
+    typeof NAVY!=='undefined'?NAVY:null, typeof ANNOUNCE!=='undefined'?ANNOUNCE:null,
+    typeof SCENARIO!=='undefined'?SCENARIO:null];
+  var idx={};
+  arrays.forEach(function(arr){ (arr||[]).forEach(function(p){
+    if(p && p.audio && p.he){ var k=_auditNorm(p.he); if(k && !idx[k]) idx[k]=p.audio; }
+  }); });
+  window.SHARED_AUDIO=idx;
+  arrays.forEach(function(arr){ (arr||[]).forEach(function(p){
+    if(p && !p.audio && p.he){ var a=idx[_auditNorm(p.he)]; if(a){ p.audio=a; p._sharedAudio=true; } }
+  }); });
 }
 
 // Render everything that depends on the loaded data
@@ -19364,7 +19386,7 @@ window.addEventListener('load', function(){
 <script>
 // Version stamp — shown in the admin panel so we can confirm which build is live
 // on a device (stale service-worker caches were causing "my changes don't show").
-window.APP_VERSION = 'v133';
+window.APP_VERSION = 'v134';
 
 // Register the service worker for full offline use in the field, WITH update
 // detection: when a new version installs, offer a one-tap refresh instead of the
