@@ -8141,6 +8141,30 @@ var BUILTIN_TASHAUL=[
   // Immediate orders (הוראות מיידיות) emergency phrases re-added at the admin's request.
   {section:'military', cat:'הוראות מיידיות', he:'זרוק את הסכין / את הנשק!', ar:'ارمي السكينة / السلاح', trans:'אִרְמִי אִלסִכִּינֶה / אִלסְלַאח!'},
   {section:'military', cat:'הוראות מיידיות', he:'תישאר כאן, אסור לזוז!', ar:'خليك هون، ممنوع تتحرك', trans:'חַ׳לִיכּ הוֹן, מַמְנוּע תִתְחַרַכּ!'},
+  // --- Recommended critical emergency set (completing Edith's approved list) ---
+  // Arabic marked [verified] pulled from existing app content; [verify] = proposed,
+  // needs the expert's confirmation (standard field phrasing).
+  {section:'military', cat:'הוראות מיידיות', he:'עצור!', ar:'وقف', trans:'וַקֵף'},                                    // [verified]
+  {section:'military', cat:'הוראות מיידיות', he:'ידיים על הראש', ar:'إيديك عالراس', trans:'אִידֵיכּ עַאלרַאס'},        // [verified]
+  {section:'military', cat:'הוראות מיידיות', he:'בוא הנה', ar:'تعال لهون', trans:'תַעַאל לַהוֹן'},                      // [verified]
+  {section:'military', cat:'הוראות מיידיות', he:'כרע ברך', ar:'اركع', trans:'אִרְכַּע'},                               // [verified]
+  {section:'military', cat:'הוראות מיידיות', he:'שתוק ותקשיב', ar:'اسكت واسمع', trans:'אֻסְכֻּת וּאִסְמַע'},           // [verified]
+  {section:'military', cat:'בידוק וזיהוי', he:'מה יש בכיס? תוציא לאט', ar:'شو بالجيب؟ طلّعه شوي شوي', trans:'שׁוּ בִּלגֵّיבּ? טַלّעֹה שְוַי שְוַי'}, // [verified]
+  {section:'military', cat:'בידוק וזיהוי', he:'מה השם שלך?', ar:'شو اسمك؟', trans:'שׁוּ אִסְמַכּ?'},                    // [verify]
+  {section:'military', cat:'בידוק וזיהוי', he:'הרם את החולצה', ar:'ارفع القميص', trans:'אִרְפַע אִלקַמִיץ'},           // [verify]
+  {section:'military', cat:'רכב ומחסום', he:'עצור את הרכב, כבה מנוע', ar:'وقّف السيارة وطفّي الموتور', trans:'וַקֵّף אִלסַّייַّארַה וּטַפִّי אִלמוֹתוֹר'}, // [verify]
+  {section:'military', cat:'רכב ומחסום', he:'ידיים על ההגה', ar:'إيديك عالدركسيون', trans:'אִידֵיכּ עַאלדִّרֵכּסְיוֹן'}, // [verify]
+  {section:'military', cat:'רכב ומחסום', he:'פתח חלון', ar:'افتح الشباك', trans:'אִפְתַח אִלשֻّבַּّאכּ'},              // [verify]
+  {section:'military', cat:'רכב ומחסום', he:'צא מהרכב לאט', ar:'اطلع من السيارة شوي شوي', trans:'אֻטְלַע מִן אִלסַّייַّארַה שְוַי שְוַי'}, // [verify]
+  {section:'military', cat:'רפואה ועזרה', he:'יש פצוע?', ar:'فيه مجروح؟', trans:'פִיה מַגְ׳רוּח?'},                    // [verified]
+  {section:'military', cat:'רפואה ועזרה', he:'אל תפחד, באנו לעזור', ar:'لا تخاف، إجينا نساعدك', trans:'לַא תְחַ׳אף, אִגִ׳ינַא נְסַאעְדַכּ'}, // [verified]
+  {section:'military', cat:'הוראות מיידיות', he:'אל תזוז!', ar:'لا تتحرك', trans:'לַא תִתְחַרַכּ'},                     // [verified]
+  {section:'military', cat:'הוראות מיידיות', he:'ידיים למעלה!', ar:'إيديك لفوق', trans:'אִידֵיכּ לַפוֹק'},             // [verified]
+  {section:'military', cat:'הוראות מיידיות', he:'תסתובב לאט', ar:'لفّ شوي شوي', trans:'לִףּ שְוַי שְוַי'},              // [verified]
+  {section:'military', cat:'רפואה ועזרה', he:'אתה פצוע?', ar:'انت مجروح؟', trans:'אִנְתֶ מַגְ׳רוּח?'},                  // [verified]
+  {section:'military', cat:'רכב ומחסום', he:'כמה אנשים ברכב?', ar:'كم واحد بالسيارة؟', trans:'כַּם וַאחַד בִּלסַّייַّארַה?'}, // [verify]
+  {section:'military', cat:'רפואה ועזרה', he:'איפה כואב?', ar:'وين بيوجعك؟', trans:'וֵין בִּיוֹגַעַכּ?'},              // [verify]
+  {section:'military', cat:'רפואה ועזרה', he:'אתה לוקח תרופות?', ar:'بتاخد أدوية؟', trans:'בְּתַאחֻ׳ד אַדְוִיֶה?'},    // [verify]
   {section:'military', cat:'יסודות: כינויי גוף', he:'אני', ar:'أنا', trans:'אַנַא'},
   {section:'military', cat:'יסודות: כינויי גוף', he:'אתה', ar:'انت', trans:'אִנְתֶ'},
   {section:'military', cat:'יסודות: כינויי גוף', he:'את', ar:'انتِ', trans:'אִנְתִי'},
@@ -19529,7 +19553,7 @@ window.addEventListener('load', function(){
 <script>
 // Version stamp — shown in the admin panel so we can confirm which build is live
 // on a device (stale service-worker caches were causing "my changes don't show").
-window.APP_VERSION = 'v141';
+window.APP_VERSION = 'v142';
 
 // Register the service worker for full offline use in the field, WITH update
 // detection: when a new version installs, offer a one-tap refresh instead of the
