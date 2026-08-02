@@ -8884,6 +8884,31 @@ async function auditDelEmpty(id, btn){
     try{ await loadData(); }catch(e){}
   }catch(e){ alert('שגיאה במחיקה: '+(e&&e.message?e.message:e)); btn.disabled=false; btn.textContent=ot; }
 }
+// ---- Deletion blocklist -------------------------------------------------------
+// Many phrases are hard-coded "built-ins" that the app re-adds on every load (both
+// into the display and into the DB). So a plain DELETE doesn't stick — the built-in
+// comes right back. When the admin deletes a phrase for good, we also record its
+// key here; every re-add path skips keys in this list. Stored per-device.
+function _delBlockNormHe(s){ return String(s||'').replace(/[^֐-׿0-9A-Za-z]/g,''); }
+function _delBlockKey(section,cat,he){ return (section||'')+'|'+(cat||'')+'|'+_delBlockNormHe(he); }
+function _delBlockList(){ try{ return JSON.parse(localStorage.getItem('deleted_builtins')||'[]'); }catch(e){ return []; } }
+function _delBlockSet(){ var o={}; _delBlockList().forEach(function(k){ o[k]=1; }); return o; }
+function _delBlockAdd(section,cat,he){ try{ var a=_delBlockList(), k=_delBlockKey(section,cat,he); if(a.indexOf(k)===-1){ a.push(k); localStorage.setItem('deleted_builtins', JSON.stringify(a)); } }catch(e){} }
+// Permanently delete a phrase: remove the DB row AND blocklist it so no re-add
+// path (display merge / auto-sync) resurrects it.
+async function auditHardDelete(id, btn){
+  if(!confirm('למחוק את המשפט הזה לגמרי מהמאגר?\nהמחיקה תישאר — המשפט לא יחזור אוטומטית.')) return;
+  btn.disabled=true; var ot=btn.textContent; btn.textContent='מוחק…';
+  try{
+    var rws=await sbFetch('/rest/v1/phrases?id=eq.'+encodeURIComponent(id)+'&select=section,cat,he');
+    var row=rws&&rws[0];
+    if(row){ _delBlockAdd(row.section,row.cat,row.he); }
+    await sbFetch('/rest/v1/phrases?id=eq.'+encodeURIComponent(id),'DELETE');
+    var box=btn.parentNode; if(box && box.parentNode){ box.parentNode.style.opacity='0.4'; } else if(box){ box.style.opacity='0.4'; }
+    btn.textContent='✓ נמחק לצמיתות';
+    try{ await loadData(); }catch(e){}
+  }catch(e){ alert('שגיאה במחיקה: '+(e&&e.message?e.message:e)); btn.disabled=false; btn.textContent=ot; }
+}
 // Live write-permission test: flip a harmless flag on one real row, verify it
 // landed, then restore it. This is THE check for "I recorded but nothing saved":
 // if writes are blocked (logged out / RLS / expired token), audio_url PATCHes are
@@ -9030,9 +9055,10 @@ async function auditRecordings(btn){
           var thr = mn.length<=4 ? 1 : (mn.length<=8 ? 2 : Math.ceil(mn.length*0.18));
           var isTwin = twin && bestDist<=thr;
           h+='<div style="padding:6px 8px;border-bottom:1px solid #1a2a3a;">'
-            +'<div style="display:flex;justify-content:space-between;align-items:center;gap:8px;">'
+            +'<div style="display:flex;justify-content:space-between;align-items:center;gap:6px;">'
             +'<div style="flex:1;min-width:0;color:#E8D9B8;font-size:12px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">'+_tabEsc(r.he)+'</div>'
             +'<button onclick="quickRecordById(\''+id+'\')" title="הקלט" style="flex-shrink:0;padding:5px 10px;background:#3a2a1a;border:1px solid #D4A24E;border-radius:6px;color:#D4A24E;font-size:12px;cursor:pointer;font-family:inherit;">🎤 הקלט</button>'
+            +(sec!=='scenario' ? '<button onclick="auditHardDelete(\''+id+'\',this)" title="מחק לגמרי מהמאגר" style="flex-shrink:0;padding:5px 8px;background:#2a1414;border:1px solid #a83232;border-radius:6px;color:#ff9a8a;font-size:12px;cursor:pointer;font-family:inherit;">🗑️</button>' : '')
             +'</div>';
           if(isTwin){
             h+='<div style="display:flex;justify-content:space-between;align-items:center;gap:8px;margin-top:5px;padding:5px 7px;background:#1c2f22;border:1px solid #2f7d54;border-radius:6px;">'
@@ -9433,9 +9459,11 @@ function populateFromData(data){
       // merged legitimately-distinct entries that share an Arabic word — e.g. the
       // imperative وقف and the past وقف in a conjugation table.)
       var _seenT={}; DB.forEach(function(p){ _seenT[(p.cat||'')+'|'+_normHeT(p.he)]=true; });
+      var _blkT=_delBlockSet();
       BUILTIN_TASHAUL.forEach(function(b){
         var k=(b.cat||'')+'|'+_normHeT(b.he);
         if(_seenT[k]) return;
+        if(_blkT[_delBlockKey('military',b.cat,b.he)]) return;   // admin deleted this for good
         DB.push(mp(b)); _seenT[k]=true;
       });
     }
@@ -9446,7 +9474,8 @@ function populateFromData(data){
     if(typeof BUILTIN_DAILY!=='undefined' && BUILTIN_DAILY.length){
       var _normHeD=function(s){return String(s||'').replace(/[^֐-׿0-9A-Za-z]/g,'');};
       var _seenD={}; DAILY.forEach(function(p){ _seenD[_normHeD(p.he)]=true; });
-      BUILTIN_DAILY.forEach(function(b){ if(!_seenD[_normHeD(b.he)]){ DAILY.push(mp(b)); _seenD[_normHeD(b.he)]=true; } });
+      var _blkD=_delBlockSet();
+      BUILTIN_DAILY.forEach(function(b){ if(_seenD[_normHeD(b.he)]) return; if(_blkD[_delBlockKey('daily',b.cat,b.he)]) return; DAILY.push(mp(b)); _seenD[_normHeD(b.he)]=true; });
     }
   }catch(e){}
   HEART=data.filter(p=>p.section==='heart' && p.cat!=='מנהגים').map(p=>{
@@ -16150,6 +16179,7 @@ async function autoSyncBuiltins(){
         var bt=BUILTIN_TASHAUL[t];
         var kt=bt.cat+'|'+normT(bt.he);
         if(haveT[kt])continue;
+        if(_delBlockList().indexOf(_delBlockKey('military',bt.cat,bt.he))!==-1)continue;   // admin deleted for good
         await sbFetch('/rest/v1/phrases','POST',{cat:bt.cat,he:bt.he,trans:bt.trans||'',ar:bt.ar||'',tags:'',why:bt.why||'',tone:'',audio_url:'',is_new:true,section:'military'});
         haveT[kt]=1; addedT++;
       }
@@ -16162,6 +16192,7 @@ async function autoSyncBuiltins(){
       var haveDay={}; (exDay||[]).forEach(function(p){ haveDay[normDay(p.he)]=1; });
       for(var dd=0;dd<BUILTIN_DAILY.length;dd++){
         var bdy=BUILTIN_DAILY[dd]; if(haveDay[normDay(bdy.he)])continue;
+        if(_delBlockList().indexOf(_delBlockKey('daily',bdy.cat,bdy.he))!==-1)continue;   // admin deleted for good
         await sbFetch('/rest/v1/phrases','POST',{cat:bdy.cat,he:bdy.he,trans:bdy.trans||'',ar:bdy.ar||'',tags:'',why:'',tone:'',audio_url:'',is_new:true,section:'daily'});
         haveDay[normDay(bdy.he)]=1; addedDay++;
       }
@@ -19314,7 +19345,7 @@ window.addEventListener('load', function(){
 <script>
 // Version stamp — shown in the admin panel so we can confirm which build is live
 // on a device (stale service-worker caches were causing "my changes don't show").
-window.APP_VERSION = 'v127';
+window.APP_VERSION = 'v128';
 
 // Register the service worker for full offline use in the field, WITH update
 // detection: when a new version installs, offer a one-tap refresh instead of the
