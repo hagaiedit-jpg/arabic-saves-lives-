@@ -8866,6 +8866,8 @@ async function migrateDictSentences(btn){
 // never a recording), and (b) reports what's genuinely still missing, per
 // category, as a record-straight-from-here worklist.
 var AUDIT_SECMAP = {military:'מבצעי', daily:'יומיומי', heart:'פותחים לב', announce:'כריזה', navy:'ימי', scenario:'תרחישים'};
+// Includes 'dictionary' too — used to label where an exact recording already exists.
+var AUDIT_SEC_LABEL = {military:'מבצעי', daily:'יומיומי', heart:'פותחים לב', announce:'כריזה', navy:'ימי', scenario:'תרחישים', dictionary:'מילון', customs:'מנהגים'};
 function _auditNorm(s){
   return String(s||'')
     .replace(/[֑-ׇ׳״]/g,'')  // drop niqqud, cantillation, maqaf, geresh/gershayim
@@ -9055,19 +9057,26 @@ async function auditRecordings(btn){
         h+='<div style="color:#7a9ab5;font-size:11px;font-weight:700;margin:6px 2px 3px;">'+_tabEsc(cat)+' ('+byCat[cat].length+')</div>';
         byCat[cat].forEach(function(r){
           var id=String(r.id||'').replace(/'/g,"\\'");
-          // Look for an already-recorded sentence that is nearly identical to this
-          // one (differs by a letter or two — spelling variant / stray character).
-          // NOTE: fuzzy "near-duplicate" matching was removed — it wrongly paired
-          // distinct words (e.g. "למה?" with "כמה?") and risked deleting real
-          // content. Each missing sentence stands on its own: record it, or delete
-          // it for good. True same-category duplicates are handled by the shadow-
-          // empties fixer (exact-text match only).
+          // EXACT-match cross-reference only (no fuzzy matching — that wrongly paired
+          // distinct words like "למה?"/"כמה?"). If this exact word is already recorded
+          // somewhere else (usually the dictionary), show it as INFO so she knows she
+          // already did it — but never auto-delete; the row stays hers to keep or drop.
+          var mn=_auditNorm(r.he), exactRec=null;
+          if(sec!=='scenario' && mn){
+            for(var ri=0; ri<recIndex.length; ri++){
+              if(recIndex[ri].norm===mn){ exactRec=recIndex[ri]; if(recIndex[ri].sec!==sec) break; }
+            }
+          }
           h+='<div style="padding:6px 8px;border-bottom:1px solid #1a2a3a;">'
             +'<div style="display:flex;justify-content:space-between;align-items:center;gap:6px;">'
             +'<div style="flex:1;min-width:0;color:#E8D9B8;font-size:12px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">'+_tabEsc(r.he)+'</div>'
             +'<button onclick="quickRecordById(\''+id+'\')" title="הקלט" style="flex-shrink:0;padding:5px 10px;background:#3a2a1a;border:1px solid #D4A24E;border-radius:6px;color:#D4A24E;font-size:12px;cursor:pointer;font-family:inherit;">🎤 הקלט</button>'
             +(sec!=='scenario' ? '<button onclick="auditHardDelete(\''+id+'\',this)" title="מחק לגמרי מהמאגר" style="flex-shrink:0;padding:5px 8px;background:#2a1414;border:1px solid #a83232;border-radius:6px;color:#ff9a8a;font-size:12px;cursor:pointer;font-family:inherit;">🗑️</button>' : '')
             +'</div>';
+          if(exactRec){
+            var _lbl=(AUDIT_SEC_LABEL[exactRec.sec]||exactRec.sec);
+            h+='<div style="margin-top:5px;padding:4px 7px;background:#16302a;border:1px solid #2f7d54;border-radius:6px;color:#a8e6cf;font-size:11px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">🔎 את המילה הזו כבר הקלטת'+(exactRec.sec!==sec?(' ב'+_lbl):'')+' — אפשר לדלג</div>';
+          }
           h+='</div>';
         });
       });
@@ -19349,7 +19358,7 @@ window.addEventListener('load', function(){
 <script>
 // Version stamp — shown in the admin panel so we can confirm which build is live
 // on a device (stale service-worker caches were causing "my changes don't show").
-window.APP_VERSION = 'v131';
+window.APP_VERSION = 'v132';
 
 // Register the service worker for full offline use in the field, WITH update
 // detection: when a new version installs, offer a one-tap refresh instead of the
