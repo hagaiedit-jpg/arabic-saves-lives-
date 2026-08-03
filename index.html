@@ -10021,14 +10021,14 @@ function openTenPhrase(i){
 // carries he/ar/trans; audio is matched live from recorded phrases in the pool.
 var SUSPECT_DESC = [
   {label:'מין', icon:'👤', options:[
-    {he:'גבר', ar:'رجّال', trans:'רַגַּ׳אל'},
-    {he:'אישה', ar:'مرا', trans:'מַרַא'},
+    {he:'גבר', ar:'رجّال', trans:'רַג׳ל'},
+    {he:'אישה', ar:'مرا', trans:'מַרַה'},
     {he:'ילד', ar:'ولد', trans:'וַלַד'},
     {he:'ילדה', ar:'بنت', trans:'בִּנְת'}
   ]},
   {label:'גיל משוער', icon:'🎂', options:[
     {he:'צעיר', ar:'شاب', trans:'שַׁאבּ'},
-    {he:'מבוגר', ar:'كبير بالعمر', trans:'כְּבִּיר בִּלעֻמֶר'},
+    {he:'מבוגר', ar:'ختيار', trans:'חְ׳תְיַאר'},
     {he:'זקן', ar:'عجوز', trans:'עַגׄוּז'},
     {he:'בן בערך...', ar:'عمره حوالي...', trans:'עֻמְרֹה חַוַאלִי...'}
   ]},
@@ -10051,7 +10051,7 @@ var SUSPECT_DESC = [
     {he:'חולצה', ar:'قميص', trans:'קַמִיץ'},
     {he:'מכנסיים', ar:'بنطلون', trans:'בַּנְטַלוֹן'},
     {he:'ז\'קט', ar:'جاكيت', trans:'גַׄאכֵּיט'},
-    {he:'כובע', ar:'طاقية', trans:'טַאקִיֵּה'}
+    {he:'כובע', ar:'طقيّة', trans:'טַקִיֵּה'}
   ]},
   {label:'צבע', icon:'🎨', options:[
     {he:'שחור', ar:'أسود', trans:'אַסְוַד'},
@@ -19790,7 +19790,7 @@ window.addEventListener('load', function(){
 <script>
 // Version stamp — shown in the admin panel so we can confirm which build is live
 // on a device (stale service-worker caches were causing "my changes don't show").
-window.APP_VERSION = 'v148';
+window.APP_VERSION = 'v149';
 
 // Register the service worker for full offline use in the field, WITH update
 // detection: when a new version installs, offer a one-tap refresh instead of the
