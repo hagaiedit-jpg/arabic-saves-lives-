@@ -10135,27 +10135,35 @@ function _descPairExists(he,ar){
   return pool.some(function(r){ return r && _tenNormHe(r.he)===heN && arN && _tenNormAr(r.ar)===arN; });
 }
 
-// One-time import: add the suspect-description template words that aren't already
-// in the kit, so they show in the admin lists for editing/recording. The template
-// then plays their recordings automatically (matched by he+ar).
+// One-time import: make sure every template word that has NO recording yet lands
+// in one recordable list (the "תיאור אדם" dictionary category), so it can be
+// recorded from the admin lists. Words that already have audio are left alone;
+// words already sitting in that category are not duplicated.
 async function importSuspectDesc(btn){
-  if(!confirm('להוסיף את מילות "תיאור חשוד" שעדיין חסרות במאגר — לעריכה והקלטה מהרשימה? פעולה חד-פעמית, ללא כפילות.'))return;
+  if(!confirm('להכניס לרשימה "תיאור אדם" את כל מילות התבנית שעדיין אין להן הקלטה — כדי שתוכלי להקליט אותן במקום אחד? פעולה חד-פעמית, ללא כפילות.'))return;
   var old=btn.textContent; btn.disabled=true; btn.textContent='מוסיף...';
   try{
-    var added=0, skipped=0;
+    // he+ar pairs already sitting in the "תיאור אדם" category (don't duplicate there)
+    var inCat={};
+    (typeof DICT!=='undefined'&&DICT?DICT:[]).forEach(function(r){
+      if(r && r.cat==='תיאור אדם') inCat[_tenNormHe(r.he)+'|'+_tenNormAr(r.ar)]=1;
+    });
+    var added=0, haveRec=0, already=0;
     for(var s=0;s<SUSPECT_DESC.length;s++){
       var slot=SUSPECT_DESC[s];
       for(var o=0;o<slot.options.length;o++){
         var op=slot.options[o];
-        if(_descPairExists(op.he,op.ar)){ skipped++; continue; }
+        if(_descMatchAudio(op.he,op.ar)){ haveRec++; continue; }   // already recorded — no need
+        var key=_tenNormHe(op.he)+'|'+_tenNormAr(op.ar);
+        if(inCat[key]){ already++; continue; }                      // already in the list to record
         await sbFetch('/rest/v1/phrases','POST',{cat:'תיאור אדם',he:op.he,trans:op.trans,ar:op.ar,tags:slot.label,why:'',tone:'',audio_url:'',is_new:false,section:'dictionary'});
-        added++;
+        inCat[key]=1; added++;
       }
     }
     try{ await loadData(); }catch(e){}
     try{ if(typeof renderSuspectDesc==='function') renderSuspectDesc(); }catch(e){}
     btn.disabled=false; btn.textContent=old;
-    alert('✓ נוספו '+added+' מילים חדשות לרשימות (קטגוריית "תיאור אדם")'+(skipped?(' · '+skipped+' כבר היו קיימות'):'')+'.\n\nעכשיו אפשר לחפש, לערוך ולהקליט כל אחת מהרשימה — והתבנית תשמיע אותן.');
+    alert('✓ '+added+' מילים נוספו לרשימה "תיאור אדם" להקלטה.\n• '+haveRec+' כבר מוקלטות (🔊 בתבנית)\n• '+already+' כבר היו ברשימה\n\nעכשיו: ניהול → 📋 רשימה → קטגוריית "תיאור אדם" → הקליטי אותן. כל מילה שתקליטי — 🔊 יופיע בתבנית.');
   }catch(e){ btn.disabled=false; btn.textContent=old; alert('שגיאה: '+(e&&e.message?e.message:e)); }
 }
 
@@ -19827,7 +19835,7 @@ window.addEventListener('load', function(){
 <script>
 // Version stamp — shown in the admin panel so we can confirm which build is live
 // on a device (stale service-worker caches were causing "my changes don't show").
-window.APP_VERSION = 'v152';
+window.APP_VERSION = 'v153';
 
 // Register the service worker for full offline use in the field, WITH update
 // detection: when a new version installs, offer a one-tap refresh instead of the
