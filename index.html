@@ -2230,6 +2230,17 @@ function showLanding() {
       </div>
     </div>
 
+    <!-- 🆕 "מה חדש" strip: appears only when new content was added. Self-explanatory,
+         visible on home without digging into "עוד". Tap opens the aggregated new list. -->
+    <div id="home-new-strip" onclick="navToTab('nwf')" style="display:none;align-items:center;gap:11px;background:linear-gradient(135deg,rgba(212,162,78,0.18),rgba(212,162,78,0.06));border:1px solid rgba(212,162,78,0.4);border-radius:14px;padding:12px 14px;margin-bottom:14px;cursor:pointer;">
+      <div style="font-size:24px;flex-shrink:0;">🆕</div>
+      <div style="flex:1;min-width:0;">
+        <div style="color:#E8D9B8;font-size:14px;font-weight:800;">נוסף לאחרונה</div>
+        <div id="home-new-strip-sub" style="color:#D4A24E;font-size:12px;font-weight:700;margin-top:1px;"></div>
+      </div>
+      <div style="color:#D4A24E;font-size:20px;flex-shrink:0;">›</div>
+    </div>
+
     <!-- Phrase of the Day (compact) - right under the greeting -->
     <div id="home-potd-card" style="display:none;background:#18293E;border:1px solid rgba(212,162,78,0.25);border-right:3px solid #D4A24E;border-radius:12px;padding:10px 12px;margin-bottom:14px;">
       <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:7px;">
@@ -2824,6 +2835,18 @@ function showLanding() {
       <button onclick="voiceSearch('dict-search',this)" title="חיפוש קולי" style="background:rgba(212,162,78,0.18);border:1px solid #D4A24E;color:#D4A24E;width:32px;height:32px;border-radius:50%;cursor:pointer;font-size:15px;flex-shrink:0;">🎤</button>
       <button onclick="document.getElementById('dict-search').value='';searchDict()" style="background:rgba(255,255,255,0.1);border:none;color:#E8D9B8;width:28px;height:28px;border-radius:50%;cursor:pointer;font-size:16px;">×</button>
     </div>
+    <div style="display:flex;gap:8px;margin-bottom:14px;">
+      <div onclick="navToTab('sem')" style="flex:1;background:#1F3147;border:1px solid #2A3D52;border-radius:10px;padding:12px 8px;text-align:center;cursor:pointer;">
+        <div style="font-size:20px;margin-bottom:3px;">🧠</div>
+        <div style="color:#E8D9B8;font-size:12px;font-weight:700;">סמנטי</div>
+        <div style="color:#7a9ab5;font-size:10px;margin-top:1px;">מילים דו-משמעיות</div>
+      </div>
+      <div onclick="navToTab('intel')" style="flex:1;background:#1F3147;border:1px solid rgba(231,76,60,0.35);border-radius:10px;padding:12px 8px;text-align:center;cursor:pointer;">
+        <div style="font-size:20px;margin-bottom:3px;">🕵️</div>
+        <div style="color:#E8D9B8;font-size:12px;font-weight:700;">מודיעין שטח</div>
+        <div style="color:#7a9ab5;font-size:10px;margin-top:1px;">מונחים לזיהוי</div>
+      </div>
+    </div>
     <div id="dict-results"></div>
   </div>
 </div>
@@ -2843,7 +2866,7 @@ function showLanding() {
 
 <!-- SEMANTIC TAB -->
 <div class="scr" id="tab-sem">
-  <div class="sec"><button onclick="navToTab('home')" style="background:transparent;border:none;color:#a0b8c8;font-size:15px;cursor:pointer;font-family:inherit;padding:4px 0;margin-bottom:10px;display:flex;align-items:center;gap:6px;">◀ חזרה לבית</button><div class="stitle">מילון סמנטי — מילים עם משמעות כפולה</div><div id="semlist"></div></div>
+  <div class="sec"><button onclick="navToTab('dict')" style="background:transparent;border:none;color:#a0b8c8;font-size:15px;cursor:pointer;font-family:inherit;padding:4px 0;margin-bottom:10px;display:flex;align-items:center;gap:6px;">◀ חזרה למילון</button><div class="stitle">מילון סמנטי — מילים עם משמעות כפולה</div><div id="semlist"></div></div>
 </div>
 
 <!-- CUSTOMS TAB -->
@@ -2879,7 +2902,7 @@ function showLanding() {
 </div>
 
 <div class="scr" id="tab-intel">
-  <button onclick="navToTab('home')" style="background:transparent;border:none;color:#a0b8c8;font-size:15px;cursor:pointer;font-family:inherit;padding:10px 14px 0;margin:0;display:flex;align-items:center;gap:6px;">◀ חזרה לבית</button>
+  <button onclick="navToTab('dict')" style="background:transparent;border:none;color:#a0b8c8;font-size:15px;cursor:pointer;font-family:inherit;padding:10px 14px 0;margin:0;display:flex;align-items:center;gap:6px;">◀ חזרה למילון</button>
   <div style="background:linear-gradient(135deg,rgba(231,76,60,0.15),rgba(231,76,60,0.05));border:1px solid rgba(231,76,60,0.4);border-radius:14px;padding:18px;margin:14px 12px 8px 12px;">
     <div style="display:flex;align-items:center;gap:12px;margin-bottom:12px;">
       <div style="font-size:32px;">🕵️</div>
@@ -6012,6 +6035,25 @@ function renderHome(){
   try {
     var cusNewEl = document.getElementById('home-cus-new');
     if (cusNewEl) cusNewEl.style.display = (typeof CUS !== 'undefined' && CUS && CUS.some(function(c){ return c && c.isNew; })) ? 'block' : 'none';
+  } catch(e) {}
+
+  // "מה חדש" home strip — shows only when there is genuinely new content,
+  // so soldiers see it on home without opening "עוד". Replaces the old buried tile.
+  try {
+    var newStrip = document.getElementById('home-new-strip');
+    if (newStrip) {
+      var newCount = 0;
+      [ (typeof DB!=='undefined'?DB:[]), (typeof DAILY!=='undefined'?DAILY:[]),
+        (typeof HEART!=='undefined'?HEART:[]), (typeof NAVY!=='undefined'?NAVY:[]) ]
+        .forEach(function(arr){ if(arr&&arr.forEach) arr.forEach(function(p){ if(p&&p.isNew) newCount++; }); });
+      if (newCount > 0) {
+        var subEl = document.getElementById('home-new-strip-sub');
+        if (subEl) subEl.textContent = newCount === 1 ? 'משפט חדש אחד — לחצו לצפייה' : (newCount + ' משפטים חדשים — לחצו לצפייה');
+        newStrip.style.display = 'flex';
+      } else {
+        newStrip.style.display = 'none';
+      }
+    }
   } catch(e) {}
 
   try {
@@ -19339,10 +19381,6 @@ try { renderHome(); } catch(_){}
       <div style="font-size:22px;margin-bottom:4px;">🎓</div>
       <div style="color:#7fd0ff;font-size:11px;font-weight:700;">יסודות השפה</div>
     </div>
-    <div onclick="navToTab('sem')" style="background:#1F3147;border-radius:10px;padding:14px 6px;text-align:center;cursor:pointer;">
-      <div style="font-size:22px;margin-bottom:4px;">🧠</div>
-      <div style="color:#E8D9B8;font-size:11px;font-weight:600;">סמנטי</div>
-    </div>
     <div onclick="navToTab('day')" style="background:#1F3147;border-radius:10px;padding:14px 6px;text-align:center;cursor:pointer;">
       <div style="font-size:22px;margin-bottom:4px;">☕</div>
       <div style="color:#E8D9B8;font-size:11px;font-weight:600;">יומיומי</div>
@@ -19351,17 +19389,9 @@ try { renderHome(); } catch(_){}
       <div style="font-size:22px;margin-bottom:4px;">🤝</div>
       <div style="color:#E8D9B8;font-size:11px;font-weight:600;">פותחים לב</div>
     </div>
-    <div onclick="document.getElementById('more-menu').style.display='none';navToTab('intel')" style="background:linear-gradient(135deg,rgba(231,76,60,0.2),rgba(231,76,60,0.05));border:1px solid rgba(231,76,60,0.4);border-radius:10px;padding:14px 6px;text-align:center;cursor:pointer;">
-      <div style="font-size:22px;margin-bottom:4px;">🕵️</div>
-      <div style="color:#E8D9B8;font-size:11px;font-weight:600;">מודיעין שטח</div>
-    </div>
     <div onclick="document.getElementById('more-menu').style.display='none';navToTab('art')" style="background:#1F3147;border-radius:10px;padding:14px 6px;text-align:center;cursor:pointer;">
       <div style="font-size:22px;margin-bottom:4px;">📰</div>
       <div style="color:#E8D9B8;font-size:11px;font-weight:600;">מאמרים</div>
-    </div>
-    <div onclick="navToTab('nwf')" style="background:#1F3147;border-radius:10px;padding:14px 6px;text-align:center;cursor:pointer;">
-      <div style="font-size:22px;margin-bottom:4px;">🆕</div>
-      <div style="color:#E8D9B8;font-size:11px;font-weight:600;">חדש</div>
     </div>
     <!-- 🏆 Unit leaderboard — gated for the future paid kit. Re-enable by removing display:none. -->
     <div onclick="document.getElementById('more-menu').style.display='none';openLeaderboard()" style="display:none;background:linear-gradient(135deg,rgba(212,162,78,0.18),rgba(212,162,78,0.05));border:1px solid rgba(212,162,78,0.4);border-radius:10px;padding:14px 6px;text-align:center;cursor:pointer;">
@@ -19602,7 +19632,7 @@ window.addEventListener('load', function(){
 <script>
 // Version stamp — shown in the admin panel so we can confirm which build is live
 // on a device (stale service-worker caches were causing "my changes don't show").
-window.APP_VERSION = 'v145';
+window.APP_VERSION = 'v146';
 
 // Register the service worker for full offline use in the field, WITH update
 // detection: when a new version installs, offer a one-tap refresh instead of the
