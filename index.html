@@ -10078,7 +10078,7 @@ var SUSPECT_DESC = [
     {he:'צלקת', ar:'ندبة', trans:'נַדְבֵּה'},
     {he:'קעקוע', ar:'وشم', trans:'וַשֵׁם'},
     {he:'צולע', ar:'بيعرج', trans:'בִּיעְרֻג׳'},
-    {he:'משקפיים', ar:'نظّارات', trans:'נַצַّ׳ארַאת'}
+    {he:'משקפיים', ar:'نظّارات', trans:'נַד׳ארַאת'}
   ]}
 ];
 
@@ -10111,10 +10111,43 @@ var TRIAGE = [
   ]},
   {label:'הרגעה וטיפול', icon:'🤲', options:[
     {he:'אל תפחד', ar:'لا تخاف', trans:'לַא תְחַ׳אף'},
-    {he:'תישאר איתי', ar:'ضلّ معي', trans:'ד׳לّ מַעִי'},
+    {he:'תישאר איתי', ar:'ضلّ معي', trans:'ד׳ל מַעִי'},
     {he:'עזרה בדרך', ar:'الإسعاف جاي', trans:'אִלאִסְעַאף גַׄאי', _new:true},
     {he:'הזעק אמבולנס', ar:'اطلب إسعاف', trans:'אֻטְלֻבּ אִסְעַאף'},
     {he:'מים', ar:'مي', trans:'מַי'}
+  ]}
+];
+
+// === מה עונים לך — recognizing the citizen's likely answers ===
+// Grouped by answer TYPE so a soldier can quickly recognize a reply. Wording
+// uses the editor-approved transliterations; _new:true where verification helps.
+var ANSWERS = [
+  {label:'אישור (כן)', icon:'✅', options:[
+    {he:'כן', ar:'آه', trans:'אַה'},
+    {he:'טוב / בסדר', ar:'طيّب', trans:'טיב', _new:true}
+  ]},
+  {label:'שלילה (לא)', icon:'❌', options:[
+    {he:'לא', ar:'لا', trans:'לַא'},
+    {he:'אין', ar:'ما فيه', trans:'מא פיה', _new:true}
+  ]},
+  {label:'אי-ידיעה', icon:'❓', options:[
+    {he:'לא יודע', ar:'ما بعرف', trans:'מא באערף', _new:true},
+    {he:'נשבע שלא יודע', ar:'والله ما بعرف', trans:'ואללה מא באערף', _new:true}
+  ]},
+  {label:'מיקום', icon:'📍', options:[
+    {he:'כאן', ar:'هون', trans:'הוֹן'},
+    {he:'שם', ar:'هنيك', trans:'הוניכּ', _new:true},
+    {he:'בבית', ar:'بالبيت', trans:'באלבית', _new:true}
+  ]},
+  {label:'אנשים', icon:'👥', options:[
+    {he:'רק המשפחה', ar:'بس العيلة', trans:'בס אלעילה', _new:true},
+    {he:'אין אף אחד', ar:'ما فيه حدا', trans:'מא פיה חדא', _new:true},
+    {he:'אני והילדים', ar:'أنا والاولاد', trans:'אנא ואלאולאד', _new:true}
+  ]},
+  {label:'זמן', icon:'⏳', options:[
+    {he:'עכשיו', ar:'هلّق', trans:'הלק', _new:true},
+    {he:'מחר', ar:'بكرة', trans:'בכרה', _new:true},
+    {he:'מזמן', ar:'من زمان', trans:'מן זמאן', _new:true}
   ]}
 ];
 
@@ -19964,7 +19997,7 @@ window.addEventListener('load', function(){
 <script>
 // Version stamp — shown in the admin panel so we can confirm which build is live
 // on a device (stale service-worker caches were causing "my changes don't show").
-window.APP_VERSION = 'v157';
+window.APP_VERSION = 'v158';
 
 // Register the service worker for full offline use in the field, WITH update
 // detection: when a new version installs, offer a one-tap refresh instead of the
