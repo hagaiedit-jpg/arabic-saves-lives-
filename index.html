@@ -10069,7 +10069,7 @@ function _descMatchAudio(he, ar){
   [typeof DB!=='undefined'?DB:null, typeof DAILY!=='undefined'?DAILY:null,
    typeof HEART!=='undefined'?HEART:null, typeof NAVY!=='undefined'?NAVY:null,
    typeof ANNOUNCE!=='undefined'?ANNOUNCE:null, typeof CUS!=='undefined'?CUS:null,
-   typeof INTEL!=='undefined'?INTEL:null].forEach(function(a){ if(Array.isArray(a))pool=pool.concat(a); });
+   typeof INTEL!=='undefined'?INTEL:null, typeof DICT!=='undefined'?DICT:null].forEach(function(a){ if(Array.isArray(a))pool=pool.concat(a); });
   var heN=_tenNormHe(he), arN=_tenNormAr(ar);
   for(var i=0;i<pool.length;i++){
     var r=pool[i]; if(!r)continue;
@@ -10102,7 +10102,7 @@ function openDescItem(si,oi){
   var slot=SUSPECT_DESC[si]; if(!slot)return;
   var o=slot.options[oi]; if(!o)return;
   var audio=_descMatchAudio(o.he,o.ar);
-  window._popupSource='ten';
+  window._popupSource='desc';
   window._popupReturnTab='desc';
   _setPopupAudio(audio||'');
   if(typeof setPopupLabel==='function')setPopupLabel('military');
@@ -10130,7 +10130,7 @@ function _descPairExists(he,ar){
   [typeof DB!=='undefined'?DB:null, typeof DAILY!=='undefined'?DAILY:null,
    typeof HEART!=='undefined'?HEART:null, typeof NAVY!=='undefined'?NAVY:null,
    typeof ANNOUNCE!=='undefined'?ANNOUNCE:null, typeof CUS!=='undefined'?CUS:null,
-   typeof INTEL!=='undefined'?INTEL:null].forEach(function(a){ if(Array.isArray(a))pool=pool.concat(a); });
+   typeof INTEL!=='undefined'?INTEL:null, typeof DICT!=='undefined'?DICT:null].forEach(function(a){ if(Array.isArray(a))pool=pool.concat(a); });
   var heN=_tenNormHe(he), arN=_tenNormAr(ar);
   return pool.some(function(r){ return r && _tenNormHe(r.he)===heN && arN && _tenNormAr(r.ar)===arN; });
 }
@@ -16091,7 +16091,8 @@ function clsP(){
     'daily':{tab:'day', row:'secondary', cb:null},
     'dict': {tab:'dict',row:'secondary', cb:function(){renderDict();}},
     'sem':  {tab:'sem', row:'secondary', cb:function(){if(typeof rSem==='function')rSem();}},
-    'ten':  {tab:'ten', row:'secondary', cb:function(){if(typeof renderTen==='function')renderTen();}}
+    'ten':  {tab:'ten', row:'secondary', cb:function(){if(typeof renderTen==='function')renderTen();}},
+    'desc': {tab:'desc',row:'secondary', cb:function(){if(typeof renderSuspectDesc==='function')renderSuspectDesc();}}
   };
   if(src && routes[src]){
     var r=routes[src];
@@ -19826,7 +19827,7 @@ window.addEventListener('load', function(){
 <script>
 // Version stamp — shown in the admin panel so we can confirm which build is live
 // on a device (stale service-worker caches were causing "my changes don't show").
-window.APP_VERSION = 'v151';
+window.APP_VERSION = 'v152';
 
 // Register the service worker for full offline use in the field, WITH update
 // detection: when a new version installs, offer a one-tap refresh instead of the
