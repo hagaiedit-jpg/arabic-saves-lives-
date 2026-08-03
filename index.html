@@ -2612,6 +2612,16 @@ function showLanding() {
         <div style="color:#a0b8c8;font-size:11px;margin-top:4px;">חזרו מחר לאתגר חדש 🎯</div>
       </div>
       
+      <!-- 🎯 Suspect-description template: field tool reachable fast from Emergency -->
+      <div onclick="navToTab('desc')" style="display:flex;align-items:center;gap:13px;background:linear-gradient(135deg,rgba(212,162,78,0.18),rgba(212,162,78,0.05));border:1px solid rgba(212,162,78,0.45);border-radius:14px;padding:13px 15px;margin-bottom:14px;cursor:pointer;">
+        <div style="font-size:26px;flex-shrink:0;">🎯</div>
+        <div style="flex:1;min-width:0;">
+          <div style="color:#E8D9B8;font-size:15px;font-weight:800;">תיאור חשוד</div>
+          <div style="color:#7a9ab5;font-size:12px;margin-top:1px;">תבנית מהירה — מה לשאול ואיך לתאר</div>
+        </div>
+        <div style="color:#D4A24E;font-size:20px;flex-shrink:0;">‹</div>
+      </div>
+
       <div class="emerg-grid" id="emerg-grid"></div>
     </div>
     <div id="emerg-list" style="display:none;">
@@ -2846,11 +2856,6 @@ function showLanding() {
         <div style="color:#E8D9B8;font-size:12px;font-weight:700;">מודיעין שטח</div>
         <div style="color:#7a9ab5;font-size:10px;margin-top:1px;">מונחים לזיהוי</div>
       </div>
-      <div onclick="navToTab('desc')" style="flex:1;background:#1F3147;border:1px solid rgba(212,162,78,0.35);border-radius:10px;padding:12px 8px;text-align:center;cursor:pointer;">
-        <div style="font-size:20px;margin-bottom:3px;">🎯</div>
-        <div style="color:#E8D9B8;font-size:12px;font-weight:700;">תיאור חשוד</div>
-        <div style="color:#7a9ab5;font-size:10px;margin-top:1px;">תבנית דיווח</div>
-      </div>
     </div>
     <div id="dict-results"></div>
   </div>
@@ -2872,7 +2877,7 @@ function showLanding() {
 <!-- SUSPECT DESCRIPTION TEMPLATE TAB -->
 <div class="scr" id="tab-desc">
   <div style="padding:14px 12px 100px 12px;min-height:100vh;">
-    <button onclick="navToTab('dict')" style="background:transparent;border:none;color:#a0b8c8;font-size:15px;cursor:pointer;font-family:inherit;padding:4px 0;margin-bottom:10px;display:flex;align-items:center;gap:6px;">◀ חזרה למילון</button>
+    <button onclick="navToTab('qk')" style="background:transparent;border:none;color:#a0b8c8;font-size:15px;cursor:pointer;font-family:inherit;padding:4px 0;margin-bottom:10px;display:flex;align-items:center;gap:6px;">◀ חזרה לחירום</button>
     <div style="text-align:center;margin-bottom:14px;">
       <div style="font-size:26px;margin-bottom:4px;">🎯</div>
       <div style="color:#E8D9B8;font-size:18px;font-weight:800;letter-spacing:0.3px;">תיאור חשוד</div>
@@ -10031,8 +10036,8 @@ var SUSPECT_DESC = [
     {he:'גבוה', ar:'طويل', trans:'טַוִיל'},
     {he:'נמוך', ar:'قصير', trans:'קַצִיר'},
     {he:'בינוני', ar:'متوسّط', trans:'מֻתַוַסֵּט'},
-    {he:'רזה', ar:'نحيف', trans:'נַחִיף'},
-    {he:'שמן', ar:'سمين', trans:'סַמִין'}
+    {he:'רזה', ar:'ضعيف', trans:'צְ׳עִיף'},
+    {he:'שמן / מלא', ar:'ناصح', trans:'נַאצֶח'}
   ]},
   {label:'שיער ופנים', icon:'💇', options:[
     {he:'שיער שחור', ar:'شعر أسود', trans:'שַׁעֵר אַסְוַד'},
@@ -12329,7 +12334,21 @@ function opC(cat,special){
     // Render: intro + learning card + (subcats OR items)
     const target = document.getElementById('litems');
     target.innerHTML = '';
-    
+
+    // Cross-link: the "תשאול: תיאור אדם" questions pair with the full description
+    // template (the whole picture — what to ask / how to describe).
+    if (cat === 'תשאול: תיאור אדם') {
+      const tplLink = document.createElement('div');
+      tplLink.style.cssText = 'display:flex;align-items:center;gap:11px;background:linear-gradient(135deg,rgba(212,162,78,0.16),rgba(212,162,78,0.04));border:1px solid rgba(212,162,78,0.4);border-radius:12px;padding:12px 14px;margin-bottom:14px;cursor:pointer;';
+      tplLink.setAttribute('onclick', "navToTab('desc')");
+      tplLink.innerHTML =
+        '<div style="font-size:22px;flex-shrink:0;">🎯</div>' +
+        '<div style="flex:1;min-width:0;"><div style="color:#E8D9B8;font-size:14px;font-weight:800;">תבנית תיאור חשוד</div>' +
+        '<div style="color:#7a9ab5;font-size:12px;margin-top:1px;">התמונה המלאה — מה לשאול ואיך לתאר</div></div>' +
+        '<div style="color:#D4A24E;font-size:18px;flex-shrink:0;">‹</div>';
+      target.appendChild(tplLink);
+    }
+
     // 1. Intro box - "what's in here"
     if (catInfo && catInfo.desc) {
       const introBox = document.createElement('div');
@@ -19771,7 +19790,7 @@ window.addEventListener('load', function(){
 <script>
 // Version stamp — shown in the admin panel so we can confirm which build is live
 // on a device (stale service-worker caches were causing "my changes don't show").
-window.APP_VERSION = 'v147';
+window.APP_VERSION = 'v148';
 
 // Register the service worker for full offline use in the field, WITH update
 // detection: when a new version installs, offer a one-tap refresh instead of the
