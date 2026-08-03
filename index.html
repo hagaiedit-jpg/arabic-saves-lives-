@@ -19311,9 +19311,11 @@ try { renderHome(); } catch(_){}
     <div style="font-size:24px;line-height:1;margin-bottom:4px;">🏠</div>
     <div style="color:#E8D9B8;font-size:11px;font-weight:700;">בית</div>
   </div>
-  <div onclick="navToTab('qk')" class="bn-btn" data-tab="qk" style="flex:1;text-align:center;cursor:pointer;padding:6px 4px;border-radius:10px;transition:all 0.2s;">
-    <div style="font-size:24px;line-height:1;margin-bottom:4px;">🚨</div>
-    <div style="color:#c0392b;font-size:11px;font-weight:700;">חירום</div>
+  <div onclick="navToTab('qk')" class="bn-btn" data-tab="qk" style="flex:1;text-align:center;cursor:pointer;padding:0 4px;border-radius:10px;transition:all 0.2s;">
+    <div style="width:58px;height:58px;margin:-22px auto 1px;background:linear-gradient(135deg,#e0392b 0%,#a82318 100%);border-radius:50%;display:flex;align-items:center;justify-content:center;box-shadow:0 4px 14px rgba(224,57,43,0.55);border:3px solid #0E1B2E;">
+      <div style="font-size:29px;line-height:1;">🚨</div>
+    </div>
+    <div style="color:#ff6b5c;font-size:11px;font-weight:800;">חירום</div>
   </div>
   <div onclick="navToTab('scn')" class="bn-btn" data-tab="scn" style="flex:1;text-align:center;cursor:pointer;padding:6px 4px;border-radius:10px;transition:all 0.2s;">
     <div style="font-size:24px;line-height:1;margin-bottom:4px;">💬</div>
@@ -19600,7 +19602,7 @@ window.addEventListener('load', function(){
 <script>
 // Version stamp — shown in the admin panel so we can confirm which build is live
 // on a device (stale service-worker caches were causing "my changes don't show").
-window.APP_VERSION = 'v144';
+window.APP_VERSION = 'v145';
 
 // Register the service worker for full offline use in the field, WITH update
 // detection: when a new version installs, offer a one-tap refresh instead of the
