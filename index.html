@@ -10078,6 +10078,31 @@ function _descMatchAudio(he, ar){
   return '';
 }
 
+// Fallback: a word may have no recording of its own but still be HEARD inside a
+// recorded sentence ("נשמע בהקשר"). Use the same smart-dict index as the
+// dictionary to find that sentence's audio, so those words also light up.
+function _descContextAudio(he, ar, trans){
+  try{
+    if(!window.SMART_DICT_INDEX && typeof buildSmartDictIndex==='function') buildSmartDictIndex();
+    var idx=window.SMART_DICT_INDEX||{};
+    if(typeof dictNorm!=='function') return '';
+    var words=[];
+    [he,ar,trans].forEach(function(t){
+      String(t||'').split(/[\s.,!?;:()\[\]،؟\/]+/).forEach(function(w){ w=w.trim(); if(w.length>=2) words.push(w); });
+    });
+    for(var i=0;i<words.length;i++){
+      var key=dictNorm(words[i]); if(!key||key.length<2) continue;
+      var e=idx[key];
+      if(e && e.phrases){ for(var j=0;j<e.phrases.length;j++){ if(e.phrases[j].audio) return e.phrases[j].audio; } }
+    }
+    return '';
+  }catch(e){ return ''; }
+}
+
+// Best available audio for a template word: its own recording first, else the
+// sentence it's heard in.
+function _descAudioFor(o){ return _descMatchAudio(o.he,o.ar) || _descContextAudio(o.he,o.ar,o.trans); }
+
 function renderSuspectDesc(){
   var el=document.getElementById('desc-list'); if(!el)return;
   var html='';
@@ -10086,7 +10111,7 @@ function renderSuspectDesc(){
     html+='<div style="color:#7a9ab5;font-size:12px;font-weight:700;margin-bottom:8px;letter-spacing:0.5px;">'+slot.icon+' '+slot.label+'</div>';
     html+='<div style="display:flex;flex-wrap:wrap;gap:8px;">';
     slot.options.forEach(function(o,oi){
-      var hasAudio=!!_descMatchAudio(o.he,o.ar);
+      var hasAudio=!!_descAudioFor(o);
       html+='<div onclick="openDescItem('+si+','+oi+')" style="flex:1 1 auto;min-width:132px;background:#1F3147;border:1px solid #2A3D52;border-radius:11px;padding:9px 12px;cursor:pointer;">';
       html+='<div style="display:flex;align-items:center;gap:6px;"><div style="color:#E8D9B8;font-size:14px;font-weight:700;flex:1;">'+o.he+'</div>'+(hasAudio?'<span style="color:#1D9E75;font-size:14px;">🔊</span>':'')+'</div>';
       html+='<div style="color:#E8D9B8;font-size:15px;font-family:Georgia,serif;direction:rtl;margin-top:2px;">'+o.ar+'</div>';
@@ -10101,7 +10126,7 @@ function renderSuspectDesc(){
 function openDescItem(si,oi){
   var slot=SUSPECT_DESC[si]; if(!slot)return;
   var o=slot.options[oi]; if(!o)return;
-  var audio=_descMatchAudio(o.he,o.ar);
+  var audio=_descAudioFor(o);
   window._popupSource='desc';
   window._popupReturnTab='desc';
   _setPopupAudio(audio||'');
@@ -10153,7 +10178,7 @@ async function importSuspectDesc(btn){
       var slot=SUSPECT_DESC[s];
       for(var o=0;o<slot.options.length;o++){
         var op=slot.options[o];
-        if(_descMatchAudio(op.he,op.ar)){ haveRec++; continue; }   // already recorded — no need
+        if(_descAudioFor(op)){ haveRec++; continue; }   // already has audio (own or in-context) — no need
         var key=_tenNormHe(op.he)+'|'+_tenNormAr(op.ar);
         if(inCat[key]){ already++; continue; }                      // already in the list to record
         await sbFetch('/rest/v1/phrases','POST',{cat:'תיאור אדם',he:op.he,trans:op.trans,ar:op.ar,tags:slot.label,why:'',tone:'',audio_url:'',is_new:false,section:'dictionary'});
@@ -19835,7 +19860,7 @@ window.addEventListener('load', function(){
 <script>
 // Version stamp — shown in the admin panel so we can confirm which build is live
 // on a device (stale service-worker caches were causing "my changes don't show").
-window.APP_VERSION = 'v153';
+window.APP_VERSION = 'v154';
 
 // Register the service worker for full offline use in the field, WITH update
 // detection: when a new version installs, offer a one-tap refresh instead of the
