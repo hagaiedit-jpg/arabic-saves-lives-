@@ -2900,6 +2900,45 @@ function showLanding() {
   </div>
 </div>
 
+<!-- ORDERS TEMPLATE TAB -->
+<div class="scr" id="tab-ord">
+  <div style="padding:14px 12px 100px 12px;min-height:100vh;">
+    <button onclick="navToTab('qk')" style="background:transparent;border:none;color:#a0b8c8;font-size:15px;cursor:pointer;font-family:inherit;padding:4px 0;margin-bottom:10px;display:flex;align-items:center;gap:6px;">◀ חזרה לחירום</button>
+    <div style="text-align:center;margin-bottom:14px;">
+      <div style="font-size:26px;margin-bottom:4px;">🚨</div>
+      <div style="color:#E8D9B8;font-size:18px;font-weight:800;letter-spacing:0.3px;">הוראות מיידיות</div>
+      <div style="color:#7a9ab5;font-size:12px;line-height:1.5;margin-top:2px;">פקודות בסדר הסלמה — לחצו על פריט לשמיעה ותרגול</div>
+    </div>
+    <div id="ord-list"></div>
+  </div>
+</div>
+
+<!-- ID-CHECK TEMPLATE TAB -->
+<div class="scr" id="tab-chk">
+  <div style="padding:14px 12px 100px 12px;min-height:100vh;">
+    <button onclick="navToTab('qk')" style="background:transparent;border:none;color:#a0b8c8;font-size:15px;cursor:pointer;font-family:inherit;padding:4px 0;margin-bottom:10px;display:flex;align-items:center;gap:6px;">◀ חזרה לחירום</button>
+    <div style="text-align:center;margin-bottom:14px;">
+      <div style="font-size:26px;margin-bottom:4px;">🪪</div>
+      <div style="color:#E8D9B8;font-size:18px;font-weight:800;letter-spacing:0.3px;">בידוק וזיהוי</div>
+      <div style="color:#7a9ab5;font-size:12px;line-height:1.5;margin-top:2px;">זהות › מוצא › חיפוש › תשאול — לחצו על פריט לשמיעה ותרגול</div>
+    </div>
+    <div id="chk-list"></div>
+  </div>
+</div>
+
+<!-- VEHICLE TEMPLATE TAB -->
+<div class="scr" id="tab-veh">
+  <div style="padding:14px 12px 100px 12px;min-height:100vh;">
+    <button onclick="navToTab('qk')" style="background:transparent;border:none;color:#a0b8c8;font-size:15px;cursor:pointer;font-family:inherit;padding:4px 0;margin-bottom:10px;display:flex;align-items:center;gap:6px;">◀ חזרה לחירום</button>
+    <div style="text-align:center;margin-bottom:14px;">
+      <div style="font-size:26px;margin-bottom:4px;">🚗</div>
+      <div style="color:#E8D9B8;font-size:18px;font-weight:800;letter-spacing:0.3px;">רכב ומחסום</div>
+      <div style="color:#7a9ab5;font-size:12px;line-height:1.5;margin-top:2px;">עצירה › פתיחה › יציאה › מסמכים — לחצו על פריט לשמיעה ותרגול</div>
+    </div>
+    <div id="veh-list"></div>
+  </div>
+</div>
+
 <!-- SEMANTIC TAB -->
 <div class="scr" id="tab-sem">
   <div class="sec"><button onclick="navToTab('dict')" style="background:transparent;border:none;color:#a0b8c8;font-size:15px;cursor:pointer;font-family:inherit;padding:4px 0;margin-bottom:10px;display:flex;align-items:center;gap:6px;">◀ חזרה למילון</button><div class="stitle">מילון סמנטי — מילים עם משמעות כפולה</div><div id="semlist"></div></div>
@@ -10159,6 +10198,78 @@ var ANSWERS = [
   ]}
 ];
 
+// === Situation templates (orders / ID-check / vehicle) — built from verified
+// kit phrases; the generic engine handles audio, edits, recording.
+var ORDERS = [
+  {label:'עצירה', icon:'✋', options:[
+    {he:'עצור!', ar:'وقف', trans:'וַקֵף'},
+    {he:'אל תזוז!', ar:'لا تتحرك', trans:'לַא תִתְחַרַכּ'},
+    {he:'תישאר כאן, אסור לזוז!', ar:'خليك هون، ممنوع تتحرك', trans:'חַ׳לִיכּ הוֹן, מַמְנוּע תִתְחַרַכּ!'}
+  ]},
+  {label:'ידיים', icon:'🙌', options:[
+    {he:'ידיים למעלה!', ar:'إيديك لفوق', trans:'אִידֵיכּ לַפוֹק'},
+    {he:'ידיים על הראש', ar:'إيديك عالراس', trans:'אִידֵיכּ עַאלרַאס'}
+  ]},
+  {label:'גישה ותנועה', icon:'👈', options:[
+    {he:'בוא הנה', ar:'تعال لهون', trans:'תַעַאל לַהוֹן'},
+    {he:'תסתובב לאט', ar:'لفّ شوي شوي', trans:'לִףּ שְוַי שְוַי'},
+    {he:'כרע ברך', ar:'اركع', trans:'אִרְכַּע'}
+  ]},
+  {label:'נשק', icon:'🔪', options:[
+    {he:'זרוק את הסכין / את הנשק!', ar:'ارمي السكينة / السلاح', trans:'אִרְמִי אִלסִכִּינֶה / אִלסְלַאח!'}
+  ]},
+  {label:'ציות', icon:'🤫', options:[
+    {he:'שתוק ותקשיב', ar:'اسكت واسمع', trans:'אֻסְכֻּת וּאִסְמַע'}
+  ]},
+];
+var CHECK = [
+  {label:'זהות', icon:'🪪', options:[
+    {he:'תן לי תעודת זהות', ar:'عطيني هويتك', trans:'עַטִינִי הַוִיּתַכּ'},
+    {he:'מה השם שלך?', ar:'شو اسمك؟', trans:'שׁוּ אִסְמַכּ?'},
+    {he:'מה שם אביך ושם המשפחה?', ar:'شو اسم أبوك واسم العيلة؟', trans:'שׁוּ אִסֶם אַבּוּכּ וּאִסֶם אִלעֵילֶה?'}
+  ]},
+  {label:'מוצא ויעד', icon:'🧭', options:[
+    {he:'מאיפה באת?', ar:'من وين جيت؟', trans:'מִן וֵין גִ׳ית?'},
+    {he:'איפה אתה גר?', ar:'وين إنت ساكن؟', trans:'וֵין אִנְתֶ סַאכֶּן?'},
+    {he:'לאן אתה הולך?', ar:'لوين رايح؟', trans:'לַוֵין רַאיֵח?'}
+  ]},
+  {label:'חיפוש', icon:'🔍', options:[
+    {he:'הרם את החולצה', ar:'ارفع القميص', trans:'אִרְפַע אִלקַמִיץ'},
+    {he:'מה יש בכיס? תוציא לאט', ar:'شو بالجيب؟ طلّعه شوي شوي', trans:'שׁוּ בִּלגֵּיבּ? טַלּעֹה שְוַי שְוַי'}
+  ]},
+  {label:'תשאול ולחץ', icon:'🗯️', options:[
+    {he:'אל תשקר לי.', ar:'ما تكذب عليّ.', trans:'מַא תִכְּדֶ׳בּ עַלַיּ.'},
+    {he:'אני יודע שאתה יודע.', ar:'أنا بعرف إنك بتعرف.', trans:'אַנַא בַּעְרֶף אִנַּכּ בְּתַעְרֶף.'},
+    {he:'יש לנו מידע. תחשוב טוב ותענה שוב.', ar:'في عنّا معلومات. فكّر منيح وجاوب كمان مرة.', trans:'פִי עִנַּא מַעְלוּמַאת. פַכֶּר מְנִיח וּגַ׳אוֶבּ כַּמַאן מַרַּה.'},
+    {he:'אם אתה דובר אמת — אין לך ממה לפחד.', ar:'إذا بتحكي الصح — ما في إشي تخاف منه.', trans:'אִזַא בְּתִחְכִּי אִלצַּח — מַא פִי אִשִי תְחַ׳אף מִנֹּה.'},
+    {he:'ראו אותך שם.', ar:'شافوك هناك.', trans:'שַאפוּכּ הְנַאכּ.'},
+    {he:'נראה שלא הבנת את השאלה', ar:'مبيّن إنّو ما فهمتش السؤال', trans:'מְבַּיֵּן אִנּוֹ מַא פְהֵמְתֵּשׁ אִלסֻאַאל'},
+    {he:'מה אתה צוחק עליי?', ar:'شو إنت بتتمسخر عليّ؟', trans:'שוּ אִנְתֶ בְּתִתְמַסְחַ׳ר עַלַיּ?'}
+  ]},
+  {label:'ליווי לחקירה', icon:'🚶', options:[
+    {he:'בוא איתנו לבידוק', ar:'تعال معنا عالتفتيش', trans:'תַעַאל מַעְנַא עַאלתַפְתִישׁ'},
+    {he:'קח תעודת זהות ובוא איתנו לחקירה', ar:'خذ هويتك وتعال معنا للتحقيق', trans:'ח׳ֻד הַוִיְתַכּ וּתַעַאִל מַעַנַא לִתַחְקִיק'}
+  ]},
+];
+var VEHICLE = [
+  {label:'עצירת רכב', icon:'🛑', options:[
+    {he:'עצור את הרכב, כבה מנוע', ar:'وقّف السيارة وطفّي الموتور', trans:'וַקֵּף אִלסַּייַּארַה וּטַפִּי אִלמוֹתוֹר'},
+    {he:'ידיים על ההגה', ar:'إيديك عالدركسيون', trans:'אִידֵיכּ עַאלדִּרֵכּסְיוֹן'}
+  ]},
+  {label:'פתיחה', icon:'🚪', options:[
+    {he:'פתח חלון', ar:'افتح الشباك', trans:'אִפְתַח אִלשֻּבַּּאכּ'},
+    {he:'פתח את הדלת', ar:'افتح الباب', trans:'אִפְתַח אִלבַּאבּ'},
+    {he:'פתח את תא המטען', ar:'افتح البغاز', trans:'אִפְתַח אִלבַּגַ׳אז'}
+  ]},
+  {label:'יציאה', icon:'🚶', options:[
+    {he:'צא מהרכב לאט', ar:'اطلع من السيارة شوي شوي', trans:'אֻטְלַע מִן אִלסַּייַּארַה שְוַי שְוַי'}
+  ]},
+  {label:'מסמכים ואנשים', icon:'🪪', options:[
+    {he:'תן לי רישיון', ar:'عطيني الرخصة', trans:'עַטִינִי אִלרֻחְ׳צַה'},
+    {he:'כמה אנשים ברכב?', ar:'كم واحد بالسيارة؟', trans:'כַּם וַאחַד בִּלסַּייַּארַה?'}
+  ]},
+];
+
 // Look up a recording for a he/ar pair across all loaded sections (same matching
 // as getTenList) so template chips play audio when it exists.
 function _descMatchAudio(he, ar){
@@ -10280,6 +10391,12 @@ function _openTpl(data, si, oi, returnTab){
 }
 function openDescItem(si,oi){ _openTpl(SUSPECT_DESC,si,oi,'desc'); }
 function openTriageItem(si,oi){ _openTpl(TRIAGE,si,oi,'triage'); }
+function renderOrders(){ _renderTpl(ORDERS,'ord-list','openOrdItem'); }
+function openOrdItem(si,oi){ _openTpl(ORDERS,si,oi,'ord'); }
+function renderCheck(){ _renderTpl(CHECK,'chk-list','openChkItem'); }
+function openChkItem(si,oi){ _openTpl(CHECK,si,oi,'chk'); }
+function renderVehicle(){ _renderTpl(VEHICLE,'veh-list','openVehItem'); }
+function openVehItem(si,oi){ _openTpl(VEHICLE,si,oi,'veh'); }
 
 // True only if the exact he+ar pair already exists somewhere in the loaded pool.
 // (he alone is not enough — e.g. "זקן" is both עجوز=old and دقن=beard.)
@@ -18978,10 +19095,20 @@ function rQK(){
     // Medical is unified into the structured 'רפואה וטריאז'' template above — no
     // separate flat cube (avoids the duplicate the soldier saw).
     if(ec.key==='medical') continue;
+    // Situations that now have a structured template open it instead of the flat list.
+    var tplTab={orders:'ord',check:'chk',vehicle:'veh'}[ec.key];
     var count=_emergPhrasesForCat(ec).length;
     // Legacy cube only appears if there are phrases there (otherwise hide)
     if(ec.legacy && count===0)continue;
     var emptyClass=count===0?' emerg-cube-empty':'';
+    if(tplTab){
+      h+='<div class="emerg-cube '+ec.color+'" onclick="navToTab(\''+tplTab+'\')">';
+      h+='<div class="emerg-cube-emoji">'+ec.emoji+'</div>';
+      h+='<div class="emerg-cube-name">'+ec.name+'</div>';
+      h+='<div class="emerg-cube-count">תבנית מסודרת</div>';
+      h+='</div>';
+      continue;
+    }
     h+='<div class="emerg-cube '+ec.color+emptyClass+'" onclick="openEmergCat(\''+ec.key+'\')">';
     h+='<div class="emerg-cube-emoji">'+ec.emoji+'</div>';
     h+='<div class="emerg-cube-name">'+ec.name+'</div>';
@@ -19898,6 +20025,9 @@ function navToTab(tabId){
     if (tabId === 'triage') {
       try { if (typeof renderTriage === 'function') renderTriage(); } catch(e) {}
     }
+    if (tabId === 'ord') { try { renderOrders(); } catch(e) {} }
+    if (tabId === 'chk') { try { renderCheck(); } catch(e) {} }
+    if (tabId === 'veh') { try { renderVehicle(); } catch(e) {} }
     if (tabId === 'intel') {
       setTimeout(function(){ 
         try { 
@@ -20008,7 +20138,7 @@ window.addEventListener('load', function(){
 <script>
 // Version stamp — shown in the admin panel so we can confirm which build is live
 // on a device (stale service-worker caches were causing "my changes don't show").
-window.APP_VERSION = 'v159';
+window.APP_VERSION = 'v160';
 
 // Register the service worker for full offline use in the field, WITH update
 // detection: when a new version installs, offer a one-tap refresh instead of the
