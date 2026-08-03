@@ -3305,6 +3305,10 @@ function showLanding() {
         <button onclick="downloadAudioBackup(this)" style="width:100%;padding:12px;background:#2c7a8a;border:none;border-radius:10px;color:#fff;font-size:13.5px;font-weight:800;cursor:pointer;font-family:inherit;">🎧 גבה את כל ההקלטות (ZIP)</button>
         <div id="audiobk-status" style="text-align:center;color:#9fb2c6;font-size:11.5px;margin-top:8px;"></div>
       </div>
+      <div style="background:#132a3a;border:1px solid #2A3D52;border-radius:12px;padding:12px;margin-bottom:14px;">
+        <div style="color:#cfe0ee;font-size:12px;line-height:1.6;margin-bottom:9px;">🔤 <b>ניקוי תעתיקים</b> — הופך שַׁדّה ערבית לדגש עברי (נקודה בבטן האות) ומסיר סימני תנועה ערביים מהתעתיק. לא נוגע בעברית/ערבית.</div>
+        <button onclick="cleanAllTranslits(this)" style="width:100%;padding:11px;background:linear-gradient(135deg,#5a7d8a 0%,#3f5a66 100%);border:none;border-radius:10px;color:#fff;font-size:13px;font-weight:800;cursor:pointer;font-family:inherit;">🔤 נקה את כל התעתיקים</button>
+      </div>
       <details style="margin-bottom:12px;" ontoggle="if(this.open&&typeof renderErrLog==='function')renderErrLog()">
         <summary style="cursor:pointer;color:#7a9ab5;font-size:12.5px;font-weight:800;padding:10px 12px;background:rgba(192,57,43,0.10);border-radius:10px;list-style:none;">🚨 יומן שגיאות (<span id="errlog-count">0</span>) — לאבחון תקלות</summary>
         <div id="errlog-list" style="margin-top:10px;max-height:280px;overflow-y:auto;"></div>
@@ -8070,21 +8074,21 @@ var BUILTIN_TASHAUL=[
   {id:'bi-tash-102', section:'military', cat:'תשאול: שאלות על האירוע', he:'תחזור שוב פעם', ar:'عيد كمان مرّة', trans:'עִיד כַּמַאן מַרַּה'},
   // משפטי שטח מאומתים — שובצו לקטגוריות מבצעי הקיימות
   {section:'military', cat:'לוח שנה ותרבות', he:'מחר יש צום (רמדאן)', ar:'بكرة فيه صوم', trans:'בֻּכְּרַה פִיה צוֹם'},
-  {section:'military', cat:'לוח שנה ותרבות', he:'אתה דתי או לא?', ar:'انت متديّن والّا لا؟', trans:'אִנְתַ מִתְדַיֵّן וַאלַّא לַא?'},
-  {section:'military', cat:'תשאול: אמצעי תקשורת', he:'אני צריך להטעין את הטלפון', ar:'لازم أشحن الجوّال', trans:'לַאזֵם אַשְחֵן אִלגַ׳וַّאל'},
+  {section:'military', cat:'לוח שנה ותרבות', he:'אתה דתי או לא?', ar:'انت متديّن والّا لا؟', trans:'אִנְתַ מִתְדַיֵּן וַאלַּא לַא?'},
+  {section:'military', cat:'תשאול: אמצעי תקשורת', he:'אני צריך להטעין את הטלפון', ar:'لازم أشحن الجوّال', trans:'לַאזֵם אַשְחֵן אִלגַ׳וַּאל'},
   {section:'military', cat:'תשאול: עבודה', he:'אני עובד כנהג מונית', ar:'باشتغل شوفير تكسي', trans:'בַּאשְתֵעֵ׳ל שוֹפֵיר תַכְּסִי'},
   {section:'military', cat:'בידוק וזיהוי', he:'בוא איתנו לבידוק', ar:'تعال معنا عالتفتيش', trans:'תַעַאל מַעְנַא עַאלתַפְתִישׁ'},
-  {section:'military', cat:'עצירת תנועה ורכב', he:'השוטר נתן לי דוח', ar:'الشرطي أعطاني مخالفة', trans:'אִלשֻّרְטִי אַעְטַאנִי מֻחַ׳אלַפֵה'},
-  {section:'military', cat:'ניהול מרחב והוראות', he:'למה אתה עומד באמצע הדרך?', ar:'ليش انت واقف بنصّ الطريق؟', trans:'לֵישׁ אִנְתַ וַאקֵף בְּנֻצّ אִלטַרִיק?'},
-  {section:'military', cat:'בידוק וזיהוי', he:'נראה שלא הבנת את השאלה', ar:'مبيّن إنّو ما فهمتش السؤال', trans:'מְבַּיֵّן אִנّוֹ מַא פְהֵמְתֵّשׁ אִלסֻאַאל'},
-  {section:'military', cat:'שמות מקומות וכיוונים', he:'אני עומד בתחנה', ar:'أنا واقف بالمحطّة', trans:'אַנַא וַאקֵף בִּ(א)למַחַטّה'},
+  {section:'military', cat:'עצירת תנועה ורכב', he:'השוטר נתן לי דוח', ar:'الشرطي أعطاني مخالفة', trans:'אִלשֻּרְטִי אַעְטַאנִי מֻחַ׳אלַפֵה'},
+  {section:'military', cat:'ניהול מרחב והוראות', he:'למה אתה עומד באמצע הדרך?', ar:'ليش انت واقف بنصّ الطريق؟', trans:'לֵישׁ אִנְתַ וַאקֵף בְּנֻצּ אִלטַרִיק?'},
+  {section:'military', cat:'בידוק וזיהוי', he:'נראה שלא הבנת את השאלה', ar:'مبيّن إنّو ما فهمتش السؤال', trans:'מְבַּיֵּן אִנּוֹ מַא פְהֵמְתֵּשׁ אִלסֻאַאל'},
+  {section:'military', cat:'שמות מקומות וכיוונים', he:'אני עומד בתחנה', ar:'أنا واقف بالمحطّة', trans:'אַנַא וַאקֵף בִּ(א)למַחַטּה'},
   {section:'military', cat:'תשאול: כתובת ובית', he:'אני גר בבניין הגבוה', ar:'أنا ساكن في العمارة العالية', trans:'אַנַא סַאכֵּן פִי אִלעִמַארַה אִלעַאלְיֵה'},
-  {section:'military', cat:'שמות מקומות וכיוונים', he:'הוא מחכה בצומת', ar:'هو بيستنّى في المفرق', trans:'הֻוֶّ בִּיסְתַנַّא פִי אִלמַפְרַק'},
+  {section:'military', cat:'שמות מקומות וכיוונים', he:'הוא מחכה בצומת', ar:'هو بيستنّى في المفرق', trans:'הֻוֶּ בִּיסְתַנַּא פִי אִלמַפְרַק'},
   {section:'military', cat:'תשאול: שאלות על האירוע', he:'תפסו את הגנב וכלאו אותו', ar:'مسكوا الحرامي وحبسوه', trans:'מַסַכּוּ אִלחַרַאמִי וְחַבַּסוּה'},
-  {section:'military', cat:'תשאול: שאלות על האירוע', he:'הוא נתן לי שלושה רימונים', ar:'أعطاني تلت رمّانات', trans:'אַעְטַאנִי תְלַת רֻמַّאנַאת'},
-  {section:'military', cat:'תשאול: שאלות על האירוע', he:'ראיתי אותו הולך ברחוב', ar:'شفته ماشي في الشارع', trans:'שֻפְתוֹ מַאשִי פִי אִלשַّארֵע'},
-  {section:'military', cat:'רפואה ועזרה ראשונה', he:'הוא חולה, צריך עזרה', ar:'هو مريض بدّو مساعدة', trans:'הֻוֶّ מַרִיד׳ בִּדّוֹ מֻסַאעַדֵה'},
-  {section:'military', cat:'ניהול מרחב והוראות', he:'תהיה בשקט עכשיו', ar:'كون ساكت هلّق', trans:'כוּן סַאכֵּת הַלַّק'},
+  {section:'military', cat:'תשאול: שאלות על האירוע', he:'הוא נתן לי שלושה רימונים', ar:'أعطاني تلت رمّانات', trans:'אַעְטַאנִי תְלַת רֻמַּאנַאת'},
+  {section:'military', cat:'תשאול: שאלות על האירוע', he:'ראיתי אותו הולך ברחוב', ar:'شفته ماشي في الشارع', trans:'שֻפְתוֹ מַאשִי פִי אִלשַּארֵע'},
+  {section:'military', cat:'רפואה ועזרה ראשונה', he:'הוא חולה, צריך עזרה', ar:'هو مريض بدّو مساعدة', trans:'הֻוֶּ מַרִיד׳ בִּדּוֹ מֻסַאעַדֵה'},
+  {section:'military', cat:'ניהול מרחב והוראות', he:'תהיה בשקט עכשיו', ar:'كون ساكت هلّق', trans:'כוּן סַאכֵּת הַלַּק'},
   {section:'military', cat:'ניהול מרחב והוראות', he:'אל תתעסק איתי', ar:'لا تتعامل معي', trans:'לַא תִתְעַאמַל מַעִי'},
   {section:'military', cat:'הרגעה ושכנוע', he:'תשלוט בעצבים שלך', ar:'امسك أعصابك', trans:'אִמְסֵכּ אַעְצַאבַּכּ'},
   {section:'military', cat:'ניהול מרחב והוראות', he:'קח את הצאן שלך ותתרחק מהגדר.', ar:'خذ الغنم تبعك وابعد عن الجدار.', trans:'חֻ׳ד׳ אִלְעַ׳נַם תַבַּעַכּ וּאִבְּעֵד עַן אִלְגִ׳דָאר.'},
@@ -8125,8 +8129,8 @@ var BUILTIN_TASHAUL=[
   // DB). Arabic verbatim from Edith; Hebrew transliteration cleaned (her paste had
   // stray Arabic diacritics) — verify with the expert if needed.
   {section:'military', cat:'רפואה ועזרה', he:'צריך אמבולנס?', ar:'بدك إسعاف؟', trans:'בִּדַּכּ אִסְעַאף?'},
-  {section:'military', cat:'רפואה ועזרה', he:'יש קושי לנשום?', ar:'في صعوبة بالتنفس؟', trans:'פִי צֻעוּבֶּה בִּאלתַّנַפֻّס?'},
-  {section:'military', cat:'רפואה ועזרה', he:'יש לך אלרגיה?', ar:'عندك حساسية؟', trans:'עִנְדַכּ חַסַאסִיֶّה?'},
+  {section:'military', cat:'רפואה ועזרה', he:'יש קושי לנשום?', ar:'في صعوبة بالتنفس؟', trans:'פִי צֻעוּבֶּה בִּאלתַּנַפֻּס?'},
+  {section:'military', cat:'רפואה ועזרה', he:'יש לך אלרגיה?', ar:'عندك حساسية؟', trans:'עִנְדַכּ חַסַאסִיֶּה?'},
   {section:'military', cat:'רפואה ועזרה', he:'אל תפחד', ar:'ما تخاف', trans:'מַא תְחַ׳אף'},
   // Vehicle/checkpoint emergency phrases re-added at the admin's request (were lost).
   {section:'military', cat:'רכב ומחסום', he:'תן לי רישיון', ar:'عطيني الرخصة', trans:'עַטִינִי אִלרֻחְ׳צַה'},
@@ -8149,20 +8153,20 @@ var BUILTIN_TASHAUL=[
   {section:'military', cat:'הוראות מיידיות', he:'בוא הנה', ar:'تعال لهون', trans:'תַעַאל לַהוֹן'},                      // [verified]
   {section:'military', cat:'הוראות מיידיות', he:'כרע ברך', ar:'اركع', trans:'אִרְכַּע'},                               // [verified]
   {section:'military', cat:'הוראות מיידיות', he:'שתוק ותקשיב', ar:'اسكت واسمع', trans:'אֻסְכֻּת וּאִסְמַע'},           // [verified]
-  {section:'military', cat:'בידוק וזיהוי', he:'מה יש בכיס? תוציא לאט', ar:'شو بالجيب؟ طلّعه شوي شوي', trans:'שׁוּ בִּלגֵّיבּ? טַלّעֹה שְוַי שְוַי'}, // [verified]
+  {section:'military', cat:'בידוק וזיהוי', he:'מה יש בכיס? תוציא לאט', ar:'شو بالجيب؟ طلّعه شوي شوي', trans:'שׁוּ בִּלגֵּיבּ? טַלּעֹה שְוַי שְוַי'}, // [verified]
   {section:'military', cat:'בידוק וזיהוי', he:'מה השם שלך?', ar:'شو اسمك؟', trans:'שׁוּ אִסְמַכּ?'},                    // [verify]
   {section:'military', cat:'בידוק וזיהוי', he:'הרם את החולצה', ar:'ارفع القميص', trans:'אִרְפַע אִלקַמִיץ'},           // [verify]
-  {section:'military', cat:'רכב ומחסום', he:'עצור את הרכב, כבה מנוע', ar:'وقّف السيارة وطفّي الموتور', trans:'וַקֵّף אִלסַّייַّארַה וּטַפִّי אִלמוֹתוֹר'}, // [verify]
-  {section:'military', cat:'רכב ומחסום', he:'ידיים על ההגה', ar:'إيديك عالدركسيون', trans:'אִידֵיכּ עַאלדִّרֵכּסְיוֹן'}, // [verify]
-  {section:'military', cat:'רכב ומחסום', he:'פתח חלון', ar:'افتح الشباك', trans:'אִפְתַח אִלשֻّבַּّאכּ'},              // [verify]
-  {section:'military', cat:'רכב ומחסום', he:'צא מהרכב לאט', ar:'اطلع من السيارة شوي شوي', trans:'אֻטְלַע מִן אִלסַّייַّארַה שְוַי שְוַי'}, // [verify]
+  {section:'military', cat:'רכב ומחסום', he:'עצור את הרכב, כבה מנוע', ar:'وقّف السيارة وطفّي الموتور', trans:'וַקֵּף אִלסַּייַּארַה וּטַפִּי אִלמוֹתוֹר'}, // [verify]
+  {section:'military', cat:'רכב ומחסום', he:'ידיים על ההגה', ar:'إيديك عالدركسيون', trans:'אִידֵיכּ עַאלדִּרֵכּסְיוֹן'}, // [verify]
+  {section:'military', cat:'רכב ומחסום', he:'פתח חלון', ar:'افتح الشباك', trans:'אִפְתַח אִלשֻּבַּּאכּ'},              // [verify]
+  {section:'military', cat:'רכב ומחסום', he:'צא מהרכב לאט', ar:'اطلع من السيارة شوي شوي', trans:'אֻטְלַע מִן אִלסַּייַּארַה שְוַי שְוַי'}, // [verify]
   {section:'military', cat:'רפואה ועזרה', he:'יש פצוע?', ar:'فيه مجروح؟', trans:'פִיה מַגְ׳רוּח?'},                    // [verified]
   {section:'military', cat:'רפואה ועזרה', he:'אל תפחד, באנו לעזור', ar:'لا تخاف، إجينا نساعدك', trans:'לַא תְחַ׳אף, אִגִ׳ינַא נְסַאעְדַכּ'}, // [verified]
   {section:'military', cat:'הוראות מיידיות', he:'אל תזוז!', ar:'لا تتحرك', trans:'לַא תִתְחַרַכּ'},                     // [verified]
   {section:'military', cat:'הוראות מיידיות', he:'ידיים למעלה!', ar:'إيديك لفوق', trans:'אִידֵיכּ לַפוֹק'},             // [verified]
   {section:'military', cat:'הוראות מיידיות', he:'תסתובב לאט', ar:'لفّ شوي شوي', trans:'לִףּ שְוַי שְוַי'},              // [verified]
   {section:'military', cat:'רפואה ועזרה', he:'אתה פצוע?', ar:'انت مجروح؟', trans:'אִנְתֶ מַגְ׳רוּח?'},                  // [verified]
-  {section:'military', cat:'רכב ומחסום', he:'כמה אנשים ברכב?', ar:'كم واحد بالسيارة؟', trans:'כַּם וַאחַד בִּלסַّייַّארַה?'}, // [verify]
+  {section:'military', cat:'רכב ומחסום', he:'כמה אנשים ברכב?', ar:'كم واحد بالسيارة؟', trans:'כַּם וַאחַד בִּלסַּייַּארַה?'}, // [verify]
   {section:'military', cat:'רפואה ועזרה', he:'איפה כואב?', ar:'وين بيوجعك؟', trans:'וֵין בִּיוֹגַעַכּ?'},              // [verify]
   {section:'military', cat:'רפואה ועזרה', he:'אתה לוקח תרופות?', ar:'بتاخد أدوية؟', trans:'בְּתַאחֻ׳ד אַדְוִיֶה?'},    // [verify]
   {section:'military', cat:'יסודות: כינויי גוף', he:'אני', ar:'أنا', trans:'אַנַא'},
@@ -8264,8 +8268,8 @@ var BUILTIN_TASHAUL=[
 ];
 // משפטי יומיום מאומתים — נמזגים ל-DAILY ומסונכרנים ל-DB (אותו דפוס כמו המילון)
 var BUILTIN_DAILY=[
-  {section:'daily', cat:'שוק ומסחר', he:'כמה עולים הדובדבנים?', ar:'قدّيش حقّ الكرز؟', trans:'קַדֵّישׁ חַקّ אִלכַּרַז?'},
-  {section:'daily', cat:'שיחת היכרות', he:'מזג האוויר פה חם כל השבוע', ar:'الجوّ هون كلّ الأسبوع حرّ', trans:'אִלגַ׳וّ הוֹן כֻּלّ אִלאֻסְבּוּע חַרّ'},
+  {section:'daily', cat:'שוק ומסחר', he:'כמה עולים הדובדבנים?', ar:'قدّيش حقّ الكرز؟', trans:'קַדֵּישׁ חַקּ אִלכַּרַז?'},
+  {section:'daily', cat:'שיחת היכרות', he:'מזג האוויר פה חם כל השבוע', ar:'الجوّ هون كلّ الأسبوع حرّ', trans:'אִלגַ׳וּ הוֹן כֻּלּ אִלאֻסְבּוּע חַרּ'},
   {section:'daily', cat:'שוק ומסחר', he:'זו הפעם האחרונה שאני קונה ממך משהו', ar:'هادي آخر مرّة باشتري منك شي', trans:'הַאדִי אַאחֶ׳ר מַרּה בַּאשְתַרִי מִנּכּ שִי'},
   {section:'daily', cat:'שוק ומסחר', he:'הוא יקנה את הסחורה', ar:'هو رح يشتري البضاعة', trans:'הֻוֶ רַח יִשְתַרִי אִלבַּדַ׳אעַה'},
   {section:'daily', cat:'שוק ומסחר', he:'אנחנו דיברנו עם הסוחר', ar:'احنا حكينا مع التاجر', trans:'אִחְנַא חַכֵּינַא מַע אִלתּאגֶ׳ר'},
@@ -9661,6 +9665,33 @@ function _sanitizeTranslit(s){
   s = s.replace(/([\u05D0-\u05EA])([\u0591-\u05C7\u05F3\u064B-\u0650\u0652-\u065F\u0670]*)\u0651/g, '$1\u05BC$2');
   return s.replace(/[\u064B-\u065F\u0670]/g, '');
 }
+// Admin tool: clean every transliteration stored in the DB using the exact rule
+// above (Arabic shadda \u2192 Hebrew dagesh; strip Arabic vowel marks). Touches only the
+// trans field (and responses' trans) \u2014 Hebrew and Arabic are never changed. This
+// fixes what shows in the edit screen / backup; the display already sanitizes live.
+async function cleanAllTranslits(btn){
+  if(!confirm('\u05DC\u05E0\u05E7\u05D5\u05EA \u05D0\u05EA \u05DB\u05DC \u05D4\u05EA\u05E2\u05EA\u05D9\u05E7\u05D9\u05DD \u05D1\u05DE\u05D0\u05D2\u05E8?\n\u2022 \u05E9\u05B7\u05C1\u05D3\u0651\u05D4 \u05E2\u05E8\u05D1\u05D9\u05EA \u2192 \u05D3\u05D2\u05E9 \u05E2\u05D1\u05E8\u05D9 (\u05E0\u05E7\u05D5\u05D3\u05D4 \u05D1\u05D1\u05D8\u05DF \u05D4\u05D0\u05D5\u05EA)\n\u2022 \u05E9\u05D0\u05E8 \u05E1\u05D9\u05DE\u05E0\u05D9 \u05D4\u05EA\u05E0\u05D5\u05E2\u05D4 \u05D4\u05E2\u05E8\u05D1\u05D9\u05D9\u05DD \u05D9\u05D5\u05E1\u05E8\u05D5\n\n\u05DC\u05D0 \u05E0\u05D5\u05D2\u05E2 \u05D1\u05E2\u05D1\u05E8\u05D9\u05EA \u05D0\u05D5 \u05D1\u05E2\u05E8\u05D1\u05D9\u05EA \u2014 \u05E8\u05E7 \u05D1\u05E9\u05D3\u05D4 \u05D4\u05EA\u05E2\u05EA\u05D9\u05E7. \u05D1\u05D8\u05D5\u05D7.')) return;
+  var old=btn.textContent; btn.disabled=true;
+  try{
+    var rows=await sbFetchAllRows('/rest/v1/phrases?select=id,trans,responses');
+    var changed=0, fail=0;
+    for(var i=0;i<(rows||[]).length;i++){
+      var r=rows[i], patch={}, need=false;
+      if(r.trans){ var c=_sanitizeTranslit(r.trans); if(c!==r.trans){ patch.trans=c; need=true; } }
+      if(r.responses){
+        try{ var arr=JSON.parse(r.responses), rc=false;
+          if(Array.isArray(arr)){ arr.forEach(function(x){ if(x&&x.trans){ var cc=_sanitizeTranslit(x.trans); if(cc!==x.trans){ x.trans=cc; rc=true; } } }); }
+          if(rc){ patch.responses=JSON.stringify(arr); need=true; }
+        }catch(e){}
+      }
+      if(need){ btn.textContent='\u05DE\u05E0\u05E7\u05D4 '+(changed+1)+'\u2026'; try{ await sbFetch('/rest/v1/phrases?id=eq.'+encodeURIComponent(r.id),'PATCH',patch); changed++; }catch(e){ fail++; } }
+    }
+    try{ await loadData(); }catch(e){}
+    try{ renderAdminList(); }catch(e){}
+    btn.disabled=false; btn.textContent=old;
+    alert('\u2713 \u05E0\u05D5\u05E7\u05D5 '+changed+' \u05EA\u05E2\u05EA\u05D9\u05E7\u05D9\u05DD'+(fail?(' \u00B7 '+fail+' \u05E0\u05DB\u05E9\u05DC\u05D5'):'')+'.\n\u05D4\u05E9\u05B7\u05C1\u05D3\u0651\u05D4 \u05D4\u05E4\u05DB\u05D4 \u05DC\u05D3\u05D2\u05E9, \u05D5\u05E1\u05D9\u05DE\u05E0\u05D9 \u05D4\u05EA\u05E0\u05D5\u05E2\u05D4 \u05D4\u05E2\u05E8\u05D1\u05D9\u05D9\u05DD \u05D4\u05D5\u05E1\u05E8\u05D5.');
+  }catch(e){ btn.disabled=false; btn.textContent=old; alert('\u05E9\u05D2\u05D9\u05D0\u05D4: '+(e&&e.message?e.message:e)); }
+}
 
 function mp(p){
   const seen = getSeenIds();
@@ -9867,7 +9898,7 @@ function getTenList(){
         if((!responses||!responses.length) && Array.isArray(r.responses) && r.responses.length)responses=r.responses;
       }
     }
-    return {he:p.he,trans:p.trans,ar:p.ar,icon:p.icon,audio:audio||p.audio||'',responses:responses};
+    return {he:p.he,trans:_sanitizeTranslit(p.trans),ar:p.ar,icon:p.icon,audio:audio||p.audio||'',responses:responses};
   });
 }
 
@@ -10951,7 +10982,7 @@ var FIELD_COMMANDS_DATA=[
   {he:"תן לי את תעודת הזהות",trans:"אַעְטִינִי (א)לְהַוִיּה",ar:"أعطيني الهوية",cat:"בידוק וזיהוי"},
   {he:"תביא את תעודת הזהות",trans:"גִ׳יבּ (א)לְהַוִיּה",ar:"جيب الهوية",cat:"בידוק וזיהוי"},
   {he:"תן לי תעודה",trans:"הַאת (א)לְהַוִיּה",ar:"هات الهَوِيّة.",cat:"בידוק וזיהוי"},
-  {he:"תוציא תעודה לאט",trans:"טַלַּע (א)לְהַוִيّה בִּשְוַּי",ar:"طَلّع الهَوِيّة بْشْوَي.",cat:"בידוק וזיהוי"},
+  {he:"תוציא תעודה לאט",trans:"טַלַּע (א)לְהַוִيה בִּשְוַּי",ar:"طَلّع الهَوِيّة بْشْوَي.",cat:"בידוק וזיהוי"},
   {he:"פתח את הדלת!",trans:"אִפְתַח (א)לְבַּאבּ",ar:"افتح الباب!",cat:"שליטה בבית"},
   {he:"פתח את הדלת עכשיו!",trans:"פַתֶּח (א)לְבַּאבּ הַלַּק",ar:"فَتِّح الباب هَلّق!",cat:"שליטה בבית"},
   {he:"תפתח לאט",trans:"פַתֶּח בִּשְוַּי",ar:"فَتِّح بْشْوَي.",cat:"שליטה בבית"},
@@ -10982,7 +11013,7 @@ var FIELD_COMMANDS_DATA=[
   {he:"יש חייל לבד למעלה",trans:"פִי גֻ׳נְדִי וַאחֶד פוֹק",ar:"في جُندي وَاحد فَوق",cat:"ניהול מרחב"},
   {he:"תביא את הסכין",trans:"הַאת (א)סִּכִּין",ar:"هات السِكِّين",cat:"בידוק וזיהוי"},
   {he:"יש תנועה משונה",trans:"פִיה חַרַכֶּה מִש טַבִּיעִיּה",ar:"فِيه حَرَكة مِش طَبِيعِيّة",cat:"ניהול מרחב"},
-  {he:"אל תשקר לי! אני יודע הכול!",trans:"מַא תִכְּדֶ׳בּ עַלַيّ! בַּאעְרֶף כֻּלּ אִשִׁי",ar:"ما تكذب علي! باعرف كل إشي!",cat:"בידוק וזיהוי"},
+  {he:"אל תשקר לי! אני יודע הכול!",trans:"מַא תִכְּדֶ׳בּ עַלַي! בַּאעְרֶף כֻּלּ אִשִׁי",ar:"ما تكذب علي! باعرف كل إشي!",cat:"בידוק וזיהוי"},
   {he:"לאן אתם הולכים?",trans:"לַוֵין רַאיְחִין",ar:"لوين رايحين؟",cat:"בידוק וזיהוי"},
   {he:"לאן אתם נוסעים?",trans:"לַוֵין אִנְתוּ מְסַאפְרִין",ar:"لوين إنتوا مسافرين؟",cat:"בידוק וזיהוי"},
   {he:"מאיפה אתה מגיע?",trans:"מִן וֵין אִנְתֶ גַ׳אי",ar:"من وين إنت جاي؟",cat:"בידוק וזיהוי"},
@@ -11029,7 +11060,7 @@ var FIELD_COMMANDS_DATA=[
   {he:"מי גר כאן? כולכם משפחה אחת?",trans:"מִין סַאכֶּן הוֹן? כֻּלְּכֻּם עֵילֶה וַאחְדֶה",ar:"مين ساكن هون؟ كلكم عيلة واحدة؟",cat:"שליטה בבית"},
   {he:"איפה הילדים? כולם כאן?",trans:"וֵין (א)לְאַוְלַאד? כֻּלְּהֻם הוֹן",ar:"وين الأولاد؟ كلهم هون؟",cat:"שליטה בבית"},
   {he:"של מי המכונית הזו שבחוץ?",trans:"לַמִין הַאדִי (א)סַּיַּארַה בַּרַּה",ar:"لمين هادي السيارة برة؟",cat:"בידוק וזיהוי"},
-  {he:"אל תשקר לי! אני יודע הכול!",trans:"מַא תִכְּדֶ׳בּ עַלַيّ! בַּאעְרֶף כֻּלּ אִשִׁי",ar:"ما تكذب علي! باعرف كل إشي!",cat:"בידוק וזיהוי"},
+  {he:"אל תשקר לי! אני יודע הכול!",trans:"מַא תִכְּדֶ׳בּ עַלַي! בַּאעְרֶף כֻּלּ אִשִׁי",ar:"ما تكذب علي! باعرف كل إشي!",cat:"בידוק וזיהוי"},
   {he:"הרם את הידיים!",trans:"אִרְפַע אִידֵיכּ",ar:"ارفع إيديك!",cat:"עצירת תנועה"},
   {he:"פתח את תא המטען",trans:"אִפְתַח (א)לְבַּגַ׳אג׳",ar:"افتح البجاج!",cat:"עצירת תנועה"},
   {he:"איפה האישור / הרישיון שלך?",trans:"וֵין (א)רֻּחְ׳צַה תַבַּעַכּ",ar:"وين الرخصة تبعك؟",cat:"בידוק וזיהוי"},
@@ -19569,7 +19600,7 @@ window.addEventListener('load', function(){
 <script>
 // Version stamp — shown in the admin panel so we can confirm which build is live
 // on a device (stale service-worker caches were causing "my changes don't show").
-window.APP_VERSION = 'v143';
+window.APP_VERSION = 'v144';
 
 // Register the service worker for full offline use in the field, WITH update
 // detection: when a new version installs, offer a one-tap refresh instead of the
