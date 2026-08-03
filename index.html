@@ -519,6 +519,7 @@ body.day-mode .toast{background:#fff;color:#0e1b2e;}
 .emerg-cube.orange{background:#a85d1e;border-color:#c97825;}
 .emerg-cube.green{background:#1d6e4f;border-color:#1D9E75;}
 .emerg-cube.gray{background:#3d3d3d;border-color:#666;}
+.emerg-cube.gold{background:#8a6d1e;border-color:#D4A24E;}
 .emerg-cube-emoji{font-size:36px;line-height:1;}
 .emerg-cube-name{color:#fff;font-size:16px;font-weight:700;line-height:1.2;}
 .emerg-cube-count{color:rgba(255,255,255,0.85);font-size:11px;font-weight:600;background:rgba(0,0,0,0.25);padding:3px 10px;border-radius:99px;}
@@ -2612,16 +2613,6 @@ function showLanding() {
         <div style="color:#a0b8c8;font-size:11px;margin-top:4px;">חזרו מחר לאתגר חדש 🎯</div>
       </div>
       
-      <!-- 🎯 Suspect-description template: field tool reachable fast from Emergency -->
-      <div onclick="navToTab('desc')" style="display:flex;align-items:center;gap:13px;background:linear-gradient(135deg,rgba(212,162,78,0.18),rgba(212,162,78,0.05));border:1px solid rgba(212,162,78,0.45);border-radius:14px;padding:13px 15px;margin-bottom:14px;cursor:pointer;">
-        <div style="font-size:26px;flex-shrink:0;">🎯</div>
-        <div style="flex:1;min-width:0;">
-          <div style="color:#E8D9B8;font-size:15px;font-weight:800;">תיאור חשוד</div>
-          <div style="color:#7a9ab5;font-size:12px;margin-top:1px;">תבנית מהירה — מה לשאול ואיך לתאר</div>
-        </div>
-        <div style="color:#D4A24E;font-size:20px;flex-shrink:0;">‹</div>
-      </div>
-
       <div class="emerg-grid" id="emerg-grid"></div>
     </div>
     <div id="emerg-list" style="display:none;">
@@ -3379,6 +3370,8 @@ function showLanding() {
         <div style="text-align:center;color:#7a9ab5;font-size:11px;margin-top:5px;">שלום, ברכות, תודה, ניחומים, חגים ועוד — ייכנסו ל"פותחים לב" תחת "ברכות ונימוסים", אחר כך אפשר לערוך ולהקליט</div>
         <button id="tool-fieldvocab" onclick="addFieldVocab(this)" style="width:100%;padding:12px;margin-top:10px;background:linear-gradient(135deg,#16a085 0%,#0e6b58 100%);border:none;border-radius:10px;color:#fff;font-size:13px;font-weight:800;cursor:pointer;font-family:inherit;">🗺️ הוסף/עדכן שמות מקומות + זיהוי ערבית כתובה</button>
         <div style="text-align:center;color:#7a9ab5;font-size:11px;margin-top:5px;">מוסיף חדשים וגם מתקן את ניקוד התעתיק בקיימים (ההקלטות נשמרות)</div>
+        <button id="tool-suspectdesc" onclick="importSuspectDesc(this)" style="width:100%;padding:12px;margin-top:10px;background:linear-gradient(135deg,#b8862f 0%,#8a6d1e 100%);border:none;border-radius:10px;color:#fff;font-size:13px;font-weight:800;cursor:pointer;font-family:inherit;">🎯 הוסף מילות "תיאור חשוד" לרשימות (להקלטה)</button>
+        <div style="text-align:center;color:#7a9ab5;font-size:11px;margin-top:5px;">מוסיף רק את מילות התבנית ש<b>עוד לא קיימות</b> במאגר (מין, גיל, מבנה, צבעים, לבוש...) — אחר כך אפשר לערוך ולהקליט כל אחת מהרשימה, והתבנית תשמיע אותן אוטומטית</div>
         <button id="tool-fieldcmd" onclick="openFieldCmdReview(this)" style="width:100%;padding:12px;margin-top:10px;background:linear-gradient(135deg,#c0704e 0%,#8a4e34 100%);border:none;border-radius:10px;color:#fff;font-size:13px;font-weight:800;cursor:pointer;font-family:inherit;">🎯 סקירה ואישור משפטי פקודות שטח (אחד-אחד)</button>
         <div style="text-align:center;color:#7a9ab5;font-size:11px;margin-top:5px;">בודקים ערבית, ממלאים תעתיק, ומאשרים כל משפט בנפרד — רק מה שאת מאשרת נכנס ל"מבצעי". שום דבר לא עולה אוטומטית.</div>
         <div id="fieldcmd-review" style="margin-top:10px;"></div>
@@ -10128,6 +10121,42 @@ function openDescItem(si,oi){
   document.querySelectorAll('[id^="tab-"]').forEach(function(x){x.className='scr';});
   document.getElementById('tab-lib').className='scr on';
   shV('vpop');
+}
+
+// True only if the exact he+ar pair already exists somewhere in the loaded pool.
+// (he alone is not enough — e.g. "זקן" is both עجوز=old and دقن=beard.)
+function _descPairExists(he,ar){
+  var pool=[];
+  [typeof DB!=='undefined'?DB:null, typeof DAILY!=='undefined'?DAILY:null,
+   typeof HEART!=='undefined'?HEART:null, typeof NAVY!=='undefined'?NAVY:null,
+   typeof ANNOUNCE!=='undefined'?ANNOUNCE:null, typeof CUS!=='undefined'?CUS:null,
+   typeof INTEL!=='undefined'?INTEL:null].forEach(function(a){ if(Array.isArray(a))pool=pool.concat(a); });
+  var heN=_tenNormHe(he), arN=_tenNormAr(ar);
+  return pool.some(function(r){ return r && _tenNormHe(r.he)===heN && arN && _tenNormAr(r.ar)===arN; });
+}
+
+// One-time import: add the suspect-description template words that aren't already
+// in the kit, so they show in the admin lists for editing/recording. The template
+// then plays their recordings automatically (matched by he+ar).
+async function importSuspectDesc(btn){
+  if(!confirm('להוסיף את מילות "תיאור חשוד" שעדיין חסרות במאגר — לעריכה והקלטה מהרשימה? פעולה חד-פעמית, ללא כפילות.'))return;
+  var old=btn.textContent; btn.disabled=true; btn.textContent='מוסיף...';
+  try{
+    var added=0, skipped=0;
+    for(var s=0;s<SUSPECT_DESC.length;s++){
+      var slot=SUSPECT_DESC[s];
+      for(var o=0;o<slot.options.length;o++){
+        var op=slot.options[o];
+        if(_descPairExists(op.he,op.ar)){ skipped++; continue; }
+        await sbFetch('/rest/v1/phrases','POST',{cat:'תיאור אדם',he:op.he,trans:op.trans,ar:op.ar,tags:slot.label,why:'',tone:'',audio_url:'',is_new:false,section:'dictionary'});
+        added++;
+      }
+    }
+    try{ await loadData(); }catch(e){}
+    try{ if(typeof renderSuspectDesc==='function') renderSuspectDesc(); }catch(e){}
+    btn.disabled=false; btn.textContent=old;
+    alert('✓ נוספו '+added+' מילים חדשות לרשימות (קטגוריית "תיאור אדם")'+(skipped?(' · '+skipped+' כבר היו קיימות'):'')+'.\n\nעכשיו אפשר לחפש, לערוך ולהקליט כל אחת מהרשימה — והתבנית תשמיע אותן.');
+  }catch(e){ btn.disabled=false; btn.textContent=old; alert('שגיאה: '+(e&&e.message?e.message:e)); }
 }
 
 // One-time import: turn the canonical 10 into real DB rows so they show in admin and can be recorded
@@ -18761,6 +18790,13 @@ function rQK(){
   grid.style.display='';
 
   var h='';
+  // 🎯 Suspect-description template — same cube styling as the situations (uniform
+  // grid), full-width at the top so the Emergency page stays visually calm.
+  h+='<div class="emerg-cube gold" style="grid-column:1/-1;" onclick="navToTab(\'desc\')">';
+  h+='<div class="emerg-cube-emoji">🎯</div>';
+  h+='<div class="emerg-cube-name">תיאור חשוד</div>';
+  h+='<div class="emerg-cube-count">תבנית — מה לשאול ואיך לתאר</div>';
+  h+='</div>';
   for(var i=0;i<EMERG_CATS.length;i++){
     var ec=EMERG_CATS[i];
     var count=_emergPhrasesForCat(ec).length;
@@ -19790,7 +19826,7 @@ window.addEventListener('load', function(){
 <script>
 // Version stamp — shown in the admin panel so we can confirm which build is live
 // on a device (stale service-worker caches were causing "my changes don't show").
-window.APP_VERSION = 'v150';
+window.APP_VERSION = 'v151';
 
 // Register the service worker for full offline use in the field, WITH update
 // detection: when a new version installs, offer a one-tap refresh instead of the
