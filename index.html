@@ -10103,6 +10103,32 @@ function _descContextAudio(he, ar, trans){
 // sentence it's heard in.
 function _descAudioFor(o){ return _descMatchAudio(o.he,o.ar) || _descContextAudio(o.he,o.ar,o.trans); }
 
+// Resolve what a template chip should DISPLAY: prefer the matching DB row so the
+// editor's edits (transliteration / Arabic) show through, falling back to the
+// built-in text. Audio comes from _descAudioFor (own recording or in-context).
+function _descResolve(o){
+  var pool=[];
+  [typeof DB!=='undefined'?DB:null, typeof DAILY!=='undefined'?DAILY:null,
+   typeof HEART!=='undefined'?HEART:null, typeof NAVY!=='undefined'?NAVY:null,
+   typeof ANNOUNCE!=='undefined'?ANNOUNCE:null, typeof CUS!=='undefined'?CUS:null,
+   typeof INTEL!=='undefined'?INTEL:null, typeof DICT!=='undefined'?DICT:null].forEach(function(a){ if(Array.isArray(a))pool=pool.concat(a); });
+  var heN=_tenNormHe(o.he), arN=_tenNormAr(o.ar);
+  var exact=null, loose=null;
+  for(var i=0;i<pool.length;i++){
+    var r=pool[i]; if(!r)continue;
+    var heM=_tenNormHe(r.he)===heN, arM=(arN && _tenNormAr(r.ar)===arN);
+    if(heM && arM){ exact=r; break; }              // exact pair — safest source of edits
+    else if((heM||arM) && !loose){ loose=r; }        // partial (one field edited)
+  }
+  var best=exact||loose;
+  return {
+    he:    (best && best.he)    || o.he,
+    ar:    (best && best.ar)    || o.ar,
+    trans: (best && best.trans) || o.trans,
+    audio: _descAudioFor(o)
+  };
+}
+
 function renderSuspectDesc(){
   var el=document.getElementById('desc-list'); if(!el)return;
   var html='';
@@ -10111,11 +10137,12 @@ function renderSuspectDesc(){
     html+='<div style="color:#7a9ab5;font-size:12px;font-weight:700;margin-bottom:8px;letter-spacing:0.5px;">'+slot.icon+' '+slot.label+'</div>';
     html+='<div style="display:flex;flex-wrap:wrap;gap:8px;">';
     slot.options.forEach(function(o,oi){
-      var hasAudio=!!_descAudioFor(o);
+      var rd=_descResolve(o);
+      var hasAudio=!!rd.audio;
       html+='<div onclick="openDescItem('+si+','+oi+')" style="flex:1 1 auto;min-width:132px;background:#1F3147;border:1px solid #2A3D52;border-radius:11px;padding:9px 12px;cursor:pointer;">';
-      html+='<div style="display:flex;align-items:center;gap:6px;"><div style="color:#E8D9B8;font-size:14px;font-weight:700;flex:1;">'+o.he+'</div>'+(hasAudio?'<span style="color:#1D9E75;font-size:14px;">🔊</span>':'')+'</div>';
-      html+='<div style="color:#E8D9B8;font-size:15px;font-family:Georgia,serif;direction:rtl;margin-top:2px;">'+o.ar+'</div>';
-      html+='<div style="color:#D4A24E;font-size:12px;margin-top:1px;">'+o.trans+'</div>';
+      html+='<div style="display:flex;align-items:center;gap:6px;"><div style="color:#E8D9B8;font-size:14px;font-weight:700;flex:1;">'+rd.he+'</div>'+(hasAudio?'<span style="color:#1D9E75;font-size:14px;">🔊</span>':'')+'</div>';
+      html+='<div style="color:#E8D9B8;font-size:15px;font-family:Georgia,serif;direction:rtl;margin-top:2px;">'+rd.ar+'</div>';
+      html+='<div style="color:#D4A24E;font-size:12px;margin-top:1px;">'+rd.trans+'</div>';
       html+='</div>';
     });
     html+='</div></div>';
@@ -10126,14 +10153,14 @@ function renderSuspectDesc(){
 function openDescItem(si,oi){
   var slot=SUSPECT_DESC[si]; if(!slot)return;
   var o=slot.options[oi]; if(!o)return;
-  var audio=_descAudioFor(o);
+  var rd=_descResolve(o);
   window._popupSource='desc';
   window._popupReturnTab='desc';
-  _setPopupAudio(audio||'');
+  _setPopupAudio(rd.audio||'');
   if(typeof setPopupLabel==='function')setPopupLabel('military');
-  document.getElementById('phe').textContent=o.he;
-  document.getElementById('parsm').textContent=o.ar;
-  document.getElementById('ptrans').textContent=o.trans||'';
+  document.getElementById('phe').textContent=rd.he;
+  document.getElementById('parsm').textContent=rd.ar;
+  document.getElementById('ptrans').textContent=rd.trans||'';
   document.getElementById('pwhy').textContent='';
   document.getElementById('pwhyb').style.display='none';
   document.getElementById('ptone').textContent='';
@@ -19860,7 +19887,7 @@ window.addEventListener('load', function(){
 <script>
 // Version stamp — shown in the admin panel so we can confirm which build is live
 // on a device (stale service-worker caches were causing "my changes don't show").
-window.APP_VERSION = 'v154';
+window.APP_VERSION = 'v155';
 
 // Register the service worker for full offline use in the field, WITH update
 // detection: when a new version installs, offer a one-tap refresh instead of the
