@@ -520,6 +520,7 @@ body.day-mode .toast{background:#fff;color:#0e1b2e;}
 .emerg-cube.green{background:#1d6e4f;border-color:#1D9E75;}
 .emerg-cube.gray{background:#3d3d3d;border-color:#666;}
 .emerg-cube.gold{background:#8a6d1e;border-color:#D4A24E;}
+.emerg-cube.teal{background:#14676b;border-color:#2fb0b0;}
 .emerg-cube-emoji{font-size:36px;line-height:1;}
 .emerg-cube-name{color:#fff;font-size:16px;font-weight:700;line-height:1.2;}
 .emerg-cube-count{color:rgba(255,255,255,0.85);font-size:11px;font-weight:600;background:rgba(0,0,0,0.25);padding:3px 10px;border-radius:99px;}
@@ -2882,6 +2883,23 @@ function showLanding() {
   </div>
 </div>
 
+<!-- TRIAGE TEMPLATE TAB -->
+<div class="scr" id="tab-triage">
+  <div style="padding:14px 12px 100px 12px;min-height:100vh;">
+    <button onclick="navToTab('qk')" style="background:transparent;border:none;color:#a0b8c8;font-size:15px;cursor:pointer;font-family:inherit;padding:4px 0;margin-bottom:10px;display:flex;align-items:center;gap:6px;">◀ חזרה לחירום</button>
+    <div style="text-align:center;margin-bottom:14px;">
+      <div style="font-size:26px;margin-bottom:4px;">🩺</div>
+      <div style="color:#E8D9B8;font-size:18px;font-weight:800;letter-spacing:0.3px;">טריאז' מהיר</div>
+      <div style="color:#7a9ab5;font-size:12px;line-height:1.5;margin-top:2px;">סדר בדיקה מהיר של נפגע — לחצו על פריט לשמיעה ותרגול</div>
+    </div>
+    <!-- order reminder: the quick triage sequence -->
+    <div style="background:#18293E;border:1px dashed rgba(231,76,60,0.45);border-radius:12px;padding:12px 14px;margin-bottom:16px;color:#e8896a;font-size:13px;line-height:1.9;direction:rtl;">
+      בהכרה? <b>›</b> פצוע/כואב? <b>›</b> מדמם? <b>›</b> יכול לזוז? <b>›</b> נושם? <b>›</b> כמה נפגעים? <b>›</b> הרגעה
+    </div>
+    <div id="triage-list"></div>
+  </div>
+</div>
+
 <!-- SEMANTIC TAB -->
 <div class="scr" id="tab-sem">
   <div class="sec"><button onclick="navToTab('dict')" style="background:transparent;border:none;color:#a0b8c8;font-size:15px;cursor:pointer;font-family:inherit;padding:4px 0;margin-bottom:10px;display:flex;align-items:center;gap:6px;">◀ חזרה למילון</button><div class="stitle">מילון סמנטי — מילים עם משמעות כפולה</div><div id="semlist"></div></div>
@@ -3372,6 +3390,8 @@ function showLanding() {
         <div style="text-align:center;color:#7a9ab5;font-size:11px;margin-top:5px;">מוסיף חדשים וגם מתקן את ניקוד התעתיק בקיימים (ההקלטות נשמרות)</div>
         <button id="tool-suspectdesc" onclick="importSuspectDesc(this)" style="width:100%;padding:12px;margin-top:10px;background:linear-gradient(135deg,#b8862f 0%,#8a6d1e 100%);border:none;border-radius:10px;color:#fff;font-size:13px;font-weight:800;cursor:pointer;font-family:inherit;">🎯 הוסף מילות "תיאור חשוד" לרשימות (להקלטה)</button>
         <div style="text-align:center;color:#7a9ab5;font-size:11px;margin-top:5px;">מוסיף רק את מילות התבנית ש<b>עוד לא קיימות</b> במאגר (מין, גיל, מבנה, צבעים, לבוש...) — אחר כך אפשר לערוך ולהקליט כל אחת מהרשימה, והתבנית תשמיע אותן אוטומטית</div>
+        <button id="tool-triage" onclick="importTriage(this)" style="width:100%;padding:12px;margin-top:10px;background:linear-gradient(135deg,#14676b 0%,#0e4a4d 100%);border:none;border-radius:10px;color:#fff;font-size:13px;font-weight:800;cursor:pointer;font-family:inherit;">🩺 הוסף משפטי "טריאז'" לרשימות (להקלטה)</button>
+        <div style="text-align:center;color:#7a9ab5;font-size:11px;margin-top:5px;">מוסיף לקטגוריית "רפואה וחירום" את משפטי הטריאז' שעדיין אין להם הקלטה (מדמם? / יכול ללכת? / כמה פצועים?...) — <b>יש לוודא את הערבית של החדשים</b> לפני שימוש בשטח</div>
         <button id="tool-fieldcmd" onclick="openFieldCmdReview(this)" style="width:100%;padding:12px;margin-top:10px;background:linear-gradient(135deg,#c0704e 0%,#8a4e34 100%);border:none;border-radius:10px;color:#fff;font-size:13px;font-weight:800;cursor:pointer;font-family:inherit;">🎯 סקירה ואישור משפטי פקודות שטח (אחד-אחד)</button>
         <div style="text-align:center;color:#7a9ab5;font-size:11px;margin-top:5px;">בודקים ערבית, ממלאים תעתיק, ומאשרים כל משפט בנפרד — רק מה שאת מאשרת נכנס ל"מבצעי". שום דבר לא עולה אוטומטית.</div>
         <div id="fieldcmd-review" style="margin-top:10px;"></div>
@@ -10058,7 +10078,44 @@ var SUSPECT_DESC = [
     {he:'צלקת', ar:'ندبة', trans:'נַדְבֵּה'},
     {he:'קעקוע', ar:'وشم', trans:'וַשֵׁם'},
     {he:'צולע', ar:'بيعرج', trans:'בִּיעְרֻג׳'},
-    {he:'משקפיים', ar:'نظّارات', trans:'נַצַּ׳ארַאת'}
+    {he:'משקפיים', ar:'نظّارات', trans:'נַצַّ׳ארַאת'}
+  ]}
+];
+
+// === טריאז' מהיר — ordered medical field-assessment flow ===
+// Verified phrases reuse the kit's "רפואה וחירום" wording; a few new ones are
+// marked _new:true so the editor can confirm the Arabic before relying on them.
+var TRIAGE = [
+  {label:'הכרה ומגע', icon:'🗣️', options:[
+    {he:'אתה בסדר?', ar:'انت منيح؟', trans:'אִנְתַ מְנִיח'},
+    {he:'אתה שומע אותי?', ar:'بتسمعني؟', trans:'בְּתִסְמַעְנִי', _new:true}
+  ]},
+  {label:'פציעה וכאב', icon:'🩹', options:[
+    {he:'אתה פצוע?', ar:'انت مجروح؟', trans:'אִנְתַ מַגׄרוּח'},
+    {he:'כואב לך?', ar:'بيوجعك؟', trans:'בִּיוּגׄעַכּ'},
+    {he:'איפה כואב?', ar:'وين بيوجعك؟', trans:'וֵין בִּיוּגׄעַכּ'}
+  ]},
+  {label:'דימום', icon:'🩸', options:[
+    {he:'אתה מדמם?', ar:'عم بتنزف؟', trans:'עַם בְּתִנְזֵף', _new:true},
+    {he:'דם', ar:'دم', trans:'דַם', _new:true}
+  ]},
+  {label:'תנועה', icon:'🚶', options:[
+    {he:'אתה יכול ללכת?', ar:'بتقدر تمشي؟', trans:'בְּתִקְדַר תִמְשִי', _new:true},
+    {he:'אתה יכול לזוז?', ar:'بتقدر تتحرك؟', trans:'בְּתִקְדַר תִתְחַרַכּ', _new:true}
+  ]},
+  {label:'נשימה', icon:'💨', options:[
+    {he:'אתה נושם?', ar:'بتتنفس؟', trans:'בְּתִתְנַפַّס', _new:true},
+    {he:'נשימה', ar:'نفس', trans:'נַפַס'}
+  ]},
+  {label:'כמה נפגעים', icon:'🔢', options:[
+    {he:'כמה פצועים?', ar:'كم مجروح؟', trans:'כַּם מַגׄרוּח', _new:true}
+  ]},
+  {label:'הרגעה וטיפול', icon:'🤲', options:[
+    {he:'אל תפחד', ar:'لا تخاف', trans:'לַא תְחַ׳אף'},
+    {he:'תישאר איתי', ar:'ضلّ معي', trans:'ד׳לّ מַעִי'},
+    {he:'עזרה בדרך', ar:'الإسعاف جاي', trans:'אִלאִסְעַאף גַׄאי', _new:true},
+    {he:'הזעק אמבולנס', ar:'اطلب إسعاف', trans:'אֻטְלֻבּ אִסְעַאף'},
+    {he:'מים', ar:'مي', trans:'מַי'}
   ]}
 ];
 
@@ -10129,17 +10186,19 @@ function _descResolve(o){
   };
 }
 
-function renderSuspectDesc(){
-  var el=document.getElementById('desc-list'); if(!el)return;
+// Generic renderer for the field templates (תיאור חשוד / טריאז'). Each chip shows
+// the resolved (edit-aware) text + a 🔊 when audio (own or in-context) exists.
+function _renderTpl(data, containerId, opener){
+  var el=document.getElementById(containerId); if(!el)return;
   var html='';
-  SUSPECT_DESC.forEach(function(slot,si){
+  data.forEach(function(slot,si){
     html+='<div style="margin-bottom:16px;">';
     html+='<div style="color:#7a9ab5;font-size:12px;font-weight:700;margin-bottom:8px;letter-spacing:0.5px;">'+slot.icon+' '+slot.label+'</div>';
     html+='<div style="display:flex;flex-wrap:wrap;gap:8px;">';
     slot.options.forEach(function(o,oi){
       var rd=_descResolve(o);
       var hasAudio=!!rd.audio;
-      html+='<div onclick="openDescItem('+si+','+oi+')" style="flex:1 1 auto;min-width:132px;background:#1F3147;border:1px solid #2A3D52;border-radius:11px;padding:9px 12px;cursor:pointer;">';
+      html+='<div onclick="'+opener+'('+si+','+oi+')" style="flex:1 1 auto;min-width:132px;background:#1F3147;border:1px solid #2A3D52;border-radius:11px;padding:9px 12px;cursor:pointer;">';
       html+='<div style="display:flex;align-items:center;gap:6px;"><div style="color:#E8D9B8;font-size:14px;font-weight:700;flex:1;">'+rd.he+'</div>'+(hasAudio?'<span style="color:#1D9E75;font-size:14px;">🔊</span>':'')+'</div>';
       html+='<div style="color:#E8D9B8;font-size:15px;font-family:Georgia,serif;direction:rtl;margin-top:2px;">'+rd.ar+'</div>';
       html+='<div style="color:#D4A24E;font-size:12px;margin-top:1px;">'+rd.trans+'</div>';
@@ -10149,13 +10208,18 @@ function renderSuspectDesc(){
   });
   el.innerHTML=html;
 }
+function renderSuspectDesc(){ _renderTpl(SUSPECT_DESC,'desc-list','openDescItem'); }
+function renderTriage(){ _renderTpl(TRIAGE,'triage-list','openTriageItem'); }
 
-function openDescItem(si,oi){
-  var slot=SUSPECT_DESC[si]; if(!slot)return;
+// Generic opener: shows the shared phrase popup for a template chip; returnTab is
+// where the ✕/back buttons go (routed via clsP's 'tpl' case and _popupReturnTab).
+function _openTpl(data, si, oi, returnTab){
+  var slot=data[si]; if(!slot)return;
   var o=slot.options[oi]; if(!o)return;
   var rd=_descResolve(o);
-  window._popupSource='desc';
-  window._popupReturnTab='desc';
+  window._popupSource='tpl';
+  window._popupReturnTab=returnTab;
+  window._popupTplReturn=returnTab;
   _setPopupAudio(rd.audio||'');
   if(typeof setPopupLabel==='function')setPopupLabel('military');
   document.getElementById('phe').textContent=rd.he;
@@ -10174,6 +10238,8 @@ function openDescItem(si,oi){
   document.getElementById('tab-lib').className='scr on';
   shV('vpop');
 }
+function openDescItem(si,oi){ _openTpl(SUSPECT_DESC,si,oi,'desc'); }
+function openTriageItem(si,oi){ _openTpl(TRIAGE,si,oi,'triage'); }
 
 // True only if the exact he+ar pair already exists somewhere in the loaded pool.
 // (he alone is not enough — e.g. "זקן" is both עجوز=old and دقن=beard.)
@@ -10191,33 +10257,36 @@ function _descPairExists(he,ar){
 // in one recordable list (the "תיאור אדם" dictionary category), so it can be
 // recorded from the admin lists. Words that already have audio are left alone;
 // words already sitting in that category are not duplicated.
-async function importSuspectDesc(btn){
-  if(!confirm('להכניס לרשימה "תיאור אדם" את כל מילות התבנית שעדיין אין להן הקלטה — כדי שתוכלי להקליט אותן במקום אחד? פעולה חד-פעמית, ללא כפילות.'))return;
+// Generic one-time import: put every template word that has NO audio yet (own or
+// in-context) into one recordable category, so it can be recorded from the lists.
+async function _importTpl(data, cat, section, btn){
+  if(!confirm('להכניס לרשימה "'+cat+'" את כל מילות התבנית שעדיין אין להן הקלטה — כדי שתוכלי להקליט אותן במקום אחד? פעולה חד-פעמית, ללא כפילות.'))return;
   var old=btn.textContent; btn.disabled=true; btn.textContent='מוסיף...';
   try{
-    // he+ar pairs already sitting in the "תיאור אדם" category (don't duplicate there)
     var inCat={};
-    (typeof DICT!=='undefined'&&DICT?DICT:[]).forEach(function(r){
-      if(r && r.cat==='תיאור אדם') inCat[_tenNormHe(r.he)+'|'+_tenNormAr(r.ar)]=1;
+    [typeof DICT!=='undefined'?DICT:[], typeof DB!=='undefined'?DB:[]].forEach(function(arr){
+      (arr||[]).forEach(function(r){ if(r && r.cat===cat) inCat[_tenNormHe(r.he)+'|'+_tenNormAr(r.ar)]=1; });
     });
     var added=0, haveRec=0, already=0;
-    for(var s=0;s<SUSPECT_DESC.length;s++){
-      var slot=SUSPECT_DESC[s];
+    for(var s=0;s<data.length;s++){
+      var slot=data[s];
       for(var o=0;o<slot.options.length;o++){
         var op=slot.options[o];
         if(_descAudioFor(op)){ haveRec++; continue; }   // already has audio (own or in-context) — no need
         var key=_tenNormHe(op.he)+'|'+_tenNormAr(op.ar);
-        if(inCat[key]){ already++; continue; }                      // already in the list to record
-        await sbFetch('/rest/v1/phrases','POST',{cat:'תיאור אדם',he:op.he,trans:op.trans,ar:op.ar,tags:slot.label,why:'',tone:'',audio_url:'',is_new:false,section:'dictionary'});
+        if(inCat[key]){ already++; continue; }           // already in the list to record
+        await sbFetch('/rest/v1/phrases','POST',{cat:cat,he:op.he,trans:op.trans,ar:op.ar,tags:slot.label,why:'',tone:'',audio_url:'',is_new:false,section:section});
         inCat[key]=1; added++;
       }
     }
     try{ await loadData(); }catch(e){}
-    try{ if(typeof renderSuspectDesc==='function') renderSuspectDesc(); }catch(e){}
+    try{ renderSuspectDesc(); renderTriage(); }catch(e){}
     btn.disabled=false; btn.textContent=old;
-    alert('✓ '+added+' מילים נוספו לרשימה "תיאור אדם" להקלטה.\n• '+haveRec+' כבר מוקלטות (🔊 בתבנית)\n• '+already+' כבר היו ברשימה\n\nעכשיו: ניהול → 📋 רשימה → קטגוריית "תיאור אדם" → הקליטי אותן. כל מילה שתקליטי — 🔊 יופיע בתבנית.');
+    alert('✓ '+added+' מילים נוספו לרשימה "'+cat+'" להקלטה.\n• '+haveRec+' כבר מוקלטות (🔊 בתבנית)\n• '+already+' כבר היו ברשימה\n\nעכשיו: ניהול → 📋 רשימה → קטגוריית "'+cat+'" → הקליטי אותן. כל מילה שתקליטי — 🔊 יופיע בתבנית.');
   }catch(e){ btn.disabled=false; btn.textContent=old; alert('שגיאה: '+(e&&e.message?e.message:e)); }
 }
+function importSuspectDesc(btn){ return _importTpl(SUSPECT_DESC,'תיאור אדם','dictionary',btn); }
+function importTriage(btn){ return _importTpl(TRIAGE,'רפואה וחירום','dictionary',btn); }
 
 // One-time import: turn the canonical 10 into real DB rows so they show in admin and can be recorded
 async function importTenPhrases(btn){
@@ -16143,6 +16212,8 @@ function clsP(){
   if(pt)clearInterval(pt);
   window._popupReturnTab='';
   var src=window._popupSource;
+  // Field templates (תיאור חשוד / טריאז') route back to their own screen.
+  if(src==='tpl'){ window._popupSource=null; try{ navToTab(window._popupTplReturn||'qk'); }catch(e){} return; }
   // Map popup source -> target tab key + which row + post-switch callback
   var routes={
     'qk':   {tab:'qk',  row:'primary',   cb:null},
@@ -16151,8 +16222,7 @@ function clsP(){
     'daily':{tab:'day', row:'secondary', cb:null},
     'dict': {tab:'dict',row:'secondary', cb:function(){renderDict();}},
     'sem':  {tab:'sem', row:'secondary', cb:function(){if(typeof rSem==='function')rSem();}},
-    'ten':  {tab:'ten', row:'secondary', cb:function(){if(typeof renderTen==='function')renderTen();}},
-    'desc': {tab:'desc',row:'secondary', cb:function(){if(typeof renderSuspectDesc==='function')renderSuspectDesc();}}
+    'ten':  {tab:'ten', row:'secondary', cb:function(){if(typeof renderTen==='function')renderTen();}}
   };
   if(src && routes[src]){
     var r=routes[src];
@@ -18851,12 +18921,17 @@ function rQK(){
   grid.style.display='';
 
   var h='';
-  // 🎯 Suspect-description template — same cube styling as the situations (uniform
-  // grid), full-width at the top so the Emergency page stays visually calm.
-  h+='<div class="emerg-cube gold" style="grid-column:1/-1;" onclick="navToTab(\'desc\')">';
+  // Field tools (תיאור חשוד + טריאז') — same cube styling as the situations, so the
+  // Emergency page reads as one uniform grid. They share the top row.
+  h+='<div class="emerg-cube gold" onclick="navToTab(\'desc\')">';
   h+='<div class="emerg-cube-emoji">🎯</div>';
   h+='<div class="emerg-cube-name">תיאור חשוד</div>';
-  h+='<div class="emerg-cube-count">תבנית — מה לשאול ואיך לתאר</div>';
+  h+='<div class="emerg-cube-count">מה לשאול ואיך לתאר</div>';
+  h+='</div>';
+  h+='<div class="emerg-cube teal" onclick="navToTab(\'triage\')">';
+  h+='<div class="emerg-cube-emoji">🩺</div>';
+  h+='<div class="emerg-cube-name">טריאז\' מהיר</div>';
+  h+='<div class="emerg-cube-count">בדיקת נפגע — סדר פעולות</div>';
   h+='</div>';
   for(var i=0;i<EMERG_CATS.length;i++){
     var ec=EMERG_CATS[i];
@@ -19777,6 +19852,9 @@ function navToTab(tabId){
     if (tabId === 'desc') {
       try { if (typeof renderSuspectDesc === 'function') renderSuspectDesc(); } catch(e) {}
     }
+    if (tabId === 'triage') {
+      try { if (typeof renderTriage === 'function') renderTriage(); } catch(e) {}
+    }
     if (tabId === 'intel') {
       setTimeout(function(){ 
         try { 
@@ -19887,7 +19965,7 @@ window.addEventListener('load', function(){
 <script>
 // Version stamp — shown in the admin panel so we can confirm which build is live
 // on a device (stale service-worker caches were causing "my changes don't show").
-window.APP_VERSION = 'v155';
+window.APP_VERSION = 'v156';
 
 // Register the service worker for full offline use in the field, WITH update
 // detection: when a new version installs, offer a one-tap refresh instead of the
