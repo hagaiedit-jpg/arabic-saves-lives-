@@ -19309,70 +19309,32 @@ function rQK(){
   grid.style.display='';
 
   var h='';
-  // The 10 must-know phrases — the most critical, fastest set — full-width at the
-  // very top of the Emergency grid (moved here from Home).
+  // The 10 must-know phrases — full-width at the very top.
   h+='<div class="emerg-cube crit" style="grid-column:1/-1;" onclick="navToTab(\'ten\')">';
   h+='<div class="emerg-cube-emoji">🎖️</div>';
   h+='<div class="emerg-cube-name">10 משפטי חובה</div>';
   h+='<div class="emerg-cube-count">מילים שמצילות חיים</div>';
   h+='</div>';
-  // Field tools (תיאור חשוד + טריאז') — same cube styling as the situations, so the
-  // Emergency page reads as one uniform grid. They share the top row.
-  h+='<div class="emerg-cube gold" onclick="navToTab(\'desc\')">';
-  h+='<div class="emerg-cube-emoji">🎯</div>';
-  h+='<div class="emerg-cube-name">תיאור חשוד</div>';
-  h+='<div class="emerg-cube-count">מה לשאול ואיך לתאר</div>';
-  h+='</div>';
-  h+='<div class="emerg-cube teal" onclick="navToTab(\'triage\')">';
-  h+='<div class="emerg-cube-emoji">🩺</div>';
-  h+='<div class="emerg-cube-name">רפואה וטריאז\'</div>';
-  h+='<div class="emerg-cube-count">בדיקת נפגע — סדר פעולות</div>';
-  h+='</div>';
-  h+='<div class="emerg-cube sky" onclick="navToTab(\'answers\')">';
-  h+='<div class="emerg-cube-emoji">💬</div>';
-  h+='<div class="emerg-cube-name">מה עונים לך</div>';
-  h+='<div class="emerg-cube-count">הבנת תשובות האזרח</div>';
-  h+='</div>';
-  h+='<div class="emerg-cube purple" onclick="navToTab(\'crowd\')">';
-  h+='<div class="emerg-cube-emoji">👥</div>';
-  h+='<div class="emerg-cube-name">קהל ואירועים</div>';
-  h+='<div class="emerg-cube-count">ניהול קהל והרחקה</div>';
-  h+='</div>';
-  h+='<div class="emerg-cube mint" onclick="navToTab(\'kids\')">';
-  h+='<div class="emerg-cube-emoji">🧒</div>';
-  h+='<div class="emerg-cube-name">ילדים ואוכלוסיות רגישות</div>';
-  h+='<div class="emerg-cube-count">מגע רגיש ומרגיע</div>';
-  h+='</div>';
-  h+='<div class="emerg-cube rose" onclick="navToTab(\'calm\')">';
-  h+='<div class="emerg-cube-emoji">🕊️</div>';
-  h+='<div class="emerg-cube-name">הרגעה ושכנוע</div>';
-  h+='<div class="emerg-cube-count">הורדת מתח ושיתוף פעולה</div>';
-  h+='</div>';
-  for(var i=0;i<EMERG_CATS.length;i++){
-    var ec=EMERG_CATS[i];
-    // Medical is unified into the structured 'רפואה וטריאז'' template above — no
-    // separate flat cube (avoids the duplicate the soldier saw).
-    if(ec.key==='medical') continue;
-    // Situations that now have a structured template open it instead of the flat list.
-    var tplTab={orders:'ord',check:'chk',vehicle:'veh'}[ec.key];
-    var count=_emergPhrasesForCat(ec).length;
-    // Legacy cube only appears if there are phrases there (otherwise hide)
-    if(ec.legacy && count===0)continue;
-    var emptyClass=count===0?' emerg-cube-empty':'';
-    if(tplTab){
-      h+='<div class="emerg-cube '+ec.color+'" onclick="navToTab(\''+tplTab+'\')">';
-      h+='<div class="emerg-cube-emoji">'+ec.emoji+'</div>';
-      h+='<div class="emerg-cube-name">'+ec.name+'</div>';
-      h+='<div class="emerg-cube-count">תבנית מסודרת</div>';
-      h+='</div>';
-      continue;
-    }
-    h+='<div class="emerg-cube '+ec.color+emptyClass+'" onclick="openEmergCat(\''+ec.key+'\')">';
-    h+='<div class="emerg-cube-emoji">'+ec.emoji+'</div>';
-    h+='<div class="emerg-cube-name">'+ec.name+'</div>';
-    h+='<div class="emerg-cube-count">'+count+' משפטים</div>';
+  // Cubes in the order the user set: הוראות/מה עונים · בידוק/תיאור · רכב/רפואה ·
+  // קהל/ילדים · הרגעה (last).
+  var EMERG_CUBES=[
+    {tab:'ord',     emoji:'🚨',  name:'הוראות מיידיות',          sub:'תבנית מסודרת',           color:'red'},
+    {tab:'answers', emoji:'💬',  name:'מה עונים לך',              sub:'הבנת תשובות האזרח',       color:'sky'},
+    {tab:'chk',     emoji:'🪪',  name:'בידוק וזיהוי',            sub:'תבנית מסודרת',           color:'blue'},
+    {tab:'desc',    emoji:'🎯',  name:'תיאור חשוד',              sub:'מה לשאול ואיך לתאר',       color:'gold'},
+    {tab:'veh',     emoji:'🚗',  name:'רכב ומחסום',              sub:'תבנית מסודרת',           color:'orange'},
+    {tab:'triage',  emoji:'🩺',  name:"רפואה וטריאז'",           sub:'בדיקת נפגע — סדר פעולות',  color:'teal'},
+    {tab:'crowd',   emoji:'👥',  name:'קהל ואירועים',            sub:'ניהול קהל והרחקה',         color:'purple'},
+    {tab:'kids',    emoji:'🧒',  name:'ילדים ואוכלוסיות רגישות', sub:'מגע רגיש ומרגיע',          color:'mint'},
+    {tab:'calm',    emoji:'🕊️', name:'הרגעה ושכנוע',            sub:'הורדת מתח ושיתוף פעולה',   color:'rose'}
+  ];
+  EMERG_CUBES.forEach(function(c){
+    h+='<div class="emerg-cube '+c.color+'" onclick="navToTab(\''+c.tab+'\')">';
+    h+='<div class="emerg-cube-emoji">'+c.emoji+'</div>';
+    h+='<div class="emerg-cube-name">'+c.name+'</div>';
+    h+='<div class="emerg-cube-count">'+c.sub+'</div>';
     h+='</div>';
-  }
+  });
   grid.innerHTML=h;
   // Admin-only: one-click marking of the approved critical set.
   var rec=document.getElementById('emerg-recmark');
@@ -20400,7 +20362,7 @@ window.addEventListener('load', function(){
 <script>
 // Version stamp — shown in the admin panel so we can confirm which build is live
 // on a device (stale service-worker caches were causing "my changes don't show").
-window.APP_VERSION = 'v171';
+window.APP_VERSION = 'v172';
 
 // Register the service worker for full offline use in the field, WITH update
 // detection: when a new version installs, offer a one-tap refresh instead of the
