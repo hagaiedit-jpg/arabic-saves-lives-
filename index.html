@@ -9379,6 +9379,11 @@ async function mergeScenarioDuplicates(btn){
 // (Same coverage rule as the recording worklist / dictionary badge.)
 function _dictRowCovered(p){
   try{
+    // A multi-word phrase (a full response/sentence) is NOT "covered" just because
+    // one word inside it is heard elsewhere — it must be recorded as a whole. Only
+    // single-word vocabulary can be covered in context. Keeps the admin list honest
+    // and consistent with the template's audio logic.
+    if(String((p&&p.he)||'').trim().split(/\s+/).filter(Boolean).length>1) return false;
     if(!window.SMART_DICT_INDEX && typeof buildSmartDictIndex==='function') buildSmartDictIndex();
     var idx=window.SMART_DICT_INDEX||{};
     var norm=(typeof dictNorm==='function')?dictNorm:function(s){return String(s||'').toLowerCase();};
@@ -10452,8 +10457,64 @@ function renderCheck(){ _renderTpl(CHECK,'chk-list','openChkItem'); }
 function openChkItem(si,oi){ _openTpl(CHECK,si,oi,'chk'); }
 function renderVehicle(){ _renderTpl(VEHICLE,'veh-list','openVehItem'); }
 function openVehItem(si,oi){ _openTpl(VEHICLE,si,oi,'veh'); }
-function renderAnswers(){ _renderTpl(ANSWERS,'answers-list','openAnsItem'); }
 function openAnsItem(si,oi){ _openTpl(ANSWERS,si,oi,'answers'); }
+// "מה עונים לך" renders from the LIVE DB category 'תשובות אזרח' when it exists, so
+// the editor's text edits and recordings always show through (no fragile matching).
+// Falls back to the built-in seed before the first import. Audio = the row's own
+// recording, else the in-context recording (single-word rows).
+function renderAnswers(){
+  var el=document.getElementById('answers-list'); if(!el)return;
+  var rows=[];
+  [typeof DICT!=='undefined'?DICT:[], typeof DB!=='undefined'?DB:[]].forEach(function(a){
+    (a||[]).forEach(function(r){ if(r && r.cat==='תשובות אזרח' && (r.he||r.ar)) rows.push(r); });
+  });
+  if(!rows.length){ _renderTpl(ANSWERS,'answers-list','openAnsItem'); return; }
+  var ICON={}; ANSWERS.forEach(function(g){ ICON[g.label]=g.icon; });
+  var seedOrder=ANSWERS.map(function(g){ return g.label; });
+  var order=[], groups={};
+  rows.forEach(function(r){
+    var g=r.tags||'תשובות'; if(!groups[g]){ groups[g]=[]; order.push(g); } groups[g].push(r);
+  });
+  order.sort(function(a,b){ var ia=seedOrder.indexOf(a), ib=seedOrder.indexOf(b); return (ia<0?99:ia)-(ib<0?99:ib); });
+  window._ansRows=rows;
+  var html='';
+  order.forEach(function(g){
+    html+='<div style="margin-bottom:16px;">';
+    html+='<div style="color:#7a9ab5;font-size:12px;font-weight:700;margin-bottom:8px;letter-spacing:0.5px;">'+(ICON[g]||'💬')+' '+g+'</div>';
+    html+='<div style="display:flex;flex-wrap:wrap;gap:8px;">';
+    groups[g].forEach(function(r){
+      var idx=rows.indexOf(r);
+      var hasAudio=!!(r.audio || _descAudioFor(r));
+      html+='<div onclick="openAnsRow('+idx+')" style="flex:1 1 auto;min-width:132px;background:#1F3147;border:1px solid #2A3D52;border-radius:11px;padding:9px 12px;cursor:pointer;">';
+      html+='<div style="display:flex;align-items:center;gap:6px;"><div style="color:#E8D9B8;font-size:14px;font-weight:700;flex:1;">'+(r.he||'')+'</div>'+(hasAudio?'<span style="color:#1D9E75;font-size:14px;">🔊</span>':'')+'</div>';
+      html+='<div style="color:#E8D9B8;font-size:15px;font-family:Georgia,serif;direction:rtl;margin-top:2px;">'+(r.ar||'')+'</div>';
+      html+='<div style="color:#D4A24E;font-size:12px;margin-top:1px;">'+(r.trans||'')+'</div>';
+      html+='</div>';
+    });
+    html+='</div></div>';
+  });
+  el.innerHTML=html;
+}
+function openAnsRow(idx){
+  var r=(window._ansRows||[])[idx]; if(!r)return;
+  var audio=r.audio || _descAudioFor(r);
+  window._popupSource='tpl'; window._popupReturnTab='answers'; window._popupTplReturn='answers';
+  _setPopupAudio(audio||'');
+  if(typeof setPopupLabel==='function')setPopupLabel('military');
+  document.getElementById('phe').textContent=r.he||'';
+  document.getElementById('parsm').textContent=r.ar||'';
+  document.getElementById('ptrans').textContent=r.trans||'';
+  document.getElementById('pwhy').textContent=''; document.getElementById('pwhyb').style.display='none';
+  document.getElementById('ptone').textContent=''; document.getElementById('ptoneb').style.display='none';
+  renderPhraseResponses(r);
+  var badge=document.getElementById('pcatbadge'); if(badge)badge.style.display='none';
+  var goTo=document.getElementById('dict-go-to-category'); if(goTo)goTo.style.display='none';
+  try{bldW();}catch(e){}
+  var wt=document.getElementById('wtime'); if(wt)wt.textContent='0:00';
+  document.querySelectorAll('[id^="tab-"]').forEach(function(x){x.className='scr';});
+  document.getElementById('tab-lib').className='scr on';
+  shV('vpop');
+}
 
 // True only if the exact he+ar pair already exists somewhere in the loaded pool.
 // (he alone is not enough — e.g. "זקן" is both עجوز=old and دقن=beard.)
@@ -20209,7 +20270,7 @@ window.addEventListener('load', function(){
 <script>
 // Version stamp — shown in the admin panel so we can confirm which build is live
 // on a device (stale service-worker caches were causing "my changes don't show").
-window.APP_VERSION = 'v167';
+window.APP_VERSION = 'v168';
 
 // Register the service worker for full offline use in the field, WITH update
 // detection: when a new version installs, offer a one-tap refresh instead of the
