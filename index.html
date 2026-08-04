@@ -2304,13 +2304,19 @@ function showLanding() {
           <div style="color:#7a9ab5;font-size:10.5px;line-height:1.4;">כל התרגילים במקום אחד (כולל מצב לחץ)</div>
         </div>
 
+        <div onclick="startPrepPath()" style="background:linear-gradient(160deg,#1F3147 0%,#243a55 100%);border:1px solid rgba(212,162,78,0.2);border-radius:14px;padding:14px 12px;cursor:pointer;box-shadow:0 2px 8px rgba(0,0,0,0.2);">
+          <div style="font-size:26px;margin-bottom:6px;line-height:1;">🪖</div>
+          <div style="color:#E8D9B8;font-size:13px;font-weight:800;margin-bottom:2px;">הכנה לשירות קרבי</div>
+          <div style="color:#7a9ab5;font-size:10.5px;line-height:1.4;">מסלול 30 יום מובנה</div>
+        </div>
+
         <div onclick="navToTab('lib')" style="background:linear-gradient(160deg,#1F3147 0%,#243a55 100%);border:1px solid rgba(212,162,78,0.2);border-radius:14px;padding:14px 12px;cursor:pointer;box-shadow:0 2px 8px rgba(0,0,0,0.2);">
           <div style="font-size:26px;margin-bottom:6px;line-height:1;">📚</div>
           <div style="color:#E8D9B8;font-size:13px;font-weight:800;margin-bottom:2px;">הספרייה המבצעית</div>
           <div style="color:#7a9ab5;font-size:10.5px;line-height:1.4;">לחפש מילה או נושא</div>
         </div>
 
-        <div onclick="navToTab('scn')" style="grid-column:1/-1;background:linear-gradient(160deg,#1F3147 0%,#243a55 100%);border:1px solid rgba(212,162,78,0.2);border-radius:14px;padding:14px 12px;cursor:pointer;box-shadow:0 2px 8px rgba(0,0,0,0.2);">
+        <div onclick="navToTab('scn')" style="background:linear-gradient(160deg,#1F3147 0%,#243a55 100%);border:1px solid rgba(212,162,78,0.2);border-radius:14px;padding:14px 12px;cursor:pointer;box-shadow:0 2px 8px rgba(0,0,0,0.2);">
           <div style="font-size:26px;margin-bottom:6px;line-height:1;">💬</div>
           <div style="color:#E8D9B8;font-size:13px;font-weight:800;margin-bottom:2px;">תרחישים מהשטח</div>
           <div style="color:#7a9ab5;font-size:10.5px;line-height:1.4;">להתאמן על שיחה אמיתית</div>
@@ -5762,6 +5768,7 @@ function renderSmartHero(){
     }
     if (foundScn) {
       window._heroMode = 'scenario';
+      card.style.display = '';
       card.innerHTML =
         '<div style="display:flex;align-items:center;gap:14px;">' +
         '<div style="font-size:32px;flex-shrink:0;">' + foundScn.icon + '</div>' +
@@ -5773,9 +5780,10 @@ function renderSmartHero(){
         '</div>';
       return;
     }
-    // Priority 2/3: prep path (the existing adaptive card handles "start" vs "continue day")
+    // Prep path now lives as a cube in the "מה מעניין" grid — no always-on hero
+    // banner here (keeps the top of Home calm). Hide unless a scenario is active.
     window._heroMode = 'prep';
-    if (typeof renderPrepPathHomeCard === 'function') renderPrepPathHomeCard();
+    card.style.display = 'none';
   } catch(e){
     console.warn('renderSmartHero error:', e);
     window._heroMode = 'prep';
@@ -20356,7 +20364,7 @@ window.addEventListener('load', function(){
 <script>
 // Version stamp — shown in the admin panel so we can confirm which build is live
 // on a device (stale service-worker caches were causing "my changes don't show").
-window.APP_VERSION = 'v173';
+window.APP_VERSION = 'v174';
 
 // Register the service worker for full offline use in the field, WITH update
 // detection: when a new version installs, offer a one-tap refresh instead of the
