@@ -523,6 +523,9 @@ body.day-mode .toast{background:#fff;color:#0e1b2e;}
 .emerg-cube.teal{background:#14676b;border-color:#2fb0b0;}
 .emerg-cube.sky{background:#2a5578;border-color:#5b9bd5;}
 .emerg-cube.crit{background:linear-gradient(135deg,#6b2440,#4a1830);border-color:#c85c8a;}
+.emerg-cube.purple{background:#4a3a6b;border-color:#8a6bd0;}
+.emerg-cube.rose{background:#6b3a4a;border-color:#d08a9b;}
+.emerg-cube.mint{background:#2f6b52;border-color:#4fd0a0;}
 .emerg-cube-emoji{font-size:36px;line-height:1;}
 .emerg-cube-name{color:#fff;font-size:16px;font-weight:700;line-height:1.2;}
 .emerg-cube-count{color:rgba(255,255,255,0.85);font-size:11px;font-weight:600;background:rgba(0,0,0,0.25);padding:3px 10px;border-radius:99px;}
@@ -2951,6 +2954,41 @@ function showLanding() {
       <div style="color:#7a9ab5;font-size:12px;line-height:1.5;margin-top:2px;">התשובות שתשמע מהאזרח — לזיהוי מהיר. לחצו לשמיעה ותרגול</div>
     </div>
     <div id="answers-list"></div>
+  </div>
+</div>
+
+<!-- CROWD / KIDS / CALM — live DB categories rendered as cards -->
+<div class="scr" id="tab-crowd">
+  <div style="padding:14px 12px 100px 12px;min-height:100vh;">
+    <button onclick="navToTab('qk')" style="background:transparent;border:none;color:#a0b8c8;font-size:15px;cursor:pointer;font-family:inherit;padding:4px 0;margin-bottom:10px;display:flex;align-items:center;gap:6px;">◀ חזרה לחירום</button>
+    <div style="text-align:center;margin-bottom:14px;">
+      <div style="font-size:26px;margin-bottom:4px;">👥</div>
+      <div style="color:#E8D9B8;font-size:18px;font-weight:800;">קהל ואירועים</div>
+      <div style="color:#7a9ab5;font-size:12px;margin-top:2px;">ניהול קהל והרחקה — לחצו על פריט לשמיעה ותרגול</div>
+    </div>
+    <div id="crowd-list"></div>
+  </div>
+</div>
+<div class="scr" id="tab-kids">
+  <div style="padding:14px 12px 100px 12px;min-height:100vh;">
+    <button onclick="navToTab('qk')" style="background:transparent;border:none;color:#a0b8c8;font-size:15px;cursor:pointer;font-family:inherit;padding:4px 0;margin-bottom:10px;display:flex;align-items:center;gap:6px;">◀ חזרה לחירום</button>
+    <div style="text-align:center;margin-bottom:14px;">
+      <div style="font-size:26px;margin-bottom:4px;">🧒</div>
+      <div style="color:#E8D9B8;font-size:18px;font-weight:800;">ילדים ואוכלוסיות רגישות</div>
+      <div style="color:#7a9ab5;font-size:12px;margin-top:2px;">מגע רגיש ומרגיע — לחצו על פריט לשמיעה ותרגול</div>
+    </div>
+    <div id="kids-list"></div>
+  </div>
+</div>
+<div class="scr" id="tab-calm">
+  <div style="padding:14px 12px 100px 12px;min-height:100vh;">
+    <button onclick="navToTab('qk')" style="background:transparent;border:none;color:#a0b8c8;font-size:15px;cursor:pointer;font-family:inherit;padding:4px 0;margin-bottom:10px;display:flex;align-items:center;gap:6px;">◀ חזרה לחירום</button>
+    <div style="text-align:center;margin-bottom:14px;">
+      <div style="font-size:26px;margin-bottom:4px;">🕊️</div>
+      <div style="color:#E8D9B8;font-size:18px;font-weight:800;">הרגעה ושכנוע</div>
+      <div style="color:#7a9ab5;font-size:12px;margin-top:2px;">הורדת מתח ובניית שיתוף פעולה — לחצו על פריט לשמיעה ותרגול</div>
+    </div>
+    <div id="calm-list"></div>
   </div>
 </div>
 
@@ -10501,6 +10539,63 @@ function renderAnswers(){
   });
   el.innerHTML=html;
 }
+// Generic: render ANY existing DB category live (military/dictionary) as cards, so
+// full existing content (with recordings & edits) surfaces without hardcoding.
+window._dbCatRows={};
+function _renderDbCat(cat, containerId, opener){
+  var el=document.getElementById(containerId); if(!el)return;
+  var rows=[];
+  [typeof DB!=='undefined'?DB:[], typeof DICT!=='undefined'?DICT:[]].forEach(function(a){
+    (a||[]).forEach(function(r){ if(r && r.cat===cat && (r.he||r.ar)) rows.push(r); });
+  });
+  window._dbCatRows[cat]=rows;
+  if(!rows.length){ el.innerHTML='<div style="text-align:center;color:#7a9ab5;font-size:13px;padding:30px 16px;line-height:1.7;">התוכן של הקטגוריה נטען מהמאגר.<br>אם ריק — ודאי חיבור לרשת ורענני את האפליקציה.</div>'; return; }
+  var order=[], groups={};
+  rows.forEach(function(r){ var g=(r.tags&&String(r.tags).trim())?String(r.tags).trim():''; if(!(g in groups)){groups[g]=[];order.push(g);} groups[g].push(r); });
+  var html='';
+  order.forEach(function(g){
+    html+='<div style="margin-bottom:16px;">';
+    if(g) html+='<div style="color:#7a9ab5;font-size:12px;font-weight:700;margin-bottom:8px;letter-spacing:0.5px;">'+g+'</div>';
+    html+='<div style="display:flex;flex-wrap:wrap;gap:8px;">';
+    groups[g].forEach(function(r){
+      var idx=rows.indexOf(r); var hasAudio=!!(r.audio || _descAudioFor(r));
+      html+='<div onclick="'+opener+'('+idx+')" style="flex:1 1 auto;min-width:150px;background:#1F3147;border:1px solid #2A3D52;border-radius:11px;padding:9px 12px;cursor:pointer;">';
+      html+='<div style="display:flex;align-items:center;gap:6px;"><div style="color:#E8D9B8;font-size:14px;font-weight:700;flex:1;">'+(r.he||'')+'</div>'+(hasAudio?'<span style="color:#1D9E75;font-size:14px;">🔊</span>':'')+'</div>';
+      html+='<div style="color:#E8D9B8;font-size:15px;font-family:Georgia,serif;direction:rtl;margin-top:2px;">'+(r.ar||'')+'</div>';
+      html+='<div style="color:#D4A24E;font-size:12px;margin-top:1px;">'+(r.trans||'')+'</div>';
+      html+='</div>';
+    });
+    html+='</div></div>';
+  });
+  el.innerHTML=html;
+}
+function _openDbCatItem(cat, idx, returnTab){
+  var r=(window._dbCatRows[cat]||[])[idx]; if(!r)return;
+  var audio=r.audio || _descAudioFor(r);
+  window._popupSource='tpl'; window._popupReturnTab=returnTab; window._popupTplReturn=returnTab;
+  _setPopupAudio(audio||'');
+  if(typeof setPopupLabel==='function')setPopupLabel('military');
+  document.getElementById('phe').textContent=r.he||'';
+  document.getElementById('parsm').textContent=r.ar||'';
+  document.getElementById('ptrans').textContent=r.trans||'';
+  document.getElementById('pwhy').textContent=''; document.getElementById('pwhyb').style.display='none';
+  document.getElementById('ptone').textContent=''; document.getElementById('ptoneb').style.display='none';
+  renderPhraseResponses(r);
+  var badge=document.getElementById('pcatbadge'); if(badge)badge.style.display='none';
+  var goTo=document.getElementById('dict-go-to-category'); if(goTo)goTo.style.display='none';
+  try{bldW();}catch(e){}
+  var wt=document.getElementById('wtime'); if(wt)wt.textContent='0:00';
+  document.querySelectorAll('[id^="tab-"]').forEach(function(x){x.className='scr';});
+  document.getElementById('tab-lib').className='scr on';
+  shV('vpop');
+}
+function renderCrowd(){ _renderDbCat('קהל ואירועים','crowd-list','openCrowdItem'); }
+function openCrowdItem(idx){ _openDbCatItem('קהל ואירועים', idx, 'crowd'); }
+function renderKids(){ _renderDbCat('ילדים ואוכלוסיות רגישות','kids-list','openKidsItem'); }
+function openKidsItem(idx){ _openDbCatItem('ילדים ואוכלוסיות רגישות', idx, 'kids'); }
+function renderCalm(){ _renderDbCat('הרגעה ושכנוע','calm-list','openCalmItem'); }
+function openCalmItem(idx){ _openDbCatItem('הרגעה ושכנוע', idx, 'calm'); }
+
 function openAnsRow(idx){
   var r=(window._ansRows||[])[idx]; if(!r)return;
   var audio=r.audio || _descAudioFor(r);
@@ -19227,6 +19322,21 @@ function rQK(){
   h+='<div class="emerg-cube-name">מה עונים לך</div>';
   h+='<div class="emerg-cube-count">הבנת תשובות האזרח</div>';
   h+='</div>';
+  h+='<div class="emerg-cube purple" onclick="navToTab(\'crowd\')">';
+  h+='<div class="emerg-cube-emoji">👥</div>';
+  h+='<div class="emerg-cube-name">קהל ואירועים</div>';
+  h+='<div class="emerg-cube-count">ניהול קהל והרחקה</div>';
+  h+='</div>';
+  h+='<div class="emerg-cube mint" onclick="navToTab(\'kids\')">';
+  h+='<div class="emerg-cube-emoji">🧒</div>';
+  h+='<div class="emerg-cube-name">ילדים ואוכלוסיות רגישות</div>';
+  h+='<div class="emerg-cube-count">מגע רגיש ומרגיע</div>';
+  h+='</div>';
+  h+='<div class="emerg-cube rose" onclick="navToTab(\'calm\')">';
+  h+='<div class="emerg-cube-emoji">🕊️</div>';
+  h+='<div class="emerg-cube-name">הרגעה ושכנוע</div>';
+  h+='<div class="emerg-cube-count">הורדת מתח ושיתוף פעולה</div>';
+  h+='</div>';
   for(var i=0;i<EMERG_CATS.length;i++){
     var ec=EMERG_CATS[i];
     // Medical is unified into the structured 'רפואה וטריאז'' template above — no
@@ -20166,6 +20276,9 @@ function navToTab(tabId){
     if (tabId === 'chk') { try { renderCheck(); } catch(e) {} }
     if (tabId === 'veh') { try { renderVehicle(); } catch(e) {} }
     if (tabId === 'answers') { try { renderAnswers(); } catch(e) {} }
+    if (tabId === 'crowd') { try { renderCrowd(); } catch(e) {} }
+    if (tabId === 'kids') { try { renderKids(); } catch(e) {} }
+    if (tabId === 'calm') { try { renderCalm(); } catch(e) {} }
     if (tabId === 'intel') {
       setTimeout(function(){ 
         try { 
@@ -20276,7 +20389,7 @@ window.addEventListener('load', function(){
 <script>
 // Version stamp — shown in the admin panel so we can confirm which build is live
 // on a device (stale service-worker caches were causing "my changes don't show").
-window.APP_VERSION = 'v169';
+window.APP_VERSION = 'v170';
 
 // Register the service worker for full offline use in the field, WITH update
 // detection: when a new version installs, offer a one-tap refresh instead of the
