@@ -522,6 +522,7 @@ body.day-mode .toast{background:#fff;color:#0e1b2e;}
 .emerg-cube.gold{background:#8a6d1e;border-color:#D4A24E;}
 .emerg-cube.teal{background:#14676b;border-color:#2fb0b0;}
 .emerg-cube.sky{background:#2a5578;border-color:#5b9bd5;}
+.emerg-cube.crit{background:linear-gradient(135deg,#6b2440,#4a1830);border-color:#c85c8a;}
 .emerg-cube-emoji{font-size:36px;line-height:1;}
 .emerg-cube-name{color:#fff;font-size:16px;font-weight:700;line-height:1.2;}
 .emerg-cube-count{color:rgba(255,255,255,0.85);font-size:11px;font-weight:600;background:rgba(0,0,0,0.25);padding:3px 10px;border-radius:99px;}
@@ -2312,12 +2313,6 @@ function showLanding() {
           <div style="color:#7a9ab5;font-size:10.5px;line-height:1.4;">להתאמן על שיחה</div>
         </div>
 
-        <div onclick="navToTab('ten')" style="background:linear-gradient(160deg,#1F3147 0%,#243a55 100%);border:1px solid rgba(212,162,78,0.2);border-radius:14px;padding:14px 12px;cursor:pointer;box-shadow:0 2px 8px rgba(0,0,0,0.2);">
-          <div style="font-size:26px;margin-bottom:6px;line-height:1;">🎖️</div>
-          <div style="color:#E8D9B8;font-size:13px;font-weight:800;margin-bottom:2px;">10 משפטים קריטיים</div>
-          <div style="color:#7a9ab5;font-size:10.5px;line-height:1.4;">מילים שמצילות חיים</div>
-        </div>
-
         <div onclick="navToTab('lib')" style="background:linear-gradient(160deg,#1F3147 0%,#243a55 100%);border:1px solid rgba(212,162,78,0.2);border-radius:14px;padding:14px 12px;cursor:pointer;box-shadow:0 2px 8px rgba(0,0,0,0.2);">
           <div style="font-size:26px;margin-bottom:6px;line-height:1;">📚</div>
           <div style="color:#E8D9B8;font-size:13px;font-weight:800;margin-bottom:2px;">הספרייה המבצעית</div>
@@ -2857,7 +2852,7 @@ function showLanding() {
 <!-- 10 ESSENTIAL PHRASES TAB -->
 <div class="scr" id="tab-ten">
   <div style="padding:18px 16px 100px;">
-    <button onclick="navToTab('home')" style="background:transparent;border:none;color:#a0b8c8;font-size:15px;cursor:pointer;font-family:inherit;padding:4px 0;margin-bottom:10px;display:flex;align-items:center;gap:6px;">◀ חזרה לבית</button>
+    <button onclick="navToTab('qk')" style="background:transparent;border:none;color:#a0b8c8;font-size:15px;cursor:pointer;font-family:inherit;padding:4px 0;margin-bottom:10px;display:flex;align-items:center;gap:6px;">◀ חזרה לחירום</button>
     <div style="text-align:center;margin-bottom:22px;">
       <div style="font-size:28px;margin-bottom:6px;">🎖️</div>
       <div style="color:#E8D9B8;font-size:18px;font-weight:800;letter-spacing:0.5px;margin-bottom:4px;">10 המשפטים שכל לוחם חייב</div>
@@ -19107,6 +19102,13 @@ function rQK(){
   grid.style.display='';
 
   var h='';
+  // The 10 must-know phrases — the most critical, fastest set — full-width at the
+  // very top of the Emergency grid (moved here from Home).
+  h+='<div class="emerg-cube crit" style="grid-column:1/-1;" onclick="navToTab(\'ten\')">';
+  h+='<div class="emerg-cube-emoji">🎖️</div>';
+  h+='<div class="emerg-cube-name">10 משפטי חובה</div>';
+  h+='<div class="emerg-cube-count">מילים שמצילות חיים</div>';
+  h+='</div>';
   // Field tools (תיאור חשוד + טריאז') — same cube styling as the situations, so the
   // Emergency page reads as one uniform grid. They share the top row.
   h+='<div class="emerg-cube gold" onclick="navToTab(\'desc\')">';
@@ -20173,7 +20175,7 @@ window.addEventListener('load', function(){
 <script>
 // Version stamp — shown in the admin panel so we can confirm which build is live
 // on a device (stale service-worker caches were causing "my changes don't show").
-window.APP_VERSION = 'v165';
+window.APP_VERSION = 'v166';
 
 // Register the service worker for full offline use in the field, WITH update
 // detection: when a new version installs, offer a one-tap refresh instead of the
