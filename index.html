@@ -10310,30 +10310,32 @@ function _descContextAudio(he, ar, trans){
     if(!window.SMART_DICT_INDEX && typeof buildSmartDictIndex==='function') buildSmartDictIndex();
     var idx=window.SMART_DICT_INDEX||{};
     if(typeof dictNorm!=='function') return '';
+    var heN=_tenNormHe(he), arN=_tenNormAr(ar);
+    // A single-word term (e.g. a color) may be heard inside a longer sentence, so
+    // any indexed unit that contains the word counts. A multi-word term (a phrase
+    // or a response like "מא בעرف") must match the WHOLE unit — never a lone sub-
+    // word inside it — so "אם אתה דובר אמת" can't borrow the recording of "אם".
+    var multi = String(he||'').trim().split(/\s+/).filter(Boolean).length>1;
     var words=[];
     [he,ar,trans].forEach(function(t){
       String(t||'').split(/[\s.,!?;:()\[\]،؟\/]+/).forEach(function(w){ w=w.trim(); if(w.length>=2) words.push(w); });
     });
     for(var i=0;i<words.length;i++){
       var key=dictNorm(words[i]); if(!key||key.length<2) continue;
-      var e=idx[key];
-      if(e && e.phrases){ for(var j=0;j<e.phrases.length;j++){ if(e.phrases[j].audio) return e.phrases[j].audio; } }
+      var e=idx[key]; if(!e||!e.phrases) continue;
+      for(var j=0;j<e.phrases.length;j++){
+        var r=e.phrases[j]; if(!r.audio) continue;
+        if(!multi) return r.audio;
+        if(_tenNormHe(r.he)===heN || (arN && _tenNormAr(r.ar)===arN)) return r.audio;
+      }
     }
     return '';
   }catch(e){ return ''; }
 }
 
-// Best available audio for a template word: its own recording first, else — only
-// for a SINGLE-WORD entry (e.g. a color) — the sentence it's heard in. A multi-
-// word phrase must have its own recording; otherwise a common word inside it
-// (e.g. "אם") would wrongly borrow an unrelated recording.
-function _descAudioFor(o){
-  var own=_descMatchAudio(o.he,o.ar);
-  if(own) return own;
-  var he=String(o.he||'').trim();
-  if(he && he.split(/\s+/).length>1) return '';
-  return _descContextAudio(o.he,o.ar,o.trans);
-}
+// Best available audio for a template item: its own recording first, else the
+// in-context recording (whole-phrase for multi-word terms — see _descContextAudio).
+function _descAudioFor(o){ return _descMatchAudio(o.he,o.ar) || _descContextAudio(o.he,o.ar,o.trans); }
 
 // Resolve what a template chip should DISPLAY: prefer the matching DB row so the
 // editor's edits (transliteration / Arabic) show through, falling back to the
@@ -20171,7 +20173,7 @@ window.addEventListener('load', function(){
 <script>
 // Version stamp — shown in the admin panel so we can confirm which build is live
 // on a device (stale service-worker caches were causing "my changes don't show").
-window.APP_VERSION = 'v164';
+window.APP_VERSION = 'v165';
 
 // Register the service worker for full offline use in the field, WITH update
 // detection: when a new version installs, offer a one-tap refresh instead of the
