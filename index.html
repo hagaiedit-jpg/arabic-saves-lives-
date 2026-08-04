@@ -10542,11 +10542,22 @@ function renderAnswers(){
 // Generic: render ANY existing DB category live (military/dictionary) as cards, so
 // full existing content (with recordings & edits) surfaces without hardcoding.
 window._dbCatRows={};
+// Per-category phrases to hide from the operational cube (don't fit the category).
+// Hidden from view only — the DB row is untouched. Keyed by normalized Hebrew.
+var DBCAT_HIDE={
+  'הרגעה ושכנוע':[
+    'הבנת אותי? קולט?',
+    'אנחנו עייפים מאוד ויש לנו הרבה בעיות הומניטריות',
+    'הודענו להם שאנחנו מצלמים כדי שלא יפחדו'
+  ]
+};
 function _renderDbCat(cat, containerId, opener){
   var el=document.getElementById(containerId); if(!el)return;
+  var _n=function(s){ return String(s||'').replace(/\s+/g,' ').trim(); };
+  var hide=(DBCAT_HIDE[cat]||[]).map(_n);
   var rows=[];
   [typeof DB!=='undefined'?DB:[], typeof DICT!=='undefined'?DICT:[]].forEach(function(a){
-    (a||[]).forEach(function(r){ if(r && r.cat===cat && (r.he||r.ar)) rows.push(r); });
+    (a||[]).forEach(function(r){ if(r && r.cat===cat && (r.he||r.ar) && hide.indexOf(_n(r.he))===-1) rows.push(r); });
   });
   window._dbCatRows[cat]=rows;
   if(!rows.length){ el.innerHTML='<div style="text-align:center;color:#7a9ab5;font-size:13px;padding:30px 16px;line-height:1.7;">התוכן של הקטגוריה נטען מהמאגר.<br>אם ריק — ודאי חיבור לרשת ורענני את האפליקציה.</div>'; return; }
@@ -20389,7 +20400,7 @@ window.addEventListener('load', function(){
 <script>
 // Version stamp — shown in the admin panel so we can confirm which build is live
 // on a device (stale service-worker caches were causing "my changes don't show").
-window.APP_VERSION = 'v170';
+window.APP_VERSION = 'v171';
 
 // Register the service worker for full offline use in the field, WITH update
 // detection: when a new version installs, offer a one-tap refresh instead of the
