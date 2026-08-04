@@ -10241,7 +10241,7 @@ var CHECK = [
     {he:'אל תשקר לי.', ar:'ما تكذب عليّ.', trans:'מַא תִכְּדֶ׳בּ עַלַיּ.'},
     {he:'אני יודע שאתה יודע.', ar:'أنا بعرف إنك بتعرف.', trans:'אַנַא בַּעְרֶף אִנַּכּ בְּתַעְרֶף.'},
     {he:'יש לנו מידע. תחשוב טוב ותענה שוב.', ar:'في عنّا معلومات. فكّر منيح وجاوب كمان مرة.', trans:'פִי עִנַּא מַעְלוּמַאת. פַכֶּר מְנִיח וּגַ׳אוֶבּ כַּמַאן מַרַּה.'},
-    {he:'אם אתה דובר אמת — אין לך ממה לפחד.', ar:'إذا بتحكي الصح — ما في إشي تخاف منه.', trans:'אִזַא בְּתִחְכִּי אִלצַּח — מַא פִי אִשִי תְחַ׳אף מִנֹּה.'},
+    {he:'אם אתה דובר אמת — אין לך ממה לפחד.', ar:'إذا انت بتحكي الحقيقة، ما في إشي تخاف منه.', trans:'אִזַא אִנְתֶ בְּתִחְכִּי אִלחַקִיקַה, מַא פִי אִשִי תְחַ׳אף מִנֹה.'},
     {he:'ראו אותך שם.', ar:'شافوك هناك.', trans:'שַאפוּכּ הְנַאכּ.'},
     {he:'נראה שלא הבנת את השאלה', ar:'مبيّن إنّو ما فهمتش السؤال', trans:'מְבַּיֵּן אִנּוֹ מַא פְהֵמְתֵּשׁ אִלסֻאַאל'},
     {he:'מה אתה צוחק עליי?', ar:'شو إنت بتتمسخر عليّ؟', trans:'שוּ אִנְתֶ בְּתִתְמַסְחַ׳ר עַלַיּ?'}
@@ -10307,9 +10307,17 @@ function _descContextAudio(he, ar, trans){
   }catch(e){ return ''; }
 }
 
-// Best available audio for a template word: its own recording first, else the
-// sentence it's heard in.
-function _descAudioFor(o){ return _descMatchAudio(o.he,o.ar) || _descContextAudio(o.he,o.ar,o.trans); }
+// Best available audio for a template word: its own recording first, else — only
+// for a SINGLE-WORD entry (e.g. a color) — the sentence it's heard in. A multi-
+// word phrase must have its own recording; otherwise a common word inside it
+// (e.g. "אם") would wrongly borrow an unrelated recording.
+function _descAudioFor(o){
+  var own=_descMatchAudio(o.he,o.ar);
+  if(own) return own;
+  var he=String(o.he||'').trim();
+  if(he && he.split(/\s+/).length>1) return '';
+  return _descContextAudio(o.he,o.ar,o.trans);
+}
 
 // Resolve what a template chip should DISPLAY: prefer the matching DB row so the
 // editor's edits (transliteration / Arabic) show through, falling back to the
@@ -11186,7 +11194,7 @@ var SURVEY_PACK = [
   {cat:'בידוק וזיהוי', he:'אל תשקר לי.', ar:'ما تكذب عليّ.', trans:'מַא תִכְּדֶ׳בּ עַלַיּ.', why:''},
   {cat:'בידוק וזיהוי', he:'ראו אותך שם.', ar:'شافوك هناك.', trans:'שַאפוּכּ הְנַאכּ.', why:''},
   {cat:'בידוק וזיהוי', he:'יש לנו מידע. תחשוב טוב ותענה שוב.', ar:'في عنّا معلومات. فكّر منيح وجاوب كمان مرة.', trans:'פִי עִנַּא מַעְלוּמַאת. פַכֶּר מְנִיח וּגַ׳אוֶבּ כַּמַאן מַרַּה.', why:''},
-  {cat:'בידוק וזיהוי', he:'אם אתה דובר אמת — אין לך ממה לפחד.', ar:'إذا بتحكي الصح — ما في إشي تخاف منه.', trans:'אִזַא בְּתִחְכִּי אִלצַּח — מַא פִי אִשִי תְחַ׳אף מִנֹּה.', why:'ערוץ יציאה מכובד — נותן לנבדק דרך לשתף פעולה בלי עימות.'},
+  {cat:'בידוק וזיהוי', he:'אם אתה דובר אמת — אין לך ממה לפחד.', ar:'إذا انت بتحكي الحقيقة، ما في إشي تخاف منه.', trans:'אִזַא אִנְתֶ בְּתִחְכִּי אִלחַקִיקַה, מַא פִי אִשִי תְחַ׳אף מִנֹה.', why:'ערוץ יציאה מכובד — נותן לנבדק דרך לשתף פעולה בלי עימות.'},
   // מה תשמע בשטח — תחינות, תלונות והכחשות נפוצות (לזיהוי)
   {cat:'מגע ראשוני', he:'תשמע: "דחילכ" — אנא ממך', ar:'دخيلك', trans:'דַחִ׳ילַכּ', why:'תחינה נפוצה מאוד. מהסקר: הלוחמים שומעים בעיקר "שאלות, תחינות, תלונות".'},
   {cat:'מגע ראשוני', he:'תשמע: "בחיאת אללה" — בחיי אלוהים', ar:'بحياة الله', trans:'בִּחְיַאת אַללָּה', why:'שבועה/תחינה — האזרח מנסה לשכנע שהוא דובר אמת.'},
@@ -20138,7 +20146,7 @@ window.addEventListener('load', function(){
 <script>
 // Version stamp — shown in the admin panel so we can confirm which build is live
 // on a device (stale service-worker caches were causing "my changes don't show").
-window.APP_VERSION = 'v160';
+window.APP_VERSION = 'v161';
 
 // Register the service worker for full offline use in the field, WITH update
 // detection: when a new version installs, offer a one-tap refresh instead of the
