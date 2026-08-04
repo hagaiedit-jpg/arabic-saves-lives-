@@ -521,6 +521,7 @@ body.day-mode .toast{background:#fff;color:#0e1b2e;}
 .emerg-cube.gray{background:#3d3d3d;border-color:#666;}
 .emerg-cube.gold{background:#8a6d1e;border-color:#D4A24E;}
 .emerg-cube.teal{background:#14676b;border-color:#2fb0b0;}
+.emerg-cube.sky{background:#2a5578;border-color:#5b9bd5;}
 .emerg-cube-emoji{font-size:36px;line-height:1;}
 .emerg-cube-name{color:#fff;font-size:16px;font-weight:700;line-height:1.2;}
 .emerg-cube-count{color:rgba(255,255,255,0.85);font-size:11px;font-weight:600;background:rgba(0,0,0,0.25);padding:3px 10px;border-radius:99px;}
@@ -2243,17 +2244,6 @@ function showLanding() {
       <div style="color:#D4A24E;font-size:20px;flex-shrink:0;">›</div>
     </div>
 
-    <!-- 💬 "מה עונים לך" — understanding the citizen's replies (a third axis: not
-         what I say, but what I hear back). Separate home card, per the design. -->
-    <div onclick="navToTab('answers')" style="display:flex;align-items:center;gap:11px;background:linear-gradient(135deg,rgba(127,208,255,0.14),rgba(127,208,255,0.04));border:1px solid rgba(127,208,255,0.4);border-radius:14px;padding:13px 14px;margin-bottom:14px;cursor:pointer;">
-      <div style="font-size:24px;flex-shrink:0;">💬</div>
-      <div style="flex:1;min-width:0;">
-        <div style="color:#E8D9B8;font-size:15px;font-weight:800;">מה עונים לך</div>
-        <div style="color:#7fd0ff;font-size:12px;margin-top:1px;">התשובות שתשמע מהאזרח — לזיהוי מהיר</div>
-      </div>
-      <div style="color:#7fd0ff;font-size:20px;flex-shrink:0;">›</div>
-    </div>
-
     <!-- Phrase of the Day (compact) - right under the greeting -->
     <div id="home-potd-card" style="display:none;background:#18293E;border:1px solid rgba(212,162,78,0.25);border-right:3px solid #D4A24E;border-radius:12px;padding:10px 12px;margin-bottom:14px;">
       <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:7px;">
@@ -2953,7 +2943,7 @@ function showLanding() {
 <!-- ANSWERS TEMPLATE TAB (understanding the citizen's replies) -->
 <div class="scr" id="tab-answers">
   <div style="padding:14px 12px 100px 12px;min-height:100vh;">
-    <button onclick="navToTab('home')" style="background:transparent;border:none;color:#a0b8c8;font-size:15px;cursor:pointer;font-family:inherit;padding:4px 0;margin-bottom:10px;display:flex;align-items:center;gap:6px;">◀ חזרה לבית</button>
+    <button onclick="navToTab('qk')" style="background:transparent;border:none;color:#a0b8c8;font-size:15px;cursor:pointer;font-family:inherit;padding:4px 0;margin-bottom:10px;display:flex;align-items:center;gap:6px;">◀ חזרה לחירום</button>
     <div style="text-align:center;margin-bottom:14px;">
       <div style="font-size:26px;margin-bottom:4px;">💬</div>
       <div style="color:#E8D9B8;font-size:18px;font-weight:800;letter-spacing:0.3px;">מה עונים לך</div>
@@ -19127,6 +19117,11 @@ function rQK(){
   h+='<div class="emerg-cube-name">רפואה וטריאז\'</div>';
   h+='<div class="emerg-cube-count">בדיקת נפגע — סדר פעולות</div>';
   h+='</div>';
+  h+='<div class="emerg-cube sky" onclick="navToTab(\'answers\')">';
+  h+='<div class="emerg-cube-emoji">💬</div>';
+  h+='<div class="emerg-cube-name">מה עונים לך</div>';
+  h+='<div class="emerg-cube-count">הבנת תשובות האזרח</div>';
+  h+='</div>';
   for(var i=0;i<EMERG_CATS.length;i++){
     var ec=EMERG_CATS[i];
     // Medical is unified into the structured 'רפואה וטריאז'' template above — no
@@ -20176,7 +20171,7 @@ window.addEventListener('load', function(){
 <script>
 // Version stamp — shown in the admin panel so we can confirm which build is live
 // on a device (stale service-worker caches were causing "my changes don't show").
-window.APP_VERSION = 'v163';
+window.APP_VERSION = 'v164';
 
 // Register the service worker for full offline use in the field, WITH update
 // detection: when a new version installs, offer a one-tap refresh instead of the
