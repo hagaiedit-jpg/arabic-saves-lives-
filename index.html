@@ -2243,6 +2243,17 @@ function showLanding() {
       <div style="color:#D4A24E;font-size:20px;flex-shrink:0;">›</div>
     </div>
 
+    <!-- 💬 "מה עונים לך" — understanding the citizen's replies (a third axis: not
+         what I say, but what I hear back). Separate home card, per the design. -->
+    <div onclick="navToTab('answers')" style="display:flex;align-items:center;gap:11px;background:linear-gradient(135deg,rgba(127,208,255,0.14),rgba(127,208,255,0.04));border:1px solid rgba(127,208,255,0.4);border-radius:14px;padding:13px 14px;margin-bottom:14px;cursor:pointer;">
+      <div style="font-size:24px;flex-shrink:0;">💬</div>
+      <div style="flex:1;min-width:0;">
+        <div style="color:#E8D9B8;font-size:15px;font-weight:800;">מה עונים לך</div>
+        <div style="color:#7fd0ff;font-size:12px;margin-top:1px;">התשובות שתשמע מהאזרח — לזיהוי מהיר</div>
+      </div>
+      <div style="color:#7fd0ff;font-size:20px;flex-shrink:0;">›</div>
+    </div>
+
     <!-- Phrase of the Day (compact) - right under the greeting -->
     <div id="home-potd-card" style="display:none;background:#18293E;border:1px solid rgba(212,162,78,0.25);border-right:3px solid #D4A24E;border-radius:12px;padding:10px 12px;margin-bottom:14px;">
       <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:7px;">
@@ -2939,6 +2950,19 @@ function showLanding() {
   </div>
 </div>
 
+<!-- ANSWERS TEMPLATE TAB (understanding the citizen's replies) -->
+<div class="scr" id="tab-answers">
+  <div style="padding:14px 12px 100px 12px;min-height:100vh;">
+    <button onclick="navToTab('home')" style="background:transparent;border:none;color:#a0b8c8;font-size:15px;cursor:pointer;font-family:inherit;padding:4px 0;margin-bottom:10px;display:flex;align-items:center;gap:6px;">◀ חזרה לבית</button>
+    <div style="text-align:center;margin-bottom:14px;">
+      <div style="font-size:26px;margin-bottom:4px;">💬</div>
+      <div style="color:#E8D9B8;font-size:18px;font-weight:800;letter-spacing:0.3px;">מה עונים לך</div>
+      <div style="color:#7a9ab5;font-size:12px;line-height:1.5;margin-top:2px;">התשובות שתשמע מהאזרח — לזיהוי מהיר. לחצו לשמיעה ותרגול</div>
+    </div>
+    <div id="answers-list"></div>
+  </div>
+</div>
+
 <!-- SEMANTIC TAB -->
 <div class="scr" id="tab-sem">
   <div class="sec"><button onclick="navToTab('dict')" style="background:transparent;border:none;color:#a0b8c8;font-size:15px;cursor:pointer;font-family:inherit;padding:4px 0;margin-bottom:10px;display:flex;align-items:center;gap:6px;">◀ חזרה למילון</button><div class="stitle">מילון סמנטי — מילים עם משמעות כפולה</div><div id="semlist"></div></div>
@@ -3431,6 +3455,8 @@ function showLanding() {
         <div style="text-align:center;color:#7a9ab5;font-size:11px;margin-top:5px;">מוסיף רק את מילות התבנית ש<b>עוד לא קיימות</b> במאגר (מין, גיל, מבנה, צבעים, לבוש...) — אחר כך אפשר לערוך ולהקליט כל אחת מהרשימה, והתבנית תשמיע אותן אוטומטית</div>
         <button id="tool-triage" onclick="importTriage(this)" style="width:100%;padding:12px;margin-top:10px;background:linear-gradient(135deg,#14676b 0%,#0e4a4d 100%);border:none;border-radius:10px;color:#fff;font-size:13px;font-weight:800;cursor:pointer;font-family:inherit;">🩺 הוסף משפטי "טריאז'" לרשימות (להקלטה)</button>
         <div style="text-align:center;color:#7a9ab5;font-size:11px;margin-top:5px;">מוסיף לקטגוריית "רפואה וחירום" את משפטי הטריאז' שעדיין אין להם הקלטה (מדמם? / יכול ללכת? / כמה פצועים?...) — <b>יש לוודא את הערבית של החדשים</b> לפני שימוש בשטח</div>
+        <button id="tool-answers" onclick="importAnswers(this)" style="width:100%;padding:12px;margin-top:10px;background:linear-gradient(135deg,#3a6d8c 0%,#254a63 100%);border:none;border-radius:10px;color:#fff;font-size:13px;font-weight:800;cursor:pointer;font-family:inherit;">💬 הוסף תשובות "מה עונים לך" לרשימות (להקלטה)</button>
+        <div style="text-align:center;color:#7a9ab5;font-size:11px;margin-top:5px;">מוסיף לקטגוריית "תשובות אזרח" את התשובות שעדיין אין להן הקלטה (מא באערף / בס אלעילה / בכרה...) — <b>יש לוודא את הערבית של החדשים</b> לפני שימוש</div>
         <button id="tool-fieldcmd" onclick="openFieldCmdReview(this)" style="width:100%;padding:12px;margin-top:10px;background:linear-gradient(135deg,#c0704e 0%,#8a4e34 100%);border:none;border-radius:10px;color:#fff;font-size:13px;font-weight:800;cursor:pointer;font-family:inherit;">🎯 סקירה ואישור משפטי פקודות שטח (אחד-אחד)</button>
         <div style="text-align:center;color:#7a9ab5;font-size:11px;margin-top:5px;">בודקים ערבית, ממלאים תעתיק, ומאשרים כל משפט בנפרד — רק מה שאת מאשרת נכנס ל"מבצעי". שום דבר לא עולה אוטומטית.</div>
         <div id="fieldcmd-review" style="margin-top:10px;"></div>
@@ -10405,6 +10431,8 @@ function renderCheck(){ _renderTpl(CHECK,'chk-list','openChkItem'); }
 function openChkItem(si,oi){ _openTpl(CHECK,si,oi,'chk'); }
 function renderVehicle(){ _renderTpl(VEHICLE,'veh-list','openVehItem'); }
 function openVehItem(si,oi){ _openTpl(VEHICLE,si,oi,'veh'); }
+function renderAnswers(){ _renderTpl(ANSWERS,'answers-list','openAnsItem'); }
+function openAnsItem(si,oi){ _openTpl(ANSWERS,si,oi,'answers'); }
 
 // True only if the exact he+ar pair already exists somewhere in the loaded pool.
 // (he alone is not enough — e.g. "זקן" is both עجوز=old and دقن=beard.)
@@ -10452,6 +10480,7 @@ async function _importTpl(data, cat, section, btn){
 }
 function importSuspectDesc(btn){ return _importTpl(SUSPECT_DESC,'תיאור אדם','dictionary',btn); }
 function importTriage(btn){ return _importTpl(TRIAGE,'רפואה וחירום','dictionary',btn); }
+function importAnswers(btn){ return _importTpl(ANSWERS,'תשובות אזרח','dictionary',btn); }
 
 // One-time import: turn the canonical 10 into real DB rows so they show in admin and can be recorded
 async function importTenPhrases(btn){
@@ -20036,6 +20065,7 @@ function navToTab(tabId){
     if (tabId === 'ord') { try { renderOrders(); } catch(e) {} }
     if (tabId === 'chk') { try { renderCheck(); } catch(e) {} }
     if (tabId === 'veh') { try { renderVehicle(); } catch(e) {} }
+    if (tabId === 'answers') { try { renderAnswers(); } catch(e) {} }
     if (tabId === 'intel') {
       setTimeout(function(){ 
         try { 
@@ -20146,7 +20176,7 @@ window.addEventListener('load', function(){
 <script>
 // Version stamp — shown in the admin panel so we can confirm which build is live
 // on a device (stale service-worker caches were causing "my changes don't show").
-window.APP_VERSION = 'v162';
+window.APP_VERSION = 'v163';
 
 // Register the service worker for full offline use in the field, WITH update
 // detection: when a new version installs, offer a one-tap refresh instead of the
