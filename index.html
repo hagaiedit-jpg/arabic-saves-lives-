@@ -2237,6 +2237,22 @@ function showLanding() {
       </div>
     </div>
 
+    <!-- Phrase of the Day (ביטוי היום) — kept high on the page, right under the greeting, so it isn't missed -->
+    <div id="home-potd-card" style="display:none;background:#18293E;border:1px solid rgba(212,162,78,0.25);border-right:3px solid #D4A24E;border-radius:12px;padding:10px 12px;margin-bottom:14px;">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:7px;">
+        <div style="color:#D4A24E;font-size:10px;font-weight:700;letter-spacing:0.5px;">✨ ביטוי היום</div>
+        <div onclick="homePotdDismiss()" title="הסתר" style="color:#5e7a92;font-size:15px;line-height:1;cursor:pointer;padding:2px 4px;">✕</div>
+      </div>
+      <div style="display:flex;align-items:center;gap:10px;">
+        <button id="home-potd-play" onclick="homePotdPlay()" style="flex-shrink:0;background:transparent;border:1px solid #D4A24E;color:#D4A24E;border-radius:50%;width:36px;height:36px;font-size:14px;cursor:pointer;font-family:inherit;padding:0;">▶</button>
+        <div style="flex:1;min-width:0;">
+          <div id="home-potd-he" style="color:#E8D9B8;font-size:15px;font-weight:700;line-height:1.35;"></div>
+          <div id="home-potd-ar" style="color:#E8D9B8;font-size:15px;font-family:Georgia,serif;line-height:1.35;direction:rtl;"></div>
+          <div id="home-potd-trans" style="color:#7a9ab5;font-size:12px;line-height:1.35;"></div>
+        </div>
+      </div>
+    </div>
+
 
     <!-- 🗓️ Weekly readiness ritual (shown once per week) -->
     <div id="home-weekly-ritual" style="display:none;margin-bottom:16px;"></div>
@@ -2262,18 +2278,21 @@ function showLanding() {
       <div style="color:#D4A24E;font-size:13px;font-weight:700;letter-spacing:0.5px;margin-bottom:10px;display:flex;align-items:center;gap:6px;">🧭 מה מעניין אותך היום?</div>
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
 
+        <!-- Row 1: כל התרגילים בקובייה אחת -->
         <div onclick="navToTab('train')" style="background:linear-gradient(160deg,#1F3147 0%,#243a55 100%);border:1px solid rgba(212,162,78,0.2);border-radius:14px;padding:14px 12px;cursor:pointer;box-shadow:0 2px 8px rgba(0,0,0,0.2);">
           <div style="font-size:26px;margin-bottom:6px;line-height:1;">🎯</div>
           <div style="color:#E8D9B8;font-size:13px;font-weight:800;margin-bottom:2px;">אימון ותרגול</div>
           <div style="color:#7a9ab5;font-size:10.5px;line-height:1.4;">כל התרגילים במקום אחד (כולל מצב לחץ)</div>
         </div>
 
-        <div onclick="startPrepPath()" style="background:linear-gradient(160deg,#1F3147 0%,#243a55 100%);border:1px solid rgba(212,162,78,0.2);border-radius:14px;padding:14px 12px;cursor:pointer;box-shadow:0 2px 8px rgba(0,0,0,0.2);">
-          <div style="font-size:26px;margin-bottom:6px;line-height:1;">🪖</div>
-          <div style="color:#E8D9B8;font-size:13px;font-weight:800;margin-bottom:2px;">הכנה לשירות קרבי</div>
-          <div style="color:#7a9ab5;font-size:10.5px;line-height:1.4;">מסלול 30 יום מובנה</div>
+        <div onclick="openDailyDrills()" style="position:relative;background:linear-gradient(160deg,#1F3147 0%,#243a55 100%);border:1px solid rgba(192,57,43,0.35);border-radius:14px;padding:14px 12px;cursor:pointer;box-shadow:0 2px 8px rgba(0,0,0,0.2);">
+          <div id="home-emerg-badge" style="display:none;position:absolute;top:8px;right:8px;background:#e74c3c;color:#fff;font-size:11px;font-weight:900;border-radius:50%;width:22px;height:22px;line-height:22px;text-align:center;box-shadow:0 2px 6px rgba(231,76,60,0.5);animation:badgePulse 2s ease-in-out infinite;">1</div>
+          <div style="font-size:26px;margin-bottom:6px;line-height:1;">🚨</div>
+          <div style="color:#E8D9B8;font-size:13px;font-weight:800;margin-bottom:2px;">אתגר יומי + חזרה שבועית</div>
+          <div style="color:#7a9ab5;font-size:10.5px;line-height:1.4;">אתגר קצר וחזרה על מה שלמדת</div>
         </div>
 
+        <!-- Row 2: ספרייה ותרחישים -->
         <div onclick="navToTab('lib')" style="background:linear-gradient(160deg,#1F3147 0%,#243a55 100%);border:1px solid rgba(212,162,78,0.2);border-radius:14px;padding:14px 12px;cursor:pointer;box-shadow:0 2px 8px rgba(0,0,0,0.2);">
           <div style="font-size:26px;margin-bottom:6px;line-height:1;">📚</div>
           <div style="color:#E8D9B8;font-size:13px;font-weight:800;margin-bottom:2px;">הספרייה המבצעית</div>
@@ -2286,6 +2305,13 @@ function showLanding() {
           <div style="color:#7a9ab5;font-size:10.5px;line-height:1.4;">להתאמן על שיחה אמיתית</div>
         </div>
 
+        <!-- Row 3: יסודות ותרבות -->
+        <div onclick="openFoundations()" style="background:linear-gradient(160deg,#1F3147 0%,#243a55 100%);border:1px solid rgba(212,162,78,0.2);border-radius:14px;padding:14px 12px;cursor:pointer;box-shadow:0 2px 8px rgba(0,0,0,0.2);">
+          <div style="font-size:26px;margin-bottom:6px;line-height:1;">🎓</div>
+          <div style="color:#E8D9B8;font-size:13px;font-weight:800;margin-bottom:2px;">יסודות השפה</div>
+          <div style="color:#7a9ab5;font-size:10.5px;line-height:1.4;">דקדוק ואוצר מילים מהבסיס</div>
+        </div>
+
         <div onclick="navToTab('cus')" style="position:relative;background:linear-gradient(160deg,#1F3147 0%,#243a55 100%);border:1px solid rgba(212,162,78,0.2);border-radius:14px;padding:14px 12px;cursor:pointer;box-shadow:0 2px 8px rgba(0,0,0,0.2);">
           <div id="home-cus-new" style="display:none;position:absolute;top:8px;right:8px;background:#D4A24E;color:#0E1B2E;font-size:9px;font-weight:800;padding:1px 7px;border-radius:8px;line-height:1.5;">חדש</div>
           <div style="font-size:26px;margin-bottom:6px;line-height:1;">🕌</div>
@@ -2293,41 +2319,19 @@ function showLanding() {
           <div style="color:#7a9ab5;font-size:10.5px;line-height:1.4;">להבין את הצד השני</div>
         </div>
 
-        <div onclick="openFoundations()" style="background:linear-gradient(160deg,#1F3147 0%,#243a55 100%);border:1px solid rgba(212,162,78,0.2);border-radius:14px;padding:14px 12px;cursor:pointer;box-shadow:0 2px 8px rgba(0,0,0,0.2);">
-          <div style="font-size:26px;margin-bottom:6px;line-height:1;">🎓</div>
-          <div style="color:#E8D9B8;font-size:13px;font-weight:800;margin-bottom:2px;">יסודות השפה</div>
-          <div style="color:#7a9ab5;font-size:10.5px;line-height:1.4;">דקדוק ואוצר מילים מהבסיס</div>
+        <!-- Row 4: שמורים והכנה לשירות קרבי -->
+        <div onclick="navToTab('fav')" style="background:linear-gradient(160deg,#1F3147 0%,#243a55 100%);border:1px solid rgba(212,162,78,0.2);border-radius:14px;padding:14px 12px;cursor:pointer;box-shadow:0 2px 8px rgba(0,0,0,0.2);">
+          <div style="font-size:26px;margin-bottom:6px;line-height:1;">⭐</div>
+          <div style="color:#E8D9B8;font-size:13px;font-weight:800;margin-bottom:2px;">שמורים</div>
+          <div style="color:#7a9ab5;font-size:10.5px;line-height:1.4;">המשפטים ששמרת</div>
         </div>
 
-      </div>
-    </div>
-
-    <!-- Secondary actions - unique items not covered by the intent block above -->
-    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px;">
-      <div onclick="openDailyDrills()" style="background:linear-gradient(160deg,#1F3147 0%,#243a55 100%);border:1px solid rgba(192,57,43,0.35);border-radius:14px;padding:18px 10px;text-align:center;cursor:pointer;box-shadow:0 2px 8px rgba(0,0,0,0.2);position:relative;">
-        <div id="home-emerg-badge" style="display:none;position:absolute;top:6px;right:6px;background:#e74c3c;color:#fff;font-size:11px;font-weight:900;border-radius:50%;width:22px;height:22px;line-height:22px;text-align:center;box-shadow:0 2px 6px rgba(231,76,60,0.5);animation:badgePulse 2s ease-in-out infinite;">1</div>
-        <div style="font-size:28px;margin-bottom:8px;line-height:1;">🚨</div>
-        <div style="color:#c0392b;font-size:12.5px;font-weight:700;line-height:1.3;">אתגר יומי<br>+ חזרה שבועית</div>
-      </div>
-      <div onclick="navToTab('fav')" style="background:linear-gradient(160deg,#1F3147 0%,#243a55 100%);border:1px solid rgba(212,162,78,0.2);border-radius:14px;padding:18px 10px;text-align:center;cursor:pointer;box-shadow:0 2px 8px rgba(0,0,0,0.2);">
-        <div style="font-size:28px;margin-bottom:8px;line-height:1;">⭐</div>
-        <div style="color:#D4A24E;font-size:12.5px;font-weight:700;">שמורים</div>
-      </div>
-    </div>
-
-    <!-- Phrase of the Day (ביטוי היום) -->
-    <div id="home-potd-card" style="display:none;background:#18293E;border:1px solid rgba(212,162,78,0.25);border-right:3px solid #D4A24E;border-radius:12px;padding:10px 12px;margin-bottom:14px;">
-      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:7px;">
-        <div style="color:#D4A24E;font-size:10px;font-weight:700;letter-spacing:0.5px;">✨ ביטוי היום</div>
-        <div onclick="homePotdDismiss()" title="הסתר" style="color:#5e7a92;font-size:15px;line-height:1;cursor:pointer;padding:2px 4px;">✕</div>
-      </div>
-      <div style="display:flex;align-items:center;gap:10px;">
-        <button id="home-potd-play" onclick="homePotdPlay()" style="flex-shrink:0;background:transparent;border:1px solid #D4A24E;color:#D4A24E;border-radius:50%;width:36px;height:36px;font-size:14px;cursor:pointer;font-family:inherit;padding:0;">▶</button>
-        <div style="flex:1;min-width:0;">
-          <div id="home-potd-he" style="color:#E8D9B8;font-size:15px;font-weight:700;line-height:1.35;"></div>
-          <div id="home-potd-ar" style="color:#E8D9B8;font-size:15px;font-family:Georgia,serif;line-height:1.35;direction:rtl;"></div>
-          <div id="home-potd-trans" style="color:#7a9ab5;font-size:12px;line-height:1.35;"></div>
+        <div onclick="startPrepPath()" style="background:linear-gradient(160deg,#1F3147 0%,#243a55 100%);border:1px solid rgba(212,162,78,0.2);border-radius:14px;padding:14px 12px;cursor:pointer;box-shadow:0 2px 8px rgba(0,0,0,0.2);">
+          <div style="font-size:26px;margin-bottom:6px;line-height:1;">🪖</div>
+          <div style="color:#E8D9B8;font-size:13px;font-weight:800;margin-bottom:2px;">הכנה לשירות קרבי</div>
+          <div style="color:#7a9ab5;font-size:10.5px;line-height:1.4;">מסלול 30 יום מובנה</div>
         </div>
+
       </div>
     </div>
 
@@ -10557,17 +10561,18 @@ window._dbCatRows={};
 var DBCAT_HIDE={
   'הרגעה ושכנוע':[
     'הבנת אותי? קולט?',
-    'אנחנו עייפים מאוד ויש לנו הרבה בעיות הומניטריות',
-    'הודענו להם שאנחנו מצלמים כדי שלא יפחדו'
+    'בעיות הומניטריות',
+    'הודענו להם שאנחנו מצלמים'
   ]
 };
 function _renderDbCat(cat, containerId, opener){
   var el=document.getElementById(containerId); if(!el)return;
   var _n=function(s){ return String(s||'').replace(/\s+/g,' ').trim(); };
   var hide=(DBCAT_HIDE[cat]||[]).map(_n);
+  var _hidden=function(he){ var h=_n(he); return hide.some(function(x){ return h.indexOf(x)>=0; }); };
   var rows=[];
   [typeof DB!=='undefined'?DB:[], typeof DICT!=='undefined'?DICT:[]].forEach(function(a){
-    (a||[]).forEach(function(r){ if(r && r.cat===cat && (r.he||r.ar) && hide.indexOf(_n(r.he))===-1) rows.push(r); });
+    (a||[]).forEach(function(r){ if(r && r.cat===cat && (r.he||r.ar) && !_hidden(r.he)) rows.push(r); });
   });
   window._dbCatRows[cat]=rows;
   if(!rows.length){ el.innerHTML='<div style="text-align:center;color:#7a9ab5;font-size:13px;padding:30px 16px;line-height:1.7;">התוכן של הקטגוריה נטען מהמאגר.<br>אם ריק — ודאי חיבור לרשת ורענני את האפליקציה.</div>'; return; }
@@ -20384,7 +20389,7 @@ window.addEventListener('load', function(){
 <script>
 // Version stamp — shown in the admin panel so we can confirm which build is live
 // on a device (stale service-worker caches were causing "my changes don't show").
-window.APP_VERSION = 'v175';
+window.APP_VERSION = 'v176';
 
 // Register the service worker for full offline use in the field, WITH update
 // detection: when a new version installs, offer a one-tap refresh instead of the
