@@ -2708,6 +2708,7 @@ function showLanding() {
     <div class="pbg"><div class="pop">
       <button onclick="closePopup()" style="position:absolute;top:12px;left:12px;background:linear-gradient(135deg,#D4A24E,#b88a3d);border:none;color:#fff;border-radius:10px;padding:8px 16px;font-size:14px;font-weight:700;cursor:pointer;font-family:inherit;display:flex;align-items:center;gap:6px;z-index:10;box-shadow:0 2px 8px rgba(0,0,0,0.3);">→ חזרה</button>
       <div id="pcatbadge" class="pcat-badge" style="display:none;"></div>
+      <div id="pmodetag" style="display:none;margin:6px 0 2px;"></div>
       <div class="phe" id="phe"></div>
       <div class="parsm" id="parsm"></div>
       <div class="pbox"><div class="ptrans" id="ptrans"></div></div>
@@ -10123,6 +10124,7 @@ function openTenPhrase(i){
   if(!p)return;
   window._popupSource='ten';
   window._popupReturnTab='ten';
+  _setModeTag(p);
   _setPopupAudio(p.audio||'');
   if(typeof setPopupLabel==='function')setPopupLabel('military');
   document.getElementById('phe').textContent=p.he;
@@ -10489,6 +10491,7 @@ function _openTpl(data, si, oi, returnTab){
   window._popupSource='tpl';
   window._popupReturnTab=returnTab;
   window._popupTplReturn=returnTab;
+  _setModeTag(rd);
   _setPopupAudio(rd.audio||'');
   if(typeof setPopupLabel==='function')setPopupLabel('military');
   document.getElementById('phe').textContent=rd.he;
@@ -10544,7 +10547,7 @@ function renderAnswers(){
       var idx=rows.indexOf(r);
       var hasAudio=!!(r.audio || _descAudioFor(r));
       html+='<div onclick="openAnsRow('+idx+')" style="flex:1 1 auto;min-width:132px;background:#1F3147;border:1px solid #2A3D52;border-radius:11px;padding:9px 12px;cursor:pointer;">';
-      html+='<div style="display:flex;align-items:center;gap:6px;"><div style="color:#E8D9B8;font-size:14px;font-weight:700;flex:1;">'+(r.he||'')+urgDot(_urgencyOf(r))+'</div>'+(hasAudio?'<span style="color:#1D9E75;font-size:14px;">🔊</span>':'')+'</div>';
+      html+='<div style="display:flex;align-items:center;gap:6px;"><div style="color:#E8D9B8;font-size:14px;font-weight:700;flex:1;">'+(r.he||'')+urgDot(_urgencyOf(r))+_modePill(r)+'</div>'+(hasAudio?'<span style="color:#1D9E75;font-size:14px;">🔊</span>':'')+'</div>';
       html+='<div style="color:#E8D9B8;font-size:15px;font-family:Georgia,serif;direction:rtl;margin-top:2px;">'+(r.ar||'')+'</div>';
       html+='<div style="color:#D4A24E;font-size:12px;margin-top:1px;">'+(r.trans||'')+'</div>';
       html+='</div>';
@@ -10599,6 +10602,7 @@ function _openDbCatItem(cat, idx, returnTab){
   var r=(window._dbCatRows[cat]||[])[idx]; if(!r)return;
   var audio=r.audio || _descAudioFor(r);
   window._popupSource='tpl'; window._popupReturnTab=returnTab; window._popupTplReturn=returnTab;
+  _setModeTag(r);
   _setPopupAudio(audio||'');
   if(typeof setPopupLabel==='function')setPopupLabel('military');
   document.getElementById('phe').textContent=r.he||'';
@@ -10626,6 +10630,7 @@ function openAnsRow(idx){
   var r=(window._ansRows||[])[idx]; if(!r)return;
   var audio=r.audio || _descAudioFor(r);
   window._popupSource='tpl'; window._popupReturnTab='answers'; window._popupTplReturn='answers';
+  _setModeTag(r);
   _setPopupAudio(audio||'');
   if(typeof setPopupLabel==='function')setPopupLabel('military');
   document.getElementById('phe').textContent=r.he||'';
@@ -16781,6 +16786,8 @@ function setPopupExtras(p) {
       badge.style.display = 'none';
     }
   }
+  // Learning-mode tag (🗣️ אני אומר / 👂 אני מזהה)
+  if (typeof _setModeTag === 'function') _setModeTag(p);
   // Cultural fact
   var cb = document.getElementById('pcultb');
   var ct = document.getElementById('pcult');
@@ -19435,7 +19442,7 @@ function _emergCardHTML(p, editing, key){
   var g=isGoldPhrase(p);
   var h='<div class="emerg-card">';
   h+='<div class="emerg-card-content" onclick="opP('+idx+')">';
-  h+='<div class="emerg-card-he">'+(g?'⭐ ':'')+p.he+urgDot(_urgencyOf(p))+'</div>';
+  h+='<div class="emerg-card-he">'+(g?'⭐ ':'')+p.he+urgDot(_urgencyOf(p))+_modePill(p)+'</div>';
   if(p.trans)h+='<div class="emerg-card-trans">'+p.trans+'</div>';
   if(p.ar)h+='<div class="emerg-card-ar">'+p.ar+'</div>';
   h+='</div>';
@@ -19728,6 +19735,34 @@ function _urgencyOf(p){
   if(s==='semantic'||s==='daily'||s==='heart') return 'routine';   // enrichment / heard-in-context
   if(s==='military'||s==='navy') return 'sensitive';               // operational default
   return '';
+}
+
+// ---- Learning mode: production ("I say") vs recognition ("I hear") -------
+// Most phrases are things the soldier SAYS (production — memorise to produce).
+// The exceptions are the citizen replies — the "תשובות אזרח" category and any
+// item flagged as a response — which the soldier only needs to RECOGNISE when
+// heard. Research shows these are two different practice modes.
+function _modeOf(p){
+  if(!p) return 'say';
+  if(p.isResponse) return 'hear';
+  if(String(p.cat||'').trim()==='תשובות אזרח') return 'hear';
+  return 'say';
+}
+// Compact pill for cards: by default only the recognition items get a pill
+// (production is the calm default, no clutter). Pass {showSay:true} in the
+// detail popup to label both explicitly.
+function _modePill(p, opts){
+  opts=opts||{};
+  var m=_modeOf(p);
+  if(m==='hear') return '<span style="display:inline-block;background:rgba(126,236,193,0.15);color:#7eecc1;font-size:10px;font-weight:700;padding:1px 7px;border-radius:6px;margin-right:5px;white-space:nowrap;">👂 אני מזהה</span>';
+  if(opts.showSay) return '<span style="display:inline-block;background:rgba(212,162,78,0.15);color:#D4A24E;font-size:10px;font-weight:700;padding:1px 7px;border-radius:6px;margin-right:5px;white-space:nowrap;">🗣️ אני אומר</span>';
+  return '';
+}
+// Set/hide the popup mode tag for a given phrase (used by every popup opener).
+function _setModeTag(p){
+  var mt=document.getElementById('pmodetag'); if(!mt) return;
+  var pill=(typeof _modePill==='function')?_modePill(p,{showSay:true}):'';
+  if(pill){ mt.innerHTML=pill; mt.style.display='block'; } else { mt.style.display='none'; }
 }
 
 function setTheme(mode){
@@ -20419,7 +20454,7 @@ window.addEventListener('load', function(){
 <script>
 // Version stamp — shown in the admin panel so we can confirm which build is live
 // on a device (stale service-worker caches were causing "my changes don't show").
-window.APP_VERSION = 'v178';
+window.APP_VERSION = 'v179';
 
 // Register the service worker for full offline use in the field, WITH update
 // detection: when a new version installs, offer a one-tap refresh instead of the
