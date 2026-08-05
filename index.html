@@ -16965,7 +16965,7 @@ function renderCoverage(){
     {label:'כריזה',         arr:(typeof ANNOUNCE!=='undefined'?ANNOUNCE:[])},
     {label:'סמנטי',         arr:(typeof SEM!=='undefined'?SEM:[])},
     {label:'תרבות ומנהגים', arr:(typeof CUS!=='undefined'?CUS:[]), noAudio:true},
-    {label:'מילון',         arr:(typeof DICT!=='undefined'?DICT:[]), noAudio:true}
+    {label:'מילון',         arr:(typeof DICT!=='undefined'?DICT:[])}
   ];
   var hasAudio=function(p){ return !!(p && (p.audio||p.audio_url)); };
   var isCrit=function(p){ try{ return _urgencyOf(p)==='urgent'; }catch(e){ return false; } };
@@ -20536,7 +20536,7 @@ window.addEventListener('load', function(){
 <script>
 // Version stamp — shown in the admin panel so we can confirm which build is live
 // on a device (stale service-worker caches were causing "my changes don't show").
-window.APP_VERSION = 'v181';
+window.APP_VERSION = 'v182';
 
 // Register the service worker for full offline use in the field, WITH update
 // detection: when a new version installs, offer a one-tap refresh instead of the
