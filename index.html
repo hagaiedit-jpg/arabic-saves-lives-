@@ -10544,7 +10544,7 @@ function renderAnswers(){
       var idx=rows.indexOf(r);
       var hasAudio=!!(r.audio || _descAudioFor(r));
       html+='<div onclick="openAnsRow('+idx+')" style="flex:1 1 auto;min-width:132px;background:#1F3147;border:1px solid #2A3D52;border-radius:11px;padding:9px 12px;cursor:pointer;">';
-      html+='<div style="display:flex;align-items:center;gap:6px;"><div style="color:#E8D9B8;font-size:14px;font-weight:700;flex:1;">'+(r.he||'')+'</div>'+(hasAudio?'<span style="color:#1D9E75;font-size:14px;">🔊</span>':'')+'</div>';
+      html+='<div style="display:flex;align-items:center;gap:6px;"><div style="color:#E8D9B8;font-size:14px;font-weight:700;flex:1;">'+(r.he||'')+urgDot(_urgencyOf(r))+'</div>'+(hasAudio?'<span style="color:#1D9E75;font-size:14px;">🔊</span>':'')+'</div>';
       html+='<div style="color:#E8D9B8;font-size:15px;font-family:Georgia,serif;direction:rtl;margin-top:2px;">'+(r.ar||'')+'</div>';
       html+='<div style="color:#D4A24E;font-size:12px;margin-top:1px;">'+(r.trans||'')+'</div>';
       html+='</div>';
@@ -10586,7 +10586,7 @@ function _renderDbCat(cat, containerId, opener){
     groups[g].forEach(function(r){
       var idx=rows.indexOf(r); var hasAudio=!!(r.audio || _descAudioFor(r));
       html+='<div onclick="'+opener+'('+idx+')" style="flex:1 1 auto;min-width:150px;background:#1F3147;border:1px solid #2A3D52;border-radius:11px;padding:9px 12px;cursor:pointer;">';
-      html+='<div style="display:flex;align-items:center;gap:6px;"><div style="color:#E8D9B8;font-size:14px;font-weight:700;flex:1;">'+(r.he||'')+'</div>'+(hasAudio?'<span style="color:#1D9E75;font-size:14px;">🔊</span>':'')+'</div>';
+      html+='<div style="display:flex;align-items:center;gap:6px;"><div style="color:#E8D9B8;font-size:14px;font-weight:700;flex:1;">'+(r.he||'')+urgDot(_urgencyOf(r))+'</div>'+(hasAudio?'<span style="color:#1D9E75;font-size:14px;">🔊</span>':'')+'</div>';
       html+='<div style="color:#E8D9B8;font-size:15px;font-family:Georgia,serif;direction:rtl;margin-top:2px;">'+(r.ar||'')+'</div>';
       html+='<div style="color:#D4A24E;font-size:12px;margin-top:1px;">'+(r.trans||'')+'</div>';
       html+='</div>';
@@ -12959,7 +12959,7 @@ function opC(cat,special){
         items.forEach(p => {
           const origIdx = DB.indexOf(p);
           html += '<div class="li" onclick="opP(' + origIdx + ')" style="margin-bottom:4px;">' +
-                  '<div class="lt">' + (p.he||'') + '</div>' +
+                  '<div class="lt">' + (p.he||'') + urgDot(_urgencyOf(p)) + '</div>' +
                   '<div class="la">›</div></div>';
         });
         
@@ -12976,7 +12976,7 @@ function opC(cat,special){
         ungrouped.forEach(p => {
           const origIdx = DB.indexOf(p);
           html += '<div class="li" onclick="opP(' + origIdx + ')" style="margin-bottom:4px;">' +
-                  '<div class="lt">' + (p.he||'') + '</div>' +
+                  '<div class="lt">' + (p.he||'') + urgDot(_urgencyOf(p)) + '</div>' +
                   '<div class="la">›</div></div>';
         });
         otherBox.innerHTML = html;
@@ -15789,7 +15789,7 @@ function searchDict(){
       html += '<div onclick="opDictPhrase(\'' + escapeJsDict(p.he) + '\', \'' + escapeJsDict(p.ar) + '\')" style="background:rgba(255,255,255,0.03);border-right:3px solid #D4A24E;padding:8px 10px;margin-bottom:6px;border-radius:6px;cursor:pointer;transition:background 0.2s;" onmouseover="this.style.background=\'rgba(212,162,78,0.1)\'" onmouseout="this.style.background=\'rgba(255,255,255,0.03)\'">';
       html += '<div style="display:flex;justify-content:space-between;align-items:start;gap:8px;">';
       html += '<div style="flex:1;min-width:0;">';
-      html += '<div style="color:#fff;font-size:13px;font-weight:600;margin-bottom:3px;">' + escapeHtmlDict(p.he) + (p.isResponse ? ' <span style="color:#7eecc1;font-size:10px;font-weight:700;background:rgba(29,158,117,0.15);padding:1px 6px;border-radius:6px;">💬 תשובה</span>' : '') + '</div>';
+      html += '<div style="color:#fff;font-size:13px;font-weight:600;margin-bottom:3px;">' + escapeHtmlDict(p.he) + urgDot(_urgencyOf(p)) + (p.isResponse ? ' <span style="color:#7eecc1;font-size:10px;font-weight:700;background:rgba(29,158,117,0.15);padding:1px 6px;border-radius:6px;">💬 תשובה</span>' : '') + '</div>';
       if (p.trans) html += '<div style="color:#D4A24E;font-size:13px;margin-bottom:2px;">' + escapeHtmlDict(p.trans) + '</div>';
       html += '<div style="color:#7a9ab5;font-size:12px;direction:rtl;">' + escapeHtmlDict(p.ar) + '</div>';
       if (p.isResponse && p.parentHe) html += '<div style="color:#7a9ab5;font-size:10px;margin-top:4px;">↩️ תשובה לשאלה: ' + escapeHtmlDict(p.parentHe) + '</div>';
@@ -16490,7 +16490,7 @@ function rItems(items,el,q){
       if (i < 0) continue;
       var star = (typeof isGoldPhrase === 'function' && isGoldPhrase(p)) ? '<span class="gold-marker">⭐</span>' : '';
       var heText = (typeof hl === 'function') ? hl(p.he, q) : p.he;
-      var dot = (typeof urgDot === 'function') ? urgDot(p.urgency) : '';
+      var dot = (typeof urgDot === 'function') ? urgDot(_urgencyOf(p)) : '';
       html += '<div class="li" onclick="opP(' + i + ')"><div class="lt">' + star + heText + dot + '</div><div class="la">‹</div></div>';
     }
     el.innerHTML = html || '<div class="empty">לא נמצאו תוצאות</div>';
@@ -19350,6 +19350,13 @@ function rQK(){
     h+='<div class="emerg-cube-count">'+c.sub+'</div>';
     h+='</div>';
   });
+  // Triage legend — explains the coloured dots that appear on the phrase cards.
+  h+='<div style="grid-column:1/-1;display:flex;align-items:center;justify-content:center;gap:16px;flex-wrap:wrap;background:#14263b;border:1px solid #2A3D52;border-radius:10px;padding:9px 12px;margin-top:4px;">'
+    +'<span style="color:#7a9ab5;font-size:11px;font-weight:700;">רמת דחיפות:</span>'
+    +'<span style="color:#E8D9B8;font-size:11.5px;">🔴 קריטי</span>'
+    +'<span style="color:#E8D9B8;font-size:11.5px;">🟡 מבצעי</span>'
+    +'<span style="color:#E8D9B8;font-size:11.5px;">🟢 רגיל</span>'
+    +'</div>';
   grid.innerHTML=h;
   // Admin-only: one-click marking of the approved critical set.
   var rec=document.getElementById('emerg-recmark');
@@ -19428,7 +19435,7 @@ function _emergCardHTML(p, editing, key){
   var g=isGoldPhrase(p);
   var h='<div class="emerg-card">';
   h+='<div class="emerg-card-content" onclick="opP('+idx+')">';
-  h+='<div class="emerg-card-he">'+(g?'⭐ ':'')+p.he+'</div>';
+  h+='<div class="emerg-card-he">'+(g?'⭐ ':'')+p.he+urgDot(_urgencyOf(p))+'</div>';
   if(p.trans)h+='<div class="emerg-card-trans">'+p.trans+'</div>';
   if(p.ar)h+='<div class="emerg-card-ar">'+p.ar+'</div>';
   h+='</div>';
@@ -19620,7 +19627,7 @@ function rFav(){
     var idx=sec==="military"?DB.findIndex(function(x){return x.id===p.id;}):sec==="daily"?DAILY.findIndex(function(x){return x.id===p.id;}):sec==="heart"?HEART.indexOf(p):NAVY.indexOf(p);
     h+='<div class="fav-card" onclick="opFavItem(\''+sec+'\','+idx+')">';
     h+='<div style="display:flex;justify-content:space-between;align-items:flex-start;">';
-    h+='<div style="flex:1;"><div class="fav-he">'+p.he+urgDot(p.urgency)+'</div>';
+    h+='<div style="flex:1;"><div class="fav-he">'+p.he+urgDot(_urgencyOf(p))+'</div>';
     h+='<div class="fav-trans">'+p.trans+'</div></div>';
     h+='<span onclick="event.stopPropagation();removeFav(\''+p.id+'\')" style="cursor:pointer;font-size:16px;">⭐</span>';
     h+='</div></div>';
@@ -19674,7 +19681,7 @@ function rRecent(){
     var idx=sec==="military"?DB.findIndex(function(x){return x.id===p.id;}):sec==="daily"?DAILY.findIndex(function(x){return x.id===p.id;}):sec==="heart"?HEART.indexOf(p):NAVY.indexOf(p);
     h+='<div style="background:#1a2535;border:1px solid #2A3D52;border-radius:8px;padding:10px 12px;margin-bottom:6px;display:flex;align-items:center;gap:8px;">';
     h+='<div class="rec-card" style="flex:1;cursor:pointer;" onclick="opPop('+idx+',\''+sec+'\')">';
-    h+='<div class="rec-he" style="color:#fff;font-size:13px;">'+p.he+urgDot(p.urgency)+'</div>';
+    h+='<div class="rec-he" style="color:#fff;font-size:13px;">'+p.he+urgDot(_urgencyOf(p))+'</div>';
     h+='<div class="rec-trans" style="color:#7a9ab5;font-size:12px;">'+p.trans+'</div></div>';
     h+='<div onclick="removeRecent(\''+p.id+'\')" style="color:#7a9ab5;font-size:18px;padding:6px 10px;cursor:pointer;">✕</div>';
     h+='</div>';
@@ -19695,9 +19702,32 @@ function removeRecent(id){
 }
 
 function urgDot(u){
-  if(u==="urgent")return '<span style="color:#e74c3c;font-size:8px;margin-left:4px;">🔴</span>';
-  if(u==="sensitive")return '<span style="color:#f1c40f;font-size:8px;margin-left:4px;">🟡</span>';
+  if(u==="urgent")   return '<span title="קריטי — מציל חיים" style="font-size:8px;margin-right:4px;">🔴</span>';
+  if(u==="sensitive")return '<span title="מבצעי — נדרש בשטח" style="font-size:8px;margin-right:4px;">🟡</span>';
+  if(u==="routine")  return '<span title="רגיל — העשרה/הבנה" style="font-size:8px;margin-right:4px;opacity:0.75;">🟢</span>';
   return "";
+}
+
+// ---- Urgency (triage) model --------------------------------------------
+// Every phrase gets a triage level automatically from its category, exactly
+// like a START triage card — a fast rule first, fine-tuning later. A manual
+// [urgent]/[sensitive] tag on a single phrase (set in the admin form) always
+// overrides the category default. Levels: urgent 🔴 / sensitive 🟡 / routine 🟢.
+var _URG_RED=['הוראות מיידיות','הוראות','רפואה ועזרה','רפואה וטריאז\'','רפואה','רפואה וחירום','סיוע רפואי','עזרה ראשונה','תיאור חשוד','תשאול: תיאור אדם'];
+var _URG_YELLOW=['בידוק וזיהוי','זיהוי ובידוק','בידוק','זיהוי','רכב ומחסום','מחסום','רכב','קהל ואירועים','קהל ואזרחים'];
+var _URG_GREEN=['תרבות','לוח שנה ותרבות','תרבות והתנהגות','ילדים ואוכלוסיות רגישות','הרגעה ושכנוע'];
+function _urgencyOf(p){
+  if(!p) return '';
+  var u=p.urgency;
+  if(u==='urgent'||u==='sensitive'||u==='routine') return u;   // manual override wins
+  var c=String(p.cat||'').trim();
+  if(_URG_RED.indexOf(c)>=0) return 'urgent';
+  if(_URG_GREEN.indexOf(c)>=0) return 'routine';
+  if(_URG_YELLOW.indexOf(c)>=0) return 'sensitive';
+  var s=String(p.section||'');
+  if(s==='semantic'||s==='daily'||s==='heart') return 'routine';   // enrichment / heard-in-context
+  if(s==='military'||s==='navy') return 'sensitive';               // operational default
+  return '';
 }
 
 function setTheme(mode){
@@ -20389,7 +20419,7 @@ window.addEventListener('load', function(){
 <script>
 // Version stamp — shown in the admin panel so we can confirm which build is live
 // on a device (stale service-worker caches were causing "my changes don't show").
-window.APP_VERSION = 'v177';
+window.APP_VERSION = 'v178';
 
 // Register the service worker for full offline use in the field, WITH update
 // detection: when a new version installs, offer a one-tap refresh instead of the
