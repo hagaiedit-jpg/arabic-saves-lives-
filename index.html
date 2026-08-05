@@ -3245,9 +3245,9 @@ function showLanding() {
       </div>
       <div style="color:#E8D9B8;font-size:13px;font-weight:700;margin-bottom:10px;">➕ הוסף חדש</div>
       <div class="afl"><label>קטגוריה</label><select id="apc">
-        <option>מצב מהיר</option><option>עצירת תנועה</option><option>ניהול מרחב</option><option>בידוק וזיהוי</option>
+        <option>מצב מהיר</option><option>עצירת תנועה ורכב</option><option>ניהול מרחב והוראות</option><option>בידוק וזיהוי</option>
         <option>שליטה בבית</option><option>הרגעה ושכנוע</option><option>מגע ראשוני</option>
-        <option>עזרה ראשונה</option><option>קהל ואזרחים</option><option>ילדים ואוכלוסיות רגישות</option>
+        <option>רפואה ועזרה ראשונה</option><option>קהל ואירועים</option><option>ילדים ואוכלוסיות רגישות</option>
         <option>לוח שנה ותרבות</option>
       </select></div>
       <div class="afl"><label>עברית *</label><input id="aphe"/></div>
@@ -5210,9 +5210,9 @@ var PREP_WEEK_TITLES_90 = {
 function getActivePath() {
   try {
     var pathType = localStorage.getItem('prep_active_path') || '30';
-    if (pathType === '90') return PREP_PATH_90;
-    if (pathType === '60') return PREP_PATH_60;
-    return PREP_PATH_30;
+    var base = pathType === '90' ? PREP_PATH_90 : pathType === '60' ? PREP_PATH_60 : PREP_PATH_30;
+    // Canonicalise each day's category so lookups match the (canonicalised) DB rows.
+    return base.map(function(d){ return (d && d.cat) ? Object.assign({}, d, {cat:_canonCat(d.cat)}) : d; });
   } catch(e) { return PREP_PATH_30; }
 }
 
@@ -5949,7 +5949,7 @@ function pickEmergencyChallengeQuestion() {
   if (!DB || DB.length === 0) return null;
 
   // Prefer phrases from emergency-related categories
-  var emergencyCats = ['עצירת תנועה', 'בידוק וזיהוי', 'מגע ראשוני', 'קהל ואזרחים', 'שליטה בבית'];
+  var emergencyCats = ['עצירת תנועה ורכב', 'בידוק וזיהוי', 'מגע ראשוני', 'קהל ואירועים', 'שליטה בבית'];
   var pool = DB.filter(function(p){
     return p.he && p.ar && emergencyCats.indexOf(p.cat) !== -1;
   });
@@ -9899,6 +9899,22 @@ async function cleanAllTranslits(btn){
   }catch(e){ btn.disabled=false; btn.textContent=old; alert('\u05E9\u05D2\u05D9\u05D0\u05D4: '+(e&&e.message?e.message:e)); }
 }
 
+// Canonical category name. Some subsystems (add-form, prep-path, field commands)
+// historically used short spellings that fragment content into near-duplicate
+// categories. Map them to the single canonical (long) name the library uses, so
+// content unifies everywhere without any DB rewrite. Applied at load in mp() and
+// to prep-path days in getActivePath().
+function _canonCat(c){
+  var k=String(c==null?'':c).trim();
+  var M={
+    'עצירת תנועה':'עצירת תנועה ורכב',
+    'ניהול מרחב':'ניהול מרחב והוראות',
+    'עזרה ראשונה':'רפואה ועזרה ראשונה',
+    'קהל ואזרחים':'קהל ואירועים'
+  };
+  return M[k]||c;
+}
+
 function mp(p){
   const seen = getSeenIds();
   // Parse why field: may contain "real why\n---\ncultural fact"
@@ -9922,7 +9938,7 @@ function mp(p){
   // Strip Arabic vowel-marks (harakat/shadda/tanwin) that slipped into the
   // Hebrew transliteration in some source rows and render as ▯ boxes.
   try { parsedResponses = parsedResponses.map(function(r){ if (r && r.trans) r.trans = _sanitizeTranslit(r.trans); if (r && r.audio_url) r.audio_url = _cldAudio(r.audio_url); if (r && r.audio) r.audio = _cldAudio(r.audio); return r; }); } catch(e) {}
-  var res={id:p.id,cat:p.cat||'',he:p.he||'',trans:_sanitizeTranslit(p.trans),ar:p.ar||'',tags:p.tags||'',why:parsedWhy,tone:p.tone||'',audio:_cldAudio(p.audio_url),when:p.tags||'',tip:parsedWhy,cultural:parsedCult,isNew:(p.is_new||false)&&!seen.includes(p.id),section:p.section,urgency:'',responses:parsedResponses};
+  var res={id:p.id,cat:_canonCat(p.cat||''),he:p.he||'',trans:_sanitizeTranslit(p.trans),ar:p.ar||'',tags:p.tags||'',why:parsedWhy,tone:p.tone||'',audio:_cldAudio(p.audio_url),when:p.tags||'',tip:parsedWhy,cultural:parsedCult,isNew:(p.is_new||false)&&!seen.includes(p.id),section:p.section,urgency:'',responses:parsedResponses};
   var _t=res.tone||'';
   var _m=_t.match(/^\[(urgent|sensitive)\]\s*/);
   if(_m){res.urgency=_m[1];res.tone=_t.substring(_m[0].length);}
@@ -11878,7 +11894,7 @@ var _fieldCmdNorm={
   he:function(s){ return String(s||'').replace(/[֑-ׇ]/g,'').replace(/[^א-ת0-9A-Za-z]/g,''); },
   ar:function(s){ return String(s||'').replace(/[ً-ْٰـ]/g,'').replace(/[آأإا]/g,'ا').replace(/[ىي]/g,'ي').replace(/ة/g,'ه').replace(/[^ء-ي]/g,''); }
 };
-var _fieldCmdCats=['מצב מהיר','עצירת תנועה','ניהול מרחב','בידוק וזיהוי','שליטה בבית','הרגעה ושכנוע','מגע ראשוני','עזרה ראשונה','קהל ואזרחים','ילדים ואוכלוסיות רגישות','לוח שנה ותרבות'];
+var _fieldCmdCats=['מצב מהיר','עצירת תנועה ורכב','ניהול מרחב והוראות','בידוק וזיהוי','שליטה בבית','הרגעה ושכנוע','מגע ראשוני','רפואה ועזרה ראשונה','קהל ואירועים','ילדים ואוכלוסיות רגישות','לוח שנה ותרבות'];
 function _fcEsc(s){ return String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
 
 async function openFieldCmdReview(btn){
@@ -16948,23 +16964,24 @@ function renderCoverage(){
     {label:'ימי',           arr:(typeof NAVY!=='undefined'?NAVY:[])},
     {label:'כריזה',         arr:(typeof ANNOUNCE!=='undefined'?ANNOUNCE:[])},
     {label:'סמנטי',         arr:(typeof SEM!=='undefined'?SEM:[])},
-    {label:'תרבות ומנהגים', arr:(typeof CUS!=='undefined'?CUS:[])},
-    {label:'מילון',         arr:(typeof DICT!=='undefined'?DICT:[])}
+    {label:'תרבות ומנהגים', arr:(typeof CUS!=='undefined'?CUS:[]), noAudio:true},
+    {label:'מילון',         arr:(typeof DICT!=='undefined'?DICT:[]), noAudio:true}
   ];
   var hasAudio=function(p){ return !!(p && (p.audio||p.audio_url)); };
   var isCrit=function(p){ try{ return _urgencyOf(p)==='urgent'; }catch(e){ return false; } };
   var isHear=function(p){ try{ return _modeOf(p)==='hear'; }catch(e){ return false; } };
   var esc=function(s){ return String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); };
-  var grandT=0, grandA=0, html='';
+  var grandT=0, recT=0, recA=0, html='';
   SECTIONS.forEach(function(sec){
     var arr=(sec.arr||[]).filter(Boolean); if(!arr.length) return;
+    var noAudio=!!sec.noAudio;
     var groups={}, order=[];
     arr.forEach(function(p){ var c=(p.cat&&String(p.cat).trim())||'— ללא קטגוריה'; if(!(c in groups)){groups[c]=[];order.push(c);} groups[c].push(p); });
     var secT=arr.length, secA=arr.filter(hasAudio).length, secPct=secT?Math.round(secA/secT*100):0;
-    grandT+=secT; grandA+=secA;
+    grandT+=secT; if(!noAudio){ recT+=secT; recA+=secA; }
     html+='<div style="margin-top:14px;margin-bottom:6px;display:flex;align-items:baseline;gap:8px;flex-wrap:wrap;">'
       +'<span style="color:#D4A24E;font-size:13px;font-weight:800;">'+esc(sec.label)+'</span>'
-      +'<span style="color:#7a9ab5;font-size:11px;">'+secT+' משפטים · '+secA+' מוקלטים ('+secPct+'%)</span></div>';
+      +'<span style="color:#7a9ab5;font-size:11px;">'+secT+' משפטים'+(noAudio?' · רקע — לא להקלטה':' · '+secA+' מוקלטים ('+secPct+'%)')+'</span></div>';
     var rows=order.map(function(c){
       var g=groups[c], t=g.length, a=g.filter(hasAudio).length;
       return {c:c,t:t,a:a,cr:g.filter(isCrit).length,hr:g.filter(isHear).length,pct:t?Math.round(a/t*100):0};
@@ -16975,18 +16992,20 @@ function renderCoverage(){
       var barColor=r.pct>=80?'#1D9E75':r.pct>=40?'#D4A24E':'#e07a5f';
       html+='<div style="display:flex;align-items:center;gap:8px;padding:7px 9px;margin-bottom:4px;background:'+(thin?'rgba(224,122,95,0.08)':'#1a2535')+';border:1px solid '+(thin?'rgba(224,122,95,0.35)':'#2A3D52')+';border-radius:8px;">'
         +'<div style="flex:1;min-width:0;"><div style="color:#E8D9B8;font-size:12.5px;font-weight:700;">'+esc(r.c)+(thin?' <span style="color:#e07a5f;font-size:10px;font-weight:700;">דק</span>':'')+'</div>'
-        +'<div style="height:5px;background:#0E1B2E;border-radius:3px;margin-top:4px;overflow:hidden;"><div style="height:100%;width:'+r.pct+'%;background:'+barColor+';"></div></div></div>'
+        +(noAudio?'':'<div style="height:5px;background:#0E1B2E;border-radius:3px;margin-top:4px;overflow:hidden;"><div style="height:100%;width:'+r.pct+'%;background:'+barColor+';"></div></div>')+'</div>'
         +'<div style="text-align:center;min-width:34px;"><div style="color:#E8D9B8;font-size:14px;font-weight:800;">'+r.t+'</div><div style="color:#7a9ab5;font-size:9px;">משפטים</div></div>'
-        +'<div style="text-align:center;min-width:46px;"><div style="color:'+barColor+';font-size:13px;font-weight:800;">'+r.a+'</div><div style="color:#7a9ab5;font-size:9px;">🎵 '+r.pct+'%</div></div>'
+        +(noAudio
+           ?'<div style="text-align:center;min-width:46px;color:#43506a;font-size:12px;">—</div>'
+           :'<div style="text-align:center;min-width:46px;"><div style="color:'+barColor+';font-size:13px;font-weight:800;">'+r.a+'</div><div style="color:#7a9ab5;font-size:9px;">🎵 '+r.pct+'%</div></div>')
         +'<div style="text-align:center;min-width:28px;"><div style="color:'+(r.cr?'#e74c3c':'#43506a')+';font-size:13px;font-weight:800;">'+r.cr+'</div><div style="color:#7a9ab5;font-size:9px;">🔴</div></div>'
         +(r.hr?'<div style="text-align:center;min-width:28px;"><div style="color:#7eecc1;font-size:13px;font-weight:800;">'+r.hr+'</div><div style="color:#7a9ab5;font-size:9px;">👂</div></div>':'')
         +'</div>';
     });
   });
-  var gp=grandT?Math.round(grandA/grandT*100):0;
+  var gp=recT?Math.round(recA/recT*100):0;
   var top='<div style="background:#14263b;border:1px solid #2A3D52;border-radius:10px;padding:11px;margin-bottom:6px;text-align:center;">'
     +'<span style="color:#E8D9B8;font-size:16px;font-weight:800;">'+grandT+'</span><span style="color:#7a9ab5;font-size:12px;"> משפטים סה״כ · </span>'
-    +'<span style="color:#1D9E75;font-size:16px;font-weight:800;">'+gp+'%</span><span style="color:#7a9ab5;font-size:12px;"> מוקלטים</span></div>';
+    +'<span style="color:#1D9E75;font-size:16px;font-weight:800;">'+gp+'%</span><span style="color:#7a9ab5;font-size:12px;"> מוקלטים (מהתוכן שדורש הקלטה)</span></div>';
   el.innerHTML = grandT ? (top+html) : '<div style="color:#7a9ab5;font-size:12px;text-align:center;padding:24px;">אין נתונים טעונים — ודאי חיבור לרשת ורענני.</div>';
 }
 
@@ -20517,7 +20536,7 @@ window.addEventListener('load', function(){
 <script>
 // Version stamp — shown in the admin panel so we can confirm which build is live
 // on a device (stale service-worker caches were causing "my changes don't show").
-window.APP_VERSION = 'v180';
+window.APP_VERSION = 'v181';
 
 // Register the service worker for full offline use in the field, WITH update
 // detection: when a new version installs, offer a one-tap refresh instead of the
