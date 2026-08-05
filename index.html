@@ -2319,17 +2319,17 @@ function showLanding() {
           <div style="color:#7a9ab5;font-size:10.5px;line-height:1.4;">להבין את הצד השני</div>
         </div>
 
-        <!-- Row 4: שמורים והכנה לשירות קרבי -->
-        <div onclick="navToTab('fav')" style="background:linear-gradient(160deg,#1F3147 0%,#243a55 100%);border:1px solid rgba(212,162,78,0.2);border-radius:14px;padding:14px 12px;cursor:pointer;box-shadow:0 2px 8px rgba(0,0,0,0.2);">
-          <div style="font-size:26px;margin-bottom:6px;line-height:1;">⭐</div>
-          <div style="color:#E8D9B8;font-size:13px;font-weight:800;margin-bottom:2px;">שמורים</div>
-          <div style="color:#7a9ab5;font-size:10.5px;line-height:1.4;">המשפטים ששמרת</div>
-        </div>
-
+        <!-- Row 4: הכנה לשירות קרבי ושמורים -->
         <div onclick="startPrepPath()" style="background:linear-gradient(160deg,#1F3147 0%,#243a55 100%);border:1px solid rgba(212,162,78,0.2);border-radius:14px;padding:14px 12px;cursor:pointer;box-shadow:0 2px 8px rgba(0,0,0,0.2);">
           <div style="font-size:26px;margin-bottom:6px;line-height:1;">🪖</div>
           <div style="color:#E8D9B8;font-size:13px;font-weight:800;margin-bottom:2px;">הכנה לשירות קרבי</div>
           <div style="color:#7a9ab5;font-size:10.5px;line-height:1.4;">מסלול 30 יום מובנה</div>
+        </div>
+
+        <div onclick="navToTab('fav')" style="background:linear-gradient(160deg,#1F3147 0%,#243a55 100%);border:1px solid rgba(212,162,78,0.2);border-radius:14px;padding:14px 12px;cursor:pointer;box-shadow:0 2px 8px rgba(0,0,0,0.2);">
+          <div style="font-size:26px;margin-bottom:6px;line-height:1;">⭐</div>
+          <div style="color:#E8D9B8;font-size:13px;font-weight:800;margin-bottom:2px;">שמורים</div>
+          <div style="color:#7a9ab5;font-size:10.5px;line-height:1.4;">המשפטים ששמרת</div>
         </div>
 
       </div>
@@ -20389,7 +20389,7 @@ window.addEventListener('load', function(){
 <script>
 // Version stamp — shown in the admin panel so we can confirm which build is live
 // on a device (stale service-worker caches were causing "my changes don't show").
-window.APP_VERSION = 'v176';
+window.APP_VERSION = 'v177';
 
 // Register the service worker for full offline use in the field, WITH update
 // detection: when a new version installs, offer a one-tap refresh instead of the
