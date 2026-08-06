@@ -27,6 +27,13 @@ window.COMMERCE_LOGIN = (function(){ try{
   if(localStorage.getItem('commerceLogin')==='1') return true;
   if(String(location.search).indexOf('login=1')!==-1) return true;
 }catch(e){} return false; })();
+// Paywall ENFORCEMENT (free preview vs premium) — DORMANT by default so the live
+// app stays fully open. Enable with ?paywall=1 or localStorage.setItem('paywall','1')
+// to preview/test the gating. Only flip on for everyone once payments are wired.
+window.PAYWALL = (function(){ try{
+  if(localStorage.getItem('paywall')==='1') return true;
+  if(String(location.search).indexOf('paywall=1')!==-1) return true;
+}catch(e){} return false; })();
 // === Client error log: ring buffer in localStorage ('err_log', max 50) =======
 // Captures window errors + unhandled promise rejections so field failures can
 // be diagnosed after the fact (admin → "🚨 יומן שגיאות"). Registered this early
@@ -3226,6 +3233,7 @@ function showLanding() {
       <button class="atab" onclick="aT('qrec',this)">🎤 הקלטת תשובות</button>
       <button class="atab" onclick="aT('acat',this)">⚙️ קטגוריות</button>
       <button class="atab" onclick="aT('cov',this)">📊 כיסוי תוכן</button>
+      <button class="atab" onclick="aT('dup',this)">🔎 כפילויות</button>
     </div>
 
     <!-- Content coverage -->
@@ -3234,6 +3242,15 @@ function showLanding() {
         <div style="color:#E8D9B8;font-size:14px;font-weight:800;margin-bottom:4px;">📊 כיסוי תוכן</div>
         <div style="color:#7a9ab5;font-size:11.5px;line-height:1.6;margin-bottom:12px;">לכל קטגוריה: כמה משפטים יש, כמה מהם מוקלטים 🎵, וכמה 🔴 קריטי. הקטגוריות ה<b>דקות</b> (מתחת ל-5 משפטים) מודגשות ומופיעות למעלה בכל מקטע — שם כדאי לעבות. הנתונים מתעדכנים מהמאגר החי.</div>
         <div id="cov-body"></div>
+      </div>
+    </div>
+
+    <!-- Duplicate check for the field-vocab extraction -->
+    <div id="at-dup" style="display:none;">
+      <div class="acard">
+        <div style="color:#E8D9B8;font-size:14px;font-weight:800;margin-bottom:4px;">🔎 בדיקת כפילויות — חילוץ שדה</div>
+        <div style="color:#7a9ab5;font-size:11.5px;line-height:1.6;margin-bottom:12px;">משווה את רשימת חילוץ השדה מול כל התוכן הטעון (מבצעי, יומיומי, מילון, מנהגים…). ⚠️ = כבר קיים (לא נייבא). ✅ = חדש. ההשוואה לפי עברית או ערבית מנוקָה.</div>
+        <div id="dupe-body"></div>
       </div>
     </div>
 
@@ -10556,6 +10573,8 @@ function renderAnswers(){
     (a||[]).forEach(function(r){ if(r && r.cat==='תשובות אזרח' && (r.he||r.ar)) rows.push(r); });
   });
   if(!rows.length){ _renderTpl(ANSWERS,'answers-list','openAnsItem'); return; }
+  var _capped=false;
+  if(typeof _previewLocked==='function' && _previewLocked() && rows.length>FREE_PREVIEW_N){ rows=rows.slice(0,FREE_PREVIEW_N); _capped=true; }
   var ICON={}; ANSWERS.forEach(function(g){ ICON[g.label]=g.icon; });
   var seedOrder=ANSWERS.map(function(g){ return g.label; });
   var order=[], groups={};
@@ -10580,6 +10599,7 @@ function renderAnswers(){
     });
     html+='</div></div>';
   });
+  if(_capped) html+=_upsellRow('פתחו את כל התשובות');
   el.innerHTML=html;
 }
 // Generic: render ANY existing DB category live (military/dictionary) as cards, so
@@ -10603,6 +10623,8 @@ function _renderDbCat(cat, containerId, opener){
   [typeof DB!=='undefined'?DB:[], typeof DICT!=='undefined'?DICT:[]].forEach(function(a){
     (a||[]).forEach(function(r){ if(r && r.cat===cat && (r.he||r.ar) && !_hidden(r.he)) rows.push(r); });
   });
+  var _capped=false;
+  if(typeof _previewLocked==='function' && _previewLocked() && rows.length>FREE_PREVIEW_N){ rows=rows.slice(0,FREE_PREVIEW_N); _capped=true; }
   window._dbCatRows[cat]=rows;
   if(!rows.length){ el.innerHTML='<div style="text-align:center;color:#7a9ab5;font-size:13px;padding:30px 16px;line-height:1.7;">התוכן של הקטגוריה נטען מהמאגר.<br>אם ריק — ודאי חיבור לרשת ורענני את האפליקציה.</div>'; return; }
   var order=[], groups={};
@@ -10622,6 +10644,7 @@ function _renderDbCat(cat, containerId, opener){
     });
     html+='</div></div>';
   });
+  if(_capped) html+=_upsellRow('פתחו את כל הקטגוריה');
   el.innerHTML=html;
 }
 function _openDbCatItem(cat, idx, returnTab){
@@ -15791,10 +15814,12 @@ function searchDict(){
     return;
   }
   
-  // Render matches
+  // Render matches (free preview caps the number of words shown when locked)
+  var _dictLocked = (typeof _previewLocked==='function' && _previewLocked());
+  var _dictCap = _dictLocked ? FREE_PREVIEW_N : 30;
   var html = '<div style="font-size:11px;color:#7a9ab5;text-align:center;margin-bottom:10px;">נמצאו ' + matches.length + ' מילים תואמות</div>';
-  
-  matches.slice(0, 30).forEach(function(match) {
+
+  matches.slice(0, _dictCap).forEach(function(match) {
     var displayWord = match.displayWords[0];
     var altForms = match.displayWords.slice(1);
     
@@ -15838,10 +15863,12 @@ function searchDict(){
     html += '</div>';
   });
   
-  if (matches.length > 30) {
+  if (_dictLocked && matches.length > _dictCap) {
+    html += _upsellRow('פתחו את המילון המלא');
+  } else if (matches.length > 30) {
     html += '<div style="text-align:center;color:#7a9ab5;font-size:12px;padding:10px;">מציג 30 מתוך ' + matches.length + ' תוצאות - חדדי את החיפוש</div>';
   }
-  
+
   resultsEl.innerHTML = html;
 }
 
@@ -16947,9 +16974,9 @@ function aT(t,el){
   // Allow programmatic jumps (shortcut buttons) — find the tab button when not passed
   if(!el) el=document.querySelector('.atab[onclick*="\''+t+'\'"]');
   if(el){ el.classList.add('active'); try{ el.scrollIntoView({behavior:'smooth',inline:'center',block:'nearest'}); }catch(e){} }
-  ['ap','ad','ah','ak','an','adict','asem','ac','al','audit','qrec','acat','cov'].forEach(id=>{var e=document.getElementById('at-'+id); if(e)e.style.display='none';});
+  ['ap','ad','ah','ak','an','adict','asem','ac','al','audit','qrec','acat','cov','dup'].forEach(id=>{var e=document.getElementById('at-'+id); if(e)e.style.display='none';});
   document.getElementById('at-'+t).style.display='block';
-  if(t==='al')renderAdminList();if(t==='acat')renderCatList();if(t==='audit')renderQuestionAudit();if(t==='qrec')renderRespRecList();if(t==='cov')renderCoverage();
+  if(t==='al')renderAdminList();if(t==='acat')renderCatList();if(t==='audit')renderQuestionAudit();if(t==='qrec')renderRespRecList();if(t==='cov')renderCoverage();if(t==='dup')checkFieldVocab();
   try{ renderTabList(t); }catch(e){ console.warn('renderTabList',e); }
 }
 
@@ -17007,6 +17034,107 @@ function renderCoverage(){
     +'<span style="color:#E8D9B8;font-size:16px;font-weight:800;">'+grandT+'</span><span style="color:#7a9ab5;font-size:12px;"> משפטים סה״כ · </span>'
     +'<span style="color:#1D9E75;font-size:16px;font-weight:800;">'+gp+'%</span><span style="color:#7a9ab5;font-size:12px;"> מוקלטים (מהתוכן שדורש הקלטה)</span></div>';
   el.innerHTML = grandT ? (top+html) : '<div style="color:#7a9ab5;font-size:12px;text-align:center;padding:24px;">אין נתונים טעונים — ודאי חיבור לרשת ורענני.</div>';
+}
+
+// Field-vocab extraction (user-verified) — checked for duplicates before import.
+var FIELD_VOCAB=[
+  {cat:'הרגעה ושכנוע', he:'כועס', ar:'غاضب', trans:"עַ'אצֶ'בּ"},
+  {cat:'הרגעה ושכנוע', he:'מפחד', ar:'خائف', trans:"ח'איֶף"},
+  {cat:'הרגעה ושכנוע', he:'לחוץ', ar:'مضغوط', trans:"מַצְ'עוּט"},
+  {cat:'הרגעה ושכנוע', he:'מודאג', ar:'قلقان', trans:'קלקאן'},
+  {cat:'הרגעה ושכנוע', he:'בודד', ar:'وحيد', trans:'וַחִיד'},
+  {cat:'הרגעה ושכנוע', he:'חולה', ar:'مريض', trans:"מַרִיצ'"},
+  {cat:'הרגעה ושכנוע', he:'עצוב', ar:'حزين', trans:'חַזִין'},
+  {cat:'הרגעה ושכנוע', he:'מרוצה', ar:'راضي', trans:"רַאצִ'י"},
+  {cat:'הרגעה ושכנוע', he:'תן לי את היד, אני אעזור לך', ar:'أعطني يدك، سأساعدك', trans:"אַעְטִינִי אִידַכּ, בַּסַאעְדַכּ"},
+  {cat:'תיאור חשוד', he:'גבוה', ar:'طويل', trans:'טַוִיל'},
+  {cat:'תיאור חשוד', he:'נמוך / קצר', ar:'قصير', trans:'קַצִיר'},
+  {cat:'תיאור חשוד', he:'צעיר', ar:'شاب', trans:'שַאבּ'},
+  {cat:'תיאור חשוד', he:'מבוגר / זקן', ar:'ختيار', trans:"חְ'תְיַאר"},
+  {cat:'תיאור חשוד', he:'זר', ar:'غريب', trans:"עַ'רִיבּ"},
+  {cat:'תיאור חשוד', he:'מקומי', ar:'محلي', trans:'מַחַלִּי'},
+  {cat:'כיוונים ושטח', he:'צפון', ar:'شمال', trans:'שְמַאל'},
+  {cat:'כיוונים ושטח', he:'דרום', ar:'جنوب', trans:"גַ'נוּבּ"},
+  {cat:'כיוונים ושטח', he:'מזרח', ar:'شرق', trans:'שַרְק'},
+  {cat:'כיוונים ושטח', he:'מערב', ar:'غرب', trans:"עַ'רְבּ"},
+  {cat:'כיוונים ושטח', he:'מול', ar:'أمام', trans:'אַמַאם'},
+  {cat:'כיוונים ושטח', he:'בפנים', ar:'داخل', trans:"דַאחֶ'ל"},
+  {cat:'כיוונים ושטח', he:'צד', ar:'جانب', trans:"גַ'אנֶבּ"},
+  {cat:'כיוונים ושטח', he:'כאן', ar:'هون', trans:'הוֹן'},
+  {cat:'כיוונים ושטח', he:'שם', ar:'هناك', trans:'הֻנַאכּ'},
+  {cat:'כיוונים ושטח', he:'הר', ar:'جبل', trans:"גַ'בַּל"},
+  {cat:'כיוונים ושטח', he:'ואדי', ar:'وادي', trans:'וַאדִי'},
+  {cat:'כיוונים ושטח', he:'שדה', ar:'حقل', trans:'חַקְל'},
+  {cat:'כיוונים ושטח', he:'יער', ar:'غابة', trans:"עַ'אבֶּה"},
+  {cat:'כיוונים ושטח', he:'חוף', ar:'شاطئ', trans:'שַאטֶא'},
+  {cat:'כיוונים ושטח', he:'מדבר', ar:'صحراء', trans:'צַחְרַא'},
+  {cat:'כיוונים ושטח', he:'נהר', ar:'نهر', trans:'נַהֶר'},
+  {cat:'כיוונים ושטח', he:'ים', ar:'بحر', trans:'בַּחֶר'},
+  {cat:'תשאול: עבודה', he:'רופא', ar:'طبيب', trans:'טַבִּיבּ'},
+  {cat:'תשאול: עבודה', he:'מהנדס', ar:'مهندس', trans:'מֻהַנְדֶס'},
+  {cat:'תשאול: עבודה', he:'מורה', ar:'معلم', trans:'מֻעַלֶּם'},
+  {cat:'תשאול: עבודה', he:'שוטר', ar:'شرطي', trans:'שֻרְטִי'},
+  {cat:'תשאול: עבודה', he:'עורך דין', ar:'محامي', trans:'מֻחַאמִי'},
+  {cat:'תשאול: עבודה', he:'טבח', ar:'طباخ', trans:"טַבַּאח'"},
+  {cat:'תשאול: עבודה', he:'חקלאי', ar:'مزارع', trans:'מֻזַארֶע'},
+  {cat:'תשאול: עבודה', he:'מכונאי', ar:'ميكانيكي', trans:'מִיכַּאנִיכִּי'},
+  {cat:'תשאול: עבודה', he:'מנהל', ar:'مدير', trans:'מֻדִיר'},
+  {cat:'יסודות השפה', he:'ללכת', ar:'يمشي', trans:'יִמְשִי'},
+  {cat:'יסודות השפה', he:'לבוא', ar:'بيجي', trans:"יִיגִ'י"},
+  {cat:'יסודות השפה', he:'לרצות', ar:'بده', trans:'בִּדּוֹ'},
+  {cat:'יסודות השפה', he:'למצוא', ar:'يلاقي', trans:'יְלַאקִי'},
+  {cat:'יסודות השפה', he:'לתת', ar:'يعطي', trans:'יַעְטִי'},
+  {cat:'יסודות השפה', he:'לקחת', ar:'يأخذ', trans:"יַאח'ֻד'"},
+  {cat:'יסודות השפה', he:'לשמוע', ar:'يسمع', trans:'יִסְמַע'},
+  {cat:'יסודות השפה', he:'לדבר', ar:'يحكي', trans:'יִחְכִּי'},
+  {cat:'יסודות השפה', he:'הכל / שלם', ar:'كامل', trans:'כַּאמֶל'},
+  {cat:'יסודות השפה', he:'קצת', ar:'قليل', trans:'קַלִיל'},
+  {cat:'יסודות השפה', he:'הרבה', ar:'كثير', trans:'כְּתִיר'},
+  {cat:'יסודות השפה', he:'חצי', ar:'نصف', trans:'נֻצְף'},
+  {cat:'הסכמה ודעה', he:'אולי', ar:'يمكن', trans:'יִמְכֶּן'},
+  {cat:'הסכמה ודעה', he:'הכרחי', ar:'ضروري', trans:"צַ'רוּרִי"},
+  {cat:'יומיומי מבצעי', he:'אני צמא, מים בבקשה', ar:'أنا عطشان، ماء من فضلك', trans:"אַנַא עַטְשַאן, מַי מִן פַצְ'לַכּ"}
+];
+function _fvHe(s){ return String(s||'').replace(/\s+/g,' ').trim(); }
+function _fvAr(s){ return String(s||'').replace(/[ؐ-ًؚ-ٰٟـۖ-ۭ\s،؛؟.!,?"'()\-\/]/g,''); }
+function checkFieldVocab(){
+  var el=document.getElementById('dupe-body'); if(!el) return;
+  var pools=[['מבצעי',typeof DB!=='undefined'?DB:[]],['יומיומי',typeof DAILY!=='undefined'?DAILY:[]],['פותחים לב',typeof HEART!=='undefined'?HEART:[]],['ימי',typeof NAVY!=='undefined'?NAVY:[]],['מילון',typeof DICT!=='undefined'?DICT:[]],['סמנטי',typeof SEM!=='undefined'?SEM:[]],['מנהגים',typeof CUS!=='undefined'?CUS:[]]];
+  var heIdx={}, arIdx={};
+  pools.forEach(function(p){ (p[1]||[]).forEach(function(r){ if(!r)return; var h=_fvHe(r.he); if(h&&!heIdx[h])heIdx[h]={sec:p[0],cat:r.cat||''}; var a=_fvAr(r.ar); if(a&&!arIdx[a])arIdx[a]={sec:p[0],cat:r.cat||''}; }); });
+  var esc=function(s){ return String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); };
+  var news=[], exists=[];
+  FIELD_VOCAB.forEach(function(v){
+    var byHe=heIdx[_fvHe(v.he)], byAr=arIdx[_fvAr(v.ar)];
+    var found=byHe||byAr;
+    if(found){ exists.push({v:v, where:found, by:byHe?'עברית':'ערבית'}); }
+    else { news.push(v); }
+  });
+  var loaded=pools.reduce(function(n,p){ return n+(p[1]?p[1].length:0); },0);
+  var html='<div style="background:#14263b;border:1px solid #2A3D52;border-radius:10px;padding:11px;margin-bottom:10px;text-align:center;">'
+    +'<span style="color:#1D9E75;font-size:16px;font-weight:800;">'+news.length+'</span><span style="color:#7a9ab5;font-size:12px;"> חדשים · </span>'
+    +'<span style="color:#e07a5f;font-size:16px;font-weight:800;">'+exists.length+'</span><span style="color:#7a9ab5;font-size:12px;"> כבר קיימים</span>'
+    +'<div style="color:#5e7a92;font-size:10px;margin-top:3px;">מתוך '+loaded+' פריטים טעונים במאגר</div></div>';
+  if(!loaded){ html+='<div style="color:#e07a5f;font-size:12px;text-align:center;padding:12px;">⚠️ המאגר עוד לא נטען — ודאי חיבור לרשת ורענני, ואז פתחי שוב.</div>'; }
+  if(news.length){
+    html+='<div style="color:#1D9E75;font-size:13px;font-weight:800;margin:10px 0 6px;">✅ חדשים ('+news.length+') — לייבוא</div>';
+    news.forEach(function(v){
+      html+='<div style="display:flex;gap:8px;align-items:center;padding:6px 9px;margin-bottom:3px;background:rgba(29,158,117,0.07);border:1px solid rgba(29,158,117,0.25);border-radius:8px;">'
+        +'<span style="color:#E8D9B8;font-size:13px;font-weight:700;flex:1;">'+esc(v.he)+'</span>'
+        +'<span style="color:#E8D9B8;font-size:14px;font-family:Georgia,serif;">'+esc(v.ar)+'</span>'
+        +'<span style="color:#7a9ab5;font-size:10px;min-width:70px;text-align:left;">'+esc(v.cat)+'</span></div>';
+    });
+  }
+  if(exists.length){
+    html+='<div style="color:#e07a5f;font-size:13px;font-weight:800;margin:12px 0 6px;">⚠️ כבר קיימים ('+exists.length+') — יידלגו</div>';
+    exists.forEach(function(x){
+      html+='<div style="display:flex;gap:8px;align-items:center;padding:6px 9px;margin-bottom:3px;background:rgba(224,122,95,0.06);border:1px solid rgba(224,122,95,0.22);border-radius:8px;">'
+        +'<span style="color:#a0b8c8;font-size:13px;font-weight:700;flex:1;">'+esc(x.v.he)+'</span>'
+        +'<span style="color:#a0b8c8;font-size:14px;font-family:Georgia,serif;">'+esc(x.v.ar)+'</span>'
+        +'<span style="color:#7a9ab5;font-size:10px;min-width:110px;text-align:left;">קיים ב-'+esc(x.where.sec)+(x.where.cat?' / '+esc(x.where.cat):'')+' (לפי '+x.by+')</span></div>';
+    });
+  }
+  el.innerHTML=html;
 }
 
 // === Per-tab "existing items" list with edit + record (added on top of the live app) ===
@@ -20377,6 +20505,8 @@ function stopAllAudio(){
 }
 
 function navToTab(tabId){
+  // Paywall: premium tabs require a subscription (dormant unless window.PAYWALL).
+  try { if (typeof _premiumGate==='function' && _premiumGate(tabId)) return; } catch(e) {}
   // Leaving a screen must never leave its audio talking
   try { stopAllAudio(); } catch(e) {}
   // Update emergency challenge state when entering qk tab
@@ -20536,7 +20666,7 @@ window.addEventListener('load', function(){
 <script>
 // Version stamp — shown in the admin panel so we can confirm which build is live
 // on a device (stale service-worker caches were causing "my changes don't show").
-window.APP_VERSION = 'v182';
+window.APP_VERSION = 'v185';
 
 // Register the service worker for full offline use in the field, WITH update
 // detection: when a new version installs, offer a one-tap refresh instead of the
@@ -20648,18 +20778,18 @@ document.getElementById('legal-modal').addEventListener('click', function(e){ if
     <div style="text-align:center;margin-bottom:16px;">
       <div style="font-size:34px;">🔐</div>
       <div style="color:#fff;font-size:20px;font-weight:800;margin-top:4px;">התחברות לערכה</div>
-      <div id="cl-sub" style="color:#9fb2c6;font-size:13px;margin-top:4px;">נשלח לך קוד ב-SMS לאימות המספר</div>
+      <div id="cl-sub" style="color:#9fb2c6;font-size:13px;margin-top:4px;">נשלח לך קוד למייל לאימות הכתובת</div>
     </div>
-    <!-- step 1: phone -->
+    <!-- step 1: email -->
     <div id="cl-step-phone">
-      <label style="display:block;color:#7a9ab5;font-size:11px;margin-bottom:4px;">מספר טלפון</label>
-      <input id="cl-phone" type="tel" inputmode="tel" placeholder="050-000-0000" autocomplete="tel"
+      <label style="display:block;color:#7a9ab5;font-size:11px;margin-bottom:4px;">כתובת מייל</label>
+      <input id="cl-phone" type="email" inputmode="email" placeholder="name@example.com" autocomplete="email"
         style="width:100%;background:#0E1B2E;border:1px solid #2A3D52;border-radius:10px;color:#E8D9B8;font-family:inherit;padding:13px;font-size:16px;direction:ltr;text-align:center;">
       <button id="cl-send-btn" onclick="clSendCode()" style="width:100%;margin-top:12px;padding:13px;background:#1D9E75;border:none;border-radius:10px;color:#fff;font-size:15px;font-weight:800;cursor:pointer;font-family:inherit;">שלח לי קוד</button>
     </div>
     <!-- step 2: code -->
     <div id="cl-step-code" style="display:none;">
-      <label style="display:block;color:#7a9ab5;font-size:11px;margin-bottom:4px;">הקוד שקיבלת ב-SMS</label>
+      <label style="display:block;color:#7a9ab5;font-size:11px;margin-bottom:4px;">הקוד שקיבלת במייל</label>
       <input id="cl-code" type="text" inputmode="numeric" maxlength="6" placeholder="______"
         style="width:100%;background:#0E1B2E;border:1px solid #2A3D52;border-radius:10px;color:#E8D9B8;font-family:inherit;padding:13px;font-size:22px;letter-spacing:8px;direction:ltr;text-align:center;">
       <button id="cl-verify-btn" onclick="clVerify()" style="width:100%;margin-top:12px;padding:13px;background:#D4A24E;border:none;border-radius:10px;color:#0E1B2E;font-size:15px;font-weight:800;cursor:pointer;font-family:inherit;">אמת והתחבר</button>
@@ -20668,29 +20798,49 @@ document.getElementById('legal-modal').addEventListener('click', function(e){ if
     <div id="cl-status" style="text-align:center;color:#ff9a8f;font-size:12.5px;margin-top:12px;min-height:16px;"></div>
   </div>
 </div>
+
+<!-- ===== Upsell / subscribe screen — dormant unless window.PAYWALL ===== -->
+<div id="upsell-overlay" style="display:none;position:fixed;inset:0;z-index:11000;background:rgba(9,17,29,.97);direction:rtl;overflow-y:auto;padding:24px 16px;">
+  <div style="max-width:400px;margin:5vh auto 0;background:linear-gradient(180deg,#1c2f47,#152539);border:1px solid #2a3d54;border-radius:16px;padding:24px;box-shadow:0 12px 40px rgba(0,0,0,.5);position:relative;">
+    <button onclick="closeUpsell()" style="position:absolute;top:12px;left:12px;background:none;border:none;color:#7a9ab5;font-size:22px;cursor:pointer;font-family:inherit;">✕</button>
+    <div style="text-align:center;margin-bottom:16px;">
+      <div style="font-size:40px;">🔓</div>
+      <div style="color:#fff;font-size:21px;font-weight:800;margin-top:6px;">פתחו את הערכה המלאה</div>
+      <div style="color:#9fb2c6;font-size:13px;margin-top:4px;">כל מה שחייל צריך כדי לתקשר בערבית בשטח</div>
+    </div>
+    <div style="background:#0E1B2E;border:1px solid #2A3D52;border-radius:12px;padding:14px 16px;margin-bottom:16px;color:#E8D9B8;font-size:14px;line-height:2;">
+      <div>✓ כל הספרייה המבצעית</div>
+      <div>✓ כל ההקלטות בקול</div>
+      <div>✓ מסלול 30 יום להכנה לשירות</div>
+      <div>✓ מבחנים ותרגול</div>
+      <div>✓ המילון המלא</div>
+      <div>✓ תרחישים מהשטח</div>
+    </div>
+    <div style="text-align:center;margin-bottom:14px;">
+      <span style="color:#fff;font-size:30px;font-weight:900;">₪19.9</span>
+      <span style="color:#9fb2c6;font-size:14px;"> / חודש</span>
+      <div style="color:#7a9ab5;font-size:11px;margin-top:2px;">ביטול בכל עת</div>
+    </div>
+    <button onclick="onUpsellCTA()" style="width:100%;padding:14px;background:#1D9E75;border:none;border-radius:10px;color:#fff;font-size:16px;font-weight:800;cursor:pointer;font-family:inherit;">התחל מנוי</button>
+    <div style="text-align:center;margin-top:12px;"><button onclick="upsellLogin()" style="background:none;border:none;color:#D4A24E;font-size:13px;cursor:pointer;font-family:inherit;text-decoration:underline;">כבר מנוי/ה? התחבר/י</button></div>
+  </div>
+</div>
 <script>
 // Commerce login via Supabase Auth REST (phone OTP) — same fetch style as adminLogin.
 function _clStatus(m,ok){ var e=document.getElementById('cl-status'); if(e){ e.textContent=m||''; e.style.color=ok?'#7eecc1':'#ff9a8f'; } }
-function clNormalizePhone(v){
-  v=String(v||'').replace(/[^\d+]/g,'');
-  if(v.charAt(0)==='+') return v;
-  if(v.slice(0,3)==='972') return '+'+v;
-  if(v.charAt(0)==='0') return '+972'+v.slice(1);   // Israeli local -> E.164
-  return '+972'+v;
-}
-window._clPhone='';
+function clValidEmail(v){ return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(String(v||'').trim()); }
+window._clPhone='';   // holds the login email (name kept for minimal churn)
 async function clSendCode(){
-  var raw=document.getElementById('cl-phone').value;
-  var phone=clNormalizePhone(raw);
-  if(phone.length<11){ _clStatus('מספר טלפון לא תקין'); return; }
+  var email=String(document.getElementById('cl-phone').value||'').trim();
+  if(!clValidEmail(email)){ _clStatus('כתובת מייל לא תקינה'); return; }
   var btn=document.getElementById('cl-send-btn'), old=btn.textContent; btn.disabled=true; btn.textContent='שולח...'; _clStatus('');
   try{
-    var r=await fetch(SUPA_URL+'/auth/v1/otp',{method:'POST',headers:{'apikey':SUPA_KEY,'Content-Type':'application/json'},body:JSON.stringify({phone:phone})});
+    var r=await fetch(SUPA_URL+'/auth/v1/otp',{method:'POST',headers:{'apikey':SUPA_KEY,'Content-Type':'application/json'},body:JSON.stringify({email:email,create_user:true})});
     if(!r.ok){ var e=await r.json().catch(function(){return{};}); throw new Error(e.msg||e.error_description||('שגיאה '+r.status)); }
-    window._clPhone=phone;
+    window._clPhone=email;
     document.getElementById('cl-step-phone').style.display='none';
     document.getElementById('cl-step-code').style.display='block';
-    document.getElementById('cl-sub').textContent='שלחנו קוד ל-'+phone;
+    document.getElementById('cl-sub').textContent='שלחנו קוד ל-'+email;
     _clStatus('הקוד נשלח ✓',true);
     setTimeout(function(){ var c=document.getElementById('cl-code'); if(c)c.focus(); },100);
   }catch(err){ _clStatus(err.message||'לא הצלחנו לשלוח קוד'); }
@@ -20699,7 +20849,7 @@ async function clSendCode(){
 function clBackToPhone(){
   document.getElementById('cl-step-code').style.display='none';
   document.getElementById('cl-step-phone').style.display='block';
-  document.getElementById('cl-sub').textContent='נשלח לך קוד ב-SMS לאימות המספר';
+  document.getElementById('cl-sub').textContent='נשלח לך קוד למייל לאימות הכתובת';
   _clStatus('');
 }
 async function clVerify(){
@@ -20707,7 +20857,7 @@ async function clVerify(){
   if(token.length<4){ _clStatus('הזיני את הקוד המלא'); return; }
   var btn=document.getElementById('cl-verify-btn'), old=btn.textContent; btn.disabled=true; btn.textContent='מאמת...'; _clStatus('');
   try{
-    var r=await fetch(SUPA_URL+'/auth/v1/verify',{method:'POST',headers:{'apikey':SUPA_KEY,'Content-Type':'application/json'},body:JSON.stringify({type:'sms',phone:window._clPhone,token:token})});
+    var r=await fetch(SUPA_URL+'/auth/v1/verify',{method:'POST',headers:{'apikey':SUPA_KEY,'Content-Type':'application/json'},body:JSON.stringify({type:'email',email:window._clPhone,token:token})});
     var d=await r.json().catch(function(){return{};});
     if(!r.ok || !d.access_token){ throw new Error(d.msg||d.error_description||'קוד שגוי או שפג תוקפו'); }
     clStoreSession(d);
@@ -20745,6 +20895,45 @@ async function clSubscribed(){
 }
 function clOpen(){ var o=document.getElementById('cl-overlay'); if(o) o.style.display='block'; }
 function clCloseAfterLogin(){ var o=document.getElementById('cl-overlay'); if(o) o.style.display='none'; }
+
+// ===== Paywall enforcement (free preview vs premium) ========================
+// Dormant unless window.PAYWALL. Builds on the entitlement layer above:
+// premium == an active subscription (clHasAccess, with offline grace).
+function _hasPremium(){
+  if(!window.PAYWALL) return true;                 // paywall off -> everything open
+  try{ return (typeof clHasAccess==='function') && clHasAccess(); }catch(e){ return false; }
+}
+// Free preview inside otherwise-open surfaces: show the first few, then lock.
+function _previewLocked(){ return !!window.PAYWALL && !_hasPremium(); }
+var FREE_PREVIEW_N=3;
+function _upsellRow(label){
+  return '<div onclick="openUpsell()" style="text-align:center;background:linear-gradient(135deg,rgba(29,158,117,.15),rgba(212,162,78,.12));border:1px dashed #1D9E75;border-radius:10px;padding:13px;margin-top:8px;cursor:pointer;color:#7eecc1;font-size:13px;font-weight:800;">🔓 '+(label||'פתחו את כל התוכן במנוי')+' · ₪19.9/חודש</div>';
+}
+// Deep/premium surfaces. Free taste stays open: home, 10 must-know (ten),
+// emergency hub (qk/emerg) + its category previews, dictionary, favorites.
+var PREMIUM_TABS={lib:1,train:1,scn:1,art:1,sem:1,day:1,hrt:1,nwf:1,cus:1};
+// Returns true (and shows the upsell) when navigation should be blocked.
+function _premiumGate(tabId){
+  if(!window.PAYWALL) return false;
+  if(!PREMIUM_TABS[tabId]) return false;
+  if(_hasPremium()) return false;
+  openUpsell();
+  return true;
+}
+function openUpsell(){ var o=document.getElementById('upsell-overlay'); if(o) o.style.display='block'; }
+function closeUpsell(){ var o=document.getElementById('upsell-overlay'); if(o) o.style.display='none'; }
+function upsellLogin(){ closeUpsell(); if(typeof clOpen==='function') clOpen(); }
+function onUpsellCTA(){
+  var s=(typeof clSession==='function')?clSession():null;
+  if(!s){ closeUpsell(); if(typeof clOpen==='function') clOpen(); return; }   // must log in first
+  startCheckout();
+}
+function startCheckout(){
+  // Payment provider (hosted checkout) will be wired here: pass the logged-in
+  // user id, the provider webhook flips subscriptions.status -> 'active', and
+  // clRefreshEntitlement() unlocks the app automatically on next check.
+  alert('חיבור לתשלום (₪19.9 לחודש) יתווסף בשלב הבא. אחרי התשלום המנוי יופעל אוטומטית.');
+}
 
 // ===== Offline entitlement enforcement =====================================
 // Premium access is granted when a subscription check succeeded recently.
