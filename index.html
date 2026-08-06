@@ -3261,7 +3261,7 @@ function showLanding() {
     <div id="at-trc" style="display:none;">
       <div class="acard">
         <div style="color:#E8D9B8;font-size:14px;font-weight:800;margin-bottom:4px;">✍️ בדיקת עקביות תעתיק</div>
-        <div style="color:#7a9ab5;font-size:11.5px;line-height:1.6;margin-bottom:12px;">מסמן תעתיקים ש<b>כנראה</b> חורגים ממדריך ההגייה: ب תמיד בּ, ك תמיד כּ, ف תמיד פ (רפויה), ואותיות שדורשות גרש — خ→ח׳, ج→ג׳, غ→ע׳, ض→ד׳, ظ→ז׳. <b>הכלי לא משנה כלום</b> — כל שורה עם קיצור ✏️ לעריכה ידנית. את מחליטה ומתקנת מה שבאמת שגוי.</div>
+        <div style="color:#7a9ab5;font-size:11.5px;line-height:1.6;margin-bottom:12px;">מסמן תעתיקים ש<b>כנראה</b> חורגים מהמוסכמה: ب תמיד בּ, ك תמיד כּ, ف תמיד פ (רפויה), ו-خ→ח׳, غ→ע׳ (גרש). <b>הכלי לא משנה כלום</b> — כל שורה עם קיצור ✏️ לעריכה ידנית. את מחליטה ומתקנת מה שבאמת שגוי.</div>
         <div id="trc-body"></div>
       </div>
     </div>
@@ -17250,11 +17250,12 @@ function _trcViolations(ar, trans){
   if(ar.indexOf('ب')>=0 && bareBet) v.push('ب→בּ (דגש)');
   if(ar.indexOf('ك')>=0 && bareKaf) v.push('ك→כּ (דגש)');
   if(ar.indexOf('ف')>=0 && fehDag)  v.push('ف→פ (רפויה)');
-  // Letters that must carry a geresh: خ→ח' ج→ג' غ→ע' ض→ד' ظ→ז'.
+  // Letters that carry a geresh in this app's convention: خ→ח' and غ→ע'.
+  // (ج→ג plain — no geresh — per the project's spelling; ض/ظ also plain.)
   // Compare how many are needed vs how many gershayim the translit actually has.
-  var needGeresh = (ar.match(/[خجغضظ]/g)||[]).length;
-  var haveGeresh = (trans.match(/['׳’]/g)||[]).length;
-  if(needGeresh > haveGeresh) v.push('חסר גרש (خ/ج/غ/ض/ظ → ח׳/ג׳/ע׳/ד׳/ז׳)');
+  var needGeresh = (ar.match(/[خغ]/g)||[]).length;
+  var haveGeresh = (trans.match(/['׳’`]/g)||[]).length;
+  if(needGeresh > haveGeresh) v.push('חסר גרש (خ/غ → ח׳/ע׳)');
   return v;
 }
 function checkTranslitConsistency(){
@@ -17263,9 +17264,11 @@ function checkTranslitConsistency(){
   var esc=function(s){ return String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); };
   var flagged=[], scanned=0;
   pools.forEach(function(p){ (p[1]||[]).forEach(function(r){ if(!r||!r.ar||!r.trans) return; scanned++; var v=_trcViolations(r.ar,r.trans); if(v.length) flagged.push({r:r,sec:p[0],why:v.join(' · ')}); }); });
+  var byRule={bet:0,kaf:0,feh:0,ger:0};
+  flagged.forEach(function(f){ if(f.why.indexOf('בּ')>=0)byRule.bet++; if(f.why.indexOf('כּ')>=0)byRule.kaf++; if(f.why.indexOf('רפויה')>=0)byRule.feh++; if(f.why.indexOf('גרש')>=0)byRule.ger++; });
   var html='<div style="background:#14263b;border:1px solid #2A3D52;border-radius:10px;padding:11px;margin-bottom:10px;text-align:center;">'
-    +'<span style="color:#e07a5f;font-size:16px;font-weight:800;">'+flagged.length+'</span><span style="color:#7a9ab5;font-size:12px;"> חשודים לתיקון · </span>'
-    +'<span style="color:#7a9ab5;font-size:12px;">מתוך '+scanned+' שנסרקו</span></div>';
+    +'<span style="color:#e07a5f;font-size:16px;font-weight:800;">'+flagged.length+'</span><span style="color:#7a9ab5;font-size:12px;"> חשודים לתיקון · מתוך '+scanned+' שנסרקו</span>'
+    +'<div style="color:#7a9ab5;font-size:11px;margin-top:4px;">בּ: '+byRule.bet+' · כּ: '+byRule.kaf+' · פ רפויה: '+byRule.feh+' · גרש: '+byRule.ger+'</div></div>';
   if(!scanned){ html+='<div style="color:#e07a5f;font-size:12px;text-align:center;padding:12px;">⚠️ המאגר עוד לא נטען — רענני ופתחי שוב.</div>'; el.innerHTML=html; return; }
   if(!flagged.length){ html+='<div style="color:#1D9E75;font-size:13px;text-align:center;padding:16px;">✅ לא נמצאו חריגות מ-3 הכללים. יפה!</div>'; el.innerHTML=html; return; }
   var cap=Math.min(flagged.length,200);
@@ -20813,7 +20816,7 @@ window.addEventListener('load', function(){
 <script>
 // Version stamp — shown in the admin panel so we can confirm which build is live
 // on a device (stale service-worker caches were causing "my changes don't show").
-window.APP_VERSION = 'v189';
+window.APP_VERSION = 'v190';
 
 // Register the service worker for full offline use in the field, WITH update
 // detection: when a new version installs, offer a one-tap refresh instead of the
