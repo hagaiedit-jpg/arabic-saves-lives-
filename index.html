@@ -3233,6 +3233,7 @@ function showLanding() {
       <button class="atab" onclick="aT('qrec',this)">🎤 הקלטת תשובות</button>
       <button class="atab" onclick="aT('acat',this)">⚙️ קטגוריות</button>
       <button class="atab" onclick="aT('cov',this)">📊 כיסוי תוכן</button>
+      <button class="atab" onclick="aT('dup',this)">🔎 כפילויות</button>
     </div>
 
     <!-- Content coverage -->
@@ -3241,6 +3242,15 @@ function showLanding() {
         <div style="color:#E8D9B8;font-size:14px;font-weight:800;margin-bottom:4px;">📊 כיסוי תוכן</div>
         <div style="color:#7a9ab5;font-size:11.5px;line-height:1.6;margin-bottom:12px;">לכל קטגוריה: כמה משפטים יש, כמה מהם מוקלטים 🎵, וכמה 🔴 קריטי. הקטגוריות ה<b>דקות</b> (מתחת ל-5 משפטים) מודגשות ומופיעות למעלה בכל מקטע — שם כדאי לעבות. הנתונים מתעדכנים מהמאגר החי.</div>
         <div id="cov-body"></div>
+      </div>
+    </div>
+
+    <!-- Duplicate check for the field-vocab extraction -->
+    <div id="at-dup" style="display:none;">
+      <div class="acard">
+        <div style="color:#E8D9B8;font-size:14px;font-weight:800;margin-bottom:4px;">🔎 בדיקת כפילויות — חילוץ שדה</div>
+        <div style="color:#7a9ab5;font-size:11.5px;line-height:1.6;margin-bottom:12px;">משווה את רשימת חילוץ השדה מול כל התוכן הטעון (מבצעי, יומיומי, מילון, מנהגים…). ⚠️ = כבר קיים (לא נייבא). ✅ = חדש. ההשוואה לפי עברית או ערבית מנוקָה.</div>
+        <div id="dupe-body"></div>
       </div>
     </div>
 
@@ -16964,9 +16974,9 @@ function aT(t,el){
   // Allow programmatic jumps (shortcut buttons) — find the tab button when not passed
   if(!el) el=document.querySelector('.atab[onclick*="\''+t+'\'"]');
   if(el){ el.classList.add('active'); try{ el.scrollIntoView({behavior:'smooth',inline:'center',block:'nearest'}); }catch(e){} }
-  ['ap','ad','ah','ak','an','adict','asem','ac','al','audit','qrec','acat','cov'].forEach(id=>{var e=document.getElementById('at-'+id); if(e)e.style.display='none';});
+  ['ap','ad','ah','ak','an','adict','asem','ac','al','audit','qrec','acat','cov','dup'].forEach(id=>{var e=document.getElementById('at-'+id); if(e)e.style.display='none';});
   document.getElementById('at-'+t).style.display='block';
-  if(t==='al')renderAdminList();if(t==='acat')renderCatList();if(t==='audit')renderQuestionAudit();if(t==='qrec')renderRespRecList();if(t==='cov')renderCoverage();
+  if(t==='al')renderAdminList();if(t==='acat')renderCatList();if(t==='audit')renderQuestionAudit();if(t==='qrec')renderRespRecList();if(t==='cov')renderCoverage();if(t==='dup')checkFieldVocab();
   try{ renderTabList(t); }catch(e){ console.warn('renderTabList',e); }
 }
 
@@ -17024,6 +17034,107 @@ function renderCoverage(){
     +'<span style="color:#E8D9B8;font-size:16px;font-weight:800;">'+grandT+'</span><span style="color:#7a9ab5;font-size:12px;"> משפטים סה״כ · </span>'
     +'<span style="color:#1D9E75;font-size:16px;font-weight:800;">'+gp+'%</span><span style="color:#7a9ab5;font-size:12px;"> מוקלטים (מהתוכן שדורש הקלטה)</span></div>';
   el.innerHTML = grandT ? (top+html) : '<div style="color:#7a9ab5;font-size:12px;text-align:center;padding:24px;">אין נתונים טעונים — ודאי חיבור לרשת ורענני.</div>';
+}
+
+// Field-vocab extraction (user-verified) — checked for duplicates before import.
+var FIELD_VOCAB=[
+  {cat:'הרגעה ושכנוע', he:'כועס', ar:'غاضب', trans:"עַ'אצֶ'בּ"},
+  {cat:'הרגעה ושכנוע', he:'מפחד', ar:'خائف', trans:"ח'איֶף"},
+  {cat:'הרגעה ושכנוע', he:'לחוץ', ar:'مضغوط', trans:"מַצְ'עוּט"},
+  {cat:'הרגעה ושכנוע', he:'מודאג', ar:'قلقان', trans:'קלקאן'},
+  {cat:'הרגעה ושכנוע', he:'בודד', ar:'وحيد', trans:'וַחִיד'},
+  {cat:'הרגעה ושכנוע', he:'חולה', ar:'مريض', trans:"מַרִיצ'"},
+  {cat:'הרגעה ושכנוע', he:'עצוב', ar:'حزين', trans:'חַזִין'},
+  {cat:'הרגעה ושכנוע', he:'מרוצה', ar:'راضي', trans:"רַאצִ'י"},
+  {cat:'הרגעה ושכנוע', he:'תן לי את היד, אני אעזור לך', ar:'أعطني يدك، سأساعدك', trans:"אַעְטִינִי אִידַכּ, בַּסַאעְדַכּ"},
+  {cat:'תיאור חשוד', he:'גבוה', ar:'طويل', trans:'טַוִיל'},
+  {cat:'תיאור חשוד', he:'נמוך / קצר', ar:'قصير', trans:'קַצִיר'},
+  {cat:'תיאור חשוד', he:'צעיר', ar:'شاب', trans:'שַאבּ'},
+  {cat:'תיאור חשוד', he:'מבוגר / זקן', ar:'ختيار', trans:"חְ'תְיַאר"},
+  {cat:'תיאור חשוד', he:'זר', ar:'غريب', trans:"עַ'רִיבּ"},
+  {cat:'תיאור חשוד', he:'מקומי', ar:'محلي', trans:'מַחַלִּי'},
+  {cat:'כיוונים ושטח', he:'צפון', ar:'شمال', trans:'שְמַאל'},
+  {cat:'כיוונים ושטח', he:'דרום', ar:'جنوب', trans:"גַ'נוּבּ"},
+  {cat:'כיוונים ושטח', he:'מזרח', ar:'شرق', trans:'שַרְק'},
+  {cat:'כיוונים ושטח', he:'מערב', ar:'غرب', trans:"עַ'רְבּ"},
+  {cat:'כיוונים ושטח', he:'מול', ar:'أمام', trans:'אַמַאם'},
+  {cat:'כיוונים ושטח', he:'בפנים', ar:'داخل', trans:"דַאחֶ'ל"},
+  {cat:'כיוונים ושטח', he:'צד', ar:'جانب', trans:"גַ'אנֶבּ"},
+  {cat:'כיוונים ושטח', he:'כאן', ar:'هون', trans:'הוֹן'},
+  {cat:'כיוונים ושטח', he:'שם', ar:'هناك', trans:'הֻנַאכּ'},
+  {cat:'כיוונים ושטח', he:'הר', ar:'جبل', trans:"גַ'בַּל"},
+  {cat:'כיוונים ושטח', he:'ואדי', ar:'وادي', trans:'וַאדִי'},
+  {cat:'כיוונים ושטח', he:'שדה', ar:'حقل', trans:'חַקְל'},
+  {cat:'כיוונים ושטח', he:'יער', ar:'غابة', trans:"עַ'אבֶּה"},
+  {cat:'כיוונים ושטח', he:'חוף', ar:'شاطئ', trans:'שַאטֶא'},
+  {cat:'כיוונים ושטח', he:'מדבר', ar:'صحراء', trans:'צַחְרַא'},
+  {cat:'כיוונים ושטח', he:'נהר', ar:'نهر', trans:'נַהֶר'},
+  {cat:'כיוונים ושטח', he:'ים', ar:'بحر', trans:'בַּחֶר'},
+  {cat:'תשאול: עבודה', he:'רופא', ar:'طبيب', trans:'טַבִּיבּ'},
+  {cat:'תשאול: עבודה', he:'מהנדס', ar:'مهندس', trans:'מֻהַנְדֶס'},
+  {cat:'תשאול: עבודה', he:'מורה', ar:'معلم', trans:'מֻעַלֶּם'},
+  {cat:'תשאול: עבודה', he:'שוטר', ar:'شرطي', trans:'שֻרְטִי'},
+  {cat:'תשאול: עבודה', he:'עורך דין', ar:'محامي', trans:'מֻחַאמִי'},
+  {cat:'תשאול: עבודה', he:'טבח', ar:'طباخ', trans:"טַבַּאח'"},
+  {cat:'תשאול: עבודה', he:'חקלאי', ar:'مزارع', trans:'מֻזַארֶע'},
+  {cat:'תשאול: עבודה', he:'מכונאי', ar:'ميكانيكي', trans:'מִיכַּאנִיכִּי'},
+  {cat:'תשאול: עבודה', he:'מנהל', ar:'مدير', trans:'מֻדִיר'},
+  {cat:'יסודות השפה', he:'ללכת', ar:'يمشي', trans:'יִמְשִי'},
+  {cat:'יסודות השפה', he:'לבוא', ar:'بيجي', trans:"יִיגִ'י"},
+  {cat:'יסודות השפה', he:'לרצות', ar:'بده', trans:'בִּדּוֹ'},
+  {cat:'יסודות השפה', he:'למצוא', ar:'يلاقي', trans:'יְלַאקִי'},
+  {cat:'יסודות השפה', he:'לתת', ar:'يعطي', trans:'יַעְטִי'},
+  {cat:'יסודות השפה', he:'לקחת', ar:'يأخذ', trans:"יַאח'ֻד'"},
+  {cat:'יסודות השפה', he:'לשמוע', ar:'يسمع', trans:'יִסְמַע'},
+  {cat:'יסודות השפה', he:'לדבר', ar:'يحكي', trans:'יִחְכִּי'},
+  {cat:'יסודות השפה', he:'הכל / שלם', ar:'كامل', trans:'כַּאמֶל'},
+  {cat:'יסודות השפה', he:'קצת', ar:'قليل', trans:'קַלִיל'},
+  {cat:'יסודות השפה', he:'הרבה', ar:'كثير', trans:'כְּתִיר'},
+  {cat:'יסודות השפה', he:'חצי', ar:'نصف', trans:'נֻצְף'},
+  {cat:'הסכמה ודעה', he:'אולי', ar:'يمكن', trans:'יִמְכֶּן'},
+  {cat:'הסכמה ודעה', he:'הכרחי', ar:'ضروري', trans:"צַ'רוּרִי"},
+  {cat:'יומיומי מבצעי', he:'אני צמא, מים בבקשה', ar:'أنا عطشان، ماء من فضلك', trans:"אַנַא עַטְשַאן, מַי מִן פַצְ'לַכּ"}
+];
+function _fvHe(s){ return String(s||'').replace(/\s+/g,' ').trim(); }
+function _fvAr(s){ return String(s||'').replace(/[ؐ-ًؚ-ٰٟـۖ-ۭ\s،؛؟.!,?"'()\-\/]/g,''); }
+function checkFieldVocab(){
+  var el=document.getElementById('dupe-body'); if(!el) return;
+  var pools=[['מבצעי',typeof DB!=='undefined'?DB:[]],['יומיומי',typeof DAILY!=='undefined'?DAILY:[]],['פותחים לב',typeof HEART!=='undefined'?HEART:[]],['ימי',typeof NAVY!=='undefined'?NAVY:[]],['מילון',typeof DICT!=='undefined'?DICT:[]],['סמנטי',typeof SEM!=='undefined'?SEM:[]],['מנהגים',typeof CUS!=='undefined'?CUS:[]]];
+  var heIdx={}, arIdx={};
+  pools.forEach(function(p){ (p[1]||[]).forEach(function(r){ if(!r)return; var h=_fvHe(r.he); if(h&&!heIdx[h])heIdx[h]={sec:p[0],cat:r.cat||''}; var a=_fvAr(r.ar); if(a&&!arIdx[a])arIdx[a]={sec:p[0],cat:r.cat||''}; }); });
+  var esc=function(s){ return String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); };
+  var news=[], exists=[];
+  FIELD_VOCAB.forEach(function(v){
+    var byHe=heIdx[_fvHe(v.he)], byAr=arIdx[_fvAr(v.ar)];
+    var found=byHe||byAr;
+    if(found){ exists.push({v:v, where:found, by:byHe?'עברית':'ערבית'}); }
+    else { news.push(v); }
+  });
+  var loaded=pools.reduce(function(n,p){ return n+(p[1]?p[1].length:0); },0);
+  var html='<div style="background:#14263b;border:1px solid #2A3D52;border-radius:10px;padding:11px;margin-bottom:10px;text-align:center;">'
+    +'<span style="color:#1D9E75;font-size:16px;font-weight:800;">'+news.length+'</span><span style="color:#7a9ab5;font-size:12px;"> חדשים · </span>'
+    +'<span style="color:#e07a5f;font-size:16px;font-weight:800;">'+exists.length+'</span><span style="color:#7a9ab5;font-size:12px;"> כבר קיימים</span>'
+    +'<div style="color:#5e7a92;font-size:10px;margin-top:3px;">מתוך '+loaded+' פריטים טעונים במאגר</div></div>';
+  if(!loaded){ html+='<div style="color:#e07a5f;font-size:12px;text-align:center;padding:12px;">⚠️ המאגר עוד לא נטען — ודאי חיבור לרשת ורענני, ואז פתחי שוב.</div>'; }
+  if(news.length){
+    html+='<div style="color:#1D9E75;font-size:13px;font-weight:800;margin:10px 0 6px;">✅ חדשים ('+news.length+') — לייבוא</div>';
+    news.forEach(function(v){
+      html+='<div style="display:flex;gap:8px;align-items:center;padding:6px 9px;margin-bottom:3px;background:rgba(29,158,117,0.07);border:1px solid rgba(29,158,117,0.25);border-radius:8px;">'
+        +'<span style="color:#E8D9B8;font-size:13px;font-weight:700;flex:1;">'+esc(v.he)+'</span>'
+        +'<span style="color:#E8D9B8;font-size:14px;font-family:Georgia,serif;">'+esc(v.ar)+'</span>'
+        +'<span style="color:#7a9ab5;font-size:10px;min-width:70px;text-align:left;">'+esc(v.cat)+'</span></div>';
+    });
+  }
+  if(exists.length){
+    html+='<div style="color:#e07a5f;font-size:13px;font-weight:800;margin:12px 0 6px;">⚠️ כבר קיימים ('+exists.length+') — יידלגו</div>';
+    exists.forEach(function(x){
+      html+='<div style="display:flex;gap:8px;align-items:center;padding:6px 9px;margin-bottom:3px;background:rgba(224,122,95,0.06);border:1px solid rgba(224,122,95,0.22);border-radius:8px;">'
+        +'<span style="color:#a0b8c8;font-size:13px;font-weight:700;flex:1;">'+esc(x.v.he)+'</span>'
+        +'<span style="color:#a0b8c8;font-size:14px;font-family:Georgia,serif;">'+esc(x.v.ar)+'</span>'
+        +'<span style="color:#7a9ab5;font-size:10px;min-width:110px;text-align:left;">קיים ב-'+esc(x.where.sec)+(x.where.cat?' / '+esc(x.where.cat):'')+' (לפי '+x.by+')</span></div>';
+    });
+  }
+  el.innerHTML=html;
 }
 
 // === Per-tab "existing items" list with edit + record (added on top of the live app) ===
@@ -20555,7 +20666,7 @@ window.addEventListener('load', function(){
 <script>
 // Version stamp — shown in the admin panel so we can confirm which build is live
 // on a device (stale service-worker caches were causing "my changes don't show").
-window.APP_VERSION = 'v184';
+window.APP_VERSION = 'v185';
 
 // Register the service worker for full offline use in the field, WITH update
 // detection: when a new version installs, offer a one-tap refresh instead of the
