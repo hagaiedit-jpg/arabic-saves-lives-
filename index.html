@@ -12884,7 +12884,7 @@ function opC(cat,special){
   if(special==='foundations'){
     // Gate sub-menu: grammar groups + basic-vocabulary groups. Each row opens its
     // own category (a regular phrase list) via opC.
-    var fh='';
+    var fh='<div class="li" onclick="openPronGuide()" style="border:1px solid rgba(212,162,78,0.45);background:rgba(212,162,78,0.08);margin-bottom:10px;"><div class="lt">📖 מדריך הגייה — איך לקרוא את התעתיק</div><div class="la">›</div></div>';
     FOUNDATION_GROUPS.forEach(function(g){
       fh+='<div style="color:#D4A24E;font-size:13px;font-weight:800;margin:14px 4px 6px;letter-spacing:.3px;">'+escapeHtml(g.title)+'</div>';
       g.items.forEach(function(it){
@@ -17177,6 +17177,42 @@ async function importFieldVocab(btn){
   }catch(e){ btn.disabled=false; btn.textContent=old; alert('שגיאה: '+(e&&e.message?e.message:e)); }
 }
 
+// Pronunciation guide (from the uploaded doc): how to read the Hebrew transliteration.
+var PRON_GUIDE=[
+ {l:'א (ا)', p:'א', ex:'עיצורית כמו בעברית. כשהיא אֵם-קריאה שקטה — מאריכה: אַוְלַאד'},
+ {l:'ו (و)', p:'W', ex:'עיצורית. כשהיא אֵם-קריאה — מאריכה תנועה: יוֹם'},
+ {l:'י (ي)', p:'י', ex:'עיצורית כמו בעברית. כשהיא אֵם-קריאה — מאריכה: אַמִיר'},
+ {l:'ב (ب)', p:'B', ex:'תמיד בדגש: בַּאבּ'},
+ {l:'כ (ك)', p:'K', ex:'תמיד בדגש: כִּיף'},
+ {l:'פ (ف)', p:'F', ex:'תמיד רפויה: פִלְפֵל'},
+ {l:'ח (ح)', p:'ח', ex:'נהגית מעומק הגרון: חַאל (מצב)'},
+ {l:"ח' (خ)", p:"כ' רפויה", ex:"חֵ'יר (טוב)"},
+ {l:"ג' (ج)", p:"J (ז'ורנל)", ex:"מַגְ'נוּן (משוגע)"},
+ {l:"ע' (غ)", p:'ר צרפתית', ex:"עַ'רְבּ (מערב)"},
+ {l:'ר (ر)', p:'ר מתגלגלת', ex:'מַרְחַבַּא (שלום)'},
+ {l:'ק (ق)', p:'ק / א / ג — לפי מבטא', ex:'כפריים: קַאל · עירוניים (חיפה, עכו, יפו): אַאל · בדואים: גַאל'},
+ {l:'ט (ط)', p:'ת+ע (אחורית גרונית)', ex:'מַחַטַה (תחנה)'},
+ {l:'צ (ص)', p:'ס+ע (אחורית גרונית)', ex:'בַּאצ (אוטובוס)'},
+ {l:"ד' (ض)", p:'ד+ע (אחורית גרונית)', ex:"דַ'רַבּ (היכה)"},
+ {l:"ז' (ظ)", p:'ז+ע (אחורית גרונית)', ex:"זַ'רִיפ (נחמד)"}
+];
+function openPronGuide(){
+  var el=document.getElementById('pron-guide-table');
+  if(el && !el.getAttribute('data-built')){
+    var h='<div style="overflow-x:auto;"><table style="width:100%;border-collapse:collapse;font-size:14px;">';
+    h+='<tr style="background:#1F3147;"><th style="padding:9px;color:#E8D9B8;border:1px solid #2A3D52;">אות ותעתיק</th><th style="padding:9px;color:#E8D9B8;border:1px solid #2A3D52;">אופן ההגייה</th><th style="padding:9px;color:#E8D9B8;border:1px solid #2A3D52;">דוגמה</th></tr>';
+    PRON_GUIDE.forEach(function(r){
+      h+='<tr><td style="padding:9px;border:1px solid #2A3D52;color:#D4A24E;font-weight:800;white-space:nowrap;">'+r.l+'</td>'
+        +'<td style="padding:9px;border:1px solid #2A3D52;color:#E8D9B8;">'+r.p+'</td>'
+        +'<td style="padding:9px;border:1px solid #2A3D52;color:#a0b8c8;line-height:1.6;">'+r.ex+'</td></tr>';
+    });
+    h+='</table></div>';
+    el.innerHTML=h; el.setAttribute('data-built','1');
+  }
+  var o=document.getElementById('pron-guide-overlay'); if(o)o.style.display='block';
+}
+function closePronGuide(){ var o=document.getElementById('pron-guide-overlay'); if(o)o.style.display='none'; }
+
 // === Per-tab "existing items" list with edit + record (added on top of the live app) ===
 // Each add-tab shows the items already saved in that section, so you can open any
 // one straight into the editor (openEditById) or jump to its recorder — no need to
@@ -20706,7 +20742,7 @@ window.addEventListener('load', function(){
 <script>
 // Version stamp — shown in the admin panel so we can confirm which build is live
 // on a device (stale service-worker caches were causing "my changes don't show").
-window.APP_VERSION = 'v186';
+window.APP_VERSION = 'v187';
 
 // Register the service worker for full offline use in the field, WITH update
 // detection: when a new version installs, offer a one-tap refresh instead of the
@@ -20836,6 +20872,18 @@ document.getElementById('legal-modal').addEventListener('click', function(e){ if
       <div style="text-align:center;margin-top:10px;"><button onclick="clBackToPhone()" style="background:none;border:none;color:#7a9ab5;font-size:12px;cursor:pointer;font-family:inherit;text-decoration:underline;">‹ שינוי מספר / שליחת קוד מחדש</button></div>
     </div>
     <div id="cl-status" style="text-align:center;color:#ff9a8f;font-size:12.5px;margin-top:12px;min-height:16px;"></div>
+  </div>
+</div>
+
+<!-- ===== Pronunciation guide (יסודות השפה) — how to read the transliteration ===== -->
+<div id="pron-guide-overlay" style="display:none;position:fixed;inset:0;z-index:11000;background:rgba(9,17,29,.98);direction:rtl;overflow-y:auto;padding:18px 14px 40px;">
+  <div style="max-width:620px;margin:0 auto;">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;">
+      <div style="color:#E8D9B8;font-size:19px;font-weight:800;">📖 מדריך הגייה</div>
+      <button onclick="closePronGuide()" style="background:linear-gradient(135deg,#D4A24E,#b88a3d);border:none;color:#fff;border-radius:10px;padding:8px 16px;font-size:14px;font-weight:700;cursor:pointer;font-family:inherit;">→ סגור</button>
+    </div>
+    <div style="color:#9fb2c6;font-size:13px;line-height:1.7;margin-bottom:16px;">טבלת העיצורים שהגייתם משתנה בערבית מדוברת — <b>ככה קוראים את התעתיק העברי</b> שלנו.</div>
+    <div id="pron-guide-table"></div>
   </div>
 </div>
 
