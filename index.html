@@ -27,6 +27,13 @@ window.COMMERCE_LOGIN = (function(){ try{
   if(localStorage.getItem('commerceLogin')==='1') return true;
   if(String(location.search).indexOf('login=1')!==-1) return true;
 }catch(e){} return false; })();
+// Paywall ENFORCEMENT (free preview vs premium) — DORMANT by default so the live
+// app stays fully open. Enable with ?paywall=1 or localStorage.setItem('paywall','1')
+// to preview/test the gating. Only flip on for everyone once payments are wired.
+window.PAYWALL = (function(){ try{
+  if(localStorage.getItem('paywall')==='1') return true;
+  if(String(location.search).indexOf('paywall=1')!==-1) return true;
+}catch(e){} return false; })();
 // === Client error log: ring buffer in localStorage ('err_log', max 50) =======
 // Captures window errors + unhandled promise rejections so field failures can
 // be diagnosed after the fact (admin → "🚨 יומן שגיאות"). Registered this early
@@ -20377,6 +20384,8 @@ function stopAllAudio(){
 }
 
 function navToTab(tabId){
+  // Paywall: premium tabs require a subscription (dormant unless window.PAYWALL).
+  try { if (typeof _premiumGate==='function' && _premiumGate(tabId)) return; } catch(e) {}
   // Leaving a screen must never leave its audio talking
   try { stopAllAudio(); } catch(e) {}
   // Update emergency challenge state when entering qk tab
@@ -20536,7 +20545,7 @@ window.addEventListener('load', function(){
 <script>
 // Version stamp — shown in the admin panel so we can confirm which build is live
 // on a device (stale service-worker caches were causing "my changes don't show").
-window.APP_VERSION = 'v182';
+window.APP_VERSION = 'v183';
 
 // Register the service worker for full offline use in the field, WITH update
 // detection: when a new version installs, offer a one-tap refresh instead of the
@@ -20668,6 +20677,33 @@ document.getElementById('legal-modal').addEventListener('click', function(e){ if
     <div id="cl-status" style="text-align:center;color:#ff9a8f;font-size:12.5px;margin-top:12px;min-height:16px;"></div>
   </div>
 </div>
+
+<!-- ===== Upsell / subscribe screen — dormant unless window.PAYWALL ===== -->
+<div id="upsell-overlay" style="display:none;position:fixed;inset:0;z-index:11000;background:rgba(9,17,29,.97);direction:rtl;overflow-y:auto;padding:24px 16px;">
+  <div style="max-width:400px;margin:5vh auto 0;background:linear-gradient(180deg,#1c2f47,#152539);border:1px solid #2a3d54;border-radius:16px;padding:24px;box-shadow:0 12px 40px rgba(0,0,0,.5);position:relative;">
+    <button onclick="closeUpsell()" style="position:absolute;top:12px;left:12px;background:none;border:none;color:#7a9ab5;font-size:22px;cursor:pointer;font-family:inherit;">✕</button>
+    <div style="text-align:center;margin-bottom:16px;">
+      <div style="font-size:40px;">🔓</div>
+      <div style="color:#fff;font-size:21px;font-weight:800;margin-top:6px;">פתחו את הערכה המלאה</div>
+      <div style="color:#9fb2c6;font-size:13px;margin-top:4px;">כל מה שחייל צריך כדי לתקשר בערבית בשטח</div>
+    </div>
+    <div style="background:#0E1B2E;border:1px solid #2A3D52;border-radius:12px;padding:14px 16px;margin-bottom:16px;color:#E8D9B8;font-size:14px;line-height:2;">
+      <div>✓ כל הספרייה המבצעית</div>
+      <div>✓ כל ההקלטות בקול</div>
+      <div>✓ מסלול 30 יום להכנה לשירות</div>
+      <div>✓ מבחנים ותרגול</div>
+      <div>✓ המילון המלא</div>
+      <div>✓ תרחישים מהשטח</div>
+    </div>
+    <div style="text-align:center;margin-bottom:14px;">
+      <span style="color:#fff;font-size:30px;font-weight:900;">₪19.9</span>
+      <span style="color:#9fb2c6;font-size:14px;"> / חודש</span>
+      <div style="color:#7a9ab5;font-size:11px;margin-top:2px;">ביטול בכל עת</div>
+    </div>
+    <button onclick="onUpsellCTA()" style="width:100%;padding:14px;background:#1D9E75;border:none;border-radius:10px;color:#fff;font-size:16px;font-weight:800;cursor:pointer;font-family:inherit;">התחל מנוי</button>
+    <div style="text-align:center;margin-top:12px;"><button onclick="upsellLogin()" style="background:none;border:none;color:#D4A24E;font-size:13px;cursor:pointer;font-family:inherit;text-decoration:underline;">כבר מנוי/ה? התחבר/י</button></div>
+  </div>
+</div>
 <script>
 // Commerce login via Supabase Auth REST (phone OTP) — same fetch style as adminLogin.
 function _clStatus(m,ok){ var e=document.getElementById('cl-status'); if(e){ e.textContent=m||''; e.style.color=ok?'#7eecc1':'#ff9a8f'; } }
@@ -20745,6 +20781,39 @@ async function clSubscribed(){
 }
 function clOpen(){ var o=document.getElementById('cl-overlay'); if(o) o.style.display='block'; }
 function clCloseAfterLogin(){ var o=document.getElementById('cl-overlay'); if(o) o.style.display='none'; }
+
+// ===== Paywall enforcement (free preview vs premium) ========================
+// Dormant unless window.PAYWALL. Builds on the entitlement layer above:
+// premium == an active subscription (clHasAccess, with offline grace).
+function _hasPremium(){
+  if(!window.PAYWALL) return true;                 // paywall off -> everything open
+  try{ return (typeof clHasAccess==='function') && clHasAccess(); }catch(e){ return false; }
+}
+// Deep/premium surfaces. Free taste stays open: home, 10 must-know (ten),
+// emergency hub (qk/emerg) + its category previews, dictionary, favorites.
+var PREMIUM_TABS={lib:1,train:1,scn:1,art:1,sem:1,day:1,hrt:1,nwf:1,cus:1};
+// Returns true (and shows the upsell) when navigation should be blocked.
+function _premiumGate(tabId){
+  if(!window.PAYWALL) return false;
+  if(!PREMIUM_TABS[tabId]) return false;
+  if(_hasPremium()) return false;
+  openUpsell();
+  return true;
+}
+function openUpsell(){ var o=document.getElementById('upsell-overlay'); if(o) o.style.display='block'; }
+function closeUpsell(){ var o=document.getElementById('upsell-overlay'); if(o) o.style.display='none'; }
+function upsellLogin(){ closeUpsell(); if(typeof clOpen==='function') clOpen(); }
+function onUpsellCTA(){
+  var s=(typeof clSession==='function')?clSession():null;
+  if(!s){ closeUpsell(); if(typeof clOpen==='function') clOpen(); return; }   // must log in first
+  startCheckout();
+}
+function startCheckout(){
+  // Payment provider (hosted checkout) will be wired here: pass the logged-in
+  // user id, the provider webhook flips subscriptions.status -> 'active', and
+  // clRefreshEntitlement() unlocks the app automatically on next check.
+  alert('חיבור לתשלום (₪19.9 לחודש) יתווסף בשלב הבא. אחרי התשלום המנוי יופעל אוטומטית.');
+}
 
 // ===== Offline entitlement enforcement =====================================
 // Premium access is granted when a subscription check succeeded recently.
