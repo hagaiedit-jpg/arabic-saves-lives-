@@ -10563,6 +10563,8 @@ function renderAnswers(){
     (a||[]).forEach(function(r){ if(r && r.cat==='תשובות אזרח' && (r.he||r.ar)) rows.push(r); });
   });
   if(!rows.length){ _renderTpl(ANSWERS,'answers-list','openAnsItem'); return; }
+  var _capped=false;
+  if(typeof _previewLocked==='function' && _previewLocked() && rows.length>FREE_PREVIEW_N){ rows=rows.slice(0,FREE_PREVIEW_N); _capped=true; }
   var ICON={}; ANSWERS.forEach(function(g){ ICON[g.label]=g.icon; });
   var seedOrder=ANSWERS.map(function(g){ return g.label; });
   var order=[], groups={};
@@ -10587,6 +10589,7 @@ function renderAnswers(){
     });
     html+='</div></div>';
   });
+  if(_capped) html+=_upsellRow('פתחו את כל התשובות');
   el.innerHTML=html;
 }
 // Generic: render ANY existing DB category live (military/dictionary) as cards, so
@@ -10610,6 +10613,8 @@ function _renderDbCat(cat, containerId, opener){
   [typeof DB!=='undefined'?DB:[], typeof DICT!=='undefined'?DICT:[]].forEach(function(a){
     (a||[]).forEach(function(r){ if(r && r.cat===cat && (r.he||r.ar) && !_hidden(r.he)) rows.push(r); });
   });
+  var _capped=false;
+  if(typeof _previewLocked==='function' && _previewLocked() && rows.length>FREE_PREVIEW_N){ rows=rows.slice(0,FREE_PREVIEW_N); _capped=true; }
   window._dbCatRows[cat]=rows;
   if(!rows.length){ el.innerHTML='<div style="text-align:center;color:#7a9ab5;font-size:13px;padding:30px 16px;line-height:1.7;">התוכן של הקטגוריה נטען מהמאגר.<br>אם ריק — ודאי חיבור לרשת ורענני את האפליקציה.</div>'; return; }
   var order=[], groups={};
@@ -10629,6 +10634,7 @@ function _renderDbCat(cat, containerId, opener){
     });
     html+='</div></div>';
   });
+  if(_capped) html+=_upsellRow('פתחו את כל הקטגוריה');
   el.innerHTML=html;
 }
 function _openDbCatItem(cat, idx, returnTab){
@@ -15798,10 +15804,12 @@ function searchDict(){
     return;
   }
   
-  // Render matches
+  // Render matches (free preview caps the number of words shown when locked)
+  var _dictLocked = (typeof _previewLocked==='function' && _previewLocked());
+  var _dictCap = _dictLocked ? FREE_PREVIEW_N : 30;
   var html = '<div style="font-size:11px;color:#7a9ab5;text-align:center;margin-bottom:10px;">נמצאו ' + matches.length + ' מילים תואמות</div>';
-  
-  matches.slice(0, 30).forEach(function(match) {
+
+  matches.slice(0, _dictCap).forEach(function(match) {
     var displayWord = match.displayWords[0];
     var altForms = match.displayWords.slice(1);
     
@@ -15845,10 +15853,12 @@ function searchDict(){
     html += '</div>';
   });
   
-  if (matches.length > 30) {
+  if (_dictLocked && matches.length > _dictCap) {
+    html += _upsellRow('פתחו את המילון המלא');
+  } else if (matches.length > 30) {
     html += '<div style="text-align:center;color:#7a9ab5;font-size:12px;padding:10px;">מציג 30 מתוך ' + matches.length + ' תוצאות - חדדי את החיפוש</div>';
   }
-  
+
   resultsEl.innerHTML = html;
 }
 
@@ -20545,7 +20555,7 @@ window.addEventListener('load', function(){
 <script>
 // Version stamp — shown in the admin panel so we can confirm which build is live
 // on a device (stale service-worker caches were causing "my changes don't show").
-window.APP_VERSION = 'v183';
+window.APP_VERSION = 'v184';
 
 // Register the service worker for full offline use in the field, WITH update
 // detection: when a new version installs, offer a one-tap refresh instead of the
@@ -20657,18 +20667,18 @@ document.getElementById('legal-modal').addEventListener('click', function(e){ if
     <div style="text-align:center;margin-bottom:16px;">
       <div style="font-size:34px;">🔐</div>
       <div style="color:#fff;font-size:20px;font-weight:800;margin-top:4px;">התחברות לערכה</div>
-      <div id="cl-sub" style="color:#9fb2c6;font-size:13px;margin-top:4px;">נשלח לך קוד ב-SMS לאימות המספר</div>
+      <div id="cl-sub" style="color:#9fb2c6;font-size:13px;margin-top:4px;">נשלח לך קוד למייל לאימות הכתובת</div>
     </div>
-    <!-- step 1: phone -->
+    <!-- step 1: email -->
     <div id="cl-step-phone">
-      <label style="display:block;color:#7a9ab5;font-size:11px;margin-bottom:4px;">מספר טלפון</label>
-      <input id="cl-phone" type="tel" inputmode="tel" placeholder="050-000-0000" autocomplete="tel"
+      <label style="display:block;color:#7a9ab5;font-size:11px;margin-bottom:4px;">כתובת מייל</label>
+      <input id="cl-phone" type="email" inputmode="email" placeholder="name@example.com" autocomplete="email"
         style="width:100%;background:#0E1B2E;border:1px solid #2A3D52;border-radius:10px;color:#E8D9B8;font-family:inherit;padding:13px;font-size:16px;direction:ltr;text-align:center;">
       <button id="cl-send-btn" onclick="clSendCode()" style="width:100%;margin-top:12px;padding:13px;background:#1D9E75;border:none;border-radius:10px;color:#fff;font-size:15px;font-weight:800;cursor:pointer;font-family:inherit;">שלח לי קוד</button>
     </div>
     <!-- step 2: code -->
     <div id="cl-step-code" style="display:none;">
-      <label style="display:block;color:#7a9ab5;font-size:11px;margin-bottom:4px;">הקוד שקיבלת ב-SMS</label>
+      <label style="display:block;color:#7a9ab5;font-size:11px;margin-bottom:4px;">הקוד שקיבלת במייל</label>
       <input id="cl-code" type="text" inputmode="numeric" maxlength="6" placeholder="______"
         style="width:100%;background:#0E1B2E;border:1px solid #2A3D52;border-radius:10px;color:#E8D9B8;font-family:inherit;padding:13px;font-size:22px;letter-spacing:8px;direction:ltr;text-align:center;">
       <button id="cl-verify-btn" onclick="clVerify()" style="width:100%;margin-top:12px;padding:13px;background:#D4A24E;border:none;border-radius:10px;color:#0E1B2E;font-size:15px;font-weight:800;cursor:pointer;font-family:inherit;">אמת והתחבר</button>
@@ -20707,26 +20717,19 @@ document.getElementById('legal-modal').addEventListener('click', function(e){ if
 <script>
 // Commerce login via Supabase Auth REST (phone OTP) — same fetch style as adminLogin.
 function _clStatus(m,ok){ var e=document.getElementById('cl-status'); if(e){ e.textContent=m||''; e.style.color=ok?'#7eecc1':'#ff9a8f'; } }
-function clNormalizePhone(v){
-  v=String(v||'').replace(/[^\d+]/g,'');
-  if(v.charAt(0)==='+') return v;
-  if(v.slice(0,3)==='972') return '+'+v;
-  if(v.charAt(0)==='0') return '+972'+v.slice(1);   // Israeli local -> E.164
-  return '+972'+v;
-}
-window._clPhone='';
+function clValidEmail(v){ return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(String(v||'').trim()); }
+window._clPhone='';   // holds the login email (name kept for minimal churn)
 async function clSendCode(){
-  var raw=document.getElementById('cl-phone').value;
-  var phone=clNormalizePhone(raw);
-  if(phone.length<11){ _clStatus('מספר טלפון לא תקין'); return; }
+  var email=String(document.getElementById('cl-phone').value||'').trim();
+  if(!clValidEmail(email)){ _clStatus('כתובת מייל לא תקינה'); return; }
   var btn=document.getElementById('cl-send-btn'), old=btn.textContent; btn.disabled=true; btn.textContent='שולח...'; _clStatus('');
   try{
-    var r=await fetch(SUPA_URL+'/auth/v1/otp',{method:'POST',headers:{'apikey':SUPA_KEY,'Content-Type':'application/json'},body:JSON.stringify({phone:phone})});
+    var r=await fetch(SUPA_URL+'/auth/v1/otp',{method:'POST',headers:{'apikey':SUPA_KEY,'Content-Type':'application/json'},body:JSON.stringify({email:email,create_user:true})});
     if(!r.ok){ var e=await r.json().catch(function(){return{};}); throw new Error(e.msg||e.error_description||('שגיאה '+r.status)); }
-    window._clPhone=phone;
+    window._clPhone=email;
     document.getElementById('cl-step-phone').style.display='none';
     document.getElementById('cl-step-code').style.display='block';
-    document.getElementById('cl-sub').textContent='שלחנו קוד ל-'+phone;
+    document.getElementById('cl-sub').textContent='שלחנו קוד ל-'+email;
     _clStatus('הקוד נשלח ✓',true);
     setTimeout(function(){ var c=document.getElementById('cl-code'); if(c)c.focus(); },100);
   }catch(err){ _clStatus(err.message||'לא הצלחנו לשלוח קוד'); }
@@ -20735,7 +20738,7 @@ async function clSendCode(){
 function clBackToPhone(){
   document.getElementById('cl-step-code').style.display='none';
   document.getElementById('cl-step-phone').style.display='block';
-  document.getElementById('cl-sub').textContent='נשלח לך קוד ב-SMS לאימות המספר';
+  document.getElementById('cl-sub').textContent='נשלח לך קוד למייל לאימות הכתובת';
   _clStatus('');
 }
 async function clVerify(){
@@ -20743,7 +20746,7 @@ async function clVerify(){
   if(token.length<4){ _clStatus('הזיני את הקוד המלא'); return; }
   var btn=document.getElementById('cl-verify-btn'), old=btn.textContent; btn.disabled=true; btn.textContent='מאמת...'; _clStatus('');
   try{
-    var r=await fetch(SUPA_URL+'/auth/v1/verify',{method:'POST',headers:{'apikey':SUPA_KEY,'Content-Type':'application/json'},body:JSON.stringify({type:'sms',phone:window._clPhone,token:token})});
+    var r=await fetch(SUPA_URL+'/auth/v1/verify',{method:'POST',headers:{'apikey':SUPA_KEY,'Content-Type':'application/json'},body:JSON.stringify({type:'email',email:window._clPhone,token:token})});
     var d=await r.json().catch(function(){return{};});
     if(!r.ok || !d.access_token){ throw new Error(d.msg||d.error_description||'קוד שגוי או שפג תוקפו'); }
     clStoreSession(d);
@@ -20788,6 +20791,12 @@ function clCloseAfterLogin(){ var o=document.getElementById('cl-overlay'); if(o)
 function _hasPremium(){
   if(!window.PAYWALL) return true;                 // paywall off -> everything open
   try{ return (typeof clHasAccess==='function') && clHasAccess(); }catch(e){ return false; }
+}
+// Free preview inside otherwise-open surfaces: show the first few, then lock.
+function _previewLocked(){ return !!window.PAYWALL && !_hasPremium(); }
+var FREE_PREVIEW_N=3;
+function _upsellRow(label){
+  return '<div onclick="openUpsell()" style="text-align:center;background:linear-gradient(135deg,rgba(29,158,117,.15),rgba(212,162,78,.12));border:1px dashed #1D9E75;border-radius:10px;padding:13px;margin-top:8px;cursor:pointer;color:#7eecc1;font-size:13px;font-weight:800;">🔓 '+(label||'פתחו את כל התוכן במנוי')+' · ₪19.9/חודש</div>';
 }
 // Deep/premium surfaces. Free taste stays open: home, 10 must-know (ten),
 // emergency hub (qk/emerg) + its category previews, dictionary, favorites.
