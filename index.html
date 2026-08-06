@@ -17256,6 +17256,10 @@ function _trcViolations(ar, trans){
   var needGeresh = (ar.match(/[خغ]/g)||[]).length;
   var haveGeresh = (trans.match(/['׳’`]/g)||[]).length;
   if(needGeresh > haveGeresh) v.push('חסר גרש (خ/غ → ח׳/ע׳)');
+  // Verify the plain-letter convention IS applied: ض→ד, ظ→ז (no geresh, but the
+  // right letter must be present). Flag only when the letter is entirely missing.
+  if(ar.indexOf('ض')>=0 && trans.indexOf('ד')<0) v.push('ض→ד (חסר ד)');
+  if(ar.indexOf('ظ')>=0 && trans.indexOf('ז')<0) v.push('ظ→ז (חסר ז)');
   return v;
 }
 function checkTranslitConsistency(){
@@ -17264,11 +17268,11 @@ function checkTranslitConsistency(){
   var esc=function(s){ return String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); };
   var flagged=[], scanned=0;
   pools.forEach(function(p){ (p[1]||[]).forEach(function(r){ if(!r||!r.ar||!r.trans) return; scanned++; var v=_trcViolations(r.ar,r.trans); if(v.length) flagged.push({r:r,sec:p[0],why:v.join(' · ')}); }); });
-  var byRule={bet:0,kaf:0,feh:0,ger:0};
-  flagged.forEach(function(f){ if(f.why.indexOf('בּ')>=0)byRule.bet++; if(f.why.indexOf('כּ')>=0)byRule.kaf++; if(f.why.indexOf('רפויה')>=0)byRule.feh++; if(f.why.indexOf('גרש')>=0)byRule.ger++; });
+  var byRule={bet:0,kaf:0,feh:0,ger:0,dz:0};
+  flagged.forEach(function(f){ if(f.why.indexOf('בּ')>=0)byRule.bet++; if(f.why.indexOf('כּ')>=0)byRule.kaf++; if(f.why.indexOf('רפויה')>=0)byRule.feh++; if(f.why.indexOf('גרש')>=0)byRule.ger++; if(f.why.indexOf('ض')>=0||f.why.indexOf('ظ')>=0)byRule.dz++; });
   var html='<div style="background:#14263b;border:1px solid #2A3D52;border-radius:10px;padding:11px;margin-bottom:10px;text-align:center;">'
     +'<span style="color:#e07a5f;font-size:16px;font-weight:800;">'+flagged.length+'</span><span style="color:#7a9ab5;font-size:12px;"> חשודים לתיקון · מתוך '+scanned+' שנסרקו</span>'
-    +'<div style="color:#7a9ab5;font-size:11px;margin-top:4px;">בּ: '+byRule.bet+' · כּ: '+byRule.kaf+' · פ רפויה: '+byRule.feh+' · גרש: '+byRule.ger+'</div></div>';
+    +'<div style="color:#7a9ab5;font-size:11px;margin-top:4px;">בּ: '+byRule.bet+' · כּ: '+byRule.kaf+' · פ רפויה: '+byRule.feh+' · גרש: '+byRule.ger+' · ד/ז: '+byRule.dz+'</div></div>';
   if(!scanned){ html+='<div style="color:#e07a5f;font-size:12px;text-align:center;padding:12px;">⚠️ המאגר עוד לא נטען — רענני ופתחי שוב.</div>'; el.innerHTML=html; return; }
   if(!flagged.length){ html+='<div style="color:#1D9E75;font-size:13px;text-align:center;padding:16px;">✅ לא נמצאו חריגות מ-3 הכללים. יפה!</div>'; el.innerHTML=html; return; }
   var cap=Math.min(flagged.length,200);
@@ -20816,7 +20820,7 @@ window.addEventListener('load', function(){
 <script>
 // Version stamp — shown in the admin panel so we can confirm which build is live
 // on a device (stale service-worker caches were causing "my changes don't show").
-window.APP_VERSION = 'v190';
+window.APP_VERSION = 'v191';
 
 // Register the service worker for full offline use in the field, WITH update
 // detection: when a new version installs, offer a one-tap refresh instead of the
