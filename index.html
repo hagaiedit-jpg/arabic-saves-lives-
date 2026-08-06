@@ -3234,6 +3234,7 @@ function showLanding() {
       <button class="atab" onclick="aT('acat',this)">⚙️ קטגוריות</button>
       <button class="atab" onclick="aT('cov',this)">📊 כיסוי תוכן</button>
       <button class="atab" onclick="aT('dup',this)">🔎 כפילויות</button>
+      <button class="atab" onclick="aT('trc',this)">✍️ עקביות תעתיק</button>
     </div>
 
     <!-- Content coverage -->
@@ -3253,6 +3254,15 @@ function showLanding() {
         <div id="dupe-body"></div>
         <button onclick="importFieldVocab(this)" style="width:100%;margin-top:14px;padding:13px;background:linear-gradient(135deg,#1D9E75 0%,#0e5a3f 100%);border:none;border-radius:10px;color:#fff;font-size:14px;font-weight:800;cursor:pointer;font-family:inherit;">⬇️ ייבא רק את החדשים למאגר</button>
         <div style="color:#7a9ab5;font-size:10.5px;line-height:1.6;margin-top:8px;">ייבוא <b>חד-פעמי</b>. אחרי הייבוא המילים הן שורות רגילות — עורכים ומתקנים ב<b>ניהול → 📋 רשימה</b> (כולל שינוי מקפים/פיצול), וכל תיקון שלך הוא המקור. המילה המקורית לא תסונכרן ולא תחזור.</div>
+      </div>
+    </div>
+
+    <!-- Transliteration consistency checker (flags suspects; you fix manually) -->
+    <div id="at-trc" style="display:none;">
+      <div class="acard">
+        <div style="color:#E8D9B8;font-size:14px;font-weight:800;margin-bottom:4px;">✍️ בדיקת עקביות תעתיק</div>
+        <div style="color:#7a9ab5;font-size:11.5px;line-height:1.6;margin-bottom:12px;">מסמן תעתיקים ש<b>כנראה</b> חורגים ממדריך ההגייה — לפי 3 כללים ברורים: ب תמיד בּ (בדגש), ك תמיד כּ (בדגש), ف תמיד פ (רפויה). <b>הכלי לא משנה כלום</b> — כל שורה עם קיצור ✏️ לעריכה ידנית. את מחליטה ומתקנת מה שבאמת שגוי.</div>
+        <div id="trc-body"></div>
       </div>
     </div>
 
@@ -16976,9 +16986,9 @@ function aT(t,el){
   // Allow programmatic jumps (shortcut buttons) — find the tab button when not passed
   if(!el) el=document.querySelector('.atab[onclick*="\''+t+'\'"]');
   if(el){ el.classList.add('active'); try{ el.scrollIntoView({behavior:'smooth',inline:'center',block:'nearest'}); }catch(e){} }
-  ['ap','ad','ah','ak','an','adict','asem','ac','al','audit','qrec','acat','cov','dup'].forEach(id=>{var e=document.getElementById('at-'+id); if(e)e.style.display='none';});
+  ['ap','ad','ah','ak','an','adict','asem','ac','al','audit','qrec','acat','cov','dup','trc'].forEach(id=>{var e=document.getElementById('at-'+id); if(e)e.style.display='none';});
   document.getElementById('at-'+t).style.display='block';
-  if(t==='al')renderAdminList();if(t==='acat')renderCatList();if(t==='audit')renderQuestionAudit();if(t==='qrec')renderRespRecList();if(t==='cov')renderCoverage();if(t==='dup')checkFieldVocab();
+  if(t==='al')renderAdminList();if(t==='acat')renderCatList();if(t==='audit')renderQuestionAudit();if(t==='qrec')renderRespRecList();if(t==='cov')renderCoverage();if(t==='dup')checkFieldVocab();if(t==='trc')checkTranslitConsistency();
   try{ renderTabList(t); }catch(e){ console.warn('renderTabList',e); }
 }
 
@@ -17212,6 +17222,62 @@ function openPronGuide(){
   var o=document.getElementById('pron-guide-overlay'); if(o)o.style.display='block';
 }
 function closePronGuide(){ var o=document.getElementById('pron-guide-overlay'); if(o)o.style.display='none'; }
+
+// Transliteration consistency — flags LIKELY violations of 3 clear rules from the
+// pronunciation guide. Never auto-fixes; each row links to manual editing.
+// Split a Hebrew transliteration into letter clusters: base letter + any niqqud
+// marks (any order) + an optional trailing geresh. Robust to dagesh-after-vowel.
+function _trcClusters(s){
+  s=String(s||''); var out=[], i=0;
+  while(i<s.length){
+    var ch=s[i];
+    if(ch>='א'&&ch<='ת'){
+      var j=i+1, marks='';
+      while(j<s.length && s[j]>='֑' && s[j]<='ׇ'){ marks+=s[j]; j++; }
+      var geresh=false;
+      if(j<s.length && (s[j]==="'"||s[j]==='׳'||s[j]==='’')){ geresh=true; j++; }
+      out.push({base:ch, dagesh:marks.indexOf('ּ')>=0, geresh:geresh});
+      i=j;
+    } else i++;
+  }
+  return out;
+}
+function _trcViolations(ar, trans){
+  var v=[]; ar=String(ar||''); var cl=_trcClusters(trans);
+  var bareBet = cl.some(function(c){ return c.base==='ב' && !c.geresh && !c.dagesh; });
+  var bareKaf = cl.some(function(c){ return (c.base==='כ'||c.base==='ך') && !c.geresh && !c.dagesh; });
+  var fehDag  = cl.some(function(c){ return (c.base==='פ'||c.base==='ף') && !c.geresh && c.dagesh; });
+  if(ar.indexOf('ب')>=0 && bareBet) v.push('ب→בּ (דגש)');
+  if(ar.indexOf('ك')>=0 && bareKaf) v.push('ك→כּ (דגש)');
+  if(ar.indexOf('ف')>=0 && fehDag)  v.push('ف→פ (רפויה)');
+  return v;
+}
+function checkTranslitConsistency(){
+  var el=document.getElementById('trc-body'); if(!el) return;
+  var pools=[['מבצעי',typeof DB!=='undefined'?DB:[]],['יומיומי',typeof DAILY!=='undefined'?DAILY:[]],['פותחים לב',typeof HEART!=='undefined'?HEART:[]],['ימי',typeof NAVY!=='undefined'?NAVY:[]],['מילון',typeof DICT!=='undefined'?DICT:[]],['סמנטי',typeof SEM!=='undefined'?SEM:[]],['מנהגים',typeof CUS!=='undefined'?CUS:[]]];
+  var esc=function(s){ return String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); };
+  var flagged=[], scanned=0;
+  pools.forEach(function(p){ (p[1]||[]).forEach(function(r){ if(!r||!r.ar||!r.trans) return; scanned++; var v=_trcViolations(r.ar,r.trans); if(v.length) flagged.push({r:r,sec:p[0],why:v.join(' · ')}); }); });
+  var html='<div style="background:#14263b;border:1px solid #2A3D52;border-radius:10px;padding:11px;margin-bottom:10px;text-align:center;">'
+    +'<span style="color:#e07a5f;font-size:16px;font-weight:800;">'+flagged.length+'</span><span style="color:#7a9ab5;font-size:12px;"> חשודים לתיקון · </span>'
+    +'<span style="color:#7a9ab5;font-size:12px;">מתוך '+scanned+' שנסרקו</span></div>';
+  if(!scanned){ html+='<div style="color:#e07a5f;font-size:12px;text-align:center;padding:12px;">⚠️ המאגר עוד לא נטען — רענני ופתחי שוב.</div>'; el.innerHTML=html; return; }
+  if(!flagged.length){ html+='<div style="color:#1D9E75;font-size:13px;text-align:center;padding:16px;">✅ לא נמצאו חריגות מ-3 הכללים. יפה!</div>'; el.innerHTML=html; return; }
+  var cap=Math.min(flagged.length,200);
+  for(var i=0;i<cap;i++){
+    var f=flagged[i], id=String(f.r.id||'').replace(/'/g,"\\'");
+    html+='<div style="padding:8px 10px;margin-bottom:5px;background:rgba(224,122,95,0.06);border:1px solid rgba(224,122,95,0.25);border-radius:8px;">'
+      +'<div style="display:flex;align-items:center;gap:8px;">'
+      +'<div style="flex:1;min-width:0;"><div style="color:#E8D9B8;font-size:13px;font-weight:700;">'+esc(f.r.he)+'</div>'
+      +'<div style="color:#E8D9B8;font-size:14px;font-family:Georgia,serif;direction:rtl;">'+esc(f.r.ar)+'</div>'
+      +'<div style="color:#D4A24E;font-size:12px;">'+esc(f.r.trans)+'</div></div>'
+      +(f.r.id?'<button onclick="openEditById(\''+id+'\')" style="flex-shrink:0;background:#2A3D52;border:none;color:#E8D9B8;border-radius:8px;padding:8px 12px;font-size:12px;font-weight:700;cursor:pointer;font-family:inherit;">✏️ ערוך</button>':'')
+      +'</div>'
+      +'<div style="color:#e07a5f;font-size:10.5px;margin-top:4px;">'+esc(f.why)+'</div></div>';
+  }
+  if(flagged.length>cap) html+='<div style="color:#7a9ab5;font-size:11px;text-align:center;padding:8px;">מציג '+cap+' מתוך '+flagged.length+' — תקני ורענני כדי לראות את הבאים</div>';
+  el.innerHTML=html;
+}
 
 // === Per-tab "existing items" list with edit + record (added on top of the live app) ===
 // Each add-tab shows the items already saved in that section, so you can open any
@@ -20742,7 +20808,7 @@ window.addEventListener('load', function(){
 <script>
 // Version stamp — shown in the admin panel so we can confirm which build is live
 // on a device (stale service-worker caches were causing "my changes don't show").
-window.APP_VERSION = 'v187';
+window.APP_VERSION = 'v188';
 
 // Register the service worker for full offline use in the field, WITH update
 // detection: when a new version installs, offer a one-tap refresh instead of the
