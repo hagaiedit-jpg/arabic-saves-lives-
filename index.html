@@ -17061,7 +17061,7 @@ var FIELD_VOCAB=[
   {cat:'הרגעה ושכנוע', he:'חולה', ar:'مريض', trans:"מַרִיצ'"},
   {cat:'הרגעה ושכנוע', he:'עצוב', ar:'حزين', trans:'חַזִין'},
   {cat:'הרגעה ושכנוע', he:'מרוצה', ar:'راضي', trans:"רַאצִ'י"},
-  {cat:'הרגעה ושכנוע', he:'תן לי את היד, אני אעזור לך', ar:'أعطني يدك، سأساعدك', trans:"אַעְטִינִי אִידַכּ, בַּסַאעְדַכּ"},
+  {cat:'משפט הרגעה', he:'תן לי את היד, אני אעזור לך', ar:'أعطني يدك، سأساعدك', trans:"אַעְטִינִי אִידַכּ, בַּסַאעְדַכּ"},
   {cat:'תיאור חשוד', he:'גבוה', ar:'طويل', trans:'טַוִיל'},
   {cat:'תיאור חשוד', he:'נמוך / קצר', ar:'قصير', trans:'קַצִיר'},
   {cat:'תיאור חשוד', he:'צעיר', ar:'شاب', trans:'שַאבּ'},
@@ -17107,14 +17107,18 @@ var FIELD_VOCAB=[
   {cat:'מילון', he:'הרבה', ar:'كثير', trans:'כְּתִיר'},
   {cat:'מילון', he:'חצי', ar:'نصف', trans:'נֻצְף'}
 ];
-// Where each source group is imported (real section+category in the DB).
+// Where each source group is imported. Standalone WORDS go to the dictionary
+// (section 'dictionary'), organised by topical category — the operational
+// sections are reserved for in-context phrases. The one rapport SENTENCE goes
+// to the operational calming category.
 var FIELD_VOCAB_TARGET={
-  'הרגעה ושכנוע':  {section:'military',   cat:'הרגעה ושכנוע'},
-  'תיאור חשוד':    {section:'military',   cat:'תשאול: תיאור אדם'},
-  'כיוונים ושטח':  {section:'military',   cat:'שמות מקומות וכיוונים'},
-  'תשאול: עבודה':  {section:'military',   cat:'תשאול: עבודה'},
-  'יסודות השפה':   {section:'military',   cat:'יסודות: נטיית פעלים'},
-  'מילון':         {section:'dictionary', cat:'כמויות'}
+  'הרגעה ושכנוע':  {section:'dictionary', cat:'רגשות ומצבים'},
+  'תיאור חשוד':    {section:'dictionary', cat:'תיאור אדם'},
+  'כיוונים ושטח':  {section:'dictionary', cat:'כיוונים ושטח'},
+  'תשאול: עבודה':  {section:'dictionary', cat:'מקצועות'},
+  'יסודות השפה':   {section:'dictionary', cat:'פעלים'},
+  'מילון':         {section:'dictionary', cat:'כמויות'},
+  'משפט הרגעה':    {section:'military',   cat:'הרגעה ושכנוע'}
 };
 function _fvHe(s){ return String(s||'').replace(/\s+/g,' ').trim(); }
 function _fvAr(s){ return String(s||'').replace(/[ؐ-ًؚ-ٰٟـۖ-ۭ\s،؛؟.!,?"'()\-\/]/g,''); }
@@ -20826,7 +20830,7 @@ window.addEventListener('load', function(){
 <script>
 // Version stamp — shown in the admin panel so we can confirm which build is live
 // on a device (stale service-worker caches were causing "my changes don't show").
-window.APP_VERSION = 'v193';
+window.APP_VERSION = 'v194';
 
 // Register the service worker for full offline use in the field, WITH update
 // detection: when a new version installs, offer a one-tap refresh instead of the
