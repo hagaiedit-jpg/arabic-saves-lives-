@@ -503,14 +503,15 @@ body.day-mode .toast{background:#fff;color:#0e1b2e;}
   padding:20px 14px;
   text-align:center;
   cursor:pointer;
-  border:1px solid rgba(255,255,255,0.08);
+  background:linear-gradient(160deg,#1F3147 0%,#243a55 100%);
+  border:1px solid rgba(212,162,78,0.18);
   transition:all 0.2s ease-out;
   display:flex;
   flex-direction:column;
   align-items:center;
   justify-content:center;
   min-height:100px;
-  box-shadow:0 3px 12px rgba(0,0,0,0.3), 0 1px 0 rgba(255,255,255,0.1) inset;
+  box-shadow:0 2px 8px rgba(0,0,0,0.2);
 }
 .emerg-cube:hover{
   transform:translateY(-3px);
@@ -521,21 +522,23 @@ body.day-mode .toast{background:#fff;color:#0e1b2e;}
   box-shadow:0 3px 8px rgba(0,0,0,0.3);
 }
 .emerg-cube:active{transform:scale(0.97);}
-.emerg-cube.red{background:#a82318;border-color:#c0392b;}
-.emerg-cube.blue{background:#1e3a5f;border-color:#2c5d8f;}
-.emerg-cube.orange{background:#a85d1e;border-color:#c97825;}
-.emerg-cube.green{background:#1d6e4f;border-color:#1D9E75;}
-.emerg-cube.gray{background:#3d3d3d;border-color:#666;}
-.emerg-cube.gold{background:#8a6d1e;border-color:#D4A24E;}
-.emerg-cube.teal{background:#14676b;border-color:#2fb0b0;}
-.emerg-cube.sky{background:#2a5578;border-color:#5b9bd5;}
-.emerg-cube.crit{background:linear-gradient(135deg,#6b2440,#4a1830);border-color:#c85c8a;}
-.emerg-cube.purple{background:#4a3a6b;border-color:#8a6bd0;}
-.emerg-cube.rose{background:#6b3a4a;border-color:#d08a9b;}
-.emerg-cube.mint{background:#2f6b52;border-color:#4fd0a0;}
-.emerg-cube-emoji{font-size:36px;line-height:1;}
-.emerg-cube-name{color:#fff;font-size:16px;font-weight:700;line-height:1.2;}
-.emerg-cube-count{color:rgba(255,255,255,0.85);font-size:11px;font-weight:600;background:rgba(0,0,0,0.25);padding:3px 10px;border-radius:99px;}
+/* Cohesive with the rest of the app: all cubes share the navy tile background;
+   the category "colour" survives only as a subtle border + a thin top accent. */
+.emerg-cube.red{border-color:rgba(192,57,43,0.5);}
+.emerg-cube.blue{border-color:rgba(91,155,213,0.38);}
+.emerg-cube.orange{border-color:rgba(201,120,37,0.42);}
+.emerg-cube.green{border-color:rgba(29,158,117,0.42);}
+.emerg-cube.gray{border-color:rgba(150,160,170,0.3);}
+.emerg-cube.gold{border-color:rgba(212,162,78,0.5);}
+.emerg-cube.teal{border-color:rgba(47,176,176,0.4);}
+.emerg-cube.sky{border-color:rgba(91,155,213,0.4);}
+.emerg-cube.crit{border-color:rgba(212,162,78,0.55);}
+.emerg-cube.purple{border-color:rgba(138,107,208,0.4);}
+.emerg-cube.rose{border-color:rgba(208,138,155,0.4);}
+.emerg-cube.mint{border-color:rgba(79,208,160,0.4);}
+.emerg-cube-emoji{font-size:34px;line-height:1;}
+.emerg-cube-name{color:#E8D9B8;font-size:15px;font-weight:800;line-height:1.2;}
+.emerg-cube-count{color:#7a9ab5;font-size:11px;font-weight:600;background:rgba(212,162,78,0.1);padding:3px 10px;border-radius:99px;}
 .emerg-cube-empty{opacity:0.5;}
 
 .emerg-back{
@@ -20823,7 +20826,7 @@ window.addEventListener('load', function(){
 <script>
 // Version stamp — shown in the admin panel so we can confirm which build is live
 // on a device (stale service-worker caches were causing "my changes don't show").
-window.APP_VERSION = 'v192';
+window.APP_VERSION = 'v193';
 
 // Register the service worker for full offline use in the field, WITH update
 // detection: when a new version installs, offer a one-tap refresh instead of the
