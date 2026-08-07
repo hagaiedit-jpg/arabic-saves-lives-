@@ -3255,8 +3255,10 @@ function showLanding() {
         <div style="color:#E8D9B8;font-size:14px;font-weight:800;margin-bottom:4px;">🔎 בדיקת כפילויות — חילוץ שדה</div>
         <div style="color:#7a9ab5;font-size:11.5px;line-height:1.6;margin-bottom:12px;">משווה את רשימת חילוץ השדה מול כל התוכן הטעון (מבצעי, יומיומי, מילון, מנהגים…). ⚠️ = כבר קיים (לא נייבא). ✅ = חדש. ההשוואה לפי עברית או ערבית מנוקָה.</div>
         <div id="dupe-body"></div>
-        <button onclick="importFieldVocab(this)" style="width:100%;margin-top:14px;padding:13px;background:linear-gradient(135deg,#1D9E75 0%,#0e5a3f 100%);border:none;border-radius:10px;color:#fff;font-size:14px;font-weight:800;cursor:pointer;font-family:inherit;">⬇️ ייבא רק את החדשים למאגר</button>
+        <button onclick="importFieldVocab(this)" style="width:100%;margin-top:14px;padding:13px;background:linear-gradient(135deg,#1D9E75 0%,#0e5a3f 100%);border:none;border-radius:10px;color:#fff;font-size:14px;font-weight:800;cursor:pointer;font-family:inherit;">⬇️ ייבא רק את החדשים למילון</button>
         <div style="color:#7a9ab5;font-size:10.5px;line-height:1.6;margin-top:8px;">ייבוא <b>חד-פעמי</b>. אחרי הייבוא המילים הן שורות רגילות — עורכים ומתקנים ב<b>ניהול → 📋 רשימה</b> (כולל שינוי מקפים/פיצול), וכל תיקון שלך הוא המקור. המילה המקורית לא תסונכרן ולא תחזור.</div>
+        <button onclick="moveFieldVocabToDict(this)" style="width:100%;margin-top:14px;padding:12px;background:#2A3D52;border:1px solid #D4A24E;border-radius:10px;color:#E8D9B8;font-size:13px;font-weight:700;cursor:pointer;font-family:inherit;">🔀 העבר מילים שכבר יובאו — למילון</button>
+        <div style="color:#7a9ab5;font-size:10.5px;line-height:1.6;margin-top:8px;">אם כבר ייבאת מילים לקטגוריות המבצעיות (לפני התיקון) — זה מעביר אותן למילון לפי נושא. <b>ההקלטות והתיקונים שלך נשמרים</b>; רק המיקום משתנה.</div>
       </div>
     </div>
 
@@ -17194,6 +17196,36 @@ async function importFieldVocab(btn){
   }catch(e){ btn.disabled=false; btn.textContent=old; alert('שגיאה: '+(e&&e.message?e.message:e)); }
 }
 
+// Relocate words that were imported into operational categories (old mapping)
+// into the dictionary, by topic. Matches by Hebrew word within non-dictionary
+// sections and PATCHes only section+cat, so recordings and edits are preserved.
+async function moveFieldVocabToDict(btn){
+  var idx={};
+  [(typeof DB!=='undefined'?DB:[]),(typeof DAILY!=='undefined'?DAILY:[]),(typeof HEART!=='undefined'?HEART:[]),(typeof NAVY!=='undefined'?NAVY:[])].forEach(function(a){
+    (a||[]).forEach(function(r){ if(!r||!r.id) return; if(String(r.section||'')==='dictionary') return; var h=_fvHe(r.he); if(h&&!idx[h]) idx[h]={id:r.id}; });
+  });
+  var toMove=[];
+  FIELD_VOCAB.forEach(function(v){
+    var t=FIELD_VOCAB_TARGET[v.cat]; if(!t||t.section!=='dictionary') return;   // only word-groups headed to the dictionary
+    var hit=idx[_fvHe(v.he)];
+    if(hit) toMove.push({id:hit.id, cat:t.cat});
+  });
+  if(!toMove.length){ alert('לא נמצאו מילים להעברה — כנראה כבר במילון, או שערכת את העברית שלהן (אז העבירי ידנית). 🎉'); return; }
+  if(!confirm('להעביר '+toMove.length+' מילים בודדות מהקטגוריות המבצעיות אל המילון (לפי נושא)?\n\nההקלטות והתיקונים שלך נשמרים — רק המיקום משתנה.')) return;
+  var old=btn.textContent; btn.disabled=true; var moved=0, failed=0;
+  try{
+    for(var i=0;i<toMove.length;i++){
+      var m=toMove[i];
+      try{ await sbFetch('/rest/v1/phrases?id=eq.'+encodeURIComponent(m.id),'PATCH',{section:'dictionary',cat:m.cat}); moved++; btn.textContent='מעביר '+moved+'/'+toMove.length+'…'; }
+      catch(e){ failed++; }
+    }
+    try{ await loadData(); }catch(e){}
+    try{ checkFieldVocab(); }catch(e){}
+    btn.disabled=false; btn.textContent=old;
+    alert('✓ '+moved+' מילים הועברו למילון'+(failed?(' ('+failed+' נכשלו)'):'')+'.\nההקלטות והתיקונים נשמרו — רק המיקום השתנה.');
+  }catch(e){ btn.disabled=false; btn.textContent=old; alert('שגיאה: '+(e&&e.message?e.message:e)); }
+}
+
 // Pronunciation guide (from the uploaded doc): how to read the Hebrew transliteration.
 var PRON_GUIDE=[
  {l:'א (ا)', p:'א', ex:'עיצורית כמו בעברית. כשהיא אֵם-קריאה שקטה — מאריכה: אַוְלַאד'},
@@ -20830,7 +20862,7 @@ window.addEventListener('load', function(){
 <script>
 // Version stamp — shown in the admin panel so we can confirm which build is live
 // on a device (stale service-worker caches were causing "my changes don't show").
-window.APP_VERSION = 'v194';
+window.APP_VERSION = 'v195';
 
 // Register the service worker for full offline use in the field, WITH update
 // detection: when a new version installs, offer a one-tap refresh instead of the
