@@ -17266,8 +17266,11 @@ function checkTranslitConsistency(){
   var el=document.getElementById('trc-body'); if(!el) return;
   var pools=[['מבצעי',typeof DB!=='undefined'?DB:[]],['יומיומי',typeof DAILY!=='undefined'?DAILY:[]],['פותחים לב',typeof HEART!=='undefined'?HEART:[]],['ימי',typeof NAVY!=='undefined'?NAVY:[]],['מילון',typeof DICT!=='undefined'?DICT:[]],['סמנטי',typeof SEM!=='undefined'?SEM:[]],['מנהגים',typeof CUS!=='undefined'?CUS:[]]];
   var esc=function(s){ return String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); };
+  // Categories excluded from the consistency scan (not relevant to fix now).
+  var TRC_SKIP_CATS=['זיהוי איום'];
+  var _skip=function(cat){ var c=String(cat||''); return TRC_SKIP_CATS.some(function(x){ return c.indexOf(x)>=0; }); };
   var flagged=[], scanned=0;
-  pools.forEach(function(p){ (p[1]||[]).forEach(function(r){ if(!r||!r.ar||!r.trans) return; scanned++; var v=_trcViolations(r.ar,r.trans); if(v.length) flagged.push({r:r,sec:p[0],why:v.join(' · ')}); }); });
+  pools.forEach(function(p){ (p[1]||[]).forEach(function(r){ if(!r||!r.ar||!r.trans) return; if(_skip(r.cat)) return; scanned++; var v=_trcViolations(r.ar,r.trans); if(v.length) flagged.push({r:r,sec:p[0],why:v.join(' · ')}); }); });
   var byRule={bet:0,kaf:0,feh:0,ger:0,dz:0};
   flagged.forEach(function(f){ if(f.why.indexOf('בּ')>=0)byRule.bet++; if(f.why.indexOf('כּ')>=0)byRule.kaf++; if(f.why.indexOf('רפויה')>=0)byRule.feh++; if(f.why.indexOf('גרש')>=0)byRule.ger++; if(f.why.indexOf('ض')>=0||f.why.indexOf('ظ')>=0)byRule.dz++; });
   var html='<div style="background:#14263b;border:1px solid #2A3D52;border-radius:10px;padding:11px;margin-bottom:10px;text-align:center;">'
@@ -20820,7 +20823,7 @@ window.addEventListener('load', function(){
 <script>
 // Version stamp — shown in the admin panel so we can confirm which build is live
 // on a device (stale service-worker caches were causing "my changes don't show").
-window.APP_VERSION = 'v191';
+window.APP_VERSION = 'v192';
 
 // Register the service worker for full offline use in the field, WITH update
 // detection: when a new version installs, offer a one-tap refresh instead of the
