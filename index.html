@@ -17203,18 +17203,36 @@ var FIELD_VOCAB_TARGET={
   'מספרים':        {section:'military',   cat:'יסודות: מספרים'}
 };
 function _fvHe(s){ return String(s||'').replace(/\s+/g,' ').trim(); }
+// Dedup index: global (any section) + per-category (section|cat). Dictionary
+// vocab dedups globally; structured foundation/operational sets dedup only
+// within their target category, so a full set (e.g. all numbers) lands together.
+function _fvIndexes(){
+  var pools=[typeof DB!=='undefined'?DB:[],typeof DAILY!=='undefined'?DAILY:[],typeof HEART!=='undefined'?HEART:[],typeof NAVY!=='undefined'?NAVY:[],typeof DICT!=='undefined'?DICT:[],typeof SEM!=='undefined'?SEM:[],typeof CUS!=='undefined'?CUS:[]];
+  var gHe={}, gAr={}, byCat={};
+  pools.forEach(function(a){ (a||[]).forEach(function(r){ if(!r) return;
+    var h=_fvHe(r.he), x=_fvAr(r.ar), key=String(r.section||'')+'|'+String(r.cat||'');
+    if(h){ if(!gHe[h])gHe[h]={sec:r.section||'',cat:r.cat||''}; byCat[key+'|H|'+h]=1; }
+    if(x){ if(!gAr[x])gAr[x]={sec:r.section||'',cat:r.cat||''}; byCat[key+'|A|'+x]=1; }
+  }); });
+  return {gHe:gHe, gAr:gAr, byCat:byCat};
+}
+function _fvDupOf(v, idx){
+  var t=(typeof FIELD_VOCAB_TARGET!=='undefined'&&FIELD_VOCAB_TARGET[v.cat])||{section:'military',cat:v.cat};
+  if(t.section==='dictionary') return idx.gHe[_fvHe(v.he)] || idx.gAr[_fvAr(v.ar)] || null;
+  var key=t.section+'|'+t.cat;
+  if(idx.byCat[key+'|H|'+_fvHe(v.he)] || idx.byCat[key+'|A|'+_fvAr(v.ar)]) return {sec:t.section,cat:t.cat};
+  return null;
+}
 function _fvAr(s){ return String(s||'').replace(/[ؐ-ًؚ-ٰٟـۖ-ۭ\s،؛؟.!,?"'()\-\/]/g,''); }
 function checkFieldVocab(){
   var el=document.getElementById('dupe-body'); if(!el) return;
   var pools=[['מבצעי',typeof DB!=='undefined'?DB:[]],['יומיומי',typeof DAILY!=='undefined'?DAILY:[]],['פותחים לב',typeof HEART!=='undefined'?HEART:[]],['ימי',typeof NAVY!=='undefined'?NAVY:[]],['מילון',typeof DICT!=='undefined'?DICT:[]],['סמנטי',typeof SEM!=='undefined'?SEM:[]],['מנהגים',typeof CUS!=='undefined'?CUS:[]]];
-  var heIdx={}, arIdx={};
-  pools.forEach(function(p){ (p[1]||[]).forEach(function(r){ if(!r)return; var h=_fvHe(r.he); if(h&&!heIdx[h])heIdx[h]={sec:p[0],cat:r.cat||''}; var a=_fvAr(r.ar); if(a&&!arIdx[a])arIdx[a]={sec:p[0],cat:r.cat||''}; }); });
+  var idx=_fvIndexes();
   var esc=function(s){ return String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); };
   var news=[], exists=[];
   FIELD_VOCAB.forEach(function(v){
-    var byHe=heIdx[_fvHe(v.he)], byAr=arIdx[_fvAr(v.ar)];
-    var found=byHe||byAr;
-    if(found){ exists.push({v:v, where:found, by:byHe?'עברית':'ערבית'}); }
+    var dup=_fvDupOf(v, idx);
+    if(dup){ exists.push({v:v, where:{sec:dup.sec, cat:dup.cat}, by:''}); }
     else { news.push(v); }
   });
   var loaded=pools.reduce(function(n,p){ return n+(p[1]?p[1].length:0); },0);
@@ -17238,7 +17256,7 @@ function checkFieldVocab(){
       html+='<div style="display:flex;gap:8px;align-items:center;padding:6px 9px;margin-bottom:3px;background:rgba(224,122,95,0.06);border:1px solid rgba(224,122,95,0.22);border-radius:8px;">'
         +'<span style="color:#a0b8c8;font-size:13px;font-weight:700;flex:1;">'+esc(x.v.he)+'</span>'
         +'<span style="color:#a0b8c8;font-size:14px;font-family:Georgia,serif;">'+esc(x.v.ar)+'</span>'
-        +'<span style="color:#7a9ab5;font-size:10px;min-width:110px;text-align:left;">קיים ב-'+esc(x.where.sec)+(x.where.cat?' / '+esc(x.where.cat):'')+' (לפי '+x.by+')</span></div>';
+        +'<span style="color:#7a9ab5;font-size:10px;min-width:110px;text-align:left;">קיים ב-'+esc(x.where.sec||'')+(x.where.cat?' / '+esc(x.where.cat):'')+'</span></div>';
     });
   }
   el.innerHTML=html;
@@ -17249,10 +17267,8 @@ function checkFieldVocab(){
 // silently reappear. Re-running only ever ADDS words still missing (deduped by
 // Hebrew or Arabic), and warns if already run once.
 async function importFieldVocab(btn){
-  var pools=[typeof DB!=='undefined'?DB:[],typeof DAILY!=='undefined'?DAILY:[],typeof HEART!=='undefined'?HEART:[],typeof NAVY!=='undefined'?NAVY:[],typeof DICT!=='undefined'?DICT:[],typeof SEM!=='undefined'?SEM:[],typeof CUS!=='undefined'?CUS:[]];
-  var heIdx={}, arIdx={};
-  pools.forEach(function(a){ (a||[]).forEach(function(r){ if(!r)return; var h=_fvHe(r.he); if(h)heIdx[h]=1; var x=_fvAr(r.ar); if(x)arIdx[x]=1; }); });
-  var toAdd=FIELD_VOCAB.filter(function(v){ return !heIdx[_fvHe(v.he)] && !arIdx[_fvAr(v.ar)]; });
+  var idx=_fvIndexes();
+  var toAdd=FIELD_VOCAB.filter(function(v){ return !_fvDupOf(v, idx); });
   if(!toAdd.length){ alert('אין מילים חדשות לייבוא — הכל כבר במאגר. 🎉'); return; }
   var warn = (function(){ try{ return localStorage.getItem('fv_imported')==='1'; }catch(e){ return false; } })()
     ? '\n\n⚠️ כבר ייבאת פעם. ייבוא חוזר יוסיף רק מילים שעדיין לא במאגר — הוא לא נוגע במילים שכבר ערכת.' : '';
@@ -20942,7 +20958,7 @@ window.addEventListener('load', function(){
 <script>
 // Version stamp — shown in the admin panel so we can confirm which build is live
 // on a device (stale service-worker caches were causing "my changes don't show").
-window.APP_VERSION = 'v197';
+window.APP_VERSION = 'v198';
 
 // Register the service worker for full offline use in the field, WITH update
 // detection: when a new version installs, offer a one-tap refresh instead of the
