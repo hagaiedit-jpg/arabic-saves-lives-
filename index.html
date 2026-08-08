@@ -10093,6 +10093,9 @@ const FOUNDATION_GROUPS=[
     {id:'יסודות: נטיית פעלים', icon:'🔤'},
     {id:'יסודות: מילות קישור', icon:'🔗'},
   ]},
+  {title:'אוצר יסוד', items:[
+    {id:'יסודות: מספרים', icon:'🔢'},
+  ]},
 ];
 const FOUNDATION_CATS = FOUNDATION_GROUPS.reduce(function(a,g){ return a.concat(g.items.map(function(x){return x.id;})); }, []);
 const CATS=[{id:'עצירת תנועה ורכב',icon:'🚫'},{id:'ניהול מרחב והוראות',icon:'📍'},{id:'בידוק וזיהוי',icon:'🔍'},{id:'שליטה בבית',icon:'🏠'},{id:'הרגעה ושכנוע',icon:'✌️'},{id:'מגע ראשוני',icon:'🕵'},{id:'רפואה ועזרה ראשונה',icon:'🩹'},{id:'קהל ואירועים',icon:'👥'},{id:'ילדים ואוכלוסיות רגישות',icon:'👶'},{id:'לוח שנה ותרבות',icon:'📅'},{id:'שמות מקומות וכיוונים',icon:'🗺️'},{id:'זיהוי ערבית כתובה בשטח',icon:'📄'},  {id:'תשאול: פרטים אישיים',icon:'🕵️'},
@@ -17142,7 +17145,42 @@ var FIELD_VOCAB=[
   {cat:'דת ותרבות', he:'מוסלמי', ar:'مسلم', trans:'מֻסְלֶם'},
   {cat:'דת ותרבות', he:'תפילה', ar:'صلاة', trans:'צַלַאה'},
   {cat:'דת ותרבות', he:'צום', ar:'صوم', trans:'צוֹם'},
-  {cat:'דת ותרבות', he:'רמדאן', ar:'رمضان', trans:'רַמַצַאן'}
+  {cat:'דת ותרבות', he:'רמדאן', ar:'رمضان', trans:'רַמַצַאן'},
+  {cat:'מספרים', he:'0 (אפס)', ar:'صفر', trans:'סִפֶר'},
+  {cat:'מספרים', he:'1 (אחד)', ar:'واحد', trans:'וַאחֶד'},
+  {cat:'מספרים', he:'2 (שתיים)', ar:'اثنين', trans:'תְנֵין'},
+  {cat:'מספרים', he:'3 (שלוש)', ar:'ثلاثة', trans:'תַלַאתֶה'},
+  {cat:'מספרים', he:'4 (ארבע)', ar:'أربعة', trans:'אַרְבַּעַה'},
+  {cat:'מספרים', he:'5 (חמש)', ar:'خمسة', trans:'חַ\'מְסֶה'},
+  {cat:'מספרים', he:'6 (שש)', ar:'ستة', trans:'סִתֶּה'},
+  {cat:'מספרים', he:'7 (שבע)', ar:'سبعة', trans:'סַבְּעַה'},
+  {cat:'מספרים', he:'8 (שמונה)', ar:'ثمانية', trans:'תַמַאנְיֶה'},
+  {cat:'מספרים', he:'9 (תשע)', ar:'تسعة', trans:'תִסְעַה'},
+  {cat:'מספרים', he:'10 (עשר)', ar:'عشرة', trans:'עַשַרַה'},
+  {cat:'מספרים', he:'11', ar:'احداعش', trans:'חְדַעַש'},
+  {cat:'מספרים', he:'12', ar:'اثناعش', trans:'תְנַעַש'},
+  {cat:'מספרים', he:'13', ar:'ثلاتعش', trans:'תַלַאתעַש'},
+  {cat:'מספרים', he:'14', ar:'اربعتعش', trans:'אַרְבַּעְתעַש'},
+  {cat:'מספרים', he:'15', ar:'خمستعش', trans:'חַ\'מַסְתעַש'},
+  {cat:'מספרים', he:'16', ar:'ستعش', trans:'סִתעַש'},
+  {cat:'מספרים', he:'17', ar:'سبعتعش', trans:'סַבַּעְתעַש'},
+  {cat:'מספרים', he:'18', ar:'تمنتعش', trans:'תַמַנְתעַש'},
+  {cat:'מספרים', he:'19', ar:'تسعتعش', trans:'תִסַעְתעַש'},
+  {cat:'מספרים', he:'20 (עשרים)', ar:'عشرين', trans:'עֶשְרִין'},
+  {cat:'מספרים', he:'30 (שלושים)', ar:'ثلاثين', trans:'תַלַאתִין'},
+  {cat:'מספרים', he:'40 (ארבעים)', ar:'أربعين', trans:'אַרְבַּעִין'},
+  {cat:'מספרים', he:'50 (חמישים)', ar:'خمسين', trans:'חַ\'מְסִין'},
+  {cat:'מספרים', he:'60 (שישים)', ar:'ستين', trans:'סִתִּין'},
+  {cat:'מספרים', he:'70 (שבעים)', ar:'سبعين', trans:'סַבְּעִין'},
+  {cat:'מספרים', he:'80 (שמונים)', ar:'ثمانين', trans:'תַמַאנִין'},
+  {cat:'מספרים', he:'90 (תשעים)', ar:'تسعين', trans:'תִסְעִין'},
+  {cat:'מספרים', he:'100 (מאה)', ar:'مية', trans:'מִייֶה'},
+  {cat:'מספרים', he:'1000 (אלף)', ar:'ألف', trans:'אַלְף'},
+  {cat:'מספרים', he:'כמה? / כמה עולה?', ar:'قديش', trans:'קַדֵּיש'},
+  {cat:'מספרים', he:'מספר', ar:'رقم', trans:'רַקַם'},
+  {cat:'מספרים', he:'ראשון', ar:'أول', trans:'אַול'},
+  {cat:'מספרים', he:'שני', ar:'ثاني', trans:'תַאני'},
+  {cat:'מספרים', he:'שלישי', ar:'ثالث', trans:'תַאלֶת'}
 ];
 // Where each source group is imported. Standalone WORDS go to the dictionary
 // (section 'dictionary'), organised by topical category — the operational
@@ -17161,7 +17199,8 @@ var FIELD_VOCAB_TARGET={
   'משפחה':         {section:'dictionary', cat:'משפחה'},
   'זמן':           {section:'dictionary', cat:'זמן'},
   'פעלים':         {section:'dictionary', cat:'פעלים'},
-  'דת ותרבות':     {section:'dictionary', cat:'דת ותרבות'}
+  'דת ותרבות':     {section:'dictionary', cat:'דת ותרבות'},
+  'מספרים':        {section:'military',   cat:'יסודות: מספרים'}
 };
 function _fvHe(s){ return String(s||'').replace(/\s+/g,' ').trim(); }
 function _fvAr(s){ return String(s||'').replace(/[ؐ-ًؚ-ٰٟـۖ-ۭ\s،؛؟.!,?"'()\-\/]/g,''); }
@@ -20903,7 +20942,7 @@ window.addEventListener('load', function(){
 <script>
 // Version stamp — shown in the admin panel so we can confirm which build is live
 // on a device (stale service-worker caches were causing "my changes don't show").
-window.APP_VERSION = 'v196';
+window.APP_VERSION = 'v197';
 
 // Register the service worker for full offline use in the field, WITH update
 // detection: when a new version installs, offer a one-tap refresh instead of the
