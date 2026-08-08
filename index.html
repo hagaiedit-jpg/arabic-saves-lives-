@@ -12762,6 +12762,18 @@ function bldCats(){
 
 // === Category metadata - introduction + subcategories ===
 const CATEGORY_INFO = {
+  'יסודות: מספרים': {
+    desc: '<b>מספרים בערבית מדוברת:</b><br>' +
+      '• <b>1–10</b> — הבסיס, לשנן קודם.<br>' +
+      '• <b>11–19</b> נגמרות ב־"־תַעַש".<br>' +
+      '• <b>עשרות (20–90)</b> נגמרות ב־"־ין".<br>' +
+      '• <b>מספר מורכב:</b> יחידה + "וּ" (תנועת U) + עשרת — <b>21 = וַאחֶד וּעֶשְרִין</b>.<br>' +
+      '• <b>ספירת שם עצם:</b><br>' +
+      '&nbsp;&nbsp;– <b>3–10:</b> מספר בצורה קצרה + שם העצם ברבים — <b>תַלַת אַוְלַאד</b> (3 ילדים).<br>' +
+      '&nbsp;&nbsp;– <b>11–19:</b> המספר מקבל ר׳ בסוף + שם העצם ביחיד — <b>תַלַאתַעְשַר וַלַד</b> (13 ילד).<br>' +
+      '• <b>100 בסמיכות</b> → <b>מִית</b>: מִית וַלַד (100 ילד).<br>' +
+      '💡 המספרים כמעט זהים בכל הלהגים — השקעה משתלמת.'
+  },
   'עצירת תנועה ורכב': {
     desc: 'פקודות לעצירת רכב או הולך רגל במחסום, בידוק נסיעה, ושאלות תזמון. השפה ישירה, החלטית, בלי הסברים.',
     subcats: {
@@ -20958,7 +20970,7 @@ window.addEventListener('load', function(){
 <script>
 // Version stamp — shown in the admin panel so we can confirm which build is live
 // on a device (stale service-worker caches were causing "my changes don't show").
-window.APP_VERSION = 'v198';
+window.APP_VERSION = 'v199';
 
 // Register the service worker for full offline use in the field, WITH update
 // detection: when a new version installs, offer a one-tap refresh instead of the
