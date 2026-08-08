@@ -17107,7 +17107,42 @@ var FIELD_VOCAB=[
   {cat:'מילון', he:'הכל / שלם', ar:'كامل', trans:'כַּאמֶל'},
   {cat:'מילון', he:'קצת', ar:'قليل', trans:'קַלִיל'},
   {cat:'מילון', he:'הרבה', ar:'كثير', trans:'כְּתִיר'},
-  {cat:'מילון', he:'חצי', ar:'نصف', trans:'נֻצְף'}
+  {cat:'מילון', he:'חצי', ar:'نصف', trans:'נֻצְף'},
+  {cat:'תחבורה', he:'מכונית', ar:'سيارة', trans:'סַיַארַה'},
+  {cat:'תחבורה', he:'אוטובוס', ar:'حافلة', trans:'חַאפִלֶה'},
+  {cat:'תחבורה', he:'אופנוע', ar:'دراجة نارية', trans:'דַרַאגֶ\'ה נַארִיֶה'},
+  {cat:'תחבורה', he:'מונית', ar:'سيارة أجرة', trans:'סַיַארַת אֻגְ\'רַה'},
+  {cat:'תחבורה', he:'רכבת', ar:'قطار', trans:'קִטַאר'},
+  {cat:'תחבורה', he:'משאית', ar:'شاحنة', trans:'שַאחְנֶה'},
+  {cat:'מקומות', he:'בית חולים', ar:'مشفى', trans:'מַשְפַא'},
+  {cat:'מקומות', he:'תחנת משטרה', ar:'محطة الشرطة', trans:'מַחַטַת אֶלשֻרְטַה'},
+  {cat:'מקומות', he:'מסגד', ar:'مسجد', trans:'מַסְגִ\'ד'},
+  {cat:'מקומות', he:'בית מרקחת', ar:'صيدلية', trans:'צַיְדַלִיֶה'},
+  {cat:'מקומות', he:'בנק', ar:'بنك', trans:'בַּנְכּ'},
+  {cat:'מקומות', he:'כלא / בית סוהר', ar:'سجن', trans:'סִגְ\'ן'},
+  {cat:'משפחה', he:'אמא', ar:'أم', trans:'אֻם'},
+  {cat:'משפחה', he:'אבא', ar:'أب', trans:'אַבּ'},
+  {cat:'משפחה', he:'בן', ar:'ابن', trans:'אִבְּן'},
+  {cat:'משפחה', he:'בת', ar:'بنت', trans:'בִּנְת'},
+  {cat:'משפחה', he:'אח', ar:'أخ', trans:'אַח\''},
+  {cat:'משפחה', he:'אחות', ar:'أخت', trans:'אֻחְ\'ת'},
+  {cat:'משפחה', he:'סבא', ar:'جد', trans:'גִ\'ד'},
+  {cat:'משפחה', he:'סבתא', ar:'جدة', trans:'גִ\'דֶה'},
+  {cat:'זמן', he:'עכשיו', ar:'الآن', trans:'אֶלְאַאן'},
+  {cat:'זמן', he:'מיד', ar:'حالا', trans:'חַאלַן'},
+  {cat:'זמן', he:'מהר', ar:'بسرعة', trans:'בִּסֻרְעַה'},
+  {cat:'זמן', he:'לאט', ar:'ببطء', trans:'בִּבֻּטְא'},
+  {cat:'זמן', he:'מוקדם', ar:'باكرا', trans:'בַּאכִּרַן'},
+  {cat:'זמן', he:'מאוחר', ar:'متأخر', trans:'מִתְאַחֶר'},
+  {cat:'פעלים', he:'להתקשר', ar:'يتصل', trans:'יִתַצֶל'},
+  {cat:'פעלים', he:'להגיע', ar:'يصل', trans:'יוֹצַל'},
+  {cat:'פעלים', he:'לעבוד', ar:'يعمل', trans:'יִעְמַל'},
+  {cat:'פעלים', he:'לדעת', ar:'يعرف', trans:'יַעְרֶף'},
+  {cat:'פעלים', he:'לחכות', ar:'ينتظر', trans:'יִנְתֶזֶר'},
+  {cat:'דת ותרבות', he:'מוסלמי', ar:'مسلم', trans:'מֻסְלֶם'},
+  {cat:'דת ותרבות', he:'תפילה', ar:'صلاة', trans:'צַלַאה'},
+  {cat:'דת ותרבות', he:'צום', ar:'صوم', trans:'צוֹם'},
+  {cat:'דת ותרבות', he:'רמדאן', ar:'رمضان', trans:'רַמַצַאן'}
 ];
 // Where each source group is imported. Standalone WORDS go to the dictionary
 // (section 'dictionary'), organised by topical category — the operational
@@ -17120,7 +17155,13 @@ var FIELD_VOCAB_TARGET={
   'תשאול: עבודה':  {section:'dictionary', cat:'מקצועות'},
   'יסודות השפה':   {section:'dictionary', cat:'פעלים'},
   'מילון':         {section:'dictionary', cat:'כמויות'},
-  'משפט הרגעה':    {section:'military',   cat:'הרגעה ושכנוע'}
+  'משפט הרגעה':    {section:'military',   cat:'הרגעה ושכנוע'},
+  'תחבורה':        {section:'dictionary', cat:'תחבורה'},
+  'מקומות':        {section:'dictionary', cat:'מקומות'},
+  'משפחה':         {section:'dictionary', cat:'משפחה'},
+  'זמן':           {section:'dictionary', cat:'זמן'},
+  'פעלים':         {section:'dictionary', cat:'פעלים'},
+  'דת ותרבות':     {section:'dictionary', cat:'דת ותרבות'}
 };
 function _fvHe(s){ return String(s||'').replace(/\s+/g,' ').trim(); }
 function _fvAr(s){ return String(s||'').replace(/[ؐ-ًؚ-ٰٟـۖ-ۭ\s،؛؟.!,?"'()\-\/]/g,''); }
@@ -20862,7 +20903,7 @@ window.addEventListener('load', function(){
 <script>
 // Version stamp — shown in the admin panel so we can confirm which build is live
 // on a device (stale service-worker caches were causing "my changes don't show").
-window.APP_VERSION = 'v195';
+window.APP_VERSION = 'v196';
 
 // Register the service worker for full offline use in the field, WITH update
 // detection: when a new version installs, offer a one-tap refresh instead of the
