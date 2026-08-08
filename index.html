@@ -9762,6 +9762,9 @@ try{
 // Populate all section arrays from a raw phrases array (used for both live and cached data)
 function populateFromData(data){
   DB=data.filter(p=>p.section==='military').map(mp);
+  // Editable category explanations (section 'explain'): override the built-in
+  // CATEGORY_INFO desc, server-persisted so all users see the admin's edit.
+  try{ window.EXPLAIN_OVERRIDES={}; data.filter(function(p){return p&&p.section==='explain'&&p.cat;}).forEach(function(p){ window.EXPLAIN_OVERRIDES[String(p.cat).trim()]=(p.why||p.he||''); }); }catch(e){}
   try{
     if(typeof BUILTIN_TASHAUL!=='undefined' && BUILTIN_TASHAUL.length){
       var _normHeT=function(s){return String(s||'').replace(/[^֐-׿0-9A-Za-z]/g,'');};
@@ -12996,16 +12999,20 @@ function opC(cat,special){
       target.appendChild(tplLink);
     }
 
-    // 1. Intro box - "what's in here"
-    if (catInfo && catInfo.desc) {
+    // 1. Intro box - "what's in here" (explanation; admin-editable, server-saved)
+    var _expl = (typeof catExplain === 'function') ? catExplain(cat) : (catInfo && catInfo.desc) || '';
+    var _isAdmin = !!window._adminAuth;
+    if (_expl || _isAdmin) {
       const introBox = document.createElement('div');
       introBox.style.cssText = 'background:linear-gradient(135deg,rgba(212,162,78,0.1),rgba(212,162,78,0.03));border:1px solid rgba(212,162,78,0.3);border-radius:12px;padding:14px;margin-bottom:14px;';
-      introBox.innerHTML = 
-        '<div style="display:flex;align-items:center;gap:8px;margin-bottom:8px;">' +
-          '<div style="font-size:18px;">ℹ️</div>' +
-          '<div style="color:#D4A24E;font-size:13px;font-weight:700;">מה יש כאן</div>' +
+      var _catEsc = String(cat).replace(/'/g,"\\'");
+      introBox.innerHTML =
+        '<div style="display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:8px;">' +
+          '<div style="display:flex;align-items:center;gap:8px;"><div style="font-size:18px;">ℹ️</div>' +
+          '<div style="color:#D4A24E;font-size:13px;font-weight:700;">הסבר</div></div>' +
+          (_isAdmin ? '<button onclick="editCatExplain(\'' + _catEsc + '\')" style="background:#2A3D52;border:1px solid #D4A24E;color:#E8D9B8;border-radius:8px;padding:5px 11px;font-size:12px;font-weight:700;cursor:pointer;font-family:inherit;">✏️ ערוך</button>' : '') +
         '</div>' +
-        '<div style="color:#c0d0e0;font-size:13px;line-height:1.6;">' + catInfo.desc + '</div>';
+        '<div style="color:#c0d0e0;font-size:13px;line-height:1.6;">' + (_expl || '<span style="color:#7a9ab5;">אין הסבר עדיין — לחצי ✏️ ערוך כדי להוסיף.</span>') + '</div>';
       target.appendChild(introBox);
     }
     
@@ -17235,6 +17242,43 @@ function _fvDupOf(v, idx){
   if(idx.byCat[key+'|H|'+_fvHe(v.he)] || idx.byCat[key+'|A|'+_fvAr(v.ar)]) return {sec:t.section,cat:t.cat};
   return null;
 }
+
+// ---- Editable category explanations -------------------------------------
+// Returns the explanation for a category: a server-saved override if present,
+// else the built-in CATEGORY_INFO desc.
+function catExplain(cat){
+  var k=String(cat||'').trim();
+  try{ if(window.EXPLAIN_OVERRIDES && typeof EXPLAIN_OVERRIDES[k]==='string') return EXPLAIN_OVERRIDES[k]; }catch(e){}
+  try{ if(typeof CATEGORY_INFO!=='undefined' && CATEGORY_INFO[k] && CATEGORY_INFO[k].desc) return CATEGORY_INFO[k].desc; }catch(e){}
+  return '';
+}
+function editCatExplain(cat){
+  window._explainEditCat=cat;
+  var ta=document.getElementById('explain-edit-text'); if(ta) ta.value=catExplain(cat);
+  var lbl=document.getElementById('explain-edit-cat'); if(lbl) lbl.textContent='קטגוריה: '+cat;
+  var o=document.getElementById('explain-edit-overlay'); if(o) o.style.display='block';
+}
+function closeCatExplain(){ var o=document.getElementById('explain-edit-overlay'); if(o) o.style.display='none'; }
+async function saveCatExplain(){
+  var cat=window._explainEditCat; if(!cat) return;
+  var txt=(document.getElementById('explain-edit-text')||{}).value||'';
+  var btn=document.getElementById('explain-save-btn'); var old=btn?btn.textContent:''; if(btn){btn.disabled=true;btn.textContent='שומר...';}
+  try{
+    var existing=await sbFetch('/rest/v1/phrases?select=id&section=eq.explain&cat=eq.'+encodeURIComponent(cat));
+    if(existing && existing.length){
+      await sbFetch('/rest/v1/phrases?id=eq.'+encodeURIComponent(existing[0].id),'PATCH',{why:txt});
+    } else {
+      await sbFetch('/rest/v1/phrases','POST',{section:'explain',cat:cat,he:cat,ar:'',trans:'',why:txt,tone:'',audio_url:'',is_new:false});
+    }
+    if(!window.EXPLAIN_OVERRIDES) window.EXPLAIN_OVERRIDES={};
+    window.EXPLAIN_OVERRIDES[String(cat).trim()]=txt;
+    try{ await loadData(); }catch(e){}
+    closeCatExplain();
+    try{ opC(cat); }catch(e){}
+    if(btn){btn.disabled=false;btn.textContent=old;}
+    alert('✓ ההסבר נשמר. כל המשתמשים יראו אותו.');
+  }catch(e){ if(btn){btn.disabled=false;btn.textContent=old;} alert('שגיאה בשמירה: '+(e&&e.message?e.message:e)); }
+}
 function _fvAr(s){ return String(s||'').replace(/[ؐ-ًؚ-ٰٟـۖ-ۭ\s،؛؟.!,?"'()\-\/]/g,''); }
 function checkFieldVocab(){
   var el=document.getElementById('dupe-body'); if(!el) return;
@@ -20970,7 +21014,7 @@ window.addEventListener('load', function(){
 <script>
 // Version stamp — shown in the admin panel so we can confirm which build is live
 // on a device (stale service-worker caches were causing "my changes don't show").
-window.APP_VERSION = 'v200';
+window.APP_VERSION = 'v201';
 
 // Register the service worker for full offline use in the field, WITH update
 // detection: when a new version installs, offer a one-tap refresh instead of the
@@ -21100,6 +21144,20 @@ document.getElementById('legal-modal').addEventListener('click', function(e){ if
       <div style="text-align:center;margin-top:10px;"><button onclick="clBackToPhone()" style="background:none;border:none;color:#7a9ab5;font-size:12px;cursor:pointer;font-family:inherit;text-decoration:underline;">‹ שינוי מספר / שליחת קוד מחדש</button></div>
     </div>
     <div id="cl-status" style="text-align:center;color:#ff9a8f;font-size:12.5px;margin-top:12px;min-height:16px;"></div>
+  </div>
+</div>
+
+<!-- ===== Category-explanation editor (admin) ===== -->
+<div id="explain-edit-overlay" style="display:none;position:fixed;inset:0;z-index:11500;background:rgba(9,17,29,.97);direction:rtl;overflow-y:auto;padding:20px 16px;">
+  <div style="max-width:580px;margin:4vh auto;background:linear-gradient(180deg,#1c2f47,#152539);border:1px solid #2a3d54;border-radius:14px;padding:18px;">
+    <div style="color:#E8D9B8;font-size:16px;font-weight:800;margin-bottom:3px;">✏️ עריכת הסבר</div>
+    <div id="explain-edit-cat" style="color:#7a9ab5;font-size:12px;margin-bottom:10px;"></div>
+    <textarea id="explain-edit-text" style="width:100%;min-height:230px;background:#0E1B2E;border:1px solid #2A3D52;border-radius:10px;color:#E8D9B8;font-family:inherit;font-size:14px;padding:12px;line-height:1.7;direction:rtl;"></textarea>
+    <div style="color:#7a9ab5;font-size:11px;margin-top:6px;line-height:1.6;">אפשר HTML פשוט: &lt;b&gt;מודגש&lt;/b&gt; · &lt;br&gt; שורה חדשה · • לנקודה. השמירה במאגר — כל המשתמשים יראו.</div>
+    <div style="display:flex;gap:8px;margin-top:14px;">
+      <button id="explain-save-btn" onclick="saveCatExplain()" style="flex:1;padding:12px;background:#1D9E75;border:none;border-radius:10px;color:#fff;font-size:14px;font-weight:800;cursor:pointer;font-family:inherit;">💾 שמור</button>
+      <button onclick="closeCatExplain()" style="padding:12px 18px;background:#2A3D52;border:none;border-radius:10px;color:#E8D9B8;font-size:14px;cursor:pointer;font-family:inherit;">ביטול</button>
+    </div>
   </div>
 </div>
 
