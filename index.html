@@ -10091,6 +10091,7 @@ const FOUNDATION_GROUPS=[
   {title:'דקדוק ומבנה', items:[
     {id:'יסודות: כינויי גוף', icon:'👤'},
     {id:'יסודות: זכר ונקבה', icon:'⚥'},
+    {id:'יסודות: כינוי רמז', icon:'👉'},
     {id:'יסודות: שייכות', icon:'🔑'},
     {id:'יסודות: מילות שאלה', icon:'❓'},
     {id:'יסודות: שלילה', icon:'🚫'},
@@ -12786,6 +12787,16 @@ const CATEGORY_INFO = {
       '• <b>תואר מתאים למין:</b> אומרים <b>וַלַד כְּבִּיר</b> (ילד גדול) אבל <b>בִּנְת כְּבִּירֶה</b> (ילדה גדולה).<br>' +
       '• <b>שים לב:</b> לא לכל מילה יש צורת נקבה נפרדת — למשל <b>אעַטִי</b> (תן/תני) נאמר אותו דבר לשני המינים.<br>' +
       '💡 כלל אצבע: שומעים "־ֶה" בסוף → כנראה נקבה. מוסיפים "־י" לפקודה → פונים לאישה.'
+  },
+  'יסודות: כינוי רמז': {
+    desc: '<b>כינויי רמז — "זה / זאת / ההוא / אלה":</b><br>' +
+      '• <b>קרוב (זה/זאת):</b> <b>הַאד</b> (ז, גם הַאדא) · <b>הַאי</b> (נ, גם הַאדי).<br>' +
+      '• <b>קרוב ברבים (אלה):</b> <b>הַדוֹל</b>.<br>' +
+      '• <b>רחוק (ההוא/ההיא):</b> <b>הַדַאכּ</b> (ז) · <b>הַדִיכּ</b> (נ).<br>' +
+      '• <b>רחוק ברבים (ההם):</b> <b>הַדוֹלַאכּ</b> (גם הַדוֹכּ).<br>' +
+      '• <b>שם עצם מיודע:</b> "זה" נצמד ל-ال ומתכווץ ל-<b>הַאל־</b> — <b>הַאלבֵּית</b> (הבית הזה), <b>הַאזַלַמֶה</b> (האיש הזה).<br>' +
+      '• <b>שאלות נפוצות:</b> <b>שוּ הַאד?</b> (מה זה?) · <b>מִין הַאד?</b> (מי זה?).<br>' +
+      '💡 בשטח: להצביע ולומר "הַאד" / "הַדַאכּ" — הדרך המהירה לכוון בלי מילים מיותרות.'
   },
   'עצירת תנועה ורכב': {
     desc: 'פקודות לעצירת רכב או הולך רגל במחסום, בידוק נסיעה, ושאלות תזמון. השפה ישירה, החלטית, בלי הסברים.',
@@ -17221,7 +17232,16 @@ var FIELD_VOCAB=[
   {cat:'זכר ונקבה', he:'רופא / רופאה', ar:'طبيب / طبيبة', trans:'טַבִּיבּ / טַבִּיבֶה'},
   {cat:'זכר ונקבה', he:'גדול / גדולה', ar:'كبير / كبيرة', trans:'כְּבִּיר / כְּבִּירֶה'},
   {cat:'זכר ונקבה', he:'קטן / קטנה', ar:'صغير / صغيرة', trans:'זְעִ\'יר / זְעִ\'ירֶה'},
-  {cat:'זכר ונקבה', he:'יפה (ז) / יפה (נ)', ar:'حلو / حلوة', trans:'חִלוּ / חִלְוֶה'}
+  {cat:'זכר ונקבה', he:'יפה (ז) / יפה (נ)', ar:'حلو / حلوة', trans:'חִלוּ / חִלְוֶה'},
+  {cat:'כינוי רמז', he:'זה / זאת (קרוב)', ar:'هاد / هادا - هاي / هادي', trans:'הַאד / הַאדא - הַאי / הַאדי'},
+  {cat:'כינוי רמז', he:'אלה (קרוב, רבים)', ar:'هدول', trans:'הַדוֹל'},
+  {cat:'כינוי רמז', he:'ההוא / ההיא (רחוק)', ar:'هداك / هديك', trans:'הַדַאכּ / הַדִיכּ'},
+  {cat:'כינוי רמז', he:'ההם (רחוק, רבים)', ar:'هدولاك / هدوك', trans:'הַדוֹלַאכּ / הַדוֹכּ'},
+  {cat:'כינוי רמז', he:'מה זה?', ar:'شو هاد؟', trans:'שוּ הַאד'},
+  {cat:'כינוי רמז', he:'מי זה?', ar:'مين هاد؟', trans:'מִין הַאד'},
+  {cat:'כינוי רמז', he:'הבית הזה', ar:'هالبيت', trans:'הַאלבֵּית'},
+  {cat:'כינוי רמז', he:'האיש הזה', ar:'هالزلمة', trans:'הַאזַלַמֶה'},
+  {cat:'כינוי רמז', he:'לא זה', ar:'مش هاد', trans:'מֶש הַאד'}
 ];
 // Where each source group is imported. Standalone WORDS go to the dictionary
 // (section 'dictionary'), organised by topical category — the operational
@@ -17242,7 +17262,8 @@ var FIELD_VOCAB_TARGET={
   'פעלים':         {section:'dictionary', cat:'פעלים'},
   'דת ותרבות':     {section:'dictionary', cat:'דת ותרבות'},
   'מספרים':        {section:'military',   cat:'יסודות: מספרים'},
-  'זכר ונקבה':     {section:'military',   cat:'יסודות: זכר ונקבה'}
+  'זכר ונקבה':     {section:'military',   cat:'יסודות: זכר ונקבה'},
+  'כינוי רמז':     {section:'military',   cat:'יסודות: כינוי רמז'}
 };
 function _fvHe(s){ return String(s||'').replace(/\s+/g,' ').trim(); }
 // Dedup index: global (any section) + per-category (section|cat). Dictionary
@@ -21054,7 +21075,7 @@ window.addEventListener('load', function(){
 <script>
 // Version stamp — shown in the admin panel so we can confirm which build is live
 // on a device (stale service-worker caches were causing "my changes don't show").
-window.APP_VERSION = 'v203';
+window.APP_VERSION = 'v204';
 
 // Register the service worker for full offline use in the field, WITH update
 // detection: when a new version installs, offer a one-tap refresh instead of the
