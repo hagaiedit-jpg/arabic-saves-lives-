@@ -10092,6 +10092,7 @@ const FOUNDATION_GROUPS=[
     {id:'יסודות: כינויי גוף', icon:'👤'},
     {id:'יסודות: זכר ונקבה', icon:'⚥'},
     {id:'יסודות: כינוי רמז', icon:'👉'},
+    {id:"יסודות: ה' הידיעה", icon:'📌'},
     {id:'יסודות: שייכות', icon:'🔑'},
     {id:'יסודות: מילות שאלה', icon:'❓'},
     {id:'יסודות: שלילה', icon:'🚫'},
@@ -12797,6 +12798,22 @@ const CATEGORY_INFO = {
       '• <b>שם עצם מיודע:</b> "זה" נצמד ל-ال ומתכווץ ל-<b>הַאל־</b> — <b>הַאלבֵּית</b> (הבית הזה), <b>הַאזַלַמֶה</b> (האיש הזה).<br>' +
       '• <b>שאלות נפוצות:</b> <b>שוּ הַאד?</b> (מה זה?) · <b>מִין הַאד?</b> (מי זה?).<br>' +
       '💡 בשטח: להצביע ולומר "הַאד" / "הַדַאכּ" — הדרך המהירה לכוון בלי מילים מיותרות.'
+  },
+  "יסודות: ה' הידיעה": {
+    desc: '<b>ה\' הידיעה — אֶל (ال):</b><br>' +
+      'ה\' הידיעה בערבית היא <b>אֶל</b> שמצטרפת לתחילת המילה — <b>אֶליום</b> = היום. איך הוגים אותה?<br><br>' +
+      '<b>א. בראש משפט</b> → הוגים אֶל מלא:<br>' +
+      '&nbsp;&nbsp;<b>אֶליום אַנַא תַעבַּאן</b> — היום אני עייף.<br>' +
+      '<b>ב. באמצע משפט</b> → האלף לא נהגית, נקרא ברצף כמילה אחת:<br>' +
+      '&nbsp;&nbsp;<b>הֻוֶּ תַעבַּאן (א)ליום</b> — הוא עייף היום.<br>' +
+      '<b>ג. לפני אות שמש</b> → ה־ל <b>נטמעת</b> באות ונשמעת מוכפלת:<br>' +
+      '&nbsp;&nbsp;<b>א(ל)דּכּתור עַיַאן</b> — הרופא חולה (ד מודגשת).<br>' +
+      '&nbsp;&nbsp;14 אותיות השמש: <b>ت ث د ذ ر ز س ش ص ض ط ظ ل ن</b> (ת ת׳ ד ד׳ ר ז ס ש צ צ׳ ט ט׳ ל נ).<br>' +
+      '<b>ד. אות שמש באמצע משפט</b> → לא הוגים אֶל בכלל:<br>' +
+      '&nbsp;&nbsp;<b>סַבַּאח א(ל)נּור</b> — בוקר טוב.<br>' +
+      '<b>ה. שם עצם הפותח בשווא</b> (כמו כּבִּיר, זעִ׳יר) → ה־ל מקבלת תנועת עזר <b>לְ</b>:<br>' +
+      '&nbsp;&nbsp;<b>אַח\'וּי (א)לְכּבִּיר</b> — אחי הגדול · <b>אַח\'וּי (א)לְזעִ\'יר</b> — אחי הקטן.<br>' +
+      '💡 (א) בסוגריים = כתוב אך לא נהגה. שומעים אות שמש? ה־ל נבלעת בתוכה.'
   },
   'עצירת תנועה ורכב': {
     desc: 'פקודות לעצירת רכב או הולך רגל במחסום, בידוק נסיעה, ושאלות תזמון. השפה ישירה, החלטית, בלי הסברים.',
@@ -17241,7 +17258,13 @@ var FIELD_VOCAB=[
   {cat:'כינוי רמז', he:'מי זה?', ar:'مين هاد؟', trans:'מִין הַאד'},
   {cat:'כינוי רמז', he:'הבית הזה', ar:'هالبيت', trans:'הַאלבֵּית'},
   {cat:'כינוי רמז', he:'האיש הזה', ar:'هالزلمة', trans:'הַאזַלַמֶה'},
-  {cat:'כינוי רמז', he:'לא זה', ar:'مش هاد', trans:'מֶש הַאד'}
+  {cat:'כינוי רמז', he:'לא זה', ar:'مش هاد', trans:'מֶש הַאד'},
+  {cat:"ה' הידיעה", he:'היום אני עייף', ar:'اليوم أنا تعبان', trans:'אֶליום אַנַא תַעבַּאן'},
+  {cat:"ה' הידיעה", he:'הוא עייף היום', ar:'هو تعبان اليوم', trans:'הֻוֶּ תַעבַּאן (א)ליום'},
+  {cat:"ה' הידיעה", he:'הרופא חולה', ar:'الدكتور عيان', trans:'א(ל)דּכּתור עַיַאן'},
+  {cat:"ה' הידיעה", he:'בוקר טוב', ar:'صباح النور', trans:'סַבַּאח א(ל)נּור'},
+  {cat:"ה' הידיעה", he:'אחי הגדול', ar:'أخوي الكبير', trans:'אַח\'וּי (א)לְכּבִּיר'},
+  {cat:"ה' הידיעה", he:'אחי הקטן', ar:'أخوي الصغير', trans:'אַח\'וּי (א)לְזעִ\'יר'}
 ];
 // Where each source group is imported. Standalone WORDS go to the dictionary
 // (section 'dictionary'), organised by topical category — the operational
@@ -17263,7 +17286,8 @@ var FIELD_VOCAB_TARGET={
   'דת ותרבות':     {section:'dictionary', cat:'דת ותרבות'},
   'מספרים':        {section:'military',   cat:'יסודות: מספרים'},
   'זכר ונקבה':     {section:'military',   cat:'יסודות: זכר ונקבה'},
-  'כינוי רמז':     {section:'military',   cat:'יסודות: כינוי רמז'}
+  'כינוי רמז':     {section:'military',   cat:'יסודות: כינוי רמז'},
+  "ה' הידיעה":     {section:'military',   cat:"יסודות: ה' הידיעה"}
 };
 function _fvHe(s){ return String(s||'').replace(/\s+/g,' ').trim(); }
 // Dedup index: global (any section) + per-category (section|cat). Dictionary
@@ -21075,7 +21099,7 @@ window.addEventListener('load', function(){
 <script>
 // Version stamp — shown in the admin panel so we can confirm which build is live
 // on a device (stale service-worker caches were causing "my changes don't show").
-window.APP_VERSION = 'v204';
+window.APP_VERSION = 'v205';
 
 // Register the service worker for full offline use in the field, WITH update
 // detection: when a new version installs, offer a one-tap refresh instead of the
