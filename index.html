@@ -10090,6 +10090,7 @@ const DB_OWNED_CATS={};
 const FOUNDATION_GROUPS=[
   {title:'דקדוק ומבנה', items:[
     {id:'יסודות: כינויי גוף', icon:'👤'},
+    {id:'יסודות: זכר ונקבה', icon:'⚥'},
     {id:'יסודות: שייכות', icon:'🔑'},
     {id:'יסודות: מילות שאלה', icon:'❓'},
     {id:'יסודות: שלילה', icon:'🚫'},
@@ -12777,6 +12778,15 @@ const CATEGORY_INFO = {
       '• <b>100 בסמיכות</b> → <b>מִית</b>: מִית וַלַד (100 ילד).<br>' +
       '💡 המספרים כמעט זהים בכל הלהגים — השקעה משתלמת.'
   },
+  'יסודות: זכר ונקבה': {
+    desc: '<b>זכר ונקבה בערבית מדוברת:</b><br>' +
+      '• <b>שם עצם/תואר נקבי</b> נגמר לרוב ב־"־ֶה" (בערבית ة) — <b>כְּבִּיר → כְּבִּירֶה</b> (גדול/גדולה), <b>מֻעַלֶם → מֻעַלְמֶה</b> (מורה).<br>' +
+      '• <b>אתה/את:</b> אִנְתַ (לזכר) / אִנְתִי (לנקבה).<br>' +
+      '• <b>פקודות (ציווי):</b> לנקבה מוסיפים "־י" בסוף — <b>רוּח → רוּחִי</b> (לך/לכי), <b>וַקֶף → וַקְפִי</b> (עצור/עצרי).<br>' +
+      '• <b>תואר מתאים למין:</b> אומרים <b>וַלַד כְּבִּיר</b> (ילד גדול) אבל <b>בִּנְת כְּבִּירֶה</b> (ילדה גדולה).<br>' +
+      '• <b>שים לב:</b> לא לכל מילה יש צורת נקבה נפרדת — למשל <b>אעַטִי</b> (תן/תני) נאמר אותו דבר לשני המינים.<br>' +
+      '💡 כלל אצבע: שומעים "־ֶה" בסוף → כנראה נקבה. מוסיפים "־י" לפקודה → פונים לאישה.'
+  },
   'עצירת תנועה ורכב': {
     desc: 'פקודות לעצירת רכב או הולך רגל במחסום, בידוק נסיעה, ושאלות תזמון. השפה ישירה, החלטית, בלי הסברים.',
     subcats: {
@@ -13012,7 +13022,7 @@ function opC(cat,special){
           '<div style="color:#D4A24E;font-size:13px;font-weight:700;">הסבר</div></div>' +
           (_isAdmin ? '<button onclick="editCatExplain(\'' + _catEsc + '\')" style="background:#2A3D52;border:1px solid #D4A24E;color:#E8D9B8;border-radius:8px;padding:5px 11px;font-size:12px;font-weight:700;cursor:pointer;font-family:inherit;">✏️ ערוך</button>' : '') +
         '</div>' +
-        '<div style="color:#c0d0e0;font-size:13px;line-height:1.6;">' + (_expl || '<span style="color:#7a9ab5;">אין הסבר עדיין — לחצי ✏️ ערוך כדי להוסיף.</span>') + '</div>';
+        '<div style="color:#c0d0e0;font-size:13px;line-height:1.6;">' + (_expl ? _explToHtml(_expl) : '<span style="color:#7a9ab5;">אין הסבר עדיין — לחצי ✏️ ערוך כדי להוסיף.</span>') + '</div>';
       target.appendChild(introBox);
     }
     
@@ -17199,7 +17209,19 @@ var FIELD_VOCAB=[
   {cat:'מספרים', he:'מספר', ar:'رقم', trans:'רַקַם'},
   {cat:'מספרים', he:'ראשון', ar:'أول', trans:'אַול'},
   {cat:'מספרים', he:'שני', ar:'ثاني', trans:'תַאני'},
-  {cat:'מספרים', he:'שלישי', ar:'ثالث', trans:'תַאלֶת'}
+  {cat:'מספרים', he:'שלישי', ar:'ثالث', trans:'תַאלֶת'},
+  {cat:'זכר ונקבה', he:'אתה / את', ar:'انت / انتي', trans:'אִנְתַ / אִנְתִי'},
+  {cat:'זכר ונקבה', he:'בוא / בואי', ar:'تعال / تعالي', trans:'תַעַאל / תַעַאלִי'},
+  {cat:'זכר ונקבה', he:'לך / לכי', ar:'روح / روحي', trans:'רוּח / רוּחִי'},
+  {cat:'זכר ונקבה', he:'עצור / עצרי', ar:'وقف / وقفي', trans:'וַקֶף / וַקְפִי'},
+  {cat:'זכר ונקבה', he:'שב / שבי', ar:'اقعد / اقعدي', trans:'אֻקְעֻד / אֻקְעֻדִי'},
+  {cat:'זכר ונקבה', he:'קום / קומי', ar:'قوم / قومي', trans:'קוּם / קוּמִי'},
+  {cat:'זכר ונקבה', he:'תן / תני', ar:'اعطي', trans:'אעַטִי'},
+  {cat:'זכר ונקבה', he:'מורה (ז) / מורה (נ)', ar:'معلم / معلمة', trans:'מֻעַלֶם / מֻעַלְמֶה'},
+  {cat:'זכר ונקבה', he:'רופא / רופאה', ar:'طبيب / طبيبة', trans:'טַבִּיבּ / טַבִּיבֶה'},
+  {cat:'זכר ונקבה', he:'גדול / גדולה', ar:'كبير / كبيرة', trans:'כְּבִּיר / כְּבִּירֶה'},
+  {cat:'זכר ונקבה', he:'קטן / קטנה', ar:'صغير / صغيرة', trans:'זְעִ\'יר / זְעִ\'ירֶה'},
+  {cat:'זכר ונקבה', he:'יפה (ז) / יפה (נ)', ar:'حلو / حلوة', trans:'חִלוּ / חִלְוֶה'}
 ];
 // Where each source group is imported. Standalone WORDS go to the dictionary
 // (section 'dictionary'), organised by topical category — the operational
@@ -17219,7 +17241,8 @@ var FIELD_VOCAB_TARGET={
   'זמן':           {section:'dictionary', cat:'זמן'},
   'פעלים':         {section:'dictionary', cat:'פעלים'},
   'דת ותרבות':     {section:'dictionary', cat:'דת ותרבות'},
-  'מספרים':        {section:'military',   cat:'יסודות: מספרים'}
+  'מספרים':        {section:'military',   cat:'יסודות: מספרים'},
+  'זכר ונקבה':     {section:'military',   cat:'יסודות: זכר ונקבה'}
 };
 function _fvHe(s){ return String(s||'').replace(/\s+/g,' ').trim(); }
 // Dedup index: global (any section) + per-category (section|cat). Dictionary
@@ -17252,9 +17275,26 @@ function catExplain(cat){
   try{ if(typeof CATEGORY_INFO!=='undefined' && CATEGORY_INFO[k] && CATEGORY_INFO[k].desc) return CATEGORY_INFO[k].desc; }catch(e){}
   return '';
 }
+// Display: HTML content (built-in) renders as-is; plain text (user-edited) is
+// escaped and its line breaks become <br> — so the user never edits raw tags.
+function _explToHtml(s){
+  s=String(s||'');
+  if(/<[a-zA-Z][^>]*>/.test(s)) return s;
+  return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/\n/g,'<br>');
+}
+// Editor: turn HTML (built-in) into clean plain text with real line breaks.
+function _explToPlain(s){
+  return String(s||'')
+    .replace(/<br\s*\/?>/gi,'\n')
+    .replace(/<\/?(b|strong|i|em|u)>/gi,'')
+    .replace(/&nbsp;/g,' ')
+    .replace(/<[^>]+>/g,'')
+    .replace(/&amp;/g,'&').replace(/&lt;/g,'<').replace(/&gt;/g,'>')
+    .replace(/[ \t]+\n/g,'\n').trim();
+}
 function editCatExplain(cat){
   window._explainEditCat=cat;
-  var ta=document.getElementById('explain-edit-text'); if(ta) ta.value=catExplain(cat);
+  var ta=document.getElementById('explain-edit-text'); if(ta) ta.value=_explToPlain(catExplain(cat));
   var lbl=document.getElementById('explain-edit-cat'); if(lbl) lbl.textContent='קטגוריה: '+cat;
   var o=document.getElementById('explain-edit-overlay'); if(o) o.style.display='block';
 }
@@ -21014,7 +21054,7 @@ window.addEventListener('load', function(){
 <script>
 // Version stamp — shown in the admin panel so we can confirm which build is live
 // on a device (stale service-worker caches were causing "my changes don't show").
-window.APP_VERSION = 'v201';
+window.APP_VERSION = 'v203';
 
 // Register the service worker for full offline use in the field, WITH update
 // detection: when a new version installs, offer a one-tap refresh instead of the
@@ -21152,7 +21192,7 @@ document.getElementById('legal-modal').addEventListener('click', function(e){ if
   <div style="max-width:580px;margin:4vh auto;background:linear-gradient(180deg,#1c2f47,#152539);border:1px solid #2a3d54;border-radius:14px;padding:18px;">
     <div style="color:#E8D9B8;font-size:16px;font-weight:800;margin-bottom:3px;">✏️ עריכת הסבר</div>
     <div id="explain-edit-cat" style="color:#7a9ab5;font-size:12px;margin-bottom:10px;"></div>
-    <textarea id="explain-edit-text" style="width:100%;min-height:230px;background:#0E1B2E;border:1px solid #2A3D52;border-radius:10px;color:#E8D9B8;font-family:inherit;font-size:14px;padding:12px;line-height:1.7;direction:rtl;"></textarea>
+    <textarea id="explain-edit-text" spellcheck="false" autocomplete="off" autocorrect="off" autocapitalize="off" style="width:100%;min-height:230px;background:#0E1B2E;border:1px solid #2A3D52;border-radius:10px;color:#ffffff;-webkit-text-fill-color:#ffffff;caret-color:#D4A24E;font-family:inherit;font-size:15px;padding:12px;line-height:1.8;direction:rtl;"></textarea>
     <div style="color:#7a9ab5;font-size:11px;margin-top:6px;line-height:1.6;">אפשר HTML פשוט: &lt;b&gt;מודגש&lt;/b&gt; · &lt;br&gt; שורה חדשה · • לנקודה. השמירה במאגר — כל המשתמשים יראו.</div>
     <div style="display:flex;gap:8px;margin-top:14px;">
       <button id="explain-save-btn" onclick="saveCatExplain()" style="flex:1;padding:12px;background:#1D9E75;border:none;border-radius:10px;color:#fff;font-size:14px;font-weight:800;cursor:pointer;font-family:inherit;">💾 שמור</button>
