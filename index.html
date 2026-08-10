@@ -21021,7 +21021,9 @@ try { renderHome(); } catch(_){}
 
 <!-- More Menu (popup from bottom) -->
 <div id="more-menu" style="display:none;position:fixed;bottom:80px;left:50%;transform:translateX(-50%);width:calc(100% - 16px);max-width:464px;box-sizing:border-box;background:#18293E;border:1px solid #2e4558;border-radius:14px;padding:12px;z-index:99;box-shadow:0 -4px 20px rgba(0,0,0,0.6);direction:rtl;">
-  <div style="text-align:center;color:#D4A24E;font-size:12px;font-weight:700;letter-spacing:1px;margin-bottom:10px;">תפריט נוסף</div>
+  <div style="text-align:center;color:#D4A24E;font-size:12px;font-weight:700;letter-spacing:1px;margin-bottom:10px;">עוד</div>
+  <!-- קבוצה 1: תוכן שפה ותרבות (העשרה — לא מבצעי) -->
+  <div style="color:#D4A24E;font-size:11px;font-weight:700;margin:2px 2px 7px;text-align:right;">שפה ותרבות</div>
   <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;">
     <div onclick="navToTab('day')" style="background:#1F3147;border-radius:10px;padding:14px 6px;text-align:center;cursor:pointer;">
       <div style="font-size:22px;margin-bottom:4px;">☕</div>
@@ -21035,6 +21037,10 @@ try { renderHome(); } catch(_){}
       <div style="font-size:22px;margin-bottom:4px;">📰</div>
       <div style="color:#E8D9B8;font-size:11px;font-weight:600;">מאמרים</div>
     </div>
+  </div>
+  <!-- קבוצה 2: כלים -->
+  <div style="color:#D4A24E;font-size:11px;font-weight:700;margin:14px 2px 7px;text-align:right;">כלים</div>
+  <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;">
     <!-- 🏆 Unit leaderboard — gated for the future paid kit. Re-enable by removing display:none. -->
     <div onclick="document.getElementById('more-menu').style.display='none';openLeaderboard()" style="display:none;background:linear-gradient(135deg,rgba(212,162,78,0.18),rgba(212,162,78,0.05));border:1px solid rgba(212,162,78,0.4);border-radius:10px;padding:14px 6px;text-align:center;cursor:pointer;">
       <div style="font-size:22px;margin-bottom:4px;">🏆</div>
@@ -21289,7 +21295,7 @@ window.addEventListener('load', function(){
 <script>
 // Version stamp — shown in the admin panel so we can confirm which build is live
 // on a device (stale service-worker caches were causing "my changes don't show").
-window.APP_VERSION = 'v211';
+window.APP_VERSION = 'v212';
 
 // Register the service worker for full offline use in the field, WITH update
 // detection: when a new version installs, offer a one-tap refresh instead of the
