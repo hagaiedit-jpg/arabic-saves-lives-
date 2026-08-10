@@ -1125,6 +1125,11 @@ body.day-mode #landing-overlay [style*="color:#7a9ab5"]{color:#7a9ab5 !important
 body.day-mode #landing-overlay [style*="color:#5e7a92"]{color:#5e7a92 !important;}
 body.day-mode #landing-overlay [style*="color:#1D9E75"]{color:#1D9E75 !important;}
 
+/* Category/foundation explanation body — theme-aware for readability.
+   Night (default, dark bg): near-white. Day (light bg): dark navy. */
+.cat-expl-body{color:#eef4fb;}
+body.day-mode .cat-expl-body{color:#15263a;}
+
 /* Full-screen dark overlays/modals stay dark in both themes (keeps their light text readable) */
 body.day-mode .force-dark{background:#0E1B2E !important;}
 body.day-mode .force-dark [style*="background:#18293E"]{background:#18293E !important;}
@@ -13182,7 +13187,7 @@ function opC(cat,special){
           '<div style="color:#D4A24E;font-size:13px;font-weight:700;">הסבר</div></div>' +
           (_isAdmin ? '<button onclick="editCatExplain(\'' + _catEsc + '\')" style="background:#2A3D52;border:1px solid #D4A24E;color:#E8D9B8;border-radius:8px;padding:5px 11px;font-size:12px;font-weight:700;cursor:pointer;font-family:inherit;">✏️ ערוך</button>' : '') +
         '</div>' +
-        '<div style="color:#c0d0e0;font-size:13px;line-height:1.6;">' + (_expl ? _explToHtml(_expl) : '<span style="color:#7a9ab5;">אין הסבר עדיין — לחצי ✏️ ערוך כדי להוסיף.</span>') + '</div>';
+        '<div class="cat-expl-body" style="font-size:13px;line-height:1.6;">' + (_expl ? _explToHtml(_expl) : '<span style="color:#7a9ab5;">אין הסבר עדיין — לחצי ✏️ ערוך כדי להוסיף.</span>') + '</div>';
       target.appendChild(introBox);
     }
     
