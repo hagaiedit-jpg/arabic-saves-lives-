@@ -13096,6 +13096,30 @@ function getPhraseSubcat(phrase, cat) {
 }
 
 
+// Meir #3 — logical operational order inside key categories. Short field
+// commands surface first in a sensible flow (greeting -> identify -> position
+// -> commands -> comprehension -> medical); longer/narrative sentences keep
+// their existing order below. Scenarios already carry their own order and are
+// untouched. Other categories are left exactly as they were.
+var CAT_FLOW={
+ 'בידוק וזיהוי':['שלום','אנחנו משטרה','משטרה','ביטחון','צה','תעוד','זהות','השם שלך','שמך','שם אביך','מה השם','מאיפה','איפה אתה גר','לאן','עברית','ערבית','עמוד','חכה','אל תזוז','ידיים','הרם','הסתובב','תסתובב','מבין','הבנת','עזרה','חולה','פצוע'],
+ 'עצירת תנועה ורכב':['עצור','כבה','מנוע','חלון','פתח','מטען','רישיון','תעוד','זהות','כמה','נשק','מסוכן','צא מהרכב','רד מ','תחזור','סע'],
+ 'ניהול מרחב והוראות':['עצור','הרם','ידיים','הסתובב','תסתובב','הישאר','תישאר','אחורה','התרחק','תתרחק','שב על','קום','אל תיגע','אל תזוז','בשקט','עמוד','בוא איתי','בוא'],
+ 'רפואה ועזרה ראשונה':['פצוע','כואב','אמבולנס','חולה','עזרה','נשימה','לנשום','אלרגי','תרופ','הריון','ילד','מדמם','דם','שב','אל תזוז','העזרה בדרך']
+};
+function _catFlowRank(cat,he){
+  var ks=CAT_FLOW[cat]; if(!ks) return 9999;
+  he=(he||'').trim();
+  if(he.length>22) return 9999;           // long/narrative sentences stay below the command flow
+  for(var i=0;i<ks.length;i++){ if(he.indexOf(ks[i])!==-1) return i; }
+  return 9999;
+}
+function _sortCatFlow(cat,arr){
+  if(!CAT_FLOW[cat]) return arr;           // untouched for every other category
+  return arr.map(function(p,idx){ return {p:p,idx:idx,r:_catFlowRank(cat,p.he)}; })
+            .sort(function(a,b){ return (a.r-b.r)||(a.idx-b.idx); })   // stable: ties keep original order
+            .map(function(x){ return x.p; });
+}
 function opC(cat,special){
   // Paywall (dormant unless window.PAYWALL): gate premium categories. The
   // foundations sub-menu itself stays reachable so the one free foundation
@@ -13152,7 +13176,7 @@ function opC(cat,special){
     }
   } else {
     // Regular category - intro + Learning Mode + (optional) subcategories
-    const catPhrases = DB.filter(p=>p.cat===cat);
+    const catPhrases = _sortCatFlow(cat, DB.filter(p=>p.cat===cat));
     const learned = JSON.parse(localStorage.getItem('learned_phrases') || '{}');
     const learnedInCat = catPhrases.filter(p=>learned[p.id]).length;
     const totalInCat = catPhrases.length;
@@ -21295,7 +21319,7 @@ window.addEventListener('load', function(){
 <script>
 // Version stamp — shown in the admin panel so we can confirm which build is live
 // on a device (stale service-worker caches were causing "my changes don't show").
-window.APP_VERSION = 'v212';
+window.APP_VERSION = 'v213';
 
 // Register the service worker for full offline use in the field, WITH update
 // detection: when a new version installs, offer a one-tap refresh instead of the
