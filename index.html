@@ -5420,6 +5420,9 @@ function renderPathSelection() {
 }
 
 function selectPath(pathType) {
+  // Paywall taste (dormant unless window.PAYWALL): the path-selection intro stays
+  // viewable (a taste of the combat-prep program); starting a path is premium.
+  try{ if(window.PAYWALL && typeof _hasPremium==='function' && !_hasPremium()){ if(typeof openUpsell==='function') openUpsell(); return; } }catch(e){}
   setActivePathType(pathType);
   var progress = getPrepPathProgress(pathType);
   if (!progress.startedAt) {
@@ -5480,6 +5483,9 @@ function markPrepDayComplete(day) {
 }
 
 function showPrepPathScreen() {
+  // Paywall (dormant unless window.PAYWALL): resuming/viewing actual path content
+  // is premium; the selection intro stays open as the taste.
+  try{ if(window.PAYWALL && typeof _hasPremium==='function' && !_hasPremium()){ if(typeof openUpsell==='function') openUpsell(); return; } }catch(e){}
   // Hide all tabs
   var allTabs = document.querySelectorAll('[id^="tab-"]');
   for (var i = 0; i < allTabs.length; i++) allTabs[i].className = 'scr';
@@ -7761,7 +7767,16 @@ function flashStart(mode, qCountOverride){
     alert('צריך לפחות 4 משפטים עם הקלטות');
     return;
   }
-  
+
+  // Paywall taste (dormant unless window.PAYWALL): a prospective buyer practices
+  // ONLY the free taste items — a real drill without unlocking premium content.
+  try{
+    if(window.PAYWALL && typeof _hasPremium==='function' && !_hasPremium() && typeof clFreeCat==='function'){
+      available = available.filter(function(p){ return clFreeCat(p.cat); });
+      if(available.length < 4){ if(typeof openUpsell==='function') openUpsell(); return; }
+    }
+  }catch(e){}
+
   // Determine how many questions (no daily limit!)
   var qCount = qCountOverride ? Math.min(qCountOverride, available.length) : Math.min(10, available.length);
   var selected = pickFlashQuestions(available, qCount, mode);
@@ -21265,7 +21280,7 @@ window.addEventListener('load', function(){
 <script>
 // Version stamp — shown in the admin panel so we can confirm which build is live
 // on a device (stale service-worker caches were causing "my changes don't show").
-window.APP_VERSION = 'v208';
+window.APP_VERSION = 'v209';
 
 // Register the service worker for full offline use in the field, WITH update
 // detection: when a new version installs, offer a one-tap refresh instead of the
