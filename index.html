@@ -12870,9 +12870,11 @@ function bldCats(){
     const cls='ct'+(c.special==='navy'?' navy':c.special==='announce'?' announce':'');
     const cnt=c.special==='announce'?ANNOUNCE.length:c.special==='navy'?NAVY.length
             :c.special==='foundations'?DB.filter(p=>FOUNDATION_CATS.indexOf(p.cat)!==-1).length:cntC(c.id);
+    // Paywall lock badge (dormant unless window.PAYWALL). Foundations tile stays open.
+    const lk=(window.PAYWALL && typeof _hasPremium==='function' && !_hasPremium() && c.special!=='foundations' && typeof clFreeCat==='function' && !clFreeCat(c.id));
     return`<div class="${cls}" onclick="opC('${c.id}','${c.special||''}')">
       ${n?_newTagHtml():''}
-      <div class="ci">${c.icon}</div><div class="cn">${c.id}</div><div class="cc">${cnt} פריטים</div></div>`;
+      <div class="ci">${c.icon}</div><div class="cn">${c.id}</div><div class="cc">${lk?'🔒 ':''}${cnt} פריטים</div></div>`;
   }).join('');
 }
 
@@ -13080,6 +13082,11 @@ function getPhraseSubcat(phrase, cat) {
 
 
 function opC(cat,special){
+  // Paywall (dormant unless window.PAYWALL): gate premium categories. The
+  // foundations sub-menu itself stays reachable so the one free foundation
+  // (ציווי ופקודות) can be opened; individual premium foundations are gated
+  // here too because they re-enter opC with their own cat id.
+  try{ if(window.PAYWALL && typeof _hasPremium==='function' && !_hasPremium() && special!=='foundations' && !clFreeCat(cat)){ openUpsell(); return; } }catch(e){}
   curC=cat;
   document.getElementById('ltitle').textContent=cat;
   
@@ -13098,8 +13105,9 @@ function opC(cat,special){
       g.items.forEach(function(it){
         var short=it.id.replace('יסודות: ','');
         var cnt=DB.filter(function(p){return p.cat===it.id;}).length;
+        var flk=false; try{ flk=(window.PAYWALL && typeof _hasPremium==='function' && !_hasPremium() && !clFreeCat(it.id)); }catch(e){}
         fh+='<div class="li" onclick="opC(\''+String(it.id).replace(/\\/g,'\\\\').replace(/'/g,"\\'")+'\')">'+
-            '<div class="lt">'+it.icon+' '+escapeHtml(short)+' <span style="color:#7a9ab5;font-size:11px;">('+cnt+')</span></div>'+
+            '<div class="lt">'+it.icon+' '+escapeHtml(short)+' '+(flk?'🔒 ':'')+'<span style="color:#7a9ab5;font-size:11px;">('+cnt+')</span></div>'+
             '<div class="la">›</div></div>';
       });
     });
@@ -14404,6 +14412,8 @@ function escapeHtmlSafe(str) {
 }
 
 function scnOpen(scnId){
+  // Paywall (dormant unless window.PAYWALL): only the free taste scenario opens.
+  try{ if(window.PAYWALL && typeof _hasPremium==='function' && !_hasPremium() && !(window.CL_FREE_SCN&&CL_FREE_SCN[scnId])){ openUpsell(); return; } }catch(e){}
   try {
     // Mark this scenario as seen (clears its "חדש" badge)
     try { var _ss = JSON.parse(localStorage.getItem('scn_seen') || '{}'); _ss[scnId] = 1; localStorage.setItem('scn_seen', JSON.stringify(_ss)); } catch(e){}
@@ -16367,6 +16377,10 @@ function openCustomsGroup(groupName){
     var cat = c.cat || 'תרבות והתנהגות';
     return getCustomsMainGroup(cat) === groupName;
   });
+  // Paywall (dormant unless window.PAYWALL): only the group holding the free
+  // taste custom is reachable; inside it, non-free items are locked below.
+  var _cusPw=false; try{ _cusPw=(window.PAYWALL && typeof _hasPremium==='function' && !_hasPremium()); }catch(e){}
+  if(_cusPw && !items.some(function(c){return c&&CL_FREE_CUSTOM[c.id];})){ openUpsell(); return; }
   document.getElementById('customs-home').style.display = 'none';
   document.getElementById('customs-list').style.display = 'block';
   document.getElementById('customs-list-title').textContent = groupName;
@@ -16383,7 +16397,9 @@ function openCustomsGroup(groupName){
     html += '</div>';
   }
   items.forEach(function(c, idx){
-    var txt = formatCustomsBody(c.why || c.ar || '');
+    var locked = _cusPw && !CL_FREE_CUSTOM[c.id];
+    var txt = locked ? ('🔒 המנהג הזה פתוח בגרסה המלאה.' + (typeof _upsellRow==='function'?_upsellRow('פתחו את כל המנהגים'):''))
+                     : formatCustomsBody(c.why || c.ar || '');
     html += '<div class="card" id="cus-item-' + idx + '" style="scroll-margin-top:70px;"><div class="che">' + c.he + '</div><div style="color:#a0b8c8;font-size:13.5px;line-height:1.85;margin-top:8px;">' + txt + '</div></div>';
   });
   document.getElementById('cuslist').innerHTML = html;
@@ -21249,7 +21265,7 @@ window.addEventListener('load', function(){
 <script>
 // Version stamp — shown in the admin panel so we can confirm which build is live
 // on a device (stale service-worker caches were causing "my changes don't show").
-window.APP_VERSION = 'v207';
+window.APP_VERSION = 'v208';
 
 // Register the service worker for full offline use in the field, WITH update
 // detection: when a new version installs, offer a one-tap refresh instead of the
@@ -21426,12 +21442,12 @@ document.getElementById('legal-modal').addEventListener('click', function(e){ if
       <div>✓ תרחישים מהשטח</div>
     </div>
     <div style="text-align:center;margin-bottom:14px;">
-      <span style="color:#fff;font-size:30px;font-weight:900;">₪19.9</span>
-      <span style="color:#9fb2c6;font-size:14px;"> / חודש</span>
-      <div style="color:#7a9ab5;font-size:11px;margin-top:2px;">ביטול בכל עת</div>
+      <span style="color:#fff;font-size:34px;font-weight:900;">₪149</span>
+      <div style="color:#7eecc1;font-size:13px;font-weight:800;margin-top:3px;">תשלום חד־פעמי · גישה לכל החיים</div>
+      <div style="color:#7a9ab5;font-size:11px;margin-top:2px;">בלי מנוי ובלי חידושים — משלמים פעם אחת</div>
     </div>
-    <button onclick="onUpsellCTA()" style="width:100%;padding:14px;background:#1D9E75;border:none;border-radius:10px;color:#fff;font-size:16px;font-weight:800;cursor:pointer;font-family:inherit;">התחל מנוי</button>
-    <div style="text-align:center;margin-top:12px;"><button onclick="upsellLogin()" style="background:none;border:none;color:#D4A24E;font-size:13px;cursor:pointer;font-family:inherit;text-decoration:underline;">כבר מנוי/ה? התחבר/י</button></div>
+    <button onclick="onUpsellCTA()" style="width:100%;padding:14px;background:#1D9E75;border:none;border-radius:10px;color:#fff;font-size:16px;font-weight:800;cursor:pointer;font-family:inherit;">פְּתחו הכול לתמיד — ₪149</button>
+    <div style="text-align:center;margin-top:12px;"><button onclick="upsellLogin()" style="background:none;border:none;color:#D4A24E;font-size:13px;cursor:pointer;font-family:inherit;text-decoration:underline;">כבר רכשת? התחבר/י</button></div>
   </div>
 </div>
 <script>
@@ -21516,11 +21532,21 @@ function _hasPremium(){
 function _previewLocked(){ return !!window.PAYWALL && !_hasPremium(); }
 var FREE_PREVIEW_N=3;
 function _upsellRow(label){
-  return '<div onclick="openUpsell()" style="text-align:center;background:linear-gradient(135deg,rgba(29,158,117,.15),rgba(212,162,78,.12));border:1px dashed #1D9E75;border-radius:10px;padding:13px;margin-top:8px;cursor:pointer;color:#7eecc1;font-size:13px;font-weight:800;">🔓 '+(label||'פתחו את כל התוכן במנוי')+' · ₪19.9/חודש</div>';
+  return '<div onclick="openUpsell()" style="text-align:center;background:linear-gradient(135deg,rgba(29,158,117,.15),rgba(212,162,78,.12));border:1px dashed #1D9E75;border-radius:10px;padding:13px;margin-top:8px;cursor:pointer;color:#7eecc1;font-size:13px;font-weight:800;">🔓 '+(label||'פתחו את כל התוכן')+' · ₪149 לתמיד</div>';
 }
-// Deep/premium surfaces. Free taste stays open: home, 10 must-know (ten),
-// emergency hub (qk/emerg) + its category previews, dictionary, favorites.
-var PREMIUM_TABS={lib:1,train:1,scn:1,art:1,sem:1,day:1,hrt:1,nwf:1,cus:1};
+// ---- Taste / free-preview model (locked: ₪149 lifetime, 7-item taste) ------
+// Source of truth: commercial/DECISIONS.md. These specific items stay OPEN
+// (a broad taste before purchase); everything else is premium.
+//   • 10 משפטי חובה (+שמע)      • תרחיש: חיפוש בבית — מי בבית
+//   • יסוד: ציווי ופקודות        • מנהג: התנהלות מול אישה — כללי צניעות
+//   • מבצעי: עצירת תנועה ורכב     • תרגול נבנה מפריטי הטעימה
+var CL_FREE_CATS={ 'עצירת תנועה ורכב':1, '10 משפטי חובה':1, 'יסודות: ציווי ופקודות':1 };
+var CL_FREE_SCN={ 'חיפוש בבית — מי בבית':1 };
+var CL_FREE_CUSTOM={ 'bi-cust-isha':1 };   // התנהלות מול אישה — כללי צניעות
+function clFreeCat(cat){ return !!CL_FREE_CATS[cat]; }
+// lib/scn/cus stay REACHABLE — gating is per-item inside them (see opC/scnOpen/
+// openCustomsGroup). Fully-premium tabs (no free taste inside) are gated whole:
+var PREMIUM_TABS={train:1,art:1,sem:1,day:1,hrt:1,nwf:1};
 // Returns true (and shows the upsell) when navigation should be blocked.
 function _premiumGate(tabId){
   if(!window.PAYWALL) return false;
@@ -21541,7 +21567,7 @@ function startCheckout(){
   // Payment provider (hosted checkout) will be wired here: pass the logged-in
   // user id, the provider webhook flips subscriptions.status -> 'active', and
   // clRefreshEntitlement() unlocks the app automatically on next check.
-  alert('חיבור לתשלום (₪19.9 לחודש) יתווסף בשלב הבא. אחרי התשלום המנוי יופעל אוטומטית.');
+  alert('חיבור לתשלום (₪149 — תשלום חד־פעמי, גישה לכל החיים) יתווסף בשלב ההפעלה. אחרי התשלום הגישה תיפתח אוטומטית.');
 }
 
 // ===== Offline entitlement enforcement =====================================
