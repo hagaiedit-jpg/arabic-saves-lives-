@@ -2748,7 +2748,7 @@ function showLanding() {
         <div id="dict-go-to-category-text" style="color:#1D9E75;font-size:13px;font-weight:700;">🔗 פתח בקטגוריה</div>
       </div>
       <div class="ibox b" id="pwhyb"><div class="ilbl b" id="pwhylbl">למה זה חשוב</div><div class="itxt b" id="pwhy"></div></div>
-      <div class="ibox o" id="ptoneb"><div class="ilbl o">טיפ ללוחם</div><div class="itxt o" id="ptone"></div></div>
+      <div class="ibox o" id="ptoneb"><div class="ilbl o" id="ptonelbl">טיפ ללוחם</div><div class="itxt o" id="ptone"></div></div>
       <div class="ibox c" id="pcultb" style="display:none;"><div class="ilbl c">✨ פאקט תרבותי</div><div class="itxt c" id="pcult"></div></div>
       <div class="responses-section" id="presponsesb" style="display:none;">
         <div class="responses-title">💬 תשובות אפשריות מהאזרח</div>
@@ -16291,10 +16291,10 @@ function opSem(i){
   document.getElementById('phe').textContent=s.he;
   document.getElementById('parsm').textContent=s.ar||'';
   document.getElementById('ptrans').textContent=s.trans||'';
-  document.getElementById('pwhy').textContent=s.field||s.why||'';
+  document.getElementById('pwhy').textContent=s.field||s.why||'';        // משמעות בשטח
   document.getElementById('pwhyb').style.display=(s.field||s.why)?'block':'none';
-  document.getElementById('ptone').textContent='';
-  document.getElementById('ptoneb').style.display='none';
+  document.getElementById('ptone').textContent=_semRiskLabel(s.risk);    // רמת סיכון (השדה שהיה חסר)
+  document.getElementById('ptoneb').style.display='block';
   document.querySelectorAll('.pbtn').forEach(b=>b.setAttribute('data-audio',''));
   bldW();document.getElementById('wtime').textContent='0:00';
   document.querySelectorAll('[id^="tab-"]').forEach(x=>x.className='scr');
@@ -16583,14 +16583,27 @@ function goMore(t){
   if(t==='nwf'&&typeof rNF==='function')rNF();
 }
 
+// Fixed explanation template per item type (Meir's recommendation): one source
+// of truth for the popup field labels, so every card of a given type looks the
+// same. why -> pwhy box, tone -> ptone box.
+//   מבצעי: למה זה חשוב + טיפ ללוחם · יומיומי: מתי משתמשים · פותחים לב: למה זה בונה אמון
+//   סמנטי: משמעות בשטח + רמת סיכון · מילון: דוגמה · מנהגים: הקשר ללוחם
+var EXPLAIN_TEMPLATE={
+  military:{why:'למה זה חשוב', tone:'טיפ ללוחם'},
+  heart:   {why:'למה זה בונה אמון'},
+  daily:   {why:'מתי משתמשים'},
+  semantic:{why:'משמעות בשטח', tone:'רמת סיכון'},
+  sem:     {why:'משמעות בשטח', tone:'רמת סיכון'},
+  dict:    {why:'דוגמה'},
+  customs: {why:'הקשר ללוחם'}
+};
 function setPopupLabel(section){
-  var lbl=document.getElementById('pwhylbl');if(!lbl)return;
-  if(section==='heart')lbl.textContent='למה זה בונה אמון';
-  else if(section==='daily')lbl.textContent='מתי משתמשים';
-  else if(section==='semantic'||section==='sem')lbl.textContent='משמעות בשטח';
-  else if(section==='dict')lbl.textContent='דוגמה';
-  else lbl.textContent='למה זה חשוב';
+  var t=EXPLAIN_TEMPLATE[section]||EXPLAIN_TEMPLATE.military;
+  var lbl=document.getElementById('pwhylbl'); if(lbl) lbl.textContent=t.why;
+  var tlbl=document.getElementById('ptonelbl'); if(tlbl) tlbl.textContent=t.tone||'טיפ ללוחם';
 }
+// Semantic risk level (stored as high/mid/low) -> a clear, color-cued label.
+function _semRiskLabel(r){ return r==='high'?'🔴 גבוה — סיכון מיידי':r==='mid'?'🟠 בינוני — שים לב':'🟢 נמוך — הקשר בלבד'; }
 
 function closePopup(){
   // Reset dict-specific button
@@ -21280,7 +21293,7 @@ window.addEventListener('load', function(){
 <script>
 // Version stamp — shown in the admin panel so we can confirm which build is live
 // on a device (stale service-worker caches were causing "my changes don't show").
-window.APP_VERSION = 'v209';
+window.APP_VERSION = 'v210';
 
 // Register the service worker for full offline use in the field, WITH update
 // detection: when a new version installs, offer a one-tap refresh instead of the
