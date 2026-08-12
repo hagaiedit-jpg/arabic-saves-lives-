@@ -3540,6 +3540,8 @@ function showLanding() {
         <div style="text-align:center;color:#7a9ab5;font-size:11px;margin-top:5px;">מוסיף לקטגוריית "רפואה וחירום" את משפטי הטריאז' שעדיין אין להם הקלטה (מדמם? / יכול ללכת? / כמה פצועים?...) — <b>יש לוודא את הערבית של החדשים</b> לפני שימוש בשטח</div>
         <button id="tool-answers" onclick="importAnswers(this)" style="width:100%;padding:12px;margin-top:10px;background:linear-gradient(135deg,#3a6d8c 0%,#254a63 100%);border:none;border-radius:10px;color:#fff;font-size:13px;font-weight:800;cursor:pointer;font-family:inherit;">💬 הוסף תשובות "מה עונים לך" לרשימות (להקלטה)</button>
         <div style="text-align:center;color:#7a9ab5;font-size:11px;margin-top:5px;">מוסיף לקטגוריית "תשובות אזרח" את התשובות שעדיין אין להן הקלטה (מא באערף / בס אלעילה / בכרה...) — <b>יש לוודא את הערבית של החדשים</b> לפני שימוש</div>
+        <button id="tool-citizenans" onclick="importCitizenAnswers(this)" style="width:100%;padding:12px;margin-top:10px;background:linear-gradient(135deg,#5a4a8c 0%,#3a2f5e 100%);border:none;border-radius:10px;color:#fff;font-size:13px;font-weight:800;cursor:pointer;font-family:inherit;">🗣️ חבר תשובות אזרח לשאלות ה"אירוע" (להקלטה)</button>
+        <div style="text-align:center;color:#7a9ab5;font-size:11px;margin-top:5px;">מחבר 3 תשובות אפשריות לכל שאלת אירוע (מה זה / את מי ראית / אתה גנבת...) אל השאלה במסד הנתונים. אחר כך פותחים כל שאלה בעורך ומקליטים כל תשובה ב-🎤. חד-פעמי; לא דורס תשובות/הקלטות קיימות.</div>
         <button id="tool-fieldcmd" onclick="openFieldCmdReview(this)" style="width:100%;padding:12px;margin-top:10px;background:linear-gradient(135deg,#c0704e 0%,#8a4e34 100%);border:none;border-radius:10px;color:#fff;font-size:13px;font-weight:800;cursor:pointer;font-family:inherit;">🎯 סקירה ואישור משפטי פקודות שטח (אחד-אחד)</button>
         <div style="text-align:center;color:#7a9ab5;font-size:11px;margin-top:5px;">בודקים ערבית, ממלאים תעתיק, ומאשרים כל משפט בנפרד — רק מה שאת מאשרת נכנס ל"מבצעי". שום דבר לא עולה אוטומטית.</div>
         <div id="fieldcmd-review" style="margin-top:10px;"></div>
@@ -10928,6 +10930,71 @@ function importTriage(btn){ return _importTpl(TRIAGE,'רפואה וחירום','
 function importAnswers(btn){ return _importTpl(ANSWERS,'תשובות אזרח','dictionary',btn); }
 
 // One-time import: turn the canonical 10 into real DB rows so they show in admin and can be recorded
+// One-time: attach the drafted citizen answers to the matching תשאול questions
+// in the DB (responses column), so each answer becomes recordable in the editor.
+// Idempotent + safe: skips any question that already has responses, so it never
+// clobbers the owner's existing answers or recordings.
+var CITIZEN_ANSWERS_IMPORT=[
+ {cat:'תשאול: שאלות על האירוע', he:'מה אתה יודע על העניין?', ar:'شو بتعرف عن الموضوع؟', trans:'שוּ בְּתִעְרַף עַן אִלמַוְצ׳וּע?', responses:[
+   {he:'לא יודע כלום', ar:'ما بأعرف إشي', trans:'מַא בַּאעְרֶף אִשִי'},
+   {he:'שמעתי רק שמועות', ar:'سمعت بس إشاعات', trans:'סְמֶעֶת בַּס אִשַאעַאת'},
+   {he:'אני לא קשור לזה', ar:'أنا ما إلي علاقة', trans:'אַנַא מַא אִלִי עַלַאקַה'}
+ ]},
+ {cat:'תשאול: שאלות על האירוע', he:'את מי ראית?', ar:'مين شفت؟', trans:'מִין שֻפְת?', responses:[
+   {he:'לא ראיתי אף אחד', ar:'ما شفت حدا', trans:'מַא שֻׁפְת חַדַא'},
+   {he:'הרבה אנשים', ar:'ناس كثير', trans:'נַאס כְּתִיר'},
+   {he:'לא מכיר אותם', ar:'ما بأعرفهم', trans:'מַא בַּאעְרֶפְהֻם'}
+ ]},
+ {cat:'תשאול: שאלות על האירוע', he:'מה עשית שם?', ar:'شو عملت هناك؟', trans:'שוּ עְמִלְת הֻנַאכּ?', responses:[
+   {he:'רק עברתי', ar:'بس كنت مارق', trans:'בַּס כֻּנְת מַארֶק'},
+   {he:'הלכתי לקנות', ar:'رحت أشتري', trans:'רֻחְת אַשְתְרִי'},
+   {he:'חיכיתי לחבר', ar:'كنت مستني صاحبي', trans:'כֻּנְת מְסַתַנّי צַאחְבִּי'}
+ ]},
+ {cat:'תשאול: שאלות על האירוע', he:'מה זה?', ar:'إيش هذا؟', trans:'אֵיש הַאדַא?', responses:[
+   {he:'זה שלי', ar:'هاد إلي', trans:'הַאד אִלִי'},
+   {he:'לא יודע מה זה', ar:'ما بأعرف شو هاد', trans:'מַא בַּאעְרֶף שׁוּ הַאד'},
+   {he:'מצאתי את זה', ar:'لقيته', trans:'לַקֵיתֹה'}
+ ]},
+ {cat:'תשאול: שאלות על האירוע', he:'מי נתן לך אותו?', ar:'مين جاب لك إيّاه؟', trans:'מִין גַ׳אבּ-לַכּ אִיַּאה?', responses:[
+   {he:'אף אחד', ar:'ما حدا', trans:'מַא חַדַא'},
+   {he:'חבר, לא זוכר מי', ar:'صاحب، ما بأتذكّر مين', trans:'צַאחֶבּ, מַא בַּאתְזַכַّר מִין'},
+   {he:'קניתי בעצמי', ar:'اشتريته بنفسي', trans:'אִשְתְרֵיתֹה בְּנַפְסִי'}
+ ]},
+ {cat:'תשאול: שאלות על האירוע', he:'אתה גנבת?', ar:'إنت سرقت؟', trans:'אִנְתֶ סַרַקְת?', responses:[
+   {he:'לא, נשבע באלוהים', ar:'لا، والله', trans:'לַא, וַאללַה'},
+   {he:'לא עשיתי כלום', ar:'ما عملت إشي', trans:'מַא עְמֶלְת אִשִי'},
+   {he:'זה לא אני', ar:'مش أنا', trans:'מֻש אַנַא'}
+ ]}
+];
+async function importCitizenAnswers(btn){
+  if(!confirm('לחבר תשובות אזרח ל-6 שאלות ה"אירוע"? פעולה חד-פעמית — לא תדרוס תשובות/הקלטות קיימות.'))return;
+  var old=btn.textContent; btn.disabled=true; btn.textContent='מחבר...';
+  try{
+    var norm=function(s){return String(s||'').replace(/[^֐-׿0-9A-Za-z]/g,'');};
+    var cat='תשאול: שאלות על האירוע';
+    var rows=await sbFetch('/rest/v1/phrases?select=id,he,responses&section=eq.military&cat=eq.'+encodeURIComponent(cat));
+    var byHe={}; (rows||[]).forEach(function(r){ byHe[norm(r.he)]=r; });
+    var updated=0, inserted=0, skipped=0;
+    for(var i=0;i<CITIZEN_ANSWERS_IMPORT.length;i++){
+      var q=CITIZEN_ANSWERS_IMPORT[i]; var row=byHe[norm(q.he)];
+      var respJson=JSON.stringify(q.responses);
+      if(row){
+        var hasResp=false; try{ var ex=typeof row.responses==='string'?JSON.parse(row.responses||'[]'):(row.responses||[]); hasResp=Array.isArray(ex)&&ex.length>0; }catch(e){}
+        if(hasResp){ skipped++; continue; }               // never clobber existing answers/recordings
+        await sbFetch('/rest/v1/phrases?id=eq.'+encodeURIComponent(row.id),'PATCH',{responses:respJson});
+        updated++;
+      } else {
+        await sbFetch('/rest/v1/phrases','POST',{section:'military',cat:cat,he:q.he,ar:q.ar,trans:q.trans,tags:'',why:'',tone:'',audio_url:'',is_new:false,responses:respJson});
+        inserted++;
+      }
+    }
+    btn.textContent='✓ '+(updated+inserted);
+    await loadData(); try{ renderAdminList(); }catch(e){}
+    alert('✓ חוברו תשובות:\n• עודכנו '+updated+' שאלות\n• נוצרו '+inserted+' שאלות חדשות\n• דילגתי על '+skipped+' (כבר היו להן תשובות)\n\nעכשיו: פותחים כל שאלה בעורך ומקליטים כל תשובה ב-🎤.');
+  }catch(e){ alert('שגיאה: '+(e&&e.message?e.message:e)); btn.textContent=old; }
+  btn.disabled=false;
+}
+
 async function importTenPhrases(btn){
   if(!confirm('להוסיף את 10 משפטי החובה לרשימות? פעולה חד-פעמית (לא תיווצר כפילות אם כבר קיימים).'))return;
   var old=btn.textContent; btn.disabled=true; btn.textContent='מוסיף...';
@@ -21349,7 +21416,7 @@ window.addEventListener('load', function(){
 <script>
 // Version stamp — shown in the admin panel so we can confirm which build is live
 // on a device (stale service-worker caches were causing "my changes don't show").
-window.APP_VERSION = 'v216';
+window.APP_VERSION = 'v217';
 
 // Register the service worker for full offline use in the field, WITH update
 // detection: when a new version installs, offer a one-tap refresh instead of the
