@@ -600,6 +600,15 @@ body.day-mode .emerg-play-btn:disabled{background:#ccc;color:#888;}
 body.day-mode .emerg-card{background:#fff;border-color:#e8dec9;}
 body.day-mode .emerg-card-he{color:#0e1b2e;}
 body.day-mode .emerg-card-trans{color:#0e1b2e;}
+/* Emergency cubes + panels were hard-coded dark; make them follow day-mode like
+   every other card (light in day, dark in night) so the page matches the app. */
+body.day-mode .emerg-cube{background:linear-gradient(135deg,#fff,#f5efe0)!important;border-color:rgba(168,82,0,0.25)!important;}
+body.day-mode .emerg-cube, body.day-mode .emerg-cube *{color:#0e1b2e!important;}
+body.day-mode .emerg-cube-count{background:rgba(212,162,78,0.18)!important;color:#7a5a1a!important;}
+body.day-mode .emerg-panel{background:linear-gradient(135deg,#fff,#f5efe0)!important;border-color:rgba(168,82,0,0.3)!important;}
+body.day-mode .emerg-panel input{color:#0e1b2e!important;}
+body.day-mode .emerg-panel input::placeholder{color:#8a7a5a!important;}
+body.day-mode .emerg-panel .keep-white{color:#0e1b2e!important;}
 .tb-tabs{display:flex;overflow-x:auto;gap:14px;padding:0 4px 10px;justify-content:flex-start;}
 .tb-tabs::-webkit-scrollbar{display:none;}
 .tb-tab{padding:6px 4px;color:#7a9ab5;font-size:14px;font-weight:600;cursor:pointer;border-bottom:2px solid transparent;white-space:nowrap;transition:all 0.2s;user-select:none;}
@@ -2612,8 +2621,8 @@ function showLanding() {
       <div style="color:#7a9ab5;font-size:12px;margin-bottom:14px;">בחירת סיטואציה</div>
 
       <!-- Quick search across all emergency phrases -->
-      <div style="background:#1F3147;border:2px solid #c0392b;border-radius:12px;padding:10px;margin-bottom:14px;display:flex;align-items:center;gap:8px;">
-        <span style="color:#e74c3c;font-size:18px;">⚡</span>
+      <div class="emerg-panel" style="background:#1F3147;border:2px solid #D4A24E;border-radius:12px;padding:10px;margin-bottom:14px;display:flex;align-items:center;gap:8px;">
+        <span style="color:#D4A24E;font-size:18px;">⚡</span>
         <input id="emerg-search" placeholder="חיפוש מהיר: עצור, תעודה, ידיים..." oninput="emergSearch()" autocomplete="off" style="flex:1;background:transparent;border:none;color:#E8D9B8;font-size:16px;font-family:inherit;outline:none;direction:rtl;text-align:right;"/>
         <button onclick="voiceSearch('emerg-search',this)" title="חיפוש קולי" style="background:rgba(212,162,78,0.18);border:1px solid #D4A24E;color:#D4A24E;width:32px;height:32px;border-radius:50%;cursor:pointer;font-size:15px;flex-shrink:0;">🎤</button>
         <button onclick="document.getElementById('emerg-search').value='';emergSearch()" style="background:rgba(255,255,255,0.1);border:none;color:#E8D9B8;width:28px;height:28px;border-radius:50%;cursor:pointer;font-size:16px;flex-shrink:0;">×</button>
@@ -2622,8 +2631,8 @@ function showLanding() {
       <button onclick="printPocketCard()" style="width:100%;background:transparent;border:1px dashed #7a9ab5;color:#a0b8c8;border-radius:10px;padding:9px;font-size:12.5px;font-weight:600;cursor:pointer;font-family:inherit;margin-bottom:14px;display:flex;align-items:center;justify-content:center;gap:6px;">🖨️ דף כיס להדפסה (גיבוי נייר לשטח)</button>
 
       <!-- Daily Emergency Challenge Card -->
-      <div id="emerg-challenge-card" style="display:none;background:linear-gradient(135deg,#c0392b 0%,#922d22 100%);border-radius:14px;padding:14px 16px;margin-bottom:14px;cursor:pointer;box-shadow:0 4px 14px rgba(192,57,43,0.35);position:relative;overflow:hidden;" onclick="startEmergencyChallenge()">
-        <div style="position:absolute;top:6px;left:8px;background:#fff;color:#c0392b;font-size:9px;font-weight:900;padding:3px 8px;border-radius:6px;letter-spacing:0.5px;">חדש!</div>
+      <div id="emerg-challenge-card" class="emerg-panel" style="display:none;background:linear-gradient(160deg,#1F3147 0%,#243a55 100%);border:1px solid rgba(212,162,78,0.35);border-radius:14px;padding:14px 16px;margin-bottom:14px;cursor:pointer;box-shadow:0 4px 12px rgba(0,0,0,0.25);position:relative;overflow:hidden;" onclick="startEmergencyChallenge()">
+        <div style="position:absolute;top:6px;left:8px;background:#D4A24E;color:#0E1B2E;font-size:9px;font-weight:900;padding:3px 8px;border-radius:6px;letter-spacing:0.5px;">חדש!</div>
         <div style="display:flex;align-items:center;gap:14px;">
           <div style="font-size:32px;flex-shrink:0;">⚡</div>
           <div style="flex:1;min-width:0;">
@@ -19348,6 +19357,7 @@ async function renderAdminList(){
     var totalCount = data.length;
     var noAudioCount = data.filter(p => !p.audio_url && !(p.section==='dictionary' && _dictRowCovered(p))).length;
     var hasRespCount = data.filter(p => p.responses && p.responses.length > 5).length;
+    var respNeedCount = data.filter(p => { try { if(!p.responses) return false; var a = typeof p.responses==='string'?JSON.parse(p.responses):p.responses; return Array.isArray(a) && a.length>0 && a.some(function(r){return !r.audio_url;}); } catch(e){ return false; } }).length;
     
     // Note: search filtering done via instant DOM filter in onAdminSearch
     
@@ -19360,6 +19370,7 @@ async function renderAdminList(){
       + '<button data-filter="no-audio" onclick="setAdminFilter(\'no-audio\')" style="padding:6px 12px;border:none;border-radius:6px;font-size:11px;cursor:pointer;font-family:inherit;background:'+(filterMode==='no-audio'?'#D4A24E':'#2A3D52')+';color:#fff;font-weight:600;">🔇 צריך הקלטה ('+noAudioCount+')</button>'
       + '<button data-filter="no-responses" onclick="setAdminFilter(\'no-responses\')" style="padding:6px 12px;border:none;border-radius:6px;font-size:11px;cursor:pointer;font-family:inherit;background:'+(filterMode==='no-responses'?'#D4A24E':'#2A3D52')+';color:#fff;font-weight:600;">💬 בלי תשובות ('+(totalCount-hasRespCount)+')</button>'
       + '<button data-filter="has-responses" onclick="setAdminFilter(\'has-responses\')" style="padding:6px 12px;border:none;border-radius:6px;font-size:11px;cursor:pointer;font-family:inherit;background:'+(filterMode==='has-responses'?'#D4A24E':'#2A3D52')+';color:#fff;font-weight:600;">✓ עם תשובות ('+hasRespCount+')</button>'
+      + '<button data-filter="resp-need" onclick="setAdminFilter(\'resp-need\')" style="padding:6px 12px;border:none;border-radius:6px;font-size:11px;cursor:pointer;font-family:inherit;background:'+(filterMode==='resp-need'?'#D4A24E':'#2A3D52')+';color:#fff;font-weight:600;">🎤 תשובות להקליט ('+respNeedCount+')</button>'
       + '</div>'
       + '<div id="admin-filter-count" style="text-align:center;color:#7a9ab5;font-size:11px;margin-top:6px;">מציג '+filteredItems.length+' מתוך '+totalCount+'</div>'
       + '</div>';
@@ -19415,11 +19426,14 @@ async function renderAdminList(){
       var dataSearch = _adminNorm((p.he||'') + ' ' + (p.ar||'') + ' ' + (p.trans||'') + ' ' + (p.cat||'') + ' ' + (p.tags||'') + ' ' + (p.why||'') + respText);
       var dHasAudio = (hasAudio || isCovered) ? '1' : '0'; // covered words leave the "needs recording" queue
       var dHasResp = hasResponses ? '1' : '0';
-      html+=`<div class="admin-card" data-search="${dataSearch.replace(/"/g, '&quot;')}" data-has-audio="${dHasAudio}" data-has-responses="${dHasResp}" style="background:#0E1B2E;border:1px solid #2A3D52;border-radius:10px;padding:12px;margin-bottom:8px;">
+      var _rTot=0,_rRec=0; try{ if(p.responses){ var _ra=typeof p.responses==='string'?JSON.parse(p.responses):p.responses; if(Array.isArray(_ra)){ _rTot=_ra.length; _rRec=_ra.filter(function(r){return r.audio_url;}).length; } } }catch(e){}
+      var dRespNeed = (_rTot>0 && _rRec<_rTot) ? '1':'0';
+      html+=`<div class="admin-card" data-search="${dataSearch.replace(/"/g, '&quot;')}" data-has-audio="${dHasAudio}" data-has-responses="${dHasResp}" data-resp-need="${dRespNeed}" style="background:#0E1B2E;border:1px solid #2A3D52;border-radius:10px;padding:12px;margin-bottom:8px;">
         <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:6px;">
           <div style="flex:1;">
             <div style="color:#fff;font-size:14px;font-weight:500;">${p.he||''}</div>
             <div style="color:#7a9ab5;font-size:11px;">${p.trans||''}</div>
+            ${_rTot>0?`<div style="font-size:10px;font-weight:700;margin-top:3px;color:${_rRec>=_rTot?'#1D9E75':'#e8b96a'};">🎤 תשובות מוקלטות: ${_rRec}/${_rTot}</div>`:''}
           </div>
           <span style="font-size:10px;background:${sc};color:#fff;padding:2px 7px;border-radius:7px;white-space:nowrap;margin-right:6px;">${sn}</span>
         </div>
@@ -19482,6 +19496,8 @@ function applyDOMFilter(){
       show = el.getAttribute('data-has-responses') !== '1';
     } else if (filterMode === 'has-responses') {
       show = el.getAttribute('data-has-responses') === '1';
+    } else if (filterMode === 'resp-need') {
+      show = el.getAttribute('data-resp-need') === '1';
     }
 
     if (show && words.length) {
@@ -21524,7 +21540,7 @@ window.addEventListener('load', function(){
 <script>
 // Version stamp — shown in the admin panel so we can confirm which build is live
 // on a device (stale service-worker caches were causing "my changes don't show").
-window.APP_VERSION = 'v220';
+window.APP_VERSION = 'v221';
 
 // Register the service worker for full offline use in the field, WITH update
 // detection: when a new version installs, offer a one-tap refresh instead of the
