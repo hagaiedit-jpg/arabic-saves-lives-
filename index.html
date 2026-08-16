@@ -9777,6 +9777,18 @@ function startRecQueue(){
   window._navMode='rec'; window._auditNavPos=0;
   try{ openEditById(ids[0]); }catch(e){ alert('שגיאה: '+(e&&e.message?e.message:e)); }
 }
+// Continuous queue for citizen ANSWERS: walks every question that still has an
+// un-recorded response. Open -> record its answers -> save -> next opens
+// automatically (reuses the same _navMode='rec' advance as the word queue).
+function startAnswerRecQueue(){
+  var data=window._adminItems||[];
+  var ids=data.filter(function(p){
+    try{ if(!p.responses) return false; var a=typeof p.responses==='string'?JSON.parse(p.responses):p.responses; return Array.isArray(a)&&a.length>0&&a.some(function(r){return !r.audio_url;}); }catch(e){ return false; }
+  }).map(function(p){ return String(p.id); });
+  if(!ids.length){ alert('🎉 אין תשובות שממתינות להקלטה — הכול מוקלט!'); return; }
+  window._auditNav=ids; window._navMode='rec'; window._auditNavPos=0;
+  try{ openEditById(ids[0]); }catch(e){ alert('שגיאה: '+(e&&e.message?e.message:e)); }
+}
 
 var BUILTIN_SCENARIO_DATA = [
   {id:'bi-harhaka-1',  section:'scenario', cat:'הרחקה מהשטח', tags:'step1',  he:'עצור במקום והרם ידיים!', ar:'اوقّف عندك وارفع إيديك لفوق!', trans:'וַקֵף עִנְדַכּ וַארְפַע אִידֵיכּ לַפוֹק'},
@@ -19376,6 +19388,9 @@ async function renderAdminList(){
       + '</div>';
     
     let html=filterBar;
+    if (respNeedCount > 0) {
+      html += '<button onclick="startAnswerRecQueue()" style="width:100%;padding:11px;margin-bottom:10px;background:linear-gradient(135deg,#1D9E75 0%,#0e5a3f 100%);border:none;border-radius:10px;color:#fff;font-size:13px;font-weight:800;cursor:pointer;font-family:inherit;">▶️ תור הקלטת תשובות רציף (' + respNeedCount + ') — פותחים שאלה, מקליטים ושומרים, והבאה נפתחת אוטומטית</button>';
+    }
     if (window._autoSyncAdded > 0) {
       html += '<div style="background:rgba(29,158,117,0.15);border:1px solid #1D9E75;border-radius:10px;padding:10px 12px;margin-bottom:10px;color:#8fe0c2;font-size:12px;font-weight:600;text-align:center;">✓ '+window._autoSyncAdded+' שורות חדשות סונכרנו אוטומטית לרשימה — אפשר לערוך ולהקליט אותן כאן</div>';
       window._autoSyncAdded = 0;
@@ -21540,7 +21555,7 @@ window.addEventListener('load', function(){
 <script>
 // Version stamp — shown in the admin panel so we can confirm which build is live
 // on a device (stale service-worker caches were causing "my changes don't show").
-window.APP_VERSION = 'v221';
+window.APP_VERSION = 'v222';
 
 // Register the service worker for full offline use in the field, WITH update
 // detection: when a new version installs, offer a one-tap refresh instead of the
