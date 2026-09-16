@@ -8676,7 +8676,11 @@ var BUILTIN_TASHAUL=[
     {he:'רק כסף', ar:'بس مصاري', trans:'בַּס מַצַארִי'},
     {he:'תעודה וטלפון', ar:'هوية وتلفون', trans:'הַוִיֶה וּתֵלֵפוֹן'}
   ]},
-  {id:'bi-tash-88', section:'military', cat:'תשאול: שאלות על האירוע', he:'יש עליך משהו שאסור שיהיה עליך?', ar:'فيه عليك إشي ممنوع يكون عليك؟', trans:'פִיה עַלֵיכּ אִשִי מַמְנוּע יְכּוּן עַלֵיכּ?'},
+  {id:'bi-tash-88', section:'military', cat:'תשאול: שאלות על האירוע', he:'יש עליך משהו שאסור שיהיה עליך?', ar:'فيه عليك إشي ممنوع يكون عليك؟', trans:'פִיה עַלֵיכּ אִשִי מַמְנוּע יְכּוּן עַלֵיכּ?', responses:[
+    {he:'לא, כלום', ar:'لا، ولا إشي', trans:'לַא, וַלַא אִשִי'},
+    {he:'רק טלפון וכסף', ar:'بس تلفون ومصاري', trans:'בַּס תֵלֵפוֹן וּמַצַארִי'},
+    {he:'לא, תבדוק בעצמך', ar:'لا، فتّش بنفسك', trans:'לַא, פַתֶּש בְּנַפְסַכּ'}
+  ]},
   {id:'bi-tash-89', section:'military', cat:'תשאול: שאלות על האירוע', he:'יש לך משהו בכיס?', ar:'فيه إشي بجيبتك؟', trans:'פִיה אִשִי בְּגֵ׳יבְּתַכּ?', responses:[
     {he:'רק טלפון', ar:'بس تلفون', trans:'בַּס תֵלֵפוֹן'},
     {he:'כסף ומפתחות', ar:'مصاري ومفاتيح', trans:'מַצַארִי וּמַפַאתִיח'},
@@ -11882,6 +11886,11 @@ var CITIZEN_ANSWERS_IMPORT=[
    {he:'תעודת בגרות', ar:'توجيهي', trans:'תַוְגִ׳יהִי'},
    {he:'תואר', ar:'شهادة جامعة', trans:'שַהַאדֶת גַ׳אמְעַה'},
    {he:'אין לי תעודה', ar:'ما معي شهادة', trans:'מַא מַעִי שַהַאדֶה'}
+ ]},
+ {cat:'תשאול: שאלות על האירוע', he:'יש עליך משהו שאסור שיהיה עליך?', ar:'فيه عليك إشي ممنوع يكون عليك؟', trans:'פִיה עַלֵיכּ אִשִי מַמְנוּע יְכּוּן עַלֵיכּ?', responses:[
+   {he:'לא, כלום', ar:'لا، ولا إشي', trans:'לַא, וַלַא אִשִי'},
+   {he:'רק טלפון וכסף', ar:'بس تلفون ومصاري', trans:'בַּס תֵלֵפוֹן וּמַצַארִי'},
+   {he:'לא, תבדוק בעצמך', ar:'لا، فتّش بنفسك', trans:'לַא, פַתֶּש בְּנַפְסַכּ'}
  ]},
 ];
 async function importCitizenAnswers(btn){
@@ -22344,7 +22353,7 @@ window.addEventListener('load', function(){
 <script>
 // Version stamp — shown in the admin panel so we can confirm which build is live
 // on a device (stale service-worker caches were causing "my changes don't show").
-window.APP_VERSION = 'v235';
+window.APP_VERSION = 'v236';
 
 // Register the service worker for full offline use in the field, WITH update
 // detection: when a new version installs, offer a one-tap refresh instead of the
