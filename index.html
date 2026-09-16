@@ -2,7 +2,7 @@
 <html lang="he" dir="rtl">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="theme-color" content="#18293E">
 <link rel="manifest" href="./manifest.json">
@@ -436,7 +436,7 @@ body.day-mode .err-msg{color:#5a3a1a;}
 /* Toast notification */
 .toast{
   position:fixed;
-  bottom:24px;
+  bottom:88px;
   left:50%;
   transform:translateX(-50%);
   background:#0E1B2E;
@@ -504,7 +504,7 @@ body.day-mode .toast{background:#fff;color:#0e1b2e;}
   text-align:center;
   cursor:pointer;
   background:linear-gradient(160deg,#1F3147 0%,#243a55 100%);
-  border:1px solid rgba(212,162,78,0.18);
+  border:2px solid rgba(212,162,78,0.18);
   transition:all 0.2s ease-out;
   display:flex;
   flex-direction:column;
@@ -524,21 +524,21 @@ body.day-mode .toast{background:#fff;color:#0e1b2e;}
 .emerg-cube:active{transform:scale(0.97);}
 /* Cohesive with the rest of the app: all cubes share the navy tile background;
    the category "colour" survives only as a subtle border + a thin top accent. */
-.emerg-cube.red{border-color:rgba(192,57,43,0.5);}
-.emerg-cube.blue{border-color:rgba(91,155,213,0.38);}
-.emerg-cube.orange{border-color:rgba(201,120,37,0.42);}
-.emerg-cube.green{border-color:rgba(29,158,117,0.42);}
-.emerg-cube.gray{border-color:rgba(150,160,170,0.3);}
-.emerg-cube.gold{border-color:rgba(212,162,78,0.5);}
-.emerg-cube.teal{border-color:rgba(47,176,176,0.4);}
-.emerg-cube.sky{border-color:rgba(91,155,213,0.4);}
-.emerg-cube.crit{border-color:rgba(212,162,78,0.55);}
-.emerg-cube.purple{border-color:rgba(138,107,208,0.4);}
-.emerg-cube.rose{border-color:rgba(208,138,155,0.4);}
-.emerg-cube.mint{border-color:rgba(79,208,160,0.4);}
+.emerg-cube.red{border-color:rgba(192,57,43,0.85);}
+.emerg-cube.blue{border-color:rgba(91,155,213,0.75);}
+.emerg-cube.orange{border-color:rgba(201,120,37,0.8);}
+.emerg-cube.green{border-color:rgba(29,158,117,0.8);}
+.emerg-cube.gray{border-color:rgba(150,160,170,0.6);}
+.emerg-cube.gold{border-color:rgba(212,162,78,0.85);}
+.emerg-cube.teal{border-color:rgba(47,176,176,0.8);}
+.emerg-cube.sky{border-color:rgba(91,155,213,0.75);}
+.emerg-cube.crit{border-color:rgba(212,162,78,0.9);}
+.emerg-cube.purple{border-color:rgba(138,107,208,0.8);}
+.emerg-cube.rose{border-color:rgba(208,138,155,0.8);}
+.emerg-cube.mint{border-color:rgba(79,208,160,0.8);}
 .emerg-cube-emoji{font-size:34px;line-height:1;}
 .emerg-cube-name{color:#E8D9B8;font-size:15px;font-weight:800;line-height:1.2;}
-.emerg-cube-count{color:#7a9ab5;font-size:11px;font-weight:600;background:rgba(212,162,78,0.1);padding:3px 10px;border-radius:99px;}
+.emerg-cube-count{color:#93b0c8;font-size:12px;font-weight:600;background:rgba(212,162,78,0.1);padding:3px 10px;border-radius:99px;}
 .emerg-cube-empty{opacity:0.5;}
 
 .emerg-back{
@@ -609,6 +609,7 @@ body.day-mode .emerg-panel{background:linear-gradient(135deg,#fff,#f5efe0)!impor
 body.day-mode .emerg-panel input{color:#0e1b2e!important;}
 body.day-mode .emerg-panel input::placeholder{color:#8a7a5a!important;}
 body.day-mode .emerg-panel .keep-white{color:#0e1b2e!important;}
+body.day-mode #practice-section{background:#f5efe0!important;border-color:rgba(168,82,0,0.3)!important;}
 /* Triage legend ("רמת דחיפות") — readable in both night and day. */
 .urg-legend{display:flex;align-items:center;justify-content:center;gap:16px;flex-wrap:wrap;background:#1c3049;border:1px solid #3a5169;border-radius:10px;padding:9px 12px;margin-top:4px;}
 .urg-legend-label{color:#cfe0f0;font-size:11.5px;font-weight:800;}
@@ -649,7 +650,7 @@ body.sun-mode .qk-card, body.sun-mode .card{ border-width:2px; }
 .si input::placeholder{color:#aaa;}
 .sx{background:none;border:none;color:#aaa;font-size:20px;cursor:pointer;}
 .lrow{background:#e07800;padding:4px 12px;display:flex;gap:6px;}
-.lb{flex:1;padding:5px;border-radius:6px;border:1px solid rgba(255,255,255,0.3);background:transparent;color:rgba(255,255,255,0.65);font-size:12px;cursor:pointer;font-family:inherit;text-align:center;}
+.lb{flex:1;padding:10px 5px;border-radius:6px;border:1px solid rgba(255,255,255,0.3);background:transparent;color:rgba(255,255,255,0.75);font-size:13px;cursor:pointer;font-family:inherit;text-align:center;}
 .lb.active{background:rgba(255,255,255,0.2);color:#fff;border-color:rgba(255,255,255,0.8);}
 .cgrid{display:grid;grid-template-columns:1fr 1fr;gap:10px;background:transparent;}
 body.day-mode .cgrid{background:transparent;gap:10px;}
@@ -781,8 +782,8 @@ body.day-mode .card:hover{
 .theart{background:#c0392b;color:#fff;}
 .tprem{background:#E8D9B8;color:#412402;}
 .trh{background:#e74c3c;color:#fff;}.trm{background:#D4A24E;color:#fff;}.trl{background:#1D9E75;color:#fff;}
-.che{color:#fff;font-size:14px;font-weight:400;margin-bottom:4px;}
-.car{color:#E8D9B8;font-size:13px;direction:rtl;font-family:Georgia,serif;margin-bottom:4px;}
+.che{color:#fff;font-size:16px;font-weight:600;margin-bottom:4px;}
+.car{color:#E8D9B8;font-size:16px;direction:rtl;font-family:Georgia,serif;margin-bottom:4px;}
 .csub{color:#7a9ab5;font-size:12px;line-height:1.6;}
 .cwarn{color:#ffb0b0;font-size:12px;padding:7px 10px;background:#2a1010;border:1px solid #5a2020;border-radius:7px;margin-top:7px;line-height:1.6;}
 .nf{padding:14px 16px;}
@@ -2631,8 +2632,8 @@ function showLanding() {
       <div class="emerg-panel" style="background:#1F3147;border:2px solid #D4A24E;border-radius:12px;padding:10px;margin-bottom:14px;display:flex;align-items:center;gap:8px;">
         <span style="color:#D4A24E;font-size:18px;">⚡</span>
         <input id="emerg-search" placeholder="חיפוש מהיר: עצור, תעודה, ידיים..." oninput="emergSearch()" autocomplete="off" style="flex:1;background:transparent;border:none;color:#E8D9B8;font-size:16px;font-family:inherit;outline:none;direction:rtl;text-align:right;"/>
-        <button onclick="voiceSearch('emerg-search',this)" title="חיפוש קולי" style="background:rgba(212,162,78,0.18);border:1px solid #D4A24E;color:#D4A24E;width:32px;height:32px;border-radius:50%;cursor:pointer;font-size:15px;flex-shrink:0;">🎤</button>
-        <button onclick="document.getElementById('emerg-search').value='';emergSearch()" style="background:rgba(255,255,255,0.1);border:none;color:#E8D9B8;width:28px;height:28px;border-radius:50%;cursor:pointer;font-size:16px;flex-shrink:0;">×</button>
+        <button onclick="voiceSearch('emerg-search',this)" title="חיפוש קולי" style="background:rgba(212,162,78,0.18);border:1px solid #D4A24E;color:#D4A24E;width:44px;height:44px;border-radius:50%;cursor:pointer;font-size:18px;flex-shrink:0;">🎤</button>
+        <button onclick="document.getElementById('emerg-search').value='';emergSearch()" title="נקה" style="background:rgba(255,255,255,0.1);border:none;color:#E8D9B8;width:40px;height:40px;border-radius:50%;cursor:pointer;font-size:18px;flex-shrink:0;">×</button>
       </div>
       <div id="emerg-search-results" style="display:none;margin-bottom:8px;"></div>
       <button onclick="printPocketCard()" style="width:100%;background:transparent;border:1px dashed #7a9ab5;color:#a0b8c8;border-radius:10px;padding:9px;font-size:12.5px;font-weight:600;cursor:pointer;font-family:inherit;margin-bottom:14px;display:flex;align-items:center;justify-content:center;gap:6px;">🖨️ דף כיס להדפסה (גיבוי נייר לשטח)</button>
@@ -10730,8 +10731,7 @@ function renderTen(){
     html+='<div style="color:#D4A24E;font-size:13px;">'+p.trans+'</div>';
     html+='<div style="color:#7a9ab5;font-size:14px;direction:rtl;margin-top:2px;">'+p.ar+'</div>';
     html+='</div>';
-    html+=p.audio?'<div style="color:#1D9E75;font-size:18px;flex-shrink:0;">🔊</div>':'';
-    html+='<div style="color:#D4A24E;font-size:18px;flex-shrink:0;">◀</div>';
+    html+='<button onclick="event.stopPropagation();playEmergCard(\''+(p.audio||'')+'\',this)" '+(p.audio?'':'disabled')+' title="השמע" style="flex-shrink:0;width:52px;height:52px;border-radius:14px;border:none;background:'+(p.audio?'linear-gradient(135deg,#1D9E75,#158060)':'rgba(255,255,255,0.08)')+';color:#fff;font-size:22px;cursor:'+(p.audio?'pointer':'default')+';display:flex;align-items:center;justify-content:center;">▶</button>';
     html+='</div>';
   });
   el.innerHTML=html;
@@ -22273,7 +22273,7 @@ window.addEventListener('load', function(){
 <script>
 // Version stamp — shown in the admin panel so we can confirm which build is live
 // on a device (stale service-worker caches were causing "my changes don't show").
-window.APP_VERSION = 'v233';
+window.APP_VERSION = 'v234';
 
 // Register the service worker for full offline use in the field, WITH update
 // detection: when a new version installs, offer a one-tap refresh instead of the
