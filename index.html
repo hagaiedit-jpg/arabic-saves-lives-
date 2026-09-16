@@ -609,6 +609,13 @@ body.day-mode .emerg-panel{background:linear-gradient(135deg,#fff,#f5efe0)!impor
 body.day-mode .emerg-panel input{color:#0e1b2e!important;}
 body.day-mode .emerg-panel input::placeholder{color:#8a7a5a!important;}
 body.day-mode .emerg-panel .keep-white{color:#0e1b2e!important;}
+/* Triage legend ("רמת דחיפות") — readable in both night and day. */
+.urg-legend{display:flex;align-items:center;justify-content:center;gap:16px;flex-wrap:wrap;background:#1c3049;border:1px solid #3a5169;border-radius:10px;padding:9px 12px;margin-top:4px;}
+.urg-legend-label{color:#cfe0f0;font-size:11.5px;font-weight:800;}
+.urg-legend-item{color:#F3E9D2;font-size:12px;font-weight:600;}
+body.day-mode .urg-legend{background:linear-gradient(135deg,#fff,#f5efe0)!important;border-color:rgba(168,82,0,0.3)!important;}
+body.day-mode .urg-legend-label{color:#a85200!important;}
+body.day-mode .urg-legend-item{color:#0e1b2e!important;}
 .tb-tabs{display:flex;overflow-x:auto;gap:14px;padding:0 4px 10px;justify-content:flex-start;}
 .tb-tabs::-webkit-scrollbar{display:none;}
 .tb-tab{padding:6px 4px;color:#7a9ab5;font-size:14px;font-weight:600;cursor:pointer;border-bottom:2px solid transparent;white-space:nowrap;transition:all 0.2s;user-select:none;}
@@ -21166,11 +21173,11 @@ function rQK(){
     h+='</div>';
   });
   // Triage legend — explains the coloured dots that appear on the phrase cards.
-  h+='<div style="grid-column:1/-1;display:flex;align-items:center;justify-content:center;gap:16px;flex-wrap:wrap;background:#14263b;border:1px solid #2A3D52;border-radius:10px;padding:9px 12px;margin-top:4px;">'
-    +'<span style="color:#7a9ab5;font-size:11px;font-weight:700;">רמת דחיפות:</span>'
-    +'<span style="color:#E8D9B8;font-size:11.5px;">🔴 קריטי</span>'
-    +'<span style="color:#E8D9B8;font-size:11.5px;">🟡 מבצעי</span>'
-    +'<span style="color:#E8D9B8;font-size:11.5px;">🟢 רגיל</span>'
+  h+='<div class="urg-legend" style="grid-column:1/-1;">'
+    +'<span class="urg-legend-label">רמת דחיפות:</span>'
+    +'<span class="urg-legend-item">🔴 קריטי</span>'
+    +'<span class="urg-legend-item">🟡 מבצעי</span>'
+    +'<span class="urg-legend-item">🟢 רגיל</span>'
     +'</div>';
   grid.innerHTML=h;
   // Admin-only: one-click marking of the approved critical set.
@@ -22266,7 +22273,7 @@ window.addEventListener('load', function(){
 <script>
 // Version stamp — shown in the admin panel so we can confirm which build is live
 // on a device (stale service-worker caches were causing "my changes don't show").
-window.APP_VERSION = 'v232';
+window.APP_VERSION = 'v233';
 
 // Register the service worker for full offline use in the field, WITH update
 // detection: when a new version installs, offer a one-tap refresh instead of the
