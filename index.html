@@ -3565,6 +3565,9 @@ function showLanding() {
         <button id="tool-auditrec" onclick="auditRecordings(this)" style="width:100%;padding:12px;margin-top:10px;background:linear-gradient(135deg,#1f8a70 0%,#0e5a48 100%);border:none;border-radius:10px;color:#fff;font-size:13px;font-weight:800;cursor:pointer;font-family:inherit;">🎙️ ביקורת הקלטות — יישור קו (כל המשפטים)</button>
         <div style="text-align:center;color:#7a9ab5;font-size:11px;margin-top:5px;">בודק שכל משפט שהעלינו מוקלט. מוצא משפטים <b>שכבר הקלטת אך מסומנים כלא-מוקלטים</b> (כפילות ריקה מסתירה את ההקלטה) ומתקן בלחיצה — בלי לאבד הקלטות. בנוסף מציג רשימת מה שבאמת חסר, לפי קטגוריה, עם כפתור הקלטה.</div>
         <div id="audit-rec-panel" style="margin-top:10px;"></div>
+        <button id="tool-auditans" onclick="auditCitizenAnswers(this)" style="width:100%;padding:12px;margin-top:10px;background:linear-gradient(135deg,#3a6d8c 0%,#243f57 100%);border:none;border-radius:10px;color:#fff;font-size:13px;font-weight:800;cursor:pointer;font-family:inherit;">🗣️ ביקורת תשובות אזרח — מה עוד לא הוקלט</button>
+        <div style="text-align:center;color:#7a9ab5;font-size:11px;margin-top:5px;">סורק את <b>תשובות האזרח</b> בכל השאלות (מה שהקלטת לאחרונה) ומראה כמה הוקלטו וכמה חסרות — לפי קטגוריה, עם רשימת התשובות שנשארו וכפתור הקלטה לכל שאלה. משלים את "ביקורת ההקלטות" שבודקת רק את המשפטים הראשיים.</div>
+        <div id="audit-ans-panel" style="margin-top:10px;"></div>
         <button id="tool-dupcheck" onclick="openDupCheck(this)" style="width:100%;padding:12px;margin-top:10px;background:linear-gradient(135deg,#7a5230 0%,#5a3a20 100%);border:none;border-radius:10px;color:#fff;font-size:13px;font-weight:800;cursor:pointer;font-family:inherit;">🔁 בדיקת כפילויות וניקוי (לפני הקלטה)</button>
         <div style="text-align:center;color:#7a9ab5;font-size:11px;margin-top:5px;">מוצא כפילויות <b>בתוך אותו סעיף בלבד</b> (לא בין מילון/תרחיש/מבצעי — שם לכל אחד תפקיד). משאיר עותק אחד, עם עדיפות לזה שכבר מוקלט.</div>
         <div id="dupcheck-panel" style="margin-top:10px;"></div>
@@ -9910,6 +9913,74 @@ async function auditRecordings(btn){
       h+='</details>';
     });
     if(!anyMiss){ h+='<div style="background:#16302a;border:1px solid #1D9E75;border-radius:10px;padding:12px;color:#a8e6cf;font-size:13px;font-weight:700;text-align:center;">🎉 כל המשפטים שהעלינו מוקלטים!</div>'; }
+    panel.innerHTML=h;
+    btn.textContent='✓ בוצעה בדיקה';
+  }catch(e){
+    panel.innerHTML='<div style="color:#e07a5f;font-size:12px;padding:8px;">שגיאה בבדיקה: '+(e&&e.message?e.message:e)+'</div>';
+    btn.textContent=old;
+  }
+  btn.disabled=false;
+}
+// Citizen-answer recording coverage. The main auditRecordings() only checks a
+// phrase's own audio_url; the 3 spoken replies live inside each question's
+// responses[] JSON, each with its own audio_url. This report scans those and
+// shows, per category, how many answers are still un-recorded — the companion
+// to the main-phrase audit.
+async function auditCitizenAnswers(btn){
+  var panel=document.getElementById('audit-ans-panel'); if(!panel) return;
+  var old=btn.textContent; btn.disabled=true; btn.textContent='בודק…';
+  try{
+    var allRows=await sbFetchAllRows('/rest/v1/phrases?select=id,he,cat,section,responses');
+    allRows=allRows||[];
+    var byCat={}, totT=0, totR=0, qWithMissing=0;
+    allRows.forEach(function(r){
+      if(!r||!r.responses) return;
+      var arr; try{ arr=typeof r.responses==='string'?JSON.parse(r.responses):r.responses; }catch(e){ return; }
+      if(!Array.isArray(arr)||!arr.length) return;
+      var tot=arr.length, rec=arr.filter(function(x){return x&&x.audio_url;}).length;
+      totT+=tot; totR+=rec;
+      var cat=r.cat||'—';
+      var c=byCat[cat]=byCat[cat]||{tot:0,rec:0,items:[]};
+      c.tot+=tot; c.rec+=rec;
+      if(rec<tot){
+        qWithMissing++;
+        var miss=arr.filter(function(x){return !(x&&x.audio_url);}).map(function(x){return x.he||x.ar||'';});
+        c.items.push({id:r.id, he:r.he||'', miss:miss, tot:tot, rec:rec});
+      }
+    });
+    var h='';
+    h+='<div style="background:#14263b;border:1px solid #2A3D52;border-radius:10px;padding:12px;margin-bottom:10px;">';
+    h+='<div style="color:#E8D9B8;font-size:14px;font-weight:800;margin-bottom:8px;">🗣️ תשובות אזרח — '+totR+' מתוך '+totT+' מוקלטות</div>';
+    Object.keys(byCat).sort().forEach(function(cat){
+      var c=byCat[cat], miss=c.tot-c.rec, col=miss===0?'#1D9E75':'#e07a5f';
+      h+='<div style="display:flex;justify-content:space-between;font-size:12px;color:#a0b8c8;padding:3px 0;border-bottom:1px solid #1a2a3a;">'
+        +'<span>'+_tabEsc(cat)+'</span>'
+        +'<span style="color:'+col+';font-weight:700;">'+c.rec+'/'+c.tot+(miss?(' · חסרים '+miss):' ✓')+'</span></div>';
+    });
+    h+='</div>';
+    if(!qWithMissing){
+      h+='<div style="background:#16302a;border:1px solid #1D9E75;border-radius:10px;padding:12px;color:#a8e6cf;font-size:13px;font-weight:700;text-align:center;">🎉 כל תשובות האזרח מוקלטות!</div>';
+    } else {
+      h+='<div style="background:#132a3a;border:1px solid #2A3D52;border-radius:10px;padding:10px 12px;margin-bottom:10px;color:#cfe0ee;font-size:12px;line-height:1.6;">נשארו <b>'+qWithMissing+'</b> שאלות עם תשובות שעדיין לא הוקלטו. אפשר לפתוח כל שאלה בכפתור 🎤, או להשתמש ב<b>"תור הקלטת תשובות רציף"</b> מרשימת הניהול.</div>';
+      Object.keys(byCat).sort().forEach(function(cat){
+        var c=byCat[cat]; if(!c.items.length) return;
+        var catMiss=c.items.reduce(function(a,it){return a+(it.tot-it.rec);},0);
+        h+='<details style="margin-bottom:8px;"><summary style="cursor:pointer;color:#D4A24E;font-size:13px;font-weight:800;padding:6px 0;">'+_tabEsc(cat)+' — '+catMiss+' תשובות להקלטה</summary>';
+        c.items.forEach(function(it){
+          var id=String(it.id||'').replace(/'/g,"\\'");
+          h+='<div style="padding:6px 8px;border-bottom:1px solid #1a2a3a;">'
+            +'<div style="display:flex;justify-content:space-between;align-items:center;gap:6px;">'
+            +'<div style="flex:1;min-width:0;color:#E8D9B8;font-size:12px;">'+_tabEsc(it.he)+' <span style="color:#7a9ab5;">('+it.rec+'/'+it.tot+')</span></div>'
+            +'<button onclick="try{openEditById(\''+id+'\')}catch(e){alert(e&&e.message?e.message:e)}" title="פתח והקלט" style="flex-shrink:0;padding:5px 10px;background:#3a2a1a;border:1px solid #D4A24E;border-radius:6px;color:#D4A24E;font-size:12px;cursor:pointer;font-family:inherit;">🎤 הקלט</button>'
+            +'</div>';
+          if(it.miss.length){
+            h+='<div style="margin-top:4px;color:#8fa8bd;font-size:11px;">חסר: '+it.miss.map(function(m){return _tabEsc(m);}).join(' · ')+'</div>';
+          }
+          h+='</div>';
+        });
+        h+='</details>';
+      });
+    }
     panel.innerHTML=h;
     btn.textContent='✓ בוצעה בדיקה';
   }catch(e){
@@ -22273,7 +22344,7 @@ window.addEventListener('load', function(){
 <script>
 // Version stamp — shown in the admin panel so we can confirm which build is live
 // on a device (stale service-worker caches were causing "my changes don't show").
-window.APP_VERSION = 'v234';
+window.APP_VERSION = 'v235';
 
 // Register the service worker for full offline use in the field, WITH update
 // detection: when a new version installs, offer a one-tap refresh instead of the
