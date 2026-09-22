@@ -9294,7 +9294,7 @@ var BUILTIN_DICT = [
   {section:'dictionary', cat:'איברי גוף', he:'צלע', ar:'ضلع (ج) ضلوع', trans:'צִ׳לְע (ר) צְ׳לוּע'},
   {section:'dictionary', cat:'מספרים', he:'0 - אפס', ar:'صفر', trans:'סִפֵר'},
   {section:'dictionary', cat:'מספרים', he:'1 - אחת', ar:'واحد', trans:'וַאחַד'},
-  {section:'dictionary', cat:'מספרים', he:'2 - שתיים', ar:'اثنين', trans:'תְנֵין'},
+  {section:'dictionary', cat:'מספרים', he:'2 - שתיים', ar:'اثنين', trans:'אִת׳נֵין'},
   {section:'dictionary', cat:'מספרים', he:'3 - שלוש', ar:'ثلاثة', trans:'תַלַאתֵה'},
   {section:'dictionary', cat:'מספרים', he:'4 - ארבע', ar:'أربعة', trans:'אַרְבַּעַה'},
   {section:'dictionary', cat:'מספרים', he:'5 - חמש', ar:'خمسة', trans:'חַמְסֵה'},
@@ -9323,6 +9323,17 @@ var BUILTIN_DICT = [
   {section:'dictionary', cat:'מספרים', he:'100 - מאה', ar:'مية', trans:'מִיֵּה'},
   {section:'dictionary', cat:'מספרים', he:'200 - מאתיים', ar:'ميتين', trans:'מִיתֵין'},
   {section:'dictionary', cat:'מספרים', he:'1000 - אלף', ar:'ألف', trans:'אַלְף'},
+  {section:'dictionary', cat:'מספרים', he:'21 - עשרים ואחת', ar:'واحد وعشرين', trans:'וַאחַד וּעִשְׁרִין'},
+  {section:'dictionary', cat:'מספרים', he:'25 - עשרים וחמש', ar:'خمسة وعشرين', trans:'חַמְסֵה וּעִשְׁרִין'},
+  {section:'dictionary', cat:'מספרים', he:'38 - שלושים ושמונה', ar:'ثمانية وثلاثين', trans:'תַמַאנְיֵה וּתַלַאתִין'},
+  {section:'dictionary', cat:'מספרים', he:'47 - ארבעים ושבע', ar:'سبعة وأربعين', trans:'סַבְּעַה וּאַרְבַּעִין'},
+  {section:'dictionary', cat:'מספרים', he:'99 - תשעים ותשע', ar:'تسعة وتسعين', trans:'תִסְעַה וּתִסְעִין'},
+  {section:'dictionary', cat:'מספרים', he:'105 - מאה וחמש', ar:'مية وخمسة', trans:'מִיֵה וּחַמְסֵה'},
+  {section:'dictionary', cat:'מספרים', he:'150 - מאה וחמישים', ar:'مية وخمسين', trans:'מִיֵה וּחַמְסִין'},
+  {section:'dictionary', cat:'מספרים', he:'כמה (אנשים)?', ar:'كم واحد؟', trans:'כַּם וַאחַד?'},
+  {section:'dictionary', cat:'מספרים', he:'בן כמה?', ar:'قدّيش عمره؟', trans:'קַדֵיש עֻמְרוֹ?'},
+  {section:'dictionary', cat:'מספרים', he:'מה המספר?', ar:'شو الرقم؟', trans:'שוּ אִלרַקַם?'},
+  {section:'dictionary', cat:'מספרים', he:'כמה פעמים?', ar:'كم مرّة؟', trans:'כַּם מַרַה?'},
   {section:'dictionary', cat:'זמן ותאריכים', he:'שעה', ar:'ساعة (ج) ساعات', trans:'סֵאעַה (ר) סַאעַאת'},
   {section:'dictionary', cat:'זמן ותאריכים', he:'דקה', ar:'دقيقة (ج) دقايق', trans:'דַקִיקַה (ר) דַקַאיֵק'},
   {section:'dictionary', cat:'זמן ותאריכים', he:'שנייה', ar:'ثانية', trans:'תַ׳אנְיֵה'},
@@ -18434,7 +18445,7 @@ var FIELD_VOCAB=[
   {cat:'דת ותרבות', he:'רמדאן', ar:'رمضان', trans:'רַמַצַאן'},
   {cat:'מספרים', he:'0 (אפס)', ar:'صفر', trans:'סִפֶר'},
   {cat:'מספרים', he:'1 (אחד)', ar:'واحد', trans:'וַאחֶד'},
-  {cat:'מספרים', he:'2 (שתיים)', ar:'اثنين', trans:'תְנֵין'},
+  {cat:'מספרים', he:'2 (שתיים)', ar:'اثنين', trans:'אִת׳נֵין'},
   {cat:'מספרים', he:'3 (שלוש)', ar:'ثلاثة', trans:'תַלַאתֶה'},
   {cat:'מספרים', he:'4 (ארבע)', ar:'أربعة', trans:'אַרְבַּעַה'},
   {cat:'מספרים', he:'5 (חמש)', ar:'خمسة', trans:'חַ\'מְסֶה'},
@@ -22353,7 +22364,7 @@ window.addEventListener('load', function(){
 <script>
 // Version stamp — shown in the admin panel so we can confirm which build is live
 // on a device (stale service-worker caches were causing "my changes don't show").
-window.APP_VERSION = 'v236';
+window.APP_VERSION = 'v237';
 
 // Register the service worker for full offline use in the field, WITH update
 // detection: when a new version installs, offer a one-tap refresh instead of the
