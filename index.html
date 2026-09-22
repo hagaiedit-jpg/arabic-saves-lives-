@@ -17494,13 +17494,14 @@ function _vrow(lbl,ar,tr){
 }
 function _threatCard(p){
   var audio=p.audio_url||p.audio||'';
-  var h='<div class="emerg-card">';
-  h+='<div class="emerg-card-content"'+(p._dbidx>=0?' onclick="opP('+p._dbidx+')"':'')+'>';
+  var canPlay=!!audio;
+  var h='<div class="emerg-card" style="align-items:center;padding:12px 14px;gap:12px;">';
+  h+='<div class="emerg-card-content" style="padding:0;flex:1;min-width:0;"'+(p._dbidx>=0?' onclick="opP('+p._dbidx+')"':'')+'>';
   h+='<div class="emerg-card-he">'+p.he+'</div>';
   if(p.trans)h+='<div class="emerg-card-trans">'+p.trans+'</div>';
   if(p.ar)h+='<div class="emerg-card-ar">'+p.ar+'</div>';
   h+='</div>';
-  h+='<button class="emerg-play-btn" onclick="playEmergCard(\''+audio+'\',this)" '+(audio?'':'disabled')+'>\u25b6</button>';
+  h+='<button onclick="playEmergCard(\''+audio+'\',this)" '+(canPlay?'':'disabled')+' style="width:44px;height:44px;border-radius:50%;border:none;flex-shrink:0;font-size:18px;cursor:'+(canPlay?'pointer':'default')+';background:'+(canPlay?'#D4A24E':'#3a4553')+';color:'+(canPlay?'#fff':'#8598ab')+';">\u25b6</button>';
   h+='</div>';
   return h;
 }
@@ -22585,7 +22586,7 @@ window.addEventListener('load', function(){
 <script>
 // Version stamp — shown in the admin panel so we can confirm which build is live
 // on a device (stale service-worker caches were causing "my changes don't show").
-window.APP_VERSION = 'v249';
+window.APP_VERSION = 'v250';
 
 // Register the service worker for full offline use in the field, WITH update
 // detection: when a new version installs, offer a one-tap refresh instead of the
