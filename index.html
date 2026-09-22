@@ -2894,7 +2894,7 @@ function showLanding() {
       <button onclick="voiceSearch('dict-search',this)" title="חיפוש קולי" style="background:rgba(212,162,78,0.18);border:1px solid #D4A24E;color:#D4A24E;width:32px;height:32px;border-radius:50%;cursor:pointer;font-size:15px;flex-shrink:0;">🎤</button>
       <button onclick="document.getElementById('dict-search').value='';searchDict()" style="background:rgba(255,255,255,0.1);border:none;color:#E8D9B8;width:28px;height:28px;border-radius:50%;cursor:pointer;font-size:16px;">×</button>
     </div>
-    <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:14px;">
+    <div style="display:flex;gap:8px;margin-bottom:14px;">
       <div onclick="navToTab('sem')" style="flex:1;background:#1F3147;border:1px solid #2A3D52;border-radius:10px;padding:12px 8px;text-align:center;cursor:pointer;">
         <div style="font-size:20px;margin-bottom:3px;">🧠</div>
         <div style="color:#E8D9B8;font-size:12px;font-weight:700;">סמנטי</div>
@@ -2910,11 +2910,6 @@ function showLanding() {
         <div style="color:#E8D9B8;font-size:12px;font-weight:700;">פעלים</div>
         <div style="color:#7a9ab5;font-size:10px;margin-top:1px;">שורשים נפוצים</div>
       </div>
-      <div onclick="navToTab('threat')" style="flex:1;background:#1F3147;border:1px solid rgba(231,76,60,0.45);border-radius:10px;padding:12px 8px;text-align:center;cursor:pointer;">
-        <div style="font-size:20px;margin-bottom:3px;">🚨</div>
-        <div style="color:#E8D9B8;font-size:12px;font-weight:700;">זיהוי איום</div>
-        <div style="color:#7a9ab5;font-size:10px;margin-top:1px;">מה שומעים בשטח</div>
-      </div>
     </div>
     <div id="dict-results"></div>
   </div>
@@ -2922,7 +2917,7 @@ function showLanding() {
 
 <div class="scr" id="tab-threat">
   <div class="sec">
-    <button onclick="navToTab('dict')" style="background:transparent;border:none;color:#a0b8c8;font-size:15px;cursor:pointer;font-family:inherit;padding:4px 0;margin-bottom:10px;display:flex;align-items:center;gap:6px;">◀ חזרה למילון</button>
+    <button onclick="navToTab('qk')" style="background:transparent;border:none;color:#a0b8c8;font-size:15px;cursor:pointer;font-family:inherit;padding:4px 0;margin-bottom:10px;display:flex;align-items:center;gap:6px;">◀ חזרה לחירום</button>
     <div class="stitle">🚨 זיהוי איום — מה שומעים בשטח</div>
     <div style="color:#7a9ab5;font-size:12px;line-height:1.6;margin:2px 2px 12px;">מילים ומשפטים שאזרח עשוי להגיד ושמסמנים סכנה או תיאום — כדי לזהות אותם מהר.</div>
     <div id="threatlist"></div>
@@ -21418,6 +21413,7 @@ function rQK(){
   var EMERG_CUBES=[
     {tab:'ord',     emoji:'🚨',  name:'הוראות מיידיות',          sub:'תבנית מסודרת',           color:'red'},
     {tab:'answers', emoji:'💬',  name:'מה עונים לך',              sub:'הבנת תשובות האזרח',       color:'sky'},
+    {tab:'threat',  emoji:'👂',  name:'זיהוי איום',              sub:'מה שומעים בשטח',          color:'red'},
     {tab:'chk',     emoji:'🪪',  name:'בידוק וזיהוי',            sub:'תבנית מסודרת',           color:'blue'},
     {tab:'desc',    emoji:'🎯',  name:'תיאור חשוד',              sub:'מה לשאול ואיך לתאר',       color:'gold'},
     {tab:'veh',     emoji:'🚗',  name:'רכב ומחסום',              sub:'תבנית מסודרת',           color:'orange'},
@@ -22540,7 +22536,7 @@ window.addEventListener('load', function(){
 <script>
 // Version stamp — shown in the admin panel so we can confirm which build is live
 // on a device (stale service-worker caches were causing "my changes don't show").
-window.APP_VERSION = 'v246';
+window.APP_VERSION = 'v247';
 
 // Register the service worker for full offline use in the field, WITH update
 // detection: when a new version installs, offer a one-tap refresh instead of the
