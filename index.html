@@ -9647,6 +9647,29 @@ var BUILTIN_DICT = [
   {section:'dictionary', cat:'מילים נפוצות (מהמשפטים)', he:'נכון / אמת', ar:'صحيح', trans:'צַחִיח'},
   {section:'dictionary', cat:'מילים נפוצות (מהמשפטים)', he:'פרטי / מיוחד', ar:'خاص', trans:'חַ׳אץ'},
   {section:'dictionary', cat:'מילים נפוצות (מהמשפטים)', he:'בבקשה', ar:'من فضلك', trans:'מִן פַדְ׳לַכּ'},
+  {section:'dictionary', cat:'מילים נפוצות (מהמשפטים)', he:'בערך', ar:'تقريباً', trans:'תַקְרִיבַּן'},
+  {section:'dictionary', cat:'מילים נפוצות (מהמשפטים)', he:'מזמן / זמן רב', ar:'زمان', trans:'זַמַאן'},
+  {section:'dictionary', cat:'מילים נפוצות (מהמשפטים)', he:'בינוני', ar:'متوسّط', trans:'מֻתְוַסֶט'},
+  {section:'dictionary', cat:'מילים נפוצות (מהמשפטים)', he:'שחור', ar:'أسود', trans:'אַסְוַד'},
+  {section:'dictionary', cat:'מילים נפוצות (מהמשפטים)', he:'האנשים', ar:'الناس', trans:'אִלנַאס'},
+  {section:'dictionary', cat:'מילים נפוצות (מהמשפטים)', he:'חף מפשע', ar:'بريء', trans:'בַּרִי'},
+  {section:'dictionary', cat:'מילים נפוצות (מהמשפטים)', he:'צבא', ar:'جيش', trans:'גֵ׳יש'},
+  {section:'dictionary', cat:'מילים נפוצות (מהמשפטים)', he:'הגנה (צה"ל = جيش الدفاع)', ar:'الدفاع', trans:'אִלדִפַאע'},
+  {section:'dictionary', cat:'מילים נפוצות (מהמשפטים)', he:'רווק', ar:'عزّابي', trans:'עַזַאבִּי'},
+  {section:'dictionary', cat:'מילים נפוצות (מהמשפטים)', he:'שלום', ar:'السلام', trans:'אִלסַלַאם'},
+  {section:'dictionary', cat:'מילים נפוצות (מהמשפטים)', he:'קטן', ar:'صغير', trans:'זְעִ׳יר'},
+  {section:'dictionary', cat:'מילים נפוצות (מהמשפטים)', he:'סטודנט / תלמיד', ar:'طالب', trans:'טַאלֶבּ'},
+  {section:'dictionary', cat:'מילים נפוצות (מהמשפטים)', he:'אימייל', ar:'إيميل', trans:'אִימֵיל'},
+  {section:'dictionary', cat:'מילים נפוצות (מהמשפטים)', he:'גר / מתגורר', ar:'ساكن', trans:'סַאכֵּן'},
+  {section:'dictionary', cat:'מילים נפוצות (מהמשפטים)', he:'אחר / אחרון', ar:'آخر', trans:'אַאחֶ׳ר'},
+  {section:'dictionary', cat:'מילים נפוצות (מהמשפטים)', he:'אולי / ייתכן', ar:'يمكن', trans:'יִמְכֵּן'},
+  {section:'dictionary', cat:'מילים נפוצות (מהמשפטים)', he:'יותר טוב', ar:'أحسن', trans:'אַחְסַן'},
+  {section:'dictionary', cat:'מילים נפוצות (מהמשפטים)', he:'שלוש (לפני שם עצם)', ar:'ثلاث', trans:'תַלַאת'},
+  {section:'dictionary', cat:'מילים נפוצות (מהמשפטים)', he:'אין / אין כזה', ar:'فيش', trans:'פִיש'},
+  {section:'dictionary', cat:'מילים נפוצות (מהמשפטים)', he:'לאן?', ar:'لوين', trans:'לַוֵין'},
+  {section:'dictionary', cat:'מילים נפוצות (מהמשפטים)', he:'אלה', ar:'هدول', trans:'הַדוֹל'},
+  {section:'dictionary', cat:'מילים נפוצות (מהמשפטים)', he:'כולם', ar:'كلهم', trans:'כֻּלְהֹם'},
+  {section:'dictionary', cat:'מילים נפוצות (מהמשפטים)', he:'בריאות', ar:'صحّة', trans:'צִחַה'},
 ];
 async function addDictCheckpoint(btn){
   if(!confirm('להוסיף את המילון המבצעי — כל הנושאים ('+BUILTIN_DICT.length+' מילים) — לרשימת העריכה וההקלטה? פעולה חד-פעמית, ללא כפילות.'))return;
@@ -22387,7 +22410,7 @@ window.addEventListener('load', function(){
 <script>
 // Version stamp — shown in the admin panel so we can confirm which build is live
 // on a device (stale service-worker caches were causing "my changes don't show").
-window.APP_VERSION = 'v238';
+window.APP_VERSION = 'v239';
 
 // Register the service worker for full offline use in the field, WITH update
 // detection: when a new version installs, offer a one-tap refresh instead of the
