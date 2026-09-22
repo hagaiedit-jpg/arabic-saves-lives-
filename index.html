@@ -2918,8 +2918,8 @@ function showLanding() {
 <div class="scr" id="tab-threat">
   <div class="sec">
     <button onclick="navToTab('qk')" style="background:transparent;border:none;color:#a0b8c8;font-size:15px;cursor:pointer;font-family:inherit;padding:4px 0;margin-bottom:10px;display:flex;align-items:center;gap:6px;">◀ חזרה לחירום</button>
-    <div class="stitle">🚨 זיהוי איום — מה שומעים בשטח</div>
-    <div style="color:#7a9ab5;font-size:12px;line-height:1.6;margin:2px 2px 12px;">מילים ומשפטים שאזרח עשוי להגיד ושמסמנים סכנה או תיאום — כדי לזהות אותם מהר.</div>
+    <div class="stitle">👂 מה שומעים בשטח</div>
+    <div style="color:#7a9ab5;font-size:12px;line-height:1.6;margin:2px 2px 4px;">להבחין בזמן אמת בין איום אמיתי לבין קללה תמימה — כדי להגיב נכון.</div>
     <div id="threatlist"></div>
   </div>
 </div>
@@ -10306,6 +10306,36 @@ function startAnswerRecQueue(){
   try{ openEditById(ids[0]); }catch(e){ alert('שגיאה: '+(e&&e.message?e.message:e)); }
 }
 
+var BUILTIN_THREAT=[
+  {section:'military', cat:'שומעים בשטח: איום', he:'יש צבא כאן!', ar:'في جيش هون!', trans:'פִי גֵ׳יש הוֹן'},
+  {section:'military', cat:'שומעים בשטח: איום', he:'הצבא הגיע', ar:'أجا الجيش', trans:'אַגַ׳א אִלגֵ׳יש'},
+  {section:'military', cat:'שומעים בשטח: איום', he:'תברחו!', ar:'اهربوا!', trans:'אֻהְרְבוּ'},
+  {section:'military', cat:'שומעים בשטח: איום', he:'תסגרו את הדלת!', ar:'سكّروا الباب!', trans:'סַכְּרוּ אִלבַּאבּ'},
+  {section:'military', cat:'שומעים בשטח: איום', he:'תחביאו!', ar:'خبّوا!', trans:'חַ׳בּוּ'},
+  {section:'military', cat:'שומעים בשטח: איום', he:'הם רוצים לחפש', ar:'بدهم يفتّشوا', trans:'בִּדְהֹם יְפַתְשוּ'},
+  {section:'military', cat:'שומעים בשטח: איום', he:'אל תגידו כלום!', ar:'ما تحكوا إشي!', trans:'מַא תִחְכּוּ אִשִי'},
+  {section:'military', cat:'שומעים בשטח: איום', he:'תזעיקו / תודיעו', ar:'خبّروا!', trans:'חַ׳בְּרוּ'},
+  {section:'military', cat:'שומעים בשטח: איום', he:'בואו מהר, כולם!', ar:'تعالوا بسرعة!', trans:'תַעַאלוּ בְּסֻרְעַה'},
+  {section:'military', cat:'שומעים בשטח: איום', he:'היזהרו / שימו לב', ar:'انتبهوا!', trans:'אִנְתַבְּהוּ'},
+  {section:'military', cat:'שומעים בשטח: איום', he:'הם באים', ar:'جايين', trans:'גַ׳איִין'},
+  {section:'military', cat:'שומעים בשטח: איום', he:'קחו אבנים', ar:'خذوا حجارة', trans:'חֻ׳דוּ חְגַ׳ארַה'},
+  {section:'military', cat:'שומעים בשטח: איום', he:'תזרקו עליהם!', ar:'ارموا عليهم!', trans:'אִרְמוּ עְלֵיהֹם'},
+  {section:'military', cat:'שומעים בשטח: איום', he:'יש לו נשק', ar:'معه سلاح', trans:'מַעוֹ סְלַאח'},
+  {section:'military', cat:'שומעים בשטח: איום', he:'יש לו סכין', ar:'معه سكّينة', trans:'מַעוֹ סִכִּינֶה'},
+  {section:'military', cat:'שומעים בשטח: איום', he:'תפסו אותו!', ar:'امسكوه!', trans:'אִמְסְכוּה'},
+  {section:'military', cat:'שומעים בשטח: איום', he:'אל תיתנו להם לעבור', ar:'ما تخلّوهم يمرقوا', trans:'מַא תְחַ׳לّוּהֹם יִמְרְקוּ'},
+  {section:'military', cat:'שומעים בשטח: איום', he:'שקט, הם מקשיבים', ar:'اسكتوا، عم بيسمعوا', trans:'אֻסְכְּתוּ, עַם בִּיסְמַעוּ'},
+  {section:'military', cat:'שומעים בשטח: איום', he:'תצלמו אותם', ar:'صوّروهم', trans:'צַוְרוּהֹם'},
+  {section:'military', cat:'שומעים בשטח: איום', he:'הצבא בכניסה לכפר', ar:'الجيش عند مدخل القرية', trans:'אִלגֵ׳יש עִנְד מַדְחַ׳ל אִלקַרְיֶה'},
+  {section:'military', cat:'שומעים בשטח: קללות', he:'אלוהים יקלל אותך', ar:'الله يلعنك', trans:'אַללָה יִלְעַנַכּ'},
+  {section:'military', cat:'שומעים בשטח: קללות', he:'לך לעזאזל', ar:'الله يقطعك', trans:'אַללָה יִקְטַעַכּ'},
+  {section:'military', cat:'שומעים בשטח: קללות', he:'אני אהרוג אותך', ar:'بأقتلك', trans:'בַּאקְתֻלַכּ'},
+  {section:'military', cat:'שומעים בשטח: קללות', he:'לך תמות', ar:'روح موت', trans:'רוּח מוּת'},
+  {section:'military', cat:'שומעים בשטח: קללות', he:'אני ארביץ לך', ar:'بأضربك', trans:'בַּאדְ׳רֻבַּכּ'},
+  {section:'military', cat:'שומעים בשטח: קללות', he:'חמור / חיה', ar:'يا حمار / يا حيوان', trans:'יַא חְמַאר / יַא חַיַוַאן'},
+  {section:'military', cat:'שומעים בשטח: קללות', he:'אשבור לך את הראש', ar:'بأكسّر راسك', trans:'בַּאכַּסֶר רַאסַכּ'},
+  {section:'military', cat:'שומעים בשטח: קללות', he:'שתוק!', ar:'اسكت!', trans:'אֻסְכֻּת'},
+];
 var BUILTIN_SCENARIO_DATA = [
   {id:'bi-harhaka-1',  section:'scenario', cat:'הרחקה מהשטח', tags:'step1',  he:'עצור במקום והרם ידיים!', ar:'اوقّف عندك وارفع إيديك لفوق!', trans:'וַקֵף עִנְדַכּ וַארְפַע אִידֵיכּ לַפוֹק'},
   {id:'bi-harhaka-2',  section:'scenario', cat:'הרחקה מהשטח', tags:'step2',  he:'מה אתה עושה כאן?', ar:'شو بتعمل هون؟', trans:'שוּ בְּתִעְמֵל הוֹן?'},
@@ -17462,26 +17492,34 @@ function _vrow(lbl,ar,tr){
     +'<span class="vrow-ar">'+ar+'</span>'
     +'<span class="vrow-tr">'+tr+'</span></div>';
 }
-var THREAT_HEAR=[
- {he:'יש צבא כאן!',ar:'في جيش هون!',tr:'פִי גֵ׳יש הוֹן'},
- {he:'הצבא הגיע',ar:'أجا الجيش',tr:'אַגַ׳א אִלגֵ׳יש'},
- {he:'תברחו!',ar:'اهربوا!',tr:'אֻהְרְבוּ'},
- {he:'תסגרו את הדלת!',ar:'سكّروا الباب!',tr:'סַכְּרוּ אִלבַּאבּ'},
- {he:'תחביאו!',ar:'خبّوا!',tr:'חַ׳בּוּ'},
- {he:'הם רוצים לחפש',ar:'بدهم يفتّشوا',tr:'בִּדְהֹם יְפַתְשוּ'},
- {he:'אל תגידו כלום!',ar:'ما تحكوا إشي!',tr:'מַא תִחְכּוּ אִשִי'},
- {he:'תזעיקו / תודיעו',ar:'خبّروا!',tr:'חַ׳בְּרוּ'},
- {he:'בואו מהר, כולם!',ar:'تعالوا بسرعة!',tr:'תַעַאלוּ בְּסֻרְעַה'},
- {he:'היזהרו / שימו לב',ar:'انتبهوا!',tr:'אִנְתַבְּהוּ'}
-];
+function _threatCard(p){
+  var audio=p.audio_url||p.audio||'';
+  var h='<div class="emerg-card">';
+  h+='<div class="emerg-card-content"'+(p._dbidx>=0?' onclick="opP('+p._dbidx+')"':'')+'>';
+  h+='<div class="emerg-card-he">'+p.he+'</div>';
+  if(p.trans)h+='<div class="emerg-card-trans">'+p.trans+'</div>';
+  if(p.ar)h+='<div class="emerg-card-ar">'+p.ar+'</div>';
+  h+='</div>';
+  h+='<button class="emerg-play-btn" onclick="playEmergCard(\''+audio+'\',this)" '+(audio?'':'disabled')+'>\u25b6</button>';
+  h+='</div>';
+  return h;
+}
 function rThreat(){
   var el=document.getElementById('threatlist'); if(!el)return;
-  el.innerHTML=THREAT_HEAR.map(function(t){
-    return '<div class="card" style="cursor:default;">'
-      +'<div class="verb-he">'+t.he+'</div>'
-      +'<div class="threat-ar">'+t.ar+'</div>'
-      +'<div class="threat-tr">'+t.tr+'</div></div>';
-  }).join('');
+  var db=(typeof DB!=='undefined'&&DB)?DB:[];
+  function findDb(cat,he){ for(var i=0;i<db.length;i++){ if(db[i].cat===cat&&db[i].he===he)return {row:db[i],idx:i}; } return null; }
+  function section(cat,title,emoji,desc){
+    var items=(typeof BUILTIN_THREAT!=='undefined'?BUILTIN_THREAT:[]).filter(function(t){return t.cat===cat;});
+    var h='<div class="stitle" style="margin-top:16px;">'+emoji+' '+title+'</div>';
+    if(desc)h+='<div style="color:#7a9ab5;font-size:12px;margin:2px 2px 10px;line-height:1.5;">'+desc+'</div>';
+    h+=items.map(function(t){
+      var f=findDb(cat,t.he);
+      return _threatCard({he:t.he,ar:t.ar,trans:t.trans,audio:f?(f.row.audio_url||f.row.audio||''):'',_dbidx:f?f.idx:-1});
+    }).join('');
+    return h;
+  }
+  el.innerHTML=section('שומעים בשטח: איום','\u05d0\u05d9\u05d5\u05dd \u05d0\u05de\u05d9\u05ea\u05d9','\ud83d\udea8','\u05de\u05d4 \u05e9\u05d0\u05d6\u05e8\u05d7 \u05d0\u05d5\u05de\u05e8 \u05e9\u05de\u05e1\u05de\u05df \u05e1\u05db\u05e0\u05d4 \u05d0\u05d5 \u05ea\u05d9\u05d0\u05d5\u05dd \u2014 \u05dc\u05d6\u05d4\u05d5\u05ea \u05de\u05d4\u05e8')
+    +section('שומעים בשטח: קללות','\u05e0\u05e9\u05de\u05e2 \u05de\u05d0\u05d9\u05dd \u05d0\u05d1\u05dc \u05ea\u05de\u05d9\u05dd','\ud83d\ude10','\u05e7\u05dc\u05dc\u05d5\u05ea \u05d5\u05e2\u05dc\u05d1\u05d5\u05e0\u05d5\u05ea \u05d9\u05d5\u05de\u05d9\u05d5\u05de\u05d9\u05d9\u05dd \u2014 \u05dc\u05d0 \u05d0\u05d9\u05d5\u05dd. \u05dc\u05d6\u05d4\u05d5\u05ea \u05db\u05d3\u05d9 \u05dc\u05d0 \u05dc\u05d4\u05d2\u05d9\u05d1 \u05d1\u05d8\u05e2\u05d5\u05ea');
 }
 function rVerbs(){
   var el=document.getElementById('verblist'); if(!el)return;
@@ -19141,6 +19179,16 @@ async function autoSyncBuiltins(){
         haveT[kt]=1; addedT++;
       }
     }
+    // --- threat recognition + curses (military), keyed by cat + normalized Hebrew ---
+    if(typeof BUILTIN_THREAT!=='undefined' && BUILTIN_THREAT.length){
+      for(var z=0;z<BUILTIN_THREAT.length;z++){
+        var bz=BUILTIN_THREAT[z]; var kz=bz.cat+'|'+normT(bz.he);
+        if(haveT[kz])continue;
+        if(_delBlockList().indexOf(_delBlockKey('military',bz.cat,bz.he))!==-1)continue;
+        await sbFetch('/rest/v1/phrases','POST',{cat:bz.cat,he:bz.he,trans:bz.trans||'',ar:bz.ar||'',tags:'',why:'',tone:'',audio_url:'',is_new:true,section:'military'});
+        haveT[kz]=1;
+      }
+    }
     // --- built-in daily sentences keyed by normalized Hebrew ---
     var addedDay=0;
     if(typeof BUILTIN_DAILY!=='undefined' && BUILTIN_DAILY.length){
@@ -20308,6 +20356,7 @@ async function addDictWord(){
 // Runs once (guarded by a localStorage flag), admin-only (needs write auth), and
 // only ever targets those two exact category names in the military section.
 async function _purgeRemovedCats(){
+  return; // disabled — threat recognition re-added at owner request under new category names
   if(localStorage.getItem('purged_threat_cats_v2')==='1') return;
   var cats=['זיהוי איום — מה שומעים בשטח','נשמע מאיים — אבל תמים'];
   for(var i=0;i<cats.length;i++){
@@ -21413,7 +21462,7 @@ function rQK(){
   var EMERG_CUBES=[
     {tab:'ord',     emoji:'🚨',  name:'הוראות מיידיות',          sub:'תבנית מסודרת',           color:'red'},
     {tab:'answers', emoji:'💬',  name:'מה עונים לך',              sub:'הבנת תשובות האזרח',       color:'sky'},
-    {tab:'threat',  emoji:'👂',  name:'זיהוי איום',              sub:'מה שומעים בשטח',          color:'red'},
+    {tab:'threat',  emoji:'👂',  name:'מה שומעים בשטח',          sub:'איום אמיתי מול תמים',      color:'red'},
     {tab:'chk',     emoji:'🪪',  name:'בידוק וזיהוי',            sub:'תבנית מסודרת',           color:'blue'},
     {tab:'desc',    emoji:'🎯',  name:'תיאור חשוד',              sub:'מה לשאול ואיך לתאר',       color:'gold'},
     {tab:'veh',     emoji:'🚗',  name:'רכב ומחסום',              sub:'תבנית מסודרת',           color:'orange'},
@@ -22536,7 +22585,7 @@ window.addEventListener('load', function(){
 <script>
 // Version stamp — shown in the admin panel so we can confirm which build is live
 // on a device (stale service-worker caches were causing "my changes don't show").
-window.APP_VERSION = 'v247';
+window.APP_VERSION = 'v248';
 
 // Register the service worker for full offline use in the field, WITH update
 // detection: when a new version installs, offer a one-tap refresh instead of the
