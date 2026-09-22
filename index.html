@@ -17138,16 +17138,14 @@ function searchDict(){
   
   if (!normalizedQ) {
     // Show empty state with stats
-    var totalWords = Object.keys(SMART_DICT_INDEX).length;
-    var totalPhrases = 0;
-    Object.values(SMART_DICT_INDEX).forEach(function(v){ totalPhrases += v.phrases.length; });
-    
+    var dictEntries = (typeof DICT !== 'undefined' && DICT) ? DICT.length : 0;
+
     resultsEl.innerHTML = '<div style="text-align:center;padding:30px 20px;color:#a0b8c8;">' +
       '<div style="font-size:48px;margin-bottom:12px;">📖</div>' +
       '<div style="font-size:16px;color:#D4A24E;font-weight:700;margin-bottom:8px;">המילון החכם שלנו</div>' +
-      '<div style="font-size:13px;margin-bottom:16px;">' + totalWords + ' מילים ייחודיות · עם הקלטות בהקשר אמיתי</div>' +
+      '<div style="font-size:13px;margin-bottom:16px;">' + dictEntries + ' ערכי מילון · + חיפוש חופשי בכל המשפטים</div>' +
       '<div style="background:rgba(212,162,78,0.1);border:1px solid rgba(212,162,78,0.3);border-radius:10px;padding:12px;margin-top:8px;font-size:12px;line-height:1.7;color:#D4A24E;">' +
-      '🔍 חפשי בעברית, ערבית, או תעתיק<br>' +
+      '🔍 חפשי בעברית, ערבית או תעתיק — כולל בתוך כל המשפטים<br>' +
       '🎤 כל מילה - לחיצה תפתח את המשפט המלא עם ההקלטה<br>' +
       '✨ מתעדכן אוטומטית עם כל משפט חדש' +
       '</div></div>';
@@ -22432,7 +22430,7 @@ window.addEventListener('load', function(){
 <script>
 // Version stamp — shown in the admin panel so we can confirm which build is live
 // on a device (stale service-worker caches were causing "my changes don't show").
-window.APP_VERSION = 'v241';
+window.APP_VERSION = 'v242';
 
 // Register the service worker for full offline use in the field, WITH update
 // detection: when a new version installs, offer a one-tap refresh instead of the
