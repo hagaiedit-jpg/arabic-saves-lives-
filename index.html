@@ -9670,6 +9670,28 @@ var BUILTIN_DICT = [
   {section:'dictionary', cat:'מילים נפוצות (מהמשפטים)', he:'אלה', ar:'هدول', trans:'הַדוֹל'},
   {section:'dictionary', cat:'מילים נפוצות (מהמשפטים)', he:'כולם', ar:'كلهم', trans:'כֻּלְהֹם'},
   {section:'dictionary', cat:'מילים נפוצות (מהמשפטים)', he:'בריאות', ar:'صحّة', trans:'צִחַה'},
+  {section:'dictionary', cat:'מילים נפוצות (מהמשפטים)', he:'שם', ar:'اسم', trans:'אִסֶם'},
+  {section:'dictionary', cat:'מילים נפוצות (מהמשפטים)', he:'גבר / בן אדם', ar:'زلمة', trans:'זַלַמֶה'},
+  {section:'dictionary', cat:'מילים נפוצות (מהמשפטים)', he:'אוניברסיטה', ar:'جامعة', trans:'גַ׳אמְעַה'},
+  {section:'dictionary', cat:'מילים נפוצות (מהמשפטים)', he:'חברון', ar:'الخليل', trans:'אִלחַ׳לִיל'},
+  {section:'dictionary', cat:'מילים נפוצות (מהמשפטים)', he:'חולה', ar:'عيّان', trans:'עַיַאן'},
+  {section:'dictionary', cat:'מילים נפוצות (מהמשפטים)', he:'כדורים', ar:'حبوب', trans:'חְבּוֹבּ'},
+  {section:'dictionary', cat:'מילים נפוצות (מהמשפטים)', he:'חברים', ar:'أصحاب', trans:'אַצְחַאבּ'},
+  {section:'dictionary', cat:'מילים נפוצות (מהמשפטים)', he:'סימנים', ar:'علامات', trans:'עַלַאמַאת'},
+  {section:'dictionary', cat:'מילים נפוצות (מהמשפטים)', he:'עובר / חולף', ar:'مارق', trans:'מַארֶק'},
+  {section:'dictionary', cat:'מילים נפוצות (מהמשפטים)', he:'שכן', ar:'جار', trans:'גַ׳אר'},
+  {section:'dictionary', cat:'מילים נפוצות (מהמשפטים)', he:'נמצא / קיים', ar:'موجود', trans:'מַוְגוּד'},
+  {section:'dictionary', cat:'מילים נפוצות (מהמשפטים)', he:'מבין', ar:'فاهم', trans:'פַאהֶם'},
+  {section:'dictionary', cat:'מילים נפוצות (מהמשפטים)', he:'חיפוש / בידוק', ar:'تفتيش', trans:'תַפְתִיש'},
+  {section:'dictionary', cat:'מילים נפוצות (מהמשפטים)', he:'יותר גדול / מבוגר', ar:'أكبر', trans:'אַכְּבַּר'},
+  {section:'dictionary', cat:'מילים נפוצות (מהמשפטים)', he:'קומות', ar:'طوابق', trans:'טַוַאבֶּק'},
+  {section:'dictionary', cat:'מילים נפוצות (מהמשפטים)', he:'טועה', ar:'غلطان', trans:'עַ׳לְטַאן'},
+  {section:'dictionary', cat:'מילים נפוצות (מהמשפטים)', he:'בחיי (שבועה)', ar:'بحياتي', trans:'בְּחַיַאתִי'},
+  {section:'dictionary', cat:'מילים נפוצות (מהמשפטים)', he:'גוף', ar:'جسم', trans:'גִ׳סֶם'},
+  {section:'dictionary', cat:'מילים נפוצות (מהמשפטים)', he:'מה?', ar:'إيش', trans:'אֵיש'},
+  {section:'dictionary', cat:'מילים נפוצות (מהמשפטים)', he:'או', ar:'والا', trans:'וִאלַא'},
+  {section:'dictionary', cat:'מילים נפוצות (מהמשפטים)', he:'לבד / לבדו', ar:'لحاله', trans:'לַחַאלוֹ'},
+  {section:'dictionary', cat:'מילים נפוצות (מהמשפטים)', he:'הולך / בדרכו', ar:'رايح', trans:'רַאיֶח'},
 ];
 async function addDictCheckpoint(btn){
   if(!confirm('להוסיף את המילון המבצעי — כל הנושאים ('+BUILTIN_DICT.length+' מילים) — לרשימת העריכה וההקלטה? פעולה חד-פעמית, ללא כפילות.'))return;
@@ -22410,7 +22432,7 @@ window.addEventListener('load', function(){
 <script>
 // Version stamp — shown in the admin panel so we can confirm which build is live
 // on a device (stale service-worker caches were causing "my changes don't show").
-window.APP_VERSION = 'v239';
+window.APP_VERSION = 'v240';
 
 // Register the service worker for full offline use in the field, WITH update
 // detection: when a new version installs, offer a one-tap refresh instead of the
