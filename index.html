@@ -628,6 +628,10 @@ body.day-mode .vrow{border-top-color:rgba(0,0,0,0.08);}
 body.day-mode .vrow-lbl{color:#8a7a5a;}
 body.day-mode .vrow-ar{color:#0e1b2e;}
 body.day-mode .vrow-tr{color:#a85200;}
+.threat-ar{color:#E8D9B8;font-size:17px;direction:rtl;font-family:Georgia,serif;margin:2px 0;}
+.threat-tr{color:#D4A24E;font-size:14px;}
+body.day-mode .threat-ar{color:#0e1b2e;}
+body.day-mode .threat-tr{color:#a85200;}
 .tb-tabs{display:flex;overflow-x:auto;gap:14px;padding:0 4px 10px;justify-content:flex-start;}
 .tb-tabs::-webkit-scrollbar{display:none;}
 .tb-tab{padding:6px 4px;color:#7a9ab5;font-size:14px;font-weight:600;cursor:pointer;border-bottom:2px solid transparent;white-space:nowrap;transition:all 0.2s;user-select:none;}
@@ -2890,7 +2894,7 @@ function showLanding() {
       <button onclick="voiceSearch('dict-search',this)" title="חיפוש קולי" style="background:rgba(212,162,78,0.18);border:1px solid #D4A24E;color:#D4A24E;width:32px;height:32px;border-radius:50%;cursor:pointer;font-size:15px;flex-shrink:0;">🎤</button>
       <button onclick="document.getElementById('dict-search').value='';searchDict()" style="background:rgba(255,255,255,0.1);border:none;color:#E8D9B8;width:28px;height:28px;border-radius:50%;cursor:pointer;font-size:16px;">×</button>
     </div>
-    <div style="display:flex;gap:8px;margin-bottom:14px;">
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:14px;">
       <div onclick="navToTab('sem')" style="flex:1;background:#1F3147;border:1px solid #2A3D52;border-radius:10px;padding:12px 8px;text-align:center;cursor:pointer;">
         <div style="font-size:20px;margin-bottom:3px;">🧠</div>
         <div style="color:#E8D9B8;font-size:12px;font-weight:700;">סמנטי</div>
@@ -2906,8 +2910,22 @@ function showLanding() {
         <div style="color:#E8D9B8;font-size:12px;font-weight:700;">פעלים</div>
         <div style="color:#7a9ab5;font-size:10px;margin-top:1px;">שורשים נפוצים</div>
       </div>
+      <div onclick="navToTab('threat')" style="flex:1;background:#1F3147;border:1px solid rgba(231,76,60,0.45);border-radius:10px;padding:12px 8px;text-align:center;cursor:pointer;">
+        <div style="font-size:20px;margin-bottom:3px;">🚨</div>
+        <div style="color:#E8D9B8;font-size:12px;font-weight:700;">זיהוי איום</div>
+        <div style="color:#7a9ab5;font-size:10px;margin-top:1px;">מה שומעים בשטח</div>
+      </div>
     </div>
     <div id="dict-results"></div>
+  </div>
+</div>
+
+<div class="scr" id="tab-threat">
+  <div class="sec">
+    <button onclick="navToTab('dict')" style="background:transparent;border:none;color:#a0b8c8;font-size:15px;cursor:pointer;font-family:inherit;padding:4px 0;margin-bottom:10px;display:flex;align-items:center;gap:6px;">◀ חזרה למילון</button>
+    <div class="stitle">🚨 זיהוי איום — מה שומעים בשטח</div>
+    <div style="color:#7a9ab5;font-size:12px;line-height:1.6;margin:2px 2px 12px;">מילים ומשפטים שאזרח עשוי להגיד ושמסמנים סכנה או תיאום — כדי לזהות אותם מהר.</div>
+    <div id="threatlist"></div>
   </div>
 </div>
 
@@ -17449,6 +17467,27 @@ function _vrow(lbl,ar,tr){
     +'<span class="vrow-ar">'+ar+'</span>'
     +'<span class="vrow-tr">'+tr+'</span></div>';
 }
+var THREAT_HEAR=[
+ {he:'יש צבא כאן!',ar:'في جيش هون!',tr:'פִי גֵ׳יש הוֹן'},
+ {he:'הצבא הגיע',ar:'أجا الجيش',tr:'אַגַ׳א אִלגֵ׳יש'},
+ {he:'תברחו!',ar:'اهربوا!',tr:'אֻהְרְבוּ'},
+ {he:'תסגרו את הדלת!',ar:'سكّروا الباب!',tr:'סַכְּרוּ אִלבַּאבּ'},
+ {he:'תחביאו!',ar:'خبّوا!',tr:'חַ׳בּוּ'},
+ {he:'הם רוצים לחפש',ar:'بدهم يفتّشوا',tr:'בִּדְהֹם יְפַתְשוּ'},
+ {he:'אל תגידו כלום!',ar:'ما تحكوا إشي!',tr:'מַא תִחְכּוּ אִשִי'},
+ {he:'תזעיקו / תודיעו',ar:'خبّروا!',tr:'חַ׳בְּרוּ'},
+ {he:'בואו מהר, כולם!',ar:'تعالوا بسرعة!',tr:'תַעַאלוּ בְּסֻרְעַה'},
+ {he:'היזהרו / שימו לב',ar:'انتبهوا!',tr:'אִנְתַבְּהוּ'}
+];
+function rThreat(){
+  var el=document.getElementById('threatlist'); if(!el)return;
+  el.innerHTML=THREAT_HEAR.map(function(t){
+    return '<div class="card" style="cursor:default;">'
+      +'<div class="verb-he">'+t.he+'</div>'
+      +'<div class="threat-ar">'+t.ar+'</div>'
+      +'<div class="threat-tr">'+t.tr+'</div></div>';
+  }).join('');
+}
 function rVerbs(){
   var el=document.getElementById('verblist'); if(!el)return;
   el.innerHTML=VERB_ROOTS.map(function(v){
@@ -22395,6 +22434,9 @@ function navToTab(tabId){
     if (tabId === 'verbs') {
       setTimeout(function(){ try { if (typeof rVerbs === 'function') rVerbs(); } catch(e) { console.warn('rVerbs error:', e); } }, 50);
     }
+    if (tabId === 'threat') {
+      setTimeout(function(){ try { if (typeof rThreat === 'function') rThreat(); } catch(e) { console.warn('rThreat error:', e); } }, 50);
+    }
     
     // 4. Update bottom nav active state
     var navBtns = document.querySelectorAll('.bn-btn');
@@ -22498,7 +22540,7 @@ window.addEventListener('load', function(){
 <script>
 // Version stamp — shown in the admin panel so we can confirm which build is live
 // on a device (stale service-worker caches were causing "my changes don't show").
-window.APP_VERSION = 'v244';
+window.APP_VERSION = 'v245';
 
 // Register the service worker for full offline use in the field, WITH update
 // detection: when a new version installs, offer a one-tap refresh instead of the
