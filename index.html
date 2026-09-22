@@ -2917,8 +2917,8 @@ function showLanding() {
 
 <div class="scr" id="tab-threat">
   <div class="sec">
-    <button onclick="navToTab('qk')" style="background:transparent;border:none;color:#a0b8c8;font-size:15px;cursor:pointer;font-family:inherit;padding:4px 0;margin-bottom:10px;display:flex;align-items:center;gap:6px;">◀ חזרה לחירום</button>
-    <div class="stitle">👂 מה שומעים בשטח</div>
+    <button class="emerg-back" onclick="navToTab('qk')">‹ חזרה לחירום</button>
+    <div class="stitle" id="emerg-list-title-threat">👂 מה שומעים בשטח</div>
     <div style="color:#7a9ab5;font-size:12px;line-height:1.6;margin:2px 2px 4px;">להבחין בזמן אמת בין איום אמיתי לבין קללה תמימה — כדי להגיב נכון.</div>
     <div id="threatlist"></div>
   </div>
@@ -22585,7 +22585,7 @@ window.addEventListener('load', function(){
 <script>
 // Version stamp — shown in the admin panel so we can confirm which build is live
 // on a device (stale service-worker caches were causing "my changes don't show").
-window.APP_VERSION = 'v248';
+window.APP_VERSION = 'v249';
 
 // Register the service worker for full offline use in the field, WITH update
 // detection: when a new version installs, offer a one-tap refresh instead of the
