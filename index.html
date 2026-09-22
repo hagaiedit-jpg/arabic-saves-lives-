@@ -17493,15 +17493,12 @@ function _vrow(lbl,ar,tr){
     +'<span class="vrow-tr">'+tr+'</span></div>';
 }
 function _threatCard(p){
-  var audio=p.audio_url||p.audio||'';
-  var canPlay=!!audio;
-  var h='<div class="emerg-card" style="align-items:center;padding:12px 14px;gap:12px;">';
-  h+='<div class="emerg-card-content" style="padding:0;flex:1;min-width:0;"'+(p._dbidx>=0?' onclick="opP('+p._dbidx+')"':'')+'>';
-  h+='<div class="emerg-card-he">'+p.he+'</div>';
-  if(p.trans)h+='<div class="emerg-card-trans">'+p.trans+'</div>';
-  if(p.ar)h+='<div class="emerg-card-ar">'+p.ar+'</div>';
-  h+='</div>';
-  h+='<button onclick="playEmergCard(\''+audio+'\',this)" '+(canPlay?'':'disabled')+' style="width:44px;height:44px;border-radius:50%;border:none;flex-shrink:0;font-size:18px;cursor:'+(canPlay?'pointer':'default')+';background:'+(canPlay?'#D4A24E':'#3a4553')+';color:'+(canPlay?'#fff':'#8598ab')+';">\u25b6</button>';
+  var hasAudio=!!(p.audio_url||p.audio);
+  var badge='<span style="display:inline-block;background:rgba(126,236,193,0.15);color:#7eecc1;font-size:10px;font-weight:700;padding:1px 7px;border-radius:6px;margin-right:5px;white-space:nowrap;">\ud83d\udc42 \u05d0\u05e0\u05d9 \u05de\u05d6\u05d4\u05d4</span>';
+  var h='<div '+(p._dbidx>=0?'onclick="opP('+p._dbidx+')" ':'')+'style="flex:1 1 auto;min-width:150px;background:#1F3147;border:1px solid #2A3D52;border-radius:11px;padding:9px 12px;cursor:pointer;">';
+  h+='<div style="display:flex;align-items:center;gap:6px;"><div style="color:#E8D9B8;font-size:14px;font-weight:700;flex:1;">'+p.he+badge+'</div>'+(hasAudio?'<span style="color:#1D9E75;font-size:14px;">\ud83d\udd0a</span>':'')+'</div>';
+  h+='<div style="color:#E8D9B8;font-size:15px;font-family:Georgia,serif;direction:rtl;margin-top:2px;">'+(p.ar||'')+'</div>';
+  h+='<div style="color:#D4A24E;font-size:12px;margin-top:1px;">'+(p.trans||'')+'</div>';
   h+='</div>';
   return h;
 }
@@ -17513,10 +17510,10 @@ function rThreat(){
     var items=(typeof BUILTIN_THREAT!=='undefined'?BUILTIN_THREAT:[]).filter(function(t){return t.cat===cat;});
     var h='<div class="stitle" style="margin-top:16px;">'+emoji+' '+title+'</div>';
     if(desc)h+='<div style="color:#7a9ab5;font-size:12px;margin:2px 2px 10px;line-height:1.5;">'+desc+'</div>';
-    h+=items.map(function(t){
+    h+='<div style="display:flex;flex-wrap:wrap;gap:8px;">'+items.map(function(t){
       var f=findDb(cat,t.he);
       return _threatCard({he:t.he,ar:t.ar,trans:t.trans,audio:f?(f.row.audio_url||f.row.audio||''):'',_dbidx:f?f.idx:-1});
-    }).join('');
+    }).join('')+'</div>';
     return h;
   }
   el.innerHTML=section('שומעים בשטח: איום','\u05d0\u05d9\u05d5\u05dd \u05d0\u05de\u05d9\u05ea\u05d9','\ud83d\udea8','\u05de\u05d4 \u05e9\u05d0\u05d6\u05e8\u05d7 \u05d0\u05d5\u05de\u05e8 \u05e9\u05de\u05e1\u05de\u05df \u05e1\u05db\u05e0\u05d4 \u05d0\u05d5 \u05ea\u05d9\u05d0\u05d5\u05dd \u2014 \u05dc\u05d6\u05d4\u05d5\u05ea \u05de\u05d4\u05e8')
@@ -22586,7 +22583,7 @@ window.addEventListener('load', function(){
 <script>
 // Version stamp — shown in the admin panel so we can confirm which build is live
 // on a device (stale service-worker caches were causing "my changes don't show").
-window.APP_VERSION = 'v250';
+window.APP_VERSION = 'v251';
 
 // Register the service worker for full offline use in the field, WITH update
 // detection: when a new version installs, offer a one-tap refresh instead of the
