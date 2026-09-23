@@ -17700,8 +17700,8 @@ var VIS_DOCS=[
   {sign:'تاريخ الإصدار',   he:'תאריך הנפקה',   trans:'תַארִיח׳ אִלאִצְדַאר'},
   {sign:'صالحة لغاية',     he:'בתוקף עד',      trans:'צַאלְחַה לְעַ׳איֶה', tip:'אחריו בא תאריך: בדקו אם פג התוקף'},
   {sign:'تصريح',           he:'היתר',          trans:'תַצְרִיח', tip:'היתר כניסה או עבודה, נפוץ במחסום'},
-  {sign:'رخصة قيادة',      he:'רישיון נהיגה',  trans:'רֻח׳צַת קִיַאדֶה'},
-  {sign:'رخصة سيارة',      he:'רישיון רכב',    trans:'רֻח׳צַת סַיַארַה'}
+  {sign:'رخصة سواقة',      he:'רישיון נהיגה',  trans:'רֻח׳צַת סְוַאקַה', tip:'על המסמך עצמו לפעמים מודפס رخصة قيادة'},
+  {sign:'رخصة السيارة',    he:'רישיון רכב',    trans:'רֻח׳צַת אִלסַיַארַה'}
 ];
 VIS_DOCS.forEach(function(r){ if(!r.ar) r.ar=r.sign; });
 
@@ -22875,7 +22875,7 @@ window.addEventListener('load', function(){
 <script>
 // Version stamp — shown in the admin panel so we can confirm which build is live
 // on a device (stale service-worker caches were causing "my changes don't show").
-window.APP_VERSION = 'v267';
+window.APP_VERSION = 'v268';
 
 // Register the service worker for full offline use in the field, WITH update
 // detection: when a new version installs, offer a one-tap refresh instead of the
