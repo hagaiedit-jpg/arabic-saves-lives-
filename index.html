@@ -17511,13 +17511,15 @@ var _BADGE_HEAR='<span style="display:inline-block;background:rgba(126,236,193,0
 var _BADGE_SAY='<span style="display:inline-block;background:rgba(212,162,78,0.15);color:#e6c98a;font-size:10px;font-weight:700;padding:1px 7px;border-radius:6px;margin-right:5px;white-space:nowrap;">\ud83d\udde3\ufe0f \u05d0\u05e0\u05d9 \u05d0\u05d5\u05de\u05e8</span>';
 function _threatCard(p, badge, num){
   if(badge===undefined) badge=_BADGE_HEAR;
-  var hasAudio=!!(p.audio_url||p.audio);
+  var url=String(p.audio_url||p.audio||''), has=!!url;
   var numHtml=num?'<span style="display:inline-flex;align-items:center;justify-content:center;width:20px;height:20px;border-radius:50%;background:#D4A24E;color:#0E1B2E;font-size:11px;font-weight:800;flex-shrink:0;">'+num+'</span>':'';
-  var h='<div '+(p._dbidx>=0?'onclick="opP('+p._dbidx+')" ':'')+'style="flex:1 1 auto;min-width:150px;background:#1F3147;border:1px solid #2A3D52;border-radius:11px;padding:9px 12px;cursor:pointer;">';
-  h+='<div style="display:flex;align-items:center;gap:6px;">'+numHtml+'<div style="color:#E8D9B8;font-size:14px;font-weight:700;flex:1;">'+p.he+badge+'</div>'+(hasAudio?'<span style="color:#1D9E75;font-size:14px;">\ud83d\udd0a</span>':'')+'</div>';
+  var btn='<button onclick="event.stopPropagation();playEmergCard(\''+url.replace(/'/g,"\\'")+'\',this)" '+(has?'':'disabled ')+'title="'+(has?'השמע':'אין הקלטה עדיין')+'" style="flex-shrink:0;width:38px;height:38px;border-radius:50%;border:none;font-size:15px;cursor:'+(has?'pointer':'default')+';background:'+(has?'#1D9E75':'rgba(255,255,255,0.08)')+';color:'+(has?'#fff':'#6f8599')+';">\u25b6</button>';
+  var h='<div style="flex:1 1 auto;min-width:150px;background:#1F3147;border:1px solid #2A3D52;border-radius:11px;padding:9px 12px;display:flex;align-items:center;gap:10px;">';
+  h+='<div style="flex:1;min-width:0;">';
+  h+='<div style="display:flex;align-items:center;gap:6px;">'+numHtml+'<div style="color:#E8D9B8;font-size:14px;font-weight:700;flex:1;">'+p.he+badge+'</div></div>';
   h+='<div style="color:#E8D9B8;font-size:15px;font-family:Georgia,serif;direction:rtl;margin-top:2px;">'+(p.ar||'')+'</div>';
   h+='<div style="color:#D4A24E;font-size:12px;margin-top:1px;">'+(p.trans||'')+'</div>';
-  h+='</div>';
+  h+='</div>'+btn+'</div>';
   return h;
 }
 function rCheckpoint(){
@@ -17525,7 +17527,7 @@ function rCheckpoint(){
   function norm(x){ return String(x||'').replace(/[\u064B-\u0652\u0670\u0640]/g,'').replace(/[!\u061F?.,\u060C\s]/g,''); }
   var pool=[];
   [typeof DB!=='undefined'?DB:[], typeof DICT!=='undefined'?DICT:[], typeof BUILTIN_CHECKPOINT!=='undefined'?BUILTIN_CHECKPOINT:[]].forEach(function(a){ (a||[]).forEach(function(r){ if(r&&r.ar&&r.he) pool.push(r); }); });
-  function match(key){ var nk=norm(key), best=null, bs=9; pool.forEach(function(r){ var nr=norm(r.ar); var sc=nr===nk?0:(nr.indexOf(nk)===0?1:(nr.indexOf(nk)>=0?2:((nk.length>5&&nk.indexOf(nr)>=0&&nr.length>4)?3:9))); if(sc<bs){bs=sc;best=r;} }); return best; }
+  function match(key){ var nk=norm(key), best=null, bs=99; pool.forEach(function(r){ var nr=norm(r.ar); var sc=nr===nk?0:(nr.indexOf(nk)===0?1:(nr.indexOf(nk)>=0?2:((nk.length>5&&nk.indexOf(nr)>=0&&nr.length>4)?3:9))); sc=sc*2+((r.audio||r.audio_url)?0:1); if(sc<bs){bs=sc;best=r;} }); return bs<18?best:null; }
   var SEQ=[
    {s:1,ar:'\u0648\u0642\u0651\u0641'},
    {s:1,ar:'\u0623\u0637\u0641\u064a \u0627\u0644\u0645\u0648\u062a\u0648\u0631'},
@@ -17552,7 +17554,7 @@ function rCheckpoint(){
 function rThreat(){
   var el=document.getElementById('threatlist'); if(!el)return;
   var db=(typeof DB!=='undefined'&&DB)?DB:[];
-  function findDb(cat,he){ for(var i=0;i<db.length;i++){ if(db[i].cat===cat&&db[i].he===he)return {row:db[i],idx:i}; } return null; }
+  function findDb(cat,he){ var hit=null; for(var i=0;i<db.length;i++){ if(db[i].cat===cat&&db[i].he===he){ if(db[i].audio||db[i].audio_url) return {row:db[i],idx:i}; if(!hit) hit={row:db[i],idx:i}; } } return hit; }
   function section(cat,title,emoji,desc){
     var items=(typeof BUILTIN_THREAT!=='undefined'?BUILTIN_THREAT:[]).filter(function(t){return t.cat===cat;});
     var h='<div class="stitle" style="margin-top:16px;">'+emoji+' '+title+'</div>';
@@ -22644,7 +22646,7 @@ window.addEventListener('load', function(){
 <script>
 // Version stamp — shown in the admin panel so we can confirm which build is live
 // on a device (stale service-worker caches were causing "my changes don't show").
-window.APP_VERSION = 'v254';
+window.APP_VERSION = 'v255';
 
 // Register the service worker for full offline use in the field, WITH update
 // detection: when a new version installs, offer a one-tap refresh instead of the
