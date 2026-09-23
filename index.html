@@ -645,6 +645,18 @@ body.day-mode .threat-tr{color:#a85200;}
 body.day-mode .vis-card{background:#fff;border-color:#e8dec9;}
 body.day-mode .vis-he{color:#0e1b2e;}
 body.day-mode .vis-tr{color:#a85200;}
+.vis-sign.vis-digit{font-size:54px;min-height:84px;line-height:1;}
+.vis-tip{color:#9fb4c8;font-size:12px;text-align:center;line-height:1.4;margin-top:2px;}
+.vis-key{display:grid;grid-template-columns:repeat(10,1fr);gap:2px;background:#1F3147;border:1px solid #2A3D52;border-radius:12px;padding:10px 4px;direction:ltr;}
+.vis-key div{text-align:center;}
+.vis-key b{display:block;font-size:26px;color:#F5F1E6;line-height:1.2;}
+.vis-key span{font-size:14px;font-weight:700;color:#D4A24E;}
+.vis-note{color:#E8D9B8;font-size:13px;line-height:1.5;margin:8px 2px 10px;}
+body.day-mode .vis-tip{color:#4a6076;}
+body.day-mode .vis-key{background:#fff;border-color:#e8dec9;}
+body.day-mode .vis-key b{color:#0e1b2e;}
+body.day-mode .vis-key span{color:#a85200;}
+body.day-mode .vis-note{color:#0e1b2e;}
 .tb-tabs{display:flex;overflow-x:auto;gap:14px;padding:0 4px 10px;justify-content:flex-start;}
 .tb-tabs::-webkit-scrollbar{display:none;}
 .tb-tab{padding:6px 4px;color:#7a9ab5;font-size:14px;font-weight:600;cursor:pointer;border-bottom:2px solid transparent;white-space:nowrap;transition:all 0.2s;user-select:none;}
@@ -14106,7 +14118,7 @@ function bldCats(){
             : c.special==='foundations' ? DB.some(p=>FOUNDATION_CATS.indexOf(p.cat)!==-1&&p.isNew)
             : DB.some(p=>p.cat===c.id&&p.isNew);
     const cls='ct'+(c.special==='navy'?' navy':c.special==='announce'?' announce':'');
-    const cnt=c.special==='visual'?(cntC('זיהוי ערבית כתובה בשטח')+cntC('זיהוי חזותי')):c.special==='announce'?ANNOUNCE.length:c.special==='navy'?NAVY.length
+    const cnt=c.special==='visual'?(cntC('זיהוי ערבית כתובה בשטח')+cntC('זיהוי חזותי')+VIS_DIGITS.length+VIS_NUM_EX.length):c.special==='announce'?ANNOUNCE.length:c.special==='navy'?NAVY.length
             :c.special==='foundations'?DB.filter(p=>FOUNDATION_CATS.indexOf(p.cat)!==-1).length:cntC(c.id);
     // Paywall lock badge (dormant unless window.PAYWALL). Foundations tile stays open.
     const lk=(window.PAYWALL && typeof _hasPremium==='function' && !_hasPremium() && c.special!=='foundations' && typeof clFreeCat==='function' && !clFreeCat(c.id));
@@ -17646,6 +17658,32 @@ function _visImg(r){
   var k=String(r&&r.he||'').replace(/[^\u05D0-\u05EA]/g,'');
   return _VIS_IMG[k]?('img/written/'+_VIS_IMG[k]+'.jpg'):'';
 }
+// 🔢 Arabic-Indic digits + how numbers look in the field. Built in (not in the DB):
+// ar holds the spoken word, so the digit's audio links to the recorded dictionary
+// number automatically; `sign` is what the card shows.
+var VIS_DIGITS=[
+  {sign:'٠', he:'0 · אפס',   ar:'صفر',    trans:'סִפֵר',        tip:'נקודה קטנה = אפס'},
+  {sign:'١', he:'1 · אחת',   ar:'واحد',   trans:'וַאחַד',        tip:'קו ישר, כמו 1'},
+  {sign:'٢', he:'2 · שתיים', ar:'اثنين',  trans:'אִת׳נֵין',      tip:'קו עם "וו" אחד למעלה'},
+  {sign:'٣', he:'3 · שלוש',  ar:'ثلاثة',  trans:'תְ׳לַאתֶ׳ה',    tip:'קו עם שני "ווים" למעלה'},
+  {sign:'٤', he:'4 · ארבע',  ar:'أربعة',  trans:'אַרְבַּעַה',    tip:'נראה כמו 3 הפוך'},
+  {sign:'٥', he:'5 · חמש',   ar:'خمسة',   trans:'חַ׳מְסֶה',      tip:'⚠️ נראה כמו אפס, אבל זה 5!'},
+  {sign:'٦', he:'6 · שש',    ar:'ستة',    trans:'סִתֶּה',        tip:'⚠️ נראה כמו 7, אבל זה 6!'},
+  {sign:'٧', he:'7 · שבע',   ar:'سبعة',   trans:'סַבְּעַה',      tip:'צורת V'},
+  {sign:'٨', he:'8 · שמונה', ar:'ثمانية', trans:'ת׳מַאנְיֶה',    tip:'V הפוך (Λ)'},
+  {sign:'٩', he:'9 · תשע',   ar:'تسعة',   trans:'תִסְעַה',       tip:'דומה ל-9 שלנו'}
+];
+var VIS_NUM_EX=[
+  {sign:'٠٥٩٩-٤٧٣٢٨١', dir:'ltr', he:'טלפון: 0599-473281',       tip:'נייד פלסטיני מתחיל ב-059 או 056'},
+  {sign:'٩٥٨٢٠٣١٤٦',   dir:'ltr', he:'תעודת זהות: 958203146',    tip:'9 ספרות, קוראים משמאל לימין'},
+  {sign:'١٥/٠٦/١٩٩٨',  dir:'ltr', he:'תאריך: 15/06/1998',         tip:'יום / חודש / שנה'},
+  {sign:'٠٧:٣٠',       dir:'ltr', he:'שעה: 07:30'},
+  {sign:'عمارة رقم ٢٧', he:'בניין מספר 27', trans:'עְמַארַה רַקַם 27', tip:'رقم = מספר'},
+  {sign:'الطابق ٣',     he:'קומה 3',        trans:'אִלטַאבֶּק 3', tip:'الطابق = הקומה'},
+  {sign:'نابلس ١٢ كم',  he:'שכם 12 ק״מ',    trans:'נַאבְּלֻס 12 כִּילוֹמֶתֶר', tip:'كم = קילומטר'},
+  {sign:'١٥ شيكل',      he:'15 שקל',        trans:'15 שֵׁיקֶל',   tip:'מחיר בחנות או במונית'}
+];
+VIS_NUM_EX.forEach(function(r){ if(!r.ar) r.ar=r.sign; });
 function _visPractice(){ try{ return localStorage.getItem('vis_practice')==='1'; }catch(e){ return false; } }
 function _visTogglePractice(){ try{ localStorage.setItem('vis_practice', _visPractice()?'0':'1'); }catch(e){} rVisual(); }
 function _visRows(){
@@ -17666,13 +17704,17 @@ function rVisual(){
     var list=window._dbCatRows['__visual']; list.push(r); var i=list.length-1;
     var has=!!(r.audio||r.audio_url||(typeof _descAudioFor==='function'&&_descAudioFor(r)));
     var c='<div class="vis-card'+(practice?' vis-hidden':'')+'" onclick="_visTap('+i+',this)">';
-    var img=_visImg(r);
-    c+= img ? '<img class="vis-img" src="'+img+'" alt="" loading="lazy">' : '<div class="vis-sign">'+(r.ar||'')+'</div>';
-    c+='<div class="vis-ans"><div class="vis-he">'+(r.he||'')+(has?' <span style="color:#1D9E75;">🔊</span>':'')+'</div><div class="vis-tr">'+(r.trans||'')+'</div></div>';
+    var img=r.sign?'':_visImg(r);
+    c+= img ? '<img class="vis-img" src="'+img+'" alt="" loading="lazy">'
+            : '<div class="vis-sign'+(r.sign&&r.sign.length===1?' vis-digit':'')+'"'+(r.dir?' style="direction:'+r.dir+';"':'')+'>'+(r.sign||r.ar||'')+'</div>';
+    c+='<div class="vis-ans"><div class="vis-he">'+(r.he||'')+(has?' <span style="color:#1D9E75;">🔊</span>':'')+'</div><div class="vis-tr">'+(r.trans||'')+'</div>'+(r.tip?'<div class="vis-tip">'+r.tip+'</div>':'')+'</div>';
     c+='<div class="vis-hint">לחצו לחשיפה</div></div>';
     return c;
   };
-  var section=function(title,list){ if(!list.length) return ''; return '<div class="stitle" style="margin-top:14px;">'+title+'</div><div class="vis-grid">'+list.map(card).join('')+'</div>'; };
+  var section=function(title,list,pre){ if(!list.length) return ''; return '<div class="stitle" style="margin-top:14px;">'+title+'</div>'+(pre||'')+'<div class="vis-grid">'+list.map(card).join('')+'</div>'; };
+  var key=practice?'':'<div class="vis-key">'+VIS_DIGITS.map(function(d,n){ return '<div><b>'+d.sign+'</b><span>'+n+'</span></div>'; }).join('')+'</div>';
+  h+=section('🔢 הספרות ٠–٩', VIS_DIGITS, key+'<div class="vis-note">בערבית כותבים מימין לשמאל, אבל <b>מספרים נכתבים ונקראים משמאל לימין</b>, בדיוק כמו אצלנו. זה נכון גם בתוך משפט בערבית.</div>');
+  h+=section('📞 מספרים בשטח', VIS_NUM_EX);
   _VIS_GROUPS.forEach(function(g){
     var keys=g.he.map(nh);
     var list=rows.filter(function(r){ var k=nh(r.he); if(used[k]||keys.indexOf(k)===-1) return false; used[k]=1; return true; });
@@ -22811,7 +22853,7 @@ window.addEventListener('load', function(){
 <script>
 // Version stamp — shown in the admin panel so we can confirm which build is live
 // on a device (stale service-worker caches were causing "my changes don't show").
-window.APP_VERSION = 'v265';
+window.APP_VERSION = 'v266';
 
 // Register the service worker for full offline use in the field, WITH update
 // detection: when a new version installs, offer a one-tap refresh instead of the
