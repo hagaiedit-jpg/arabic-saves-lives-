@@ -10913,7 +10913,7 @@ const HCATS=[
 const TEN_PHRASES=[
   {he:'עצור!',                  trans:'וַקֵּף',                                   ar:'وقّف!',                          icon:'✋', audio:''},
   {he:'אל תתקרב!',              trans:'לַא תְקַרֶּב מִנִּי',                        ar:'لا تقرّب منّي!',                  icon:'🚫', audio:''},
-  {he:'ידיים למעלה!',           trans:'אִרְפַע אִידֵיכּ',                          ar:'ارفع يديك',                       icon:'🙌', audio:''},
+  {he:'ידיים למעלה!',           trans:'אִרְפַע אִידֵיכּ',                          ar:'ارفع إيديك', alt:'ارفع يديك',      icon:'🙌', audio:''},
   {he:'זרוק את מה שיש לך ביד!', trans:'אִרְמִי אִללִי בִּאִידַכּ',                   ar:'ارمي اللي بإيدك!',                icon:'⬇️', audio:''},
   {he:'אל תזוז!',               trans:'לַא תִתְחַרַּכּ',                           ar:'لا تتحرّك',                       icon:'🛑', audio:''},
   {he:'הרם את החולצה',          trans:'אִרְפַע אִלקַמִיץ',                         ar:'ارفع القميص',                     icon:'👕', audio:''},
@@ -10943,11 +10943,11 @@ function getTenList(){
     if(Array.isArray(a))pool=pool.concat(a);
   });
   return TEN_PHRASES.map(function(p){
-    var heN=_tenNormHe(p.he), arN=_tenNormAr(p.ar), audio='', responses=[];
+    var heN=_tenNormHe(p.he), arN=_tenNormAr(p.ar), altN=p.alt?_tenNormAr(p.alt):'', audio='', responses=[];
     // Pass 1: same Arabic (so the audio says exactly what's written).
     // Pass 2: same Hebrew — only for rows with no Arabic, so a different Arabic
     // wording (e.g. إيديك لفوق vs ارفع يديك) never lends its audio.
-    [function(r){ return arN && _tenNormAr(r.ar)===arN; },
+    [function(r){ var n=_tenNormAr(r.ar); return (arN && n===arN) || (altN && n===altN); },
      function(r){ return _tenNormHe(r.he)===heN && !_tenNormAr(r.ar); }].forEach(function(test){
       for(var i=0;i<pool.length;i++){
         var r=pool[i]; if(!r||!test(r))continue;
@@ -22667,7 +22667,7 @@ window.addEventListener('load', function(){
 <script>
 // Version stamp — shown in the admin panel so we can confirm which build is live
 // on a device (stale service-worker caches were causing "my changes don't show").
-window.APP_VERSION = 'v258';
+window.APP_VERSION = 'v259';
 
 // Register the service worker for full offline use in the field, WITH update
 // detection: when a new version installs, offer a one-tap refresh instead of the
