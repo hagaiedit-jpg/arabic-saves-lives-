@@ -14118,7 +14118,7 @@ function bldCats(){
             : c.special==='foundations' ? DB.some(p=>FOUNDATION_CATS.indexOf(p.cat)!==-1&&p.isNew)
             : DB.some(p=>p.cat===c.id&&p.isNew);
     const cls='ct'+(c.special==='navy'?' navy':c.special==='announce'?' announce':'');
-    const cnt=c.special==='visual'?(cntC('זיהוי ערבית כתובה בשטח')+cntC('זיהוי חזותי')+VIS_DIGITS.length+VIS_NUM_EX.length):c.special==='announce'?ANNOUNCE.length:c.special==='navy'?NAVY.length
+    const cnt=c.special==='visual'?(cntC('זיהוי ערבית כתובה בשטח')+cntC('זיהוי חזותי')+VIS_DIGITS.length+VIS_NUM_EX.length+VIS_DOCS.length):c.special==='announce'?ANNOUNCE.length:c.special==='navy'?NAVY.length
             :c.special==='foundations'?DB.filter(p=>FOUNDATION_CATS.indexOf(p.cat)!==-1).length:cntC(c.id);
     // Paywall lock badge (dormant unless window.PAYWALL). Foundations tile stays open.
     const lk=(window.PAYWALL && typeof _hasPremium==='function' && !_hasPremium() && c.special!=='foundations' && typeof clFreeCat==='function' && !clFreeCat(c.id));
@@ -17646,7 +17646,7 @@ var _VIS_GROUPS=[
   {t:'🏥 שלטים ומקומות', he:['בית חולים','בית מרקחת','בית ספר','מסגד','עירייה','משטרה','שוק','תחנת דלק']},
   {t:'⛔ אזהרות ומחסום', he:['אסורה הכניסה','סכנה','עצור','בידוק','כניסה','יציאה']},
   {t:'🧱 כתובות והסתה', he:['פלסטין','ההתנגדות','שהיד','השיבה','מהפכה','נקמה','חמאס','פתח',"ג'יהאד אסלאמי",'ג׳יהאד אסלאמי','גדודי אל-קסאם']},
-  {t:'🪪 תעודה ומסמכים', he:['תעודת זהות','כרטיס','השם','תאריך לידה','כתובת']},
+  {t:'🪪 תעודה ומסמכים', he:['תעודת זהות','כרטיס','השם','תאריך לידה','כתובת'], extra:'docs'},
   {t:'🔫 נשק וציוד', he:['נשק','תחמושת','מפה']}
 ];
 // Illustrative images (generated reconstructions) — replace any file in
@@ -17684,6 +17684,27 @@ var VIS_NUM_EX=[
   {sign:'١٥ شيكل',      he:'15 שקל',        trans:'15 שֵׁיקֶל',   tip:'מחיר בחנות או במונית'}
 ];
 VIS_NUM_EX.forEach(function(r){ if(!r.ar) r.ar=r.sign; });
+// 🪪 Document fields a soldier reads at a checkpoint — appended to the
+// 'תעודה ומסמכים' group (after the existing DB items, never replacing them).
+var VIS_DOCS=[
+  {sign:'السلطة الوطنية الفلسطينية', he:'הרשות הפלסטינית', trans:'אִלסֻּלְטַה אִלוַטַנִיֶּה אִלפִלַסְטִינִיֶּה', tip:'כותרת בראש תעודה פלסטינית'},
+  {sign:'وزارة الداخلية',  he:'משרד הפנים',    trans:'וִזַארַת אִלדַאח׳לִיֶּה', tip:'מי שהנפיק את המסמך'},
+  {sign:'رقم الهوية',      he:'מספר זהות',     trans:'רַקַם אִלהַוִיֶּה'},
+  {sign:'اسم الأب',        he:'שם האב',        trans:'אִסְם אִלאַבּ'},
+  {sign:'اسم الجد',        he:'שם הסב',        trans:'אִסְם אִלגַ׳ד', tip:'שם מלא = שם, שם האב, שם הסב, שם המשפחה'},
+  {sign:'اسم العائلة',     he:'שם משפחה',      trans:'אִסְם אִלעַאאִלֶה'},
+  {sign:'مكان الولادة',    he:'מקום לידה',     trans:'מַכַּאן אִלוִלַאדֶה'},
+  {sign:'الجنس: ذكر',      he:'מין: זכר',      trans:'אִלגִ׳נְס: דַכַּר'},
+  {sign:'أنثى',            he:'נקבה',          trans:'אֻנְת׳ַא'},
+  {sign:'الحالة الاجتماعية', he:'מצב משפחתי',  trans:'אִלחַאלֶה אִלאִגְ׳תִמַאעִיֶּה'},
+  {sign:'تاريخ الإصدار',   he:'תאריך הנפקה',   trans:'תַארִיח׳ אִלאִצְדַאר'},
+  {sign:'صالحة لغاية',     he:'בתוקף עד',      trans:'צַאלְחַה לְעַ׳איֶה', tip:'אחריו בא תאריך: בדקו אם פג התוקף'},
+  {sign:'تصريح',           he:'היתר',          trans:'תַצְרִיח', tip:'היתר כניסה או עבודה, נפוץ במחסום'},
+  {sign:'رخصة قيادة',      he:'רישיון נהיגה',  trans:'רֻח׳צַת קִיַאדֶה'},
+  {sign:'رخصة سيارة',      he:'רישיון רכב',    trans:'רֻח׳צַת סַיַארַה'}
+];
+VIS_DOCS.forEach(function(r){ if(!r.ar) r.ar=r.sign; });
+
 function _visPractice(){ try{ return localStorage.getItem('vis_practice')==='1'; }catch(e){ return false; } }
 function _visTogglePractice(){ try{ localStorage.setItem('vis_practice', _visPractice()?'0':'1'); }catch(e){} rVisual(); }
 function _visRows(){
@@ -17718,6 +17739,7 @@ function rVisual(){
   _VIS_GROUPS.forEach(function(g){
     var keys=g.he.map(nh);
     var list=rows.filter(function(r){ var k=nh(r.he); if(used[k]||keys.indexOf(k)===-1) return false; used[k]=1; return true; });
+    if(g.extra==='docs') VIS_DOCS.forEach(function(d){ var k=nh(d.he); if(!used[k]){ used[k]=1; list.push(d); } });
     h+=section(g.t,list);
   });
   h+=section('➕ נוספים', rows.filter(function(r){ return !used[nh(r.he)]; }));
@@ -22853,7 +22875,7 @@ window.addEventListener('load', function(){
 <script>
 // Version stamp — shown in the admin panel so we can confirm which build is live
 // on a device (stale service-worker caches were causing "my changes don't show").
-window.APP_VERSION = 'v266';
+window.APP_VERSION = 'v267';
 
 // Register the service worker for full offline use in the field, WITH update
 // detection: when a new version installs, offer a one-tap refresh instead of the
