@@ -10973,11 +10973,21 @@ function renderTen(){
     html+='<div style="color:#7a9ab5;font-size:14px;direction:rtl;margin-top:2px;">'+p.ar+'</div>';
     html+='</div>';
     html+='<button onclick="event.stopPropagation();playEmergCard(\''+(p.audio||'')+'\',this)" '+(p.audio?'':'disabled')+' title="השמע" style="flex-shrink:0;width:52px;height:52px;border-radius:14px;border:none;background:'+(p.audio?'linear-gradient(135deg,#1D9E75,#158060)':'rgba(255,255,255,0.08)')+';color:#fff;font-size:22px;cursor:'+(p.audio?'pointer':'default')+';display:flex;align-items:center;justify-content:center;">▶</button>';
+    if(window._adminAuth) html+='<button onclick="event.stopPropagation();_recordTen('+i+')" title="הקלט את המשפט הזה" style="flex-shrink:0;width:44px;height:44px;border-radius:12px;border:1px solid #D4A24E;background:rgba(212,162,78,0.15);color:#D4A24E;font-size:18px;cursor:pointer;">🎤</button>';
     html+='</div>';
   });
   el.innerHTML=html;
 }
 
+// Admin: record a 10-must-know phrase straight from the 10 screen — opens the
+// editor on that phrase's own row in the '10 משפטי חובה' category.
+function _recordTen(i){
+  var p=(window._tenList||[])[i]; if(!p) return;
+  var nh=function(x){ return String(x||'').replace(/[^א-ת]/g,''); };
+  var row=(DB||[]).filter(function(r){ return r && r.cat===TEN_CAT && nh(r.he)===nh(p.he); })[0];
+  if(!row||!row.id){ alert('המשפט עוד לא סונכרן למאגר. היכנסי פעם אחת לאדמין (5 לחיצות על הכותרת), חזרי למסך הזה ונסי שוב.'); return; }
+  quickRecordById(row.id);
+}
 function openTenPhrase(i){
   var list=window._tenList||TEN_PHRASES;
   var p=list[i];
@@ -22699,7 +22709,7 @@ window.addEventListener('load', function(){
 <script>
 // Version stamp — shown in the admin panel so we can confirm which build is live
 // on a device (stale service-worker caches were causing "my changes don't show").
-window.APP_VERSION = 'v260';
+window.APP_VERSION = 'v261';
 
 // Register the service worker for full offline use in the field, WITH update
 // detection: when a new version installs, offer a one-tap refresh instead of the
