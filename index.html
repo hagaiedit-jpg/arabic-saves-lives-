@@ -677,8 +677,8 @@ body.day-mode .ct{border:1px solid #ebe0c5;}
 .ct.navy{background:#1F3147;}.ct.navy:active{background:#2a3f54;}
 .ct.announce{background:#1F3147;}.ct.announce:active{background:#2a3f54;}
 .ci{width:48px;height:48px;border-radius:14px;background:rgba(212,162,78,0.12);display:flex;align-items:center;justify-content:center;font-size:24px;transition:transform 0.2s;}
-.cn{color:#E8D9B8;font-size:13.5px;font-weight:700;text-align:center;line-height:1.3;letter-spacing:0.2px;}
-.cc{display:inline-block;background:rgba(212,162,78,0.12);color:#D4A24E;font-size:10px;font-weight:700;padding:3px 11px;border-radius:10px;letter-spacing:0.3px;}
+.cn{color:#E8D9B8;font-size:15px;font-weight:800;text-align:center;line-height:1.2;letter-spacing:0.2px;}
+.cc{display:inline-block;background:rgba(212,162,78,0.12);color:#D4A24E;font-size:12px;font-weight:700;padding:3px 11px;border-radius:10px;letter-spacing:0.3px;}
 .lhdr{background:#18293E;padding:11px 16px;display:flex;align-items:center;gap:10px;border-bottom:1px solid #1F3147;}
 .bbtn{background:#0E1B2E;border:1px solid #2A3D52;border-radius:8px;color:#E8D9B8;font-size:13px;padding:5px 12px;cursor:pointer;font-family:inherit;}
 .ltitle{color:#E8D9B8;font-size:14px;font-weight:500;}
@@ -15376,7 +15376,7 @@ function renderScnGrid(){
       html += '<div style="display:flex;align-items:center;gap:14px;">';
       html += '<div style="width:42px;height:42px;background:rgba(212,162,78,0.12);border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:22px;">' + cat.icon + '</div>';
       html += '<div>';
-      html += '<div style="display:flex;align-items:center;gap:8px;"><div style="color:#E8D9B8;font-size:15px;font-weight:700;letter-spacing:0.3px;">' + cat.title + '</div>';
+      html += '<div style="display:flex;align-items:center;gap:8px;"><div style="color:#E8D9B8;font-size:15px;font-weight:800;letter-spacing:0.3px;">' + cat.title + '</div>';
       if (catHasNew) html += '<span style="background:#D4A24E;color:#0E1B2E;font-size:9px;font-weight:800;padding:1px 7px;border-radius:8px;line-height:1.5;">חדש</span>';
       html += '</div>';
       html += '<div style="color:#7a9ab5;font-size:12px;margin-top:3px;">' + cat.scenarios.length + ' תרחישים';
@@ -15437,16 +15437,16 @@ function renderScnGrid(){
           html += '<div style="font-size:28px;margin-bottom:10px;line-height:1;">' + s.icon + '</div>';
           
           // Title
-          html += '<div style="color:#E8D9B8;font-size:12.5px;font-weight:700;line-height:1.3;margin-bottom:6px;min-height:32px;display:flex;align-items:center;justify-content:center;">' + s.title + '</div>';
+          html += '<div style="color:#E8D9B8;font-size:15px;font-weight:800;line-height:1.2;margin-bottom:6px;min-height:36px;display:flex;align-items:center;justify-content:center;">' + s.title + '</div>';
           
           // Status pill
           if (ready) {
             var pillBg = isCompleted ? 'rgba(29,158,117,0.18)' : 'rgba(212,162,78,0.12)';
             var pillColor = isCompleted ? '#1D9E75' : '#D4A24E';
             var pillText = isCompleted ? '✓ הושלם' : phrases.length + ' שלבים';
-            html += '<div style="display:inline-block;background:' + pillBg + ';color:' + pillColor + ';font-size:10px;font-weight:700;padding:3px 10px;border-radius:10px;">' + pillText + '</div>';
+            html += '<div style="display:inline-block;background:' + pillBg + ';color:' + pillColor + ';font-size:12px;font-weight:700;padding:3px 10px;border-radius:10px;">' + pillText + '</div>';
           } else {
-            html += '<div style="display:inline-block;background:rgba(122,154,181,0.1);color:#7a9ab5;font-size:10px;font-weight:600;padding:3px 10px;border-radius:10px;">בקרוב</div>';
+            html += '<div style="display:inline-block;background:rgba(122,154,181,0.1);color:#7a9ab5;font-size:12px;font-weight:600;padding:3px 10px;border-radius:10px;">בקרוב</div>';
           }
           html += '</div>';
         });
@@ -15513,14 +15513,14 @@ function scnSearch(){
       html += '<div style="background:' + cardBg + ';border:1px solid ' + cardBorder + ';border-radius:14px;padding:16px 10px 12px;text-align:center;cursor:pointer;opacity:' + cardOpacity + ';position:relative;" ' + clickHandler + '>';
       if (isCompleted) html += '<div style="position:absolute;top:8px;left:8px;background:#1D9E75;color:#fff;border-radius:50%;width:22px;height:22px;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;">✓</div>';
       html += '<div style="font-size:28px;margin-bottom:10px;line-height:1;">' + s.icon + '</div>';
-      html += '<div style="color:#E8D9B8;font-size:12.5px;font-weight:700;line-height:1.3;margin-bottom:6px;min-height:32px;display:flex;align-items:center;justify-content:center;">' + s.title + '</div>';
+      html += '<div style="color:#E8D9B8;font-size:15px;font-weight:800;line-height:1.2;margin-bottom:6px;min-height:36px;display:flex;align-items:center;justify-content:center;">' + s.title + '</div>';
       if (ready) {
         var pillBg = isCompleted ? 'rgba(29,158,117,0.18)' : 'rgba(212,162,78,0.12)';
         var pillColor = isCompleted ? '#1D9E75' : '#D4A24E';
         var pillText = isCompleted ? '✓ הושלם' : phrases.length + ' שלבים';
-        html += '<div style="display:inline-block;background:' + pillBg + ';color:' + pillColor + ';font-size:10px;font-weight:700;padding:3px 10px;border-radius:10px;">' + pillText + '</div>';
+        html += '<div style="display:inline-block;background:' + pillBg + ';color:' + pillColor + ';font-size:12px;font-weight:700;padding:3px 10px;border-radius:10px;">' + pillText + '</div>';
       } else {
-        html += '<div style="display:inline-block;background:rgba(122,154,181,0.1);color:#7a9ab5;font-size:10px;font-weight:600;padding:3px 10px;border-radius:10px;">בקרוב</div>';
+        html += '<div style="display:inline-block;background:rgba(122,154,181,0.1);color:#7a9ab5;font-size:12px;font-weight:600;padding:3px 10px;border-radius:10px;">בקרוב</div>';
       }
       html += '</div>';
     });
@@ -17509,21 +17509,20 @@ function _vrow(lbl,ar,tr){
 }
 var _BADGE_HEAR='<span style="display:inline-block;background:rgba(126,236,193,0.15);color:#7eecc1;font-size:10px;font-weight:700;padding:1px 7px;border-radius:6px;margin-right:5px;white-space:nowrap;">\ud83d\udc42 \u05d0\u05e0\u05d9 \u05de\u05d6\u05d4\u05d4</span>';
 var _BADGE_SAY='<span style="display:inline-block;background:rgba(212,162,78,0.15);color:#e6c98a;font-size:10px;font-weight:700;padding:1px 7px;border-radius:6px;margin-right:5px;white-space:nowrap;">\ud83d\udde3\ufe0f \u05d0\u05e0\u05d9 \u05d0\u05d5\u05de\u05e8</span>';
-function _threatCard(p, badge, num){
+function _threatCard(p, badge, num, onclick){
   if(badge===undefined) badge=_BADGE_HEAR;
-  var url=String(p.audio_url||p.audio||''), has=!!url;
+  var has=!!(p.audio||p.audio_url||(typeof _descAudioFor==='function'&&_descAudioFor(p)));
   var numHtml=num?'<span style="display:inline-flex;align-items:center;justify-content:center;width:20px;height:20px;border-radius:50%;background:#D4A24E;color:#0E1B2E;font-size:11px;font-weight:800;flex-shrink:0;">'+num+'</span>':'';
-  var btn='<button onclick="event.stopPropagation();playEmergCard(\''+url.replace(/'/g,"\\'")+'\',this)" '+(has?'':'disabled ')+'title="'+(has?'השמע':'אין הקלטה עדיין')+'" style="flex-shrink:0;width:38px;height:38px;border-radius:50%;border:none;font-size:15px;cursor:'+(has?'pointer':'default')+';background:'+(has?'#1D9E75':'rgba(255,255,255,0.08)')+';color:'+(has?'#fff':'#6f8599')+';">\u25b6</button>';
-  var h='<div style="flex:1 1 auto;min-width:150px;background:#1F3147;border:1px solid #2A3D52;border-radius:11px;padding:9px 12px;display:flex;align-items:center;gap:10px;">';
-  h+='<div style="flex:1;min-width:0;">';
-  h+='<div style="display:flex;align-items:center;gap:6px;">'+numHtml+'<div style="color:#E8D9B8;font-size:14px;font-weight:700;flex:1;">'+p.he+badge+'</div></div>';
+  var h='<div'+(onclick?' onclick="'+onclick+'"':'')+' style="flex:1 1 auto;min-width:132px;background:#1F3147;border:1px solid #2A3D52;border-radius:11px;padding:9px 12px;cursor:pointer;">';
+  h+='<div style="display:flex;align-items:center;gap:6px;">'+numHtml+'<div style="color:#E8D9B8;font-size:14px;font-weight:700;flex:1;">'+p.he+badge+'</div>'+(has?'<span style="color:#1D9E75;font-size:14px;">🔊</span>':'')+'</div>';
   h+='<div style="color:#E8D9B8;font-size:15px;font-family:Georgia,serif;direction:rtl;margin-top:2px;">'+(p.ar||'')+'</div>';
   h+='<div style="color:#D4A24E;font-size:12px;margin-top:1px;">'+(p.trans||'')+'</div>';
-  h+='</div>'+btn+'</div>';
+  h+='</div>';
   return h;
 }
 function rCheckpoint(){
   var el=document.getElementById('checkpointlist'); if(!el)return;
+  window._dbCatRows=window._dbCatRows||{}; window._dbCatRows['__checkpoint']=[];
   // Arabic normalizer: drop harakat/shadda, unify alef/hamza forms (أ إ آ ٱ -> ا),
   // ى->ي, ة->ه, strip punctuation+spaces. So an edit like أطفي -> إطفي still matches.
   function norm(x){ return String(x||'').replace(/[ً-ْٰـ]/g,'').replace(/[أإآٱ]/g,'ا').replace(/ى/g,'ي').replace(/ة/g,'ه').replace(/[!؟?.,،—\-\s]/g,''); }
@@ -17560,14 +17559,15 @@ function rCheckpoint(){
     if(it.s!==cur){ if(open) h+='</div>'; cur=it.s; h+='<div class="stitle" style="margin-top:16px;">'+TITLES[it.s]+'</div><div style="display:flex;flex-direction:column;gap:8px;margin-top:8px;">'; open=true; }
     var best=match(it.ar,it.he); if(!best) return;
     n++;
-    var idx=(typeof DB!=='undefined'&&DB)?DB.indexOf(best):-1;
-    h+=_threatCard({he:best.he,ar:best.ar,trans:best.trans,audio:best.audio_url||best.audio||'',_dbidx:idx}, _BADGE_SAY, n);
+    var rows=window._dbCatRows['__checkpoint']; rows.push(best);
+    h+=_threatCard(best, _BADGE_SAY, n, "_openDbCatItem('__checkpoint',"+(rows.length-1)+",'checkpoint')");
   });
   if(open) h+='</div>';
   el.innerHTML=h;
 }
 function rThreat(){
   var el=document.getElementById('threatlist'); if(!el)return;
+  window._dbCatRows=window._dbCatRows||{}; window._dbCatRows['__threat']=[];
   var db=(typeof DB!=='undefined'&&DB)?DB:[];
   function findDb(cat,he){ var hit=null; for(var i=0;i<db.length;i++){ if(db[i].cat===cat&&db[i].he===he){ if(db[i].audio||db[i].audio_url) return {row:db[i],idx:i}; if(!hit) hit={row:db[i],idx:i}; } } return hit; }
   function section(cat,title,emoji,desc){
@@ -17576,7 +17576,9 @@ function rThreat(){
     if(desc)h+='<div style="color:#7a9ab5;font-size:12px;margin:2px 2px 10px;line-height:1.5;">'+desc+'</div>';
     h+='<div style="display:flex;flex-wrap:wrap;gap:8px;">'+items.map(function(t){
       var f=findDb(cat,t.he);
-      return _threatCard({he:t.he,ar:t.ar,trans:t.trans,audio:f?(f.row.audio_url||f.row.audio||''):'',_dbidx:f?f.idx:-1});
+      var row=f?f.row:{he:t.he,ar:t.ar,trans:t.trans,cat:cat};
+      var rows=window._dbCatRows['__threat']; rows.push(row);
+      return _threatCard(row, undefined, 0, "_openDbCatItem('__threat',"+(rows.length-1)+",'threat')");
     }).join('')+'</div>';
     return h;
   }
@@ -22661,7 +22663,7 @@ window.addEventListener('load', function(){
 <script>
 // Version stamp — shown in the admin panel so we can confirm which build is live
 // on a device (stale service-worker caches were causing "my changes don't show").
-window.APP_VERSION = 'v256';
+window.APP_VERSION = 'v257';
 
 // Register the service worker for full offline use in the field, WITH update
 // detection: when a new version installs, offer a one-tap refresh instead of the
