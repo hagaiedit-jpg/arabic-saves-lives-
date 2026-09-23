@@ -10345,6 +10345,12 @@ var BUILTIN_THREAT=[
   {section:'military', cat:'שומעים בשטח: קללות', he:'אשבור לך את הראש', ar:'بأكسّر راسك', trans:'בַּאכַּסֶר רַאסַכּ'},
   {section:'military', cat:'שומעים בשטח: קללות', he:'שתוק!', ar:'اسكت!', trans:'אֻסְכֻּת'},
 ];
+var BUILTIN_CHECKPOINT=[
+  {section:'military', cat:'רגע ראשון במחסום', he:'כבה את המנוע', ar:'أطفي الموتور', trans:'אִטְפִי אִלמוֹתוֹר'},
+  {section:'military', cat:'רגע ראשון במחסום', he:'שים מפתחות על גג הרכב', ar:'حطّ المفاتيح على سطح السيّارة', trans:'חֻטּ אִלמַפַאתִיח עַלַא סַטֶח אלסַיַארַה'},
+  {section:'military', cat:'רגע ראשון במחסום', he:'כל מי שברכב — ידיים למעלה', ar:'كل اللي بالسيّارة، إيديكم لفوق', trans:'כֻּל אֵללִי בִּאלסַיַארַה, אִידֵיכֻם לַפוֹק'},
+  {section:'military', cat:'רגע ראשון במחסום', he:'כל אחד יוצא עם ידיים למעלה', ar:'كل واحد يطلع وإيديه لفوق', trans:'כֻּל וַאחַד יִטְלַע וּאִידֵיה לַפוֹק'},
+];
 var BUILTIN_SCENARIO_DATA = [
   {id:'bi-harhaka-1',  section:'scenario', cat:'הרחקה מהשטח', tags:'step1',  he:'עצור במקום והרם ידיים!', ar:'اوقّف عندك وارفع إيديك لفوق!', trans:'וַקֵף עִנְדַכּ וַארְפַע אִידֵיכּ לַפוֹק'},
   {id:'bi-harhaka-2',  section:'scenario', cat:'הרחקה מהשטח', tags:'step2',  he:'מה אתה עושה כאן?', ar:'شو بتعمل هون؟', trans:'שוּ בְּתִעְמֵל הוֹן?'},
@@ -17518,19 +17524,29 @@ function rCheckpoint(){
   var el=document.getElementById('checkpointlist'); if(!el)return;
   function norm(x){ return String(x||'').replace(/[\u064B-\u0652\u0670\u0640]/g,'').replace(/[!\u061F?.,\u060C\s]/g,''); }
   var pool=[];
-  [typeof DB!=='undefined'?DB:[], typeof DICT!=='undefined'?DICT:[]].forEach(function(a){ (a||[]).forEach(function(r){ if(r&&r.ar&&r.he) pool.push(r); }); });
-  var seq=['\u0648\u0642\u0651\u0641','\u0637\u0641\u0651\u064a \u0627\u0644\u0645\u0648\u062a\u0648\u0631','\u0625\u064a\u062f\u064a\u0643 \u0644\u0641\u0648\u0642','\u0644\u0627 \u062a\u062a\u062d\u0631\u0651\u0643','\u0627\u0641\u062a\u062d \u0627\u0644\u0634\u0628\u0651\u0627\u0643','\u0627\u0639\u0637\u064a\u0646\u064a \u0627\u0644\u0647\u0648\u064a\u0629','\u0643\u0645 \u0648\u0627\u062d\u062f \u0628\u0627\u0644\u0633\u064a\u0627\u0631\u0629','\u0627\u0637\u0644\u0639 \u0645\u0646 \u0627\u0644\u0633\u064a\u0627\u0631\u0629'];
-  var h='<div style="display:flex;flex-direction:column;gap:8px;">';
-  var n=0, misses=0;
-  seq.forEach(function(key){
-    var nk=norm(key), best=null, bestScore=9;
-    pool.forEach(function(r){ var nr=norm(r.ar); var sc = nr===nk?0:(nr.indexOf(nk)===0?1:(nr.indexOf(nk)>=0?2:((nk.length>5&&nk.indexOf(nr)>=0&&nr.length>4)?3:9))); if(sc<bestScore){bestScore=sc;best=r;} });
-    if(!best){ misses++; return; }
+  [typeof DB!=='undefined'?DB:[], typeof DICT!=='undefined'?DICT:[], typeof BUILTIN_CHECKPOINT!=='undefined'?BUILTIN_CHECKPOINT:[]].forEach(function(a){ (a||[]).forEach(function(r){ if(r&&r.ar&&r.he) pool.push(r); }); });
+  function match(key){ var nk=norm(key), best=null, bs=9; pool.forEach(function(r){ var nr=norm(r.ar); var sc=nr===nk?0:(nr.indexOf(nk)===0?1:(nr.indexOf(nk)>=0?2:((nk.length>5&&nk.indexOf(nr)>=0&&nr.length>4)?3:9))); if(sc<bs){bs=sc;best=r;} }); return best; }
+  var SEQ=[
+   {s:1,ar:'\u0648\u0642\u0651\u0641'},
+   {s:1,ar:'\u0623\u0637\u0641\u064a \u0627\u0644\u0645\u0648\u062a\u0648\u0631'},
+   {s:1,ar:'\u0627\u0637\u0644\u0639 \u0645\u0646 \u0627\u0644\u0633\u064a\u0627\u0631\u0629 \u0634\u0648\u064a \u0634\u0648\u064a'},
+   {s:1,ar:'\u062d\u0637\u0651 \u0627\u0644\u0645\u0641\u0627\u062a\u064a\u062d \u0639\u0644\u0649 \u0633\u0637\u062d \u0627\u0644\u0633\u064a\u0627\u0631\u0629'},
+   {s:2,ar:'\u0643\u0644 \u0627\u0644\u0644\u064a \u0628\u0627\u0644\u0633\u064a\u0627\u0631\u0629 \u0625\u064a\u062f\u064a\u0643\u0645 \u0644\u0641\u0648\u0642'},
+   {s:2,ar:'\u0643\u0644 \u0648\u0627\u062d\u062f \u064a\u0637\u0644\u0639 \u0648\u0625\u064a\u062f\u064a\u0647 \u0644\u0641\u0648\u0642'},
+   {s:2,ar:'\u0627\u0631\u0641\u0639 \u0627\u0644\u0642\u0645\u064a\u0635'},
+   {s:2,ar:'\u0625\u064a\u062f\u064a\u0643 \u0644\u0641\u0648\u0642'},
+   {s:2,ar:'\u0644\u0627 \u062a\u062a\u062d\u0631\u0651\u0643'}
+  ];
+  var TITLES={1:'\u05d7\u05dc\u05e7 \u05d0\u05f3 \u2014 \u05e2\u05e6\u05d9\u05e8\u05d4 \u05d5\u05d4\u05d5\u05e8\u05d3\u05ea \u05d4\u05e0\u05d4\u05d2', 2:'\u05d0\u05d5 \u05dc\u05d7\u05d9\u05dc\u05d5\u05e4\u05d9\u05df \u2014 \u05de\u05e1\u05e4\u05e8 \u05e0\u05d5\u05e1\u05e2\u05d9\u05dd'};
+  var h='', n=0, cur=null, open=false;
+  SEQ.forEach(function(it){
+    if(it.s!==cur){ if(open) h+='</div>'; cur=it.s; h+='<div class="stitle" style="margin-top:16px;">'+TITLES[it.s]+'</div><div style="display:flex;flex-direction:column;gap:8px;margin-top:8px;">'; open=true; }
+    var best=match(it.ar); if(!best) return;
     n++;
     var idx=(typeof DB!=='undefined'&&DB)?DB.indexOf(best):-1;
     h+=_threatCard({he:best.he,ar:best.ar,trans:best.trans,audio:best.audio_url||best.audio||'',_dbidx:idx}, _BADGE_SAY, n);
   });
-  h+='</div>';
+  if(open) h+='</div>';
   el.innerHTML=h;
 }
 function rThreat(){
@@ -19216,6 +19232,16 @@ async function autoSyncBuiltins(){
         if(_delBlockList().indexOf(_delBlockKey('military',bz.cat,bz.he))!==-1)continue;
         await sbFetch('/rest/v1/phrases','POST',{cat:bz.cat,he:bz.he,trans:bz.trans||'',ar:bz.ar||'',tags:'',why:'',tone:'',audio_url:'',is_new:true,section:'military'});
         haveT[kz]=1;
+      }
+    }
+    // --- checkpoint first-moment (military), keyed by cat + normalized Hebrew ---
+    if(typeof BUILTIN_CHECKPOINT!=='undefined' && BUILTIN_CHECKPOINT.length){
+      for(var y=0;y<BUILTIN_CHECKPOINT.length;y++){
+        var by=BUILTIN_CHECKPOINT[y]; var ky=by.cat+'|'+normT(by.he);
+        if(haveT[ky])continue;
+        if(_delBlockList().indexOf(_delBlockKey('military',by.cat,by.he))!==-1)continue;
+        await sbFetch('/rest/v1/phrases','POST',{cat:by.cat,he:by.he,trans:by.trans||'',ar:by.ar||'',tags:'',why:'',tone:'',audio_url:'',is_new:true,section:'military'});
+        haveT[ky]=1;
       }
     }
     // --- built-in daily sentences keyed by normalized Hebrew ---
@@ -22618,7 +22644,7 @@ window.addEventListener('load', function(){
 <script>
 // Version stamp — shown in the admin panel so we can confirm which build is live
 // on a device (stale service-worker caches were causing "my changes don't show").
-window.APP_VERSION = 'v252';
+window.APP_VERSION = 'v253';
 
 // Register the service worker for full offline use in the field, WITH update
 // detection: when a new version installs, offer a one-tap refresh instead of the
