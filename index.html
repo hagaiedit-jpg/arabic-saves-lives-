@@ -17534,9 +17534,8 @@ function _threatCard(p, badge, num, onclick){
   h+='</div>';
   return h;
 }
-function rCheckpoint(){
-  var el=document.getElementById('checkpointlist'); if(!el)return;
-  window._dbCatRows=window._dbCatRows||{}; window._dbCatRows['__checkpoint']=[];
+// Resolved checkpoint sequence [{s:part, row}] — shared by the screen and the pocket card.
+function _checkpointSteps(){
   // Arabic normalizer: drop harakat/shadda, unify alef/hamza forms (أ إ آ ٱ -> ا),
   // ى->ي, ة->ه, strip punctuation+spaces. So an edit like أطفي -> إطفي still matches.
   function norm(x){ return String(x||'').replace(/[ً-ْٰـ]/g,'').replace(/[أإآٱ]/g,'ا').replace(/ى/g,'ي').replace(/ة/g,'ه').replace(/[!؟?.,،—\-\s]/g,''); }
@@ -17567,14 +17566,18 @@ function rCheckpoint(){
    {s:2,ar:'إيديك لفوق'},
    {s:2,ar:'لا تتحرّك'}
   ];
-  var TITLES={1:'\u05d7\u05dc\u05e7 \u05d0\u05f3 \u2014 \u05e2\u05e6\u05d9\u05e8\u05d4 \u05d5\u05d4\u05d5\u05e8\u05d3\u05ea \u05d4\u05e0\u05d4\u05d2', 2:'\u05d0\u05d5 \u05dc\u05d7\u05d9\u05dc\u05d5\u05e4\u05d9\u05df \u2014 \u05de\u05e1\u05e4\u05e8 \u05e0\u05d5\u05e1\u05e2\u05d9\u05dd'};
+  return SEQ.map(function(it){ return {s:it.s, row:match(it.ar,it.he)}; }).filter(function(x){ return x.row; });
+}
+var _CP_TITLES={1:'\u05d7\u05dc\u05e7 \u05d0\u05f3 \u2014 \u05e2\u05e6\u05d9\u05e8\u05d4 \u05d5\u05d4\u05d5\u05e8\u05d3\u05ea \u05d4\u05e0\u05d4\u05d2', 2:'\u05d0\u05d5 \u05dc\u05d7\u05d9\u05dc\u05d5\u05e4\u05d9\u05df \u2014 \u05de\u05e1\u05e4\u05e8 \u05e0\u05d5\u05e1\u05e2\u05d9\u05dd'};
+function rCheckpoint(){
+  var el=document.getElementById('checkpointlist'); if(!el)return;
+  window._dbCatRows=window._dbCatRows||{}; window._dbCatRows['__checkpoint']=[];
   var h='', n=0, cur=null, open=false;
-  SEQ.forEach(function(it){
-    if(it.s!==cur){ if(open) h+='</div>'; cur=it.s; h+='<div class="stitle" style="margin-top:16px;">'+TITLES[it.s]+'</div><div style="display:flex;flex-direction:column;gap:8px;margin-top:8px;">'; open=true; }
-    var best=match(it.ar,it.he); if(!best) return;
+  _checkpointSteps().forEach(function(st){
+    if(st.s!==cur){ if(open) h+='</div>'; cur=st.s; h+='<div class="stitle" style="margin-top:16px;">'+_CP_TITLES[st.s]+'</div><div style="display:flex;flex-direction:column;gap:8px;margin-top:8px;">'; open=true; }
     n++;
-    var rows=window._dbCatRows['__checkpoint']; rows.push(best);
-    h+=_threatCard(best, _BADGE_SAY, n, "_openDbCatItem('__checkpoint',"+(rows.length-1)+",'checkpoint')");
+    var rows=window._dbCatRows['__checkpoint']; rows.push(st.row);
+    h+=_threatCard(st.row, _BADGE_SAY, n, "_openDbCatItem('__checkpoint',"+(rows.length-1)+",'checkpoint')");
   });
   if(open) h+='</div>';
   el.innerHTML=h;
@@ -21700,9 +21703,22 @@ function _emergCardHTML(p, editing, key){
 // Printable pocket cheat-sheet — an offline paper backup of the critical phrases
 function _escHtml(s){ return String(s == null ? '' : s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
 function printPocketCard(){
-  var cats = [];
+  // Order: 10 must-know → checkpoint first-moment (part A, then B) → the emergency
+  // categories. A phrase already printed above is not repeated below.
+  var cats = [], seen = {};
+  var key = function(p){ return (typeof _tenNormAr==='function' ? _tenNormAr(p.ar) : String(p.ar||'')) || String(p.he||'').trim(); };
+  var take = function(list){ return (list||[]).filter(function(p){ if(!p||(!p.he&&!p.ar)) return false; var k=key(p); if(seen[k]) return false; seen[k]=1; return true; }); };
+  try { var ten = take(getTenList()); if (ten.length) cats.push({ name: '🎖️ 10 משפטי חובה', items: ten }); } catch(e) {}
+  try {
+    var steps = _checkpointSteps();
+    [1,2].forEach(function(part){
+      // The sequence is kept whole (order matters); its phrases still count as printed.
+      var items = steps.filter(function(st){ return st.s===part; }).map(function(st){ seen[key(st.row)]=1; return st.row; });
+      if (items.length) cats.push({ name: '🛑 רגע ראשון במחסום — ' + _CP_TITLES[part], items: items });
+    });
+  } catch(e) {}
   for (var i = 0; i < EMERG_CATS.length; i++) {
-    var items = _emergPhrasesForCat(EMERG_CATS[i]);
+    var items = take(_emergPhrasesForCat(EMERG_CATS[i]));
     if (items.length) cats.push({ name: EMERG_CATS[i].emoji + ' ' + EMERG_CATS[i].name, items: items });
   }
   if (!cats.length) { alert('אין עדיין משפטים להדפסה. ודאי שהנתונים נטענו.'); return; }
@@ -22709,7 +22725,7 @@ window.addEventListener('load', function(){
 <script>
 // Version stamp — shown in the admin panel so we can confirm which build is live
 // on a device (stale service-worker caches were causing "my changes don't show").
-window.APP_VERSION = 'v261';
+window.APP_VERSION = 'v262';
 
 // Register the service worker for full offline use in the field, WITH update
 // detection: when a new version installs, offer a one-tap refresh instead of the
