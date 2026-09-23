@@ -20444,6 +20444,37 @@ async function _purgeRemovedCats(){
   try{ await loadData(); }catch(e){}
 }
 
+// One-time move of the 3 phrases that left the "10 must-know" list into the
+// operational categories where they belong — keeping their recordings.
+// Never deletes: if the target already has the same phrase, only copy the
+// recording onto it when it has none.
+async function _moveTenLeftovers(){
+  if(localStorage.getItem('moved_ten_leftovers_v1')==='1') return;
+  var moves=[
+    {he:'בוא הנה',   target:'הוראות מיידיות'},
+    {he:'מי בבית?',  target:'שליטה בבית'},
+    {he:'אל תפחד',   target:'הרגעה ושכנוע'}
+  ];
+  var nh=function(x){ return String(x||'').replace(/[^א-ת]/g,''); };
+  var q=function(cat){ return '/rest/v1/phrases?select=id,he,audio_url&section=eq.military&cat=eq.'+encodeURIComponent(cat); };
+  var ten=await sbFetch(q(TEN_CAT));
+  if(!Array.isArray(ten)) return;   // fetch failed — try again next admin visit
+  for(var i=0;i<moves.length;i++){
+    var m=moves[i];
+    var src=ten.filter(function(r){ return nh(r.he)===nh(m.he); });
+    if(!src.length) continue;
+    var rec=src.filter(function(r){ return r.audio_url; })[0] || src[0];
+    var tgt=(await sbFetch(q(m.target)) || []).filter(function(r){ return nh(r.he)===nh(m.he); });
+    if(!tgt.length){
+      await sbFetch('/rest/v1/phrases?id=eq.'+encodeURIComponent(rec.id),'PATCH',{cat:m.target});
+    } else if(rec.audio_url && !tgt.some(function(r){ return r.audio_url; })){
+      await sbFetch('/rest/v1/phrases?id=eq.'+encodeURIComponent(tgt[0].id),'PATCH',{audio_url:rec.audio_url});
+    }
+  }
+  try{ localStorage.setItem('moved_ten_leftovers_v1','1'); }catch(e){}
+  try{ await loadData(); }catch(e){}
+}
+
 // Admin list
 async function renderAdminList(){
   const el=document.getElementById('admin-list');
@@ -20454,6 +20485,7 @@ async function renderAdminList(){
     // One-time cleanup: the two threat categories were removed from the app at the
     // user's request — purge any leftover rows from the DB so nothing lingers.
     try{ await _purgeRemovedCats(); }catch(e){ console.warn('purge skipped', e); }
+    try{ await _moveTenLeftovers(); }catch(e){ console.warn('ten move skipped', e); }
     // Make sure everything shipped in code is available for editing/recording — automatic, once per session.
     try{ await autoSyncBuiltins(); }catch(e){ console.warn('autoSync skipped', e); }
     const data=await sbFetchAllRows('/rest/v1/phrases?select=*&order=created_at.desc,id.desc');
@@ -22667,7 +22699,7 @@ window.addEventListener('load', function(){
 <script>
 // Version stamp — shown in the admin panel so we can confirm which build is live
 // on a device (stale service-worker caches were causing "my changes don't show").
-window.APP_VERSION = 'v259';
+window.APP_VERSION = 'v260';
 
 // Register the service worker for full offline use in the field, WITH update
 // detection: when a new version installs, offer a one-tap refresh instead of the
