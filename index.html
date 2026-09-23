@@ -17640,7 +17640,7 @@ var _VIS_GROUPS=[
 // Illustrative images (generated reconstructions) — replace any file in
 // img/written/ with an authentic field photo of the same name, or attach a photo
 // to a row via its tags as "img:<url>" (that wins over the built-in file).
-var _VIS_IMG={'ביתחולים':'hospital','ביתמרקחת':'pharmacy','ביתספר':'school','מסגד':'mosque','עירייה':'municipality','משטרה':'police','שוק':'market','תחנתדלק':'fuel','אסורההכניסה':'noentry','סכנה':'danger','עצור':'stop','בידוק':'inspection','כניסה':'entrance','יציאה':'exit','פלסטין':'palestine','ההתנגדות':'resistance','שהיד':'shahid','השיבה':'return','מהפכה':'revolution','נקמה':'revenge','חמאס':'hamas','פתח':'fatah','גיהאדאסלאמי':'pij','גדודיאלקסאם':'qassam','תעודתזהות':'id','כרטיס':'card','השם':'name','תאריךלידה':'dob','כתובת':'address','נשק':'weapon','תחמושת':'ammo','מפה':'map'};
+var _VIS_IMG={'ביתחולים':'hospital','ביתמרקחת':'pharmacy','ביתספר':'school','מסגד':'mosque','עירייה':'municipality','משטרה':'police','שוק':'market','תחנתדלק':'fuel','אסורההכניסה':'noentry','סכנה':'danger','עצור':'stop','בידוק':'inspection','כניסה':'entrance','יציאה':'exit','פלסטין':'palestine-wall','ההתנגדות':'resistance','שהיד':'shahid','השיבה':'return','מהפכה':'revolution','נקמה':'revenge','חמאס':'hamas','פתח':'fatah','גיהאדאסלאמי':'pij','גדודיאלקסאם':'qassam','תעודתזהות':'id','כרטיס':'card','השם':'name','תאריךלידה':'dob','כתובת':'address','נשק':'weapon','תחמושת':'ammo','מפה':'map'};
 function _visImg(r){
   var t=String(r&&r.tags||''); var m=t.match(/(?:^|\s)img:(\S+)/); if(m) return m[1];
   var k=String(r&&r.he||'').replace(/[^\u05D0-\u05EA]/g,'');
@@ -22811,7 +22811,7 @@ window.addEventListener('load', function(){
 <script>
 // Version stamp — shown in the admin panel so we can confirm which build is live
 // on a device (stale service-worker caches were causing "my changes don't show").
-window.APP_VERSION = 'v264';
+window.APP_VERSION = 'v265';
 
 // Register the service worker for full offline use in the field, WITH update
 // detection: when a new version installs, offer a one-tap refresh instead of the
