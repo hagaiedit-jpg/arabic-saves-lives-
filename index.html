@@ -14118,7 +14118,7 @@ function bldCats(){
             : c.special==='foundations' ? DB.some(p=>FOUNDATION_CATS.indexOf(p.cat)!==-1&&p.isNew)
             : DB.some(p=>p.cat===c.id&&p.isNew);
     const cls='ct'+(c.special==='navy'?' navy':c.special==='announce'?' announce':'');
-    const cnt=c.special==='visual'?(cntC('זיהוי ערבית כתובה בשטח')+cntC('זיהוי חזותי')+VIS_DIGITS.length+VIS_NUM_EX.length+VIS_DOCS.length):c.special==='announce'?ANNOUNCE.length:c.special==='navy'?NAVY.length
+    const cnt=c.special==='visual'?(cntC('זיהוי ערבית כתובה בשטח')+cntC('זיהוי חזותי')+VIS_DIGITS.length+VIS_NUM_EX.length+VIS_DOCS.length+VIS_CARS.length):c.special==='announce'?ANNOUNCE.length:c.special==='navy'?NAVY.length
             :c.special==='foundations'?DB.filter(p=>FOUNDATION_CATS.indexOf(p.cat)!==-1).length:cntC(c.id);
     // Paywall lock badge (dormant unless window.PAYWALL). Foundations tile stays open.
     const lk=(window.PAYWALL && typeof _hasPremium==='function' && !_hasPremium() && c.special!=='foundations' && typeof clFreeCat==='function' && !clFreeCat(c.id));
@@ -17704,6 +17704,21 @@ var VIS_DOCS=[
   {sign:'رخصة السيارة',    he:'רישיון רכב',    trans:'רֻח׳צַת אִלסַיַארַה'}
 ];
 VIS_DOCS.forEach(function(r){ if(!r.ar) r.ar=r.sign; });
+// 🚗 Vehicles: 3 illustrated cars (img/written/<img>.jpg) + words written on vehicles.
+var VIS_CARS=[
+  {img:'taxi',      ar:'تاكسي',  he:'מונית',            trans:'תַאכְּסִי', tip:'מונית צהובה. על הדלת לפעמים כתוב عمومي'},
+  {img:'plate',     ar:'فلسطين', he:'לוחית פלסטינית',   trans:'פִלַסְטִין', tip:'فلسطين ו-P על הלוחית = רכב שרשום ברשות הפלסטינית. לוחית צהובה = רכב ישראלי'},
+  {img:'ambulance', ar:'إسعاف',  he:'אמבולנס',          trans:'אִסְעַאף', tip:'על מכסה המנוע כתוב בהיפוך, כדי שיקראו במראה'},
+  {sign:'عمومي',   he:'ציבורי',            trans:'עֻמוּמִי', tip:'רכב הסעה ציבורי / מונית שירות'},
+  {sign:'خصوصي',   he:'פרטי',              trans:'חֻ׳צוּצִי'},
+  {sign:'الهلال الأحمر الفلسطيني', he:'הסהר האדום הפלסטיני', trans:'אִלהִלַאל אִלאַחְמַר אִלפִלַסְטִינִי'},
+  {sign:'الدفاع المدني', he:'הגנה אזרחית (כיבוי והצלה)', trans:'אִלדִפַאע אִלמַדַנִי'},
+  {sign:'صحافة',   he:'עיתונות',           trans:'צַחַאפֶה', tip:'רכב של עיתונאים. לרוב כתוב לידו גם PRESS'},
+  {sign:'تعليم سواقة', he:'לימוד נהיגה',   trans:'תַעְלִים סְוַאקַה'},
+  {sign:'باص',     he:'אוטובוס',           trans:'בַּאץ'},
+  {sign:'شاحنة',   he:'משאית',             trans:'שַאחְנֶה'}
+];
+VIS_CARS.forEach(function(r){ if(!r.ar) r.ar=r.sign; });
 
 function _visPractice(){ try{ return localStorage.getItem('vis_practice')==='1'; }catch(e){ return false; } }
 function _visTogglePractice(){ try{ localStorage.setItem('vis_practice', _visPractice()?'0':'1'); }catch(e){} rVisual(); }
@@ -17725,7 +17740,7 @@ function rVisual(){
     var list=window._dbCatRows['__visual']; list.push(r); var i=list.length-1;
     var has=!!(r.audio||r.audio_url||(typeof _descAudioFor==='function'&&_descAudioFor(r)));
     var c='<div class="vis-card'+(practice?' vis-hidden':'')+'" onclick="_visTap('+i+',this)">';
-    var img=r.sign?'':_visImg(r);
+    var img=r.img?('img/written/'+r.img+'.jpg'):(r.sign?'':_visImg(r));
     c+= img ? '<img class="vis-img" src="'+img+'" alt="" loading="lazy">'
             : '<div class="vis-sign'+(r.sign&&r.sign.length===1?' vis-digit':'')+'"'+(r.dir?' style="direction:'+r.dir+';"':'')+'>'+(r.sign||r.ar||'')+'</div>';
     c+='<div class="vis-ans"><div class="vis-he">'+(r.he||'')+(has?' <span style="color:#1D9E75;">🔊</span>':'')+'</div><div class="vis-tr">'+(r.trans||'')+'</div>'+(r.tip?'<div class="vis-tip">'+r.tip+'</div>':'')+'</div>';
@@ -17742,6 +17757,7 @@ function rVisual(){
     if(g.extra==='docs') VIS_DOCS.forEach(function(d){ var k=nh(d.he); if(!used[k]){ used[k]=1; list.push(d); } });
     h+=section(g.t,list);
   });
+  h+=section('🚗 רכב ולוחיות', VIS_CARS);
   h+=section('➕ נוספים', rows.filter(function(r){ return !used[nh(r.he)]; }));
   el.innerHTML=h||'<div class="empty">אין עדיין פריטים</div>';
 }
@@ -22895,7 +22911,7 @@ window.addEventListener('load', function(){
 <script>
 // Version stamp — shown in the admin panel so we can confirm which build is live
 // on a device (stale service-worker caches were causing "my changes don't show").
-window.APP_VERSION = 'v269';
+window.APP_VERSION = 'v270';
 
 // Register the service worker for full offline use in the field, WITH update
 // detection: when a new version installs, offer a one-tap refresh instead of the

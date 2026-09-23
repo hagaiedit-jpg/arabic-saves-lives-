@@ -7,7 +7,8 @@ Regenerate (after editing the JOBS list / templates in `gen.html`):
 
     cd tools/written-images
     npm install playwright-core@1 @fontsource/cairo @fontsource/lalezar @fontsource/reem-kufi
-    node gen.js
+    node gen.js              # all images
+    node gen.js taxi ambulance   # only these slugs
 
 To use an authentic photo instead: overwrite `img/written/<slug>.jpg` with a
 photo of the same name (≈800×560, JPEG), or add `img:<url>` to that phrase's

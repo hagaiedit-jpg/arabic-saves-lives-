@@ -48,6 +48,37 @@ const tpl={
    return wrap('',`<rect width="${W}" height="${H}" fill="#5a4a3a"/><g filter="url(#sh)" transform="rotate(3 400 280)"><rect x="110" y="70" width="580" height="420" fill="#efe6cf" stroke="#c9b98f" stroke-width="3"/><path d="M130 420 C260 360 330 300 440 310 S620 220 670 160" stroke="#c0392b" stroke-width="6" fill="none"/><path d="M150 180 C260 230 380 200 470 260 S600 400 660 420" stroke="#e0a800" stroke-width="5" fill="none"/><path d="M200 470 C230 380 300 330 300 240 S360 120 420 90" stroke="#2c7fb8" stroke-width="5" fill="none"/><g fill="#6d8a4f" opacity=".35"><ellipse cx="560" cy="330" rx="70" ry="40"/><ellipse cx="240" cy="160" rx="60" ry="30"/></g><rect x="235" y="85" width="330" height="96" fill="#efe6cf" stroke="#333" stroke-width="3"/>${T(400,158,ar,74,'#1b1b1b')}</g>`);
  }
 };
+
+// ---------- vehicles ----------
+const street=()=>`<rect width="${W}" height="${H}" fill="url(#st)"/><rect x="0" y="0" width="${W}" height="${H}" fill="#000" opacity=".06"/><rect x="0" y="352" width="${W}" height="26" fill="#bdb6a8"/><rect x="0" y="378" width="${W}" height="182" fill="#5f6266"/><rect x="0" y="378" width="${W}" height="6" fill="#4b4e52"/>`;
+const wheel=(x,y,r=50)=>`<circle cx="${x}" cy="${y}" r="${r}" fill="#1c1c1c"/><circle cx="${x}" cy="${y}" r="${r*.5}" fill="#9aa1a8"/><circle cx="${x}" cy="${y}" r="${r*.16}" fill="#555"/>`;
+const sedan=(body,extra='')=>`<g filter="url(#sh)"><ellipse cx="400" cy="468" rx="330" ry="18" fill="#000" opacity=".35"/>`
+ +`<path d="M250 290 L318 205 H520 L600 290 Z" fill="${body}"/><path d="M270 286 L326 218 H410 V286 Z" fill="#9cc3d8"/><path d="M422 286 V218 H512 L578 286 Z" fill="#9cc3d8"/>`
+ +`<path d="M95 385 Q95 300 170 292 L640 286 Q712 292 712 360 V400 Q712 420 690 420 H118 Q95 420 95 400 Z" fill="${body}"/>`
+ +`<rect x="95" y="360" width="617" height="10" fill="#000" opacity=".12"/><line x1="416" y1="292" x2="416" y2="410" stroke="#000" stroke-opacity=".25" stroke-width="3"/>`
+ +`<rect x="98" y="318" width="34" height="22" rx="6" fill="#fff6c8"/><rect x="684" y="316" width="26" height="26" rx="5" fill="#c8102e"/>`
+ +wheel(225,420)+wheel(590,420)+extra+`</g>`;
+tpl.taxi=()=>wrap(stoneWall('#d8c9a8','#cdbd99'),street()+sedan('#f2c318',
+  `<rect x="330" y="166" width="170" height="40" rx="8" fill="#fff" stroke="#222" stroke-width="3"/>${T(415,198,'تاكسي',34,'#111')}`
+ +`${T(515,352,'عمومي',42,'#111')}${T(310,352,'تاكسي',42,'#111')}`));
+tpl.plate=()=>wrap(stoneWall('#dccfb3','#cfc09f'),street()
+ +`<g filter="url(#sh)"><ellipse cx="400" cy="486" rx="300" ry="16" fill="#000" opacity=".35"/>`
+ +`<rect x="165" y="420" width="72" height="62" rx="10" fill="#1c1c1c"/><rect x="563" y="420" width="72" height="62" rx="10" fill="#1c1c1c"/>`
+ +`<path d="M255 120 H545 L610 250 H190 Z" fill="#8f9aa5"/><path d="M272 134 H528 L584 244 H216 Z" fill="#a9cadb"/>`
+ +`<rect x="130" y="245" width="540" height="200" rx="42" fill="#8f9aa5"/><rect x="130" y="245" width="540" height="18" rx="9" fill="#fff" opacity=".18"/>`
+ +`<ellipse cx="200" cy="300" rx="48" ry="24" fill="#f3f0dc"/><ellipse cx="600" cy="300" rx="48" ry="24" fill="#f3f0dc"/><rect x="300" y="280" width="200" height="44" rx="10" fill="#2b2f33"/>`
+ +`<rect x="138" y="392" width="524" height="46" rx="16" fill="#7c8793"/>`
+ +`<rect x="240" y="342" width="320" height="96" rx="8" fill="#fff" stroke="#111" stroke-width="5"/><rect x="243" y="345" width="50" height="90" rx="5" fill="#0b6b3a"/>`
+ +`<text x="268" y="404" text-anchor="middle" font-family="Arial" font-weight="700" font-size="38" fill="#fff">P</text>`
+ +`${T(426,380,'فلسطين',30,'#111','Cairo',700)}<text x="426" y="426" text-anchor="middle" font-family="Arial" font-weight="700" font-size="40" fill="#111" letter-spacing="2">7-2468-95</text></g>`);
+tpl.ambulance=()=>wrap(stoneWall('#d9ccb0','#cbbb98'),street()
+ +`<g filter="url(#sh)"><ellipse cx="400" cy="470" rx="340" ry="18" fill="#000" opacity=".35"/>`
+ +`<path d="M80 420 V268 L150 178 H715 V420 Z" fill="#f6f6f2"/><path d="M100 262 L158 192 H250 V262 Z" fill="#9cc3d8"/>`
+ +`<rect x="300" y="160" width="120" height="20" rx="5" fill="#c8102e"/><rect x="420" y="160" width="60" height="20" rx="5" fill="#1f5fd1"/>`
+ +`<rect x="80" y="330" width="635" height="22" fill="#c8102e"/><rect x="80" y="356" width="635" height="8" fill="#c8102e" opacity=".6"/>`
+ +`<g transform="translate(640 232)"><circle r="44" fill="#fff" stroke="#ddd"/><circle r="34" fill="#d11f2c"/><circle cx="13" cy="-5" r="28" fill="#fff"/></g>`
+ +`${T(440,252,'إسعاف',80,'#c8102e')}${T(390,306,'الهلال الأحمر الفلسطيني',26,'#c8102e')}`
+ +`<rect x="84" y="286" width="26" height="22" rx="5" fill="#fff6c8"/>`+wheel(205,420,48)+wheel(600,420,48)+`</g>`);
 const stoneW={defs:stoneWall(),body:`<rect width="${W}" height="${H}" fill="url(#st)"/>`};
 const whiteW={defs:'',body:plaster('#ece7dd')};
 const redCres=`<g transform="translate(600 220)"><circle r="54" fill="#fff"/><circle r="40" fill="#d11f2c"/><circle cx="16" cy="-6" r="34" fill="#fff"/></g>`;
@@ -89,5 +120,8 @@ window.JOBS=[
  ['weapon',tpl.crate('سلاح','wood')],
  ['ammo',tpl.crate('ذخيرة','metal')],
  ['map',tpl.crate('خريطة','map')],
+ ['taxi',tpl.taxi()],
+ ['plate',tpl.plate()],
+ ['ambulance',tpl.ambulance()],
 ];
 </script></body></html>
