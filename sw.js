@@ -1,6 +1,6 @@
 /* Service worker for "ערבית מצילה חיים" — offline-first field use.
    Bump CACHE when shipping changes that must invalidate old caches. */
-const CACHE = 'asl-v272';
+const CACHE = 'asl-v273';
 // Recordings + fonts live in a separate cache that SURVIVES app updates —
 // otherwise every version bump would silently wipe the downloaded offline pack.
 const MEDIA = 'asl-media-v1';
@@ -66,8 +66,9 @@ self.addEventListener('fetch', function(e){
     return;
   }
 
-  // Recordings (Cloudinary) + fonts -> cache first, so they keep working offline once fetched
-  if (url.hostname.indexOf('res.cloudinary.com') !== -1 || url.hostname.indexOf('fonts.g') !== -1) {
+  // Recordings (Cloudinary), fonts and recognition images -> cache first, so they keep working offline once fetched
+  if (url.hostname.indexOf('res.cloudinary.com') !== -1 || url.hostname.indexOf('fonts.g') !== -1 ||
+      (url.origin === self.location.origin && url.pathname.indexOf('/img/written/') !== -1)) {
     e.respondWith(cacheFirst(req).catch(function(){ return caches.match(req); }));
     return;
   }

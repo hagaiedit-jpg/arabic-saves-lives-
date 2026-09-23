@@ -1,0 +1,92 @@
+<!doctype html><html><head><meta charset="utf-8"><style>
+@font-face{font-family:Cairo;font-weight:900;src:url(node_modules/@fontsource/cairo/files/cairo-arabic-900-normal.woff2)}
+@font-face{font-family:Cairo;font-weight:700;src:url(node_modules/@fontsource/cairo/files/cairo-arabic-700-normal.woff2)}
+@font-face{font-family:Lalezar;src:url(node_modules/@fontsource/lalezar/files/lalezar-arabic-400-normal.woff2)}
+@font-face{font-family:Kufi;font-weight:700;src:url(node_modules/@fontsource/reem-kufi/files/reem-kufi-arabic-700-normal.woff2)}
+body{margin:0;background:#111} svg{display:block}
+</style></head><body><div id="stage"></div>
+<script>
+const W=800,H=560;
+const T=(x,y,txt,sz,fill,fam='Cairo',wt=900,extra='')=>`<text x="${x}" y="${y}" text-anchor="middle" font-family="${fam}" font-weight="${wt}" font-size="${sz}" fill="${fill}" direction="rtl" ${extra}>${txt}</text>`;
+const grain=(id,seed,a=.10,f=.9)=>`<filter id="${id}"><feTurbulence type="fractalNoise" baseFrequency="${f}" numOctaves="2" seed="${seed}"/><feColorMatrix type="saturate" values="0"/><feComponentTransfer><feFuncA type="table" tableValues="0 ${a}"/></feComponentTransfer><feBlend in="SourceGraphic" mode="multiply"/></filter>`;
+const shadow=`<filter id="sh"><feDropShadow dx="4" dy="7" stdDeviation="6" flood-opacity=".38"/></filter>`;
+const spray=`<filter id="spray" x="-10%" y="-10%" width="120%" height="120%"><feTurbulence type="fractalNoise" baseFrequency="1.4" numOctaves="2" seed="4" result="n"/><feDisplacementMap in="SourceGraphic" in2="n" scale="7" xChannelSelector="R" yChannelSelector="G" result="d"/><feGaussianBlur in="d" stdDeviation=".7"/></filter>`;
+const wrap=(defs,body)=>`<svg width="${W}" height="${H}" viewBox="0 0 ${W} ${H}"><defs>${grain('g',3)}${shadow}${spray}${defs}</defs>${body}<rect width="${W}" height="${H}" filter="url(#g)" fill="transparent"/></svg>`;
+
+// ---------- backgrounds ----------
+const sky=(tint='#8fb8dc')=>`<linearGradient id="sky" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="${tint}"/><stop offset="1" stop-color="#e2ecf2"/></linearGradient>`;
+const land=`<path d="M0 470 Q200 440 400 462 T800 450 V560 H0Z" fill="#b9a98a"/><path d="M0 505 Q250 485 520 508 T800 498 V560 H0Z" fill="#a3916f"/><ellipse cx="120" cy="458" rx="70" ry="20" fill="#7d8f5e"/><ellipse cx="690" cy="450" rx="90" ry="24" fill="#6f8354"/>`;
+const pole=(x,y1,y2)=>`<rect x="${x-10}" y="${y1}" width="20" height="${y2-y1}" fill="#9aa0a6"/><rect x="${x-10}" y="${y1}" width="6" height="${y2-y1}" fill="#c9ced3"/>`;
+const stoneWall=(c1='#d8c9a8',c2='#cdbd99')=>`<pattern id="st" width="160" height="80" patternUnits="userSpaceOnUse"><rect width="160" height="80" fill="${c2}"/><rect x="2" y="2" width="76" height="36" fill="${c1}"/><rect x="82" y="2" width="76" height="36" fill="${c2}" opacity=".9"/><rect x="-38" y="42" width="76" height="36" fill="${c1}" opacity=".9"/><rect x="42" y="42" width="76" height="36" fill="${c1}"/><rect x="122" y="42" width="76" height="36" fill="${c2}"/></pattern>`;
+const plaster=(c='#e9e4da')=>`<rect width="${W}" height="${H}" fill="${c}"/>`;
+const concrete=(seed=11,base='#9d978b')=>`<rect width="${W}" height="${H}" fill="${base}"/><filter id="cc"><feTurbulence type="fractalNoise" baseFrequency=".035" numOctaves="4" seed="${seed}"/><feColorMatrix type="matrix" values="0 0 0 0 .62  0 0 0 0 .60  0 0 0 0 .56  0 0 0 -1.2 1.25"/></filter><rect width="${W}" height="${H}" filter="url(#cc)"/><g stroke="#7b766b" stroke-width="3" opacity=".55"><line x1="0" y1="186" x2="800" y2="186"/><line x1="0" y1="372" x2="800" y2="372"/><line x1="270" y1="0" x2="270" y2="186"/><line x1="560" y1="186" x2="560" y2="372"/><line x1="140" y1="372" x2="140" y2="560"/></g>`;
+const shutter=(c='#8a9197')=>{let s=`<rect width="${W}" height="${H}" fill="${c}"/>`;for(let y=0;y<H;y+=22)s+=`<rect x="0" y="${y}" width="${W}" height="11" fill="#fff" opacity=".10"/><rect x="0" y="${y+18}" width="${W}" height="4" fill="#000" opacity=".18"/>`;return s+`<rect x="0" y="0" width="${W}" height="${H}" fill="#6b3d1f" opacity=".10"/>`;};
+
+// ---------- templates ----------
+const tpl={
+ noentry:(ar,en)=>wrap(sky(),`<rect width="${W}" height="${H}" fill="url(#sky)"/>${land}${pole(400,150,520)}<g filter="url(#sh)"><circle cx="400" cy="150" r="98" fill="#fff"/><circle cx="400" cy="150" r="92" fill="#c8102e"/><rect x="330" y="134" width="140" height="32" rx="4" fill="#fff"/><rect x="196" y="262" width="408" height="138" rx="10" fill="#fff" stroke="#111" stroke-width="7"/>${T(400,344,ar,50,'#111')}${T(400,383,en,26,'#111','Arial',700)}</g>`),
+ stop:(ar)=>wrap(sky('#9cc3e2'),`<rect width="${W}" height="${H}" fill="url(#sky)"/>${land}${pole(400,250,520)}<g filter="url(#sh)" transform="translate(400 215)"><polygon points="-62,-150 62,-150 150,-62 150,62 62,150 -62,150 -150,62 -150,-62" fill="#fff"/><polygon points="-57,-138 57,-138 138,-57 138,57 57,138 -57,138 -138,57 -138,-57" fill="#c8102e"/>${T(0,45,ar,150,'#fff')}${T(0,105,'STOP',34,'#fff','Arial',700)}</g>`),
+ danger:(ar)=>wrap(sky(),`<rect width="${W}" height="${H}" fill="url(#sky)"/>${land}${pole(400,200,520)}<g filter="url(#sh)"><polygon points="400,40 540,270 260,270" fill="#c8102e"/><polygon points="400,68 516,258 284,258" fill="#ffd200"/><rect x="392" y="120" width="16" height="80" rx="5" fill="#111"/><circle cx="400" cy="226" r="11" fill="#111"/><rect x="230" y="300" width="340" height="130" rx="8" fill="#ffd200" stroke="#111" stroke-width="6"/>${T(400,388,ar,84,'#111')}</g>`),
+ inspection:(ar)=>wrap(sky('#a5c4dc'),`<rect width="${W}" height="${H}" fill="url(#sky)"/>${land}<rect x="120" y="380" width="560" height="26" fill="#d9d9d9"/><g>${[140,220,300,380,460,540,620].map(x=>`<rect x="${x}" y="380" width="40" height="26" fill="#c8102e"/>`).join('')}</g>${pole(250,200,420)}${pole(550,200,420)}<g filter="url(#sh)"><rect x="170" y="90" width="460" height="200" rx="10" fill="#fff" stroke="#c8102e" stroke-width="12"/>${T(400,210,ar,110,'#c8102e')}${T(400,264,'CHECKPOINT',30,'#111','Arial',700)}</g>`),
+ dir:(ar,en,arrow)=>wrap(plaster('#dcd6cb'),`${plaster('#dcd6cb')}<rect x="0" y="420" width="${W}" height="140" fill="#77706a"/><g filter="url(#sh)"><rect x="140" y="150" width="520" height="190" rx="12" fill="#0b7d3e" stroke="#fff" stroke-width="6"/>${T(355,265,ar,104,'#fff')}${T(355,318,en,28,'#fff','Arial',700)}<g transform="translate(575 245) scale(${arrow})"><polygon points="-40,-18 10,-18 10,-45 55,0 10,45 10,18 -40,18" fill="#fff"/></g></g>`),
+ building:(ar,sub,bg,fg,icon,wallFn,en,sz=98,tx=360)=>wrap(wallFn.defs||'',`${wallFn.body}<rect x="0" y="430" width="${W}" height="130" fill="#6b4f35"/><rect x="270" y="410" width="260" height="150" fill="#3a2f27"/><rect x="282" y="422" width="236" height="138" fill="#55707a" opacity=".75"/><g filter="url(#sh)"><rect x="100" y="110" width="600" height="220" rx="12" fill="${bg}" stroke="rgba(0,0,0,.35)" stroke-width="6"/>${icon}${T(tx,228,ar,sz,fg)}${sub?T(tx,292,sub,40,fg,'Cairo',700,'opacity=".9"'):''}${en?T(tx,300,en,26,fg,'Arial',700):''}</g>`),
+ graffiti:(ar,wallBody,color,rot,size,extra='')=>wrap('',`${wallBody}<g filter="url(#spray)"><text x="400" y="${300+size*0.2}" text-anchor="middle" font-family="Lalezar" font-size="${size}" fill="${color}" direction="rtl" transform="rotate(${rot} 400 290)">${ar}</text><g fill="${color}"><rect x="300" y="${300+size*0.18}" width="5" height="60" rx="2.5"/><rect x="470" y="${298+size*0.18}" width="4" height="80" rx="2"/></g></g>${extra}`),
+ idcard:(hl)=>{const rows=[['الاسم','name'],['تاريخ الميلاد','dob'],['العنوان','addr'],['رقم البطاقة','no']];
+   let r='';rows.forEach((f,i)=>{const y=230+i*70;const on=hl===f[1];
+     r+=(on?`<rect x="420" y="${y-46}" width="282" height="60" rx="10" fill="#ffe14d" stroke="#e0a800" stroke-width="3"/>`:'')
+       +`<text x="690" y="${y}" text-anchor="start" font-family="Cairo" font-weight="700" font-size="${on?40:34}" fill="#1b2a44" direction="rtl">${f[0]}:</text>`
+       +`<line x1="130" y1="${y+4}" x2="405" y2="${y+4}" stroke="#8a93a3" stroke-width="2" stroke-dasharray="6 5"/>`;});
+   const hw=(w,x)=>hl===w?`<rect x="${x-78}" y="74" width="156" height="60" rx="8" fill="#ffe14d" stroke="#e0a800" stroke-width="3"/>`:'';
+   return wrap('<linearGradient id="card" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#e8f1f8"/><stop offset="1" stop-color="#cfe0ee"/></linearGradient>',
+     `<rect width="${W}" height="${H}" fill="#6a5d50"/><rect width="${W}" height="${H}" fill="#3d3128" opacity=".35"/>`
+    +`<g filter="url(#sh)" transform="rotate(-2 400 280)"><rect x="70" y="50" width="660" height="460" rx="24" fill="url(#card)" stroke="#9fb4c8" stroke-width="3"/>`
+    +hw('card',520)+hw('id',350)+T(520,120,'بطاقة',52,'#1b2a44')+T(350,120,'هوية',52,'#1b2a44')
+    +`<rect x="96" y="140" width="610" height="3" fill="#b8cbdc"/>`+r+`<rect x="96" y="470" width="610" height="10" fill="#b8cbdc"/></g>`);},
+ crate:(ar,kind)=>{
+   if(kind==='wood') return wrap('<pattern id="wd" width="800" height="60" patternUnits="userSpaceOnUse"><rect width="800" height="60" fill="#a57a4a"/><rect y="56" width="800" height="4" fill="#6f4d2a"/><path d="M0 20 Q200 14 400 22 T800 18" stroke="#8c6238" stroke-width="2" fill="none"/></pattern>',`<rect width="${W}" height="${H}" fill="#3b3a35"/><g filter="url(#sh)"><rect x="90" y="110" width="620" height="360" fill="url(#wd)" stroke="#5c3e1f" stroke-width="8"/><rect x="90" y="110" width="40" height="360" fill="#7a5530"/><rect x="670" y="110" width="40" height="360" fill="#7a5530"/><g filter="url(#spray)">${T(400,330,ar,150,'#1a1a1a','Cairo',900,'opacity=".88"')}</g></g>`);
+   if(kind==='metal') return wrap('',`<rect width="${W}" height="${H}" fill="#2f322c"/><g filter="url(#sh)"><rect x="120" y="140" width="560" height="300" rx="18" fill="#4d5a36" stroke="#2f3822" stroke-width="8"/><rect x="330" y="112" width="140" height="40" rx="10" fill="#3a4428"/><rect x="150" y="170" width="500" height="10" fill="#3f4a2c"/><g filter="url(#spray)">${T(400,340,ar,130,'#f2e9c9','Cairo',900)}</g></g>`);
+   return wrap('',`<rect width="${W}" height="${H}" fill="#5a4a3a"/><g filter="url(#sh)" transform="rotate(3 400 280)"><rect x="110" y="70" width="580" height="420" fill="#efe6cf" stroke="#c9b98f" stroke-width="3"/><path d="M130 420 C260 360 330 300 440 310 S620 220 670 160" stroke="#c0392b" stroke-width="6" fill="none"/><path d="M150 180 C260 230 380 200 470 260 S600 400 660 420" stroke="#e0a800" stroke-width="5" fill="none"/><path d="M200 470 C230 380 300 330 300 240 S360 120 420 90" stroke="#2c7fb8" stroke-width="5" fill="none"/><g fill="#6d8a4f" opacity=".35"><ellipse cx="560" cy="330" rx="70" ry="40"/><ellipse cx="240" cy="160" rx="60" ry="30"/></g><rect x="235" y="85" width="330" height="96" fill="#efe6cf" stroke="#333" stroke-width="3"/>${T(400,158,ar,74,'#1b1b1b')}</g>`);
+ }
+};
+const stoneW={defs:stoneWall(),body:`<rect width="${W}" height="${H}" fill="url(#st)"/>`};
+const whiteW={defs:'',body:plaster('#ece7dd')};
+const redCres=`<g transform="translate(600 220)"><circle r="54" fill="#fff"/><circle r="40" fill="#d11f2c"/><circle cx="16" cy="-6" r="34" fill="#fff"/></g>`;
+const crossI=`<g transform="translate(600 220)"><rect x="-40" y="-14" width="80" height="28" fill="#fff"/><rect x="-14" y="-40" width="28" height="80" fill="#fff"/></g>`;
+const domeI=`<g transform="translate(600 235)" fill="#e7c65a"><path d="M-48 20 Q-48 -40 0 -58 Q48 -40 48 20Z"/><rect x="-52" y="18" width="104" height="14"/><rect x="-3" y="-86" width="6" height="30"/><circle cy="-92" r="8"/></g>`;
+const pumpI=`<g transform="translate(600 225)" fill="#fff"><rect x="-32" y="-50" width="52" height="100" rx="8"/><rect x="-22" y="-38" width="32" height="26" fill="#c8102e"/><path d="M20 -30 h14 v50 a8 8 0 0 0 16 0 v-40" stroke="#fff" stroke-width="7" fill="none"/></g>`;
+
+window.JOBS=[
+ ['hospital',tpl.building('مستشفى','','#fff','#1f4f9c',redCres,whiteW,'HOSPITAL',86,330)],
+ ['pharmacy',tpl.building('صيدلية','الشفاء','#15884b','#fff',crossI,stoneW)],
+ ['school',tpl.building('مدرسة','الأساسية','#1f5fa8','#fff','',stoneW)],
+ ['mosque',tpl.building('مسجد','النور','#0f6b3c','#f3d67a',domeI,stoneW)],
+ ['municipality',tpl.building('بلدية','','#b38b3c','#1d1406','',stoneW)],
+ ['police',tpl.building('شرطة','','#123b8a','#fff','',whiteW,'POLICE')],
+ ['market',tpl.building('سوق','الخضار','#7a1f1f','#ffe7b0','',stoneW)],
+ ['fuel',tpl.building('محطة بنزين','','#c8102e','#fff',pumpI,whiteW,'',68,320)],
+ ['noentry',tpl.noentry('ممنوع الدخول','NO ENTRY')],
+ ['danger',tpl.danger('خطر')],
+ ['stop',tpl.stop('قف')],
+ ['inspection',tpl.inspection('تفتيش')],
+ ['entrance',tpl.dir('مدخل','ENTRANCE',1)],
+ ['exit',tpl.dir('مخرج','EXIT',-1)],
+ ['palestine',tpl.graffiti('فلسطين',concrete(11),'#111',-4,200)],
+ ['resistance',tpl.graffiti('المقاومة',shutter(),'#b3121f',-3,150)],
+ ['shahid',tpl.graffiti('شهيد',concrete(21,'#a8a296'),'#0e5c2a',-5,220)],
+ ['return',tpl.graffiti('العودة',`<defs>${stoneWall('#d9ccb0','#cbbb98')}</defs><rect width="${W}" height="${H}" fill="url(#st)"/>`,'#111',-3,190)],
+ ['revolution',tpl.graffiti('ثورة',shutter('#7d858c'),'#c8102e',-6,220)],
+ ['revenge',tpl.graffiti('انتقام',concrete(33,'#96918a'),'#8c0f0f',-4,190)],
+ ['hamas',tpl.graffiti('حماس',concrete(44),'#0e7a33',-5,220)],
+ ['fatah',tpl.graffiti('فتح',`<defs>${stoneWall('#dcd0b6','#cdbf9f')}</defs><rect width="${W}" height="${H}" fill="url(#st)"/>`,'#d6a300',-4,240)],
+ ['pij',tpl.graffiti('الجهاد الإسلامي',concrete(55),'#111',-3,112)],
+ ['qassam',tpl.graffiti('كتائب القسّام',shutter('#737b82'),'#0e6a2d',-3,122)],
+ ['id',tpl.idcard('id')],
+ ['card',tpl.idcard('card')],
+ ['name',tpl.idcard('name')],
+ ['dob',tpl.idcard('dob')],
+ ['address',tpl.idcard('addr')],
+ ['weapon',tpl.crate('سلاح','wood')],
+ ['ammo',tpl.crate('ذخيرة','metal')],
+ ['map',tpl.crate('خريطة','map')],
+];
+</script></body></html>

@@ -636,6 +636,7 @@ body.day-mode .threat-tr{color:#a85200;}
 .vis-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
 .vis-card{background:#1F3147;border:1px solid #2A3D52;border-radius:12px;padding:10px;cursor:pointer;display:flex;flex-direction:column;gap:8px;}
 .vis-sign{background:#F5F1E6;color:#111;border:3px solid #2b2b2b;border-radius:8px;min-height:64px;display:flex;align-items:center;justify-content:center;text-align:center;padding:8px 6px;font-family:Georgia,'Times New Roman',serif;font-size:24px;font-weight:700;direction:rtl;line-height:1.3;}
+.vis-img{display:block;width:100%;aspect-ratio:10/7;object-fit:cover;border-radius:8px;background:#2a3d52;}
 .vis-he{color:#E8D9B8;font-size:15px;font-weight:800;text-align:center;}
 .vis-tr{color:#D4A24E;font-size:13px;text-align:center;}
 .vis-hint{display:none;color:#7a9ab5;font-size:12px;text-align:center;padding:6px 0;}
@@ -17636,6 +17637,15 @@ var _VIS_GROUPS=[
   {t:'🪪 תעודה ומסמכים', he:['תעודת זהות','כרטיס','השם','תאריך לידה','כתובת']},
   {t:'🔫 נשק וציוד', he:['נשק','תחמושת','מפה']}
 ];
+// Illustrative images (generated reconstructions) — replace any file in
+// img/written/ with an authentic field photo of the same name, or attach a photo
+// to a row via its tags as "img:<url>" (that wins over the built-in file).
+var _VIS_IMG={'ביתחולים':'hospital','ביתמרקחת':'pharmacy','ביתספר':'school','מסגד':'mosque','עירייה':'municipality','משטרה':'police','שוק':'market','תחנתדלק':'fuel','אסורההכניסה':'noentry','סכנה':'danger','עצור':'stop','בידוק':'inspection','כניסה':'entrance','יציאה':'exit','פלסטין':'palestine','ההתנגדות':'resistance','שהיד':'shahid','השיבה':'return','מהפכה':'revolution','נקמה':'revenge','חמאס':'hamas','פתח':'fatah','גיהאדאסלאמי':'pij','גדודיאלקסאם':'qassam','תעודתזהות':'id','כרטיס':'card','השם':'name','תאריךלידה':'dob','כתובת':'address','נשק':'weapon','תחמושת':'ammo','מפה':'map'};
+function _visImg(r){
+  var t=String(r&&r.tags||''); var m=t.match(/(?:^|\s)img:(\S+)/); if(m) return m[1];
+  var k=String(r&&r.he||'').replace(/[^\u05D0-\u05EA]/g,'');
+  return _VIS_IMG[k]?('img/written/'+_VIS_IMG[k]+'.jpg'):'';
+}
 function _visPractice(){ try{ return localStorage.getItem('vis_practice')==='1'; }catch(e){ return false; } }
 function _visTogglePractice(){ try{ localStorage.setItem('vis_practice', _visPractice()?'0':'1'); }catch(e){} rVisual(); }
 function _visRows(){
@@ -17656,7 +17666,8 @@ function rVisual(){
     var list=window._dbCatRows['__visual']; list.push(r); var i=list.length-1;
     var has=!!(r.audio||r.audio_url||(typeof _descAudioFor==='function'&&_descAudioFor(r)));
     var c='<div class="vis-card'+(practice?' vis-hidden':'')+'" onclick="_visTap('+i+',this)">';
-    c+='<div class="vis-sign">'+(r.ar||'')+'</div>';
+    var img=_visImg(r);
+    c+= img ? '<img class="vis-img" src="'+img+'" alt="" loading="lazy">' : '<div class="vis-sign">'+(r.ar||'')+'</div>';
     c+='<div class="vis-ans"><div class="vis-he">'+(r.he||'')+(has?' <span style="color:#1D9E75;">🔊</span>':'')+'</div><div class="vis-tr">'+(r.trans||'')+'</div></div>';
     c+='<div class="vis-hint">לחצו לחשיפה</div></div>';
     return c;
@@ -22800,7 +22811,7 @@ window.addEventListener('load', function(){
 <script>
 // Version stamp — shown in the admin panel so we can confirm which build is live
 // on a device (stale service-worker caches were causing "my changes don't show").
-window.APP_VERSION = 'v263';
+window.APP_VERSION = 'v264';
 
 // Register the service worker for full offline use in the field, WITH update
 // detection: when a new version installs, offer a one-tap refresh instead of the
