@@ -10911,16 +10911,16 @@ const HCATS=[
 
 // === 10 essential phrases every recruit must know before combat service ===
 const TEN_PHRASES=[
-  {he:'עצור!',          trans:'וַקֵף',                     ar:'وقف',                       icon:'✋', audio:''},
-  {he:'ידיים למעלה!',   trans:'אִרְפַע אִידֵיכּ',           ar:'ارفع يديك',                icon:'🙌', audio:''},
-  {he:'אל תזוז!',       trans:'לַא תִתְחַרַכּ',             ar:'لا تتحرك',                 icon:'🛑', audio:''},
-  {he:'בוא הנה',        trans:'תַעַאל לַהוֹן',             ar:'تعال لهون',                icon:'👈', audio:''},
-  {he:'תן תעודה',       trans:'אַעְטִינִי אִלהַוִּיֶה',      ar:'اعطيني الهوية',            icon:'🪪', audio:''},
-  {he:'מי בבית?',       trans:'מִין פִי אִלבֵּית',          ar:'مين في البيت؟',            icon:'🏠', audio:''},
-  {he:'פתח את הדלת',    trans:'אִפְתַח אִלבַּאבּ',          ar:'افتح الباب',               icon:'🚪', audio:''},
-  {he:'אל תפחד',        trans:"לַא תְחַ'אף",               ar:'لا تخاف',                  icon:'🤲', audio:''},
-  {he:'אנחנו צה"ל',     trans:"אִחְנַא גֵ'ישׁ אִלדִּפַאע אִלאִסְרַאאִילִי", ar:'احنا جيش الدفاع الإسرائيلي', icon:'🪖', audio:''},
-  {he:'יש פצוע?',       trans:"פִיה מַגְ'רוּח",            ar:'فيه مجروح؟',               icon:'🩹', audio:''}
+  {he:'עצור!',                  trans:'וַקֵּף',                                   ar:'وقّف!',                          icon:'✋', audio:''},
+  {he:'אל תתקרב!',              trans:'לַא תְקַרֶּב מִנִּי',                        ar:'لا تقرّب منّي!',                  icon:'🚫', audio:''},
+  {he:'ידיים למעלה!',           trans:'אִרְפַע אִידֵיכּ',                          ar:'ارفع يديك',                       icon:'🙌', audio:''},
+  {he:'זרוק את מה שיש לך ביד!', trans:'אִרְמִי אִללִי בִּאִידַכּ',                   ar:'ارمي اللي بإيدك!',                icon:'⬇️', audio:''},
+  {he:'אל תזוז!',               trans:'לַא תִתְחַרַּכּ',                           ar:'لا تتحرّك',                       icon:'🛑', audio:''},
+  {he:'הרם את החולצה',          trans:'אִרְפַע אִלקַמִיץ',                         ar:'ارفع القميص',                     icon:'👕', audio:''},
+  {he:'תן תעודה',               trans:'אַעְטִינִי אִלהַוִיֶּה',                      ar:'اعطيني الهوية',                   icon:'🪪', audio:''},
+  {he:'אנחנו צה"ל',             trans:'אִחְנַא גֵ׳יש אִלדִּפַאע אִלאִסְרַאאִילִי',     ar:'احنا جيش الدفاع الإسرائيلي',       icon:'🎖️', audio:''},
+  {he:'פתח את הדלת',            trans:'אִפְתַח אִלבַּאבּ',                          ar:'افتح الباب',                      icon:'🚪', audio:''},
+  {he:'יש פצוע?',               trans:'פִיה מַגְ׳רוּח?',                           ar:'فيه مجروح؟',                      icon:'🩹', audio:''}
 ];
 
 // Category used to store the 10 phrases in the DB (so they appear in admin & can be recorded)
@@ -10930,7 +10930,7 @@ const TEN_CAT='10 משפטי חובה';
 // Matches by Hebrew OR Arabic (normalized) across all loaded sections, so a recording
 // added in admin is picked up regardless of its exact category.
 function _tenNormHe(s){return (s||'').replace(/\s+/g,' ').trim();}
-function _tenNormAr(s){return (s||'').replace(/[\s،؛؟?!.,؛]/g,'').trim();}
+function _tenNormAr(s){return (s||'').replace(/[\u064B-\u0652\u0670\u0640]/g,'').replace(/[\u0623\u0625\u0622\u0671]/g,'\u0627').replace(/\u0649/g,'\u064a').replace(/\u0629/g,'\u0647').replace(/[\s،؛؟?!.,؛]/g,'').trim();}
 function getTenList(){
   var pool=[];
   [typeof DB!=='undefined'?DB:null,
@@ -10944,13 +10944,17 @@ function getTenList(){
   });
   return TEN_PHRASES.map(function(p){
     var heN=_tenNormHe(p.he), arN=_tenNormAr(p.ar), audio='', responses=[];
-    for(var i=0;i<pool.length;i++){
-      var r=pool[i]; if(!r)continue;
-      if(_tenNormHe(r.he)===heN || (arN && _tenNormAr(r.ar)===arN)){
+    // Pass 1: same Arabic (so the audio says exactly what's written).
+    // Pass 2: same Hebrew — only for rows with no Arabic, so a different Arabic
+    // wording (e.g. إيديك لفوق vs ارفع يديك) never lends its audio.
+    [function(r){ return arN && _tenNormAr(r.ar)===arN; },
+     function(r){ return _tenNormHe(r.he)===heN && !_tenNormAr(r.ar); }].forEach(function(test){
+      for(var i=0;i<pool.length;i++){
+        var r=pool[i]; if(!r||!test(r))continue;
         if(!audio && r.audio)audio=r.audio;
         if((!responses||!responses.length) && Array.isArray(r.responses) && r.responses.length)responses=r.responses;
       }
-    }
+    });
     return {he:p.he,trans:_sanitizeTranslit(p.trans),ar:p.ar,icon:p.icon,audio:audio||p.audio||'',responses:responses};
   });
 }
@@ -22663,7 +22667,7 @@ window.addEventListener('load', function(){
 <script>
 // Version stamp — shown in the admin panel so we can confirm which build is live
 // on a device (stale service-worker caches were causing "my changes don't show").
-window.APP_VERSION = 'v257';
+window.APP_VERSION = 'v258';
 
 // Register the service worker for full offline use in the field, WITH update
 // detection: when a new version installs, offer a one-tap refresh instead of the
