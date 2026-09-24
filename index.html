@@ -2946,7 +2946,7 @@ function showLanding() {
     <div class="stitle">📷 זיהוי חזותי</div>
     <div style="color:#7a9ab5;font-size:12px;line-height:1.6;margin:2px 2px 10px;">רואים שלט או כתובת בשטח — מזהים מה כתוב. במצב תרגול התשובה מוסתרת עד שלוחצים; לחיצה על כרטיס גלוי פותחת אותו עם השמע.</div>
     <div style="display:flex;gap:8px;margin-bottom:12px;flex-wrap:wrap;">
-      <button id="vis-practice-btn" onclick="_visTogglePractice()" style="flex:1;min-width:150px;padding:10px 14px;border-radius:10px;border:1px solid #D4A24E;background:rgba(212,162,78,0.12);color:#D4A24E;font-size:13px;font-weight:800;cursor:pointer;font-family:inherit;">🎯 מצב תרגול: כבוי</button>
+      <button id="vis-practice-btn" onclick="_visTogglePractice()" style="flex:1;min-width:150px;padding:10px 14px;border-radius:10px;border:1px solid #D4A24E;background:rgba(212,162,78,0.12);color:#D4A24E;font-size:13px;font-weight:800;cursor:pointer;font-family:inherit;">🙈 הסתר תשובות: כבוי</button>
       <button onclick="visQuizStart()" style="flex:1;min-width:150px;padding:10px 14px;border-radius:10px;border:none;background:linear-gradient(135deg,#1D9E75 0%,#0e5a3f 100%);color:#fff;font-size:13px;font-weight:800;cursor:pointer;font-family:inherit;">📝 מבחן זיהוי</button>
     </div>
     <div id="visuallist"></div>
@@ -17835,7 +17835,7 @@ function _visRows(){
 function rVisual(){
   var el=document.getElementById('visuallist'); if(!el) return;
   var practice=_visPractice();
-  var btn=document.getElementById('vis-practice-btn'); if(btn) btn.textContent='🎯 מצב תרגול: '+(practice?'פעיל':'כבוי');
+  var btn=document.getElementById('vis-practice-btn'); if(btn) btn.textContent='🙈 הסתר תשובות: '+(practice?'פעיל':'כבוי');
   window._dbCatRows=window._dbCatRows||{}; window._dbCatRows['__visual']=[];
   var rows=_visRows(), used={}, h='';
   var nh=function(x){ return String(x||'').replace(/[^א-ת]/g,''); };
@@ -21962,8 +21962,8 @@ function rQK(){
     {tab:'chk',     emoji:'🪪',  name:'בידוק וזיהוי',            sub:'תבנית מסודרת',           color:'blue'},
     {tab:'triage',  emoji:'🩺',  name:"רפואה וטריאז'",           sub:'בדיקת נפגע — סדר פעולות',  color:'teal'},
     {tab:'visual',  emoji:'📷',  name:'זיהוי ערבית בשטח',        sub:'שלטים, מסמכים, רכב + מבחן', color:'sky'},
-    {tab:'calm',    emoji:'🕊️', name:'הרגעה ושכנוע',            sub:'הורדת מתח ושיתוף פעולה',   color:'rose'},
     {tab:'desc',    emoji:'🎯',  name:'תיאור חשוד',              sub:'מה לשאול ואיך לתאר',       color:'gold'},
+    {tab:'calm',    emoji:'🕊️', name:'הרגעה ושכנוע',            sub:'הורדת מתח ושיתוף פעולה',   color:'rose'},
     {tab:'crowd',   emoji:'👥',  name:'קהל ואירועים',            sub:'ניהול קהל והרחקה',         color:'purple'},
     {tab:'kids',    emoji:'🧒',  name:'ילדים ואוכלוסיות רגישות', sub:'מגע רגיש ומרגיע',          color:'mint'}
   ];
@@ -23111,7 +23111,7 @@ window.addEventListener('load', function(){
 <script>
 // Version stamp — shown in the admin panel so we can confirm which build is live
 // on a device (stale service-worker caches were causing "my changes don't show").
-window.APP_VERSION = 'v277';
+window.APP_VERSION = 'v278';
 
 // Register the service worker for full offline use in the field, WITH update
 // detection: when a new version installs, offer a one-tap refresh instead of the
