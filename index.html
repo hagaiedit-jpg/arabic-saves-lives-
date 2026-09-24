@@ -11301,7 +11301,7 @@ var CHECK = [
 ];
 var VEHICLE = [
   {label:'עצירת רכב', icon:'🛑', options:[
-    {he:'עצור את הרכב, כבה מנוע', ar:'وقّف السيارة وطفّي الموتور', trans:'וַקֵּף אִלסַּייַּארַה וּטַפִּי אִלמוֹתוֹר'},
+    // "עצור וכבה מנוע" הועבר לרצף הפתיחה (🛑 הרגע הראשון) — לא מוצג פעמיים כאן
     {he:'ידיים על ההגה', ar:'إيديك عالدركسيون', trans:'אִידֵיכּ עַאלדִּרֵכּסְיוֹן'}
   ]},
   {label:'פתיחה', icon:'🚪', options:[
@@ -23111,7 +23111,7 @@ window.addEventListener('load', function(){
 <script>
 // Version stamp — shown in the admin panel so we can confirm which build is live
 // on a device (stale service-worker caches were causing "my changes don't show").
-window.APP_VERSION = 'v276';
+window.APP_VERSION = 'v277';
 
 // Register the service worker for full offline use in the field, WITH update
 // detection: when a new version installs, offer a one-tap refresh instead of the
