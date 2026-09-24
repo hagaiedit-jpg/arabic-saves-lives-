@@ -91,6 +91,78 @@ tpl.roadclosed=()=>wrap(sky('#a3c3dc'),`<rect width="${W}" height="${H}" fill="u
 tpl.detour=()=>wrap(sky('#9dc0de'),`<rect width="${W}" height="${H}" fill="url(#sky)"/>${land}${pole(400,330,530)}`
  +`<g filter="url(#sh)"><rect x="160" y="60" width="480" height="290" rx="14" fill="#f39200" stroke="#111" stroke-width="7"/>${T(400,180,'تحويلة',96,'#111')}${T(400,232,'DETOUR',30,'#111','Arial',700)}`
  +`<path d="M300 320 H470 V272" stroke="#111" stroke-width="16" fill="none"/><polygon points="448,278 492,278 470,246" fill="#111"/></g>`);
+
+// ---------- documents (zoomed, one field highlighted) ----------
+const isLtr=v=>/^[٠-٩0-9\/\-:. A-Za-z]+$/.test(v);
+const LTRX='unicode-bidi="bidi-override"';
+const TV=(x,y,v,sz,fill)=>isLtr(v)?`<text x="${x}" y="${y}" text-anchor="end" font-family="Cairo" font-weight="700" font-size="${sz}" fill="${fill}" direction="ltr" ${LTRX}>${v}</text>`
+                                  :`<text x="${x}" y="${y}" text-anchor="start" font-family="Cairo" font-weight="700" font-size="${sz}" fill="${fill}" direction="rtl">${v}</text>`;
+tpl.doc=(o)=>{ // o: {title,title2,band,paper,rows:[[label,value]],hl:'title'|'title2'|label}
+  const hlBox=(x,y,w,h)=>`<rect x="${x}" y="${y}" width="${w}" height="${h}" rx="10" fill="#ffe14d" stroke="#e0a800" stroke-width="4"/>`;
+  let b=`<rect width="${W}" height="${H}" fill="#6a5d50"/><rect width="${W}" height="${H}" fill="#3d3128" opacity=".35"/>`
+   +`<g filter="url(#sh)" transform="rotate(-1.5 400 280)"><rect x="50" y="36" width="700" height="490" rx="22" fill="${o.paper||'#e8f1f8'}" stroke="#9fb4c8" stroke-width="3"/>`
+   +`<path d="M50 58 a22 22 0 0 1 22 -22 h656 a22 22 0 0 1 22 22 v92 h-700z" fill="${o.band||'#1b4f8a'}"/>`;
+  if(o.hl==='title') b+=`<rect x="70" y="44" width="660" height="${o.title2?66:100}" rx="10" fill="none" stroke="#ffe14d" stroke-width="6"/>`;
+  if(o.hl==='title2') b+=`<rect x="170" y="108" width="460" height="40" rx="8" fill="none" stroke="#ffe14d" stroke-width="5"/>`;
+  b+= o.title2 ? T(400,94,o.title,40,'#fff')+T(400,138,o.title2,27,'#fff','Cairo',700) : T(400,118,o.title,62,'#fff');
+  o.rows.forEach((r,i)=>{ const y=222+i*84, on=o.hl===r[0];
+    if(on) b+=hlBox(78,y-52,644,72);
+    b+=`<text x="712" y="${y}" text-anchor="start" font-family="Cairo" font-weight="900" font-size="${on?40:34}" fill="#1b2a44" direction="rtl">${r[0]}:</text>`;
+    b+=TV(isLtr(r[1])?330:360,y,r[1],on?40:34,'#333');
+    if(!on) b+=`<line x1="96" y1="${y+14}" x2="704" y2="${y+14}" stroke="#b8c6d4" stroke-width="2"/>`;
+  });
+  b+=`<text x="80" y="508" font-family="Cairo" font-weight="700" font-size="20" fill="#8a97a6" direction="rtl" text-anchor="end">نموذج للتدريب</text></g>`;
+  return wrap('',b);
+};
+const ID_F=[['رقم الهوية','٩٥٨٢٠٣١٤٦'],['الاسم','أحمد'],['اسم الأب','محمود'],['اسم الجد','خليل'],['اسم العائلة','الأحمد'],['تاريخ الميلاد','١٥/٠٦/١٩٩٨'],['مكان الولادة','نابلس'],['الجنس','ذكر'],['الحالة الاجتماعية','أعزب'],['تاريخ الإصدار','٠٣/٠٢/٢٠٢٠']];
+const idDoc=(hl,over)=>{ let i=Math.max(0,ID_F.findIndex(r=>r[0]===hl)); let st=Math.min(Math.max(0,i-1),ID_F.length-4);
+  let rows=ID_F.slice(st,st+4).map(r=>over&&r[0]===over[0]?over:r); if(hl==='title'||hl==='title2') rows=ID_F.slice(0,4);
+  return tpl.doc({title:'السلطة الوطنية الفلسطينية',title2:'وزارة الداخلية — بطاقة هوية',rows,hl}); };
+const LIC={title:'رخصة سواقة',title2:'وزارة النقل والمواصلات',band:'#8a1f3d',paper:'#f6eef0',rows:[['الاسم','أحمد محمود'],['رقم الرخصة','٤٥٦٧٨٩'],['تاريخ الإصدار','٠١/٠٣/٢٠٢٢'],['صالحة لغاية','٠١/٠٣/٢٠٣٢']]};
+const CARLIC={title:'رخصة السيارة',title2:'وزارة النقل والمواصلات',band:'#2d6a4f',paper:'#eef6f1',rows:[['رقم السيارة','7-2468-95'],['نوع السيارة','خصوصي'],['اسم المالك','أحمد محمود'],['صالحة لغاية','١٠/١١/٢٠٢٧']]};
+const PERMIT={title:'تصريح',band:'#5b4a8a',paper:'#f1eef8',rows:[['الاسم','أحمد محمود'],['رقم الهوية','٩٥٨٢٠٣١٤٦'],['صالح من','٠١/٠٩/٢٠٢٦'],['لغاية','٣٠/١١/٢٠٢٦']]};
+
+// ---------- boards: plaques / road signs ----------
+// lines: [text,size,color,(font),(weight),(ltr)] stacked from y0 with gap
+const TL=(x,y,t,sz,fill,fam='Cairo',wt=900)=>`<text x="${x}" y="${y}" text-anchor="middle" font-family="${fam}" font-weight="${wt}" font-size="${sz}" fill="${fill}" direction="ltr" ${LTRX}>${t}</text>`;
+const board=(o)=>{ // o:{scene:'sky'|'wall'|'plaster', x,y,w,h,bg,stroke,sw,lines:[[t,sz,col,fam,wt,ltr,dy]],icon,poles}
+  let sc = o.scene==='wall' ? `<rect width="${W}" height="${H}" fill="url(#st)"/>` : o.scene==='plaster' ? plaster('#e4ddd0')+`<rect x="0" y="440" width="${W}" height="120" fill="#77706a"/>` : `<rect width="${W}" height="${H}" fill="url(#sky)"/>${land}`;
+  let b=sc+(o.poles||'')+`<g filter="url(#sh)"><rect x="${o.x}" y="${o.y}" width="${o.w}" height="${o.h}" rx="${o.rx??14}" fill="${o.bg}" stroke="${o.stroke||'#fff'}" stroke-width="${o.sw??6}"/>${o.icon||''}`;
+  const cx=o.cx??(o.x+o.w/2);
+  o.lines.forEach(l=>{ b+= l[5] ? TL(cx,l[6],l[0],l[1],l[2],l[3]||'Cairo',l[4]||900) : T(cx,l[6],l[0],l[1],l[2],l[3]||'Cairo',l[4]||900); });
+  return wrap((o.scene==='sky'||!o.scene)?sky():o.scene==='wall'?stoneWall():'', b+`</g>${o.extra||''}`);
+};
+const EN=(t,sz,col,dy)=>[t,sz,col,'Arial',700,true,dy];
+const green={bg:'#0b6b3a'}, two=pole(250,300,530)+pole(550,300,530), one=pole(400,300,530);
+const town=(ar,en,km,rot)=>board({x:120,y:80,w:560,h:230,bg:'#0b6b3a',poles:two,cx:km?360:430,
+  lines:[[ar,88,'#fff',0,0,0,205],EN(en,26,'#fff',262)].concat(km?[[km,52,'#fff',0,0,0,215]]:[]).map((l,i)=>i===2?l:l),
+  icon: arrowG(km?600:200,195,rot,'#fff',1.5)+(km?'':''), extra:''});
+const distSign=()=>board({x:110,y:80,w:580,h:230,bg:'#0b6b3a',poles:two,cx:440,
+  lines:[['نابلس ١٢ كم',70,'#fff',0,0,0,205],EN('NABLUS 12 km',26,'#fff',262)],icon:arrowG(170,190,180,'#fff',1.2)});
+const circleSign=(inner)=>`<g transform="translate(400 150)"><circle r="96" fill="#fff"/>${inner}</g>`;
+const noStop=circleSign(`<circle r="88" fill="#c8102e"/><circle r="66" fill="#1f5fd1"/><path d="M-50 -50 L50 50 M50 -50 L-50 50" stroke="#c8102e" stroke-width="18"/>`);
+const noTruck=circleSign(`<circle r="88" fill="#c8102e"/><circle r="68" fill="#fff"/><g fill="#111"><rect x="-44" y="-22" width="52" height="40"/><rect x="10" y="-8" width="30" height="26"/><circle cx="-28" cy="24" r="10"/><circle cx="26" cy="24" r="10"/></g>`);
+const slowTri=`<g transform="translate(400 150)"><polygon points="0,-110 105,75 -105,75" fill="#c8102e"/><polygon points="0,-78 78,60 -78,60" fill="#fff"/><text x="0" y="45" text-anchor="middle" font-family="Arial" font-weight="700" font-size="70" fill="#111">!</text></g>`;
+const plaqueUnder=(t,sz=58,col='#111',bg='#fff')=>`<rect x="190" y="268" width="420" height="116" rx="10" fill="${bg}" stroke="#111" stroke-width="6"/>${T(400,346,t,sz,col)}`;
+const busIcon=`<g transform="translate(610 190)" fill="#fff"><rect x="-50" y="-48" width="100" height="84" rx="12"/><rect x="-40" y="-36" width="80" height="34" fill="#1f5fd1"/><circle cx="-28" cy="44" r="10"/><circle cx="28" cy="44" r="10"/></g>`;
+const van=(color,big,bigc,small,roof)=>wrap(stoneWall('#d8c9a8','#cdbd99'),street()
+ +`<g filter="url(#sh)"><ellipse cx="400" cy="470" rx="340" ry="18" fill="#000" opacity=".35"/>`
+ +`<path d="M80 420 V268 L150 178 H715 V420 Z" fill="${color}"/><path d="M100 262 L158 192 H250 V262 Z" fill="#9cc3d8"/>`
+ +`<rect x="300" y="196" width="130" height="62" rx="6" fill="#9cc3d8"/><rect x="450" y="196" width="130" height="62" rx="6" fill="#9cc3d8"/>`
+ +(roof||'')+T(430,340,big,72,bigc)+(small?T(430,392,small,32,bigc,'Cairo',700):'')
+ +`<rect x="84" y="290" width="26" height="22" rx="5" fill="#fff6c8"/>`+wheel(205,420,48)+wheel(600,420,48)+`</g>`);
+const shopSign=(name,phone)=>wrap(stoneWall(),`<rect width="${W}" height="${H}" fill="url(#st)"/><rect x="0" y="430" width="${W}" height="130" fill="#6b4f35"/><rect x="220" y="400" width="360" height="160" fill="#8a9197"/>${[0,1,2,3,4,5,6].map(i=>`<rect x="220" y="${410+i*22}" width="360" height="5" fill="#000" opacity=".18"/>`).join('')}`
+ +`<g filter="url(#sh)"><rect x="90" y="70" width="620" height="270" rx="12" fill="#b3261e" stroke="rgba(0,0,0,.35)" stroke-width="6"/>${T(400,185,name,92,'#fff')}<rect x="150" y="222" width="500" height="84" rx="10" fill="#fff"/>${TL(400,284,phone,54,'#b3261e')}</g>`);
+const wallPlaque=(lines,bg,fg,icon='')=>wrap(stoneWall(),`<rect width="${W}" height="${H}" fill="url(#st)"/><g filter="url(#sh)"><rect x="170" y="120" width="460" height="300" rx="16" fill="${bg}" stroke="#fff" stroke-width="10"/>${icon}${lines.map(l=>l[3]?TL(400,l[2],l[0],l[1],fg):T(400,l[2],l[0],l[1],fg)).join('')}</g>`);
+const priceCard=()=>wrap('',`<rect width="${W}" height="${H}" fill="#4a3b2c"/>`
+ +`<g>${[[160,330],[250,300],[340,335],[440,305],[540,330],[630,300],[210,380],[400,370],[590,380]].map(([x,y])=>`<circle cx="${x}" cy="${y}" r="58" fill="#d8322b"/><circle cx="${x-18}" cy="${y-20}" r="14" fill="#fff" opacity=".25"/>`).join('')}</g>`
+ +`<rect x="60" y="360" width="680" height="200" fill="#8a6238"/><rect x="60" y="360" width="680" height="12" fill="#6f4d2a"/>`
+ +`<g filter="url(#sh)" transform="rotate(-4 400 170)"><rect x="200" y="40" width="400" height="230" fill="#e9d9b5" stroke="#b89a64" stroke-width="4"/>${T(400,120,'بندورة',60,'#1b1b1b')}${T(400,225,'الكيلو ١٥ شيكل',58,'#c8102e')}</g>`);
+const pressCar=()=>wrap(stoneWall('#d8c9a8','#cdbd99'),street()+sedan('#f4f4f1',`${T(515,352,'صحافة',46,'#1f5fd1')}${TL(300,350,'PRESS',44,'#1f5fd1','Arial',700)}<rect x="360" y="170" width="120" height="36" rx="6" fill="#1f5fd1"/>${TL(420,197,'TV',26,'#fff','Arial',700)}`));
+const schoolCar=()=>wrap(stoneWall('#d8c9a8','#cdbd99'),street()+sedan('#e05a2b',`<rect x="300" y="160" width="230" height="46" rx="8" fill="#fff" stroke="#222" stroke-width="3"/>${T(415,195,'تعليم سواقة',32,'#111')}${T(420,352,'تعليم سواقة',42,'#fff')}`));
+const milZone=()=>wrap(sky(),`<rect width="${W}" height="${H}" fill="url(#sky)"/>${land}<g stroke="#7d7f82" stroke-width="3" opacity=".8">${[0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16].map(i=>`<line x1="${i*50}" y1="330" x2="${i*50+50}" y2="470"/><line x1="${i*50+50}" y1="330" x2="${i*50}" y2="470"/>`).join('')}<line x1="0" y1="330" x2="800" y2="330" stroke-width="5"/></g>${pole(120,300,480)}${pole(680,300,480)}`
+ +`<g filter="url(#sh)"><rect x="100" y="40" width="600" height="330" rx="10" fill="#c8102e" stroke="#fff" stroke-width="8"/>`
+ +`<text x="400" y="118" text-anchor="middle" font-family="Arial" font-weight="700" font-size="50" fill="#fff" direction="rtl">שטח צבאי סגור</text>${T(400,218,'منطقة عسكرية مغلقة',50,'#fff')}${TL(400,300,'CLOSED MILITARY ZONE',34,'#fff','Arial',700)}</g>`);
 const stoneW={defs:stoneWall(),body:`<rect width="${W}" height="${H}" fill="url(#st)"/>`};
 const whiteW={defs:'',body:plaster('#ece7dd')};
 const redCres=`<g transform="translate(600 220)"><circle r="54" fill="#fff"/><circle r="40" fill="#d11f2c"/><circle cx="16" cy="-6" r="34" fill="#fff"/></g>`;
@@ -138,5 +210,55 @@ window.JOBS=[
  ['roadsign',tpl.roadsign()],
  ['roadclosed',tpl.roadclosed()],
  ['detour',tpl.detour()],
+ ['id-authority',idDoc('title')],
+ ['id-ministry',idDoc('title2')],
+ ['id-number',idDoc('رقم الهوية')],
+ ['id-father',idDoc('اسم الأب')],
+ ['id-grandfather',idDoc('اسم الجد')],
+ ['id-family',idDoc('اسم العائلة')],
+ ['id-dob',idDoc('تاريخ الميلاد')],
+ ['id-birthplace',idDoc('مكان الولادة')],
+ ['id-sex',idDoc('الجنس')],
+ ['id-female',idDoc('الجنس',['الجنس','أنثى'])],
+ ['id-marital',idDoc('الحالة الاجتماعية')],
+ ['id-issue',idDoc('تاريخ الإصدار')],
+ ['licence',tpl.doc(Object.assign({},LIC,{hl:'title'}))],
+ ['licence-valid',tpl.doc(Object.assign({},LIC,{hl:'صالحة لغاية'}))],
+ ['carlicence',tpl.doc(Object.assign({},CARLIC,{hl:'title'}))],
+ ['carlicence-private',tpl.doc(Object.assign({},CARLIC,{hl:'نوع السيارة'}))],
+ ['permit',tpl.doc(Object.assign({},PERMIT,{hl:'title'}))],
+ ['num-phone',shopSign('بقالة الأمل','٠٥٩٩-٤٧٣٢٨١')],
+ ['num-time',wallPlaque([['نفتح الساعة',56,200],['٠٧:٣٠',110,340,true]],'#1f5fa8','#fff')],
+ ['num-building',wallPlaque([['عمارة رقم',64,230],['٢٧',130,370,true]],'#1f5fa8','#fff')],
+ ['num-floor',wallPlaque([['الطابق',70,240],['٣',140,390,true]],'#f2f2ee','#1b2a44')],
+ ['num-distance',distSign()],
+ ['num-price',priceCard()],
+ ['van-public',van('#f2c318','عمومي','#111','نابلس - رام الله',`<rect x="330" y="150" width="190" height="30" rx="6" fill="#fff" stroke="#222" stroke-width="3"/>${T(425,174,'تاكسي',24,'#111')}`)],
+ ['civil-defence',van('#c8102e','الدفاع المدني','#fff','',`<rect x="330" y="160" width="140" height="20" rx="5" fill="#1f5fd1"/>`)],
+ ['press',pressCar()],
+ ['driving-school',schoolCar()],
+ ['bus-stop',board({x:170,y:70,w:460,h:230,bg:'#1f5fd1',poles:one,cx:340,lines:[['موقف باص',70,'#fff',0,0,0,205]],icon:busIcon})],
+ ['no-trucks',board({x:0,y:0,w:0,h:0,bg:'none',sw:0,poles:pole(400,150,530),icon:noTruck+plaqueUnder('ممنوع دخول الشاحنات',40),lines:[]})],
+ ['military-zone',milZone()],
+ ['checkpoint',board({x:170,y:50,w:460,h:250,bg:'#fff',stroke:'#c8102e',sw:12,poles:pole(250,290,420)+pole(550,290,420),lines:[['حاجز',116,'#c8102e',0,0,0,190],EN('CHECKPOINT',32,'#111',266)],extra:`<rect x="120" y="380" width="560" height="26" fill="#d9d9d9"/>${[140,220,300,380,460,540,620].map(x=>`<rect x="${x}" y="380" width="40" height="26" fill="#c8102e"/>`).join('')}`})],
+ ['right',board({x:120,y:80,w:560,h:230,bg:'#0b6b3a',poles:two,cx:350,lines:[['يمين',96,'#fff',0,0,0,200],EN('RIGHT',28,'#fff',270)],icon:arrowG(590,190,0,'#fff',1.5)})],
+ ['left',board({x:120,y:80,w:560,h:230,bg:'#0b6b3a',poles:two,cx:450,lines:[['يسار',96,'#fff',0,0,0,200],EN('LEFT',28,'#fff',270)],icon:arrowG(210,190,180,'#fff',1.5)})],
+ ['junction',board({x:120,y:80,w:560,h:230,bg:'#0b6b3a',poles:two,cx:360,lines:[['مفرق',96,'#fff',0,0,0,210],EN('JUNCTION',28,'#fff',264)],icon:`<path d="M540 150 H660 M600 150 V260" stroke="#fff" stroke-width="20" fill="none"/>`})],
+ ['roundabout',board({x:120,y:80,w:560,h:230,bg:'#0b6b3a',poles:two,cx:340,lines:[['دوار الساعة',64,'#fff',0,0,0,205],EN('CLOCK SQUARE',26,'#fff',264)],icon:`<circle cx="600" cy="195" r="42" stroke="#fff" stroke-width="14" fill="none"/><polygon points="636,160 660,196 616,196" fill="#fff"/>`})],
+ ['bridge',board({x:120,y:80,w:560,h:230,bg:'#0b6b3a',poles:two,cx:360,lines:[['جسر',100,'#fff',0,0,0,210],EN('BRIDGE',28,'#fff',264)],icon:`<path d="M530 240 Q600 150 670 240" stroke="#fff" stroke-width="12" fill="none"/><rect x="520" y="236" width="160" height="12" fill="#fff"/>`})],
+ ['no-stopping',board({x:0,y:0,w:0,h:0,bg:'none',sw:0,poles:pole(400,150,530),icon:noStop+plaqueUnder('ممنوع الوقوف',58),lines:[]})],
+ ['slow',board({x:0,y:0,w:0,h:0,bg:'none',sw:0,poles:pole(400,150,530),icon:slowTri+plaqueUnder('خفف السرعة',60),lines:[]})],
+ ['welcome',board({x:90,y:60,w:620,h:280,bg:'#f4efe4',stroke:'#0b6b3a',sw:10,poles:two,lines:[['أهلا وسهلا بكم في',56,'#0b6b3a',0,0,0,150],['نابلس',104,'#111',0,0,0,265],EN('WELCOME TO NABLUS',24,'#0b6b3a',318)]})],
+ ['camp',board({x:120,y:70,w:560,h:250,bg:'#1d1d1d',stroke:'#e7c65a',sw:8,poles:two,lines:[['مخيم بلاطة',92,'#e7c65a',0,0,0,205],EN('BALATA CAMP',28,'#fff',270)]})],
+ ['town-jerusalem',town('القدس','JERUSALEM','',0)],
+ ['town-nablus',town('نابلس','NABLUS','',180)],
+ ['town-hebron',town('الخليل','HEBRON','',0)],
+ ['town-jenin',town('جنين','JENIN','',-90)],
+ ['town-ramallah',town('رام الله','RAMALLAH','',-90)],
+ ['town-bethlehem',town('بيت لحم','BETHLEHEM','',180)],
+ ['town-tulkarm',town('طولكرم','TULKARM','',180)],
+ ['town-qalqilya',town('قلقيلية','QALQILYA','',0)],
+ ['town-jericho',town('أريحا','JERICHO','',0)],
+ ['town-gaza',town('غزة','GAZA','',-90)],
 ];
 </script></body></html>

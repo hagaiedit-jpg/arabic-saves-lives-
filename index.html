@@ -17710,13 +17710,13 @@ var VIS_CARS=[
   {img:'plate',     ar:'فلسطين', he:'לוחית פלסטינית',   trans:'פִלַסְטִין', tip:'فلسطين ו-P על הלוחית = רכב שרשום ברשות הפלסטינית. לוחית צהובה = רכב ישראלי'},
   {img:'ambulance', ar:'إسعاف',  he:'אמבולנס',          trans:'אִסְעַאף', tip:'על מכסה המנוע כתוב בהיפוך, כדי שיקראו במראה'},
   {sign:'عمومي',   he:'ציבורי',            trans:'עֻמוּמִי', tip:'רכב הסעה ציבורי / מונית שירות'},
-  {sign:'خصوصي',   he:'פרטי',              trans:'חֻ׳צוּצִי'},
+  {sign:'خصوصي',   he:'פרטי',              trans:'חֻ׳צוּצִי', tip:'ברישיון הרכב: نوع السيارة: خصوصي = רכב פרטי'},
   {sign:'الهلال الأحمر الفلسطيني', he:'הסהר האדום הפלסטיני', trans:'אִלהִלַאל אִלאַחְמַר אִלפִלַסְטִינִי'},
   {sign:'الدفاع المدني', he:'הגנה אזרחית (כיבוי והצלה)', trans:'אִלדִפַאע אִלמַדַנִי'},
   {sign:'صحافة',   he:'עיתונות',           trans:'צַחַאפֶה', tip:'רכב של עיתונאים. לרוב כתוב לידו גם PRESS'},
   {sign:'تعليم سواقة', he:'לימוד נהיגה',   trans:'תַעְלִים סְוַאקַה'},
-  {sign:'باص',     he:'אוטובוס',           trans:'בַּאץ'},
-  {sign:'شاحنة',   he:'משאית',             trans:'שַאחְנֶה'}
+  {sign:'باص',     he:'אוטובוס',           trans:'בַּאץ', tip:'موقف باص = תחנת אוטובוס'},
+  {sign:'شاحنة',   he:'משאית',             trans:'שַאחְנֶה', tip:'ممنوع دخول الشاحنات = אסורה כניסת משאיות'}
 ];
 VIS_CARS.forEach(function(r){ if(!r.ar) r.ar=r.sign; });
 // 🪧 Road signs + city names as written on signs. City transliterations match the
@@ -17730,7 +17730,7 @@ var VIS_ROAD=[
   {sign:'يمين',     he:'ימין',            trans:'יַמִין'},
   {sign:'يسار',     he:'שמאל',            trans:'יַסַאר', tip:'בדיבור אומרים شمال (שְמַאל), אותה מילה כמו "צפון"'},
   {sign:'مفرق',     he:'צומת',            trans:'מַפְרַק'},
-  {sign:'دوار',     he:'כיכר',            trans:'דַוַּאר'},
+  {sign:'دوار',     he:'כיכר',            trans:'דַוַּאר', tip:'دوار الساعة = כיכר השעון'},
   {sign:'جسر',      he:'גשר',             trans:'גִ׳סְר'},
   {sign:'ممنوع الوقوف', he:'אסור לעצור / לחנות', trans:'מַמְנוּע אִלוֻקוּף'},
   {sign:'خفف السرعة',  he:'האט',          trans:'חַ׳פֵּף אִלסֻּרְעַה'},
@@ -17750,6 +17750,22 @@ var VIS_TOWNS=[
   {sign:'غزة',     he:'עזה',     trans:'עַ׳זֶּה'}
 ];
 VIS_ROAD.concat(VIS_TOWNS).forEach(function(r){ if(!r.ar) r.ar=r.sign; });
+// Illustrations (img/written/<slug>.jpg) for the built-in cards, keyed by their Arabic.
+var _VIS_BUILTIN_IMG={
+  '٠٥٩٩-٤٧٣٢٨١':'num-phone','٩٥٨٢٠٣١٤٦':'id-number','١٥/٠٦/١٩٩٨':'id-dob','٠٧:٣٠':'num-time',
+  'عمارة رقم ٢٧':'num-building','الطابق ٣':'num-floor','نابلس ١٢ كم':'num-distance','١٥ شيكل':'num-price',
+  'السلطة الوطنية الفلسطينية':'id-authority','وزارة الداخلية':'id-ministry','رقم الهوية':'id-number',
+  'اسم الأب':'id-father','اسم الجد':'id-grandfather','اسم العائلة':'id-family','مكان الولادة':'id-birthplace',
+  'الجنس: ذكر':'id-sex','أنثى':'id-female','الحالة الاجتماعية':'id-marital','تاريخ الإصدار':'id-issue',
+  'صالحة لغاية':'licence-valid','تصريح':'permit','رخصة سواقة':'licence','رخصة السيارة':'carlicence',
+  'عمومي':'van-public','خصوصي':'carlicence-private','الهلال الأحمر الفلسطيني':'ambulance','الدفاع المدني':'civil-defence',
+  'صحافة':'press','تعليم سواقة':'driving-school','باص':'bus-stop','شاحنة':'no-trucks',
+  'منطقة عسكرية مغلقة':'military-zone','حاجز':'checkpoint','يمين':'right','يسار':'left','مفرق':'junction',
+  'دوار':'roundabout','جسر':'bridge','ممنوع الوقوف':'no-stopping','خفف السرعة':'slow','أهلا وسهلا بكم':'welcome','مخيم':'camp',
+  'القدس':'town-jerusalem','نابلس':'town-nablus','الخليل':'town-hebron','جنين':'town-jenin','رام الله':'town-ramallah',
+  'بيت لحم':'town-bethlehem','طولكرم':'town-tulkarm','قلقيلية':'town-qalqilya','أريحا':'town-jericho','غزة':'town-gaza'
+};
+VIS_NUM_EX.concat(VIS_DOCS,VIS_CARS,VIS_ROAD,VIS_TOWNS).forEach(function(r){ if(!r.img && _VIS_BUILTIN_IMG[r.ar]) r.img=_VIS_BUILTIN_IMG[r.ar]; });
 
 function _visPractice(){ try{ return localStorage.getItem('vis_practice')==='1'; }catch(e){ return false; } }
 function _visTogglePractice(){ try{ localStorage.setItem('vis_practice', _visPractice()?'0':'1'); }catch(e){} rVisual(); }
@@ -17773,7 +17789,7 @@ function rVisual(){
     var c='<div class="vis-card'+(practice?' vis-hidden':'')+'" onclick="_visTap('+i+',this)">';
     var img=r.img?('img/written/'+r.img+'.jpg'):(r.sign?'':_visImg(r));
     c+= img ? '<img class="vis-img" src="'+img+'" alt="" loading="lazy">'
-            : '<div class="vis-sign'+(r.sign&&r.sign.length===1?' vis-digit':'')+'"'+(r.dir?' style="direction:'+r.dir+';"':'')+'>'+(r.sign||r.ar||'')+'</div>';
+            : '<div class="vis-sign'+(r.sign&&r.sign.length===1?' vis-digit':'')+'"'+(r.dir?' style="direction:'+r.dir+';unicode-bidi:bidi-override;"':'')+'>'+(r.sign||r.ar||'')+'</div>';
     c+='<div class="vis-ans"><div class="vis-he">'+(r.he||'')+(has?' <span style="color:#1D9E75;">🔊</span>':'')+'</div><div class="vis-tr">'+(r.trans||'')+'</div>'+(r.tip?'<div class="vis-tip">'+r.tip+'</div>':'')+'</div>';
     c+='<div class="vis-hint">לחצו לחשיפה</div></div>';
     return c;
@@ -22944,7 +22960,7 @@ window.addEventListener('load', function(){
 <script>
 // Version stamp — shown in the admin panel so we can confirm which build is live
 // on a device (stale service-worker caches were causing "my changes don't show").
-window.APP_VERSION = 'v272';
+window.APP_VERSION = 'v273';
 
 // Register the service worker for full offline use in the field, WITH update
 // detection: when a new version installs, offer a one-tap refresh instead of the
