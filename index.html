@@ -14118,7 +14118,7 @@ function bldCats(){
             : c.special==='foundations' ? DB.some(p=>FOUNDATION_CATS.indexOf(p.cat)!==-1&&p.isNew)
             : DB.some(p=>p.cat===c.id&&p.isNew);
     const cls='ct'+(c.special==='navy'?' navy':c.special==='announce'?' announce':'');
-    const cnt=c.special==='visual'?(cntC('זיהוי ערבית כתובה בשטח')+cntC('זיהוי חזותי')+VIS_DIGITS.length+VIS_NUM_EX.length+VIS_DOCS.length+VIS_CARS.length):c.special==='announce'?ANNOUNCE.length:c.special==='navy'?NAVY.length
+    const cnt=c.special==='visual'?(cntC('זיהוי ערבית כתובה בשטח')+cntC('זיהוי חזותי')+VIS_DIGITS.length+VIS_NUM_EX.length+VIS_DOCS.length+VIS_CARS.length+VIS_ROAD.length+VIS_TOWNS.length):c.special==='announce'?ANNOUNCE.length:c.special==='navy'?NAVY.length
             :c.special==='foundations'?DB.filter(p=>FOUNDATION_CATS.indexOf(p.cat)!==-1).length:cntC(c.id);
     // Paywall lock badge (dormant unless window.PAYWALL). Foundations tile stays open.
     const lk=(window.PAYWALL && typeof _hasPremium==='function' && !_hasPremium() && c.special!=='foundations' && typeof clFreeCat==='function' && !clFreeCat(c.id));
@@ -17719,6 +17719,37 @@ var VIS_CARS=[
   {sign:'شاحنة',   he:'משאית',             trans:'שַאחְנֶה'}
 ];
 VIS_CARS.forEach(function(r){ if(!r.ar) r.ar=r.sign; });
+// 🪧 Road signs + city names as written on signs. City transliterations match the
+// existing 'שמות מקומות וכיוונים' rows, so their recordings link up automatically.
+var VIS_ROAD=[
+  {img:'roadsign',   ar:'رام الله · نابلس · الخليل', he:'שלט הכוונה: רמאללה, שכם, חברון', trans:'רַאם אללה · נַאבֻּלֻס · אִלחַ׳לִיל'},
+  {img:'roadclosed', ar:'طريق مغلق', he:'דרך סגורה', trans:'טַרִיק מֻעְ׳לַק', tip:'בדיבור אומרים: الطريق مسكّرة'},
+  {img:'detour',     ar:'تحويلة',    he:'עקיפה / מסלול חלופי', trans:'תַחְוִילֶה'},
+  {sign:'منطقة عسكرية مغلقة', he:'שטח צבאי סגור', trans:'מַנְטִקַה עַסְכַּרִיֶּה מֻעְ׳לַקַה'},
+  {sign:'حاجز',     he:'מחסום',           trans:'חַאגֶ׳ז'},
+  {sign:'يمين',     he:'ימין',            trans:'יַמִין'},
+  {sign:'يسار',     he:'שמאל',            trans:'יַסַאר', tip:'בדיבור אומרים شمال (שְמַאל), אותה מילה כמו "צפון"'},
+  {sign:'مفرق',     he:'צומת',            trans:'מַפְרַק'},
+  {sign:'دوار',     he:'כיכר',            trans:'דַוַּאר'},
+  {sign:'جسر',      he:'גשר',             trans:'גִ׳סְר'},
+  {sign:'ممنوع الوقوف', he:'אסור לעצור / לחנות', trans:'מַמְנוּע אִלוֻקוּף'},
+  {sign:'خفف السرعة',  he:'האט',          trans:'חַ׳פֵּף אִלסֻּרְעַה'},
+  {sign:'أهلا وسهلا بكم', he:'ברוכים הבאים', trans:'אַהְלַן וַסַהְלַן בִּכֻּם', tip:'בכניסה לעיר או לכפר, ואחריו השם'},
+  {sign:'مخيم',     he:'מחנה פליטים',     trans:'מֻחַ׳יַּם', tip:'מופיע בשמות: مخيم جنين, مخيم بلاطة'}
+];
+var VIS_TOWNS=[
+  {sign:'القدس',   he:'ירושלים', trans:'אִלקֻדְס'},
+  {sign:'نابلس',   he:'שכם',     trans:'נַאבֻּלֻס'},
+  {sign:'الخليل',  he:'חברון',   trans:'אִלחַ׳לִיל'},
+  {sign:'جنين',    he:"ג'נין",   trans:'גִ׳נִין'},
+  {sign:'رام الله', he:'רמאללה', trans:'רַאם אללה'},
+  {sign:'بيت لحم', he:'בית לחם', trans:'בֵּית לַחֶם'},
+  {sign:'طولكرم',  he:'טולכרם',  trans:'טוּלְכַּרֶם'},
+  {sign:'قلقيلية', he:'קלקיליה', trans:'קַלְקִילְיֶה'},
+  {sign:'أريحا',   he:'יריחו',   trans:'אַרִיחַא'},
+  {sign:'غزة',     he:'עזה',     trans:'עַ׳זֶּה'}
+];
+VIS_ROAD.concat(VIS_TOWNS).forEach(function(r){ if(!r.ar) r.ar=r.sign; });
 
 function _visPractice(){ try{ return localStorage.getItem('vis_practice')==='1'; }catch(e){ return false; } }
 function _visTogglePractice(){ try{ localStorage.setItem('vis_practice', _visPractice()?'0':'1'); }catch(e){} rVisual(); }
@@ -17758,6 +17789,8 @@ function rVisual(){
     h+=section(g.t,list);
   });
   h+=section('🚗 רכב ולוחיות', VIS_CARS);
+  h+=section('🪧 שלטי דרכים וכיוונים', VIS_ROAD);
+  h+=section('🏙️ שמות ערים בשלט', VIS_TOWNS);
   h+=section('➕ נוספים', rows.filter(function(r){ return !used[nh(r.he)]; }));
   el.innerHTML=h||'<div class="empty">אין עדיין פריטים</div>';
 }
@@ -22911,7 +22944,7 @@ window.addEventListener('load', function(){
 <script>
 // Version stamp — shown in the admin panel so we can confirm which build is live
 // on a device (stale service-worker caches were causing "my changes don't show").
-window.APP_VERSION = 'v270';
+window.APP_VERSION = 'v271';
 
 // Register the service worker for full offline use in the field, WITH update
 // detection: when a new version installs, offer a one-tap refresh instead of the

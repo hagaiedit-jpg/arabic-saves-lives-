@@ -79,6 +79,18 @@ tpl.ambulance=()=>wrap(stoneWall('#d9ccb0','#cbbb98'),street()
  +`<g transform="translate(640 232)"><circle r="44" fill="#fff" stroke="#ddd"/><circle r="34" fill="#d11f2c"/><circle cx="13" cy="-5" r="28" fill="#fff"/></g>`
  +`${T(440,252,'إسعاف',80,'#c8102e')}${T(390,306,'الهلال الأحمر الفلسطيني',26,'#c8102e')}`
  +`<rect x="84" y="286" width="26" height="22" rx="5" fill="#fff6c8"/>`+wheel(205,420,48)+wheel(600,420,48)+`</g>`);
+
+// ---------- road signs ----------
+const arrowG=(x,y,rot,c='#fff',sc=1)=>`<g transform="translate(${x} ${y}) rotate(${rot}) scale(${sc})"><polygon points="-26,-11 6,-11 6,-28 34,0 6,28 6,11 -26,11" fill="${c}"/></g>`;
+tpl.roadsign=()=>wrap(sky('#94bddf'),`<rect width="${W}" height="${H}" fill="url(#sky)"/>${land}${pole(250,300,530)}${pole(550,300,530)}<g filter="url(#sh)"><rect x="110" y="48" width="580" height="350" rx="14" fill="#0b6b3a" stroke="#fff" stroke-width="7"/>`
+ +[[0,'رام الله','RAMALLAH',-90],[1,'نابلس','NABLUS',180],[2,'الخليل','HEBRON',0]].map(([i,ar,en,rot])=>{const t=58+i*112;return `${i?`<rect x="130" y="${t}" width="540" height="3" fill="#fff" opacity=".5"/>`:''}${T(430,t+58,ar,50,'#fff')}${T(430,t+98,en,19,'#fff','Arial',700,'letter-spacing="2"')}${arrowG(200,t+56,rot,'#fff',1.1)}`;}).join('')
+ +`</g>`);
+tpl.roadclosed=()=>wrap(sky('#a3c3dc'),`<rect width="${W}" height="${H}" fill="url(#sky)"/>${land}<rect x="0" y="440" width="${W}" height="120" fill="#6a6d70"/>`
+ +`<g filter="url(#sh)"><rect x="90" y="360" width="620" height="54" fill="#fff"/>${[0,1,2,3,4,5,6].map(i=>`<polygon points="${90+i*90},360 ${130+i*90},360 ${90+i*90+80},414 ${90+i*90+40},414" fill="#c8102e"/>`).join('')}<rect x="120" y="414" width="20" height="80" fill="#555"/><rect x="660" y="414" width="20" height="80" fill="#555"/>`
+ +`${pole(400,300,362)}<rect x="170" y="70" width="460" height="240" rx="12" fill="#fff" stroke="#c8102e" stroke-width="14"/>${T(400,196,'طريق مغلق',68,'#c8102e')}${T(400,262,'ROAD CLOSED',30,'#111','Arial',700)}</g>`);
+tpl.detour=()=>wrap(sky('#9dc0de'),`<rect width="${W}" height="${H}" fill="url(#sky)"/>${land}${pole(400,330,530)}`
+ +`<g filter="url(#sh)"><rect x="160" y="60" width="480" height="290" rx="14" fill="#f39200" stroke="#111" stroke-width="7"/>${T(400,180,'تحويلة',96,'#111')}${T(400,232,'DETOUR',30,'#111','Arial',700)}`
+ +`<path d="M300 320 H470 V272" stroke="#111" stroke-width="16" fill="none"/><polygon points="448,278 492,278 470,246" fill="#111"/></g>`);
 const stoneW={defs:stoneWall(),body:`<rect width="${W}" height="${H}" fill="url(#st)"/>`};
 const whiteW={defs:'',body:plaster('#ece7dd')};
 const redCres=`<g transform="translate(600 220)"><circle r="54" fill="#fff"/><circle r="40" fill="#d11f2c"/><circle cx="16" cy="-6" r="34" fill="#fff"/></g>`;
@@ -123,5 +135,8 @@ window.JOBS=[
  ['taxi',tpl.taxi()],
  ['plate',tpl.plate()],
  ['ambulance',tpl.ambulance()],
+ ['roadsign',tpl.roadsign()],
+ ['roadclosed',tpl.roadclosed()],
+ ['detour',tpl.detour()],
 ];
 </script></body></html>
