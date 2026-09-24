@@ -2942,11 +2942,23 @@ function showLanding() {
 
 <div class="scr" id="tab-visual">
   <div class="sec">
-    <button class="emerg-back" onclick="navToTab('lib');shV('vcats')">‹ חזרה למבצעי</button>
+    <button class="emerg-back" id="vis-back-btn" onclick="navToTab('lib');shV('vcats')">‹ חזרה למבצעי</button>
     <div class="stitle">📷 זיהוי חזותי</div>
     <div style="color:#7a9ab5;font-size:12px;line-height:1.6;margin:2px 2px 10px;">רואים שלט או כתובת בשטח — מזהים מה כתוב. במצב תרגול התשובה מוסתרת עד שלוחצים; לחיצה על כרטיס גלוי פותחת אותו עם השמע.</div>
-    <button id="vis-practice-btn" onclick="_visTogglePractice()" style="margin-bottom:12px;padding:9px 14px;border-radius:10px;border:1px solid #D4A24E;background:rgba(212,162,78,0.12);color:#D4A24E;font-size:13px;font-weight:800;cursor:pointer;font-family:inherit;">🎯 מצב תרגול: כבוי</button>
+    <div style="display:flex;gap:8px;margin-bottom:12px;flex-wrap:wrap;">
+      <button id="vis-practice-btn" onclick="_visTogglePractice()" style="flex:1;min-width:150px;padding:10px 14px;border-radius:10px;border:1px solid #D4A24E;background:rgba(212,162,78,0.12);color:#D4A24E;font-size:13px;font-weight:800;cursor:pointer;font-family:inherit;">🎯 מצב תרגול: כבוי</button>
+      <button onclick="visQuizStart()" style="flex:1;min-width:150px;padding:10px 14px;border-radius:10px;border:none;background:linear-gradient(135deg,#1D9E75 0%,#0e5a3f 100%);color:#fff;font-size:13px;font-weight:800;cursor:pointer;font-family:inherit;">📝 מבחן זיהוי</button>
+    </div>
     <div id="visuallist"></div>
+  </div>
+</div>
+
+<!-- 📝 VISUAL RECOGNITION TEST -->
+<div class="scr" id="tab-visquiz">
+  <div class="sec">
+    <button class="emerg-back" onclick="navToTab('visual')">‹ חזרה לזיהוי חזותי</button>
+    <div class="stitle">📝 מבחן זיהוי חזותי</div>
+    <div id="visquiz-body"></div>
   </div>
 </div>
 
@@ -4095,9 +4107,21 @@ async function downloadAllOffline(){
         if(p&&Array.isArray(p.responses)) p.responses.forEach(function(r){ if(r&&r.audio_url) urls[r.audio_url]=1; });
       });
     });
+    // Recognition images (📷 זיהוי חזותי) — cache them too so the visual cards
+    // work with no signal. Same-origin files under img/written/.
+    try{
+      var _imgs={};
+      if(typeof _visRows==='function'){ _visRows().forEach(function(r){ var u=(typeof _visImg==='function')&&_visImg(r); if(u) _imgs[u]=1; }); }
+      [typeof VIS_NUM_EX!=='undefined'?VIS_NUM_EX:null, typeof VIS_DOCS!=='undefined'?VIS_DOCS:null,
+       typeof VIS_CARS!=='undefined'?VIS_CARS:null, typeof VIS_ROAD!=='undefined'?VIS_ROAD:null,
+       typeof VIS_TOWNS!=='undefined'?VIS_TOWNS:null, typeof VIS_POSTER!=='undefined'?VIS_POSTER:null].forEach(function(L){
+        (L||[]).forEach(function(r){ if(r&&r.img) _imgs['img/written/'+r.img+'.jpg']=1; });
+      });
+      Object.keys(_imgs).forEach(function(u){ urls[u]=1; });
+    }catch(e){}
     var all=Object.keys(urls);
     if(!all.length){ alert('אין הקלטות להורדה עדיין'); return; }
-    if(!confirm('להוריד '+all.length+' הקלטות לשימוש בלי קליטה? מומלץ בחיבור WiFi. אפשר להמשיך להשתמש בזמן ההורדה.')) return;
+    if(!confirm('להוריד '+all.length+' פריטים (הקלטות + תמונות זיהוי) לשימוש בלי קליטה? מומלץ בחיבור WiFi. אפשר להמשיך להשתמש בזמן ההורדה.')) return;
     window._offlineDlBusy=true;
     var status=document.getElementById('offline-dl-status');
     var bar=document.getElementById('offline-dl-bar');
@@ -14118,7 +14142,7 @@ function bldCats(){
             : c.special==='foundations' ? DB.some(p=>FOUNDATION_CATS.indexOf(p.cat)!==-1&&p.isNew)
             : DB.some(p=>p.cat===c.id&&p.isNew);
     const cls='ct'+(c.special==='navy'?' navy':c.special==='announce'?' announce':'');
-    const cnt=c.special==='visual'?(cntC('זיהוי ערבית כתובה בשטח')+cntC('זיהוי חזותי')+VIS_DIGITS.length+VIS_NUM_EX.length+VIS_DOCS.length+VIS_CARS.length+VIS_ROAD.length+VIS_TOWNS.length):c.special==='announce'?ANNOUNCE.length:c.special==='navy'?NAVY.length
+    const cnt=c.special==='visual'?(cntC('זיהוי ערבית כתובה בשטח')+cntC('זיהוי חזותי')+VIS_DIGITS.length+VIS_NUM_EX.length+VIS_DOCS.length+VIS_CARS.length+VIS_ROAD.length+VIS_TOWNS.length+VIS_POSTER.length):c.special==='announce'?ANNOUNCE.length:c.special==='navy'?NAVY.length
             :c.special==='foundations'?DB.filter(p=>FOUNDATION_CATS.indexOf(p.cat)!==-1).length:cntC(c.id);
     // Paywall lock badge (dormant unless window.PAYWALL). Foundations tile stays open.
     const lk=(window.PAYWALL && typeof _hasPremium==='function' && !_hasPremium() && c.special!=='foundations' && typeof clFreeCat==='function' && !clFreeCat(c.id));
@@ -17766,6 +17790,22 @@ var _VIS_BUILTIN_IMG={
   'بيت لحم':'town-bethlehem','طولكرم':'town-tulkarm','قلقيلية':'town-qalqilya','أريحا':'town-jericho','غزة':'town-gaza'
 };
 VIS_NUM_EX.concat(VIS_DOCS,VIS_CARS,VIS_ROAD,VIS_TOWNS).forEach(function(r){ if(!r.img && _VIS_BUILTIN_IMG[r.ar]) r.img=_VIS_BUILTIN_IMG[r.ar]; });
+// 📰 Posters and notices on walls — what a soldier reads to know what is happening
+// in the village (a funeral, a martyr, a strike / "day of rage").
+var VIS_POSTER=[
+  {img:'p-strike',          ar:'إضراب شامل',    he:'שביתה כללית', trans:'אִצְ׳רַאבּ שַאמֶל', tip:'הכול סגור. סימן למתיחות'},
+  {img:'p-strike-rage',     ar:'يوم غضب',       he:'יום זעם', trans:'יוֹם עַ׳צַ׳בּ', tip:'קריאה להפגנות ולעימותים. סימן אזהרה'},
+  {img:'p-strike-nafir',    ar:'النفير العام',  he:'קריאה כללית לצאת (גיוס המונים)', trans:'אִלנַּפִיר אִלעַאם'},
+  {img:'p-strike-statement',ar:'بيان',          he:'הודעה / כרוז רשמי', trans:'בַּיַאן', tip:'הודעה של ארגון או ועד'},
+  {img:'p-martyr-hero',     ar:'الشهيد البطل',  he:'השהיד הגיבור', trans:'אִלשַּהִיד אִלבַּטַל', tip:'פוסטר הנצחה. עליו שם, תמונה ולעיתים סמל ארגון'},
+  {img:'p-martyr-rose',     ar:'ارتقى شهيداً',  he:'"עלה כשהיד" (נהרג)', trans:'אִרְתַקַא שַהִידַן'},
+  {img:'p-martyr-funeral',  ar:'موكب التشييع',  he:'תהלוכת הלוויה', trans:'מַוְכֵּבּ אִלתַּשְיִיע', tip:'התכנסות המונים, לרוב אחרי צהריים'},
+  {img:'p-obit',            ar:'نعي',           he:'מודעת אבל', trans:'נַעְי', tip:'הודעה על פטירה (מוות טבעי)'},
+  {img:'p-obit-late',       ar:'المرحوم',       he:'המנוח', trans:'אִלמַרְחוּם', tip:'ואחריו שם הנפטר'},
+  {img:'p-obit-house',      ar:'بيت العزاء',    he:'בית האבלים', trans:'בֵּית אִלעַזַא', tip:'המקום שאליו באים לנחם'},
+  {img:'p-wedding',         ar:'حفل زفاف',      he:'חתונה', trans:'חַפְל זַפַאף', tip:'התכנסות המונים — אבל שמחה, לא אירוע חריג'}
+];
+VIS_POSTER.forEach(function(r){ if(!r.ar) r.ar=r.sign; });
 
 function _visPractice(){ try{ return localStorage.getItem('vis_practice')==='1'; }catch(e){ return false; } }
 function _visTogglePractice(){ try{ localStorage.setItem('vis_practice', _visPractice()?'0':'1'); }catch(e){} rVisual(); }
@@ -17805,6 +17845,7 @@ function rVisual(){
     h+=section(g.t,list);
   });
   h+=section('🚗 רכב ולוחיות', VIS_CARS);
+  h+=section('📰 פוסטרים ומודעות על קירות', VIS_POSTER);
   h+=section('🪧 שלטי דרכים וכיוונים', VIS_ROAD);
   h+=section('🏙️ שמות ערים בשלט', VIS_TOWNS);
   h+=section('➕ נוספים', rows.filter(function(r){ return !used[nh(r.he)]; }));
@@ -17813,6 +17854,87 @@ function rVisual(){
 function _visTap(i, el){
   if(el && el.classList.contains('vis-hidden')){ el.classList.remove('vis-hidden'); return; }
   _openDbCatItem('__visual', i, 'visual');
+}
+
+// ===== 📝 מבחן זיהוי חזותי — show a picture, pick the Hebrew meaning =====
+// Pool = every visual card that has an illustration and a Hebrew answer.
+function _visQuizPool(){
+  var pool=[], seen={};
+  var take=function(L){ (L||[]).forEach(function(r){ if(!r||!r.img||!r.he) return; var k=r.img; if(seen[k])return; seen[k]=1; pool.push(r); }); };
+  // built-in arrays
+  [typeof VIS_NUM_EX!=='undefined'?VIS_NUM_EX:null, typeof VIS_DOCS!=='undefined'?VIS_DOCS:null,
+   typeof VIS_CARS!=='undefined'?VIS_CARS:null, typeof VIS_ROAD!=='undefined'?VIS_ROAD:null,
+   typeof VIS_TOWNS!=='undefined'?VIS_TOWNS:null, typeof VIS_POSTER!=='undefined'?VIS_POSTER:null].forEach(take);
+  // DB / dictionary rows that resolve to a generated image
+  if(typeof _visRows==='function'){
+    _visRows().forEach(function(r){
+      if(!r||!r.he) return;
+      var u=(typeof _visImg==='function')&&_visImg(r); if(!u) return;
+      var slug=u.replace(/^.*\//,'').replace(/\.jpg.*$/,''); if(seen[slug])return; seen[slug]=1;
+      pool.push({img:slug,he:r.he,trans:r.trans,ar:r.ar,_url:u});
+    });
+  }
+  return pool;
+}
+function _visImgUrl(r){ return r._url || ('img/written/'+r.img+'.jpg'); }
+function visQuizStart(){
+  var pool=_visQuizPool();
+  if(pool.length<4){ alert('צריך יותר פריטים למבחן'); return; }
+  var order=pool.slice().sort(function(){return Math.random()-0.5;}).slice(0,Math.min(10,pool.length));
+  window._visQuiz={pool:pool, order:order, i:0, correct:0, answered:false};
+  navToTab('visquiz');
+  _visQuizRender();
+}
+function _visQuizRender(){
+  var q=window._visQuiz, el=document.getElementById('visquiz-body'); if(!q||!el) return;
+  if(q.i>=q.order.length){ return _visQuizFinish(); }
+  var item=q.order[q.i];
+  // 3 distractors with a DIFFERENT Hebrew answer
+  var used={}; used[item.he]=1; var opts=[];
+  var sh=q.pool.slice().sort(function(){return Math.random()-0.5;});
+  for(var j=0;j<sh.length && opts.length<3;j++){ if(!used[sh[j].he]){ used[sh[j].he]=1; opts.push(sh[j]); } }
+  opts.push(item); opts.sort(function(){return Math.random()-0.5;});
+  var h='<div style="background:linear-gradient(135deg,#18293E 0%,#1F3147 100%);border:1px solid rgba(29,158,117,0.3);border-radius:12px;padding:12px;margin-bottom:14px;text-align:center;">'
+    +'<div style="color:#1D9E75;font-size:13px;font-weight:700;margin-bottom:6px;">שאלה '+(q.i+1)+' מתוך '+q.order.length+'</div>'
+    +'<div style="height:6px;background:rgba(255,255,255,0.08);border-radius:3px;overflow:hidden;"><div style="height:100%;background:linear-gradient(90deg,#1D9E75,#0e5a3f);border-radius:3px;width:'+Math.round((q.i)/q.order.length*100)+'%;transition:width .4s;"></div></div></div>';
+  h+='<div style="color:#E8D9B8;font-size:14px;font-weight:700;text-align:center;margin-bottom:10px;">מה כתוב בתמונה?</div>';
+  h+='<img class="vis-img" src="'+_visImgUrl(item)+'" alt="" style="max-width:320px;margin:0 auto 14px;">';
+  h+='<div id="visquiz-opts" style="display:grid;gap:8px;">';
+  opts.forEach(function(o){
+    h+='<button class="visq-opt" onclick="visQuizAnswer(this,'+(o.he===item.he?1:0)+')" data-he="'+String(o.he).replace(/"/g,'&quot;')+'" style="background:#1F3147;border:1px solid #2A3D52;color:#E8D9B8;border-radius:10px;padding:13px 14px;font-size:15px;font-weight:700;cursor:pointer;font-family:inherit;text-align:center;">'+o.he+'</button>';
+  });
+  h+='</div><div id="visquiz-fb" style="margin-top:14px;"></div>';
+  el.innerHTML=h; q.answered=false; q._item=item;
+}
+function visQuizAnswer(btn, isCorrect){
+  var q=window._visQuiz; if(!q||q.answered) return; q.answered=true;
+  var item=q._item;
+  document.querySelectorAll('#visquiz-opts .visq-opt').forEach(function(b){
+    b.style.cursor='default';
+    var isRight=b.getAttribute('data-he')===item.he;
+    if(isRight){ b.style.background='rgba(29,158,117,0.25)'; b.style.borderColor='#1D9E75'; b.style.color='#fff'; }
+    else if(b===btn){ b.style.background='rgba(192,57,43,0.22)'; b.style.borderColor='#c0392b'; b.style.color='#fff'; }
+    else { b.style.opacity='0.5'; }
+  });
+  if(isCorrect) q.correct++;
+  var fb=document.getElementById('visquiz-fb');
+  fb.innerHTML='<div style="background:#18293E;border:1px solid #2A3D52;border-radius:10px;padding:12px;text-align:center;">'
+    +'<div style="color:#fff;font-size:16px;font-weight:800;direction:rtl;">'+(item.ar||'')+'</div>'
+    +(item.trans?'<div style="color:#D4A24E;font-size:13px;margin-top:3px;">'+item.trans+'</div>':'')
+    +(item.tip?'<div style="color:#7a9ab5;font-size:12px;margin-top:6px;line-height:1.5;">'+item.tip+'</div>':'')
+    +'<button onclick="visQuizNext()" style="margin-top:12px;background:linear-gradient(135deg,#1D9E75 0%,#0e5a3f 100%);border:none;color:#fff;border-radius:10px;padding:11px 28px;font-size:14px;font-weight:800;cursor:pointer;font-family:inherit;">'+(q.i+1>=q.order.length?'סיום ←':'הבא ←')+'</button></div>';
+}
+function visQuizNext(){ var q=window._visQuiz; if(!q)return; q.i++; _visQuizRender(); }
+function _visQuizFinish(){
+  var q=window._visQuiz, el=document.getElementById('visquiz-body'); if(!q||!el)return;
+  var pct=Math.round(q.correct/q.order.length*100);
+  var emoji=pct>=80?'🎯':pct>=50?'👍':'💪', msg=pct>=80?'מצוין! זיהוי חד':pct>=50?'יפה, ממשיכים להתאמן':'שווה עוד סבב תרגול';
+  el.innerHTML='<div style="text-align:center;padding:26px 16px;">'
+    +'<div style="font-size:52px;margin-bottom:10px;">'+emoji+'</div>'
+    +'<div style="color:#E8D9B8;font-size:22px;font-weight:800;margin-bottom:4px;">'+q.correct+' / '+q.order.length+'</div>'
+    +'<div style="color:#D4A24E;font-size:14px;margin-bottom:22px;">'+msg+'</div>'
+    +'<button onclick="visQuizStart()" style="background:linear-gradient(135deg,#1D9E75 0%,#0e5a3f 100%);border:none;color:#fff;border-radius:12px;padding:13px 30px;font-size:15px;font-weight:800;cursor:pointer;font-family:inherit;margin-bottom:10px;">🔁 סבב חדש</button><br>'
+    +'<button onclick="navToTab(\'visual\')" style="background:transparent;border:1px solid #2A3D52;color:#a0b8c8;border-radius:12px;padding:11px 26px;font-size:14px;font-weight:700;cursor:pointer;font-family:inherit;">חזרה לזיהוי חזותי</button></div>';
 }
 function rVerbs(){
   var el=document.getElementById('verblist'); if(!el)return;
@@ -21819,6 +21941,7 @@ function rQK(){
     {tab:'ord',     emoji:'🚨',  name:'הוראות מיידיות',          sub:'תבנית מסודרת',           color:'red'},
     {tab:'answers', emoji:'💬',  name:'מה עונים לך',              sub:'הבנת תשובות האזרח',       color:'sky'},
     {tab:'threat',  emoji:'👂',  name:'מה שומעים בשטח',          sub:'איום אמיתי מול תמים',      color:'red'},
+    {tab:'visual',  emoji:'📷',  name:'זיהוי ערבית בשטח',        sub:'שלטים, מסמכים, רכב + מבחן', color:'sky'},
     {tab:'chk',     emoji:'🪪',  name:'בידוק וזיהוי',            sub:'תבנית מסודרת',           color:'blue'},
     {tab:'desc',    emoji:'🎯',  name:'תיאור חשוד',              sub:'מה לשאול ואיך לתאר',       color:'gold'},
     {tab:'veh',     emoji:'🚗',  name:'רכב ומחסום',              sub:'תבנית מסודרת',           color:'orange'},
@@ -22852,8 +22975,19 @@ function navToTab(tabId){
       setTimeout(function(){ try { if (typeof rThreat === 'function') rThreat(); } catch(e) { console.warn('rThreat error:', e); } }, 50);
     }
     if (tabId === 'visual') {
+      // Remember where the user came from so the back button returns there
+      // (📷 is reachable both from מבצעי and from the emergency grid).
+      try {
+        var _from = window._navPrevTab;
+        var _vb = document.getElementById('vis-back-btn');
+        if (_vb) {
+          if (_from === 'qk') { _vb.setAttribute('onclick', "navToTab('qk')"); _vb.textContent='‹ חזרה לחירום'; }
+          else { _vb.setAttribute('onclick', "navToTab('lib');shV('vcats')"); _vb.textContent='‹ חזרה למבצעי'; }
+        }
+      } catch(e) {}
       setTimeout(function(){ try { if (typeof rVisual === 'function') rVisual(); } catch(e) { console.warn('rVisual error:', e); } }, 50);
     }
+    try { if (tabId !== 'visquiz') window._navPrevTab = tabId; } catch(e) {}
     if (tabId === 'checkpoint') {
       setTimeout(function(){ try { if (typeof rCheckpoint === 'function') rCheckpoint(); } catch(e) { console.warn('rCheckpoint error:', e); } }, 50);
     }
@@ -22960,7 +23094,7 @@ window.addEventListener('load', function(){
 <script>
 // Version stamp — shown in the admin panel so we can confirm which build is live
 // on a device (stale service-worker caches were causing "my changes don't show").
-window.APP_VERSION = 'v273';
+window.APP_VERSION = 'v274';
 
 // Register the service worker for full offline use in the field, WITH update
 // detection: when a new version installs, offer a one-tap refresh instead of the
