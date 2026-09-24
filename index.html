@@ -17795,12 +17795,12 @@ VIS_NUM_EX.concat(VIS_DOCS,VIS_CARS,VIS_ROAD,VIS_TOWNS).forEach(function(r){ if(
 var VIS_POSTER=[
   {img:'p-strike',          ar:'إضراب شامل',    he:'שביתה כללית', trans:'אִצְ׳רַאבּ שַאמֶל', tip:'הכול סגור. סימן למתיחות'},
   {img:'p-strike-rage',     ar:'يوم غضب',       he:'יום זעם', trans:'יוֹם עַ׳צַ׳בּ', tip:'קריאה להפגנות ולעימותים. סימן אזהרה'},
-  {img:'p-strike-nafir',    ar:'النفير العام',  he:'קריאה כללית לצאת (גיוס המונים)', trans:'אִלנַּפִיר אִלעַאם'},
+  {img:'p-strike-nafir',    ar:'دعوة',          he:'קריאה / הזמנה (לצאת, להתכנס)', trans:'דַעְוֶה', tip:'קריאה לציבור לצאת. בהקשר של שביתה או עימות — סימן אזהרה'},
   {img:'p-strike-statement',ar:'بيان',          he:'הודעה / כרוז רשמי', trans:'בַּיַאן', tip:'הודעה של ארגון או ועד'},
   {img:'p-martyr-hero',     ar:'الشهيد البطل',  he:'השהיד הגיבור', trans:'אִלשַּהִיד אִלבַּטַל', tip:'פוסטר הנצחה. עליו שם, תמונה ולעיתים סמל ארגון'},
   {img:'p-martyr-rose',     ar:'ارتقى شهيداً',  he:'"עלה כשהיד" (נהרג)', trans:'אִרְתַקַא שַהִידַן'},
   {img:'p-martyr-funeral',  ar:'موكب التشييع',  he:'תהלוכת הלוויה', trans:'מַוְכֵּבּ אִלתַּשְיִיע', tip:'התכנסות המונים, לרוב אחרי צהריים'},
-  {img:'p-obit',            ar:'نعي',           he:'מודעת אבל', trans:'נַעְי', tip:'הודעה על פטירה (מוות טבעי)'},
+  {img:'p-obit',            ar:'نعي',           he:'מודעת אבל', trans:'נַעְי', tip:'המודעה כולה נקראת ورقة نعي (וַרַקַת נַעְי) — הודעה על פטירה, מוות טבעי'},
   {img:'p-obit-late',       ar:'المرحوم',       he:'המנוח', trans:'אִלמַרְחוּם', tip:'ואחריו שם הנפטר'},
   {img:'p-obit-house',      ar:'بيت العزاء',    he:'בית האבלים', trans:'בֵּית אִלעַזַא', tip:'המקום שאליו באים לנחם'},
   {img:'p-wedding',         ar:'حفل زفاف',      he:'חתונה', trans:'חַפְל זַפַאף', tip:'התכנסות המונים — אבל שמחה, לא אירוע חריג'}
@@ -21936,19 +21936,21 @@ function rQK(){
   h+='</div>';
   // Cubes in the order the user set: הוראות/מה עונים · בידוק/תיאור · רכב/רפואה ·
   // קהל/ילדים · הרגעה (last).
+  // Order = field priority: what a soldier needs first in a live incident at the
+  // top, situational/population-specific tools lower down.
   var EMERG_CUBES=[
     {tab:'checkpoint', emoji:'🛑', name:'רגע ראשון במחסום',        sub:'רצף העצירה המיידי',        color:'gold'},
-    {tab:'ord',     emoji:'🚨',  name:'הוראות מיידיות',          sub:'תבנית מסודרת',           color:'red'},
-    {tab:'answers', emoji:'💬',  name:'מה עונים לך',              sub:'הבנת תשובות האזרח',       color:'sky'},
+    {tab:'ord',     emoji:'🚨',  name:'הוראות מיידיות',          sub:'עצור, ידיים, אל תזוז',    color:'red'},
     {tab:'threat',  emoji:'👂',  name:'מה שומעים בשטח',          sub:'איום אמיתי מול תמים',      color:'red'},
-    {tab:'visual',  emoji:'📷',  name:'זיהוי ערבית בשטח',        sub:'שלטים, מסמכים, רכב + מבחן', color:'sky'},
+    {tab:'answers', emoji:'💬',  name:'מה עונים לך',              sub:'הבנת תשובות האזרח',       color:'sky'},
     {tab:'chk',     emoji:'🪪',  name:'בידוק וזיהוי',            sub:'תבנית מסודרת',           color:'blue'},
-    {tab:'desc',    emoji:'🎯',  name:'תיאור חשוד',              sub:'מה לשאול ואיך לתאר',       color:'gold'},
     {tab:'veh',     emoji:'🚗',  name:'רכב ומחסום',              sub:'תבנית מסודרת',           color:'orange'},
     {tab:'triage',  emoji:'🩺',  name:"רפואה וטריאז'",           sub:'בדיקת נפגע — סדר פעולות',  color:'teal'},
+    {tab:'visual',  emoji:'📷',  name:'זיהוי ערבית בשטח',        sub:'שלטים, מסמכים, רכב + מבחן', color:'sky'},
+    {tab:'calm',    emoji:'🕊️', name:'הרגעה ושכנוע',            sub:'הורדת מתח ושיתוף פעולה',   color:'rose'},
+    {tab:'desc',    emoji:'🎯',  name:'תיאור חשוד',              sub:'מה לשאול ואיך לתאר',       color:'gold'},
     {tab:'crowd',   emoji:'👥',  name:'קהל ואירועים',            sub:'ניהול קהל והרחקה',         color:'purple'},
-    {tab:'kids',    emoji:'🧒',  name:'ילדים ואוכלוסיות רגישות', sub:'מגע רגיש ומרגיע',          color:'mint'},
-    {tab:'calm',    emoji:'🕊️', name:'הרגעה ושכנוע',            sub:'הורדת מתח ושיתוף פעולה',   color:'rose'}
+    {tab:'kids',    emoji:'🧒',  name:'ילדים ואוכלוסיות רגישות', sub:'מגע רגיש ומרגיע',          color:'mint'}
   ];
   EMERG_CUBES.forEach(function(c){
     h+='<div class="emerg-cube '+c.color+'" onclick="navToTab(\''+c.tab+'\')">';
@@ -23094,7 +23096,7 @@ window.addEventListener('load', function(){
 <script>
 // Version stamp — shown in the admin panel so we can confirm which build is live
 // on a device (stale service-worker caches were causing "my changes don't show").
-window.APP_VERSION = 'v274';
+window.APP_VERSION = 'v275';
 
 // Register the service worker for full offline use in the field, WITH update
 // detection: when a new version installs, offer a one-tap refresh instead of the
