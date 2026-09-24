@@ -2133,6 +2133,10 @@ body, body *, .scr, .scr *, button, input, textarea, select {
           </div>
           <div style="display:flex;align-items:flex-start;gap:12px;">
             <span style="color:#1D9E75;font-size:16px;font-weight:800;line-height:1.4;flex-shrink:0;">✓</span>
+            <span style="color:#E8D9B8;font-size:14.5px;line-height:1.55;">לזהות ערבית כתובה בשטח — שלטים, תעודות, לוחיות רכב, מספרים ומודעות</span>
+          </div>
+          <div style="display:flex;align-items:flex-start;gap:12px;">
+            <span style="color:#1D9E75;font-size:16px;font-weight:800;line-height:1.4;flex-shrink:0;">✓</span>
             <span style="color:#E8D9B8;font-size:14.5px;line-height:1.55;">להתאמן על תרחישים אמיתיים — מסיפורי חיילים מהשטח</span>
           </div>
           <div style="display:flex;align-items:flex-start;gap:12px;">
@@ -2353,55 +2357,55 @@ function showLanding() {
         <!-- Row 1: כל התרגילים בקובייה אחת -->
         <div onclick="navToTab('train')" style="background:linear-gradient(160deg,#1F3147 0%,#243a55 100%);border:1px solid rgba(212,162,78,0.2);border-radius:14px;padding:14px 12px;cursor:pointer;box-shadow:0 2px 8px rgba(0,0,0,0.2);">
           <div style="font-size:26px;margin-bottom:6px;line-height:1;">🎯</div>
-          <div style="color:#E8D9B8;font-size:13px;font-weight:800;margin-bottom:2px;">אימון ותרגול</div>
-          <div style="color:#7a9ab5;font-size:10.5px;line-height:1.4;">כל התרגילים במקום אחד (כולל מצב לחץ)</div>
+          <div style="color:#E8D9B8;font-size:15px;font-weight:800;margin-bottom:2px;">אימון ותרגול</div>
+          <div style="color:#7a9ab5;font-size:12px;line-height:1.4;">כל התרגילים במקום אחד (כולל מצב לחץ)</div>
         </div>
 
         <div onclick="openDailyDrills()" style="position:relative;background:linear-gradient(160deg,#1F3147 0%,#243a55 100%);border:1px solid rgba(212,162,78,0.2);border-radius:14px;padding:14px 12px;cursor:pointer;box-shadow:0 2px 8px rgba(0,0,0,0.2);">
           <div id="home-emerg-badge" style="display:none;position:absolute;top:8px;right:8px;background:#e74c3c;color:#fff;font-size:11px;font-weight:900;border-radius:50%;width:22px;height:22px;line-height:22px;text-align:center;box-shadow:0 2px 6px rgba(231,76,60,0.5);animation:badgePulse 2s ease-in-out infinite;">1</div>
           <div style="font-size:26px;margin-bottom:6px;line-height:1;">🔁</div>
-          <div style="color:#E8D9B8;font-size:13px;font-weight:800;margin-bottom:2px;">אתגר יומי + חזרה שבועית</div>
-          <div style="color:#7a9ab5;font-size:10.5px;line-height:1.4;">אתגר קצר וחזרה על מה שלמדת</div>
+          <div style="color:#E8D9B8;font-size:15px;font-weight:800;margin-bottom:2px;">אתגר יומי + חזרה שבועית</div>
+          <div style="color:#7a9ab5;font-size:12px;line-height:1.4;">אתגר קצר וחזרה על מה שלמדת</div>
         </div>
 
         <!-- Row 2: ספרייה ותרחישים -->
         <div onclick="navToTab('lib')" style="background:linear-gradient(160deg,#1F3147 0%,#243a55 100%);border:1px solid rgba(212,162,78,0.2);border-radius:14px;padding:14px 12px;cursor:pointer;box-shadow:0 2px 8px rgba(0,0,0,0.2);">
           <div style="font-size:26px;margin-bottom:6px;line-height:1;">📚</div>
-          <div style="color:#E8D9B8;font-size:13px;font-weight:800;margin-bottom:2px;">הספרייה המבצעית</div>
-          <div style="color:#7a9ab5;font-size:10.5px;line-height:1.4;">לחפש מילה או נושא</div>
+          <div style="color:#E8D9B8;font-size:15px;font-weight:800;margin-bottom:2px;">הספרייה המבצעית</div>
+          <div style="color:#7a9ab5;font-size:12px;line-height:1.4;">לחפש מילה או נושא</div>
         </div>
 
         <div onclick="navToTab('scn')" style="background:linear-gradient(160deg,#1F3147 0%,#243a55 100%);border:1px solid rgba(212,162,78,0.2);border-radius:14px;padding:14px 12px;cursor:pointer;box-shadow:0 2px 8px rgba(0,0,0,0.2);">
           <div style="font-size:26px;margin-bottom:6px;line-height:1;">💬</div>
-          <div style="color:#E8D9B8;font-size:13px;font-weight:800;margin-bottom:2px;">תרחישים מהשטח</div>
-          <div style="color:#7a9ab5;font-size:10.5px;line-height:1.4;">להתאמן על שיחה אמיתית</div>
+          <div style="color:#E8D9B8;font-size:15px;font-weight:800;margin-bottom:2px;">תרחישים מהשטח</div>
+          <div style="color:#7a9ab5;font-size:12px;line-height:1.4;">להתאמן על שיחה אמיתית</div>
         </div>
 
         <!-- Row 3: יסודות ותרבות -->
         <div onclick="openFoundations()" style="background:linear-gradient(160deg,#1F3147 0%,#243a55 100%);border:1px solid rgba(212,162,78,0.2);border-radius:14px;padding:14px 12px;cursor:pointer;box-shadow:0 2px 8px rgba(0,0,0,0.2);">
           <div style="font-size:26px;margin-bottom:6px;line-height:1;">🎓</div>
-          <div style="color:#E8D9B8;font-size:13px;font-weight:800;margin-bottom:2px;">יסודות השפה</div>
-          <div style="color:#7a9ab5;font-size:10.5px;line-height:1.4;">דקדוק ואוצר מילים מהבסיס</div>
+          <div style="color:#E8D9B8;font-size:15px;font-weight:800;margin-bottom:2px;">יסודות השפה</div>
+          <div style="color:#7a9ab5;font-size:12px;line-height:1.4;">דקדוק ואוצר מילים מהבסיס</div>
         </div>
 
         <div onclick="navToTab('cus')" style="position:relative;background:linear-gradient(160deg,#1F3147 0%,#243a55 100%);border:1px solid rgba(212,162,78,0.2);border-radius:14px;padding:14px 12px;cursor:pointer;box-shadow:0 2px 8px rgba(0,0,0,0.2);">
           <div id="home-cus-new" style="display:none;position:absolute;top:8px;right:8px;background:#D4A24E;color:#0E1B2E;font-size:9px;font-weight:800;padding:1px 7px;border-radius:8px;line-height:1.5;">חדש</div>
           <div style="font-size:26px;margin-bottom:6px;line-height:1;">🕌</div>
-          <div style="color:#E8D9B8;font-size:13px;font-weight:800;margin-bottom:2px;">תרבות ומנהגים</div>
-          <div style="color:#7a9ab5;font-size:10.5px;line-height:1.4;">להבין את הצד השני</div>
+          <div style="color:#E8D9B8;font-size:15px;font-weight:800;margin-bottom:2px;">תרבות ומנהגים</div>
+          <div style="color:#7a9ab5;font-size:12px;line-height:1.4;">להבין את הצד השני</div>
         </div>
 
         <!-- Row 4: הכנה לשירות קרבי ושמורים -->
         <div onclick="startPrepPath()" style="background:linear-gradient(160deg,#1F3147 0%,#243a55 100%);border:1px solid rgba(212,162,78,0.2);border-radius:14px;padding:14px 12px;cursor:pointer;box-shadow:0 2px 8px rgba(0,0,0,0.2);">
           <div style="font-size:26px;margin-bottom:6px;line-height:1;">🪖</div>
-          <div style="color:#E8D9B8;font-size:13px;font-weight:800;margin-bottom:2px;">הכנה לשירות קרבי</div>
-          <div style="color:#7a9ab5;font-size:10.5px;line-height:1.4;">מסלול 30 יום מובנה</div>
+          <div style="color:#E8D9B8;font-size:15px;font-weight:800;margin-bottom:2px;">הכנה לשירות קרבי</div>
+          <div style="color:#7a9ab5;font-size:12px;line-height:1.4;">מסלול 30 יום מובנה</div>
         </div>
 
         <div onclick="navToTab('fav')" style="background:linear-gradient(160deg,#1F3147 0%,#243a55 100%);border:1px solid rgba(212,162,78,0.2);border-radius:14px;padding:14px 12px;cursor:pointer;box-shadow:0 2px 8px rgba(0,0,0,0.2);">
           <div style="font-size:26px;margin-bottom:6px;line-height:1;">⭐</div>
-          <div style="color:#E8D9B8;font-size:13px;font-weight:800;margin-bottom:2px;">שמורים</div>
-          <div style="color:#7a9ab5;font-size:10.5px;line-height:1.4;">המשפטים ששמרת</div>
+          <div style="color:#E8D9B8;font-size:15px;font-weight:800;margin-bottom:2px;">שמורים</div>
+          <div style="color:#7a9ab5;font-size:12px;line-height:1.4;">המשפטים ששמרת</div>
         </div>
 
       </div>
@@ -21961,8 +21965,8 @@ function rQK(){
     {tab:'answers', emoji:'💬',  name:'מה עונים לך',              sub:'הבנת תשובות האזרח',       color:'sky'},
     {tab:'chk',     emoji:'🪪',  name:'בידוק וזיהוי',            sub:'תבנית מסודרת',           color:'blue'},
     {tab:'triage',  emoji:'🩺',  name:"רפואה וטריאז'",           sub:'בדיקת נפגע — סדר פעולות',  color:'teal'},
-    {tab:'visual',  emoji:'📷',  name:'זיהוי ערבית בשטח',        sub:'שלטים, מסמכים, רכב + מבחן', color:'sky'},
     {tab:'desc',    emoji:'🎯',  name:'תיאור חשוד',              sub:'מה לשאול ואיך לתאר',       color:'gold'},
+    {tab:'visual',  emoji:'📷',  name:'זיהוי ערבית בשטח',        sub:'שלטים, מסמכים, רכב + מבחן', color:'sky'},
     {tab:'calm',    emoji:'🕊️', name:'הרגעה ושכנוע',            sub:'הורדת מתח ושיתוף פעולה',   color:'rose'},
     {tab:'crowd',   emoji:'👥',  name:'קהל ואירועים',            sub:'ניהול קהל והרחקה',         color:'purple'},
     {tab:'kids',    emoji:'🧒',  name:'ילדים ואוכלוסיות רגישות', sub:'מגע רגיש ומרגיע',          color:'mint'}
@@ -23111,7 +23115,7 @@ window.addEventListener('load', function(){
 <script>
 // Version stamp — shown in the admin panel so we can confirm which build is live
 // on a device (stale service-worker caches were causing "my changes don't show").
-window.APP_VERSION = 'v278';
+window.APP_VERSION = 'v280';
 
 // Register the service worker for full offline use in the field, WITH update
 // detection: when a new version installs, offer a one-tap refresh instead of the
