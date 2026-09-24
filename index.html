@@ -3068,8 +3068,17 @@ function showLanding() {
     <button onclick="navToTab('qk')" style="background:transparent;border:none;color:#a0b8c8;font-size:15px;cursor:pointer;font-family:inherit;padding:4px 0;margin-bottom:10px;display:flex;align-items:center;gap:6px;">◀ חזרה לחירום</button>
     <div style="text-align:center;margin-bottom:14px;">
       <div style="font-size:26px;margin-bottom:4px;">🚗</div>
-      <div style="color:#E8D9B8;font-size:18px;font-weight:800;letter-spacing:0.3px;">רכב ומחסום</div>
-      <div style="color:#7a9ab5;font-size:12px;line-height:1.5;margin-top:2px;">עצירה › פתיחה › יציאה › מסמכים — לחצו על פריט לשמיעה ותרגול</div>
+      <div style="color:#E8D9B8;font-size:18px;font-weight:800;letter-spacing:0.3px;">רכב במחסום</div>
+      <div style="color:#7a9ab5;font-size:12px;line-height:1.5;margin-top:2px;">קודם רצף העצירה המיידי לפי הסדר, ואז ההתנהלות הרגילה — לחצו על פריט לשמיעה ותרגול</div>
+    </div>
+    <div style="background:rgba(212,162,78,0.10);border:1px solid rgba(212,162,78,0.35);border-radius:12px;padding:10px 12px;margin-bottom:6px;">
+      <div style="color:#D4A24E;font-size:15px;font-weight:800;display:flex;align-items:center;gap:6px;">🛑 הרגע הראשון במחסום</div>
+      <div style="color:#7a9ab5;font-size:11.5px;line-height:1.5;margin-top:2px;">רצף מחייב לפי הסדר — עד שמוודאים שאין נשק</div>
+    </div>
+    <div id="veh-checkpoint"></div>
+    <div style="background:rgba(122,154,181,0.10);border:1px solid rgba(122,154,181,0.30);border-radius:12px;padding:10px 12px;margin:22px 0 6px;">
+      <div style="color:#E8D9B8;font-size:15px;font-weight:800;display:flex;align-items:center;gap:6px;">🚗 התנהלות רגילה במחסום</div>
+      <div style="color:#7a9ab5;font-size:11.5px;line-height:1.5;margin-top:2px;">פקודות לפי הצורך — מסמכים, תא מטען, חלון, מספר נוסעים</div>
     </div>
     <div id="veh-list"></div>
   </div>
@@ -11445,7 +11454,13 @@ function renderOrders(){ _renderTpl(ORDERS,'ord-list','openOrdItem'); }
 function openOrdItem(si,oi){ _openTpl(ORDERS,si,oi,'ord'); }
 function renderCheck(){ _renderTpl(CHECK,'chk-list','openChkItem'); }
 function openChkItem(si,oi){ _openTpl(CHECK,si,oi,'chk'); }
-function renderVehicle(){ _renderTpl(VEHICLE,'veh-list','openVehItem'); }
+function renderVehicle(){
+  // Merged screen: the fixed opening SEQUENCE (רגע ראשון במחסום) first, in order,
+  // then the regular vehicle toolbox. One cube instead of two so the soldier isn't
+  // split between them.
+  try{ _renderCheckpointList('veh-checkpoint','veh'); }catch(e){}
+  _renderTpl(VEHICLE,'veh-list','openVehItem');
+}
 function openVehItem(si,oi){ _openTpl(VEHICLE,si,oi,'veh'); }
 function openAnsItem(si,oi){ _openTpl(ANSWERS,si,oi,'answers'); }
 // "מה עונים לך" renders from the LIVE DB category 'תשובות אזרח' when it exists, so
@@ -17629,19 +17644,20 @@ function _checkpointSteps(){
   return SEQ.map(function(it){ return {s:it.s, row:match(it.ar,it.he)}; }).filter(function(x){ return x.row; });
 }
 var _CP_TITLES={1:'\u05d7\u05dc\u05e7 \u05d0\u05f3 \u2014 \u05e2\u05e6\u05d9\u05e8\u05d4 \u05d5\u05d4\u05d5\u05e8\u05d3\u05ea \u05d4\u05e0\u05d4\u05d2', 2:'\u05d0\u05d5 \u05dc\u05d7\u05d9\u05dc\u05d5\u05e4\u05d9\u05df \u2014 \u05de\u05e1\u05e4\u05e8 \u05e0\u05d5\u05e1\u05e2\u05d9\u05dd'};
-function rCheckpoint(){
-  var el=document.getElementById('checkpointlist'); if(!el)return;
+function _renderCheckpointList(elId, returnTab){
+  var el=document.getElementById(elId); if(!el)return;
   window._dbCatRows=window._dbCatRows||{}; window._dbCatRows['__checkpoint']=[];
   var h='', n=0, cur=null, open=false;
   _checkpointSteps().forEach(function(st){
     if(st.s!==cur){ if(open) h+='</div>'; cur=st.s; h+='<div class="stitle" style="margin-top:16px;">'+_CP_TITLES[st.s]+'</div><div style="display:flex;flex-direction:column;gap:8px;margin-top:8px;">'; open=true; }
     n++;
     var rows=window._dbCatRows['__checkpoint']; rows.push(st.row);
-    h+=_threatCard(st.row, _BADGE_SAY, n, "_openDbCatItem('__checkpoint',"+(rows.length-1)+",'checkpoint')");
+    h+=_threatCard(st.row, _BADGE_SAY, n, "_openDbCatItem('__checkpoint',"+(rows.length-1)+",'"+(returnTab||'checkpoint')+"')");
   });
   if(open) h+='</div>';
   el.innerHTML=h;
 }
+function rCheckpoint(){ _renderCheckpointList('checkpointlist','checkpoint'); }
 function rThreat(){
   var el=document.getElementById('threatlist'); if(!el)return;
   window._dbCatRows=window._dbCatRows||{}; window._dbCatRows['__threat']=[];
@@ -21939,12 +21955,11 @@ function rQK(){
   // Order = field priority: what a soldier needs first in a live incident at the
   // top, situational/population-specific tools lower down.
   var EMERG_CUBES=[
-    {tab:'checkpoint', emoji:'🛑', name:'רגע ראשון במחסום',        sub:'רצף העצירה המיידי',        color:'gold'},
+    {tab:'veh',     emoji:'🛑',  name:'רכב במחסום',              sub:'רצף העצירה + התנהלות רגילה', color:'gold'},
     {tab:'ord',     emoji:'🚨',  name:'הוראות מיידיות',          sub:'עצור, ידיים, אל תזוז',    color:'red'},
     {tab:'threat',  emoji:'👂',  name:'מה שומעים בשטח',          sub:'איום אמיתי מול תמים',      color:'red'},
     {tab:'answers', emoji:'💬',  name:'מה עונים לך',              sub:'הבנת תשובות האזרח',       color:'sky'},
     {tab:'chk',     emoji:'🪪',  name:'בידוק וזיהוי',            sub:'תבנית מסודרת',           color:'blue'},
-    {tab:'veh',     emoji:'🚗',  name:'רכב ומחסום',              sub:'תבנית מסודרת',           color:'orange'},
     {tab:'triage',  emoji:'🩺',  name:"רפואה וטריאז'",           sub:'בדיקת נפגע — סדר פעולות',  color:'teal'},
     {tab:'visual',  emoji:'📷',  name:'זיהוי ערבית בשטח',        sub:'שלטים, מסמכים, רכב + מבחן', color:'sky'},
     {tab:'calm',    emoji:'🕊️', name:'הרגעה ושכנוע',            sub:'הורדת מתח ושיתוף פעולה',   color:'rose'},
@@ -23096,7 +23111,7 @@ window.addEventListener('load', function(){
 <script>
 // Version stamp — shown in the admin panel so we can confirm which build is live
 // on a device (stale service-worker caches were causing "my changes don't show").
-window.APP_VERSION = 'v275';
+window.APP_VERSION = 'v276';
 
 // Register the service worker for full offline use in the field, WITH update
 // detection: when a new version installs, offer a one-tap refresh instead of the
