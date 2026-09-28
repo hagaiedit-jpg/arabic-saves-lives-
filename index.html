@@ -14525,6 +14525,20 @@ const CATEGORY_INFO = {
 };
 
 // Get subcategory for a phrase based on keywords
+// Clean phrase cards for a flat list (כריזה / תשאול ימי) — same look as the rest.
+function _libFlatCards(items, opener, idxFn){
+  return '<div style="display:flex;flex-wrap:wrap;gap:8px;margin-top:12px;">' + (items||[]).map(function(p){
+    var idx = idxFn(p);
+    var hasAudio = !!(p.audio || (typeof _descAudioFor==='function' && _descAudioFor(p)));
+    var urg = (typeof urgDot==='function' && typeof _urgencyOf==='function') ? urgDot(_urgencyOf(p)) : '';
+    return '<div onclick="' + opener + '(' + idx + ')" style="flex:1 1 auto;min-width:150px;background:#1F3147;border:1px solid #2A3D52;border-radius:11px;padding:9px 12px;cursor:pointer;">' +
+      '<div style="display:flex;align-items:center;gap:6px;"><div style="color:#E8D9B8;font-size:14px;font-weight:700;flex:1;">' + (p.he||'') + urg + '</div>' +
+        (hasAudio ? '<span style="color:#1D9E75;font-size:13px;">🔊</span>' : '') + '</div>' +
+      (p.ar ? '<div style="color:#E8D9B8;font-size:15px;font-family:Georgia,serif;direction:rtl;margin-top:2px;">' + p.ar + '</div>' : '') +
+      (p.trans ? '<div style="color:#D4A24E;font-size:12px;margin-top:1px;">' + p.trans + '</div>' : '') +
+    '</div>';
+  }).join('') + '</div>';
+}
 // A small icon per sub-topic header, matched by keyword (operational library).
 function _libSubEmoji(name){
   var n = String(name||'');
@@ -14875,8 +14889,7 @@ function opAnnounceList(cat){
         </div>
       </div></div>`;
   }
-  document.getElementById('litems').innerHTML=learnCard+items.map((a,i)=>`
-    <div class="li" onclick="opAnnounce(${ANNOUNCE.indexOf(a)})"><div class="lt">📢 ${a.he}</div><div class="la">‹</div></div>`).join('');
+  document.getElementById('litems').innerHTML=learnCard+_libFlatCards(items,'opAnnounce',function(a){return ANNOUNCE.indexOf(a);});
 }
 
 function opNavyListIdx(idx){
@@ -14915,14 +14928,9 @@ function opNavyList(cat){
     '<div style="color:rgba(255,255,255,0.9);font-size:11px;margin-top:6px;">' + learnedInCat + ' מתוך ' + items.length + ' (' + pct + '%)</div>' +
   '</div>';
   
-  // Items list
-  items.forEach(function(n){
-    var origIdx = NAVY.indexOf(n);
-    html += '<div class="li" onclick="opNavyP(' + origIdx + ')">' +
-            '<div class="lt">' + escapeHtml(n.he) + '</div>' +
-            '<div class="la">›</div></div>';
-  });
-  
+  // Items list — clean cards, like the rest of the library
+  html += _libFlatCards(items, 'opNavyP', function(n){ return NAVY.indexOf(n); });
+
   document.getElementById('litems').innerHTML = html;
 }
 
@@ -23307,7 +23315,7 @@ window.addEventListener('load', function(){
 <script>
 // Version stamp — shown in the admin panel so we can confirm which build is live
 // on a device (stale service-worker caches were causing "my changes don't show").
-window.APP_VERSION = 'v287';
+window.APP_VERSION = 'v288';
 
 // Register the service worker for full offline use in the field, WITH update
 // detection: when a new version installs, offer a one-tap refresh instead of the
