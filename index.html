@@ -3017,6 +3017,12 @@ function showLanding() {
       </div>
     </div>
 
+    <div id="legal-account-row" style="display:none;background:#18293E;border:1px solid #2A3D52;border-radius:12px;padding:14px 16px;margin-bottom:12px;">
+      <div style="color:#D4A24E;font-size:15px;font-weight:800;margin-bottom:8px;">👤 החשבון שלי</div>
+      <div id="legal-account-email" style="color:#E8D9B8;font-size:13px;margin-bottom:10px;"></div>
+      <button onclick="memberLogout()" style="background:#2A3D52;border:1px solid #3a4d62;color:#E8D9B8;border-radius:10px;padding:10px 18px;font-size:13px;font-weight:700;cursor:pointer;font-family:inherit;">התנתקות</button>
+    </div>
+
     <div style="background:rgba(212,162,78,0.08);border:1px dashed rgba(212,162,78,0.4);border-radius:12px;padding:12px 14px;color:#D4A24E;font-size:12px;line-height:1.6;text-align:center;">
       טיוטה לעיון — מומלץ אישור משפטי (עו"ד) לפני הפצה ציבורית, והשלמת פרטי יצירת קשר.
     </div>
@@ -4035,9 +4041,14 @@ function _adminTokenGet(){
   if(window._adminToken) return window._adminToken;
   try { return sessionStorage.getItem('admin_at') || ''; } catch(e){ return ''; }
 }
+// The logged-in member's access token (email-OTP login), used for READS so that
+// once RLS is enabled the server returns content only to authenticated members.
+function _clTokenGet(){ try{ return localStorage.getItem('cl_at') || ''; }catch(e){ return ''; } }
 function _sbAuthHeader(method){
-  var tok = (method && method!=='GET') ? _adminTokenGet() : '';
-  return 'Bearer ' + (tok || SUPA_KEY);
+  var admin = _adminTokenGet();
+  // Writes: admin only. Reads: admin token, else the member's token, else anon key.
+  if (method && method!=='GET') return 'Bearer ' + (admin || SUPA_KEY);
+  return 'Bearer ' + (admin || _clTokenGet() || SUPA_KEY);
 }
 async function adminLogin(email, password){
   try {
@@ -23270,6 +23281,18 @@ function navToTab(tabId){
       } catch(e) {}
       setTimeout(function(){ try { if (typeof rVisual === 'function') rVisual(); } catch(e) { console.warn('rVisual error:', e); } }, 50);
     }
+    if (tabId === 'legal') {
+      try {
+        var _s = (typeof clSession==='function') ? clSession() : null;
+        var _row = document.getElementById('legal-account-row');
+        if (_row) {
+          if (_s && _s.user && _s.user.email) {
+            document.getElementById('legal-account-email').textContent = 'מחובר/ת כ: ' + _s.user.email;
+            _row.style.display = 'block';
+          } else { _row.style.display = 'none'; }
+        }
+      } catch(e) {}
+    }
     try { if (tabId !== 'visquiz') window._navPrevTab = tabId; } catch(e) {}
     if (tabId === 'checkpoint') {
       setTimeout(function(){ try { if (typeof rCheckpoint === 'function') rCheckpoint(); } catch(e) { console.warn('rCheckpoint error:', e); } }, 50);
@@ -23371,13 +23394,15 @@ window.addEventListener('load', function(){
       defaultBtn.style.background = 'rgba(212,162,78,0.15)';
     }
   }, 500);
+  // Enforce the login gate once everything is parsed (functions defined).
+  try{ if(typeof enforceLoginGate==='function') enforceLoginGate(); }catch(e){}
 });
 </script>
 
 <script>
 // Version stamp — shown in the admin panel so we can confirm which build is live
 // on a device (stale service-worker caches were causing "my changes don't show").
-window.APP_VERSION = 'v290';
+window.APP_VERSION = 'v291';
 
 // Register the service worker for full offline use in the field, WITH update
 // detection: when a new version installs, offer a one-tap refresh instead of the
@@ -23600,7 +23625,11 @@ async function clVerify(){
     clStoreSession(d);
     try{ clRefreshEntitlement(); }catch(e){}
     _clStatus('התחברת בהצלחה ✓',true);
-    setTimeout(clCloseAfterLogin,500);
+    setTimeout(function(){
+      clCloseAfterLogin();
+      // Login-gate mode: reload content with the member's token and reveal the app.
+      if(typeof _loginGateActive==='function' && _loginGateActive()){ try{ _afterMemberLogin(); }catch(e){} }
+    },500);
   }catch(err){ _clStatus(err.message||'האימות נכשל'); }
   btn.disabled=false; btn.textContent=old;
 }
@@ -23632,6 +23661,34 @@ async function clSubscribed(){
 }
 function clOpen(){ var o=document.getElementById('cl-overlay'); if(o) o.style.display='block'; }
 function clCloseAfterLogin(){ var o=document.getElementById('cl-overlay'); if(o) o.style.display='none'; }
+
+// ===== Login gate (content behind login) ====================================
+// When ON, the app requires an email-OTP login before content is shown. Real
+// protection is the DB (RLS) — this is the app-side gate that pairs with it.
+// OFF by default; flip on together once Supabase Auth (email) + RLS are set up:
+//   localStorage.setItem('login_gate','1')  (or change the default below).
+window.LOGIN_GATE = (function(){ try{ return localStorage.getItem('login_gate')==='1'; }catch(e){ return false; } })();
+function _loginGateActive(){ return !!window.LOGIN_GATE; }
+function _memberLoggedIn(){ try{ return !!(clSession() || window._adminAuth); }catch(e){ return false; } }
+// Show the mandatory login if the gate is on and nobody is logged in.
+function enforceLoginGate(){
+  if(!_loginGateActive()) return true;      // gate off -> app open
+  if(_memberLoggedIn()) return true;        // logged in -> app open
+  try{ clOpen(); }catch(e){}
+  return false;
+}
+// After a member logs in, reload content (now with their token so RLS returns it)
+// and reveal the app.
+async function _afterMemberLogin(){
+  try{ if(typeof loadData==='function') await loadData(); }catch(e){}
+  try{ if(typeof bldCats==='function') bldCats(); }catch(e){}
+  try{ if(typeof navToTab==='function') navToTab('home'); }catch(e){}
+}
+function memberLogout(){
+  try{ clLogout(); }catch(e){}
+  if(_loginGateActive()){ location.reload(); }
+  else { try{ if(typeof showToast==='function') showToast('התנתקת','success'); }catch(e){} }
+}
 
 // ===== Paywall enforcement (free preview vs premium) ========================
 // Dormant unless window.PAYWALL. Builds on the entitlement layer above:
