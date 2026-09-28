@@ -14453,6 +14453,16 @@ const CATEGORY_INFO = {
 };
 
 // Get subcategory for a phrase based on keywords
+// Toggle a collapsible sub-topic section in the operational library.
+function _libToggleAcc(h){
+  try{
+    var b=h.nextElementSibling; if(!b) return;
+    var chev=h.querySelector('.lib-acc-chev');
+    var open=b.style.display!=='none';
+    b.style.display=open?'none':'block';
+    if(chev) chev.style.transform=open?'rotate(-90deg)':'rotate(0deg)';
+  }catch(e){}
+}
 function getPhraseSubcat(phrase, cat) {
   const info = CATEGORY_INFO[cat];
   if (!info || !info.subcats) return null;
@@ -14647,43 +14657,34 @@ function opC(cat,special){
         }
       });
       
-      // Render subcategories
+      // Render subcategories as collapsible accordion sections — a short, scannable
+      // menu of topics (like the emergency cubes) instead of one long "grocery list".
       window._curCatPhrases = catPhrases;  // Store for navigation
-      
-      Object.entries(grouped).forEach(([subcat, items]) => {
-        if (items.length === 0) return;
-        const subcatBox = document.createElement('div');
-        subcatBox.style.cssText = 'background:rgba(255,255,255,0.03);border-radius:10px;padding:12px;margin-bottom:10px;';
-        
-        let html = '<div style="color:#D4A24E;font-size:13px;font-weight:700;margin-bottom:8px;padding-bottom:6px;border-bottom:1px solid rgba(212,162,78,0.2);">' + 
-                   subcat + ' <span style="color:#7a9ab5;font-size:11px;font-weight:400;">(' + items.length + ')</span></div>';
-        
-        items.forEach(p => {
-          const origIdx = DB.indexOf(p);
-          html += '<div class="li" onclick="opP(' + origIdx + ')" style="margin-bottom:4px;">' +
+      var _accIdx = 0;
+      var _accSection = function(title, items, isOther){
+        if (!items.length) return;
+        var open = (_accIdx === 0);   // first topic open, the rest collapsed
+        _accIdx++;
+        var sec = document.createElement('div');
+        sec.style.cssText = 'margin-bottom:8px;border:1px solid #2A3D52;border-radius:12px;overflow:hidden;background:#18293E;';
+        var body = '';
+        items.forEach(function(p){
+          var origIdx = DB.indexOf(p);
+          body += '<div class="li" onclick="opP(' + origIdx + ')" style="margin:0;border-radius:0;border-bottom:1px solid rgba(255,255,255,0.05);">' +
                   '<div class="lt">' + (p.he||'') + urgDot(_urgencyOf(p)) + '</div>' +
                   '<div class="la">›</div></div>';
         });
-        
-        subcatBox.innerHTML = html;
-        target.appendChild(subcatBox);
-      });
-      
-      // Render ungrouped items at the bottom
-      if (ungrouped.length > 0) {
-        const otherBox = document.createElement('div');
-        otherBox.style.cssText = 'background:rgba(255,255,255,0.03);border-radius:10px;padding:12px;';
-        let html = '<div style="color:#7a9ab5;font-size:13px;font-weight:700;margin-bottom:8px;padding-bottom:6px;border-bottom:1px solid rgba(255,255,255,0.1);">' + 
-                   'נוספים <span style="font-size:11px;font-weight:400;">(' + ungrouped.length + ')</span></div>';
-        ungrouped.forEach(p => {
-          const origIdx = DB.indexOf(p);
-          html += '<div class="li" onclick="opP(' + origIdx + ')" style="margin-bottom:4px;">' +
-                  '<div class="lt">' + (p.he||'') + urgDot(_urgencyOf(p)) + '</div>' +
-                  '<div class="la">›</div></div>';
-        });
-        otherBox.innerHTML = html;
-        target.appendChild(otherBox);
-      }
+        sec.innerHTML =
+          '<div class="lib-acc-h" onclick="_libToggleAcc(this)" style="display:flex;align-items:center;justify-content:space-between;gap:8px;padding:13px 14px;cursor:pointer;user-select:none;-webkit-user-select:none;">' +
+            '<div style="color:' + (isOther?'#9fb4c8':'#E8D9B8') + ';font-size:15px;font-weight:800;">' + title +
+              ' <span style="color:#7a9ab5;font-size:12px;font-weight:600;">(' + items.length + ')</span></div>' +
+            '<div class="lib-acc-chev" style="color:#D4A24E;font-size:15px;transition:transform .2s;transform:rotate(' + (open?'0':'-90') + 'deg);">▾</div>' +
+          '</div>' +
+          '<div class="lib-acc-b" style="display:' + (open?'block':'none') + ';border-top:1px solid #2A3D52;">' + body + '</div>';
+        target.appendChild(sec);
+      };
+      Object.entries(grouped).forEach(function(e){ _accSection(e[0], e[1], false); });
+      if (ungrouped.length > 0) _accSection('נוספים', ungrouped, true);
     } else {
       // No subcategories - regular flat list
       const itemsContainer = document.createElement('div');
@@ -23226,7 +23227,7 @@ window.addEventListener('load', function(){
 <script>
 // Version stamp — shown in the admin panel so we can confirm which build is live
 // on a device (stale service-worker caches were causing "my changes don't show").
-window.APP_VERSION = 'v284';
+window.APP_VERSION = 'v285';
 
 // Register the service worker for full offline use in the field, WITH update
 // detection: when a new version installs, offer a one-tap refresh instead of the
