@@ -14453,15 +14453,17 @@ const CATEGORY_INFO = {
 };
 
 // Get subcategory for a phrase based on keywords
-// Toggle a collapsible sub-topic section in the operational library.
-function _libToggleAcc(h){
-  try{
-    var b=h.nextElementSibling; if(!b) return;
-    var chev=h.querySelector('.lib-acc-chev');
-    var open=b.style.display!=='none';
-    b.style.display=open?'none':'block';
-    if(chev) chev.style.transform=open?'rotate(-90deg)':'rotate(0deg)';
-  }catch(e){}
+// A small icon per sub-topic header, matched by keyword (operational library).
+function _libSubEmoji(name){
+  var n = String(name||'');
+  var map = [['עציר','🛑'],['עלייה','🛑'],['ידיים','✋'],['תעוד','🪪'],['זהות','🪪'],['בידוק','🔎'],['חיפוש','🔎'],
+    ['תשאול','❓'],['שאל','❓'],['מידע','❓'],['מסלול','🧭'],['כיוונ','🧭'],['הקשבה','👂'],['מיקום','📍'],['עמידה','📍'],
+    ['כניס','🚪'],['פתיחה','🚪'],['ניהול','👥'],['מעצר','🚨'],['חשד','🚨'],['הרגע','🕊️'],['שכנוע','🤝'],['ברכ','👋'],
+    ['זיהוי','🆔'],['מטרה','🎯'],['אבחון','🩺'],['פצוע','🩺'],['עזרה','🚑'],['פקוד','📢'],['הורא','📢'],['נשק','🔫'],
+    ['רכב','🚗'],['דת','🕌'],['תרבות','🕌'],['משפח','👨‍👩‍👧'],['טלפון','📞'],['מספר','🔢'],['עבודה','💼'],['השכלה','🎓'],
+    ['בית','🏠'],['ילד','🧒'],['קהל','👥'],['מנהג','🕌']];
+  for (var i=0;i<map.length;i++){ if(n.indexOf(map[i][0])!==-1) return map[i][1]; }
+  return '▸';
 }
 function getPhraseSubcat(phrase, cat) {
   const info = CATEGORY_INFO[cat];
@@ -14657,34 +14659,32 @@ function opC(cat,special){
         }
       });
       
-      // Render subcategories as collapsible accordion sections — a short, scannable
-      // menu of topics (like the emergency cubes) instead of one long "grocery list".
+      // Render sub-topics as clean cards grouped under topic headers (like the
+      // emergency sub-screens), ordered by importance — not a long flat list.
       window._curCatPhrases = catPhrases;  // Store for navigation
-      var _accIdx = 0;
-      var _accSection = function(title, items, isOther){
-        if (!items.length) return;
-        var open = (_accIdx === 0);   // first topic open, the rest collapsed
-        _accIdx++;
-        var sec = document.createElement('div');
-        sec.style.cssText = 'margin-bottom:8px;border:1px solid #2A3D52;border-radius:12px;overflow:hidden;background:#18293E;';
-        var body = '';
-        items.forEach(function(p){
-          var origIdx = DB.indexOf(p);
-          body += '<div class="li" onclick="opP(' + origIdx + ')" style="margin:0;border-radius:0;border-bottom:1px solid rgba(255,255,255,0.05);">' +
-                  '<div class="lt">' + (p.he||'') + urgDot(_urgencyOf(p)) + '</div>' +
-                  '<div class="la">›</div></div>';
-        });
-        sec.innerHTML =
-          '<div class="lib-acc-h" onclick="_libToggleAcc(this)" style="display:flex;align-items:center;justify-content:space-between;gap:8px;padding:13px 14px;cursor:pointer;user-select:none;-webkit-user-select:none;">' +
-            '<div style="color:' + (isOther?'#9fb4c8':'#E8D9B8') + ';font-size:15px;font-weight:800;">' + title +
-              ' <span style="color:#7a9ab5;font-size:12px;font-weight:600;">(' + items.length + ')</span></div>' +
-            '<div class="lib-acc-chev" style="color:#D4A24E;font-size:15px;transition:transform .2s;transform:rotate(' + (open?'0':'-90') + 'deg);">▾</div>' +
-          '</div>' +
-          '<div class="lib-acc-b" style="display:' + (open?'block':'none') + ';border-top:1px solid #2A3D52;">' + body + '</div>';
-        target.appendChild(sec);
+      var _grpCard = function(p){
+        var origIdx = DB.indexOf(p);
+        var hasAudio = !!(p.audio || (typeof _descAudioFor==='function' && _descAudioFor(p)));
+        return '<div onclick="opP(' + origIdx + ')" style="flex:1 1 auto;min-width:150px;background:#1F3147;border:1px solid #2A3D52;border-radius:11px;padding:9px 12px;cursor:pointer;">' +
+          '<div style="display:flex;align-items:center;gap:6px;"><div style="color:#E8D9B8;font-size:14px;font-weight:700;flex:1;">' + (p.he||'') + urgDot(_urgencyOf(p)) + '</div>' +
+            (hasAudio ? '<span style="color:#1D9E75;font-size:13px;">🔊</span>' : '') + '</div>' +
+          '<div style="color:#E8D9B8;font-size:15px;font-family:Georgia,serif;direction:rtl;margin-top:2px;">' + (p.ar||'') + '</div>' +
+          '<div style="color:#D4A24E;font-size:12px;margin-top:1px;">' + (p.trans||'') + '</div>' +
+        '</div>';
       };
-      Object.entries(grouped).forEach(function(e){ _accSection(e[0], e[1], false); });
-      if (ungrouped.length > 0) _accSection('נוספים', ungrouped, true);
+      var _grpSection = function(title, items, isOther){
+        if (!items.length) return;
+        var box = document.createElement('div');
+        box.style.cssText = 'margin-bottom:18px;';
+        box.innerHTML =
+          '<div style="color:' + (isOther?'#7a9ab5':'#D4A24E') + ';font-size:14px;font-weight:800;margin-bottom:10px;letter-spacing:0.3px;">' +
+            (isOther ? '' : _libSubEmoji(title) + ' ') + title +
+            ' <span style="color:#7a9ab5;font-size:12px;font-weight:600;">(' + items.length + ')</span></div>' +
+          '<div style="display:flex;flex-wrap:wrap;gap:8px;">' + items.map(_grpCard).join('') + '</div>';
+        target.appendChild(box);
+      };
+      Object.entries(grouped).forEach(function(e){ _grpSection(e[0], e[1], false); });
+      if (ungrouped.length > 0) _grpSection('נוספים', ungrouped, true);
     } else {
       // No subcategories - regular flat list
       const itemsContainer = document.createElement('div');
@@ -23227,7 +23227,7 @@ window.addEventListener('load', function(){
 <script>
 // Version stamp — shown in the admin panel so we can confirm which build is live
 // on a device (stale service-worker caches were causing "my changes don't show").
-window.APP_VERSION = 'v285';
+window.APP_VERSION = 'v286';
 
 // Register the service worker for full offline use in the field, WITH update
 // detection: when a new version installs, offer a one-tap refresh instead of the
