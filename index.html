@@ -23394,6 +23394,13 @@ window.addEventListener('load', function(){
       defaultBtn.style.background = 'rgba(212,162,78,0.15)';
     }
   }, 500);
+  // Easy testing without the console: opening the app with ?login=1 shows the
+  // login screen. ?login=0 clears the gate flag (back to normal).
+  try{
+    var _q=(location.search||'');
+    if(/[?&]login=1/.test(_q)){ try{ localStorage.setItem('login_gate','1'); }catch(e){} window.LOGIN_GATE=true; }
+    if(/[?&]login=0/.test(_q)){ try{ localStorage.setItem('login_gate','0'); localStorage.removeItem('member_ok'); }catch(e){} window.LOGIN_GATE=false; }
+  }catch(e){}
   // Enforce the login gate once everything is parsed (functions defined).
   try{ if(typeof enforceLoginGate==='function') enforceLoginGate(); }catch(e){}
 });
@@ -23402,7 +23409,7 @@ window.addEventListener('load', function(){
 <script>
 // Version stamp — shown in the admin panel so we can confirm which build is live
 // on a device (stale service-worker caches were causing "my changes don't show").
-window.APP_VERSION = 'v293';
+window.APP_VERSION = 'v294';
 
 // Register the service worker for full offline use in the field, WITH update
 // detection: when a new version installs, offer a one-tap refresh instead of the
@@ -23514,23 +23521,16 @@ document.getElementById('legal-modal').addEventListener('click', function(e){ if
     <div style="text-align:center;margin-bottom:16px;">
       <div style="font-size:34px;">🔐</div>
       <div style="color:#fff;font-size:20px;font-weight:800;margin-top:4px;">התחברות לערכה</div>
-      <div id="cl-sub" style="color:#9fb2c6;font-size:13px;margin-top:4px;">נשלח לך קוד למייל לאימות הכתובת</div>
+      <div id="cl-sub" style="color:#9fb2c6;font-size:13px;margin-top:4px;">התחברות עם אימייל וסיסמה</div>
     </div>
-    <!-- step 1: email -->
-    <div id="cl-step-phone">
-      <label style="display:block;color:#7a9ab5;font-size:11px;margin-bottom:4px;">כתובת מייל</label>
-      <input id="cl-phone" type="email" inputmode="email" placeholder="name@example.com" autocomplete="email"
-        style="width:100%;background:#0E1B2E;border:1px solid #2A3D52;border-radius:10px;color:#E8D9B8;font-family:inherit;padding:13px;font-size:16px;direction:ltr;text-align:center;">
-      <button id="cl-send-btn" onclick="clSendCode()" style="width:100%;margin-top:12px;padding:13px;background:#1D9E75;border:none;border-radius:10px;color:#fff;font-size:15px;font-weight:800;cursor:pointer;font-family:inherit;">שלח לי קוד</button>
-    </div>
-    <!-- step 2: code -->
-    <div id="cl-step-code" style="display:none;">
-      <label style="display:block;color:#7a9ab5;font-size:11px;margin-bottom:4px;">הקוד שקיבלת במייל</label>
-      <input id="cl-code" type="text" inputmode="numeric" maxlength="8" placeholder="________"
-        style="width:100%;background:#0E1B2E;border:1px solid #2A3D52;border-radius:10px;color:#E8D9B8;font-family:inherit;padding:13px;font-size:22px;letter-spacing:8px;direction:ltr;text-align:center;">
-      <button id="cl-verify-btn" onclick="clVerify()" style="width:100%;margin-top:12px;padding:13px;background:#D4A24E;border:none;border-radius:10px;color:#0E1B2E;font-size:15px;font-weight:800;cursor:pointer;font-family:inherit;">אמת והתחבר</button>
-      <div style="text-align:center;margin-top:10px;"><button onclick="clBackToPhone()" style="background:none;border:none;color:#7a9ab5;font-size:12px;cursor:pointer;font-family:inherit;text-decoration:underline;">‹ שינוי מספר / שליחת קוד מחדש</button></div>
-    </div>
+    <label style="display:block;color:#7a9ab5;font-size:11px;margin-bottom:4px;">כתובת מייל</label>
+    <input id="cl-phone" type="email" inputmode="email" placeholder="name@example.com" autocomplete="username"
+      style="width:100%;background:#0E1B2E;border:1px solid #2A3D52;border-radius:10px;color:#E8D9B8;font-family:inherit;padding:13px;font-size:16px;direction:ltr;text-align:center;">
+    <label style="display:block;color:#7a9ab5;font-size:11px;margin:12px 0 4px;">סיסמה</label>
+    <input id="cl-pass" type="password" autocomplete="current-password" placeholder="הסיסמה שקיבלת"
+      onkeydown="if(event.key==='Enter'){clLogin();}"
+      style="width:100%;background:#0E1B2E;border:1px solid #2A3D52;border-radius:10px;color:#E8D9B8;font-family:inherit;padding:13px;font-size:16px;text-align:center;">
+    <button id="cl-login-btn" onclick="clLogin()" style="width:100%;margin-top:14px;padding:13px;background:#1D9E75;border:none;border-radius:10px;color:#fff;font-size:15px;font-weight:800;cursor:pointer;font-family:inherit;">התחבר</button>
     <div id="cl-status" style="text-align:center;color:#ff9a8f;font-size:12.5px;margin-top:12px;min-height:16px;"></div>
   </div>
 </div>
@@ -23610,6 +23610,33 @@ document.getElementById('legal-modal').addEventListener('click', function(e){ if
 function _clStatus(m,ok){ var e=document.getElementById('cl-status'); if(e){ e.textContent=m||''; e.style.color=ok?'#7eecc1':'#ff9a8f'; } }
 function clValidEmail(v){ return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(String(v||'').trim()); }
 window._clPhone='';   // holds the login email (name kept for minimal churn)
+// Member login with email + password (Supabase password grant — same as admin).
+// Chosen over email-OTP for the pilot: no email delivery / rate-limit issues.
+async function clLogin(){
+  var email=String(document.getElementById('cl-phone').value||'').trim();
+  var pass=String(document.getElementById('cl-pass').value||'');
+  if(!clValidEmail(email)){ _clStatus('כתובת מייל לא תקינה'); return; }
+  if(!pass){ _clStatus('נא להזין סיסמה'); return; }
+  var btn=document.getElementById('cl-login-btn'), old=btn?btn.textContent:''; if(btn){ btn.disabled=true; btn.textContent='מתחבר...'; } _clStatus('');
+  try{
+    var r=await fetch(SUPA_URL+'/auth/v1/token?grant_type=password',{method:'POST',headers:{'apikey':SUPA_KEY,'Content-Type':'application/json'},body:JSON.stringify({email:email,password:pass})});
+    var d=await r.json().catch(function(){return{};});
+    if(!r.ok || !d.access_token){ throw new Error(_clLoginErr(d)); }
+    clStoreSession(d);
+    _clStatus('התחברת בהצלחה ✓',true);
+    setTimeout(function(){
+      clCloseAfterLogin();
+      if(typeof _loginGateActive==='function' && _loginGateActive()){ try{ _afterMemberLogin(); }catch(e){} }
+    },400);
+  }catch(err){ _clStatus((err&&err.message)||'ההתחברות נכשלה'); }
+  if(btn){ btn.disabled=false; btn.textContent=old; }
+}
+function _clLoginErr(d){
+  var m=(d && (d.msg||d.error_description||d.error||d.message))||'';
+  if(/invalid|credent|grant/i.test(m)) return 'אימייל או סיסמה שגויים';
+  if(/confirm/i.test(m)) return 'החשבון עדיין לא אושר';
+  return m||'ההתחברות נכשלה';
+}
 async function clSendCode(){
   var email=String(document.getElementById('cl-phone').value||'').trim();
   if(!clValidEmail(email)){ _clStatus('כתובת מייל לא תקינה'); return; }
@@ -23713,16 +23740,19 @@ function _showActivateOverlay(email){
   var o=document.getElementById('activate-overlay'); if(o){ var e=document.getElementById('activate-email'); if(e) e.textContent=email||''; o.style.display='block'; }
 }
 function _hideActivateOverlay(){ var o=document.getElementById('activate-overlay'); if(o) o.style.display='none'; }
-// The orchestrator: decide login → activation → open app.
+// The orchestrator: decide login → (optional paid-list) → open app.
+// Pilot model: an account exists only for members who paid (you create it), so a
+// valid login = access. Set window.REQUIRE_PAID_LIST=true to also require the
+// members table (stricter, lets you revoke without deleting the account).
 async function runGate(){
   if(!_loginGateActive()) return;                          // gate off -> app open
   if(window._adminAuth) return;                            // admin bypass
   var s=null; try{ s=clSession(); }catch(e){}
   if(!s){ _hideActivateOverlay(); try{ clOpen(); }catch(e){} return; }   // not logged in
   try{ clCloseAfterLogin(); }catch(e){}
+  if(!window.REQUIRE_PAID_LIST){ _hideActivateOverlay(); return; }        // logged in -> open
   var ok=await memberActivated();
-  if(ok){ _hideActivateOverlay(); }
-  else { _showActivateOverlay(_memberEmail()); }
+  if(ok){ _hideActivateOverlay(); } else { _showActivateOverlay(_memberEmail()); }
 }
 function enforceLoginGate(){ try{ runGate(); }catch(e){} return true; }
 // After a member logs in: reload content (now with their token so RLS returns it),
@@ -23731,7 +23761,7 @@ async function _afterMemberLogin(){
   try{ if(typeof loadData==='function') await loadData(); }catch(e){}
   try{ if(typeof bldCats==='function') bldCats(); }catch(e){}
   try{ await runGate(); }catch(e){}
-  try{ if(typeof navToTab==='function' && (await memberActivated())) navToTab('home'); }catch(e){}
+  try{ if(typeof navToTab==='function') navToTab('home'); }catch(e){}
 }
 function memberRecheck(){ try{ localStorage.removeItem('member_ok'); }catch(e){} if(_loginGateActive()){ location.reload(); } }
 function memberLogout(){
