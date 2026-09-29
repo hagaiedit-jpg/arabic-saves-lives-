@@ -23409,7 +23409,7 @@ window.addEventListener('load', function(){
 <script>
 // Version stamp — shown in the admin panel so we can confirm which build is live
 // on a device (stale service-worker caches were causing "my changes don't show").
-window.APP_VERSION = 'v294';
+window.APP_VERSION = 'v296';
 
 // Register the service worker for full offline use in the field, WITH update
 // detection: when a new version installs, offer a one-tap refresh instead of the
@@ -23521,16 +23521,17 @@ document.getElementById('legal-modal').addEventListener('click', function(e){ if
     <div style="text-align:center;margin-bottom:16px;">
       <div style="font-size:34px;">🔐</div>
       <div style="color:#fff;font-size:20px;font-weight:800;margin-top:4px;">התחברות לערכה</div>
-      <div id="cl-sub" style="color:#9fb2c6;font-size:13px;margin-top:4px;">התחברות עם אימייל וסיסמה</div>
+      <div id="cl-sub" style="color:#9fb2c6;font-size:13px;margin-top:4px;">הרשמה עם אימייל וסיסמה</div>
     </div>
     <label style="display:block;color:#7a9ab5;font-size:11px;margin-bottom:4px;">כתובת מייל</label>
     <input id="cl-phone" type="email" inputmode="email" placeholder="name@example.com" autocomplete="username"
       style="width:100%;background:#0E1B2E;border:1px solid #2A3D52;border-radius:10px;color:#E8D9B8;font-family:inherit;padding:13px;font-size:16px;direction:ltr;text-align:center;">
     <label style="display:block;color:#7a9ab5;font-size:11px;margin:12px 0 4px;">סיסמה</label>
-    <input id="cl-pass" type="password" autocomplete="current-password" placeholder="הסיסמה שקיבלת"
-      onkeydown="if(event.key==='Enter'){clLogin();}"
+    <input id="cl-pass" type="password" autocomplete="current-password" placeholder="בחרו סיסמה (6 תווים לפחות)"
+      onkeydown="if(event.key==='Enter'){clSubmit();}"
       style="width:100%;background:#0E1B2E;border:1px solid #2A3D52;border-radius:10px;color:#E8D9B8;font-family:inherit;padding:13px;font-size:16px;text-align:center;">
-    <button id="cl-login-btn" onclick="clLogin()" style="width:100%;margin-top:14px;padding:13px;background:#1D9E75;border:none;border-radius:10px;color:#fff;font-size:15px;font-weight:800;cursor:pointer;font-family:inherit;">התחבר</button>
+    <button id="cl-login-btn" onclick="clSubmit()" style="width:100%;margin-top:14px;padding:13px;background:#1D9E75;border:none;border-radius:10px;color:#fff;font-size:15px;font-weight:800;cursor:pointer;font-family:inherit;">הרשמה</button>
+    <div style="text-align:center;margin-top:12px;"><button id="cl-mode-toggle" onclick="clToggleMode()" style="background:none;border:none;color:#D4A24E;font-size:13px;cursor:pointer;font-family:inherit;text-decoration:underline;">כבר יש לך חשבון? התחברות</button></div>
     <div id="cl-status" style="text-align:center;color:#ff9a8f;font-size:12.5px;margin-top:12px;min-height:16px;"></div>
   </div>
 </div>
@@ -23637,6 +23638,51 @@ function _clLoginErr(d){
   if(/confirm/i.test(m)) return 'החשבון עדיין לא אושר';
   return m||'ההתחברות נכשלה';
 }
+// Self-registration: a soldier creates their own account (no work for the owner).
+// Needs Supabase "Confirm email" OFF so signup returns a session immediately.
+window._clMode='signup';   // new visitors register first
+function clToggleMode(){
+  window._clMode=(window._clMode==='login')?'signup':'login';
+  var b=document.getElementById('cl-login-btn'), t=document.getElementById('cl-mode-toggle'),
+      sub=document.getElementById('cl-sub'), p=document.getElementById('cl-pass');
+  if(window._clMode==='signup'){
+    if(b)b.textContent='הרשמה'; if(t)t.textContent='כבר יש לך חשבון? התחברות';
+    if(sub)sub.textContent='הרשמה עם אימייל וסיסמה'; if(p)p.setAttribute('placeholder','בחרו סיסמה (6 תווים לפחות)');
+  } else {
+    if(b)b.textContent='התחבר'; if(t)t.textContent='עדיין אין לך חשבון? הרשמה';
+    if(sub)sub.textContent='התחברות עם אימייל וסיסמה'; if(p)p.setAttribute('placeholder','הסיסמה שלך');
+  }
+  _clStatus('');
+}
+function clSubmit(){ return (window._clMode==='signup') ? clSignup() : clLogin(); }
+async function clSignup(){
+  var email=String(document.getElementById('cl-phone').value||'').trim();
+  var pass=String(document.getElementById('cl-pass').value||'');
+  if(!clValidEmail(email)){ _clStatus('כתובת מייל לא תקינה'); return; }
+  if(pass.length<6){ _clStatus('הסיסמה צריכה לפחות 6 תווים'); return; }
+  var btn=document.getElementById('cl-login-btn'), old=btn?btn.textContent:''; if(btn){ btn.disabled=true; btn.textContent='נרשם...'; } _clStatus('');
+  try{
+    var r=await fetch(SUPA_URL+'/auth/v1/signup',{method:'POST',headers:{'apikey':SUPA_KEY,'Content-Type':'application/json'},body:JSON.stringify({email:email,password:pass})});
+    var d=await r.json().catch(function(){return{};});
+    if(!r.ok){ throw new Error(_clSignupErr(d)); }
+    if(d.access_token){
+      clStoreSession(d);
+      _clStatus('נרשמת בהצלחה ✓',true);
+      setTimeout(function(){ clCloseAfterLogin(); if(typeof _loginGateActive==='function' && _loginGateActive()){ try{ _afterMemberLogin(); }catch(e){} } },400);
+    } else {
+      // Email confirmation is ON in Supabase — no instant session.
+      _clStatus('נרשמת! נשלח מייל אישור — יש לאשר ואז להתחבר.',true);
+    }
+  }catch(err){ _clStatus((err&&err.message)||'ההרשמה נכשלה'); }
+  if(btn){ btn.disabled=false; btn.textContent=old; }
+}
+function _clSignupErr(d){
+  var m=(d && (d.msg||d.error_description||d.error||d.message))||'';
+  if(/already|registered|exists/i.test(m)) return 'האימייל כבר רשום — נסו להתחבר';
+  if(/password/i.test(m)) return 'סיסמה חלשה מדי (לפחות 6 תווים)';
+  if(/signup|disabled|not allowed/i.test(m)) return 'ההרשמה סגורה כרגע';
+  return m||'ההרשמה נכשלה';
+}
 async function clSendCode(){
   var email=String(document.getElementById('cl-phone').value||'').trim();
   if(!clValidEmail(email)){ _clStatus('כתובת מייל לא תקינה'); return; }
@@ -23713,6 +23759,11 @@ function clCloseAfterLogin(){ var o=document.getElementById('cl-overlay'); if(o)
 // this is the app-side gate that pairs with it. OFF by default until the Supabase
 // side is set up — flip on with localStorage.setItem('login_gate','1').
 window.LOGIN_GATE = (function(){ try{ return localStorage.getItem('login_gate')==='1'; }catch(e){ return false; } })();
+// Paid product: a logged-in member must also be on the "members" (paid) list to
+// see content. During the demand-validation phase the list is empty, so people
+// register and hit the purchase wall (you measure sign-ups in Supabase). Once
+// payment is connected, a paid member is added automatically.
+window.REQUIRE_PAID_LIST = true;
 function _loginGateActive(){ return !!window.LOGIN_GATE; }
 function _memberEmail(){ try{ var s=clSession(); return (s&&s.user&&s.user.email)?String(s.user.email).toLowerCase():''; }catch(e){ return ''; } }
 // Is the logged-in member on the paid list? Checks the members table with the
