@@ -23402,7 +23402,7 @@ window.addEventListener('load', function(){
 <script>
 // Version stamp — shown in the admin panel so we can confirm which build is live
 // on a device (stale service-worker caches were causing "my changes don't show").
-window.APP_VERSION = 'v292';
+window.APP_VERSION = 'v293';
 
 // Register the service worker for full offline use in the field, WITH update
 // detection: when a new version installs, offer a one-tap refresh instead of the
@@ -23526,7 +23526,7 @@ document.getElementById('legal-modal').addEventListener('click', function(e){ if
     <!-- step 2: code -->
     <div id="cl-step-code" style="display:none;">
       <label style="display:block;color:#7a9ab5;font-size:11px;margin-bottom:4px;">הקוד שקיבלת במייל</label>
-      <input id="cl-code" type="text" inputmode="numeric" maxlength="6" placeholder="______"
+      <input id="cl-code" type="text" inputmode="numeric" maxlength="8" placeholder="________"
         style="width:100%;background:#0E1B2E;border:1px solid #2A3D52;border-radius:10px;color:#E8D9B8;font-family:inherit;padding:13px;font-size:22px;letter-spacing:8px;direction:ltr;text-align:center;">
       <button id="cl-verify-btn" onclick="clVerify()" style="width:100%;margin-top:12px;padding:13px;background:#D4A24E;border:none;border-radius:10px;color:#0E1B2E;font-size:15px;font-weight:800;cursor:pointer;font-family:inherit;">אמת והתחבר</button>
       <div style="text-align:center;margin-top:10px;"><button onclick="clBackToPhone()" style="background:none;border:none;color:#7a9ab5;font-size:12px;cursor:pointer;font-family:inherit;text-decoration:underline;">‹ שינוי מספר / שליחת קוד מחדש</button></div>
