@@ -2106,8 +2106,11 @@ body, body *, .scr, .scr *, button, input, textarea, select {
         </h1>
         <div style="color:#E8D9B8;font-size:20px;font-weight:800;letter-spacing:3px;margin-bottom:14px;">להבין · להגיב · לפעול</div>
         <div style="color:#E8D9B8;font-size:17px;font-weight:700;letter-spacing:0.3px;margin-bottom:14px;">לא קורס. לא עוד אפליקציה. שכבת הגנה.</div>
-        <div style="color:#a0b8c8;font-size:15px;line-height:1.7;max-width:430px;margin:0 auto;">
-          ערבית מבצעית לשטח — משפטים, תשובות ושמע מיידי למצבים אמיתיים.<br>
+        <div style="color:#E8D9B8;font-size:15.5px;line-height:1.75;max-width:440px;margin:0 auto;font-weight:600;">
+          מה אומרים לך · מה עונים · מה כתוב בשטח<br>
+          <span style="color:#a0b8c8;font-weight:400;">כלי שטח מיידי, תרחישים ואימון — תשובה בשניות.</span>
+        </div>
+        <div style="color:#a0b8c8;font-size:14px;line-height:1.6;max-width:430px;margin:12px auto 0;">
           מילה אחת שלא הבנת יכולה להכריע אירוע שלם.
         </div>
         <div style="color:#7a9ab5;font-size:12.5px;margin-top:10px;">🎧 בקול אמיתי · ✓ עובד גם ללא קליטה</div>
@@ -2295,25 +2298,80 @@ function showLanding() {
 <!-- HOME TAB -->
 <div class="scr on" id="tab-home">
   <div style="padding:20px 16px 16px;">
-
-    <!-- Global search across the whole app -->
-    <div style="display:flex;align-items:center;gap:8px;margin-bottom:16px;">
-      <div onclick="openGlobalSearch()" style="flex:1;background:#1F3147;border:1px solid #2A3D52;border-radius:12px;padding:11px 12px;display:flex;align-items:center;gap:8px;cursor:pointer;user-select:none;-webkit-user-select:none;-webkit-touch-callout:none;">
-        <span style="color:#D4A24E;font-size:18px;">🔍</span>
-        <span style="flex:1;color:#7a9ab5;font-size:14px;">חיפוש בכל הערכה...</span>
+    <!-- 🚨 Primary action #1 — field mode (the reason the app exists) -->
+    <div onclick="navToTab('qk')" style="background:linear-gradient(135deg,#c0392b 0%,#8e1f15 100%);border-radius:18px;padding:20px 18px;margin-bottom:12px;cursor:pointer;box-shadow:0 6px 18px rgba(192,57,43,0.35);display:flex;align-items:center;gap:14px;">
+      <div style="font-size:40px;line-height:1;flex-shrink:0;">🚨</div>
+      <div style="flex:1;min-width:0;">
+        <div class="keep-white" style="color:#fff;font-size:22px;font-weight:900;line-height:1.2;">אני בשטח עכשיו</div>
+        <div style="color:rgba(255,255,255,0.9);font-size:13.5px;margin-top:3px;">מה אומרים לך ומה עונים — תוך שניות</div>
       </div>
-      <button onclick="gsHomeVoice()" title="חיפוש קולי" style="background:rgba(212,162,78,0.18);border:1px solid #D4A24E;color:#D4A24E;width:44px;height:44px;border-radius:12px;cursor:pointer;font-size:19px;flex-shrink:0;">🎤</button>
+      <div class="keep-white" style="color:#fff;font-size:24px;flex-shrink:0;">◀</div>
     </div>
 
-    <!-- Welcome -->
-    <div style="margin-bottom:18px;">
-      <!-- Main greeting (no more badge here - moved to big card) -->
-      <div id="home-greeting" style="color:#E8D9B8;font-size:24px;font-weight:800;letter-spacing:0.3px;margin-bottom:4px;">בוקר טוב</div>
-      <div id="home-subtitle" style="color:#7a9ab5;font-size:13px;">בואו נמשיך לתרגל</div>
-      <!-- Keep old hidden badge for compatibility -->
-      <div id="home-streak-badge" style="display:none;">
-        <span id="home-streak-count"></span>
+    <!-- Global search across the whole app -->
+    <div style="display:flex;align-items:center;gap:8px;margin-bottom:12px;">
+      <div onclick="openGlobalSearch()" style="flex:1;background:#1F3147;border:1px solid #2A3D52;border-radius:12px;padding:15px 14px;display:flex;align-items:center;gap:10px;border-width:2px;border-color:#D4A24E;cursor:pointer;user-select:none;-webkit-user-select:none;-webkit-touch-callout:none;">
+        <span style="color:#D4A24E;font-size:21px;">🔍</span>
+        <span style="flex:1;color:#9fb4c8;font-size:15px;font-weight:600;">חיפוש מהיר: עצור, ידיים, תעודה, פצוע, נשק...</span>
       </div>
+      <button onclick="gsHomeVoice()" title="חיפוש קולי" style="background:rgba(212,162,78,0.18);border:1px solid #D4A24E;color:#D4A24E;width:54px;height:54px;border-radius:12px;cursor:pointer;font-size:19px;flex-shrink:0;">🎤</button>
+    </div>
+
+    <!-- 🎯 Primary action #3 — training (prepare for next time) -->
+    <div onclick="navToTab('train')" style="background:linear-gradient(135deg,#1f4f86 0%,#163a63 100%);border:1px solid rgba(120,170,230,0.3);border-radius:18px;padding:16px 18px;margin-bottom:18px;cursor:pointer;box-shadow:0 4px 12px rgba(0,0,0,0.25);display:flex;align-items:center;gap:14px;">
+      <div style="font-size:34px;line-height:1;flex-shrink:0;">🎯</div>
+      <div style="flex:1;min-width:0;">
+        <div class="keep-white" style="color:#fff;font-size:19px;font-weight:900;line-height:1.2;">אני רוצה להתאמן</div>
+        <div style="color:rgba(255,255,255,0.85);font-size:13px;margin-top:3px;">תרגול, תרחישים, מבחנים ומסלול 30 יום</div>
+      </div>
+      <div class="keep-white" style="color:#fff;font-size:22px;flex-shrink:0;">◀</div>
+    </div>
+
+    <!-- Secondary — quieter: everything else -->
+    <div style="color:#7a9ab5;font-size:12px;font-weight:700;margin:0 2px 8px;">עוד בערכה</div>
+    <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:16px;">
+      <div onclick="navToTab('lib')" style="position:relative;background:#1F3147;border:1px solid #2A3D52;border-radius:12px;padding:11px 6px;text-align:center;cursor:pointer;"><div style="font-size:20px;line-height:1;margin-bottom:5px;">📚</div><div style="color:#E8D9B8;font-size:13px;font-weight:700;line-height:1.25;">ספרייה</div></div>
+      <div onclick="navToTab('scn')" style="position:relative;background:#1F3147;border:1px solid #2A3D52;border-radius:12px;padding:11px 6px;text-align:center;cursor:pointer;"><div style="font-size:20px;line-height:1;margin-bottom:5px;">💬</div><div style="color:#E8D9B8;font-size:13px;font-weight:700;line-height:1.25;">תרחישים</div></div>
+      <div onclick="navToTab('fav')" style="position:relative;background:#1F3147;border:1px solid #2A3D52;border-radius:12px;padding:11px 6px;text-align:center;cursor:pointer;"><div style="font-size:20px;line-height:1;margin-bottom:5px;">⭐</div><div style="color:#E8D9B8;font-size:13px;font-weight:700;line-height:1.25;">שמורים</div></div>
+      <div onclick="navToTab('cus')" style="position:relative;background:#1F3147;border:1px solid #2A3D52;border-radius:12px;padding:11px 6px;text-align:center;cursor:pointer;"><div id="home-cus-new" style="display:none;position:absolute;top:4px;right:4px;background:#D4A24E;color:#0E1B2E;font-size:9px;font-weight:800;padding:0 6px;border-radius:8px;line-height:1.6;">חדש</div><div style="font-size:20px;line-height:1;margin-bottom:5px;">🕌</div><div style="color:#E8D9B8;font-size:13px;font-weight:700;line-height:1.25;">תרבות</div></div>
+      <div onclick="openFoundations()" style="position:relative;background:#1F3147;border:1px solid #2A3D52;border-radius:12px;padding:11px 6px;text-align:center;cursor:pointer;"><div style="font-size:20px;line-height:1;margin-bottom:5px;">🎓</div><div style="color:#E8D9B8;font-size:13px;font-weight:700;line-height:1.25;">יסודות</div></div>
+      <div onclick="openDailyDrills()" style="position:relative;background:#1F3147;border:1px solid #2A3D52;border-radius:12px;padding:11px 6px;text-align:center;cursor:pointer;"><div id="home-emerg-badge" style="display:none;position:absolute;top:5px;right:5px;background:#e74c3c;color:#fff;font-size:10px;font-weight:900;border-radius:50%;width:18px;height:18px;line-height:18px;text-align:center;">1</div><div style="font-size:20px;line-height:1;margin-bottom:5px;">🔁</div><div style="color:#E8D9B8;font-size:13px;font-weight:700;line-height:1.25;">אתגר יומי</div></div>
+    </div>
+
+    <!-- Continue where you left off (small & compact) -->
+    <div id="home-continue-card" style="display:none;background:linear-gradient(135deg,#D4A24E 0%,#b87325 100%);border:1px solid rgba(255,255,255,0.2);border-radius:12px;padding:10px 14px;margin-bottom:14px;cursor:pointer;box-shadow:0 2px 8px rgba(212,134,46,0.25);" onclick="homeContinue()">
+      <div style="display:flex;align-items:center;justify-content:space-between;gap:10px;">
+        <div style="flex:1;min-width:0;">
+          <div style="color:rgba(255,255,255,0.9);font-size:10px;font-weight:700;letter-spacing:0.5px;margin-bottom:2px;">🔄 תרחיש פעיל</div>
+          <div id="home-continue-title" class="keep-white" style="color:#fff;font-size:14px;font-weight:700;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;"></div>
+        </div>
+        <div class="keep-white" style="color:#fff;font-size:18px;">◀</div>
+      </div>
+    </div>
+    
+    <!-- ⏱️ Daily nudge (only when not practiced today) -->
+    <div id="home-daily-nudge" onclick="quickDailyDrill()" style="display:none;align-items:center;gap:12px;background:linear-gradient(135deg,#b07a2a 0%,#7a5418 100%);border-radius:14px;padding:13px 15px;margin-bottom:14px;cursor:pointer;box-shadow:0 4px 12px rgba(176,122,42,0.3);">
+      <div id="home-daily-nudge-icon" style="font-size:26px;">🔥</div>
+      <div style="flex:1;min-width:0;">
+        <div id="home-daily-nudge-title" class="keep-white" style="color:#fff;font-size:15px;font-weight:800;"></div>
+        <div id="home-daily-nudge-sub" style="color:rgba(255,255,255,0.9);font-size:12px;"></div>
+      </div>
+      <div class="keep-white" style="color:#fff;font-size:20px;">◀</div>
+    </div>
+
+    <!-- 🆕 "נוסף לאחרונה" strip -->
+    <div id="home-new-strip" onclick="navToTab('nwf')" style="display:none;align-items:center;gap:11px;background:linear-gradient(135deg,rgba(212,162,78,0.18),rgba(212,162,78,0.06));border:1px solid rgba(212,162,78,0.4);border-radius:14px;padding:12px 14px;margin-bottom:14px;cursor:pointer;">
+      <div style="font-size:24px;flex-shrink:0;">🆕</div>
+      <div style="flex:1;min-width:0;">
+        <div style="color:#E8D9B8;font-size:14px;font-weight:800;">נוסף לאחרונה</div>
+        <div id="home-new-strip-sub" style="color:#D4A24E;font-size:12px;font-weight:700;margin-top:1px;"></div>
+      </div>
+      <div style="color:#D4A24E;font-size:20px;flex-shrink:0;">›</div>
+    </div>
+
+    <!-- Prep Path - Combat Readiness Track (HERO - the main "what to do now") -->
+    <div onclick="heroAction()" id="home-prep-card" style="background:linear-gradient(135deg,#D4A24E 0%,#a85200 100%);border-radius:14px;padding:14px 16px;margin-bottom:14px;cursor:pointer;box-shadow:0 4px 12px rgba(212,134,46,0.25);position:relative;overflow:hidden;min-height:60px;">
+      <!-- Content set by JS -->
     </div>
 
     <!-- Phrase of the Day (ביטוי היום) — kept high on the page, right under the greeting, so it isn't missed -->
@@ -2336,115 +2394,17 @@ function showLanding() {
     <!-- 🗓️ Weekly readiness ritual (shown once per week) -->
     <div id="home-weekly-ritual" style="display:none;margin-bottom:16px;"></div>
 
-    <!-- Continue where you left off (small & compact) -->
-    <div id="home-continue-card" style="display:none;background:linear-gradient(135deg,#D4A24E 0%,#b87325 100%);border:1px solid rgba(255,255,255,0.2);border-radius:12px;padding:10px 14px;margin-bottom:14px;cursor:pointer;box-shadow:0 2px 8px rgba(212,134,46,0.25);" onclick="homeContinue()">
-      <div style="display:flex;align-items:center;justify-content:space-between;gap:10px;">
-        <div style="flex:1;min-width:0;">
-          <div style="color:rgba(255,255,255,0.9);font-size:10px;font-weight:700;letter-spacing:0.5px;margin-bottom:2px;">🔄 תרחיש פעיל</div>
-          <div id="home-continue-title" class="keep-white" style="color:#fff;font-size:14px;font-weight:700;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;"></div>
-        </div>
-        <div class="keep-white" style="color:#fff;font-size:18px;">◀</div>
-      </div>
-    </div>
-    
-    <!-- Prep Path - Combat Readiness Track (HERO - the main "what to do now") -->
-    <div onclick="heroAction()" id="home-prep-card" style="background:linear-gradient(135deg,#D4A24E 0%,#a85200 100%);border-radius:14px;padding:14px 16px;margin-bottom:14px;cursor:pointer;box-shadow:0 4px 12px rgba(212,134,46,0.25);position:relative;overflow:hidden;min-height:60px;">
-      <!-- Content set by JS -->
-    </div>
-
-    <!-- 🧭 What do you want today? - intent-based quick entry -->
-    <div style="margin-bottom:14px;">
-      <div style="color:#D4A24E;font-size:13px;font-weight:700;letter-spacing:0.5px;margin-bottom:10px;display:flex;align-items:center;gap:6px;">🧭 מה מעניין אותך היום?</div>
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
-
-        <!-- Row 1: כל התרגילים בקובייה אחת -->
-        <div onclick="navToTab('train')" style="background:linear-gradient(160deg,#1F3147 0%,#243a55 100%);border:1px solid rgba(212,162,78,0.2);border-radius:14px;padding:14px 12px;cursor:pointer;box-shadow:0 2px 8px rgba(0,0,0,0.2);">
-          <div style="font-size:26px;margin-bottom:6px;line-height:1;">🎯</div>
-          <div style="color:#E8D9B8;font-size:15px;font-weight:800;margin-bottom:2px;">אימון ותרגול</div>
-          <div style="color:#7a9ab5;font-size:12px;line-height:1.4;">כל התרגילים במקום אחד (כולל מצב לחץ)</div>
-        </div>
-
-        <div onclick="openDailyDrills()" style="position:relative;background:linear-gradient(160deg,#1F3147 0%,#243a55 100%);border:1px solid rgba(212,162,78,0.2);border-radius:14px;padding:14px 12px;cursor:pointer;box-shadow:0 2px 8px rgba(0,0,0,0.2);">
-          <div id="home-emerg-badge" style="display:none;position:absolute;top:8px;right:8px;background:#e74c3c;color:#fff;font-size:11px;font-weight:900;border-radius:50%;width:22px;height:22px;line-height:22px;text-align:center;box-shadow:0 2px 6px rgba(231,76,60,0.5);animation:badgePulse 2s ease-in-out infinite;">1</div>
-          <div style="font-size:26px;margin-bottom:6px;line-height:1;">🔁</div>
-          <div style="color:#E8D9B8;font-size:15px;font-weight:800;margin-bottom:2px;">אתגר יומי + חזרה שבועית</div>
-          <div style="color:#7a9ab5;font-size:12px;line-height:1.4;">אתגר קצר וחזרה על מה שלמדת</div>
-        </div>
-
-        <!-- Row 2: ספרייה ותרחישים -->
-        <div onclick="navToTab('lib')" style="background:linear-gradient(160deg,#1F3147 0%,#243a55 100%);border:1px solid rgba(212,162,78,0.2);border-radius:14px;padding:14px 12px;cursor:pointer;box-shadow:0 2px 8px rgba(0,0,0,0.2);">
-          <div style="font-size:26px;margin-bottom:6px;line-height:1;">📚</div>
-          <div style="color:#E8D9B8;font-size:15px;font-weight:800;margin-bottom:2px;">הספרייה המבצעית</div>
-          <div style="color:#7a9ab5;font-size:12px;line-height:1.4;">לחפש מילה או נושא</div>
-        </div>
-
-        <div onclick="navToTab('scn')" style="background:linear-gradient(160deg,#1F3147 0%,#243a55 100%);border:1px solid rgba(212,162,78,0.2);border-radius:14px;padding:14px 12px;cursor:pointer;box-shadow:0 2px 8px rgba(0,0,0,0.2);">
-          <div style="font-size:26px;margin-bottom:6px;line-height:1;">💬</div>
-          <div style="color:#E8D9B8;font-size:15px;font-weight:800;margin-bottom:2px;">תרחישים מהשטח</div>
-          <div style="color:#7a9ab5;font-size:12px;line-height:1.4;">להתאמן על שיחה אמיתית</div>
-        </div>
-
-        <!-- Row 3: יסודות ותרבות -->
-        <div onclick="openFoundations()" style="background:linear-gradient(160deg,#1F3147 0%,#243a55 100%);border:1px solid rgba(212,162,78,0.2);border-radius:14px;padding:14px 12px;cursor:pointer;box-shadow:0 2px 8px rgba(0,0,0,0.2);">
-          <div style="font-size:26px;margin-bottom:6px;line-height:1;">🎓</div>
-          <div style="color:#E8D9B8;font-size:15px;font-weight:800;margin-bottom:2px;">יסודות השפה</div>
-          <div style="color:#7a9ab5;font-size:12px;line-height:1.4;">דקדוק ואוצר מילים מהבסיס</div>
-        </div>
-
-        <div onclick="navToTab('cus')" style="position:relative;background:linear-gradient(160deg,#1F3147 0%,#243a55 100%);border:1px solid rgba(212,162,78,0.2);border-radius:14px;padding:14px 12px;cursor:pointer;box-shadow:0 2px 8px rgba(0,0,0,0.2);">
-          <div id="home-cus-new" style="display:none;position:absolute;top:8px;right:8px;background:#D4A24E;color:#0E1B2E;font-size:9px;font-weight:800;padding:1px 7px;border-radius:8px;line-height:1.5;">חדש</div>
-          <div style="font-size:26px;margin-bottom:6px;line-height:1;">🕌</div>
-          <div style="color:#E8D9B8;font-size:15px;font-weight:800;margin-bottom:2px;">תרבות ומנהגים</div>
-          <div style="color:#7a9ab5;font-size:12px;line-height:1.4;">להבין את הצד השני</div>
-        </div>
-
-        <!-- Row 4: הכנה לשירות קרבי ושמורים -->
-        <div onclick="startPrepPath()" style="background:linear-gradient(160deg,#1F3147 0%,#243a55 100%);border:1px solid rgba(212,162,78,0.2);border-radius:14px;padding:14px 12px;cursor:pointer;box-shadow:0 2px 8px rgba(0,0,0,0.2);">
-          <div style="font-size:26px;margin-bottom:6px;line-height:1;">🪖</div>
-          <div style="color:#E8D9B8;font-size:15px;font-weight:800;margin-bottom:2px;">הכנה לשירות קרבי</div>
-          <div style="color:#7a9ab5;font-size:12px;line-height:1.4;">מסלול 30 יום מובנה</div>
-        </div>
-
-        <div onclick="navToTab('fav')" style="background:linear-gradient(160deg,#1F3147 0%,#243a55 100%);border:1px solid rgba(212,162,78,0.2);border-radius:14px;padding:14px 12px;cursor:pointer;box-shadow:0 2px 8px rgba(0,0,0,0.2);">
-          <div style="font-size:26px;margin-bottom:6px;line-height:1;">⭐</div>
-          <div style="color:#E8D9B8;font-size:15px;font-weight:800;margin-bottom:2px;">שמורים</div>
-          <div style="color:#7a9ab5;font-size:12px;line-height:1.4;">המשפטים ששמרת</div>
-        </div>
-
+    <!-- Welcome -->
+    <div style="display:none;">
+      <!-- Main greeting (no more badge here - moved to big card) -->
+      <div id="home-greeting" style="color:#E8D9B8;font-size:24px;font-weight:800;letter-spacing:0.3px;margin-bottom:4px;">בוקר טוב</div>
+      <div id="home-subtitle" style="color:#7a9ab5;font-size:13px;">בואו נמשיך לתרגל</div>
+      <!-- Keep old hidden badge for compatibility -->
+      <div id="home-streak-badge" style="display:none;">
+        <span id="home-streak-count"></span>
       </div>
     </div>
 
-    <!-- 🆕 "נוסף לאחרונה" strip -->
-    <div id="home-new-strip" onclick="navToTab('nwf')" style="display:none;align-items:center;gap:11px;background:linear-gradient(135deg,rgba(212,162,78,0.18),rgba(212,162,78,0.06));border:1px solid rgba(212,162,78,0.4);border-radius:14px;padding:12px 14px;margin-bottom:14px;cursor:pointer;">
-      <div style="font-size:24px;flex-shrink:0;">🆕</div>
-      <div style="flex:1;min-width:0;">
-        <div style="color:#E8D9B8;font-size:14px;font-weight:800;">נוסף לאחרונה</div>
-        <div id="home-new-strip-sub" style="color:#D4A24E;font-size:12px;font-weight:700;margin-top:1px;"></div>
-      </div>
-      <div style="color:#D4A24E;font-size:20px;flex-shrink:0;">›</div>
-    </div>
-
-    <!-- ⏱️ Daily nudge (only when not practiced today) -->
-    <div id="home-daily-nudge" onclick="quickDailyDrill()" style="display:none;align-items:center;gap:12px;background:linear-gradient(135deg,#c0392b 0%,#7a2018 100%);border-radius:14px;padding:13px 15px;margin-bottom:14px;cursor:pointer;box-shadow:0 4px 12px rgba(192,57,43,0.3);">
-      <div id="home-daily-nudge-icon" style="font-size:26px;">🔥</div>
-      <div style="flex:1;min-width:0;">
-        <div id="home-daily-nudge-title" class="keep-white" style="color:#fff;font-size:15px;font-weight:800;"></div>
-        <div id="home-daily-nudge-sub" style="color:rgba(255,255,255,0.9);font-size:12px;"></div>
-      </div>
-      <div class="keep-white" style="color:#fff;font-size:20px;">◀</div>
-    </div>
-
-    <!-- Progress status: at-a-glance stats, tap for the full status screen -->
-
-
-
-
-
-    <!-- Daily Reminder banner removed - streak & daily goal are shown in the stats cubes below -->
-
-    <!-- Weekly Summary banner removed - progress is shown in the Status screen + the stats cubes below -->
-
-    
     <div id="home-stats-cubes" onclick="navToTab('progress')" style="display:block;background:linear-gradient(135deg,#18293E 0%,#1F3147 100%);border:1px solid rgba(212,162,78,0.2);border-radius:12px;padding:8px 12px;margin-bottom:10px;cursor:pointer;">
       <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px;">
         <div style="color:#D4A24E;font-size:12px;font-weight:800;letter-spacing:0.5px;">📊 ההתקדמות שלי</div>
@@ -6668,7 +6628,7 @@ function renderHome(){
             if (nI) nI.textContent = '🔥';
             if (nT) nT.textContent = 'הרצף שלך (' + nStreak + ') בסכנה';
             if (nS) nS.textContent = 'דקה אחת של תרגול שומרת עליו — קדימה';
-            nudge.style.background = 'linear-gradient(135deg,#c0392b 0%,#7a2018 100%)';
+            nudge.style.background = 'linear-gradient(135deg,#b07a2a 0%,#7a5418 100%)';
           } else {
             if (nI) nI.textContent = '⏱️';
             if (nT) nT.textContent = 'דקה ביום';
@@ -23408,7 +23368,7 @@ window.addEventListener('load', function(){
 <script>
 // Version stamp — shown in the admin panel so we can confirm which build is live
 // on a device (stale service-worker caches were causing "my changes don't show").
-window.APP_VERSION = 'v297';
+window.APP_VERSION = 'v298';
 
 // Register the service worker for full offline use in the field, WITH update
 // detection: when a new version installs, offer a one-tap refresh instead of the
