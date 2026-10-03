@@ -546,7 +546,9 @@ body.day-mode .stitle{color:#1A2B3C;}
 /* 🔠 Large text: scales the emergency situation screens (not the menu grid) */
 body.field-big #tab-ten, body.field-big #tab-veh, body.field-big #tab-ord, body.field-big #tab-threat,
 body.field-big #tab-answers, body.field-big #tab-chk, body.field-big #tab-triage, body.field-big #tab-desc,
-body.field-big #tab-calm, body.field-big #tab-crowd, body.field-big #tab-kids, body.field-big #emerg-list{zoom:1.22;}
+body.field-big #tab-calm, body.field-big #tab-crowd, body.field-big #tab-kids, body.field-big #emerg-list, body.field-big #heard-results{zoom:1.22;}
+body.day-mode .heard-mean{color:#0e1b2e!important;}
+body.day-mode .heard-title{color:#147a59!important;}
 .emerg-cube-emoji{font-size:34px;line-height:1;}
 .emerg-cube-name{color:#E8D9B8;font-size:15px;font-weight:800;line-height:1.2;}
 .emerg-cube-count{color:#93b0c8;font-size:12px;font-weight:600;background:rgba(212,162,78,0.1);padding:3px 10px;border-radius:99px;}
@@ -2332,6 +2334,16 @@ function showLanding() {
       <button onclick="gsHomeVoice()" title="חיפוש קולי" style="background:rgba(212,162,78,0.18);border:1px solid #D4A24E;color:#D4A24E;width:54px;height:54px;border-radius:12px;cursor:pointer;font-size:19px;flex-shrink:0;">🎤</button>
     </div>
 
+    <!-- 👂 Primary action — "what did they say to me?" (reverse lookup by sound) -->
+    <div onclick="navToTab('heard')" style="background:linear-gradient(135deg,#17785a 0%,#0e5a3f 100%);border-radius:18px;padding:14px 18px;margin-bottom:12px;cursor:pointer;box-shadow:0 4px 12px rgba(0,0,0,0.22);display:flex;align-items:center;gap:14px;">
+      <div style="font-size:32px;line-height:1;flex-shrink:0;">👂</div>
+      <div style="flex:1;min-width:0;">
+        <div class="keep-white" style="color:#fff;font-size:19px;font-weight:900;line-height:1.2;">מה אמרו לי?</div>
+        <div style="color:rgba(255,255,255,0.88);font-size:13px;margin-top:3px;">שמעתם ערבית? כתבו איך שזה נשמע</div>
+      </div>
+      <div class="keep-white" style="color:#fff;font-size:22px;flex-shrink:0;">◀</div>
+    </div>
+
     <!-- 🎯 Primary action #3 — training (prepare for next time) -->
     <div onclick="navToTab('train')" style="background:linear-gradient(135deg,#1f4f86 0%,#163a63 100%);border:1px solid rgba(120,170,230,0.3);border-radius:18px;padding:16px 18px;margin-bottom:18px;cursor:pointer;box-shadow:0 4px 12px rgba(0,0,0,0.25);display:flex;align-items:center;gap:14px;">
       <div style="font-size:34px;line-height:1;flex-shrink:0;">🎯</div>
@@ -2944,6 +2956,20 @@ function showLanding() {
 </div>
 
 <!-- 📝 VISUAL RECOGNITION TEST -->
+<div class="scr" id="tab-heard">
+  <div class="sec">
+    <button class="emerg-back" onclick="navToTab(window._heardFrom||'qk')">‹ חזרה</button>
+    <div class="heard-title" style="color:#4fd0a0;font-size:22px;font-weight:900;margin:4px 0 4px;">👂 מה אמרו לי?</div>
+    <div style="color:#a0b8c8;font-size:13px;line-height:1.6;margin-bottom:12px;">כתבו את מה ששמעתם, איך שזה נשמע. בעברית או בערבית, בלי ניקוד, גם אם לא מדויק.</div>
+    <div class="emerg-panel" style="background:#1F3147;border:2px solid #1D9E75;border-radius:12px;padding:10px;margin-bottom:8px;display:flex;align-items:center;gap:8px;">
+      <input id="heard-input" placeholder="למשל: מעו סלאח" oninput="heardSearchSoon()" autocomplete="off" autocorrect="off" spellcheck="false" style="flex:1;min-width:0;background:transparent;border:none;color:#E8D9B8;font-size:18px;font-family:inherit;outline:none;direction:rtl;text-align:right;"/>
+      <button id="heard-voice" onclick="heardVoice(this)" title="תן לטלפון לשמוע (ערבית)" style="background:rgba(29,158,117,0.18);border:1px solid #1D9E75;color:#4fd0a0;width:46px;height:46px;border-radius:50%;cursor:pointer;font-size:19px;flex-shrink:0;">🎤</button>
+      <button onclick="var i=document.getElementById('heard-input');i.value='';heardSearch();i.focus();" title="נקה" style="background:rgba(255,255,255,0.1);border:none;color:#E8D9B8;width:40px;height:40px;border-radius:50%;cursor:pointer;font-size:18px;flex-shrink:0;">×</button>
+    </div>
+    <div style="color:#7a9ab5;font-size:11.5px;margin:0 2px 14px;">🎤 = הטלפון מקשיב לערבית. אפשר לקרב אותו למי שמדבר.</div>
+    <div id="heard-results"></div>
+  </div>
+</div>
 <div class="scr" id="tab-visquiz">
   <div class="sec">
     <button class="emerg-back" onclick="navToTab('visual')">‹ חזרה לזיהוי חזותי</button>
@@ -17906,6 +17932,156 @@ function _renderCheckpointList(elId, returnTab){
   el.innerHTML=h;
 }
 function rCheckpoint(){ _renderCheckpointList('checkpointlist','checkpoint'); }
+
+// ===== 👂 "מה אמרו לי?" — reverse lookup by SOUND =====
+// The soldier types what they HEARD (Hebrew letters, no niqqud, imprecise) or lets
+// the phone listen in Arabic. Both sides are reduced to a consonant "sound
+// skeleton" (letters a Hebrew ear confuses are merged; vowels/gutturals dropped),
+// then matched word-by-word with a small edit-distance tolerance.
+var _HEARD_HE={'ב':'B','פ':'F','ף':'F','כ':'K','ך':'K','ק':'K','ח':'K','ג':'G','ד':'D','ז':'Z','ט':'T','ת':'T','ס':'S','ש':'S','צ':'S','ץ':'S','ל':'L','מ':'M','ם':'M','נ':'N','ן':'N','ר':'R'};
+var _HEARD_AR={'ب':'B','ف':'F','ك':'K','ق':'K','خ':'K','ح':'K','ج':'G','د':'D','ض':'D','ذ':'D','ظ':'D','ز':'Z','ت':'T','ط':'T','ث':'T','س':'S','ش':'S','ص':'S','ل':'L','م':'M','ن':'N','ر':'R'};
+function _heardWordSkel(w){
+  w=String(w||'').replace(/[\u0591-\u05C7\u064B-\u0652\u0670\u0640'"`׳״]/g,'');
+  // The article (אל / ال) is often swallowed in speech — drop it on both sides.
+  if(w.length>3 && (w.indexOf('אל')===0 || w.indexOf('ال')===0)) w=w.slice(2);
+  var out='';
+  for(var i=0;i<w.length;i++){ var c=w[i]; var m=_HEARD_HE[c]||_HEARD_AR[c]; if(m) out+=m; }
+  return out;
+}
+function _heardSkelWords(str){
+  return String(str||'').split(/[\s\/\-–—,،.!?؟:;()]+/).filter(function(w){ return !/^(אל|אִל|ال|al|el)$/i.test(w); }).map(_heardWordSkel).filter(function(x){ return x.length>0; });
+}
+function _heardRaw(str){ return (typeof dictNorm==='function'?dictNorm(str):String(str||'')).replace(/[^\u05D0-\u05EA\u0621-\u064A]/g,''); }
+window._heardIdx=null; window._heardIdxKey='';
+function _heardBuildIndex(){
+  var key=[typeof DB!=='undefined'&&DB?DB.length:0, typeof DICT!=='undefined'&&DICT?DICT.length:0].join('|');
+  if(window._heardIdx && window._heardIdxKey===key) return window._heardIdx;
+  var out=[], seen={};
+  function add(o){
+    if(!o || !o.ar) return;
+    // One card per Arabic text. The same reply to several questions → no single question shown.
+    var k=_heardRaw(o.ar);
+    var prev=seen[k];
+    if(prev){ if(!prev.audio && o.audio) prev.audio=o.audio; if(prev.q && o.q!==prev.q) prev.q=''; return; }
+    o.words=_heardSkelWords(o.trans).concat(_heardSkelWords(o.ar));
+    o.raw=_heardRaw(o.trans)+' '+_heardRaw(o.ar);
+    seen[k]=o; out.push(o);
+  }
+  function kindOf(cat){ return cat==='שומעים בשטח: איום'?'threat':(cat==='שומעים בשטח: קללות'?'curse':(cat==='תשובות אזרח'?'answer':'gen')); }
+  function fromRow(r){
+    if(!r) return;
+    var au=r.audio||r.audio_url||'';
+    if(r.ar) add({he:r.he, ar:r.ar, trans:r.trans, audio:au, kind:kindOf(r.cat), src:r});
+    if(Array.isArray(r.responses)) r.responses.forEach(function(x){ if(x&&x.ar) add({he:x.he, ar:x.ar, trans:x.trans, audio:x.audio_url||x.audio||'', kind:'resp', q:r.he}); });
+  }
+  // Civilian speech first (threat, answers, interrogation replies), then the rest.
+  [typeof DB!=='undefined'?DB:[], typeof BUILTIN_THREAT!=='undefined'?BUILTIN_THREAT:[], typeof BUILTIN_TASHAUL!=='undefined'?BUILTIN_TASHAUL:[]].forEach(function(a){ (a||[]).forEach(fromRow); });
+  try{ (typeof ANSWERS!=='undefined'?ANSWERS:[]).forEach(function(g){ (g.options||[]).forEach(function(o){ add({he:o.he, ar:o.ar, trans:o.trans, audio:'', kind:'answer'}); }); }); }catch(e){}
+  [typeof DAILY!=='undefined'?DAILY:[], typeof HEART!=='undefined'?HEART:[], typeof NAVY!=='undefined'?NAVY:[], typeof DICT!=='undefined'?DICT:[],
+   typeof BUILTIN_DAILY!=='undefined'?BUILTIN_DAILY:[], typeof BUILTIN_DICT!=='undefined'?BUILTIN_DICT:[]].forEach(function(a){ (a||[]).forEach(fromRow); });
+  window._heardIdx=out; window._heardIdxKey=key; return out;
+}
+function _heardLev(a,b,max){
+  if(Math.abs(a.length-b.length)>max) return max+1;
+  var prev=[],cur=[],i,j;
+  for(j=0;j<=b.length;j++) prev[j]=j;
+  for(i=1;i<=a.length;i++){ cur=[i]; var rowMin=i;
+    for(j=1;j<=b.length;j++){ cur[j]=Math.min(prev[j]+1,cur[j-1]+1,prev[j-1]+(a[i-1]===b[j-1]?0:1)); if(cur[j]<rowMin) rowMin=cur[j]; }
+    if(rowMin>max) return max+1; prev=cur; }
+  return prev[b.length];
+}
+function _heardWordScore(q,w){
+  if(q===w) return 1;
+  if(q.length>=3 && w.indexOf(q)===0) return 0.85;
+  var tol=q.length<=2?0:(q.length<=4?1:2);
+  if(!tol) return 0;
+  var d=_heardLev(q,w,tol);
+  return d===0?1:(d===1?0.75:(d===2?0.55:0));
+}
+var _HEARD_KIND_BOOST={threat:0.12, curse:0.1, answer:0.1, resp:0.1, gen:0};
+function _heardMatch(rawQ){
+  var qw=_heardSkelWords(rawQ), qRaw=_heardRaw(rawQ);
+  if(!qw.length && !qRaw) return [];
+  var idx=_heardBuildIndex(), res=[];
+  idx.forEach(function(e){
+    var sc=0;
+    if(qw.length){
+      var used={}, sum=0;
+      qw.forEach(function(q){ var best=0, bi=-1;
+        for(var i=0;i<e.words.length;i++){ if(used[i]) continue; var v=_heardWordScore(q,e.words[i]); if(v>best){best=v;bi=i;} if(best===1) break; }
+        if(bi>=0) used[bi]=1; sum+=best; });
+      sc=sum/qw.length;
+      // Prefer phrases about as long as what was heard.
+      var extra=Math.max(0,(e.words.length/2)-qw.length); sc-=Math.min(0.2,extra*0.04);
+    }
+    if(qRaw.length>=3 && e.raw.replace(/\s/g,'').indexOf(qRaw)>=0) sc+=0.3;
+    if(sc<0.6) return;
+    sc+=_HEARD_KIND_BOOST[e.kind]||0; if(e.audio) sc+=0.03;
+    res.push({e:e, sc:sc});
+  });
+  res.sort(function(a,b){ return b.sc-a.sc; });
+  // A clear hit shouldn't be buried under weak look-alikes.
+  var top=res.length?res[0].sc:0;
+  return res.filter(function(x){ return x.sc>=top-0.3; }).slice(0,8).map(function(x){ return x.e; });
+}
+var _HEARD_EX=['מעו סלאח','אוהרבו','מא בערף','מש אנא','ג׳איין','ואללה'];
+function _heardEmptyHtml(){
+  var h='<div style="color:#7a9ab5;font-size:12px;font-weight:700;margin:4px 2px 8px;">נסו לדוגמה:</div><div style="display:flex;flex-wrap:wrap;gap:8px;">';
+  _HEARD_EX.forEach(function(x){ h+='<button onclick="heardTry(\''+x.replace(/'/g,"\\'")+'\')" style="background:#1F3147;border:1px solid #2A3D52;border-radius:14px;padding:8px 14px;color:#E8D9B8;font-size:14px;font-weight:600;cursor:pointer;font-family:inherit;">'+x+'</button>'; });
+  return h+'</div>';
+}
+function heardTry(x){ var i=document.getElementById('heard-input'); if(i){ i.value=x; heardSearch(); } }
+var _heardT=null;
+function heardSearchSoon(){ clearTimeout(_heardT); _heardT=setTimeout(heardSearch,140); }
+function heardSearch(){
+  var out=document.getElementById('heard-results'); if(!out) return;
+  var raw=((document.getElementById('heard-input')||{}).value||'').trim();
+  if(!raw){ out.innerHTML=_heardEmptyHtml(); return; }
+  var hits=_heardMatch(raw);
+  window._heardHits=hits;
+  if(!hits.length){
+    out.innerHTML='<div style="text-align:center;color:#a0b8c8;font-size:14px;line-height:1.7;padding:22px 10px;">לא מצאנו משהו שנשמע כמו "'+raw+'".<br><span style="font-size:12.5px;color:#7a9ab5;">נסו לכתוב רק מילה אחת ששמעתם בבירור, או לחפש לפי משמעות:</span><br>'
+      +'<button onclick="heardToSearch()" style="margin-top:10px;background:rgba(212,162,78,0.15);border:1px solid #D4A24E;border-radius:12px;padding:8px 16px;color:#D4A24E;font-size:14px;font-weight:700;cursor:pointer;font-family:inherit;">🔍 חיפוש בכל הערכה ‹</button></div>';
+    return;
+  }
+  var BADGE={
+    threat:['🚨 סימן לאיום: היערכו','#e74c3c','rgba(231,76,60,0.15)'],
+    curse:['😐 קללה או עלבון: לא איום','#e6a23c','rgba(230,162,60,0.14)'],
+    answer:['💬 תשובה של אזרח','#4fd0a0','rgba(29,158,117,0.14)'],
+    resp:['💬 תשובה של אזרח','#4fd0a0','rgba(29,158,117,0.14)'],
+    gen:['📘 ביטוי','#a0b8c8','rgba(160,184,200,0.12)']
+  };
+  var h='<div style="color:#7a9ab5;font-size:12px;margin:0 2px 10px;">הכי קרוב למה ששמעתם:</div>';
+  hits.forEach(function(e,i){
+    var au=e.audio; if(!au && e.src){ try{ au=_descAudioFor(e.src)||''; }catch(_){ } }
+    var b=BADGE[e.kind]||BADGE.gen;
+    h+='<div style="background:#1F3147;border:1px solid '+(e.kind==='threat'?'rgba(231,76,60,0.7)':'#2A3D52')+';border-radius:12px;padding:11px 13px;margin-bottom:9px;">';
+    h+='<div style="display:flex;align-items:center;gap:8px;margin-bottom:6px;"><span style="background:'+b[2]+';color:'+b[1]+';font-size:11.5px;font-weight:800;padding:2px 9px;border-radius:8px;">'+b[0]+'</span></div>';
+    h+='<div style="display:flex;align-items:center;gap:10px;"><div style="flex:1;min-width:0;">';
+    h+='<div style="color:#E8D9B8;font-size:21px;font-family:Georgia,serif;direction:rtl;line-height:1.35;">'+(e.ar||'')+'</div>';
+    if(e.trans) h+='<div style="color:#D4A24E;font-size:14px;margin-top:1px;">'+e.trans+'</div>';
+    h+='</div>'+(au?'<button onclick="playResponseAudio(\''+String(au).replace(/'/g,"\\'")+'\',this)" style="background:rgba(29,158,117,0.18);border:1px solid #1D9E75;color:#4fd0a0;width:44px;height:44px;border-radius:50%;font-size:16px;cursor:pointer;font-family:inherit;flex-shrink:0;">▶</button>':'')+'</div>';
+    h+='<div style="color:#fff;font-size:17px;font-weight:800;margin-top:7px;" class="heard-mean">= '+(e.he||'')+'</div>';
+    if(e.q) h+='<div style="color:#7a9ab5;font-size:12px;margin-top:4px;">↩️ עונים כך על השאלה: '+e.q+'</div>';
+    h+='</div>';
+  });
+  out.innerHTML=h;
+}
+function heardToSearch(){
+  var raw=((document.getElementById('heard-input')||{}).value||'').trim();
+  try{ openGlobalSearch(); var i=document.getElementById('gs-input'); if(i){ i.value=raw; globalSearch(); } }catch(e){}
+}
+// Let the phone listen in ARABIC (the global voice search defaults to Hebrew).
+function heardVoice(btn){
+  var old=window._voiceLang; window._voiceLang='ar-JO';
+  try{ voiceSearch('heard-input', btn); }catch(e){}
+  window._voiceLang=old;
+}
+function rHeard(){
+  var i=document.getElementById('heard-input');
+  heardSearch();
+  if(i && !i.value) setTimeout(function(){ try{ i.focus(); }catch(e){} }, 150);
+}
 function rThreat(){
   var el=document.getElementById('threatlist'); if(!el)return;
   window._dbCatRows=window._dbCatRows||{}; window._dbCatRows['__threat']=[];
@@ -22196,6 +22372,12 @@ function rQK(){
 
   var h='';
   // The 10 must-know phrases — full-width at the very top.
+  h+='<div class="emerg-cube green" style="grid-column:1/-1;flex-direction:row;min-height:0;padding:12px 16px;gap:12px;justify-content:flex-start;text-align:right;" onclick="navToTab(\'heard\')">';
+  h+='<div class="emerg-cube-emoji" style="font-size:28px;">👂</div>';
+  h+='<div style="flex:1;"><div class="emerg-cube-name">מה אמרו לי?</div>';
+  h+='<div style="color:#a0b8c8;font-size:12px;margin-top:2px;">שמעתם ערבית ולא הבנתם? כתבו איך שזה נשמע</div></div>';
+  h+='<div class="emerg-cube-name">◀</div>';
+  h+='</div>';
   h+='<div class="emerg-cube crit" style="grid-column:1/-1;flex-direction:row;min-height:0;padding:12px 16px;gap:12px;justify-content:flex-start;text-align:right;" onclick="navToTab(\'ten\')">';
   h+='<div class="emerg-cube-emoji" style="font-size:28px;">🎖️</div>';
   h+='<div style="flex:1;"><div class="emerg-cube-name">10 משפטי חובה</div>';
@@ -23190,7 +23372,7 @@ function stopAllAudio(){
 
 
 // ── Field mode (מצב שטח): keep the screen on + large text on emergency screens ──
-var FIELD_TABS=['qk','ten','veh','ord','threat','answers','chk','triage','desc','visual','calm','crowd','kids'];
+var FIELD_TABS=['qk','heard','ten','veh','ord','threat','answers','chk','triage','desc','visual','calm','crowd','kids'];
 window._fieldWake=null; window._fieldCurTab='home';
 function _fieldPref(k,d){ try{ var v=localStorage.getItem(k); return v===null?d:v==='1'; }catch(e){ return d; } }
 function _fieldSet(k,v){ try{ localStorage.setItem(k,v?'1':'0'); }catch(e){} }
@@ -23290,6 +23472,10 @@ function navToTab(tabId){
     }
     if (tabId === 'verbs') {
       setTimeout(function(){ try { if (typeof rVerbs === 'function') rVerbs(); } catch(e) { console.warn('rVerbs error:', e); } }, 50);
+    }
+    if (tabId === 'heard') {
+      try { if (window._navPrevTab && window._navPrevTab!=='heard') window._heardFrom = window._navPrevTab; } catch(e) {}
+      setTimeout(function(){ try { rHeard(); } catch(e) {} }, 30);
     }
     if (tabId === 'threat') {
       setTimeout(function(){ try { if (typeof rThreat === 'function') rThreat(); } catch(e) { console.warn('rThreat error:', e); } }, 50);
@@ -23435,7 +23621,7 @@ window.addEventListener('load', function(){
 <script>
 // Version stamp — shown in the admin panel so we can confirm which build is live
 // on a device (stale service-worker caches were causing "my changes don't show").
-window.APP_VERSION = 'v300';
+window.APP_VERSION = 'v301';
 
 // Register the service worker for full offline use in the field, WITH update
 // detection: when a new version installs, offer a one-tap refresh instead of the
