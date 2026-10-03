@@ -536,6 +536,17 @@ body.day-mode .toast{background:#fff;color:#0e1b2e;}
 .emerg-cube.purple{border-color:rgba(138,107,208,0.8);}
 .emerg-cube.rose{border-color:rgba(208,138,155,0.8);}
 .emerg-cube.mint{border-color:rgba(79,208,160,0.8);}
+/* ── Field mode (מצב שטח) ── */
+.field-chip{flex:1;background:#1F3147;border:1px solid #2A3D52;color:#a0b8c8;border-radius:10px;padding:9px 6px;font-size:13px;font-weight:700;cursor:pointer;font-family:inherit;}
+.field-chip.on{background:rgba(29,158,117,0.18);border-color:#1D9E75;color:#4fd0a0;}
+body.day-mode .field-chip{background:#fff;border-color:rgba(26,43,60,0.2);color:#4a5b6c;}
+body.day-mode .field-chip.on{background:rgba(29,158,117,0.12);border-color:#1D9E75;color:#147a59;}
+body.day-mode .field-title{color:#c0392b!important;}
+body.day-mode .stitle{color:#1A2B3C;}
+/* 🔠 Large text: scales the emergency situation screens (not the menu grid) */
+body.field-big #tab-ten, body.field-big #tab-veh, body.field-big #tab-ord, body.field-big #tab-threat,
+body.field-big #tab-answers, body.field-big #tab-chk, body.field-big #tab-triage, body.field-big #tab-desc,
+body.field-big #tab-calm, body.field-big #tab-crowd, body.field-big #tab-kids, body.field-big #emerg-list{zoom:1.22;}
 .emerg-cube-emoji{font-size:34px;line-height:1;}
 .emerg-cube-name{color:#E8D9B8;font-size:15px;font-weight:800;line-height:1.2;}
 .emerg-cube-count{color:#93b0c8;font-size:12px;font-weight:600;background:rgba(212,162,78,0.1);padding:3px 10px;border-radius:99px;}
@@ -2635,9 +2646,15 @@ function showLanding() {
 <div class="scr" id="tab-qk">
   <div class="sec">
     <div id="emerg-home">
-      <button onclick="navToTab('home')" style="background:transparent;border:none;color:#a0b8c8;font-size:15px;cursor:pointer;font-family:inherit;padding:4px 0;margin-bottom:10px;display:flex;align-items:center;gap:6px;">◀ חזרה לבית</button>
-      <div class="stitle">🚨 חירום</div>
-      <div style="color:#7a9ab5;font-size:12px;margin-bottom:14px;">בחירת סיטואציה</div>
+      <!-- 🚨 Field mode header: what you need now, nothing else -->
+      <div style="display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:10px;">
+        <div class="field-title" style="color:#e74c3c;font-size:23px;font-weight:900;line-height:1.1;">🚨 מצב שטח</div>
+        <button onclick="navToTab('home')" style="background:transparent;border:none;color:#a0b8c8;font-size:14px;cursor:pointer;font-family:inherit;padding:6px 0;">◀ בית</button>
+      </div>
+      <div style="display:flex;gap:8px;margin-bottom:12px;">
+        <button id="field-wake-btn" class="field-chip" onclick="fieldToggleWake()">🔆 מסך דלוק</button>
+        <button id="field-big-btn" class="field-chip" onclick="fieldToggleBig()">🔠 טקסט גדול</button>
+      </div>
 
       <!-- Quick search across all emergency phrases -->
       <div class="emerg-panel" style="background:#1F3147;border:2px solid #D4A24E;border-radius:12px;padding:10px;margin-bottom:14px;display:flex;align-items:center;gap:8px;">
@@ -2647,6 +2664,9 @@ function showLanding() {
         <button onclick="document.getElementById('emerg-search').value='';emergSearch()" title="נקה" style="background:rgba(255,255,255,0.1);border:none;color:#E8D9B8;width:40px;height:40px;border-radius:50%;cursor:pointer;font-size:18px;flex-shrink:0;">×</button>
       </div>
       <div id="emerg-search-results" style="display:none;margin-bottom:8px;"></div>
+      <div class="emerg-grid" id="emerg-grid"></div>
+      <!-- Prep & training — below the situations, not in the soldier's way -->
+      <div style="color:#7a9ab5;font-size:12px;font-weight:700;margin:20px 2px 8px;">הכנה ותרגול</div>
       <button onclick="printPocketCard()" style="width:100%;background:transparent;border:1px dashed #7a9ab5;color:#a0b8c8;border-radius:10px;padding:9px;font-size:12.5px;font-weight:600;cursor:pointer;font-family:inherit;margin-bottom:14px;display:flex;align-items:center;justify-content:center;gap:6px;">🖨️ דף כיס להדפסה (גיבוי נייר לשטח)</button>
 
       <!-- Daily Emergency Challenge Card -->
@@ -2666,7 +2686,6 @@ function showLanding() {
         <div style="color:#a0b8c8;font-size:11px;margin-top:4px;">חזרו מחר לאתגר חדש 🎯</div>
       </div>
       
-      <div class="emerg-grid" id="emerg-grid"></div>
     </div>
     <div id="emerg-list" style="display:none;">
       <button class="emerg-back" onclick="backToEmergHome()">‹ חזרה לחירום</button>
@@ -22177,10 +22196,11 @@ function rQK(){
 
   var h='';
   // The 10 must-know phrases — full-width at the very top.
-  h+='<div class="emerg-cube crit" style="grid-column:1/-1;" onclick="navToTab(\'ten\')">';
-  h+='<div class="emerg-cube-emoji">🎖️</div>';
-  h+='<div class="emerg-cube-name">10 משפטי חובה</div>';
-  h+='<div class="emerg-cube-count">מילים שמצילות חיים</div>';
+  h+='<div class="emerg-cube crit" style="grid-column:1/-1;flex-direction:row;min-height:0;padding:12px 16px;gap:12px;justify-content:flex-start;text-align:right;" onclick="navToTab(\'ten\')">';
+  h+='<div class="emerg-cube-emoji" style="font-size:28px;">🎖️</div>';
+  h+='<div style="flex:1;"><div class="emerg-cube-name">10 משפטי חובה</div>';
+  h+='<div style="color:#a0b8c8;font-size:12px;margin-top:2px;">מילים שמצילות חיים</div></div>';
+  h+='<div class="emerg-cube-name">◀</div>';
   h+='</div>';
   // Cubes in the order the user set: הוראות/מה עונים · בידוק/תיאור · רכב/רפואה ·
   // קהל/ילדים · הרגעה (last).
@@ -22199,8 +22219,10 @@ function rQK(){
     {tab:'crowd',   emoji:'👥',  name:'קהל ואירועים',            sub:'ניהול קהל והרחקה',         color:'purple'},
     {tab:'kids',    emoji:'🧒',  name:'ילדים ואוכלוסיות רגישות', sub:'מגע רגיש ומרגיע',          color:'mint'}
   ];
-  EMERG_CUBES.forEach(function(c){
-    h+='<div class="emerg-cube '+c.color+'" onclick="navToTab(\''+c.tab+'\')">';
+  EMERG_CUBES.forEach(function(c,i){
+    // An odd last cube spans the full row instead of leaving a hole beside it.
+    var _span=(i===EMERG_CUBES.length-1 && EMERG_CUBES.length%2)?' style="grid-column:1/-1;"':'';
+    h+='<div class="emerg-cube '+c.color+'"'+_span+' onclick="navToTab(\''+c.tab+'\')">';
     h+='<div class="emerg-cube-emoji">'+c.emoji+'</div>';
     h+='<div class="emerg-cube-name">'+c.name+'</div>';
     h+='<div class="emerg-cube-count">'+c.sub+'</div>';
@@ -23166,11 +23188,52 @@ function stopAllAudio(){
   }catch(e){}
 }
 
+
+// ── Field mode (מצב שטח): keep the screen on + large text on emergency screens ──
+var FIELD_TABS=['qk','ten','veh','ord','threat','answers','chk','triage','desc','visual','calm','crowd','kids'];
+window._fieldWake=null; window._fieldCurTab='home';
+function _fieldPref(k,d){ try{ var v=localStorage.getItem(k); return v===null?d:v==='1'; }catch(e){ return d; } }
+function _fieldSet(k,v){ try{ localStorage.setItem(k,v?'1':'0'); }catch(e){} }
+function _fieldChips(){
+  var w=document.getElementById('field-wake-btn'), g=document.getElementById('field-big-btn');
+  if(w){ if(!('wakeLock' in navigator)){ w.style.display='none'; }
+         else { var on=_fieldPref('field_wake',true); w.className='field-chip'+(on?' on':''); w.textContent=on?'🔆 מסך דלוק ✓':'🔆 מסך דלוק'; } }
+  if(g){ var big=_fieldPref('field_big',false); g.className='field-chip'+(big?' on':''); g.textContent=big?'🔠 טקסט גדול ✓':'🔠 טקסט גדול'; }
+}
+async function _fieldWakeOn(){
+  try{ if(!('wakeLock' in navigator) || window._fieldWake || !_fieldPref('field_wake',true)) return;
+    window._fieldWake=await navigator.wakeLock.request('screen');
+    window._fieldWake.addEventListener('release',function(){ window._fieldWake=null; });
+  }catch(e){ window._fieldWake=null; }
+}
+function _fieldWakeOff(){ try{ if(window._fieldWake){ window._fieldWake.release(); } }catch(e){} window._fieldWake=null; }
+function fieldOnNav(tabId){
+  window._fieldCurTab=tabId;
+  try{ document.body.classList.toggle('field-big', _fieldPref('field_big',false)); }catch(e){}
+  if(FIELD_TABS.indexOf(tabId)>=0) _fieldWakeOn(); else _fieldWakeOff();
+  if(tabId==='qk') _fieldChips();
+}
+function fieldToggleWake(){
+  var on=!_fieldPref('field_wake',true); _fieldSet('field_wake',on);
+  if(on) _fieldWakeOn(); else _fieldWakeOff();
+  _fieldChips();
+}
+function fieldToggleBig(){
+  _fieldSet('field_big',!_fieldPref('field_big',false));
+  try{ document.body.classList.toggle('field-big', _fieldPref('field_big',false)); }catch(e){}
+  _fieldChips();
+}
+// A wake lock is dropped whenever the app goes to background — take it back on return.
+document.addEventListener('visibilitychange',function(){
+  if(!document.hidden && FIELD_TABS.indexOf(window._fieldCurTab)>=0) _fieldWakeOn();
+});
+
 function navToTab(tabId){
   // Paywall: premium tabs require a subscription (dormant unless window.PAYWALL).
   try { if (typeof _premiumGate==='function' && _premiumGate(tabId)) return; } catch(e) {}
   // Leaving a screen must never leave its audio talking
   try { stopAllAudio(); } catch(e) {}
+  try { fieldOnNav(tabId); } catch(e) {}
   // Update emergency challenge state when entering qk tab
   if (tabId === 'qk') {
     try { setTimeout(function(){ updateEmergencyChallengeBadge(); }, 50); } catch(e) {}
@@ -23372,7 +23435,7 @@ window.addEventListener('load', function(){
 <script>
 // Version stamp — shown in the admin panel so we can confirm which build is live
 // on a device (stale service-worker caches were causing "my changes don't show").
-window.APP_VERSION = 'v299';
+window.APP_VERSION = 'v300';
 
 // Register the service worker for full offline use in the field, WITH update
 // detection: when a new version installs, offer a one-tap refresh instead of the
