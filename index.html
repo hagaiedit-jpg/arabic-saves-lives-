@@ -537,6 +537,9 @@ body.day-mode .toast{background:#fff;color:#0e1b2e;}
 .emerg-cube.purple{border-color:rgba(138,107,208,0.8);}
 .emerg-cube.rose{border-color:rgba(208,138,155,0.8);}
 .emerg-cube.mint{border-color:rgba(79,208,160,0.8);}
+/* Threat cards keep their accent in day mode too */
+body.day-mode .thr-threat{border-color:rgba(192,57,43,0.5)!important;border-right:4px solid #c0392b!important;}
+body.day-mode .thr-curse{border-color:rgba(200,130,30,0.5)!important;border-right:4px solid #d08a1e!important;}
 /* ── Simplified phrase card ── */
 #tab-lib.pop-open > button:first-child, #tab-lib.pop-open > .sbar, #tab-lib.pop-open > .lrow{display:none!important;}
 #vpop .ww{display:none!important;}
@@ -725,14 +728,16 @@ body.sun-mode .bn-btn{ padding:10px 4px; }
 body.sun-mode .scn-play-btn,
 body.sun-mode .scn-rec-btn{ padding:9px 18px; font-size:14px; }
 body.sun-mode .qk-card, body.sun-mode .card{ border-width:2px; }
-.sbar{background:#D4A24E;padding:10px 12px;}
-.si{background:#fff;border-radius:8px;display:flex;align-items:center;padding:0 12px;gap:8px;}
+.sbar{background:transparent;padding:10px 14px 6px;}
+.si{background:#fff;border-radius:12px;border:2px solid #D4A24E;display:flex;align-items:center;padding:0 12px;gap:8px;}
 .si input{flex:1;border:none;outline:none;font-size:16px;padding:11px 0;direction:rtl;font-family:inherit;color:#222;background:transparent;}
 .si input::placeholder{color:#aaa;}
 .sx{background:none;border:none;color:#aaa;font-size:20px;cursor:pointer;}
-.lrow{background:#e07800;padding:4px 12px;display:flex;gap:6px;}
-.lb{flex:1;padding:10px 5px;border-radius:6px;border:1px solid rgba(255,255,255,0.3);background:transparent;color:rgba(255,255,255,0.75);font-size:13px;cursor:pointer;font-family:inherit;text-align:center;}
-.lb.active{background:rgba(255,255,255,0.2);color:#fff;border-color:rgba(255,255,255,0.8);}
+.lrow{background:transparent;padding:0 14px 8px;display:flex;gap:6px;}
+.lb{flex:1;padding:8px 5px;border-radius:10px;border:1px solid rgba(212,162,78,0.35);background:transparent;color:#a0b8c8;font-size:13px;cursor:pointer;font-family:inherit;text-align:center;}
+.lb.active{background:rgba(212,162,78,0.18);color:#D4A24E;border-color:#D4A24E;font-weight:700;}
+body.day-mode .lb{color:#4a5b6c;}
+body.day-mode .lb.active{color:#a85200;}
 .cgrid{display:grid;grid-template-columns:1fr 1fr;gap:10px;background:transparent;}
 body.day-mode .cgrid{background:transparent;gap:10px;}
 body.day-mode .ct{border:1px solid #ebe0c5;}
@@ -3324,7 +3329,7 @@ function showLanding() {
       <div style="color:#7a9ab5;font-size:12px;">בחר תרגיל — כל הכלים לחדד את הערבית במקום אחד</div>
     </div>
 
-    <div onclick="navToTab('flash')" style="background:linear-gradient(135deg,#2e6da8 0%,#16335c 100%);border-radius:14px;padding:14px;margin-bottom:14px;cursor:pointer;box-shadow:0 4px 12px rgba(46,109,168,0.3);display:flex;align-items:center;gap:12px;">
+    <div onclick="navToTab('flash')" style="background:linear-gradient(135deg,#1f4f86 0%,#163a63 100%);border-radius:14px;padding:14px;margin-bottom:14px;cursor:pointer;box-shadow:0 4px 12px rgba(0,0,0,0.25);border:1px solid rgba(120,170,230,0.3);display:flex;align-items:center;gap:12px;">
       <div style="font-size:26px;">⏱️</div>
       <div style="flex:1;">
         <div class="keep-white" style="color:#fff;font-size:15px;font-weight:800;">חזרה ובחינה</div>
@@ -3333,7 +3338,7 @@ function showLanding() {
       <div style="color:#fff;font-size:20px;">◀</div>
     </div>
 
-    <div onclick="lcStart()" style="background:linear-gradient(135deg,#1D9E75 0%,#0e5a3f 100%);border-radius:14px;padding:14px;margin-bottom:14px;cursor:pointer;box-shadow:0 4px 12px rgba(29,158,117,0.3);display:flex;align-items:center;gap:12px;">
+    <div onclick="lcStart()" style="background:linear-gradient(135deg,#1f4f86 0%,#163a63 100%);border-radius:14px;padding:14px;margin-bottom:14px;cursor:pointer;box-shadow:0 4px 12px rgba(0,0,0,0.25);border:1px solid rgba(120,170,230,0.3);display:flex;align-items:center;gap:12px;">
       <div style="font-size:26px;">👂</div>
       <div style="flex:1;">
         <div class="keep-white" style="color:#fff;font-size:15px;font-weight:800;">הבנת תשובות</div>
@@ -3342,7 +3347,7 @@ function showLanding() {
       <div style="color:#fff;font-size:20px;">◀</div>
     </div>
 
-    <div onclick="ppStart()" style="background:linear-gradient(135deg,#D4A24E 0%,#a85200 100%);border-radius:14px;padding:14px;margin-bottom:14px;cursor:pointer;box-shadow:0 4px 12px rgba(212,134,46,0.3);display:flex;align-items:center;gap:12px;">
+    <div onclick="ppStart()" style="background:linear-gradient(135deg,#1f4f86 0%,#163a63 100%);border-radius:14px;padding:14px;margin-bottom:14px;cursor:pointer;box-shadow:0 4px 12px rgba(0,0,0,0.25);border:1px solid rgba(120,170,230,0.3);display:flex;align-items:center;gap:12px;">
       <div style="font-size:26px;">🗣️</div>
       <div style="flex:1;">
         <div class="keep-white" style="color:#fff;font-size:15px;font-weight:800;">תרגול הפקה</div>
@@ -3351,7 +3356,7 @@ function showLanding() {
       <div style="color:#fff;font-size:20px;">◀</div>
     </div>
 
-    <div onclick="lmStart()" style="background:linear-gradient(135deg,#6a4ca8 0%,#3a2a6b 100%);border-radius:14px;padding:14px;margin-bottom:14px;cursor:pointer;box-shadow:0 4px 12px rgba(106,76,168,0.3);display:flex;align-items:center;gap:12px;">
+    <div onclick="lmStart()" style="background:linear-gradient(135deg,#1f4f86 0%,#163a63 100%);border-radius:14px;padding:14px;margin-bottom:14px;cursor:pointer;box-shadow:0 4px 12px rgba(0,0,0,0.25);border:1px solid rgba(120,170,230,0.3);display:flex;align-items:center;gap:12px;">
       <div style="font-size:26px;">🎧</div>
       <div style="flex:1;">
         <div class="keep-white" style="color:#fff;font-size:15px;font-weight:800;">מצב האזנה</div>
@@ -3360,7 +3365,7 @@ function showLanding() {
       <div style="color:#fff;font-size:20px;">◀</div>
     </div>
 
-    <div onclick="startFieldMode()" style="background:linear-gradient(135deg,#c0392b 0%,#7a2018 100%);border-radius:14px;padding:14px;margin-bottom:6px;cursor:pointer;box-shadow:0 4px 12px rgba(192,57,43,0.3);display:flex;align-items:center;gap:12px;">
+    <div onclick="startFieldMode()" style="background:linear-gradient(135deg,#1f4f86 0%,#163a63 100%);border-radius:14px;padding:14px;margin-bottom:6px;cursor:pointer;box-shadow:0 4px 12px rgba(0,0,0,0.25);border:1px solid rgba(120,170,230,0.3);display:flex;align-items:center;gap:12px;">
       <div style="font-size:26px;">🎯</div>
       <div style="flex:1;">
         <div class="keep-white" style="color:#fff;font-size:15px;font-weight:800;">מצב לחץ אמיתי</div>
@@ -3388,7 +3393,7 @@ function showLanding() {
       <button onclick="voiceSearch('scn-search',this)" title="חיפוש קולי" style="background:rgba(212,162,78,0.18);border:1px solid #D4A24E;color:#D4A24E;width:32px;height:32px;border-radius:50%;cursor:pointer;font-size:15px;flex-shrink:0;">🎤</button>
       <button onclick="document.getElementById('scn-search').value='';scnSearch()" style="background:rgba(255,255,255,0.1);border:none;color:#E8D9B8;width:28px;height:28px;border-radius:50%;cursor:pointer;font-size:16px;">×</button>
     </div>
-    <div onclick="navToTab('train')" style="background:linear-gradient(135deg,#D4A24E 0%,#a85200 100%);border-radius:14px;padding:14px;margin-bottom:16px;cursor:pointer;box-shadow:0 4px 12px rgba(212,134,46,0.3);display:flex;align-items:center;gap:12px;">
+    <div onclick="navToTab('train')" style="background:linear-gradient(135deg,#1f4f86 0%,#163a63 100%);border-radius:14px;padding:14px;margin-bottom:16px;cursor:pointer;box-shadow:0 4px 12px rgba(0,0,0,0.25);border:1px solid rgba(120,170,230,0.3);display:flex;align-items:center;gap:12px;">
       <div style="font-size:26px;">🎯</div>
       <div style="flex:1;">
         <div class="keep-white" style="color:#fff;font-size:15px;font-weight:800;">אימון ותרגול</div>
@@ -17910,11 +17915,12 @@ function _vrow(lbl,ar,tr){
 }
 var _BADGE_HEAR='<span style="display:inline-block;background:rgba(126,236,193,0.15);color:#7eecc1;font-size:10px;font-weight:700;padding:1px 7px;border-radius:6px;margin-right:5px;white-space:nowrap;">\ud83d\udc42 \u05d0\u05e0\u05d9 \u05de\u05d6\u05d4\u05d4</span>';
 var _BADGE_SAY='<span style="display:inline-block;background:rgba(212,162,78,0.15);color:#e6c98a;font-size:10px;font-weight:700;padding:1px 7px;border-radius:6px;margin-right:5px;white-space:nowrap;">\ud83d\udde3\ufe0f \u05d0\u05e0\u05d9 \u05d0\u05d5\u05de\u05e8</span>';
-function _threatCard(p, badge, num, onclick){
+function _threatCard(p, badge, num, onclick, tone){
   if(badge===undefined) badge=_BADGE_HEAR;
   var has=!!(p.audio||p.audio_url||(typeof _descAudioFor==='function'&&_descAudioFor(p)));
   var numHtml=num?'<span style="display:inline-flex;align-items:center;justify-content:center;width:20px;height:20px;border-radius:50%;background:#D4A24E;color:#0E1B2E;font-size:11px;font-weight:800;flex-shrink:0;">'+num+'</span>':'';
-  var h='<div'+(onclick?' onclick="'+onclick+'"':'')+' style="flex:1 1 auto;min-width:132px;background:#1F3147;border:1px solid #2A3D52;border-radius:11px;padding:9px 12px;cursor:pointer;">';
+  var _bd=tone==='threat'?'border:1px solid rgba(231,76,60,0.55);border-right:4px solid #e74c3c;':(tone==='curse'?'border:1px solid rgba(230,162,60,0.5);border-right:4px solid #e6a23c;':'border:1px solid #2A3D52;');
+  var h='<div'+(onclick?' onclick="'+onclick+'"':'')+' class="thr-card'+(tone?' thr-'+tone:'')+'" style="flex:1 1 auto;min-width:132px;background:#1F3147;'+_bd+'border-radius:11px;padding:9px 12px;cursor:pointer;">';
   h+='<div style="display:flex;align-items:center;gap:6px;">'+numHtml+'<div style="color:#E8D9B8;font-size:14px;font-weight:700;flex:1;">'+p.he+badge+'</div>'+(has?'<span style="color:#1D9E75;font-size:14px;">🔊</span>':'')+'</div>';
   h+='<div style="color:#E8D9B8;font-size:15px;font-family:Georgia,serif;direction:rtl;margin-top:2px;">'+(p.ar||'')+'</div>';
   h+='<div style="color:#D4A24E;font-size:12px;margin-top:1px;">'+(p.trans||'')+'</div>';
@@ -18133,7 +18139,10 @@ function rThreat(){
       var f=findDb(cat,t.he);
       var row=f?f.row:{he:t.he,ar:t.ar,trans:t.trans,cat:cat};
       var rows=window._dbCatRows['__threat']; rows.push(row);
-      return _threatCard(row, undefined, 0, "_openDbCatItem('__threat',"+(rows.length-1)+",'threat')");
+      var _tone=cat==='שומעים בשטח: איום'?'threat':'curse';
+      var _bdg=_tone==='threat'?'<span style="display:inline-block;background:rgba(231,76,60,0.15);color:#e74c3c;font-size:10px;font-weight:800;padding:1px 7px;border-radius:6px;margin-right:5px;white-space:nowrap;">🚨 איום</span>'
+        :'<span style="display:inline-block;background:rgba(230,162,60,0.15);color:#e6a23c;font-size:10px;font-weight:800;padding:1px 7px;border-radius:6px;margin-right:5px;white-space:nowrap;">😐 לא איום</span>';
+      return _threatCard(row, _bdg, 0, "_openDbCatItem('__threat',"+(rows.length-1)+",'threat')", _tone);
     }).join('')+'</div>';
     return h;
   }
@@ -22430,17 +22439,17 @@ function rQK(){
   // Order = field priority: what a soldier needs first in a live incident at the
   // top, situational/population-specific tools lower down.
   var EMERG_CUBES=[
-    {tab:'veh',     emoji:'🛑',  name:'רכב במחסום',              sub:'רצף העצירה + התנהלות רגילה', color:'gold'},
+    {tab:'veh',     emoji:'🛑',  name:'רכב במחסום',              sub:'רצף העצירה + התנהלות רגילה', color:'red'},
     {tab:'ord',     emoji:'🚨',  name:'הוראות מיידיות',          sub:'עצור, ידיים, אל תזוז',    color:'red'},
     {tab:'threat',  emoji:'👂',  name:'מה שומעים בשטח',          sub:'איום אמיתי מול תמים',      color:'red'},
-    {tab:'answers', emoji:'💬',  name:'מה עונים לך',              sub:'הבנת תשובות האזרח',       color:'sky'},
-    {tab:'chk',     emoji:'🪪',  name:'בידוק וזיהוי',            sub:'תבנית מסודרת',           color:'blue'},
-    {tab:'triage',  emoji:'🩺',  name:"רפואה וטריאז'",           sub:'בדיקת נפגע — סדר פעולות',  color:'teal'},
+    {tab:'answers', emoji:'💬',  name:'מה עונים לך',              sub:'הבנת תשובות האזרח',       color:'green'},
+    {tab:'chk',     emoji:'🪪',  name:'בידוק וזיהוי',            sub:'תבנית מסודרת',           color:'gold'},
+    {tab:'triage',  emoji:'🩺',  name:"רפואה וטריאז'",           sub:'בדיקת נפגע — סדר פעולות',  color:'gold'},
     {tab:'desc',    emoji:'🎯',  name:'תיאור חשוד',              sub:'מה לשאול ואיך לתאר',       color:'gold'},
-    {tab:'visual',  emoji:'📷',  name:'זיהוי ערבית בשטח',        sub:'שלטים, מסמכים, רכב + מבחן', color:'sky'},
-    {tab:'calm',    emoji:'🕊️', name:'הרגעה ושכנוע',            sub:'הורדת מתח ושיתוף פעולה',   color:'rose'},
-    {tab:'crowd',   emoji:'👥',  name:'קהל ואירועים',            sub:'ניהול קהל והרחקה',         color:'purple'},
-    {tab:'kids',    emoji:'🧒',  name:'ילדים ואוכלוסיות רגישות', sub:'מגע רגיש ומרגיע',          color:'mint'}
+    {tab:'visual',  emoji:'📷',  name:'זיהוי ערבית בשטח',        sub:'שלטים, מסמכים, רכב + מבחן', color:'gold'},
+    {tab:'calm',    emoji:'🕊️', name:'הרגעה ושכנוע',            sub:'הורדת מתח ושיתוף פעולה',   color:'green'},
+    {tab:'crowd',   emoji:'👥',  name:'קהל ואירועים',            sub:'ניהול קהל והרחקה',         color:'gold'},
+    {tab:'kids',    emoji:'🧒',  name:'ילדים ואוכלוסיות רגישות', sub:'מגע רגיש ומרגיע',          color:'green'}
   ];
   EMERG_CUBES.forEach(function(c,i){
     // An odd last cube spans the full row instead of leaving a hole beside it.
@@ -23723,7 +23732,7 @@ window.addEventListener('load', function(){
 <script>
 // Version stamp — shown in the admin panel so we can confirm which build is live
 // on a device (stale service-worker caches were causing "my changes don't show").
-window.APP_VERSION = 'v304';
+window.APP_VERSION = 'v305';
 
 // Register the service worker for full offline use in the field, WITH update
 // detection: when a new version installs, offer a one-tap refresh instead of the
