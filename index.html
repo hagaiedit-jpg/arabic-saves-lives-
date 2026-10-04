@@ -3471,14 +3471,8 @@ function showLanding() {
       <button onclick="voiceSearch('scn-search',this)" title="חיפוש קולי" style="background:rgba(212,162,78,0.18);border:1px solid #D4A24E;color:#D4A24E;width:32px;height:32px;border-radius:50%;cursor:pointer;font-size:15px;flex-shrink:0;">🎤</button>
       <button onclick="document.getElementById('scn-search').value='';scnSearch()" style="background:rgba(255,255,255,0.1);border:none;color:#E8D9B8;width:28px;height:28px;border-radius:50%;cursor:pointer;font-size:16px;">×</button>
     </div>
-    <div onclick="navToTab('train')" style="background:linear-gradient(135deg,#1f4f86 0%,#163a63 100%);border-radius:14px;padding:14px;margin-bottom:16px;cursor:pointer;box-shadow:0 4px 12px rgba(0,0,0,0.25);border:1px solid rgba(120,170,230,0.3);display:flex;align-items:center;gap:12px;">
-      <div style="font-size:26px;">🎯</div>
-      <div style="flex:1;">
-        <div class="keep-white" style="color:#fff;font-size:15px;font-weight:800;">אימון ותרגול</div>
-        <div style="color:rgba(255,255,255,0.85);font-size:12px;">הבנת תשובות, הפקה, האזנה וחזרה — הכל במקום אחד</div>
-      </div>
-      <div style="color:#fff;font-size:20px;">◀</div>
-    </div>
+    <!-- Learning mode built from the scenario dialogues themselves -->
+    <div class="learn-bar" onclick="scnPracticeAll()" style="margin-bottom:16px;"><span class="lb-ic">🎯</span><span class="lb-t">מצב למידה</span><span class="lb-s">משפטים מתוך התרחישים — שומעים את האזרח, עונים כמו החייל</span><span class="lb-go">‹</span></div>
     <div id="scn-grid"></div>
   </div>
 
@@ -3495,7 +3489,8 @@ function showLanding() {
     <!-- Mode toggle -->
     <div style="display:flex;gap:8px;margin-bottom:14px;">
       <button id="scn-mode-continuous" onclick="scnSetMode('continuous')" style="flex:1;background:linear-gradient(135deg,#D4A24E 0%,#b8862e 100%);border:none;color:#18293E;border-radius:10px;padding:10px 8px;font-size:12px;font-weight:700;cursor:pointer;font-family:inherit;">📜 שיחה מלאה</button>
-      <button id="scn-mode-interactive" onclick="scnSetMode('interactive')" style="flex:1;background:transparent;border:1px solid rgba(29,158,117,0.4);color:#1D9E75;border-radius:10px;padding:10px 8px;font-size:12px;font-weight:700;cursor:pointer;font-family:inherit;">🎯 מצב למידה</button>
+      <button id="scn-mode-interactive" onclick="scnSetMode('interactive')" style="flex:1;background:transparent;border:1px solid rgba(29,158,117,0.4);color:#1D9E75;border-radius:10px;padding:10px 8px;font-size:12px;font-weight:700;cursor:pointer;font-family:inherit;">👣 שלב אחר שלב</button>
+      <button onclick="scnPracticeCurrent()" style="flex:1;background:transparent;border:1px solid rgba(91,155,213,0.6);color:#5b9bd5;border-radius:10px;padding:10px 8px;font-size:12px;font-weight:700;cursor:pointer;font-family:inherit;">🎯 מצב למידה</button>
     </div>
     
     <!-- Play all button - shown in continuous mode -->
@@ -15099,7 +15094,7 @@ function _lrnAudioOf(p){ var a=p.audio_url||p.audio||''; if(!a){ try{ a=_descAud
 function _lrnShuffle(a){ for(var i=a.length-1;i>0;i--){ var j=Math.floor(Math.random()*(i+1)); var t=a[i]; a[i]=a[j]; a[j]=t; } return a; }
 function lrnStart(title, phrases, onClose){
   var items=(phrases||[]).filter(function(p){ return p && p.he && p.ar; }).map(function(p){
-    return {id:p.id, he:p.he, ar:p.ar, trans:p.trans||'', audio:_lrnAudioOf(p)};
+    return {id:p.id, he:p.he, ar:p.ar, trans:p.trans||'', audio:_lrnAudioOf(p), role:p._role||''};
   });
   if(!items.length){ alert('אין משפטים לתרגול בקטגוריה זו'); return; }
   var rounds=[]; for(var i=0;i<items.length;i+=5) rounds.push(items.slice(i,i+5));
@@ -15127,6 +15122,7 @@ function _lrnHeader(stepTxt, instr, pct){
 }
 function _lrnPhraseCard(it, big){
   var h='<div style="background:#18293E;border:1px solid #2A3D52;border-radius:14px;padding:18px 16px;text-align:center;">';
+  if(it.role) h+='<div style="display:inline-block;margin-bottom:8px;font-size:12px;font-weight:800;padding:2px 10px;border-radius:9px;'+(it.role==='civilian'?'background:rgba(29,158,117,0.15);color:#4fd0a0;">👤 האזרח אומר':'background:rgba(212,162,78,0.15);color:#D4A24E;">👮 אתם אומרים')+'</div>';
   h+='<div style="color:#E8D9B8;font-size:'+(big?21:18)+'px;font-weight:800;line-height:1.4;">'+it.he+'</div>';
   h+='<div style="color:#FFD700;font-size:'+(big?26:22)+'px;font-family:Georgia,serif;direction:rtl;margin-top:10px;line-height:1.4;">'+it.ar+'</div>';
   if(it.trans) h+='<div style="color:#D4A24E;font-size:16px;margin-top:6px;">'+it.trans+'</div>';
@@ -15146,7 +15142,7 @@ function _lrnRender(){
   var rTxt='סבב '+(_lrn.r+1)+' מתוך '+R;
   if(_lrn.phase==='intro'){
     var it=round[_lrn.i];
-    _lrnHeader(rTxt+' · שלב 1: הכירו · '+(_lrn.i+1)+'/'+round.length, '👂 הקשיבו למשפט וחזרו עליו בקול פעמיים', _lrnRoundPct());
+    _lrnHeader(rTxt+' · שלב 1: הכירו · '+(_lrn.i+1)+'/'+round.length, it.role==='civilian'?'👂 הקשיבו — כך האזרח עשוי לענות לכם':'👂 הקשיבו למשפט וחזרו עליו בקול פעמיים', _lrnRoundPct());
     var last=_lrn.i===round.length-1;
     body.innerHTML=_lrnPhraseCard(it,true)
       +'<div style="display:flex;gap:8px;margin-top:14px;">'+(it.audio?_lrnBtn('🔊 השמע שוב','lrnPlayCur()','ghost'):'')+_lrnBtn(last?'מתחילים לתרגל ◀':'הבא ◀','lrnIntroNext()','main')+'</div>';
@@ -15196,6 +15192,9 @@ function _lrnBuildQuiz(){
   var types=['say','read','hear'];
   var q=_lrnShuffle(round.slice()).map(function(it,k){
     var t=types[(k+_lrn.r)%3];
+    // Dialogue lines: what the soldier says is practised as "say it", what the civilian says as "understand it".
+    if(it.role==='soldier') t='say';
+    else if(it.role==='civilian') t=(it.audio?((k%2)?'read':'hear'):'read');
     if(t==='hear' && !it.audio) t='read';
     if(!canMC) t='say';
     return _lrnMakeQ(it,t);
@@ -15264,6 +15263,26 @@ function lrnClose(){
   document.getElementById('lrn-modal').style.display='none';
   var cb=_lrn&&_lrn.onClose; _lrn=null;
   try{ if(cb) cb(); }catch(e){}
+}
+
+// ===== Scenario learning mode: lines from the dialogues, by role =====
+function _scnLines(list){
+  return (list||[]).filter(function(p){ var t=(p.tags||'').toLowerCase(); return p && p.he && p.ar && t.indexOf('divider')===-1; })
+    .map(function(p){ var t=(p.tags||'').toLowerCase(); return Object.assign({}, p, {_role: t.indexOf('civilian')!==-1 ? 'civilian' : 'soldier'}); });
+}
+function scnPracticeAll(){
+  var all=_scnLines(typeof SCENARIO!=='undefined'?SCENARIO:[]);
+  if(!all.length && typeof BUILTIN_SCENARIO_DATA!=='undefined') all=_scnLines(BUILTIN_SCENARIO_DATA);
+  if(!all.length){ alert('התרחישים עוד נטענים — נסו שוב בעוד רגע'); return; }
+  var civ=_lrnShuffle(all.filter(function(p){ return p._role==='civilian'; })).slice(0,5);
+  var sol=_lrnShuffle(all.filter(function(p){ return p._role==='soldier'; })).slice(0,10-civ.length);
+  var mix=[]; for(var i=0;i<Math.max(civ.length,sol.length);i++){ if(sol[i]) mix.push(sol[i]); if(civ[i]) mix.push(civ[i]); }
+  lrnStart('מתוך התרחישים', mix);
+}
+function scnPracticeCurrent(){
+  var lines=_scnLines(_scnSteps);
+  if(!lines.length){ alert('אין משפטים לתרגול בתרחיש הזה'); return; }
+  lrnStart(String(_scnCurrent||'תרחיש').replace(/^🎯\s*/,''), lines);
 }
 
 // Category learning now runs the dedicated learning mode above. The previous
@@ -24065,7 +24084,7 @@ window.addEventListener('load', function(){
 <script>
 // Version stamp — shown in the admin panel so we can confirm which build is live
 // on a device (stale service-worker caches were causing "my changes don't show").
-window.APP_VERSION = 'v312';
+window.APP_VERSION = 'v313';
 
 // Register the service worker for full offline use in the field, WITH update
 // detection: when a new version installs, offer a one-tap refresh instead of the
