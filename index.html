@@ -537,6 +537,33 @@ body.day-mode .toast{background:#fff;color:#0e1b2e;}
 .emerg-cube.purple{border-color:rgba(138,107,208,0.8);}
 .emerg-cube.rose{border-color:rgba(208,138,155,0.8);}
 .emerg-cube.mint{border-color:rgba(79,208,160,0.8);}
+/* ── "עוד" menu = map of the whole kit, same look as home ── */
+#more-menu .mm-h{color:#D4A24E;font-size:12px;font-weight:800;margin:14px 2px 7px;}
+#more-menu .mm-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:7px;}
+#more-menu .mm-tile{background:#1F3147;border:1px solid #2A3D52;border-radius:12px;padding:10px 4px;text-align:center;cursor:pointer;}
+#more-menu .mm-ic{font-size:20px;line-height:1;margin-bottom:5px;}
+#more-menu .mm-lb{color:#E8D9B8;font-size:12px;font-weight:700;line-height:1.25;}
+#more-menu .mm-row{margin-top:14px;background:#1F3147;border:1px solid #2A3D52;border-radius:12px;padding:11px 14px;cursor:pointer;display:flex;align-items:center;gap:10px;}
+#more-menu .mm-row-t{color:#E8D9B8;font-size:13px;font-weight:700;}
+#more-menu .mm-row-s{color:#7a9ab5;font-size:11px;margin-top:2px;}
+#more-menu #offline-pack-row{border-radius:12px!important;}
+#more-menu .mm-admin{display:block;margin:12px auto 0;background:transparent;border:none;color:#7a9ab5;font-size:12px;cursor:pointer;font-family:inherit;opacity:0.8;}
+body.day-mode #more-menu .mm-tile, body.day-mode #more-menu .mm-row{background:#fff!important;border-color:rgba(168,82,0,0.2)!important;}
+body.day-mode #more-menu .mm-lb, body.day-mode #more-menu .mm-row-t{color:#0e1b2e!important;}
+body.day-mode #more-menu .mm-h{color:#a85200!important;}
+/* ── Phrase lists: one column, strong headings, jump chips ── */
+.pc-list{display:flex;flex-direction:column;gap:8px;}
+.pc-list > div{flex:none!important;min-width:0!important;padding:11px 14px!important;}
+.pc-sec{display:flex;align-items:center;gap:8px;color:#E8D9B8;font-size:15.5px;font-weight:800;margin:22px 0 10px;padding:3px 10px 3px 0;border-right:4px solid #D4A24E;line-height:1.3;}
+.pc-sec-other{border-right-color:#7a9ab5;color:#a0b8c8;}
+.pc-cnt{background:rgba(212,162,78,0.15);color:#D4A24E;font-size:11.5px;font-weight:800;padding:1px 9px;border-radius:9px;}
+body.day-mode .pc-sec{color:#0e1b2e;}
+body.day-mode .pc-sec-other{color:#4a5b6c;}
+body.day-mode .pc-cnt{background:rgba(168,82,0,0.12);color:#a85200;}
+.pc-nav{display:flex;gap:6px;overflow-x:auto;padding:2px 0 8px;margin-bottom:2px;scrollbar-width:none;-webkit-overflow-scrolling:touch;}
+.pc-nav::-webkit-scrollbar{display:none;}
+.pc-nav button{flex-shrink:0;background:#1F3147;border:1px solid #2A3D52;color:#E8D9B8;border-radius:16px;padding:7px 13px;font-size:13px;font-weight:700;cursor:pointer;font-family:inherit;white-space:nowrap;}
+body.day-mode .pc-nav button{background:#fff;border-color:rgba(168,82,0,0.25);color:#0e1b2e;}
 /* Threat cards keep their accent in day mode too */
 body.day-mode .thr-threat{border-color:rgba(192,57,43,0.5)!important;border-right:4px solid #c0392b!important;}
 body.day-mode .thr-curse{border-color:rgba(200,130,30,0.5)!important;border-right:4px solid #d08a1e!important;}
@@ -1297,9 +1324,6 @@ body.day-mode .bn-btn.active{
 body.day-mode #more-menu{
   background:#fff !important;
   border-color:#e0d4b5 !important;
-}
-body.day-mode #more-menu > div > div{
-  background:#f5efe0 !important;
 }
 body.day-mode #more-menu div[style*="color:#E8D9B8"]{
   color:#0e1b2e !important;
@@ -11622,6 +11646,27 @@ function _descResolve(o){
   };
 }
 
+
+// ===== Phrase lists: one clear column + section jump chips =====
+// Every phrase screen renders cards in ONE column (no mixed 1-2 per row mosaic)
+// under strong section headings. With 3+ sections, a row of chips at the top
+// jumps straight to a section — the soldier sees the structure before scrolling.
+function _pcNav(el){
+  try{
+    if(!el) return;
+    var old=el.querySelector(':scope > .pc-nav'); if(old) old.remove();
+    var secs=el.querySelectorAll('.pc-sec'); if(secs.length<3) return;
+    var nav=document.createElement('div'); nav.className='pc-nav';
+    secs.forEach(function(h,i){
+      var b=document.createElement('button'); b.type='button';
+      var label=h.cloneNode(true); var c=label.querySelector('.pc-cnt'); if(c) c.remove();
+      b.textContent=label.textContent.trim();
+      b.onclick=function(){ try{ var y=h.getBoundingClientRect().top+window.pageYOffset-90; window.scrollTo({top:y,behavior:'smooth'}); }catch(e){ h.scrollIntoView(); } };
+      nav.appendChild(b);
+    });
+    el.insertBefore(nav, el.firstChild);
+  }catch(e){}
+}
 // Generic renderer for the field templates (תיאור חשוד / טריאז'). Each chip shows
 // the resolved (edit-aware) text + a 🔊 when audio (own or in-context) exists.
 function _renderTpl(data, containerId, opener){
@@ -11629,8 +11674,8 @@ function _renderTpl(data, containerId, opener){
   var html='';
   data.forEach(function(slot,si){
     html+='<div style="margin-bottom:16px;">';
-    html+='<div style="color:#7a9ab5;font-size:12px;font-weight:700;margin-bottom:8px;letter-spacing:0.5px;">'+slot.icon+' '+slot.label+'</div>';
-    html+='<div style="display:flex;flex-wrap:wrap;gap:8px;">';
+    html+='<div class="pc-sec">'+slot.icon+' '+slot.label+'<span class="pc-cnt">'+slot.options.length+'</span></div>';
+    html+='<div class="pc-list">';
     slot.options.forEach(function(o,oi){
       var rd=_descResolve(o);
       var hasAudio=!!rd.audio;
@@ -11643,6 +11688,7 @@ function _renderTpl(data, containerId, opener){
     html+='</div></div>';
   });
   el.innerHTML=html;
+  _pcNav(el);
 }
 function renderSuspectDesc(){ _renderTpl(SUSPECT_DESC,'desc-list','openDescItem'); }
 function renderTriage(){ _renderTpl(TRIAGE,'triage-list','openTriageItem'); }
@@ -11714,8 +11760,8 @@ function renderAnswers(){
   var html='';
   order.forEach(function(g){
     html+='<div style="margin-bottom:16px;">';
-    html+='<div style="color:#7a9ab5;font-size:12px;font-weight:700;margin-bottom:8px;letter-spacing:0.5px;">'+(ICON[g]||'💬')+' '+g+'</div>';
-    html+='<div style="display:flex;flex-wrap:wrap;gap:8px;">';
+    html+='<div class="pc-sec">'+(ICON[g]||'💬')+' '+g+'<span class="pc-cnt">'+groups[g].length+'</span></div>';
+    html+='<div class="pc-list">';
     groups[g].forEach(function(r){
       var idx=rows.indexOf(r);
       var hasAudio=!!(r.audio || _descAudioFor(r));
@@ -11729,6 +11775,7 @@ function renderAnswers(){
   });
   if(_capped) html+=_upsellRow('פתחו את כל התשובות');
   el.innerHTML=html;
+  _pcNav(el);
 }
 // Generic: render ANY existing DB category live (military/dictionary) as cards, so
 // full existing content (with recordings & edits) surfaces without hardcoding.
@@ -11760,8 +11807,8 @@ function _renderDbCat(cat, containerId, opener){
   var html='';
   order.forEach(function(g){
     html+='<div style="margin-bottom:16px;">';
-    if(g) html+='<div style="color:#7a9ab5;font-size:12px;font-weight:700;margin-bottom:8px;letter-spacing:0.5px;">'+g+'</div>';
-    html+='<div style="display:flex;flex-wrap:wrap;gap:8px;">';
+    if(g) html+='<div class="pc-sec">'+g+'<span class="pc-cnt">'+groups[g].length+'</span></div>';
+    html+='<div class="pc-list">';
     groups[g].forEach(function(r){
       var idx=rows.indexOf(r); var hasAudio=!!(r.audio || _descAudioFor(r));
       html+='<div onclick="'+opener+'('+idx+')" style="flex:1 1 auto;min-width:150px;background:#1F3147;border:1px solid #2A3D52;border-radius:11px;padding:9px 12px;cursor:pointer;">';
@@ -11774,6 +11821,7 @@ function _renderDbCat(cat, containerId, opener){
   });
   if(_capped) html+=_upsellRow('פתחו את כל הקטגוריה');
   el.innerHTML=html;
+  _pcNav(el);
 }
 function _openDbCatItem(cat, idx, returnTab){
   var r=(window._dbCatRows[cat]||[])[idx]; if(!r)return;
@@ -14643,7 +14691,7 @@ const CATEGORY_INFO = {
 // Get subcategory for a phrase based on keywords
 // Clean phrase cards for a flat list (כריזה / תשאול ימי) — same look as the rest.
 function _libFlatCards(items, opener, idxFn){
-  return '<div style="display:flex;flex-wrap:wrap;gap:8px;margin-top:12px;">' + (items||[]).map(function(p){
+  return '<div class="pc-list" style="margin-top:12px;">' + (items||[]).map(function(p){
     var idx = idxFn(p);
     var hasAudio = !!(p.audio || (typeof _descAudioFor==='function' && _descAudioFor(p)));
     var urg = (typeof urgDot==='function' && typeof _urgencyOf==='function') ? urgDot(_urgencyOf(p)) : '';
@@ -14887,14 +14935,15 @@ function opC(cat,special){
         var box = document.createElement('div');
         box.style.cssText = 'margin-bottom:18px;';
         box.innerHTML =
-          '<div style="color:' + (isOther?'#7a9ab5':'#D4A24E') + ';font-size:14px;font-weight:800;margin-bottom:10px;letter-spacing:0.3px;">' +
+          '<div class="pc-sec' + (isOther?' pc-sec-other':'') + '">' +
             (isOther ? '' : _libSubEmoji(title) + ' ') + title +
-            ' <span style="color:#7a9ab5;font-size:12px;font-weight:600;">(' + items.length + ')</span></div>' +
-          '<div style="display:flex;flex-wrap:wrap;gap:8px;">' + items.map(_grpCard).join('') + '</div>';
+            '<span class="pc-cnt">' + items.length + '</span></div>' +
+          '<div class="pc-list">' + items.map(_grpCard).join('') + '</div>';
         target.appendChild(box);
       };
       Object.entries(grouped).forEach(function(e){ _grpSection(e[0], e[1], false); });
       if (ungrouped.length > 0) _grpSection('נוספים', ungrouped, true);
+      try{ _pcNav(target); }catch(e){}
     } else {
       // No subcategories - regular flat list
       const itemsContainer = document.createElement('div');
@@ -18133,9 +18182,9 @@ function rThreat(){
   function findDb(cat,he){ var hit=null; for(var i=0;i<db.length;i++){ if(db[i].cat===cat&&db[i].he===he){ if(db[i].audio||db[i].audio_url) return {row:db[i],idx:i}; if(!hit) hit={row:db[i],idx:i}; } } return hit; }
   function section(cat,title,emoji,desc){
     var items=(typeof BUILTIN_THREAT!=='undefined'?BUILTIN_THREAT:[]).filter(function(t){return t.cat===cat;});
-    var h='<div class="stitle" style="margin-top:16px;">'+emoji+' '+title+'</div>';
+    var h='<div class="pc-sec">'+emoji+' '+title+'<span class="pc-cnt">'+items.length+'</span></div>';
     if(desc)h+='<div style="color:#7a9ab5;font-size:12px;margin:2px 2px 10px;line-height:1.5;">'+desc+'</div>';
-    h+='<div style="display:flex;flex-wrap:wrap;gap:8px;">'+items.map(function(t){
+    h+='<div class="pc-list">'+items.map(function(t){
       var f=findDb(cat,t.he);
       var row=f?f.row:{he:t.he,ar:t.ar,trans:t.trans,cat:cat};
       var rows=window._dbCatRows['__threat']; rows.push(row);
@@ -23299,45 +23348,45 @@ try { renderHome(); } catch(_){}
 </div>
 
 <!-- More Menu (popup from bottom) -->
-<div id="more-menu" style="display:none;position:fixed;bottom:80px;left:50%;transform:translateX(-50%);width:calc(100% - 16px);max-width:464px;box-sizing:border-box;background:#18293E;border:1px solid #2e4558;border-radius:14px;padding:12px;z-index:99;box-shadow:0 -4px 20px rgba(0,0,0,0.6);direction:rtl;">
-  <div style="text-align:center;color:#D4A24E;font-size:12px;font-weight:700;letter-spacing:1px;margin-bottom:10px;">עוד</div>
-  <!-- קבוצה 1: תוכן שפה ותרבות (העשרה — לא מבצעי) -->
-  <div style="color:#D4A24E;font-size:11px;font-weight:700;margin:2px 2px 7px;text-align:right;">שפה ותרבות</div>
-  <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;">
-    <div onclick="navToTab('day')" style="background:#1F3147;border-radius:10px;padding:14px 6px;text-align:center;cursor:pointer;">
-      <div style="font-size:22px;margin-bottom:4px;">☕</div>
-      <div style="color:#E8D9B8;font-size:11px;font-weight:600;">יומיומי</div>
-    </div>
-    <div onclick="navToTab('hrt')" style="background:#1F3147;border-radius:10px;padding:14px 6px;text-align:center;cursor:pointer;">
-      <div style="font-size:22px;margin-bottom:4px;">🤝</div>
-      <div style="color:#E8D9B8;font-size:11px;font-weight:600;">פותחים לב</div>
-    </div>
-    <div onclick="document.getElementById('more-menu').style.display='none';navToTab('art')" style="background:#1F3147;border-radius:10px;padding:14px 6px;text-align:center;cursor:pointer;">
-      <div style="font-size:22px;margin-bottom:4px;">📰</div>
-      <div style="color:#E8D9B8;font-size:11px;font-weight:600;">מאמרים</div>
-    </div>
+<div id="more-menu" style="display:none;position:fixed;bottom:80px;left:50%;transform:translateX(-50%);width:calc(100% - 16px);max-width:464px;max-height:calc(100vh - 110px);overflow-y:auto;box-sizing:border-box;background:#18293E;border:1px solid #2e4558;border-radius:14px;padding:12px 12px 14px;z-index:99;box-shadow:0 -4px 20px rgba(0,0,0,0.6);direction:rtl;">
+  <div style="text-align:center;color:#D4A24E;font-size:13px;font-weight:800;letter-spacing:0.5px;margin-bottom:4px;">כל הערכה</div>
+  <!-- Same map as the app itself: field → learn → language & culture → mine -->
+  <div class="mm-h">🚨 בשטח</div>
+  <div class="mm-grid">
+    <div class="mm-tile" onclick="navToTab('qk')" style="border-color:rgba(231,76,60,0.6);"><div class="mm-ic">🚨</div><div class="mm-lb">מצב שטח</div></div>
+    <div class="mm-tile" onclick="navToTab('heard')"><div class="mm-ic">👂</div><div class="mm-lb">מה אמרו לי?</div></div>
+    <div class="mm-tile" onclick="navToTab('ten')"><div class="mm-ic">🎖️</div><div class="mm-lb">10 משפטי חובה</div></div>
+    <div class="mm-tile" onclick="navToTab('visual')"><div class="mm-ic">📷</div><div class="mm-lb">זיהוי ערבית בשטח</div></div>
+    <div class="mm-tile" onclick="navToTab('threat')"><div class="mm-ic">🚩</div><div class="mm-lb">מה שומעים בשטח</div></div>
+    <div class="mm-tile" onclick="navToTab('answers')"><div class="mm-ic">💬</div><div class="mm-lb">מה עונים לך</div></div>
   </div>
-  <!-- קבוצה 2: כלים -->
-  <div style="color:#D4A24E;font-size:11px;font-weight:700;margin:14px 2px 7px;text-align:right;">כלים</div>
-  <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;">
-    <!-- 🏆 Unit leaderboard — gated for the future paid kit. Re-enable by removing display:none. -->
-    <div onclick="document.getElementById('more-menu').style.display='none';openLeaderboard()" style="display:none;background:linear-gradient(135deg,rgba(212,162,78,0.18),rgba(212,162,78,0.05));border:1px solid rgba(212,162,78,0.4);border-radius:10px;padding:14px 6px;text-align:center;cursor:pointer;">
+  <div class="mm-h">🎯 לימוד ואימון</div>
+  <div class="mm-grid">
+    <div class="mm-tile" onclick="navToTab('train')"><div class="mm-ic">🎯</div><div class="mm-lb">אימון ותרגול</div></div>
+    <div class="mm-tile" onclick="navToTab('scn')"><div class="mm-ic">🗨️</div><div class="mm-lb">תרחישים</div></div>
+    <div class="mm-tile" onclick="navToTab('lib')"><div class="mm-ic">📚</div><div class="mm-lb">ספריית מבצעי</div></div>
+    <div class="mm-tile" onclick="_mmGo(function(){openFoundations();})"><div class="mm-ic">🎓</div><div class="mm-lb">יסודות השפה</div></div>
+    <div class="mm-tile" onclick="navToTab('dict')"><div class="mm-ic">📖</div><div class="mm-lb">מילון</div></div>
+    <div class="mm-tile" onclick="_mmGo(function(){openDailyDrills();})"><div class="mm-ic">🔁</div><div class="mm-lb">אתגר יומי</div></div>
+  </div>
+  <div class="mm-h">🕌 שפה ותרבות</div>
+  <div class="mm-grid">
+    <div class="mm-tile" onclick="navToTab('cus')"><div class="mm-ic">🕌</div><div class="mm-lb">מנהגים ותרבות</div></div>
+    <div class="mm-tile" onclick="navToTab('day')"><div class="mm-ic">☕</div><div class="mm-lb">יומיומי</div></div>
+    <div class="mm-tile" onclick="navToTab('hrt')"><div class="mm-ic">🤝</div><div class="mm-lb">פותחים לב</div></div>
+    <div class="mm-tile" onclick="navToTab('art')"><div class="mm-ic">📰</div><div class="mm-lb">מאמרים</div></div>
+  </div>
+  <div class="mm-h">⭐ שלי</div>
+  <div class="mm-grid">
+    <div class="mm-tile" onclick="navToTab('fav')"><div class="mm-ic">⭐</div><div class="mm-lb">שמורים</div></div>
+    <div class="mm-tile" onclick="navToTab('progress')"><div class="mm-ic">📊</div><div class="mm-lb">ההתקדמות שלי</div></div>
+  </div>
+  <!-- 🏆 Unit leaderboard — gated for the future paid kit. Re-enable by removing display:none. -->
+  <div onclick="document.getElementById('more-menu').style.display='none';openLeaderboard()" style="display:none;background:linear-gradient(135deg,rgba(212,162,78,0.18),rgba(212,162,78,0.05));border:1px solid rgba(212,162,78,0.4);border-radius:10px;padding:14px 6px;text-align:center;cursor:pointer;">
       <div style="font-size:22px;margin-bottom:4px;">🏆</div>
       <div style="color:#D4A24E;font-size:11px;font-weight:600;">לוח יחידה</div>
     </div>
-    <div onclick="openAdminFromMenu()" style="background:linear-gradient(135deg,rgba(212,162,78,0.15),rgba(212,162,78,0.05));border:1px solid rgba(212,162,78,0.4);border-radius:10px;padding:14px 6px;text-align:center;cursor:pointer;">
-      <div style="font-size:22px;margin-bottom:4px;">🔒</div>
-      <div style="color:#D4A24E;font-size:11px;font-weight:600;">ניהול</div>
-    </div>
-  </div>
-  <div onclick="document.getElementById('more-menu').style.display='none';navToTab('legal')" style="margin-top:10px;background:#1F3147;border:1px solid #2e4558;border-radius:10px;padding:12px 14px;cursor:pointer;display:flex;align-items:center;gap:10px;">
-    <div style="font-size:22px;">ℹ️</div>
-    <div style="flex:1;">
-      <div style="color:#E8D9B8;font-size:12.5px;font-weight:700;">מידע ומשפטי</div>
-      <div style="color:#7a9ab5;font-size:11px;margin-top:2px;">התקנה · פרטיות · תנאי שימוש · מיקרופון</div>
-    </div>
-    <div style="color:#7a9ab5;font-size:18px;">‹</div>
-  </div>
+  <div class="mm-row" onclick="navToTab('legal')"><div style="font-size:20px;">ℹ️</div><div style="flex:1;"><div class="mm-row-t">מידע ומשפטי</div><div class="mm-row-s">התקנה · פרטיות · תנאי שימוש · מיקרופון</div></div><div class="mm-row-s" style="font-size:18px;">‹</div></div>
   <div id="offline-pack-row" onclick="downloadAllOffline()" style="margin-top:10px;background:#1F3147;border:1px solid rgba(29,158,117,0.45);border-radius:10px;padding:12px;cursor:pointer;">
     <div style="display:flex;align-items:center;gap:10px;">
       <div style="font-size:22px;">⬇️</div>
@@ -23348,10 +23397,13 @@ try { renderHome(); } catch(_){}
     </div>
     <div style="height:5px;background:rgba(255,255,255,0.08);border-radius:3px;margin-top:8px;overflow:hidden;"><div id="offline-dl-bar" style="height:100%;width:0%;background:#1D9E75;border-radius:3px;transition:width 0.2s;"></div></div>
   </div>
+  <button class="mm-admin" onclick="openAdminFromMenu()">🔒 ניהול</button>
 </div>
 
 <script>
 try{ _offlinePackInit(); }catch(e){}
+// Menu tiles that call a function (not a tab) close the menu first.
+function _mmGo(fn){ try{ document.getElementById('more-menu').style.display='none'; }catch(e){} try{ fn(); }catch(e){} }
 // === Bottom Nav functions ===
 function _refreshSecureModeChip(){
   try{
@@ -23732,7 +23784,7 @@ window.addEventListener('load', function(){
 <script>
 // Version stamp — shown in the admin panel so we can confirm which build is live
 // on a device (stale service-worker caches were causing "my changes don't show").
-window.APP_VERSION = 'v305';
+window.APP_VERSION = 'v306';
 
 // Register the service worker for full offline use in the field, WITH update
 // detection: when a new version installs, offer a one-tap refresh instead of the
