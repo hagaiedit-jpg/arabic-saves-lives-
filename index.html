@@ -166,6 +166,7 @@ body.day-mode body.day-mode .tb-brand{
   color:#a85200;
 }
 .tb-badges{display:flex;gap:5px;align-items:center;}
+@media (max-width:380px){ #brand-title{font-size:15px!important;} #dictTopBtn .dict-top-lbl{display:none;} #dictTopBtn{padding:0 11px!important;} }
 .tb-left-group{display:flex;gap:8px;align-items:center;flex-shrink:0;padding-right:6px;}
 .bnew{
   background:#1D9E75;
@@ -735,15 +736,15 @@ body.sun-mode .qk-card, body.sun-mode .card{ border-width:2px; }
 .cgrid{display:grid;grid-template-columns:1fr 1fr;gap:10px;background:transparent;}
 body.day-mode .cgrid{background:transparent;gap:10px;}
 body.day-mode .ct{border:1px solid #ebe0c5;}
-.ct{background:linear-gradient(160deg,#1F3147 0%,#243a55 100%);padding:22px 12px 18px;display:flex;flex-direction:column;align-items:center;gap:10px;cursor:pointer;min-height:128px;justify-content:center;transition:transform 0.15s,box-shadow 0.15s;position:relative;border-radius:16px;box-shadow:0 2px 8px rgba(0,0,0,0.2);border:1px solid rgba(212,162,78,0.15);}
+.ct{background:linear-gradient(160deg,#1F3147 0%,#243a55 100%);padding:12px 10px 11px;display:flex;flex-direction:column;align-items:center;gap:6px;cursor:pointer;min-height:96px;justify-content:center;transition:transform 0.15s,box-shadow 0.15s;position:relative;border-radius:16px;box-shadow:0 2px 8px rgba(0,0,0,0.2);border:1px solid rgba(212,162,78,0.15);}
 .ct:active{background:#2a3f54;}
 .ct.daily{background:linear-gradient(160deg,#1F3147 0%,#243a55 100%);}.ct.daily:active{transform:scale(0.97);}
 .ct.heart{background:linear-gradient(160deg,#1F3147 0%,#243a55 100%);}.ct.heart:active{transform:scale(0.97);}
 .ct.navy{background:#1F3147;}.ct.navy:active{background:#2a3f54;}
 .ct.announce{background:#1F3147;}.ct.announce:active{background:#2a3f54;}
-.ci{width:48px;height:48px;border-radius:14px;background:rgba(212,162,78,0.12);display:flex;align-items:center;justify-content:center;font-size:24px;transition:transform 0.2s;}
-.cn{color:#E8D9B8;font-size:15px;font-weight:800;text-align:center;line-height:1.2;letter-spacing:0.2px;}
-.cc{display:inline-block;background:rgba(212,162,78,0.12);color:#D4A24E;font-size:12px;font-weight:700;padding:3px 11px;border-radius:10px;letter-spacing:0.3px;}
+.ci{width:40px;height:40px;border-radius:12px;background:rgba(212,162,78,0.12);display:flex;align-items:center;justify-content:center;font-size:21px;transition:transform 0.2s;}
+.cn{color:#E8D9B8;font-size:14.5px;font-weight:800;text-align:center;line-height:1.2;letter-spacing:0.2px;}
+.cc{display:inline-block;background:rgba(212,162,78,0.12);color:#D4A24E;font-size:11.5px;font-weight:700;padding:2px 10px;border-radius:10px;letter-spacing:0.3px;}
 .lhdr{background:#18293E;padding:11px 16px;display:flex;align-items:center;gap:10px;border-bottom:1px solid #1F3147;}
 .bbtn{background:#0E1B2E;border:1px solid #2A3D52;border-radius:8px;color:#E8D9B8;font-size:13px;padding:5px 12px;cursor:pointer;font-family:inherit;}
 .ltitle{color:#E8D9B8;font-size:14px;font-weight:500;}
@@ -2261,7 +2262,7 @@ function showLanding() {
   <div class="tb-top" style="display:flex;align-items:center;justify-content:space-between;padding:14px 14px 12px;direction:rtl;">
     <!-- Right side: Dictionary (primary content shortcut, discoverable) -->
     <button onclick="openDictTab()" id="dictTopBtn" title="מילון" style="background:rgba(212,162,78,0.12);border:1px solid rgba(212,162,78,0.4);border-radius:20px;height:38px;padding:0 14px;display:flex;align-items:center;gap:6px;cursor:pointer;font-size:14px;color:#D4A24E;font-family:inherit;font-weight:800;flex-shrink:0;">
-      <span style="font-size:17px;">📖</span><span>מילון</span>
+      <span style="font-size:17px;">📖</span><span class="dict-top-lbl">מילון</span>
     </button>
 
     <!-- Center: Title -->
@@ -2791,7 +2792,7 @@ function showLanding() {
     </div>
     
     <div class="loading" id="cats-loading"><div style="text-align:center;padding:20px;"><div style="font-size:16px;color:#D4A24E;margin-bottom:8px;">טוען...</div><div style="font-size:10px;color:#7a9ab5;opacity:0.6;">v20260617-2230</div></div></div>
-    <div class="cgrid" id="cgrid" style="display:none;"></div>
+    <div class="cgrid" id="cgrid" style="display:none;padding:0 14px 16px;"></div>
   </div>
   <div id="vlist" class="scr">
     <div class="lhdr"><button class="bbtn" onclick="goB('lib')">→ חזור</button><div class="ltitle" id="ltitle"></div></div>
@@ -14372,7 +14373,7 @@ function bldCats(){
   }
   loadEl.style.display='none';
   gridEl.style.display='grid';
-  gridEl.innerHTML=CATS.map(c=>{
+  gridEl.innerHTML=CATS.map((c,ci)=>{
     const n = c.special==='navy' ? NAVY.some(p=>p.isNew)
             : c.special==='announce' ? ANNOUNCE.some(p=>p.isNew)
             : c.special==='foundations' ? DB.some(p=>FOUNDATION_CATS.indexOf(p.cat)!==-1&&p.isNew)
@@ -14382,7 +14383,8 @@ function bldCats(){
             :c.special==='foundations'?DB.filter(p=>FOUNDATION_CATS.indexOf(p.cat)!==-1).length:cntC(c.id);
     // Paywall lock badge (dormant unless window.PAYWALL). Foundations tile stays open.
     const lk=(window.PAYWALL && typeof _hasPremium==='function' && !_hasPremium() && c.special!=='foundations' && typeof clFreeCat==='function' && !clFreeCat(c.id));
-    return`<div class="${cls}" onclick="opC('${c.id}','${c.special||''}')">
+    const span=(ci===CATS.length-1 && CATS.length%2)?' style="grid-column:1/-1;"':'';
+    return`<div class="${cls}"${span} onclick="opC('${c.id}','${c.special||''}')">
       ${n?_newTagHtml():''}
       <div class="ci">${c.icon}</div><div class="cn">${c.id}</div><div class="cc">${lk?'🔒 ':''}${cnt} פריטים</div></div>`;
   }).join('');
@@ -23721,7 +23723,7 @@ window.addEventListener('load', function(){
 <script>
 // Version stamp — shown in the admin panel so we can confirm which build is live
 // on a device (stale service-worker caches were causing "my changes don't show").
-window.APP_VERSION = 'v303';
+window.APP_VERSION = 'v304';
 
 // Register the service worker for full offline use in the field, WITH update
 // detection: when a new version installs, offer a one-tap refresh instead of the
