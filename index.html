@@ -582,6 +582,13 @@ body.day-mode .pc-nav button{background:#fff;border-color:rgba(168,82,0,0.25);co
 /* Threat cards keep their accent in day mode too */
 body.day-mode .thr-threat{border-color:rgba(192,57,43,0.5)!important;border-right:4px solid #c0392b!important;}
 body.day-mode .thr-curse{border-color:rgba(200,130,30,0.5)!important;border-right:4px solid #d08a1e!important;}
+/* Home "continue" strip (path / scenario in progress) — sits under the training card */
+.home-cont-strip{min-height:0!important;box-shadow:none!important;}
+#home-prep-card.home-cont-strip, #home-prep-card.home-cont-strip *{color:#E8D9B8!important;}
+.home-cont-strip [style*="font-size:32px"]{font-size:22px!important;}
+.home-cont-strip [style*="font-size:22px;"]{font-size:16px!important;}
+body.day-mode .home-cont-strip{background:#fff!important;border-color:rgba(31,79,134,0.25)!important;border-right-color:#1f4f86!important;}
+body.day-mode #home-prep-card.home-cont-strip, body.day-mode #home-prep-card.home-cont-strip *{color:#0e1b2e!important;}
 /* ── Accessibility layer ── */
 :focus-visible{outline:3px solid #D4A24E!important;outline-offset:2px;border-radius:8px;}
 @media (prefers-reduced-motion: reduce){ *,*::before,*::after{animation-duration:0.001ms!important;animation-iteration-count:1!important;transition-duration:0.001ms!important;scroll-behavior:auto!important;} }
@@ -2434,7 +2441,7 @@ function showLanding() {
     </div>
 
     <!-- 🎯 Primary action #3 — training (prepare for next time) -->
-    <div onclick="navToTab('train')" style="background:linear-gradient(135deg,#1f4f86 0%,#163a63 100%);border:1px solid rgba(120,170,230,0.3);border-radius:18px;padding:16px 18px;margin-bottom:18px;cursor:pointer;box-shadow:0 4px 12px rgba(0,0,0,0.25);display:flex;align-items:center;gap:14px;">
+    <div onclick="navToTab('train')" style="background:linear-gradient(135deg,#1f4f86 0%,#163a63 100%);border:1px solid rgba(120,170,230,0.3);border-radius:18px;padding:16px 18px;margin-bottom:12px;cursor:pointer;box-shadow:0 4px 12px rgba(0,0,0,0.25);display:flex;align-items:center;gap:14px;">
       <div style="font-size:34px;line-height:1;flex-shrink:0;">🎯</div>
       <div style="flex:1;min-width:0;">
         <div class="keep-white" style="color:#fff;font-size:19px;font-weight:900;line-height:1.2;">אני רוצה להתאמן</div>
@@ -2443,10 +2450,15 @@ function showLanding() {
       <div class="keep-white" style="color:#fff;font-size:22px;flex-shrink:0;">◀</div>
     </div>
 
+    <!-- Prep Path - Combat Readiness Track (HERO - the main "what to do now") -->
+    <div onclick="heroAction()" id="home-prep-card" class="home-cont-strip" style="background:#1F3147;border:1px solid #2A3D52;border-right:4px solid #5b9bd5;border-radius:12px;padding:9px 14px;margin:-6px 0 18px;cursor:pointer;position:relative;overflow:hidden;min-height:60px;">
+      <!-- Content set by JS -->
+    </div>
+
     <!-- Secondary — quieter: everything else -->
     <div style="color:#7a9ab5;font-size:12px;font-weight:700;margin:0 2px 8px;">עוד בערכה</div>
     <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:16px;">
-      <div onclick="navToTab('lib')" style="position:relative;background:#1F3147;border:1px solid #2A3D52;border-radius:12px;padding:11px 6px;text-align:center;cursor:pointer;"><div style="font-size:20px;line-height:1;margin-bottom:5px;">📚</div><div style="color:#E8D9B8;font-size:13px;font-weight:700;line-height:1.25;">ספרייה</div></div>
+      <div onclick="navToTab('lib')" style="position:relative;background:#1F3147;border:1px solid #2A3D52;border-radius:12px;padding:11px 6px;text-align:center;cursor:pointer;"><div style="font-size:20px;line-height:1;margin-bottom:5px;">📚</div><div style="color:#E8D9B8;font-size:13px;font-weight:700;line-height:1.25;">ספרייה מבצעית</div></div>
       <div onclick="navToTab('scn')" style="position:relative;background:#1F3147;border:1px solid #2A3D52;border-radius:12px;padding:11px 6px;text-align:center;cursor:pointer;"><div style="font-size:20px;line-height:1;margin-bottom:5px;">💬</div><div style="color:#E8D9B8;font-size:13px;font-weight:700;line-height:1.25;">תרחישים</div></div>
       <div onclick="navToTab('fav')" style="position:relative;background:#1F3147;border:1px solid #2A3D52;border-radius:12px;padding:11px 6px;text-align:center;cursor:pointer;"><div style="font-size:20px;line-height:1;margin-bottom:5px;">⭐</div><div style="color:#E8D9B8;font-size:13px;font-weight:700;line-height:1.25;">שמורים</div></div>
       <div onclick="navToTab('cus')" style="position:relative;background:#1F3147;border:1px solid #2A3D52;border-radius:12px;padding:11px 6px;text-align:center;cursor:pointer;"><div id="home-cus-new" style="display:none;position:absolute;top:4px;right:4px;background:#D4A24E;color:#0E1B2E;font-size:9px;font-weight:800;padding:0 6px;border-radius:8px;line-height:1.6;">חדש</div><div style="font-size:20px;line-height:1;margin-bottom:5px;">🕌</div><div style="color:#E8D9B8;font-size:13px;font-weight:700;line-height:1.25;">תרבות</div></div>
@@ -2483,11 +2495,6 @@ function showLanding() {
         <div id="home-new-strip-sub" style="color:#D4A24E;font-size:12px;font-weight:700;margin-top:1px;"></div>
       </div>
       <div style="color:#D4A24E;font-size:20px;flex-shrink:0;">›</div>
-    </div>
-
-    <!-- Prep Path - Combat Readiness Track (HERO - the main "what to do now") -->
-    <div onclick="heroAction()" id="home-prep-card" style="background:linear-gradient(135deg,#1f4f86 0%,#163a63 100%);border:1px solid rgba(120,170,230,0.3);border-radius:14px;padding:14px 16px;margin-bottom:14px;cursor:pointer;box-shadow:0 4px 12px rgba(0,0,0,0.25);position:relative;overflow:hidden;min-height:60px;">
-      <!-- Content set by JS -->
     </div>
 
     <!-- Phrase of the Day (ביטוי היום) — kept high on the page, right under the greeting, so it isn't missed -->
@@ -2663,8 +2670,7 @@ function showLanding() {
 
     <!-- Header -->
     <div style="margin-bottom:18px;">
-      <div style="color:#D4A24E;font-size:13px;font-weight:700;letter-spacing:1px;margin-bottom:4px;">📊 ההתקדמות שלך</div>
-      <div style="color:#E8D9B8;font-size:22px;font-weight:800;">סטטיסטיקות מלאות</div>
+      <div style="color:#E8D9B8;font-size:22px;font-weight:800;">📊 ההתקדמות שלי</div>
     </div>
     
     <!-- Big Stats Row -->
@@ -2705,23 +2711,20 @@ function showLanding() {
     <div style="background:linear-gradient(135deg,#1F3147 0%,#18293E 100%);border:1px solid rgba(29,158,117,0.35);border-radius:14px;padding:16px;margin-bottom:14px;">
       <div style="display:flex;align-items:center;gap:8px;margin-bottom:14px;">
         <span style="font-size:18px;">💡</span>
-        <span style="color:#1D9E75;font-size:12px;font-weight:800;letter-spacing:0.5px;">תובנות והמלצות</span>
+        <span style="color:#1D9E75;font-size:12px;font-weight:800;letter-spacing:0.5px;">מה כדאי לתרגל עכשיו</span>
       </div>
       <div id="prog-insights" style="display:flex;flex-direction:column;gap:8px;">
         <!-- Insights filled by JS -->
       </div>
     </div>
     
-    <!-- Achievements Panel (NEW!) -->
-    <div style="background:linear-gradient(135deg,#1F3147 0%,#18293E 100%);border:1px solid rgba(212,162,78,0.35);border-radius:14px;padding:16px;margin-bottom:14px;">
-      <div style="display:flex;align-items:center;gap:8px;margin-bottom:14px;">
-        <span style="font-size:18px;">🏆</span>
-        <span style="color:#D4A24E;font-size:12px;font-weight:800;letter-spacing:0.5px;">הישגים</span>
-      </div>
-      <div id="prog-achievements">
+    <!-- Achievements — collapsed to one line; open to see all -->
+    <details class="pop-more" style="background:linear-gradient(135deg,#1F3147 0%,#18293E 100%);border:1px solid rgba(212,162,78,0.35);border-radius:14px;margin:0 0 14px;padding:0 14px;">
+      <summary id="prog-ach-sum" style="text-align:right;color:#E8D9B8;">🏆 הישגים</summary>
+      <div id="prog-achievements" style="padding-bottom:12px;">
         <!-- Filled by JS -->
       </div>
-    </div>
+    </details>
     
     <!-- Category Breakdown -->
     <div style="background:linear-gradient(135deg,#18293E 0%,#1F3147 100%);border:1px solid rgba(212,162,78,0.25);border-radius:14px;padding:16px;margin-bottom:14px;">
@@ -2732,8 +2735,8 @@ function showLanding() {
       <div id="prog-categories"></div>
     </div>
 
-    <!-- Activity Summary -->
-    <div style="background:linear-gradient(135deg,#18293E 0%,#1F3147 100%);border:1px solid rgba(212,162,78,0.25);border-radius:14px;padding:16px;margin-bottom:14px;">
+    <!-- Activity Summary — duplicated the tiles at the top; kept hidden (data still computed) -->
+    <div style="display:none;background:linear-gradient(135deg,#18293E 0%,#1F3147 100%);border:1px solid rgba(212,162,78,0.25);border-radius:14px;padding:16px;margin-bottom:14px;">
       <div style="display:flex;align-items:center;gap:8px;margin-bottom:12px;">
         <span style="font-size:16px;">⚡</span>
         <span style="color:#D4A24E;font-size:12px;font-weight:700;letter-spacing:0.5px;">סיכום פעילות</span>
@@ -2821,7 +2824,7 @@ function showLanding() {
   <div id="vcats" class="scr on">
     <div style="text-align:center;margin-bottom:22px;">
       <div style="font-size:28px;margin-bottom:6px;">📚</div>
-      <div style="color:#E8D9B8;font-size:18px;font-weight:800;letter-spacing:0.5px;margin-bottom:4px;">ספריית מבצעי</div>
+      <div style="color:#E8D9B8;font-size:18px;font-weight:800;letter-spacing:0.5px;margin-bottom:4px;">ספרייה מבצעית</div>
       <div style="color:#7a9ab5;font-size:12px;">ביטויים חיוניים למצבי שטח</div>
     </div>
     <!-- Phrase of the Day Banner - MOVED to home tab, hidden here -->
@@ -6254,7 +6257,7 @@ function renderPrepPathHomeCard() {
       // In progress - put day info in subtitle, progress as a thin colored strip on left edge
       var currentDayData = path.filter(function(d){ return d.day === currentDay; })[0];
       var todayTitle = currentDayData ? currentDayData.title : 'הסתיים!';
-      var pathLabel = '🪖 הכנה לגיוס · ' + (pathType === '90' ? 'מסלול מומחה' : (pathType === '60' ? 'מסלול מעמיק' : 'מסלול מהיר'));
+      var pathLabel = 'הכנה לגיוס · ' + (pathType === '90' ? 'מסלול מומחה' : (pathType === '60' ? 'מסלול מעמיק' : 'מסלול מהיר'));
       
       // Same structure as field/flash - progress shown as percentage badge
       card.innerHTML = 
@@ -6913,6 +6916,11 @@ function renderAchievementsPanel(){
     });
     
     container.innerHTML = html;
+    try {
+      var nxt = ACHIEVEMENTS.filter(function(a){ return earned.indexOf(a.id) === -1; })[0];
+      var sum = document.getElementById('prog-ach-sum');
+      if (sum) sum.textContent = '🏆 הישגים · ' + totalEarned + '/' + totalAch + (nxt ? ' · הבא: ' + nxt.icon + ' ' + nxt.title : ' · הכל הושג!') + '  ▾';
+    } catch(e) {}
   } catch(e) { console.warn('renderAchievementsPanel error:', e); }
 }
 
@@ -6975,15 +6983,15 @@ function renderInsights() {
     
     // === Generate insights ===
     
-    // 1. Today's goal status
-    if (todayCount >= dailyGoal) {
+    // 1. Today's goal status — shown by the daily-goal card above; only nudge when nothing done yet
+    if (false) {
       insights.push({
         icon: '🎯', color: '#1D9E75',
         title: 'יעד היום הושג!',
         body: 'תרגלת ' + todayCount + ' משפטים. כל הכבוד! היום שלך נקצר רצף.',
         action: null
       });
-    } else if (todayCount > 0) {
+    } else if (false) {
       var remaining = dailyGoal - todayCount;
       insights.push({
         icon: '📈', color: '#D4A24E',
@@ -6991,7 +6999,7 @@ function renderInsights() {
         body: 'תרגלת ' + todayCount + '/' + dailyGoal + ' היום. עוד קצת ותסיים את היעד!',
         action: { label: 'תרגול מהיר', fn: 'startFlashcards' }
       });
-    } else {
+    } else if (false) {
       insights.push({
         icon: '🌅', color: '#D4A24E',
         title: 'התחל את היום',
@@ -7000,15 +7008,15 @@ function renderInsights() {
       });
     }
     
-    // 2. Streak insight
-    if (streak >= 7) {
+    // 2. Streak — already in the tile at the top
+    if (false) {
       insights.push({
         icon: '🔥', color: '#1D9E75',
         title: 'רצף מרשים של ' + streak + ' ימים!',
         body: 'אתה עקבי - וזה הסוד להצלחה. השיא האישי שלך: ' + maxStreak + ' ימים.',
         action: null
       });
-    } else if (streak > 0 && streak < 7) {
+    } else if (false) {
       insights.push({
         icon: '⚡', color: '#D4A24E',
         title: 'בדרך ל-7 ימים ברצף',
@@ -7037,13 +7045,13 @@ function renderInsights() {
           icon: '📚', color: '#D4A24E',
           title: 'קטגוריה לתרגול: ' + weakest.name,
           body: 'למדת ' + weakest.learned + '/' + weakest.total + ' (' + weakest.pct + '%). עוד תרגול וזה ינוצח!',
-          action: { label: 'פתח קטגוריה', fn: 'navToLib' }
+          action: { label: 'תרגלו אותה', fn: "progLearnCat('" + String(weakest.name).replace(/'/g,"\\'") + "')" }
         });
       }
     }
     
-    // 5. Mastered milestone
-    if (masteredCount >= 10) {
+    // 5. Mastered milestone — covered by achievements
+    if (false) {
       insights.push({
         icon: '🏆', color: '#1D9E75',
         title: masteredCount + ' משפטים נשלטים!',
@@ -7074,18 +7082,22 @@ function renderInsights() {
       html += '<div style="color:' + ins.color + ';font-size:12px;font-weight:700;margin-bottom:3px;">' + ins.title + '</div>';
       html += '<div style="color:#a0b8c8;font-size:11px;line-height:1.5;">' + ins.body + '</div>';
       if (ins.action) {
-        html += '<button onclick="' + ins.action.fn + '()" style="margin-top:6px;background:rgba(' + (ins.color === '#1D9E75' ? '29,158,117' : (ins.color === '#c0392b' ? '192,57,43' : (ins.color === '#D4A24E' ? '212,162,78' : '212,134,46'))) + ',0.15);border:1px solid ' + ins.color + ';color:' + ins.color + ';border-radius:6px;padding:5px 12px;font-size:11px;font-weight:700;cursor:pointer;font-family:inherit;">' + ins.action.label + ' ◀</button>';
+        html += '<button onclick="' + (ins.action.fn.indexOf('(')>=0 ? ins.action.fn : ins.action.fn + '()') + '" style="margin-top:6px;background:rgba(' + (ins.color === '#1D9E75' ? '29,158,117' : (ins.color === '#c0392b' ? '192,57,43' : (ins.color === '#D4A24E' ? '212,162,78' : '212,134,46'))) + ',0.15);border:1px solid ' + ins.color + ';color:' + ins.color + ';border-radius:6px;padding:5px 12px;font-size:11px;font-weight:700;cursor:pointer;font-family:inherit;">' + ins.action.label + ' ◀</button>';
       }
       html += '</div></div>';
     });
     
     if (insights.length === 0) {
-      html = '<div style="text-align:center;color:#7a9ab5;padding:20px;font-size:12px;">טרם נאספו נתונים. תרגלו קצת ותקבלו תובנות!</div>';
+      html = '<div style="text-align:center;padding:8px 6px;"><div style="color:#a0b8c8;font-size:12.5px;margin-bottom:8px;">אין כרגע משהו שדורש חיזוק — המשיכו להתאמן</div><button onclick="navToTab(\'train\')" style="background:rgba(91,155,213,0.18);border:1px solid #5b9bd5;color:#8fbfef;border-radius:10px;padding:9px 16px;font-size:13px;font-weight:800;cursor:pointer;font-family:inherit;">🎯 לאימון ותרגול</button></div>';
+      if (false) html = '<div style="text-align:center;color:#7a9ab5;padding:20px;font-size:12px;">טרם נאספו נתונים. תרגלו קצת ותקבלו תובנות!</div>';
     }
     
     container.innerHTML = html;
   } catch(e) { console.warn('renderInsights error:', e); }
 }
+
+// Progress → straight into the learning mode of the weakest category.
+function progLearnCat(cat){ try{ navToTab('lib'); opC(cat,''); setTimeout(function(){ startCatLearn(cat); }, 80); }catch(e){} }
 
 function renderProgress(){
   try { renderInsights(); } catch(e) {}
@@ -23632,7 +23644,7 @@ try { renderHome(); } catch(_){}
   <div class="mm-grid">
     <div class="mm-tile" onclick="navToTab('train')"><div class="mm-ic">🎯</div><div class="mm-lb">אימון ותרגול</div></div>
     <div class="mm-tile" onclick="navToTab('scn')"><div class="mm-ic">🗨️</div><div class="mm-lb">תרחישים</div></div>
-    <div class="mm-tile" onclick="navToTab('lib')"><div class="mm-ic">📚</div><div class="mm-lb">ספריית מבצעי</div></div>
+    <div class="mm-tile" onclick="navToTab('lib')"><div class="mm-ic">📚</div><div class="mm-lb">ספרייה מבצעית</div></div>
     <div class="mm-tile" onclick="_mmGo(function(){openFoundations();})"><div class="mm-ic">🎓</div><div class="mm-lb">יסודות השפה</div></div>
     <div class="mm-tile" onclick="navToTab('dict')"><div class="mm-ic">📖</div><div class="mm-lb">מילון</div></div>
     <div class="mm-tile" onclick="_mmGo(function(){openDailyDrills();})"><div class="mm-ic">🔁</div><div class="mm-lb">אתגר יומי</div></div>
@@ -24053,7 +24065,7 @@ window.addEventListener('load', function(){
 <script>
 // Version stamp — shown in the admin panel so we can confirm which build is live
 // on a device (stale service-worker caches were causing "my changes don't show").
-window.APP_VERSION = 'v311';
+window.APP_VERSION = 'v312';
 
 // Register the service worker for full offline use in the field, WITH update
 // detection: when a new version installs, offer a one-tap refresh instead of the
