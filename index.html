@@ -574,7 +574,7 @@ body.day-mode .learn-bar .lb-s{color:#4a5b6c;}
 .pc-cnt{background:rgba(212,162,78,0.15);color:#D4A24E;font-size:11.5px;font-weight:800;padding:1px 9px;border-radius:9px;}
 body.day-mode .pc-sec{color:#0e1b2e;}
 body.day-mode .pc-sec-other{color:#4a5b6c;}
-body.day-mode .pc-cnt{background:rgba(168,82,0,0.12);color:#a85200;}
+body.day-mode .pc-cnt{background:rgba(168,82,0,0.10);color:#7f3e00;}
 .pc-nav{display:flex;gap:6px;overflow-x:auto;padding:2px 0 8px;margin-bottom:2px;scrollbar-width:none;-webkit-overflow-scrolling:touch;}
 .pc-nav::-webkit-scrollbar{display:none;}
 .pc-nav button{flex-shrink:0;background:#1F3147;border:1px solid #2A3D52;color:#E8D9B8;border-radius:16px;padding:7px 13px;font-size:13px;font-weight:700;cursor:pointer;font-family:inherit;white-space:nowrap;}
@@ -582,6 +582,23 @@ body.day-mode .pc-nav button{background:#fff;border-color:rgba(168,82,0,0.25);co
 /* Threat cards keep their accent in day mode too */
 body.day-mode .thr-threat{border-color:rgba(192,57,43,0.5)!important;border-right:4px solid #c0392b!important;}
 body.day-mode .thr-curse{border-color:rgba(200,130,30,0.5)!important;border-right:4px solid #d08a1e!important;}
+/* ── Accessibility layer ── */
+:focus-visible{outline:3px solid #D4A24E!important;outline-offset:2px;border-radius:8px;}
+@media (prefers-reduced-motion: reduce){ *,*::before,*::after{animation-duration:0.001ms!important;animation-iteration-count:1!important;transition-duration:0.001ms!important;scroll-behavior:auto!important;} }
+.a11y-back{min-height:40px!important;display:inline-flex!important;align-items:center;}
+.sx{min-width:40px;min-height:40px;}
+.pc-nav button{padding:9px 14px!important;}
+.a11y-sr{position:absolute!important;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap;}
+/* Day-mode contrast (WCAG AA 4.5:1 for small text) */
+body.day-mode .bnav-emerg-lbl{color:#a52a1e!important;}
+body.day-mode .home-search-ph{color:#5a6b7c!important;}
+body.day-mode .triage-path{color:#a8381f!important;background:#fff6f4!important;}
+body.day-mode .ct .cc{color:#8a4300!important;}
+body.day-mode .field-chip.on{color:#0f6b4c!important;}
+.thr-badge-threat{color:#ff9488!important;}
+.thr-badge-curse{color:#f0b866!important;}
+body.day-mode .thr-badge-threat{color:#a8261a!important;}
+body.day-mode .thr-badge-curse{color:#7a4c0c!important;}
 /* ── Simplified phrase card ── */
 #tab-lib.pop-open > button:first-child, #tab-lib.pop-open > .sbar, #tab-lib.pop-open > .lrow{display:none!important;}
 #vpop .ww{display:none!important;}
@@ -779,7 +796,7 @@ body.sun-mode .qk-card, body.sun-mode .card{ border-width:2px; }
 .lb{flex:1;padding:8px 5px;border-radius:10px;border:1px solid rgba(212,162,78,0.35);background:transparent;color:#a0b8c8;font-size:13px;cursor:pointer;font-family:inherit;text-align:center;}
 .lb.active{background:rgba(212,162,78,0.18);color:#D4A24E;border-color:#D4A24E;font-weight:700;}
 body.day-mode .lb{color:#4a5b6c;}
-body.day-mode .lb.active{color:#a85200;}
+body.day-mode .lb.active{color:#7f3e00;}
 .cgrid{display:grid;grid-template-columns:1fr 1fr;gap:10px;background:transparent;}
 body.day-mode .cgrid{background:transparent;gap:10px;}
 body.day-mode .ct{border:1px solid #ebe0c5;}
@@ -1527,7 +1544,7 @@ body.day-mode [style*="color:#FF8C00"]{
 
 /* Keep gold visible but darker */
 body.day-mode [style*="color:#D4A24E"]{
-  color:#8a6420 !important;
+  color:#76541a !important;
 }
 
 /* Keep emergency red */
@@ -2401,7 +2418,7 @@ function showLanding() {
     <div style="display:flex;align-items:center;gap:8px;margin-bottom:12px;">
       <div onclick="openGlobalSearch()" style="flex:1;background:#1F3147;border:1px solid #2A3D52;border-radius:12px;padding:15px 14px;display:flex;align-items:center;gap:10px;border-width:2px;border-color:#D4A24E;cursor:pointer;user-select:none;-webkit-user-select:none;-webkit-touch-callout:none;">
         <span style="color:#D4A24E;font-size:21px;">🔍</span>
-        <span style="flex:1;color:#9fb4c8;font-size:15px;font-weight:600;">חיפוש מהיר: עצור, ידיים, תעודה, פצוע, נשק...</span>
+        <span class="home-search-ph" style="flex:1;color:#9fb4c8;font-size:15px;font-weight:600;">חיפוש מהיר: עצור, ידיים, תעודה, פצוע, נשק...</span>
       </div>
       <button onclick="gsHomeVoice()" title="חיפוש קולי" style="background:rgba(212,162,78,0.18);border:1px solid #D4A24E;color:#D4A24E;width:54px;height:54px;border-radius:12px;cursor:pointer;font-size:19px;flex-shrink:0;">🎤</button>
     </div>
@@ -2477,7 +2494,7 @@ function showLanding() {
     <div id="home-potd-card" style="display:none;background:#18293E;border:1px solid rgba(212,162,78,0.25);border-right:3px solid #D4A24E;border-radius:12px;padding:10px 12px;margin-bottom:14px;">
       <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:7px;">
         <div style="color:#D4A24E;font-size:10px;font-weight:700;letter-spacing:0.5px;">✨ ביטוי היום</div>
-        <div onclick="homePotdDismiss()" title="הסתר" style="color:#5e7a92;font-size:15px;line-height:1;cursor:pointer;padding:2px 4px;">✕</div>
+        <div onclick="homePotdDismiss()" title="הסתר" aria-label="הסתר" style="color:#5e7a92;font-size:16px;line-height:1;cursor:pointer;padding:0;min-width:36px;min-height:36px;display:flex;align-items:center;justify-content:center;">✕</div>
       </div>
       <div style="display:flex;align-items:center;gap:10px;">
         <button id="home-potd-play" onclick="homePotdPlay()" style="flex-shrink:0;background:transparent;border:1px solid #D4A24E;color:#D4A24E;border-radius:50%;width:36px;height:36px;font-size:14px;cursor:pointer;font-family:inherit;padding:0;">▶</button>
@@ -3064,7 +3081,7 @@ function showLanding() {
   <div class="sec">
     <button class="emerg-back" onclick="navToTab('home')">‹ חזרה לבית</button>
     <div class="stitle">ℹ️ מידע ומשפטי</div>
-    <div style="color:#7a9ab5;font-size:12px;line-height:1.6;margin:2px 2px 14px;">כל מה שצריך לדעת לפני השימוש — התקנה, פרטיות, תנאי שימוש והרשאת מיקרופון.</div>
+    <div style="color:#7a9ab5;font-size:12px;line-height:1.6;margin:2px 2px 14px;">כל מה שצריך לדעת לפני השימוש — התקנה, נגישות, פרטיות, תנאי שימוש והרשאת מיקרופון.</div>
 
     <div style="background:#18293E;border:1px solid #2A3D52;border-radius:12px;padding:14px 16px;margin-bottom:12px;">
       <div style="color:#D4A24E;font-size:15px;font-weight:800;margin-bottom:8px;">📲 התקנה למסך הבית</div>
@@ -3106,6 +3123,16 @@ function showLanding() {
       </div>
     </div>
 
+    <div style="background:#18293E;border:1px solid #2A3D52;border-radius:12px;padding:14px 16px;margin-bottom:12px;">
+      <div style="color:#D4A24E;font-size:15px;font-weight:800;margin-bottom:8px;">♿ הצהרת נגישות</div>
+      <div style="color:#E8D9B8;font-size:13px;line-height:1.7;">
+        אנו פועלים להנגיש את האפליקציה לכלל המשתמשים, בהתאם לתקן הישראלי ת״י 5568 (המבוסס על הנחיות WCAG 2.0 ברמה AA).<br>
+        <b>מה הונגש:</b> כל הכפתורים והקוביות זמינים לקוראי מסך ולמקלדת (Tab ו-Enter) · לכפתורי אייקון יש שם מוקרא · ניגודיות צבעים לפי התקן במצב יום ובמצב לילה · מסגרת פוקוס בולטת · כפתורים גדולים למגע · אפשרות הגדלת טקסט ("🔠 טקסט גדול" במצב שטח) והגדלת התצוגה בדפדפן · תמיכה בהגדרת "הפחתת תנועה" · לכל הקלטה יש טקסט מלא בעברית, בערבית ובתעתיק.<br>
+        <b>מגבלות ידועות:</b> חלק מהאייקונים הם אימוג׳י שמראם תלוי במכשיר · זיהוי דיבור תלוי בתמיכת הדפדפן (באייפון — דרך מיקרופון המקלדת).<br>
+        <b>נתקלתם בבעיית נגישות?</b> נשמח לשמוע ולתקן: <a href="mailto:hagaiedit@gmail.com" style="color:#D4A24E;">hagaiedit@gmail.com</a><br>
+        <span style="color:#7a9ab5;">עודכן: אוקטובר 2026</span>
+      </div>
+    </div>
     <div id="legal-account-row" style="display:none;background:#18293E;border:1px solid #2A3D52;border-radius:12px;padding:14px 16px;margin-bottom:12px;">
       <div style="color:#D4A24E;font-size:15px;font-weight:800;margin-bottom:8px;">👤 החשבון שלי</div>
       <div id="legal-account-email" style="color:#E8D9B8;font-size:13px;margin-bottom:10px;"></div>
@@ -3186,7 +3213,7 @@ function showLanding() {
       <div style="color:#7a9ab5;font-size:12px;line-height:1.5;margin-top:2px;">בדיקת נפגע לפי סדר + משפטי עזרה — לחצו על פריט לשמיעה ותרגול</div>
     </div>
     <!-- order reminder: the quick triage sequence -->
-    <div style="background:#18293E;border:1px dashed rgba(231,76,60,0.45);border-radius:12px;padding:12px 14px;margin-bottom:16px;color:#e8896a;font-size:13px;line-height:1.9;direction:rtl;">
+    <div class="triage-path" style="background:#18293E;border:1px dashed rgba(231,76,60,0.45);border-radius:12px;padding:12px 14px;margin-bottom:16px;color:#e8896a;font-size:13px;line-height:1.9;direction:rtl;">
       בהכרה? <b>›</b> פצוע/כואב? <b>›</b> מדמם? <b>›</b> יכול לזוז? <b>›</b> נושם? <b>›</b> כמה נפגעים? <b>›</b> הרגעה
     </div>
     <div id="triage-list"></div>
@@ -11673,6 +11700,46 @@ function _learnBar(onclickJs, learned, total){
   return '<div class="learn-bar" onclick="'+String(onclickJs).replace(/"/g,'&quot;')+'"><span class="lb-ic">🎯</span><span class="lb-t">מצב למידה</span><span class="lb-s">תרגול שלב־אחר־שלב</span>'+prog+'<span class="lb-go">‹</span></div>';
 }
 
+// ===== ♿ Accessibility layer =====
+// The UI uses many clickable <div>s. Give every one of them button semantics
+// (role, keyboard focus, Enter/Space), name icon-only buttons, and mark section
+// titles as headings — automatically, for everything rendered now or later.
+var _A11Y_ICON={'⚙️':'הגדרות','⚙':'הגדרות','🎤':'חיפוש קולי','×':'נקה','✕':'סגור','▶':'השמע','⏹':'עצור','■':'עצור','⏸':'השהה','🔊':'השמע','📖':'מילון','◀':'הבא','‹':'חזרה','☰':'תפריט','⋯':'עוד','…':'עוד','🔴':'עצור הקלטה'};
+function _a11yName(el){
+  var t=(el.textContent||'').replace(/[\s‎‏]/g,'');
+  if(/[A-Za-z֐-׿؀-ۿ0-9]/.test(t)) return '';
+  return el.getAttribute('title') || _A11Y_ICON[t] || '';
+}
+function _a11yScan(root){
+  try{
+    (root||document).querySelectorAll('[onclick]:not(button):not(a):not(input):not(select):not(textarea):not([data-a11y])').forEach(function(el){
+      el.setAttribute('data-a11y','1');
+      if(!el.hasAttribute('role')) el.setAttribute('role','button');
+      if(!el.hasAttribute('tabindex')) el.setAttribute('tabindex','0');
+      var n=_a11yName(el); if(n && !el.hasAttribute('aria-label')) el.setAttribute('aria-label',n);
+    });
+    (root||document).querySelectorAll('button:not([data-a11y])').forEach(function(el){
+      el.setAttribute('data-a11y','1');
+      var n=_a11yName(el); if(n && !el.hasAttribute('aria-label')) el.setAttribute('aria-label',n);
+      var tx=(el.textContent||'').trim();
+      if((tx.indexOf('◀')===0||tx.indexOf('‹')===0) && /חזרה|בית/.test(tx)) el.classList.add('a11y-back');
+    });
+    (root||document).querySelectorAll('.stitle:not([role]),.pc-sec:not([role])').forEach(function(el){ el.setAttribute('role','heading'); el.setAttribute('aria-level','2'); });
+  }catch(e){}
+}
+document.addEventListener('keydown',function(e){
+  if(e.key!=='Enter' && e.key!==' ') return;
+  var el=e.target; if(!el || el.getAttribute('role')!=='button' || /^(BUTTON|A|INPUT|SELECT|TEXTAREA)$/.test(el.tagName)) return;
+  e.preventDefault(); el.click();
+});
+(function(){
+  var pending=false;
+  function run(){ pending=false; _a11yScan(document);
+    try{ var bt=document.getElementById('brand-title'); if(bt && !bt.hasAttribute('aria-level')){ bt.setAttribute('role','heading'); bt.setAttribute('aria-level','1'); } }catch(e){} }
+  try{ new MutationObserver(function(){ if(!pending){ pending=true; (window.requestAnimationFrame||setTimeout)(run); } }).observe(document.documentElement,{childList:true,subtree:true}); }catch(e){}
+  if(document.readyState==='loading') document.addEventListener('DOMContentLoaded',run); else run();
+})();
+
 // ===== Phrase lists: one clear column + section jump chips =====
 // Every phrase screen renders cards in ONE column (no mixed 1-2 per row mosaic)
 // under strong section headings. With 3+ sections, a row of chips at the top
@@ -18168,8 +18235,8 @@ function rThreat(){
       var row=f?f.row:{he:t.he,ar:t.ar,trans:t.trans,cat:cat};
       var rows=window._dbCatRows['__threat']; rows.push(row);
       var _tone=cat==='שומעים בשטח: איום'?'threat':'curse';
-      var _bdg=_tone==='threat'?'<span style="display:inline-block;background:rgba(231,76,60,0.15);color:#e74c3c;font-size:10px;font-weight:800;padding:1px 7px;border-radius:6px;margin-right:5px;white-space:nowrap;">🚨 איום</span>'
-        :'<span style="display:inline-block;background:rgba(230,162,60,0.15);color:#e6a23c;font-size:10px;font-weight:800;padding:1px 7px;border-radius:6px;margin-right:5px;white-space:nowrap;">😐 לא איום</span>';
+      var _bdg=_tone==='threat'?'<span class="thr-badge-threat" style="display:inline-block;background:rgba(231,76,60,0.15);color:#e74c3c;font-size:10.5px;font-weight:800;padding:1px 7px;border-radius:6px;margin-right:5px;white-space:nowrap;">🚨 איום</span>'
+        :'<span class="thr-badge-curse" style="display:inline-block;background:rgba(230,162,60,0.15);color:#e6a23c;font-size:10.5px;font-weight:800;padding:1px 7px;border-radius:6px;margin-right:5px;white-space:nowrap;">😐 לא איום</span>';
       return _threatCard(row, _bdg, 0, "_openDbCatItem('__threat',"+(rows.length-1)+",'threat')", _tone);
     }).join('')+'</div>';
     return h;
@@ -23298,7 +23365,7 @@ try { renderHome(); } catch(_){}
     <div style="width:58px;height:58px;margin:-22px auto 1px;background:linear-gradient(135deg,#e0392b 0%,#a82318 100%);border-radius:50%;display:flex;align-items:center;justify-content:center;box-shadow:0 4px 14px rgba(224,57,43,0.55);border:3px solid #0E1B2E;">
       <div style="font-size:29px;line-height:1;">🚨</div>
     </div>
-    <div style="color:#ff6b5c;font-size:11px;font-weight:800;">חירום</div>
+    <div class="bnav-emerg-lbl" style="color:#ff6b5c;font-size:11px;font-weight:800;">חירום</div>
   </div>
   <div onclick="navToTab('scn')" class="bn-btn" data-tab="scn" style="flex:1;text-align:center;cursor:pointer;padding:6px 4px;border-radius:10px;transition:all 0.2s;">
     <div style="font-size:24px;line-height:1;margin-bottom:4px;">💬</div>
@@ -23763,7 +23830,7 @@ window.addEventListener('load', function(){
 <script>
 // Version stamp — shown in the admin panel so we can confirm which build is live
 // on a device (stale service-worker caches were causing "my changes don't show").
-window.APP_VERSION = 'v307';
+window.APP_VERSION = 'v308';
 
 // Register the service worker for full offline use in the field, WITH update
 // detection: when a new version installs, offer a one-tap refresh instead of the
