@@ -551,6 +551,21 @@ body.day-mode .toast{background:#fff;color:#0e1b2e;}
 body.day-mode #more-menu .mm-tile, body.day-mode #more-menu .mm-row{background:#fff!important;border-color:rgba(168,82,0,0.2)!important;}
 body.day-mode #more-menu .mm-lb, body.day-mode #more-menu .mm-row-t{color:#0e1b2e!important;}
 body.day-mode #more-menu .mm-h{color:#a85200!important;}
+/* Library category lists sit flush in their container — give them the app's side margin */
+#litems > .pc-nav, #litems > .learn-bar, #litems .pc-list, #litems .pc-sec{margin-left:14px!important;margin-right:14px!important;}
+#dlitems > .learn-bar, #dlitems .pc-list, #hlitems > .learn-bar{margin-left:0;margin-right:0;}
+/* Slim learning-mode bar (same everywhere) */
+.learn-bar{position:relative;display:flex;align-items:center;gap:8px;background:transparent;border:1px solid rgba(120,170,230,0.45);border-radius:10px;padding:8px 12px;margin:0 0 12px;cursor:pointer;overflow:hidden;}
+.learn-bar .lb-ic{font-size:15px;}
+.learn-bar .lb-t{color:#8fbfef;font-size:13.5px;font-weight:800;white-space:nowrap;}
+.learn-bar .lb-s{color:#7a9ab5;font-size:12px;flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.learn-bar .lb-cnt{color:#8fbfef;font-size:11.5px;font-weight:700;}
+.learn-bar .lb-track{position:absolute;left:0;right:0;bottom:0;height:3px;background:rgba(120,170,230,0.15);}
+.learn-bar .lb-track span{display:block;height:100%;background:#5b9bd5;}
+.learn-bar .lb-go{color:#8fbfef;font-size:16px;}
+body.day-mode .learn-bar{border-color:rgba(31,79,134,0.4);background:#fff;}
+body.day-mode .learn-bar .lb-t, body.day-mode .learn-bar .lb-cnt, body.day-mode .learn-bar .lb-go{color:#1f4f86;}
+body.day-mode .learn-bar .lb-s{color:#4a5b6c;}
 /* ── Phrase lists: one column, strong headings, jump chips ── */
 .pc-list{display:flex;flex-direction:column;gap:8px;}
 .pc-list > div{flex:none!important;min-width:0!important;padding:11px 14px!important;}
@@ -11647,6 +11662,17 @@ function _descResolve(o){
 }
 
 
+// One slim, uniform "learning mode" bar for every category (training = blue).
+// Thin so the section jump chips and the phrases below stay the focus.
+function _learnBar(onclickJs, learned, total){
+  var prog='';
+  if(typeof total==='number' && total>0){
+    var pct=Math.round(((learned||0)/total)*100);
+    prog='<span class="lb-cnt">'+(learned||0)+'/'+total+'</span><span class="lb-track"><span style="width:'+pct+'%"></span></span>';
+  }
+  return '<div class="learn-bar" onclick="'+String(onclickJs).replace(/"/g,'&quot;')+'"><span class="lb-ic">🎯</span><span class="lb-t">מצב למידה</span><span class="lb-s">תרגול שלב־אחר־שלב</span>'+prog+'<span class="lb-go">‹</span></div>';
+}
+
 // ===== Phrase lists: one clear column + section jump chips =====
 // Every phrase screen renders cards in ONE column (no mixed 1-2 per row mosaic)
 // under strong section headings. With 3+ sections, a row of chips at the top
@@ -14843,21 +14869,7 @@ function opC(cat,special){
     // Build the Learning Mode card
     let learnCard = '';
     if (totalInCat > 0) {
-      learnCard = `
-        <div onclick="startCatLearn('${cat.replace(/'/g,"\\'")}')" style="background:linear-gradient(135deg,#1D9E75 0%,#0e5a3f 100%);border-radius:14px;padding:14px;margin-bottom:14px;cursor:pointer;box-shadow:0 4px 12px rgba(29,158,117,0.3);">
-          <div style="display:flex;align-items:center;gap:10px;margin-bottom:8px;">
-            <div style="font-size:24px;">🎯</div>
-            <div>
-              <div class="keep-white" style="color:#fff;font-size:15px;font-weight:700;">התחל מצב למידה</div>
-              <div style="color:rgba(255,255,255,0.85);font-size:12px;">תרגל את כל הקטגוריה שלב-שלב</div>
-            </div>
-          </div>
-          <div style="height:6px;background:rgba(255,255,255,0.2);border-radius:3px;overflow:hidden;margin-top:8px;">
-            <div style="height:100%;background:#fff;width:${pct}%;border-radius:3px;"></div>
-          </div>
-          <div style="color:rgba(255,255,255,0.95);font-size:11px;margin-top:6px;text-align:left;">${learnedInCat}/${totalInCat} משפטים נלמדו</div>
-        </div>
-      `;
+      learnCard = _learnBar("startCatLearn('"+cat.replace(/'/g,"\\'")+"')", learnedInCat, totalInCat);
     }
     
     // Render: intro + learning card + (subcats OR items)
@@ -15045,14 +15057,7 @@ function opAnnounceList(cat){
   const items=ANNOUNCE.filter(a=>a.cat===cat);
   let learnCard='';
   if(items.length>0){
-    learnCard=`<div onclick="startAnnounceLearn('${cat.replace(/'/g,"\\'")}')" style="background:linear-gradient(135deg,#1D9E75 0%,#0e5a3f 100%);border-radius:14px;padding:14px;margin-bottom:14px;cursor:pointer;box-shadow:0 4px 12px rgba(29,158,117,0.3);">
-      <div style="display:flex;align-items:center;gap:10px;">
-        <div style="font-size:24px;">🎯</div>
-        <div>
-          <div class="keep-white" style="color:#fff;font-size:15px;font-weight:700;">התחל מצב למידה</div>
-          <div style="color:rgba(255,255,255,0.85);font-size:12px;">תרגל את כל הקטגוריה שלב-שלב</div>
-        </div>
-      </div></div>`;
+    learnCard=_learnBar("startAnnounceLearn('"+cat.replace(/'/g,"\\'")+"')");
   }
   document.getElementById('litems').innerHTML=learnCard+_libFlatCards(items,'opAnnounce',function(a){return ANNOUNCE.indexOf(a);});
 }
@@ -15079,19 +15084,7 @@ function opNavyList(cat){
   var pct = items.length > 0 ? Math.round((learnedInCat/items.length)*100) : 0;
   
   var safeCat = cat.replace(/'/g, "\\'");
-  var html = '<div onclick="startNavyLearn(\'' + safeCat + '\')" style="background:linear-gradient(135deg,#1D9E75 0%,#0e5a3f 100%);border-radius:14px;padding:14px;margin:8px 12px;cursor:pointer;box-shadow:0 4px 12px rgba(29,158,117,0.3);">' +
-    '<div style="display:flex;align-items:center;gap:10px;margin-bottom:8px;">' +
-      '<div style="font-size:24px;">🎯</div>' +
-      '<div>' +
-        '<div style="color:#fff;font-size:15px;font-weight:700;">התחל מצב למידה</div>' +
-        '<div style="color:rgba(255,255,255,0.85);font-size:12px;">תרגל את כל הקטגוריה שלב-שלב</div>' +
-      '</div>' +
-    '</div>' +
-    '<div style="height:6px;background:rgba(255,255,255,0.2);border-radius:3px;overflow:hidden;">' +
-      '<div style="height:100%;background:#fff;width:' + pct + '%;"></div>' +
-    '</div>' +
-    '<div style="color:rgba(255,255,255,0.9);font-size:11px;margin-top:6px;">' + learnedInCat + ' מתוך ' + items.length + ' (' + pct + '%)</div>' +
-  '</div>';
+  var html = _learnBar("startNavyLearn('" + safeCat + "')", learnedInCat, items.length);
   
   // Items list — clean cards, like the rest of the library
   html += _libFlatCards(items, 'opNavyP', function(n){ return NAVY.indexOf(n); });
@@ -17459,14 +17452,7 @@ function opDC(cat){
   const dItems=DAILY.filter(d=>d.cat===cat);
   let learnCard='';
   if(dItems.length>0){
-    learnCard=`<div onclick="startDailyLearn('${cat.replace(/'/g,"\\'")}')" style="background:linear-gradient(135deg,#1D9E75 0%,#0e5a3f 100%);border-radius:14px;padding:14px;margin-bottom:14px;cursor:pointer;box-shadow:0 4px 12px rgba(29,158,117,0.3);">
-      <div style="display:flex;align-items:center;gap:10px;">
-        <div style="font-size:24px;">🎯</div>
-        <div>
-          <div class="keep-white" style="color:#fff;font-size:15px;font-weight:700;">התחל מצב למידה</div>
-          <div style="color:rgba(255,255,255,0.85);font-size:12px;">תרגל את כל הקטגוריה שלב-שלב</div>
-        </div>
-      </div></div>`;
+    learnCard=_learnBar("startDailyLearn('"+cat.replace(/'/g,"\\'")+"')");
   }
   document.getElementById('dlitems').innerHTML=learnCard+(dItems.map(d=>{
     const i=DAILY.indexOf(d);
@@ -17505,14 +17491,7 @@ function opHC(cat){
   var _pairs=_buildGreetPairs(items);
   let learnCard='';
   if(items.length>0){
-    learnCard=`<div onclick="startHeartLearn('${cat.replace(/'/g,"\\'")}')" style="background:linear-gradient(135deg,#1D9E75 0%,#0e5a3f 100%);border-radius:14px;padding:14px;margin-bottom:14px;cursor:pointer;box-shadow:0 4px 12px rgba(29,158,117,0.3);">
-      <div style="display:flex;align-items:center;gap:10px;">
-        <div style="font-size:24px;">🎯</div>
-        <div>
-          <div class="keep-white" style="color:#fff;font-size:15px;font-weight:700;">התחל מצב למידה</div>
-          <div style="color:rgba(255,255,255,0.85);font-size:12px;">תרגל את כל הקטגוריה שלב-שלב</div>
-        </div>
-      </div></div>`;
+    learnCard=_learnBar("startHeartLearn('"+cat.replace(/'/g,"\\'")+"')");
   }
   document.getElementById('hlist').innerHTML=learnCard+(items.length?items.map((h)=>{
     const i=HEART.indexOf(h);
@@ -23348,7 +23327,7 @@ try { renderHome(); } catch(_){}
 </div>
 
 <!-- More Menu (popup from bottom) -->
-<div id="more-menu" style="display:none;position:fixed;bottom:80px;left:50%;transform:translateX(-50%);width:calc(100% - 16px);max-width:464px;max-height:calc(100vh - 110px);overflow-y:auto;box-sizing:border-box;background:#18293E;border:1px solid #2e4558;border-radius:14px;padding:12px 12px 14px;z-index:99;box-shadow:0 -4px 20px rgba(0,0,0,0.6);direction:rtl;">
+<div id="more-menu" style="display:none;position:fixed;bottom:80px;left:50%;transform:translateX(-50%);width:calc(100% - 16px);max-width:464px;max-height:calc(100vh - 180px);max-height:calc(100dvh - 180px);overflow-y:auto;overscroll-behavior:contain;box-sizing:border-box;background:#18293E;border:1px solid #2e4558;border-radius:14px;padding:12px 12px 14px;z-index:99;box-shadow:0 -4px 20px rgba(0,0,0,0.6);direction:rtl;">
   <div style="text-align:center;color:#D4A24E;font-size:13px;font-weight:800;letter-spacing:0.5px;margin-bottom:4px;">כל הערכה</div>
   <!-- Same map as the app itself: field → learn → language & culture → mine -->
   <div class="mm-h">🚨 בשטח</div>
@@ -23784,7 +23763,7 @@ window.addEventListener('load', function(){
 <script>
 // Version stamp — shown in the admin panel so we can confirm which build is live
 // on a device (stale service-worker caches were causing "my changes don't show").
-window.APP_VERSION = 'v306';
+window.APP_VERSION = 'v307';
 
 // Register the service worker for full offline use in the field, WITH update
 // detection: when a new version installs, offer a one-tap refresh instead of the
