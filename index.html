@@ -589,6 +589,23 @@ body.day-mode .thr-curse{border-color:rgba(200,130,30,0.5)!important;border-righ
 .home-cont-strip [style*="font-size:22px;"]{font-size:16px!important;}
 body.day-mode .home-cont-strip{background:#fff!important;border-color:rgba(31,79,134,0.25)!important;border-right-color:#1f4f86!important;}
 body.day-mode #home-prep-card.home-cont-strip, body.day-mode #home-prep-card.home-cont-strip *{color:#0e1b2e!important;}
+/* ⚡ Search action cluster */
+.cl-box{background:#18293E;border:2px solid #D4A24E;border-radius:14px;padding:12px;margin-bottom:12px;}
+.cl-head{color:#D4A24E;font-size:15px;font-weight:800;margin-bottom:4px;}
+.cl-sec{color:#E8D9B8;font-size:13px;font-weight:800;margin:12px 2px 6px;padding-right:8px;border-right:3px solid #D4A24E;}
+.cl-row{display:flex;align-items:center;gap:10px;background:#1F3147;border:1px solid #2A3D52;border-radius:10px;padding:9px 12px;margin-bottom:6px;cursor:pointer;}
+.cl-txt{flex:1;min-width:0;}
+.cl-he{color:#E8D9B8;font-size:14.5px;font-weight:700;}
+.cl-ar{color:#FFD700;font-size:16px;font-family:Georgia,serif;direction:rtl;margin-top:1px;}
+.cl-tr{color:#D4A24E;font-size:12.5px;margin-top:1px;}
+.cl-q{color:#7a9ab5;font-size:11.5px;margin-top:3px;}
+.cl-play{flex-shrink:0;width:42px;height:42px;border-radius:50%;background:rgba(212,162,78,0.15);border:1px solid #D4A24E;color:#D4A24E;font-size:15px;cursor:pointer;font-family:inherit;}
+body.day-mode .cl-box{background:#fff;border-color:#c99a45;}
+body.day-mode .cl-row{background:#fbf7ee;border-color:rgba(168,82,0,0.2);}
+body.day-mode .cl-he, body.day-mode .cl-sec{color:#0e1b2e;}
+body.day-mode .cl-ar{color:#5a3d00;}
+body.day-mode .cl-tr, body.day-mode .cl-head{color:#7f3e00;}
+body.day-mode .cl-q{color:#4a5b6c;}
 /* ── Accessibility layer ── */
 :focus-visible{outline:3px solid #D4A24E!important;outline-offset:2px;border-radius:8px;}
 @media (prefers-reduced-motion: reduce){ *,*::before,*::after{animation-duration:0.001ms!important;animation-iteration-count:1!important;transition-duration:0.001ms!important;scroll-behavior:auto!important;} }
@@ -11815,6 +11832,106 @@ document.addEventListener('keydown',function(e){
   if(document.readyState==='loading') document.addEventListener('DOMContentLoaded',run); else run();
 })();
 
+// ===== ⚡ Search as an ACTION CLUSTER =====
+// Typing a field concept ("נשק", "דם", "תעודה"…) returns, before any list,
+// everything a soldier needs around it: what to SAY, what the civilian may
+// ANSWER, and what you may HEAR — drawn from all of the kit's content.
+var CLUSTER_SYN=[
+  ['נשק','אקדח','רובה','סכין','סכינה','תחמושת','רימון','חומר נפץ'],
+  ['דם','מדמם','דימום','פצוע','פציעה','נפצע','כואב','כאב','אמבולנס','חובש','רופא','בית חולים','נשימה','נושם'],
+  ['תעודה','תעודת','זהות','רישיון','רשיון','היתר','מסמך','דרכון','ניירות'],
+  ['ידיים','ידיך','ידיכם','הרם','הרימו'],
+  ['רכב','מכונית','אוטו','נהג','מנוע','תא המטען','מפתחות'],
+  ['עצור','תעצור','עצרו','לעצור','אל תזוז','לא לזוז'],
+  ['ילד','ילדים','ילדה','תינוק','בן','בת'],
+  ['בית','דלת','חדר','דירה','חצר','גג','מרתף'],
+  ['טלפון','נייד','פלאפון','מספר'],
+  ['תיק','כיס','שקית','ארגז'],
+  ['מים','לשתות','אוכל','רעב','צמא'],
+  ['תרופה','תרופות','כדור','כדורים','מחלה','חולה','סוכרת','לב'],
+  ['עבודה','עובד','מקצוע'],
+  ['משפחה','אבא','אמא','אח','אחות','אשה','בעל','דוד'],
+  ['מחסום','בידוק','חיפוש']
+];
+function _clNorm(x){ return (typeof dictNorm==='function'?dictNorm(x):String(x||'')).replace(/[^\u05D0-\u05EA\s]/g,' ').replace(/\s+/g,' ').trim(); }
+function _clStrip(w){ var o=[w]; if(w.length>=4 && 'בהוכלמש'.indexOf(w[0])>=0){ o.push(w.slice(1)); if(w.length>=5 && 'הבלמכש'.indexOf(w[1])>=0) o.push(w.slice(2)); } return o; }
+function _clStem(t){ return (t.length>=4 && /[הת]$/.test(t)) ? t.slice(0,-1) : t; }
+function _clTerms(q){
+  var nq=_clNorm(q); if(!nq) return [];
+  var words=nq.split(' '); if(words.length>2) return [];
+  var base=[]; _clStrip(nq).forEach(function(x){ base.push(x); }); words.forEach(function(w){ _clStrip(w).forEach(function(x){ if(base.indexOf(x)<0) base.push(x); }); });
+  var out=base.slice();
+  CLUSTER_SYN.forEach(function(g){ var gn=g.map(_clNorm); if(gn.some(function(t){ return base.indexOf(t)>=0 || base.indexOf(_clStem(t))>=0 || base.some(function(b){ return b.length>=3 && _clStem(b)===_clStem(t); }); })) gn.forEach(function(t){ if(out.indexOf(t)<0) out.push(t); }); });
+  return out.filter(function(t){ return t.length>=2; });
+}
+window._clPool=null; window._clKey='';
+function _clBuildPool(){
+  var key=(typeof DB!=='undefined'&&DB?DB.length:0)+'|'+(typeof SCENARIO!=='undefined'&&SCENARIO?SCENARIO.length:0);
+  if(window._clPool && window._clKey===key) return window._clPool;
+  var out=[], seen={};
+  function add(o,role,extra){ if(!o||!o.he||!o.ar) return; if(typeof _notRemoved==='function' && !_notRemoved(o)) return;
+    // Field phrases only: no grammar tables / reading drills, no grammar notes, no long stories.
+    var c=String(o.cat||''); if(c.indexOf('יסודות')===0 || c.indexOf('זיהוי')===0) return;
+    if(/סיומת|\((זכר|נקבה|רבים|יחיד)|\u200e/.test(o.he) || o.he.length>90) return;
+    var k=role+'|'+_clNorm(o.he); if(seen[k]){ if(!seen[k].audio && (o.audio||o.audio_url)) seen[k].audio=o.audio||o.audio_url; return; }
+    var it={he:o.he, ar:o.ar, trans:o.trans||'', audio:o.audio||o.audio_url||'', role:role, id:o.id, cat:o.cat, q:(extra&&extra.q)||'', words:_clNorm(o.he).split(' ')};
+    seen[k]=it; out.push(it); }
+  try{ (DB||[]).forEach(function(r){ var c=r.cat||''; var role=c==='תשובות אזרח'?'civ':(c.indexOf('שומעים בשטח')===0?'hear':'say');
+    if(c.indexOf('יסודות')===0 || c.indexOf('זיהוי')===0) return; add(r,role); if(Array.isArray(r.responses)) r.responses.forEach(function(x){ add(x,'civ',{q:r.he}); }); }); }catch(e){}
+  try{ (BUILTIN_TASHAUL||[]).forEach(function(r){ add(r,'say'); (r.responses||[]).forEach(function(x){ add(x,'civ',{q:r.he}); }); }); }catch(e){}
+  try{ (BUILTIN_THREAT||[]).forEach(function(r){ add(r,'hear'); }); }catch(e){}
+  try{ [ORDERS,CHECK,VEHICLE,TRIAGE,SUSPECT_DESC].forEach(function(T){ (T||[]).forEach(function(sl){ (sl.options||[]).forEach(function(o){ add(_descResolve(o),'say'); }); }); }); }catch(e){}
+  try{ (ANSWERS||[]).forEach(function(g){ (g.options||[]).forEach(function(o){ add(o,'civ'); }); }); }catch(e){}
+  try{ (SCENARIO||[]).forEach(function(r){ var t=(r.tags||'').toLowerCase(); if(t.indexOf('divider')>=0) return; add(r, t.indexOf('civilian')>=0?'civ':'say'); }); }catch(e){}
+  window._clPool=out; window._clKey=key; return out;
+}
+function _clMatch(q){
+  var terms=_clTerms(q); if(!terms.length) return null;
+  var pool=_clBuildPool(), hits=[];
+  pool.forEach(function(it){
+    var best=0;
+    it.words.forEach(function(w){ _clStrip(w).forEach(function(v){ terms.forEach(function(t,ti){
+      var sc=0;
+      if(v===t) sc=3; else if(t.length>=3 && v.indexOf(_clStem(t))===0) sc=2;
+      if(sc && ti>=1) sc-=0.5;   // synonyms rank just under the typed word
+      if(sc>best) best=sc; }); }); });
+    if(best>0) hits.push({it:it, sc:best*10 - Math.min(it.he.length,60)/12 + (it.audio?0.6:0)});
+  });
+  if(hits.length<3) return null;
+  hits.sort(function(a,b){ return b.sc-a.sc; });
+  var g={say:[],civ:[],hear:[]};
+  hits.forEach(function(h){ g[h.it.role].push(h.it); });
+  return g;
+}
+function _clusterHtml(q, ctx){
+  var g=_clMatch(q); if(!g) return '';
+  var lim={say:6,civ:5,hear:3}, rows=[];
+  var title=String(q).trim();
+  var h='<div class="cl-box"><div class="cl-head">⚡ '+title+' — מה אומרים ומה עונים</div>';
+  [['say','🗣️ אתם אומרים'],['civ','👂 האזרח עשוי לענות'],['hear','🚨 מה תשמעו בשטח']].forEach(function(sec){
+    var arr=g[sec[0]].slice(0,lim[sec[0]]); if(!arr.length) return;
+    h+='<div class="cl-sec">'+sec[1]+'</div>';
+    arr.forEach(function(it){
+      var i=rows.length; rows.push(it);
+      var au=it.audio; if(!au){ try{ au=_descAudioFor(it)||''; }catch(e){} it.audio=au; }
+      h+='<div class="cl-row" onclick="clusterOpen('+i+')">'
+        +'<div class="cl-txt"><div class="cl-he">'+it.he+'</div><div class="cl-ar">'+it.ar+'</div>'+(it.trans?'<div class="cl-tr">'+it.trans+'</div>':'')
+        +(it.q?'<div class="cl-q">↩️ תשובה ל: '+it.q+'</div>':'')+'</div>'
+        +(au?'<button class="cl-play" aria-label="השמע" onclick="event.stopPropagation();playResponseAudio(\''+String(au).replace(/'/g,"\\'")+'\',this)">▶</button>':'')+'</div>';
+    });
+  });
+  h+='</div>';
+  window._clRows=rows; window._clCtx=ctx;
+  return h;
+}
+function clusterOpen(i){
+  var it=(window._clRows||[])[i]; if(!it) return;
+  var back=window._fieldCurTab||'home';
+  try{ if(window._clCtx==='gs') closeGlobalSearch(); }catch(e){}
+  window._dbCatRows=window._dbCatRows||{}; window._dbCatRows['__cluster']=window._clRows;
+  _openDbCatItem('__cluster', i, back);
+}
+
 // ===== Phrase lists: one clear column + section jump chips =====
 // Every phrase screen renders cards in ONE column (no mixed 1-2 per row mosaic)
 // under strong section headings. With 3+ sections, a row of chips at the top
@@ -21111,6 +21228,8 @@ function globalSearch(){
   var rawQ = (inp && inp.value || '').trim();
   var q = _gsNorm(rawQ);
   if(!q){ window._gsDest=[]; out.innerHTML = _gsEmptyHtml(); return; }
+  // 0) Action cluster (say / answer / hear) for a field concept — first.
+  var clHtml = ''; try { clHtml = _clusterHtml(rawQ, 'gs'); } catch(e) {}
   // 1) Jump-to destinations (categories / scenarios / sections) at the top.
   var destHtml = _gsDestHtml(rawQ);
   // 2) Phrase-level matches (existing behavior).
@@ -21122,14 +21241,15 @@ function globalSearch(){
       if(hay.indexOf(q)!==-1) results.push({ p:p, label:s.label, icon:s.icon });
     });
   });
-  if(!destHtml && !results.length){
+  if(!destHtml && !results.length && !clHtml){
     var sug=_gsSuggest(rawQ);
     var nh='<div style="text-align:center;color:#7a9ab5;font-size:13px;padding:26px 10px 8px;">לא נמצאו תוצאות ל"'+rawQ+'".</div>';
     if(sug){ nh+='<div style="text-align:center;padding:4px 10px 20px;color:#a0b8c8;font-size:13px;">האם התכוונת ל־ <button onclick="gsUseRecent(\''+String(sug).replace(/'/g,"\\'")+'\')" style="background:rgba(212,162,78,0.15);border:1px solid #D4A24E;border-radius:12px;padding:6px 14px;color:#D4A24E;font-size:14px;font-weight:700;cursor:pointer;font-family:inherit;">'+sug+' ‹</button> ?</div>'; }
     out.innerHTML=nh; return;
   }
-  var h = destHtml;
+  var h = clHtml + destHtml;
   if(results.length){
+    if(clHtml) h += '<div style="color:#7a9ab5;font-size:12px;font-weight:700;margin:14px 2px 8px;">כל התוצאות</div>';
     var counts = {}; results.forEach(function(r){ counts[r.label]=(counts[r.label]||0)+1; });
     if(_gsFilter !== 'all' && !counts[_gsFilter]) _gsFilter = 'all';
     var shown = results.filter(function(r){ return _gsFilter==='all' || r.label===_gsFilter; });
@@ -23035,8 +23155,9 @@ function emergSearch(){
     return (a.he||'').localeCompare(b.he||'','he');
   });
   results.style.display='block';
-  if(!matches.length){ results.innerHTML='<div class="empty">לא נמצאו משפטים ל"'+q+'".</div>'; return; }
-  var h='';
+  var _cl=''; try{ _cl=_clusterHtml((inp&&inp.value)||'', 'qk'); }catch(e){}
+  if(!matches.length){ results.innerHTML=_cl || '<div class="empty">לא נמצאו משפטים ל"'+q+'".</div>'; return; }
+  var h=_cl;
   for(var i=0;i<matches.length;i++){ h+=_emergCardHTML(matches[i]); }
   results.innerHTML=h;
 }
@@ -24123,7 +24244,7 @@ window.addEventListener('load', function(){
 <script>
 // Version stamp — shown in the admin panel so we can confirm which build is live
 // on a device (stale service-worker caches were causing "my changes don't show").
-window.APP_VERSION = 'v314';
+window.APP_VERSION = 'v315';
 
 // Register the service worker for full offline use in the field, WITH update
 // detection: when a new version installs, offer a one-tap refresh instead of the
