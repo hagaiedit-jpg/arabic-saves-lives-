@@ -589,6 +589,16 @@ body.day-mode .thr-curse{border-color:rgba(200,130,30,0.5)!important;border-righ
 .home-cont-strip [style*="font-size:22px;"]{font-size:16px!important;}
 body.day-mode .home-cont-strip{background:#fff!important;border-color:rgba(31,79,134,0.25)!important;border-right-color:#1f4f86!important;}
 body.day-mode #home-prep-card.home-cont-strip, body.day-mode #home-prep-card.home-cont-strip *{color:#0e1b2e!important;}
+/* 📶 Works-offline indicator */
+.offline-chip{display:none;align-items:center;gap:8px;border-radius:12px;padding:9px 12px;margin:0 0 12px;font-size:13px;font-weight:700;line-height:1.4;}
+.offline-chip.ready{display:flex;background:rgba(29,158,117,0.12);border:1px solid rgba(29,158,117,0.5);color:#4fd0a0;}
+.offline-chip.todo{display:flex;background:rgba(212,162,78,0.10);border:1px dashed rgba(212,162,78,0.6);color:#E8D9B8;cursor:pointer;}
+.offline-chip.off{display:flex;background:rgba(91,155,213,0.14);border:1px solid rgba(91,155,213,0.55);color:#8fbfef;}
+.offline-chip .oc-sub{display:block;font-weight:600;font-size:11.5px;opacity:0.85;}
+.offline-chip .oc-btn{margin-right:auto;flex-shrink:0;background:#D4A24E;color:#0E1B2E;border-radius:9px;padding:6px 10px;font-size:12px;font-weight:800;}
+body.day-mode .offline-chip.ready{color:#0f6b4c;background:rgba(29,158,117,0.10);}
+body.day-mode .offline-chip.todo{color:#0e1b2e;background:#fff;}
+body.day-mode .offline-chip.off{color:#1f4f86;background:#fff;}
 /* ⚡ Search action cluster */
 .cl-box{background:#18293E;border:2px solid #D4A24E;border-radius:14px;padding:12px;margin-bottom:12px;}
 .cl-head{color:#D4A24E;font-size:15px;font-weight:800;margin-bottom:4px;}
@@ -2438,6 +2448,7 @@ function showLanding() {
       <div class="keep-white" style="color:#fff;font-size:24px;flex-shrink:0;">◀</div>
     </div>
 
+    <div class="offline-chip" data-offline-chip></div>
     <!-- Global search across the whole app -->
     <div style="display:flex;align-items:center;gap:8px;margin-bottom:12px;">
       <div onclick="openGlobalSearch()" style="flex:1;background:#1F3147;border:1px solid #2A3D52;border-radius:12px;padding:15px 14px;display:flex;align-items:center;gap:10px;border-width:2px;border-color:#D4A24E;cursor:pointer;user-select:none;-webkit-user-select:none;-webkit-touch-callout:none;">
@@ -2772,6 +2783,7 @@ function showLanding() {
         <div class="field-title" style="color:#e74c3c;font-size:23px;font-weight:900;line-height:1.1;">🚨 מצב שטח</div>
         <button onclick="navToTab('home')" style="background:transparent;border:none;color:#a0b8c8;font-size:14px;cursor:pointer;font-family:inherit;padding:6px 0;">◀ בית</button>
       </div>
+      <div class="offline-chip" data-offline-chip></div>
       <div style="display:flex;gap:8px;margin-bottom:12px;">
         <button id="field-wake-btn" class="field-chip" onclick="fieldToggleWake()">🔆 מסך דלוק</button>
         <button id="field-big-btn" class="field-chip" onclick="fieldToggleBig()">🔠 טקסט גדול</button>
@@ -4379,6 +4391,7 @@ async function downloadAllOffline(){
     try{
       localStorage.setItem('offline_pack_at', new Date().toLocaleDateString('he-IL'));
       localStorage.setItem('offline_pack_n', String(okCount));
+      try{ _offlineChipsRefresh(); }catch(e){}
     }catch(e){}
     if(status) status.textContent='✓ '+okCount+' הקלטות זמינות אופליין'+(fail?' · '+fail+' נכשלו':'');
     if(bar) bar.style.width='100%';
@@ -11832,6 +11845,29 @@ document.addEventListener('keydown',function(e){
   if(document.readyState==='loading') document.addEventListener('DOMContentLoaded',run); else run();
 })();
 
+// ===== 📶 "Works without reception" — a live, honest indicator =====
+// Offline is a core feature in the field, so it is shown where the soldier looks
+// (Home + field mode): ready ✓ (recordings saved on the phone), a one-tap prompt to
+// save them, or — when there's no reception right now — reassurance that it works.
+function _offlineChipsRefresh(){
+  try{
+    var at=null,n=null; try{ at=localStorage.getItem('offline_pack_at'); n=localStorage.getItem('offline_pack_n'); }catch(e){}
+    var offline=(typeof navigator!=='undefined' && navigator.onLine===false);
+    var html, cls, click='';
+    if(offline){ cls='off'; html='📵<span>אין קליטה עכשיו — הכל עובד מהטלפון ✓<span class="oc-sub">'+(n?n+' הקלטות שמורות במכשיר':'ההקלטות שכבר הושמעו זמינות')+'</span></span>'; }
+    else if(at && n){ cls='ready'; html='📶<span>מוכן לשטח גם בלי קליטה ✓<span class="oc-sub">'+n+' הקלטות שמורות בטלפון · עודכן '+at+'</span></span>'; }
+    else { cls='todo'; click='downloadAllOffline()'; html='📶<span>עובד גם ללא קליטה<span class="oc-sub">הורידו את ההקלטות לטלפון — פעם אחת, מומלץ ב-WiFi</span></span><span class="oc-btn">⬇️ הורדה</span>'; }
+    document.querySelectorAll('[data-offline-chip]').forEach(function(el){
+      el.className='offline-chip '+cls; el.innerHTML=html;
+      if(click){ el.setAttribute('onclick',click); el.setAttribute('role','button'); el.setAttribute('tabindex','0'); }
+      else { el.removeAttribute('onclick'); el.removeAttribute('role'); el.removeAttribute('tabindex'); }
+    });
+  }catch(e){}
+}
+window.addEventListener('online',_offlineChipsRefresh);
+window.addEventListener('offline',_offlineChipsRefresh);
+if(document.readyState==='loading') document.addEventListener('DOMContentLoaded',_offlineChipsRefresh); else setTimeout(_offlineChipsRefresh,0);
+
 // ===== ⚡ Search as an ACTION CLUSTER =====
 // Typing a field concept ("נשק", "דם", "תעודה"…) returns, before any list,
 // everything a soldier needs around it: what to SAY, what the civilian may
@@ -16227,6 +16263,12 @@ var _scnIdx = 0;         // current step index
 // variant collapses into the single correct scenario.
 function _scnCatNorm(s){ return String(s||'').replace(/[—–\-]/g,' ').replace(/\s+/g,' ').trim(); }
 function _scnCatEq(a,b){ return _scnCatNorm(a)===_scnCatNorm(b); }
+// Scenario rows store the SCENARIO name (e.g. "כריזה לבית"); the group shown on the
+// scenarios screen ("מגע ראשוני וסריקות") lives only in SCN_CATEGORIES. Map one to the other.
+function _scnGroupOf(cat){
+  try{ for(var i=0;i<SCN_CATEGORIES.length;i++){ var g=SCN_CATEGORIES[i]; if((g.scenarios||[]).some(function(x){ return _scnCatEq(x.id,cat); })) return g.title; } }catch(e){}
+  return '';
+}
 // DISPLAY-ONLY dedup: the same step can exist as two rows (a category-name variant,
 // or a line re-recorded because it once showed as "missing"). Collapse rows that
 // represent the SAME step so each step shows ONCE — preferring the copy that has
@@ -19914,7 +19956,9 @@ function renderCoverage(){
     {label:'כריזה',         arr:(typeof ANNOUNCE!=='undefined'?ANNOUNCE:[])},
     {label:'סמנטי',         arr:(typeof SEM!=='undefined'?SEM:[])},
     {label:'תרבות ומנהגים', arr:(typeof CUS!=='undefined'?CUS:[]), noAudio:true},
-    {label:'מילון',         arr:(typeof DICT!=='undefined'?DICT:[])}
+    {label:'מילון',         arr:(typeof DICT!=='undefined'?DICT:[])},
+    {label:'תרחישים',       arr:(typeof SCENARIO!=='undefined'?SCENARIO:[]).filter(function(p){ return p && String(p.ar||'').trim() && !/\bdivider\b/.test(String(p.tags||'')); }),
+     catFn:function(p){ var g=_scnGroupOf(p.cat); return (g?g+' › ':'')+(p.cat||''); }}
   ];
   var hasAudio=function(p){ return !!(p && (p.audio||p.audio_url)); };
   var isCrit=function(p){ try{ return _urgencyOf(p)==='urgent'; }catch(e){ return false; } };
@@ -19925,7 +19969,7 @@ function renderCoverage(){
     var arr=(sec.arr||[]).filter(Boolean); if(!arr.length) return;
     var noAudio=!!sec.noAudio;
     var groups={}, order=[];
-    arr.forEach(function(p){ var c=(p.cat&&String(p.cat).trim())||'— ללא קטגוריה'; if(!(c in groups)){groups[c]=[];order.push(c);} groups[c].push(p); });
+    arr.forEach(function(p){ var c=(sec.catFn?sec.catFn(p):(p.cat&&String(p.cat).trim()))||'— ללא קטגוריה'; if(!(c in groups)){groups[c]=[];order.push(c);} groups[c].push(p); });
     var secT=arr.length, secA=arr.filter(hasAudio).length, secPct=secT?Math.round(secA/secT*100):0;
     grandT+=secT; if(!noAudio){ recT+=secT; recA+=secA; }
     html+='<div style="margin-top:14px;margin-bottom:6px;display:flex;align-items:baseline;gap:8px;flex-wrap:wrap;">'
@@ -21931,7 +21975,9 @@ async function renderAdminList(){
       // recorded answers — normalized so typing without niqqud still matches.
       var respText='';
       try{ if(p.responses){ JSON.parse(p.responses).forEach(function(r){ respText+=' '+(r.he||'')+' '+(r.trans||'')+' '+(r.ar||''); }); } }catch(e){}
-      var dataSearch = _adminNorm((p.he||'') + ' ' + (p.ar||'') + ' ' + (p.trans||'') + ' ' + (p.cat||'') + ' ' + (p.tags||'') + ' ' + (p.why||'') + respText);
+      var _grp = (p.section==='scenario') ? _scnGroupOf(p.cat) : '';
+      if (_grp) statusBadges += '<span style="font-size:11px;color:#8fbfef;background:rgba(91,155,213,0.15);padding:2px 7px;border-radius:7px;">📂 '+_grp+' › '+(p.cat||'')+'</span>';
+      var dataSearch = _adminNorm((p.he||'') + ' ' + (p.ar||'') + ' ' + (p.trans||'') + ' ' + (p.cat||'') + ' ' + _grp + ' תרחישים ' + (p.tags||'') + ' ' + (p.why||'') + respText);
       var dHasAudio = (hasAudio || isCovered) ? '1' : '0'; // covered words leave the "needs recording" queue
       var dHasResp = hasResponses ? '1' : '0';
       var _rTot=0,_rRec=0; try{ if(p.responses){ var _ra=typeof p.responses==='string'?JSON.parse(p.responses):p.responses; if(Array.isArray(_ra)){ _rTot=_ra.length; _rRec=_ra.filter(function(r){return r.audio_url;}).length; } } }catch(e){}
@@ -24244,7 +24290,7 @@ window.addEventListener('load', function(){
 <script>
 // Version stamp — shown in the admin panel so we can confirm which build is live
 // on a device (stale service-worker caches were causing "my changes don't show").
-window.APP_VERSION = 'v315';
+window.APP_VERSION = 'v316';
 
 // Register the service worker for full offline use in the field, WITH update
 // detection: when a new version installs, offer a one-tap refresh instead of the
