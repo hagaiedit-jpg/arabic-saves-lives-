@@ -536,6 +536,16 @@ body.day-mode .toast{background:#fff;color:#0e1b2e;}
 .emerg-cube.purple{border-color:rgba(138,107,208,0.8);}
 .emerg-cube.rose{border-color:rgba(208,138,155,0.8);}
 .emerg-cube.mint{border-color:rgba(79,208,160,0.8);}
+/* ── 📢 Show to civilian ── */
+.civ-show-btn{display:block;width:100%;margin-top:14px;background:linear-gradient(135deg,#1D9E75 0%,#147a59 100%);color:#fff;border:none;border-radius:12px;padding:13px;font-size:16px;font-weight:800;cursor:pointer;font-family:inherit;box-shadow:0 3px 10px rgba(29,158,117,0.3);}
+#civ-overlay{position:fixed;inset:0;z-index:100000;display:none;flex-direction:column;background:#fff;color:#000;font-family:inherit;}
+#civ-overlay.dark{background:#000;color:#FFE45C;}
+#civ-overlay .civ-bar{display:flex;gap:10px;padding:max(12px,env(safe-area-inset-top)) 14px 10px;}
+#civ-overlay .civ-bar button{flex:1;border-radius:12px;padding:12px 8px;font-size:15px;font-weight:800;cursor:pointer;font-family:inherit;border:2px solid currentColor;background:transparent;color:inherit;}
+#civ-text{flex:1;display:flex;align-items:center;justify-content:center;text-align:center;padding:10px 18px;direction:rtl;font-family:'Geeza Pro','Noto Naskh Arabic','Arial',sans-serif;font-weight:700;line-height:1.35;word-break:break-word;overflow:hidden;}
+#civ-play{margin:0 18px 12px;border:none;border-radius:16px;padding:18px;font-size:22px;font-weight:900;cursor:pointer;font-family:inherit;background:#000;color:#fff;}
+#civ-overlay.dark #civ-play{background:#FFE45C;color:#000;}
+#civ-he{text-align:center;font-size:13px;opacity:0.55;padding:0 16px max(14px,env(safe-area-inset-bottom));}
 /* ── Field mode (מצב שטח) ── */
 .field-chip{flex:1;background:#1F3147;border:1px solid #2A3D52;color:#a0b8c8;border-radius:10px;padding:9px 6px;font-size:13px;font-weight:700;cursor:pointer;font-family:inherit;}
 .field-chip.on{background:rgba(29,158,117,0.18);border-color:#1D9E75;color:#4fd0a0;}
@@ -2851,6 +2861,7 @@ function showLanding() {
         <div id="practice-error" style="display:none;text-align:center;color:#e74c3c;font-size:12px;padding:8px;"></div>
       </div>
       
+    <button onclick="civShowFromPopup()" class="civ-show-btn">📢 הצג לאזרח</button>
     <div class="popup-actions"><button onclick="toggleFav()" id="fav-btn" class="popup-action-btn fav">☆ שמור למועדפים</button><button onclick="clsP()" class="popup-action-btn close">✕ סגור</button></div>
     </div></div>
   </div>
@@ -19044,6 +19055,7 @@ function opPop(i,section){
   document.getElementById('tab-lib').className='scr on';shV('vpop');
 }
 function clsP(){
+  try{ civClose(); }catch(e){}
   if(curAudio){curAudio.pause();curAudio=null;}
   if(pt)clearInterval(pt);
   window._popupReturnTab='';
@@ -23371,6 +23383,67 @@ function stopAllAudio(){
 }
 
 
+// ===== 📢 "הצג לאזרח" — the phrase in huge Arabic, for showing the screen =====
+// For noise, distance, a hearing-impaired civilian, or when you can't pronounce it:
+// turn the phone around. Max-contrast (white/black, or black/yellow at night),
+// text auto-sized to fill the screen, big play button, screen kept on.
+window._civWake=null;
+function _civEl(){
+  var o=document.getElementById('civ-overlay'); if(o) return o;
+  o=document.createElement('div'); o.id='civ-overlay';
+  o.innerHTML='<div class="civ-bar"><button onclick="civClose()">✕ סגור</button><button onclick="civToggleDark()">🌓 יום / לילה</button></div>'
+    +'<div id="civ-text"></div><button id="civ-play" onclick="civPlay()">🔊 השמע בקול</button><div id="civ-he"></div>';
+  document.body.appendChild(o); return o;
+}
+function _civFit(){
+  var t=document.getElementById('civ-text'); if(!t) return;
+  var inner=t.firstChild; if(!inner) return;
+  var size=Math.min(120, Math.floor(window.innerWidth/3.2));
+  inner.style.fontSize=size+'px';
+  // Shrink until the text fits the free area (width AND height).
+  var guard=0;
+  while(guard++<60 && size>26 && (inner.scrollWidth>t.clientWidth-8 || inner.scrollHeight>t.clientHeight-8)){ size-=Math.max(2,Math.round(size*0.07)); inner.style.fontSize=size+'px'; }
+}
+function civShow(ar, he, audio){
+  if(!ar) return;
+  var o=_civEl();
+  try{ if(localStorage.getItem('civ_dark')==='1') o.classList.add('dark'); else o.classList.remove('dark'); }catch(e){}
+  var t=document.getElementById('civ-text'); t.innerHTML=''; var sp=document.createElement('div'); sp.textContent=ar; t.appendChild(sp);
+  document.getElementById('civ-he').textContent=he?('(לך: '+he+')'):'';
+  window._civAudio=audio||'';
+  var pb=document.getElementById('civ-play'); pb.style.display=audio?'block':'none'; pb.textContent='🔊 השמע בקול';
+  o.style.display='flex';
+  setTimeout(_civFit,0);
+  try{ if('wakeLock' in navigator && !window._civWake) navigator.wakeLock.request('screen').then(function(w){ window._civWake=w; w.addEventListener('release',function(){ window._civWake=null; }); }).catch(function(){}); }catch(e){}
+}
+function civShowFromPopup(){
+  var ar=(document.getElementById('parsm')||{}).textContent||'';
+  var he=(document.getElementById('phe')||{}).textContent||'';
+  try{ if(typeof curAudio!=='undefined' && curAudio) curAudio.pause(); }catch(e){}
+  civShow(ar.trim(), he.trim(), (typeof _popupPlaySrc==='function')?_popupPlaySrc():(window._popupAudio||''));
+}
+function civPlay(){
+  var u=window._civAudio; if(!u) return;
+  var pb=document.getElementById('civ-play');
+  try{
+    if(window._civA && !window._civA.paused){ window._civA.pause(); window._civA=null; pb.textContent='🔊 השמע בקול'; return; }
+    window._civA=new Audio(u); pb.textContent='⏹ עצור';
+    window._civA.onended=function(){ pb.textContent='🔊 השמע בקול'; window._civA=null; };
+    window._civA.play().catch(function(){ pb.textContent='🔊 השמע בקול'; });
+  }catch(e){}
+}
+function civToggleDark(){
+  var o=_civEl(); o.classList.toggle('dark');
+  try{ localStorage.setItem('civ_dark', o.classList.contains('dark')?'1':'0'); }catch(e){}
+}
+function civClose(){
+  var o=document.getElementById('civ-overlay'); if(o) o.style.display='none';
+  try{ if(window._civA){ window._civA.pause(); window._civA=null; } }catch(e){}
+  // Release only if field mode doesn't hold its own lock for the current screen.
+  try{ if(window._civWake){ window._civWake.release(); window._civWake=null; } }catch(e){}
+}
+window.addEventListener('resize',function(){ var o=document.getElementById('civ-overlay'); if(o && o.style.display==='flex') _civFit(); });
+
 // ── Field mode (מצב שטח): keep the screen on + large text on emergency screens ──
 var FIELD_TABS=['qk','heard','ten','veh','ord','threat','answers','chk','triage','desc','visual','calm','crowd','kids'];
 window._fieldWake=null; window._fieldCurTab='home';
@@ -23621,7 +23694,7 @@ window.addEventListener('load', function(){
 <script>
 // Version stamp — shown in the admin panel so we can confirm which build is live
 // on a device (stale service-worker caches were causing "my changes don't show").
-window.APP_VERSION = 'v301';
+window.APP_VERSION = 'v302';
 
 // Register the service worker for full offline use in the field, WITH update
 // detection: when a new version installs, offer a one-tap refresh instead of the
