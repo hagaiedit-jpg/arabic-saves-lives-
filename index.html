@@ -3996,6 +3996,19 @@ function showLanding() {
 </div>
 
 <!-- Production drill: say the phrase in Arabic, then self-check -->
+<div id="lrn-modal" class="force-dark" role="dialog" aria-modal="true" aria-labelledby="lrn-title" style="display:none;position:fixed;top:0;left:0;right:0;bottom:0;background:#0E1B2E;z-index:9998;direction:rtl;overflow-y:auto;">
+  <div style="max-width:460px;margin:0 auto;padding:18px 16px 40px;">
+    <div style="display:flex;justify-content:space-between;align-items:center;gap:10px;margin-bottom:8px;">
+      <div id="lrn-title" style="color:#E8D9B8;font-size:17px;font-weight:800;line-height:1.3;">🎯 מצב למידה</div>
+      <button onclick="lrnClose()" aria-label="סגור" style="background:#2A3D52;border:none;color:#E8D9B8;width:40px;height:40px;border-radius:50%;font-size:18px;cursor:pointer;font-family:inherit;flex-shrink:0;">✕</button>
+    </div>
+    <div style="height:6px;background:#1F3147;border-radius:3px;overflow:hidden;margin-bottom:5px;"><div id="lrn-bar" style="height:100%;width:0;background:#5b9bd5;border-radius:3px;transition:width 0.3s;"></div></div>
+    <div id="lrn-step" style="text-align:center;color:#8fbfef;font-size:12px;font-weight:700;margin-bottom:12px;"></div>
+    <div id="lrn-instr" style="background:rgba(91,155,213,0.12);border:1px solid rgba(91,155,213,0.35);border-radius:10px;padding:9px 12px;color:#E8D9B8;font-size:14px;font-weight:700;line-height:1.5;margin-bottom:14px;text-align:center;"></div>
+    <div id="lrn-body" aria-live="polite"></div>
+  </div>
+</div>
+
 <div id="pp-modal" class="force-dark" style="display:none;position:fixed;top:0;left:0;right:0;bottom:0;background:#0E1B2E;z-index:9998;direction:rtl;overflow-y:auto;">
   <div style="max-width:460px;margin:0 auto;padding:18px 16px 40px;">
     <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;">
@@ -15040,7 +15053,193 @@ function openFoundations(){
   try{ navToTab('lib'); }catch(e){}
   setTimeout(function(){ try{ opC('יסודות השפה','foundations'); }catch(e){} }, 60);
 }
+
+// ===== 🎯 Learning mode (per category) — learn → practise → summary =====
+// Rounds of 5 phrases. Each round: (1) הכירו — listen & repeat every phrase;
+// (2) תרגול — varied exercises (say it / what did you hear / what does it mean),
+// a miss comes back at the end of the round; (3) סיכום. A phrase answered right
+// counts as learned (fills the category progress bar).
+var _lrn=null;
+function _lrnAudioOf(p){ var a=p.audio_url||p.audio||''; if(!a){ try{ a=_descAudioFor(p)||''; }catch(e){} } return a; }
+function _lrnShuffle(a){ for(var i=a.length-1;i>0;i--){ var j=Math.floor(Math.random()*(i+1)); var t=a[i]; a[i]=a[j]; a[j]=t; } return a; }
+function lrnStart(title, phrases, onClose){
+  var items=(phrases||[]).filter(function(p){ return p && p.he && p.ar; }).map(function(p){
+    return {id:p.id, he:p.he, ar:p.ar, trans:p.trans||'', audio:_lrnAudioOf(p)};
+  });
+  if(!items.length){ alert('אין משפטים לתרגול בקטגוריה זו'); return; }
+  var rounds=[]; for(var i=0;i<items.length;i+=5) rounds.push(items.slice(i,i+5));
+  if(rounds.length>1 && rounds[rounds.length-1].length<3){ var last=rounds.pop(); rounds[rounds.length-1]=rounds[rounds.length-1].concat(last); }
+  _lrn={title:title, all:items, rounds:rounds, r:0, phase:'intro', i:0, queue:[], first:{}, okFirst:0, totalOk:0, onClose:onClose||null};
+  document.getElementById('lrn-title').textContent='🎯 מצב למידה · '+title;
+  document.getElementById('lrn-modal').style.display='block';
+  _lrnRender();
+}
+function _lrnPlay(url){
+  if(!url) return;
+  try{ if(window._lrnAudio) window._lrnAudio.pause(); window._lrnAudio=new Audio(url); window._lrnAudio.play().catch(function(){}); }catch(e){}
+}
+function lrnPlayCur(){ var it=_lrnCurItem(); if(it) _lrnPlay(it.audio); }
+function _lrnCurItem(){
+  if(!_lrn) return null;
+  if(_lrn.phase==='intro') return _lrn.rounds[_lrn.r][_lrn.i];
+  if(_lrn.phase==='quiz') return _lrn.queue[_lrn.i] && _lrn.queue[_lrn.i].item;
+  return null;
+}
+function _lrnHeader(stepTxt, instr, pct){
+  document.getElementById('lrn-step').textContent=stepTxt;
+  document.getElementById('lrn-instr').innerHTML=instr;
+  document.getElementById('lrn-bar').style.width=Math.max(0,Math.min(100,pct))+'%';
+}
+function _lrnPhraseCard(it, big){
+  var h='<div style="background:#18293E;border:1px solid #2A3D52;border-radius:14px;padding:18px 16px;text-align:center;">';
+  h+='<div style="color:#E8D9B8;font-size:'+(big?21:18)+'px;font-weight:800;line-height:1.4;">'+it.he+'</div>';
+  h+='<div style="color:#FFD700;font-size:'+(big?26:22)+'px;font-family:Georgia,serif;direction:rtl;margin-top:10px;line-height:1.4;">'+it.ar+'</div>';
+  if(it.trans) h+='<div style="color:#D4A24E;font-size:16px;margin-top:6px;">'+it.trans+'</div>';
+  h+='</div>';
+  return h;
+}
+function _lrnBtn(label, onclick, kind){
+  var st={main:'background:#5b9bd5;color:#0E1B2E;border:none;', ok:'background:rgba(29,158,117,0.2);border:1px solid #1D9E75;color:#E8D9B8;', no:'background:rgba(192,57,43,0.18);border:1px solid #c0392b;color:#E8D9B8;', ghost:'background:#1F3147;border:1px solid #2A3D52;color:#E8D9B8;'}[kind||'main'];
+  return '<button onclick="'+onclick+'" style="flex:1;width:100%;min-height:50px;padding:12px;border-radius:12px;font-size:15px;font-weight:800;cursor:pointer;font-family:inherit;'+st+'">'+label+'</button>';
+}
+function _lrnRoundPct(){ var R=_lrn.rounds.length; var r=_lrn.rounds[_lrn.r]; var part=0;
+  if(_lrn.phase==='intro') part=(_lrn.i/r.length)*0.4; else if(_lrn.phase==='quiz') part=0.4+0.6*(_lrn.i/Math.max(1,_lrn.queue.length)); else part=1;
+  return ((_lrn.r+part)/R)*100; }
+function _lrnRender(){
+  if(!_lrn) return;
+  var R=_lrn.rounds.length, round=_lrn.rounds[_lrn.r], body=document.getElementById('lrn-body');
+  var rTxt='סבב '+(_lrn.r+1)+' מתוך '+R;
+  if(_lrn.phase==='intro'){
+    var it=round[_lrn.i];
+    _lrnHeader(rTxt+' · שלב 1: הכירו · '+(_lrn.i+1)+'/'+round.length, '👂 הקשיבו למשפט וחזרו עליו בקול פעמיים', _lrnRoundPct());
+    var last=_lrn.i===round.length-1;
+    body.innerHTML=_lrnPhraseCard(it,true)
+      +'<div style="display:flex;gap:8px;margin-top:14px;">'+(it.audio?_lrnBtn('🔊 השמע שוב','lrnPlayCur()','ghost'):'')+_lrnBtn(last?'מתחילים לתרגל ◀':'הבא ◀','lrnIntroNext()','main')+'</div>';
+    _lrnPlay(it.audio);
+    return;
+  }
+  if(_lrn.phase==='quiz'){
+    var q=_lrn.queue[_lrn.i], it2=q.item;
+    var stepTxt=rTxt+' · שלב 2: תרגול · '+(_lrn.i+1)+'/'+_lrn.queue.length;
+    if(q.type==='say'){
+      _lrnHeader(stepTxt,'🗣️ איך אומרים את זה בערבית? אמרו בקול — ואז בדקו',_lrnRoundPct());
+      body.innerHTML='<div style="background:#18293E;border:1px solid #2A3D52;border-radius:14px;padding:22px 16px;text-align:center;">'
+        +'<div style="color:#E8D9B8;font-size:22px;font-weight:800;line-height:1.4;">'+it2.he+'</div><div id="lrn-reveal"></div></div>'
+        +'<div id="lrn-actions" style="margin-top:14px;">'+_lrnBtn('👁️ הצג תשובה','lrnReveal()','main')+'</div>';
+      return;
+    }
+    // multiple choice (hear / read): 3 Hebrew meanings
+    var isHear=q.type==='hear';
+    _lrnHeader(stepTxt, isHear?'🎧 הקשיבו — מה נאמר? בחרו את המשמעות':'📖 מה פירוש המשפט? בחרו את המשמעות', _lrnRoundPct());
+    var h='<div style="background:#18293E;border:1px solid #2A3D52;border-radius:14px;padding:18px 16px;text-align:center;">';
+    if(isHear) h+='<button onclick="lrnPlayCur()" aria-label="השמע" style="width:84px;height:84px;border-radius:50%;border:none;background:#5b9bd5;color:#0E1B2E;font-size:34px;cursor:pointer;">🔊</button><div style="color:#7a9ab5;font-size:12px;margin-top:8px;">אפשר להשמיע שוב</div>';
+    else h+='<div style="color:#FFD700;font-size:26px;font-family:Georgia,serif;direction:rtl;line-height:1.4;">'+it2.ar+'</div>'+(it2.trans?'<div style="color:#D4A24E;font-size:16px;margin-top:6px;">'+it2.trans+'</div>':'');
+    h+='</div><div style="display:flex;flex-direction:column;gap:8px;margin-top:14px;">';
+    q.opts.forEach(function(o,k){ h+='<button class="lrn-opt" data-k="'+k+'" onclick="lrnPick('+k+')" style="min-height:52px;padding:12px 14px;border-radius:12px;background:#1F3147;border:1px solid #2A3D52;color:#E8D9B8;font-size:16px;font-weight:700;text-align:right;cursor:pointer;font-family:inherit;">'+o+'</button>'; });
+    h+='</div><div id="lrn-actions" style="margin-top:12px;"></div>';
+    body.innerHTML=h;
+    if(isHear) _lrnPlay(it2.audio);
+    return;
+  }
+  // round summary
+  var ok=round.filter(function(x){ return _lrn.first[x.id||x.he]===true; }).length;
+  var lastRound=_lrn.r===R-1;
+  _lrnHeader(rTxt+' · שלב 3: סיכום', lastRound?'🏁 סיימתם את כל הקטגוריה!':'✅ סבב הושלם — אפשר להמשיך לסבב הבא', _lrnRoundPct());
+  var h2='<div style="text-align:center;padding:16px 6px 6px;">'
+    +'<div style="font-size:44px;margin-bottom:6px;">'+(ok===round.length?'🏆':'📊')+'</div>'
+    +'<div style="color:#E8D9B8;font-size:21px;font-weight:800;">ידעתם '+ok+' מתוך '+round.length+' בניסיון הראשון</div>'
+    +'<div style="color:#7a9ab5;font-size:13px;margin-top:6px;">'+(ok===round.length?'שליטה מלאה בסבב הזה 🎯':'מה שטעיתם בו חזר שוב בסוף — ככה זה נקלט')+'</div></div>'
+    +'<div style="display:flex;flex-direction:column;gap:8px;margin-top:14px;">'
+    +(lastRound?'':_lrnBtn('סבב הבא ◀','lrnNextRound()','main'))
+    +_lrnBtn('🔁 תרגלו שוב את הסבב הזה','lrnRepeatRound()','ghost')
+    +_lrnBtn(lastRound?'סיום ✓':'עצירה כאן','lrnClose()',lastRound?'main':'ghost')+'</div>';
+  body.innerHTML=h2;
+}
+function _lrnBuildQuiz(){
+  var round=_lrn.rounds[_lrn.r], pool=_lrn.all;
+  var canMC=pool.length>=3;
+  var types=['say','read','hear'];
+  var q=_lrnShuffle(round.slice()).map(function(it,k){
+    var t=types[(k+_lrn.r)%3];
+    if(t==='hear' && !it.audio) t='read';
+    if(!canMC) t='say';
+    return _lrnMakeQ(it,t);
+  });
+  _lrn.queue=q; _lrn.i=0;
+}
+function _lrnMakeQ(it,t){
+  var q={item:it, type:t};
+  if(t!=='say'){
+    var others=_lrnShuffle(_lrn.all.filter(function(x){ return x.he!==it.he; }).map(function(x){ return x.he; }).filter(function(v,i,a){ return a.indexOf(v)===i; })).slice(0,2);
+    q.opts=_lrnShuffle([it.he].concat(others)); q.ans=q.opts.indexOf(it.he);
+  }
+  return q;
+}
+function lrnIntroNext(){
+  var round=_lrn.rounds[_lrn.r];
+  if(_lrn.i<round.length-1){ _lrn.i++; } else { _lrn.phase='quiz'; _lrnBuildQuiz(); }
+  _lrnRender();
+}
+function _lrnMark(it, ok){
+  var k=it.id||it.he;
+  if(!(k in _lrn.first)) _lrn.first[k]=ok;
+  if(ok){ try{ if(it.id && typeof trackLearned==='function') trackLearned(it.id); }catch(e){} }
+  else {
+    // A miss comes back at the end of the round — as "say it" if it was multiple choice, else as multiple choice.
+    var q=_lrn.queue[_lrn.i]; var nt=(q.type==='say' && _lrn.all.length>=3)?'read':'say';
+    _lrn.queue.push(_lrnMakeQ(it,nt));
+  }
+}
+function lrnReveal(){
+  var q=_lrn.queue[_lrn.i], it=q.item;
+  var rv=document.getElementById('lrn-reveal');
+  if(rv) rv.innerHTML='<div style="border-top:1px solid #2A3D52;margin-top:14px;padding-top:12px;">'
+    +'<div style="color:#FFD700;font-size:26px;font-family:Georgia,serif;direction:rtl;line-height:1.4;">'+it.ar+'</div>'
+    +(it.trans?'<div style="color:#D4A24E;font-size:16px;margin-top:6px;">'+it.trans+'</div>':'')+'</div>';
+  _lrnPlay(it.audio);
+  document.getElementById('lrn-actions').innerHTML='<div style="color:#a0b8c8;font-size:13px;text-align:center;margin-bottom:8px;">אמרתם נכון?</div><div style="display:flex;gap:8px;">'
+    +_lrnBtn('✗ עוד לא','lrnSelf(0)','no')+(it.audio?'<button onclick="lrnPlayCur()" aria-label="השמע שוב" style="min-width:54px;min-height:50px;border-radius:12px;background:#1F3147;border:1px solid #2A3D52;color:#E8D9B8;font-size:18px;cursor:pointer;">🔊</button>':'')
+    +_lrnBtn('✓ ידעתי','lrnSelf(1)','ok')+'</div>';
+}
+function lrnSelf(ok){ _lrnMark(_lrn.queue[_lrn.i].item, !!ok); lrnQuizNext(); }
+function lrnPick(k){
+  var q=_lrn.queue[_lrn.i]; if(q.done) return; q.done=true;
+  var ok=(k===q.ans);
+  document.querySelectorAll('#lrn-body .lrn-opt').forEach(function(b){
+    var kk=+b.getAttribute('data-k'); b.disabled=true;
+    if(kk===q.ans){ b.style.background='rgba(29,158,117,0.25)'; b.style.borderColor='#1D9E75'; b.textContent='✓ '+b.textContent; }
+    else if(kk===k){ b.style.background='rgba(192,57,43,0.22)'; b.style.borderColor='#c0392b'; b.textContent='✗ '+b.textContent; }
+  });
+  _lrnMark(q.item, ok);
+  var it=q.item;
+  document.getElementById('lrn-actions').innerHTML='<div style="background:'+(ok?'rgba(29,158,117,0.12)':'rgba(192,57,43,0.12)')+';border-radius:12px;padding:12px;text-align:center;margin-bottom:10px;">'
+    +'<div style="color:'+(ok?'#4fd0a0':'#ff9488')+';font-size:15px;font-weight:800;margin-bottom:6px;">'+(ok?'✓ נכון!':'✗ לא בדיוק — המשפט יחזור שוב בסוף הסבב')+'</div>'
+    +'<div style="color:#FFD700;font-size:20px;font-family:Georgia,serif;direction:rtl;">'+it.ar+'</div>'+(it.trans?'<div style="color:#D4A24E;font-size:14px;margin-top:3px;">'+it.trans+'</div>':'')+'</div>'
+    +_lrnBtn('הבא ◀','lrnQuizNext()','main');
+  if(q.type!=='hear') _lrnPlay(it.audio);
+}
+function lrnQuizNext(){
+  if(_lrn.i<_lrn.queue.length-1){ _lrn.i++; } else { _lrn.phase='summary'; }
+  _lrnRender();
+}
+function lrnNextRound(){ if(_lrn.r<_lrn.rounds.length-1){ _lrn.r++; _lrn.phase='intro'; _lrn.i=0; _lrnRender(); } }
+function lrnRepeatRound(){ _lrn.rounds[_lrn.r].forEach(function(x){ delete _lrn.first[x.id||x.he]; }); _lrn.phase='quiz'; _lrnBuildQuiz(); _lrnRender(); }
+function lrnClose(){
+  try{ if(window._lrnAudio) window._lrnAudio.pause(); }catch(e){}
+  document.getElementById('lrn-modal').style.display='none';
+  var cb=_lrn&&_lrn.onClose; _lrn=null;
+  try{ if(cb) cb(); }catch(e){}
+}
+
+// Category learning now runs the dedicated learning mode above. The previous
+// chat-style version is kept as startCatLearnChat (unused) as a fallback.
 function startCatLearn(cat, phrasesOverride){
+  var list=Array.isArray(phrasesOverride)?phrasesOverride:((typeof DB!=='undefined'&&DB)?DB.filter(function(p){ return p.cat===cat; }):[]);
+  if(!list.length){ alert('אין משפטים בקטגוריה זו'); return; }
+  var fromLib=!Array.isArray(phrasesOverride);
+  lrnStart(cat, list, fromLib?function(){ try{ if(typeof opC==='function' && document.getElementById('tab-lib').className.indexOf('on')>=0) opC(cat,''); }catch(e){} }:null);
+}
+function startCatLearnChat(cat, phrasesOverride){
   try {
     if (!Array.isArray(phrasesOverride) && !DB) {
       alert('הנתונים עוד לא נטענו');
@@ -23503,7 +23702,7 @@ function stopAllAudio(){
     if (typeof _scnStopAll === 'function') _scnStopAll();
     ['_flashAudio','_homePotdAudioObj','_hrtPairAudio','_scnCurrentAudio','_scnAllAudio',
      '_potdAudio','_respQueueAudio','_responseAudio','_lcAudio','_ppAudio','_lmAudio',
-     '_gsAudio','_hrtAudio','_scnAllAudio','practiceCurrentAudio'].forEach(function(k){
+     '_gsAudio','_hrtAudio','_scnAllAudio','practiceCurrentAudio','_lrnAudio'].forEach(function(k){
       var a=window[k]; if(a && typeof a.pause==='function'){ try{ a.pause(); }catch(e){} }
     });
     try{
@@ -23830,7 +24029,7 @@ window.addEventListener('load', function(){
 <script>
 // Version stamp — shown in the admin panel so we can confirm which build is live
 // on a device (stale service-worker caches were causing "my changes don't show").
-window.APP_VERSION = 'v308';
+window.APP_VERSION = 'v309';
 
 // Register the service worker for full offline use in the field, WITH update
 // detection: when a new version installs, offer a one-tap refresh instead of the
