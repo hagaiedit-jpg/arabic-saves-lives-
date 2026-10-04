@@ -2486,7 +2486,7 @@ function showLanding() {
     </div>
 
     <!-- Prep Path - Combat Readiness Track (HERO - the main "what to do now") -->
-    <div onclick="heroAction()" id="home-prep-card" style="background:linear-gradient(135deg,#D4A24E 0%,#a85200 100%);border-radius:14px;padding:14px 16px;margin-bottom:14px;cursor:pointer;box-shadow:0 4px 12px rgba(212,134,46,0.25);position:relative;overflow:hidden;min-height:60px;">
+    <div onclick="heroAction()" id="home-prep-card" style="background:linear-gradient(135deg,#1f4f86 0%,#163a63 100%);border:1px solid rgba(120,170,230,0.3);border-radius:14px;padding:14px 16px;margin-bottom:14px;cursor:pointer;box-shadow:0 4px 12px rgba(0,0,0,0.25);position:relative;overflow:hidden;min-height:60px;">
       <!-- Content set by JS -->
     </div>
 
@@ -3395,6 +3395,15 @@ function showLanding() {
       <div style="color:#7a9ab5;font-size:12px;">בחר תרגיל — כל הכלים לחדד את הערבית במקום אחד</div>
     </div>
 
+    <!-- 🪖 Pre-enlistment path (30/60/90 days) — the structured daily plan -->
+    <div onclick="startPrepPath()" style="background:linear-gradient(135deg,#1f4f86 0%,#163a63 100%);border-radius:14px;padding:14px;margin-bottom:14px;cursor:pointer;box-shadow:0 4px 12px rgba(0,0,0,0.25);border:2px solid rgba(212,162,78,0.55);display:flex;align-items:center;gap:12px;">
+      <div style="font-size:30px;flex-shrink:0;">🪖</div>
+      <div style="flex:1;min-width:0;">
+        <div class="keep-white" style="color:#fff;font-size:15px;font-weight:800;">מסלול הכנה לגיוס</div>
+        <div style="color:rgba(255,255,255,0.85);font-size:12px;line-height:1.4;" id="train-prep-sub">תרגול יומי מובנה לקראת השירות · 30 / 60 / 90 יום</div>
+      </div>
+      <div class="keep-white" style="color:#fff;font-size:20px;flex-shrink:0;">◀</div>
+    </div>
     <div onclick="navToTab('flash')" style="background:linear-gradient(135deg,#1f4f86 0%,#163a63 100%);border-radius:14px;padding:14px;margin-bottom:14px;cursor:pointer;box-shadow:0 4px 12px rgba(0,0,0,0.25);border:1px solid rgba(120,170,230,0.3);display:flex;align-items:center;gap:12px;">
       <div style="font-size:26px;">⏱️</div>
       <div style="flex:1;">
@@ -6017,6 +6026,20 @@ function startPrepDay(day) {
   document.body.appendChild(overlay);
 }
 
+// The paths were written with short category names; map them to the real
+// categories (and to the announcement / naval sets) so no day comes up empty.
+var _PREP_CAT_ALIAS={'ניהול מרחב':'ניהול מרחב והוראות','עצירת תנועה':'עצירת תנועה ורכב','קהל ואזרחים':'קהל ואירועים','עזרה ראשונה':'רפואה ועזרה ראשונה'};
+function _prepPool(cat){
+  try{
+    if(cat==='כריזה') return (typeof ANNOUNCE!=='undefined'?ANNOUNCE:[]).filter(function(p){ return p && p.he; });
+    if(cat==='ימי' || cat==='תשאול ימי') return (typeof NAVY!=='undefined'?NAVY:[]).filter(function(p){ return p && p.he; });
+    var real=_PREP_CAT_ALIAS[cat]||cat;
+    var pool=(typeof DB!=='undefined'&&DB?DB:[]).filter(function(p){ return p.cat===real && p.he; });
+    if(!pool.length){ pool=(DB||[]).filter(function(p){ return p.cat && p.cat.indexOf(cat)===0 && p.he; }); }
+    return pool;
+  }catch(e){ return []; }
+}
+
 // === Prep Path Flashcards Helper ===
 function startFlashcardsForPrepDay(day) {
   var path = getActivePath();
@@ -6024,7 +6047,7 @@ function startFlashcardsForPrepDay(day) {
   if (!dayData || dayData.type !== 'category') return false;
   
   // Filter phrases from this category
-  var pool = DB.filter(function(p){ return p.cat === dayData.cat && p.he; });
+  var pool = _prepPool(dayData.cat);
   if (pool.length === 0) return false;
   
   // Pick up to N random ones
@@ -6056,22 +6079,20 @@ function executePrepDay(day) {
   window._prepPathActive = true;
   
   if (dayData.type === 'category') {
-    // Use flashcards with specific category phrases (limit to dayData.count)
-    var pool = DB.filter(function(p){ return p.cat === dayData.cat && p.he; });
+    // New phrases → the learning mode (learn, practise, summary); prefer phrases not learned yet.
+    var pool = _prepPool(dayData.cat);
     if (pool.length === 0) {
-      alert('הקטגוריה ריקה - דלגו ליום הבא');
+      alert('הקטגוריה עדיין ריקה — דלגו ליום הבא');
       return;
     }
-    
-    var shuffled = pool.slice().sort(function(){ return Math.random() - 0.5; });
-    var selected = shuffled.slice(0, dayData.count);
-    
-    // Start flashcards with our custom pool
-    if (typeof startFlashcardsWithPool === 'function') {
+    var learnedMap = {}; try { learnedMap = JSON.parse(localStorage.getItem('learned_phrases') || '{}'); } catch(e) {}
+    var fresh = pool.filter(function(p){ return !learnedMap[p.id]; });
+    var src = (fresh.length >= dayData.count ? fresh : pool).slice().sort(function(){ return Math.random() - 0.5; });
+    var selected = src.slice(0, dayData.count);
+    if (typeof lrnStart === 'function') {
+      lrnStart('יום ' + day + ': ' + dayData.title, selected, function(){ try { autoCheckPrepDayCompletion(); } catch(e) {} try { showPrepPathScreen(); } catch(e) {} });
+    } else if (typeof startFlashcardsWithPool === 'function') {
       startFlashcardsWithPool(selected, 'יום ' + day + ': ' + dayData.cat);
-    } else if (typeof startFlashcards === 'function') {
-      // Fallback - start regular flashcards
-      startFlashcards();
     }
   } else if (dayData.type === 'practice') {
     if (typeof startFlashcards === 'function') startFlashcards();
@@ -6098,8 +6119,8 @@ function checkPrepDayProgress(day) {
       
       var count = 0;
       if (typeof DB !== 'undefined' && DB) {
-        DB.forEach(function(p){
-          if (p.cat === dayData.cat && learned[p.id]) {
+        _prepPool(dayData.cat).forEach(function(p){
+          if (learned[p.id]) {
             try {
               if (_actDay(learned[p.id]) === todayStr) count++;
             } catch(e) {}
@@ -6187,10 +6208,12 @@ function renderSmartHero(){
         '</div>';
       return;
     }
-    // Prep path now lives as a cube in the "מה מעניין" grid — no always-on hero
-    // banner here (keeps the top of Home calm). Hide unless a scenario is active.
+    // An enlistment path in progress gets a "continue" card on Home; a path not yet
+    // started is reached from אימון ותרגול / the "עוד" menu (keeps Home calm).
     window._heroMode = 'prep';
-    card.style.display = 'none';
+    var _pp=null; try{ _pp=getPrepPathProgress(getActivePathType()); }catch(_){}
+    if(_pp && _pp.startedAt){ card.style.display=''; renderPrepPathHomeCard(); }
+    else card.style.display = 'none';
   } catch(e){
     console.warn('renderSmartHero error:', e);
     window._heroMode = 'prep';
@@ -6231,7 +6254,7 @@ function renderPrepPathHomeCard() {
       // In progress - put day info in subtitle, progress as a thin colored strip on left edge
       var currentDayData = path.filter(function(d){ return d.day === currentDay; })[0];
       var todayTitle = currentDayData ? currentDayData.title : 'הסתיים!';
-      var pathLabel = pathType === '90' ? 'מסלול מומחה' : (pathType === '60' ? 'מסלול מעמיק' : 'מסלול מהיר');
+      var pathLabel = '🪖 הכנה לגיוס · ' + (pathType === '90' ? 'מסלול מומחה' : (pathType === '60' ? 'מסלול מעמיק' : 'מסלול מהיר'));
       
       // Same structure as field/flash - progress shown as percentage badge
       card.innerHTML = 
@@ -23613,6 +23636,7 @@ try { renderHome(); } catch(_){}
     <div class="mm-tile" onclick="_mmGo(function(){openFoundations();})"><div class="mm-ic">🎓</div><div class="mm-lb">יסודות השפה</div></div>
     <div class="mm-tile" onclick="navToTab('dict')"><div class="mm-ic">📖</div><div class="mm-lb">מילון</div></div>
     <div class="mm-tile" onclick="_mmGo(function(){openDailyDrills();})"><div class="mm-ic">🔁</div><div class="mm-lb">אתגר יומי</div></div>
+    <div class="mm-tile" onclick="_mmGo(function(){startPrepPath();})"><div class="mm-ic">🪖</div><div class="mm-lb">הכנה לגיוס</div></div>
   </div>
   <div class="mm-h">🕌 שפה ותרבות</div>
   <div class="mm-grid">
@@ -24029,7 +24053,7 @@ window.addEventListener('load', function(){
 <script>
 // Version stamp — shown in the admin panel so we can confirm which build is live
 // on a device (stale service-worker caches were causing "my changes don't show").
-window.APP_VERSION = 'v309';
+window.APP_VERSION = 'v311';
 
 // Register the service worker for full offline use in the field, WITH update
 // detection: when a new version installs, offer a one-tap refresh instead of the
