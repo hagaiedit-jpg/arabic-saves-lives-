@@ -2367,6 +2367,10 @@ function showLanding() {
       <span style="font-size:18px;">☀️</span>
       <span id="sunModeLabel">מצב שמש: כבוי</span>
     </button>
+    <button id="fieldWakeMenuBtn" onclick="fieldToggleWake();" style="display:flex;align-items:center;gap:10px;width:100%;background:transparent;border:none;color:#E8D9B8;padding:10px 12px;text-align:right;cursor:pointer;font-family:inherit;font-size:14px;">
+      <span style="font-size:18px;">🔆</span>
+      <span id="fieldWakeLabel">מסך דלוק במצב שטח: פעיל</span>
+    </button>
     <button onclick="openReminderSettings();" style="display:flex;align-items:center;gap:10px;width:100%;background:transparent;border:none;color:#E8D9B8;padding:10px 12px;text-align:right;cursor:pointer;font-family:inherit;font-size:14px;border-radius:8px;">
       <span style="font-size:18px;">🔔</span>
       <span>תזכורת יומית</span>
@@ -2381,13 +2385,9 @@ function showLanding() {
       <span>מצב מאובטח <span id="secureModeState" style="font-size:11px;font-weight:700;padding:1px 7px;border-radius:999px;margin-inline-start:4px;">כבוי</span></span>
     </button>
     <div style="height:1px;background:#2e4558;margin:6px 4px;"></div>
-    <button onclick="openLegal('privacy');document.getElementById('header-menu').style.display='none';" style="display:flex;align-items:center;gap:10px;width:100%;background:transparent;border:none;color:#E8D9B8;padding:10px 12px;text-align:right;cursor:pointer;font-family:inherit;font-size:14px;border-radius:8px;">
-      <span style="font-size:18px;">🔒</span>
-      <span>מדיניות פרטיות</span>
-    </button>
-    <button onclick="openLegal('terms');document.getElementById('header-menu').style.display='none';" style="display:flex;align-items:center;gap:10px;width:100%;background:transparent;border:none;color:#E8D9B8;padding:10px 12px;text-align:right;cursor:pointer;font-family:inherit;font-size:14px;border-radius:8px;">
-      <span style="font-size:18px;">📄</span>
-      <span>תנאי שימוש</span>
+    <button onclick="document.getElementById('header-menu').style.display='none';navToTab('legal');" style="display:flex;align-items:center;gap:10px;width:100%;background:transparent;border:none;color:#E8D9B8;padding:10px 12px;text-align:right;cursor:pointer;font-family:inherit;font-size:14px;">
+      <span style="font-size:18px;">ℹ️</span>
+      <span>מידע, משפטי ונגישות</span>
     </button>
   </div>
   <div class="tb-tabs" style="display:none;">
@@ -2498,7 +2498,7 @@ function showLanding() {
     </div>
 
     <!-- Phrase of the Day (ביטוי היום) — kept high on the page, right under the greeting, so it isn't missed -->
-    <div id="home-potd-card" style="display:none;background:#18293E;border:1px solid rgba(212,162,78,0.25);border-right:3px solid #D4A24E;border-radius:12px;padding:10px 12px;margin-bottom:14px;">
+    <div id="home-potd-card" style="display:none;background:#18293E;border:1px solid rgba(212,162,78,0.25);border-right:3px solid #D4A24E;border-radius:12px;padding:8px 12px 10px;margin:0 auto 14px;max-width:82%;">
       <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:7px;">
         <div style="color:#D4A24E;font-size:10px;font-weight:700;letter-spacing:0.5px;">✨ ביטוי היום</div>
         <div onclick="homePotdDismiss()" title="הסתר" aria-label="הסתר" style="color:#5e7a92;font-size:16px;line-height:1;cursor:pointer;padding:0;min-width:36px;min-height:36px;display:flex;align-items:center;justify-content:center;">✕</div>
@@ -3859,6 +3859,9 @@ function showLanding() {
         <button id="tool-auditrec" onclick="auditRecordings(this)" style="width:100%;padding:12px;margin-top:10px;background:linear-gradient(135deg,#1f8a70 0%,#0e5a48 100%);border:none;border-radius:10px;color:#fff;font-size:13px;font-weight:800;cursor:pointer;font-family:inherit;">🎙️ ביקורת הקלטות — יישור קו (כל המשפטים)</button>
         <div style="text-align:center;color:#7a9ab5;font-size:11px;margin-top:5px;">בודק שכל משפט שהעלינו מוקלט. מוצא משפטים <b>שכבר הקלטת אך מסומנים כלא-מוקלטים</b> (כפילות ריקה מסתירה את ההקלטה) ומתקן בלחיצה — בלי לאבד הקלטות. בנוסף מציג רשימת מה שבאמת חסר, לפי קטגוריה, עם כפתור הקלטה.</div>
         <div id="audit-rec-panel" style="margin-top:10px;"></div>
+        <button id="tool-auditscreens" onclick="auditScreenRecordings(this)" style="width:100%;padding:12px;margin-top:10px;background:linear-gradient(135deg,#1f4f86 0%,#163a63 100%);border:none;border-radius:10px;color:#fff;font-size:13px;font-weight:800;cursor:pointer;font-family:inherit;">📱 הקלטות במסכי השטח</button>
+        <div style="text-align:center;color:#7a9ab5;font-size:11px;margin-top:5px;">בודק את המשפטים שמוצגים במסכי החירום (הוראות, רכב, בידוק, טריאז׳, תיאור חשוד, מה שומעים, 10 משפטי חובה, רצף המחסום) — ומראה מה מופיע בלי הקלטה.</div>
+        <div id="audit-screens-panel" style="margin-top:10px;"></div>
         <button id="tool-auditans" onclick="auditCitizenAnswers(this)" style="width:100%;padding:12px;margin-top:10px;background:linear-gradient(135deg,#3a6d8c 0%,#243f57 100%);border:none;border-radius:10px;color:#fff;font-size:13px;font-weight:800;cursor:pointer;font-family:inherit;">🗣️ ביקורת תשובות אזרח — מה עוד לא הוקלט</button>
         <div style="text-align:center;color:#7a9ab5;font-size:11px;margin-top:5px;">סורק את <b>תשובות האזרח</b> בכל השאלות (מה שהקלטת לאחרונה) ומראה כמה הוקלטו וכמה חסרות — לפי קטגוריה, עם רשימת התשובות שנשארו וכפתור הקלטה לכל שאלה. משלים את "ביקורת ההקלטות" שבודקת רק את המשפטים הראשיים.</div>
         <div id="audit-ans-panel" style="margin-top:10px;"></div>
@@ -9126,7 +9129,6 @@ var BUILTIN_TASHAUL=[
   {section:'military', cat:'עצירת תנועה ורכב', he:'הוא ראה אותם נכנסים לאזור ללא רישיון נהיגה', ar:'شافهم داخلين عالمنطقة بدون رخصة سواقة', trans:'שַאפְהֹם דַאחְ׳לִין עַאלְמַנְטַקַה בְּדוּן רֻחְ׳צַת סְוַאקַה'},
   {section:'military', cat:'עצירת תנועה ורכב', he:'כשעצרתי ביקשו ממני לצאת מהרכב והתחילו לחפש עליי', ar:'لمّا وقفت طلبوا مني أطلع من السيارة وبلّشوا يعملوا عليّ تفتيش', trans:'לַמּא וִקֶפְת טַלַבּוּ מִנּי אַטְלַע מִן אִלסַּייַּארַה וּבַלּשוּ יִעְמַלוּ עַלַיּ תַפְתִיש'},
   {section:'military', cat:'שליטה בבית', he:'אני אוציא את אימי מהבית', ar:'رح طلّع إمّي من البيت', trans:'רַח טַלּע אִמּי מִן אִלבֵּית'},
-  {section:'military', cat:'שליטה בבית', he:'אני רוצה לעשות חיפוש ברפת', ar:'بدّي أعمل تفتيش في الزريبة', trans:'בִּדּי אַעְמֶל תַפְתִיש פִי אִלזּרִיבֶּה'},
   {section:'military', cat:'ניהול מרחב והוראות', he:'הסגר את עצמך או שאני יורה בך', ar:'سلّم حالك وإلّا بطخّك', trans:'סַלּם חַאלַכּ וְאִלּא בַּטֻ׳כּכּ'},
   {section:'military', cat:'ניהול מרחב והוראות', he:'הרם ידיים למעלה ועמוד ליד הבית', ar:'ارفع إيدك لفوق ووقف جنب البيت', trans:'אִרְפַע אִידַכּ לַפוֹק וּוֶקֶף גַ׳נְבּ אִלבֵּית'},
   {section:'military', cat:'ניהול מרחב והוראות', he:'למה היא לא נכנסת פנימה?', ar:'ليش هي ما بتفوت جوّة؟', trans:'לֵיש הִיֶ מַא בְּתְפוּת גַ׳וּה?'},
@@ -10210,6 +10212,31 @@ async function migrateDictSentences(btn){
   btn.disabled=false;
 }
 
+
+// Field screens show built-in phrases whose recording is matched from the DB.
+// List, per screen, what is displayed without any recording.
+function auditScreenRecordings(btn){
+  var panel=document.getElementById('audit-screens-panel'); if(!panel) return;
+  var groups=[];
+  function tpl(name,data){ var miss=[], tot=0; (data||[]).forEach(function(slot){ (slot.options||[]).forEach(function(o){ tot++; var rd=_descResolve(o); if(!rd.audio) miss.push(rd); }); }); groups.push({name:name,tot:tot,miss:miss}); }
+  try{ tpl('🚨 הוראות מיידיות',ORDERS); }catch(e){}
+  try{ tpl('🚗 רכב במחסום',VEHICLE); }catch(e){}
+  try{ tpl('🪪 בידוק וזיהוי',CHECK); }catch(e){}
+  try{ tpl('🩺 רפואה וטריאז׳',TRIAGE); }catch(e){}
+  try{ tpl('🎯 תיאור חשוד',SUSPECT_DESC); }catch(e){}
+  try{ var cp=_checkpointSteps().map(function(x){return x.row;}); groups.push({name:'🛑 רצף המחסום',tot:cp.length,miss:cp.filter(function(r){ return !(r.audio||r.audio_url||_descAudioFor(r)); })}); }catch(e){}
+  try{ var th=(BUILTIN_THREAT||[]).map(function(t){ var hit=(DB||[]).filter(function(d){ return d.cat===t.cat&&d.he===t.he&&(d.audio||d.audio_url); })[0]; return hit||t; }); groups.push({name:'👂 מה שומעים בשטח',tot:th.length,miss:th.filter(function(r){ return !(r.audio||r.audio_url||_descAudioFor(r)); })}); }catch(e){}
+  try{ var tn=getTenList(); groups.push({name:'🎖️ 10 משפטי חובה',tot:tn.length,miss:tn.filter(function(r){ return !(r.audio||r.audio_url||_descAudioFor(r)); })}); }catch(e){}
+  var totMiss=groups.reduce(function(a,g){ return a+g.miss.length; },0);
+  var h='<div style="background:#13263c;border:1px solid #2A3D52;border-radius:10px;padding:12px;">';
+  h+='<div style="color:'+(totMiss?'#e6a23c':'#4fd0a0')+';font-size:14px;font-weight:800;margin-bottom:8px;">'+(totMiss?('⚠️ '+totMiss+' משפטים מוצגים בלי הקלטה'):'✅ כל המשפטים במסכי השטח מוקלטים')+'</div>';
+  groups.forEach(function(g){
+    h+='<div style="margin-top:8px;color:#E8D9B8;font-size:13px;font-weight:700;">'+g.name+' — '+(g.tot-g.miss.length)+'/'+g.tot+' מוקלטים</div>';
+    g.miss.forEach(function(r){ h+='<div style="color:#a0b8c8;font-size:12px;padding:3px 10px;">• '+(r.he||'')+' — <span style="font-family:Georgia,serif;color:#E8D9B8;">'+(r.ar||'')+'</span></div>'; });
+  });
+  h+='<div style="color:#7a9ab5;font-size:11px;margin-top:10px;">כדי להוסיף הקלטה: מוצאים את המשפט בספרייה (חיפוש) ומקליטים — המסך יקבל אותה אוטומטית.</div></div>';
+  panel.innerHTML=h;
+}
 // === Recording audit — "יישור קו" =========================================
 // Goal: every sentence we uploaded should have a recording, and anything Edith
 // already recorded must show as recorded. The #1 reason a recorded sentence
@@ -10946,7 +10973,12 @@ try{
 }catch(e){}
 
 // Populate all section arrays from a raw phrases array (used for both live and cached data)
+// Phrases removed from the kit by the editor — filtered out wherever they load from
+// (built-in lists and the database), so they never appear anywhere.
+var REMOVED_PHRASES=['אני רוצה לעשות חיפוש ברפת'];
+function _notRemoved(p){ var h=String(p&&p.he||'').replace(/[\s?!.,]/g,''); return !REMOVED_PHRASES.some(function(r){ return h===r.replace(/[\s?!.,]/g,''); }); }
 function populateFromData(data){
+  data=(data||[]).filter(_notRemoved);
   DB=data.filter(p=>p.section==='military').map(mp);
   // Editable category explanations (section 'explain'): override the built-in
   // CATEGORY_INFO desc, server-persisted so all users see the admin's edit.
@@ -23269,6 +23301,7 @@ function applyTextScale(level){
     else if (level === 2) document.body.classList.add('text-xl');
     var lbl = document.getElementById('textSizeLabel');
     if (lbl) lbl.textContent = 'גודל טקסט: ' + (level === 0 ? 'רגיל' : (level === 1 ? 'גדול' : 'ענק'));
+    try { if (typeof _fieldChips === 'function') _fieldChips(); } catch(e) {}
   } catch(e) {}
 }
 function cycleTextSize(){
@@ -23843,7 +23876,10 @@ function _fieldChips(){
   var w=document.getElementById('field-wake-btn'), g=document.getElementById('field-big-btn');
   if(w){ if(!('wakeLock' in navigator)){ w.style.display='none'; }
          else { var on=_fieldPref('field_wake',true); w.className='field-chip'+(on?' on':''); w.textContent=on?'🔆 מסך דלוק ✓':'🔆 מסך דלוק'; } }
-  if(g){ var big=_fieldPref('field_big',false); g.className='field-chip'+(big?' on':''); g.textContent=big?'🔠 טקסט גדול ✓':'🔠 טקסט גדול'; }
+  if(g){ var big=_textScale()>0; g.className='field-chip'+(big?' on':''); g.textContent=big?'🔠 טקסט גדול ✓':'🔠 טקסט גדול'; }
+  var wl=document.getElementById('fieldWakeLabel'), wb=document.getElementById('fieldWakeMenuBtn');
+  if(wb && !('wakeLock' in navigator)) wb.style.display='none';
+  if(wl) wl.textContent='מסך דלוק במצב שטח: '+(_fieldPref('field_wake',true)?'פעיל':'כבוי');
 }
 async function _fieldWakeOn(){
   try{ if(!('wakeLock' in navigator) || window._fieldWake || !_fieldPref('field_wake',true)) return;
@@ -23854,18 +23890,21 @@ async function _fieldWakeOn(){
 function _fieldWakeOff(){ try{ if(window._fieldWake){ window._fieldWake.release(); } }catch(e){} window._fieldWake=null; }
 function fieldOnNav(tabId){
   window._fieldCurTab=tabId;
-  try{ document.body.classList.toggle('field-big', _fieldPref('field_big',false)); }catch(e){}
+  try{ document.body.classList.remove('field-big'); }catch(e){}
   if(FIELD_TABS.indexOf(tabId)>=0) _fieldWakeOn(); else _fieldWakeOff();
-  if(tabId==='qk') _fieldChips();
+  _fieldChips();
 }
 function fieldToggleWake(){
   var on=!_fieldPref('field_wake',true); _fieldSet('field_wake',on);
   if(on) _fieldWakeOn(); else _fieldWakeOff();
   _fieldChips();
 }
+// "🔠 טקסט גדול" in field mode is a shortcut to the ONE text-size setting (⚙️ גודל טקסט).
+function _textScale(){ try{ return parseInt(localStorage.getItem('text_scale')||'0',10)||0; }catch(e){ return 0; } }
 function fieldToggleBig(){
-  _fieldSet('field_big',!_fieldPref('field_big',false));
-  try{ document.body.classList.toggle('field-big', _fieldPref('field_big',false)); }catch(e){}
+  var lvl=_textScale()>0?0:2;
+  try{ localStorage.setItem('text_scale', String(lvl)); }catch(e){}
+  try{ applyTextScale(lvl); }catch(e){}
   _fieldChips();
 }
 // A wake lock is dropped whenever the app goes to background — take it back on return.
@@ -24084,7 +24123,7 @@ window.addEventListener('load', function(){
 <script>
 // Version stamp — shown in the admin panel so we can confirm which build is live
 // on a device (stale service-worker caches were causing "my changes don't show").
-window.APP_VERSION = 'v313';
+window.APP_VERSION = 'v314';
 
 // Register the service worker for full offline use in the field, WITH update
 // detection: when a new version installs, offer a one-tap refresh instead of the
@@ -24178,8 +24217,17 @@ function openLegal(which){
   document.getElementById('legal-modal').style.display = 'flex';
   switchLegal(which || 'privacy');
 }
+// Single source: copy the matching section from the "מידע ומשפטי" screen.
+function _legalFromScreen(which){
+  try{
+    var key = which==='terms' ? 'תנאי שימוש' : 'מדיניות פרטיות';
+    var titles=document.querySelectorAll('#tab-legal .sec > div > div:first-child');
+    for(var i=0;i<titles.length;i++){ if((titles[i].textContent||'').indexOf(key)>=0) return titles[i].parentNode.innerHTML; }
+  }catch(e){}
+  return '';
+}
 function switchLegal(which){
-  document.getElementById('legal-body').innerHTML = LEGAL_CONTENT[which] || '';
+  document.getElementById('legal-body').innerHTML = _legalFromScreen(which) || LEGAL_CONTENT[which] || '';
   document.getElementById('legal-body').scrollTop = 0;
   var pv = document.getElementById('legal-tab-privacy'), tm = document.getElementById('legal-tab-terms');
   var on = 'background:#D4A24E;color:#0E1B2E;', off = 'background:#2A3D52;color:#E8D9B8;';
