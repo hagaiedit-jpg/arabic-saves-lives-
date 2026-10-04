@@ -536,6 +536,23 @@ body.day-mode .toast{background:#fff;color:#0e1b2e;}
 .emerg-cube.purple{border-color:rgba(138,107,208,0.8);}
 .emerg-cube.rose{border-color:rgba(208,138,155,0.8);}
 .emerg-cube.mint{border-color:rgba(79,208,160,0.8);}
+/* ── Simplified phrase card ── */
+#tab-lib.pop-open > button:first-child, #tab-lib.pop-open > .sbar, #tab-lib.pop-open > .lrow{display:none!important;}
+#vpop .ww{display:none!important;}
+#vpop .phe{font-size:21px!important;font-weight:800!important;margin-top:8px;}
+#vpop .play-row{display:grid;grid-template-columns:2fr 1fr 1fr;}
+#vpop .big-pbtn.play-slow, #vpop .big-pbtn.play-loop{padding:12px 6px;}
+#vpop .big-pbtn.play-slow .big-icon, #vpop .big-pbtn.play-loop .big-icon{font-size:22px;}
+.pop-main-actions{display:flex;gap:10px;align-items:stretch;margin:0 0 14px;}
+.pop-main-actions .civ-show-btn{flex:2;margin-top:0;}
+.pop-main-actions .popup-action-btn.fav{flex:1;background:transparent!important;border:1.5px solid #D4A24E;color:#D4A24E!important;border-radius:12px;font-size:14px;font-weight:800;}
+.pop-main-actions .popup-action-btn.fav.active{background:#D4A24E!important;color:#0E1B2E!important;}
+.pop-more{margin-top:14px;border:1px solid rgba(122,154,181,0.35);border-radius:12px;padding:0 12px;}
+.pop-more > summary{list-style:none;cursor:pointer;padding:12px 2px;color:#7a9ab5;font-size:13.5px;font-weight:700;text-align:center;}
+.pop-more > summary::-webkit-details-marker{display:none;}
+.pop-more[open] > summary{color:#D4A24E;}
+.pop-more[open]{padding-bottom:12px;}
+.pop-close-btn{display:block;margin:14px auto 0;background:transparent;border:1px solid rgba(122,154,181,0.5);color:#7a9ab5;border-radius:10px;padding:9px 26px;font-size:13px;font-weight:700;cursor:pointer;font-family:inherit;}
 /* ── 📢 Show to civilian ── */
 .civ-show-btn{display:block;width:100%;margin-top:14px;background:linear-gradient(135deg,#1D9E75 0%,#147a59 100%);color:#fff;border:none;border-radius:12px;padding:13px;font-size:16px;font-weight:800;cursor:pointer;font-family:inherit;box-shadow:0 3px 10px rgba(29,158,117,0.3);}
 #civ-overlay{position:fixed;inset:0;z-index:100000;display:none;flex-direction:column;background:#fff;color:#000;font-family:inherit;}
@@ -545,7 +562,7 @@ body.day-mode .toast{background:#fff;color:#0e1b2e;}
 #civ-text{flex:1;display:flex;align-items:center;justify-content:center;text-align:center;padding:10px 18px;direction:rtl;font-family:'Geeza Pro','Noto Naskh Arabic','Arial',sans-serif;font-weight:700;line-height:1.35;word-break:break-word;overflow:hidden;}
 #civ-play{margin:0 18px 12px;border:none;border-radius:16px;padding:18px;font-size:22px;font-weight:900;cursor:pointer;font-family:inherit;background:#000;color:#fff;}
 #civ-overlay.dark #civ-play{background:#FFE45C;color:#000;}
-#civ-he{text-align:center;font-size:13px;opacity:0.55;padding:0 16px max(14px,env(safe-area-inset-bottom));}
+#civ-he{text-align:center;font-size:16px;font-weight:600;opacity:0.6;padding:0 16px max(14px,env(safe-area-inset-bottom));}
 /* ── Field mode (מצב שטח) ── */
 .field-chip{flex:1;background:#1F3147;border:1px solid #2A3D52;color:#a0b8c8;border-radius:10px;padding:9px 6px;font-size:13px;font-weight:700;cursor:pointer;font-family:inherit;}
 .field-chip.on{background:rgba(29,158,117,0.18);border-color:#1D9E75;color:#4fd0a0;}
@@ -2811,19 +2828,27 @@ function showLanding() {
           <span class="big-lbl">לולאה</span>
         </button>
       </div>
+      <!-- Main actions — right under the phrase -->
+      <div class="pop-main-actions">
+        <button onclick="civShowFromPopup()" class="civ-show-btn">📢 הצג לאזרח</button>
+        <button onclick="toggleFav()" id="fav-btn" class="popup-action-btn fav">☆ שמור</button>
+      </div>
       
       <!-- Go-to-category button (shown only when opened from dictionary) -->
       <div id="dict-go-to-category" style="display:none;margin-top:12px;padding:12px;background:rgba(29,158,117,0.1);border:1px solid #1D9E75;border-radius:10px;text-align:center;cursor:pointer;" onclick="goToDictCategory()">
         <div id="dict-go-to-category-text" style="color:#1D9E75;font-size:13px;font-weight:700;">🔗 פתח בקטגוריה</div>
       </div>
-      <div class="ibox b" id="pwhyb"><div class="ilbl b" id="pwhylbl">למה זה חשוב</div><div class="itxt b" id="pwhy"></div></div>
-      <div class="ibox o" id="ptoneb"><div class="ilbl o" id="ptonelbl">טיפ ללוחם</div><div class="itxt o" id="ptone"></div></div>
-      <div class="ibox c" id="pcultb" style="display:none;"><div class="ilbl c">✨ פאקט תרבותי</div><div class="itxt c" id="pcult"></div></div>
       <div class="responses-section" id="presponsesb" style="display:none;">
         <div class="responses-title">💬 תשובות אפשריות מהאזרח</div>
         <div class="responses-list" id="presponses"></div>
       </div>
       
+      <!-- Everything secondary lives behind "עוד" -->
+      <details id="pmore" class="pop-more">
+        <summary>➕ עוד: הסבר, טיפ ותרגול הגייה</summary>
+      <div class="ibox b" id="pwhyb"><div class="ilbl b" id="pwhylbl">למה זה חשוב</div><div class="itxt b" id="pwhy"></div></div>
+      <div class="ibox o" id="ptoneb"><div class="ilbl o" id="ptonelbl">טיפ ללוחם</div><div class="itxt o" id="ptone"></div></div>
+      <div class="ibox c" id="pcultb" style="display:none;"><div class="ilbl c">✨ פאקט תרבותי</div><div class="itxt c" id="pcult"></div></div>
       <!-- Practice pronunciation section -->
       <div id="practice-section" style="margin-top:14px;padding:14px;background:#0E1B2E;border:1px solid rgba(212,162,78,0.2);border-radius:12px;">
         <div style="display:flex;align-items:center;gap:8px;margin-bottom:10px;">
@@ -2861,8 +2886,8 @@ function showLanding() {
         <div id="practice-error" style="display:none;text-align:center;color:#e74c3c;font-size:12px;padding:8px;"></div>
       </div>
       
-    <button onclick="civShowFromPopup()" class="civ-show-btn">📢 הצג לאזרח</button>
-    <div class="popup-actions"><button onclick="toggleFav()" id="fav-btn" class="popup-action-btn fav">☆ שמור למועדפים</button><button onclick="clsP()" class="popup-action-btn close">✕ סגור</button></div>
+          </details>
+      <button onclick="clsP()" class="pop-close-btn">✕ סגור</button>
     </div></div>
   </div>
 </div>
@@ -18779,6 +18804,8 @@ function goToDictCategory(){
 
 function shV(id){
   ['vcats','vlist','vsrch','vpop'].forEach(v=>{document.getElementById(v).className='scr'+(v===id?' on':'');});
+  try{ document.getElementById('tab-lib').classList.toggle('pop-open', id==='vpop'); }catch(e){}
+  try{ if(id==='vpop'){ var pm=document.getElementById('pmore'); if(pm) pm.open=false; } }catch(e){}
   // When showing the phrase popup: hide audio controls if there is no recording
   // (e.g. informational categories like Customs that have no audio by design)
   if(id==='vpop'){
@@ -22690,14 +22717,14 @@ function isFav(id){return getFavIds().includes(id);}
 function toggleFav(){
   var id=window._currentPopupId;if(!id)return;
   var favs=getFavIds();var btn=document.getElementById("fav-btn");
-  if(favs.includes(id)){favs=favs.filter(function(f){return f!==id;});btn.innerHTML="☆ שמור למועדפים";}
-  else{favs.push(id);btn.innerHTML="⭐ הסר ממועדפים";}
+  if(favs.includes(id)){favs=favs.filter(function(f){return f!==id;});btn.innerHTML="☆ שמור";}
+  else{favs.push(id);btn.innerHTML="⭐ שמור ✓";}
   localStorage.setItem("fav_ids",JSON.stringify(favs));
 }
 function updateFavBtn(id){
   window._currentPopupId=id;
   var btn=document.getElementById("fav-btn");
-  if(btn)btn.innerHTML=isFav(id)?"⭐ הסר ממועדפים":"☆ שמור למועדפים";
+  if(btn)btn.innerHTML=isFav(id)?"⭐ שמור ✓":"☆ שמור";
 }
 function rFav(){
   var el=document.getElementById("favlist");if(!el)return;
@@ -23409,7 +23436,7 @@ function civShow(ar, he, audio){
   var o=_civEl();
   try{ if(localStorage.getItem('civ_dark')==='1') o.classList.add('dark'); else o.classList.remove('dark'); }catch(e){}
   var t=document.getElementById('civ-text'); t.innerHTML=''; var sp=document.createElement('div'); sp.textContent=ar; t.appendChild(sp);
-  document.getElementById('civ-he').textContent=he?('(לך: '+he+')'):'';
+  document.getElementById('civ-he').textContent=he||'';
   window._civAudio=audio||'';
   var pb=document.getElementById('civ-play'); pb.style.display=audio?'block':'none'; pb.textContent='🔊 השמע בקול';
   o.style.display='flex';
@@ -23694,7 +23721,7 @@ window.addEventListener('load', function(){
 <script>
 // Version stamp — shown in the admin panel so we can confirm which build is live
 // on a device (stale service-worker caches were causing "my changes don't show").
-window.APP_VERSION = 'v302';
+window.APP_VERSION = 'v303';
 
 // Register the service worker for full offline use in the field, WITH update
 // detection: when a new version installs, offer a one-tap refresh instead of the
