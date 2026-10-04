@@ -591,6 +591,25 @@ body.day-mode .home-cont-strip{background:#fff!important;border-color:rgba(31,79
 body.day-mode #home-prep-card.home-cont-strip, body.day-mode #home-prep-card.home-cont-strip *{color:#0e1b2e!important;}
 /* Home: no "streak in danger" banner — the streak is shown in progress; daily challenge has its own badge */
 #home-daily-nudge{display:none!important;}
+/* ⚡ First 10 seconds */
+.fs-box{background:#18293E;border:2px solid #D4A24E;border-radius:14px;padding:12px;margin-bottom:14px;}
+.fs-head{display:flex;align-items:center;justify-content:space-between;gap:8px;flex-wrap:wrap;color:#D4A24E;font-size:16px;font-weight:900;margin-bottom:8px;}
+.fs-actions{display:flex;gap:6px;}
+.fs-actions button{background:rgba(212,162,78,0.16);border:1px solid #D4A24E;color:#E8D9B8;border-radius:10px;padding:8px 11px;font-size:13px;font-weight:800;cursor:pointer;font-family:inherit;min-height:40px;}
+.fs-veh{margin:8px 0 4px;} .fs-veh button{flex:1;}
+.fs-step{display:flex;align-items:center;gap:10px;background:#1F3147;border:1px solid #2A3D52;border-radius:10px;padding:9px 11px;margin-bottom:6px;cursor:pointer;}
+.fs-step.on{border-color:#D4A24E;}
+.fs-n{flex-shrink:0;width:26px;height:26px;border-radius:50%;background:#D4A24E;color:#0E1B2E;font-size:13px;font-weight:900;display:flex;align-items:center;justify-content:center;}
+.fs-t{flex:1;min-width:0;display:flex;flex-direction:column;color:#E8D9B8;font-size:14.5px;}
+.fs-ar{color:#FFD700;font-size:16px;font-family:Georgia,serif;direction:rtl;}
+.fs-tr{color:#D4A24E;font-size:12.5px;}
+.fs-nr{opacity:0.6;}
+.fs-mini{display:flex;flex-wrap:wrap;gap:6px;}
+.fs-mini span{background:#1F3147;border:1px solid #2A3D52;border-radius:9px;padding:6px 10px;color:#E8D9B8;font-size:13px;font-weight:700;cursor:pointer;}
+body.day-mode .fs-box{background:#fff;border-color:#c99a45;}
+body.day-mode .fs-step, body.day-mode .fs-mini span{background:#fbf7ee;border-color:rgba(168,82,0,0.2);color:#0e1b2e;}
+body.day-mode .fs-t, body.day-mode .fs-actions button{color:#0e1b2e;}
+body.day-mode .fs-ar{color:#5a3d00;} body.day-mode .fs-tr, body.day-mode .fs-head{color:#7f3e00;}
 /* 📶 Works-offline indicator */
 .offline-chip{display:none;align-items:center;gap:8px;border-radius:12px;padding:9px 12px;margin:0 0 12px;font-size:13px;font-weight:700;line-height:1.4;}
 .offline-chip.ready{display:flex;background:rgba(29,158,117,0.12);border:1px solid rgba(29,158,117,0.5);color:#4fd0a0;}
@@ -3088,6 +3107,14 @@ function showLanding() {
 </div>
 
 <!-- 📝 VISUAL RECOGNITION TEST -->
+<div class="scr" id="tab-first">
+  <div class="sec">
+    <button class="emerg-back" onclick="navToTab('qk')">‹ חזרה למצב שטח</button>
+    <div style="color:#D4A24E;font-size:21px;font-weight:900;margin:4px 0 4px;">⚡ 10 השניות הראשונות</div>
+    <div style="color:#a0b8c8;font-size:13px;line-height:1.6;margin-bottom:12px;">מה אומרים קודם, לפי הסדר, בכל סיטואציה. ▶ משמיע את כל הרצף, 📢 מציג אותו לאזרח משפט אחר משפט.</div>
+    <div id="first-list"></div>
+  </div>
+</div>
 <div class="scr" id="tab-heard">
   <div class="sec">
     <button class="emerg-back" onclick="navToTab(window._heardFrom||'qk')">‹ חזרה</button>
@@ -3250,6 +3277,7 @@ function showLanding() {
     <div class="triage-path" style="background:#18293E;border:1px dashed rgba(231,76,60,0.45);border-radius:12px;padding:12px 14px;margin-bottom:16px;color:#e8896a;font-size:13px;line-height:1.9;direction:rtl;">
       בהכרה? <b>›</b> פצוע/כואב? <b>›</b> מדמם? <b>›</b> יכול לזוז? <b>›</b> נושם? <b>›</b> כמה נפגעים? <b>›</b> הרגעה
     </div>
+    <div id="fs-triage"></div>
     <div id="triage-list"></div>
   </div>
 </div>
@@ -3263,6 +3291,7 @@ function showLanding() {
       <div style="color:#E8D9B8;font-size:18px;font-weight:800;letter-spacing:0.3px;">הוראות מיידיות</div>
       <div style="color:#7a9ab5;font-size:12px;line-height:1.5;margin-top:2px;">פקודות בסדר הסלמה — לחצו על פריט לשמיעה ותרגול</div>
     </div>
+    <div id="fs-ord"></div>
     <div id="ord-list"></div>
   </div>
 </div>
@@ -3293,6 +3322,7 @@ function showLanding() {
       <div style="color:#D4A24E;font-size:15px;font-weight:800;display:flex;align-items:center;gap:6px;">🛑 הרגע הראשון במחסום</div>
       <div style="color:#7a9ab5;font-size:11.5px;line-height:1.5;margin-top:2px;">רצף מחייב לפי הסדר — עד שמוודאים שאין נשק</div>
     </div>
+    <div id="fs-veh-play"></div>
     <div id="veh-checkpoint"></div>
     <div style="background:rgba(122,154,181,0.10);border:1px solid rgba(122,154,181,0.30);border-radius:12px;padding:10px 12px;margin:22px 0 6px;">
       <div style="color:#E8D9B8;font-size:15px;font-weight:800;display:flex;align-items:center;gap:6px;">🚗 התנהלות רגילה במחסום</div>
@@ -3324,6 +3354,7 @@ function showLanding() {
       <div style="color:#E8D9B8;font-size:18px;font-weight:800;">קהל ואירועים</div>
       <div style="color:#7a9ab5;font-size:12px;margin-top:2px;">ניהול קהל והרחקה — לחצו על פריט לשמיעה ותרגול</div>
     </div>
+    <div id="fs-crowd"></div>
     <div id="crowd-list"></div>
   </div>
 </div>
@@ -11846,6 +11877,98 @@ document.addEventListener('keydown',function(e){
   try{ new MutationObserver(function(){ if(!pending){ pending=true; (window.requestAnimationFrame||setTimeout)(run); } }).observe(document.documentElement,{childList:true,subtree:true}); }catch(e){}
   if(document.readyState==='loading') document.addEventListener('DOMContentLoaded',run); else run();
 })();
+
+// ===== ⚡ "10 השניות הראשונות" — ordered opening sequences per situation =====
+// Built ONLY from phrases already in the kit (matched by Hebrew; the recorded copy wins).
+var FIRST_SEQ=[
+  {key:'veh',   icon:'🛑', title:'מחסום / רכב', screen:'veh', steps:null},
+  {key:'house', icon:'🏠', title:'כניסה לבית', steps:[
+    {he:'פתח את הדלת', ar:'افتح الباب'},
+    {he:'כולם החוצה', ar:'كلّكم لبرّة'},
+    {he:'צאו אחד-אחד, ידיים מורמות מעל הראש.', ar:'اطلعوا واحد واحد، الإيدين مرفوعة فوق الراس.'},
+    {he:'מי בבית?', ar:'مين بالبيت؟'},
+    {he:'כמה אנשים בבית?', ar:'كم واحد بالبيت؟'},
+    {he:'אל תפחד', ar:'لا تخاف'}]},
+  {key:'triage',icon:'🩺', title:'פצוע', screen:'triage', steps:[
+    {he:'יש פצוע?', ar:'فيه مجروح؟'},
+    {he:'אתה שומע אותי?', ar:'بتسمعني؟'},
+    {he:'איפה כואב?', ar:'وين بيوجعك؟'},
+    {he:'אתה מדמם?', ar:'عم بتنزف؟'},
+    {he:'אל תפחד, באנו לעזור', ar:'لا تخاف، إجينا نساعدك'}]},
+  {key:'ord',   icon:'⚠️', title:'חשוד / איום', screen:'ord', steps:[
+    {he:'עצור! אל תתקרב!', ar:'وقّف! ما تقرّب!'},
+    {he:'זרוק את מה שיש לך ביד!', ar:'ارمي اللي بإيدك!'},
+    {he:'הרם ידיים', ar:'ارفع إيديك'},
+    {he:'תסתובב לאט', ar:'لفّ شوي شوي'},
+    {he:'אל תזוז! ידיים על הראש!', ar:'ما تتحرّك! إيديك ع راسك!'}]},
+  {key:'crowd', icon:'👥', title:'קהל', screen:'crowd', steps:[
+    {he:'אסור לעבור כאן עכשיו!', ar:'ممنوع تعبّر من هون هلّق!'},
+    {he:'תחזור אחורה', ar:'ارجع لورا'},
+    {he:'אחד אחד — לא כולם ביחד.', ar:'واحد واحد — مش كلكم مع بعض.'},
+    {he:'תהיה בשקט עכשיו', ar:'كون ساكت هلّق'}]}
+];
+function _fsNorm(x){ return String(x||'').replace(/[^א-ת]/g,''); }
+function _fsPool(){
+  var pool=[];
+  [typeof DB!=='undefined'?DB:[], typeof DICT!=='undefined'?DICT:[], typeof SCENARIO!=='undefined'?SCENARIO:[], typeof BUILTIN_TASHAUL!=='undefined'?BUILTIN_TASHAUL:[], typeof BUILTIN_THREAT!=='undefined'?BUILTIN_THREAT:[]].forEach(function(a){ (a||[]).forEach(function(r){ if(r&&r.he&&r.ar) pool.push(r); }); });
+  try{ [ORDERS,CHECK,VEHICLE,TRIAGE,SUSPECT_DESC].forEach(function(T){ (T||[]).forEach(function(sl){ (sl.options||[]).forEach(function(o){ pool.push(_descResolve(o)); }); }); }); }catch(e){}
+  return pool;
+}
+function _fsResolve(step, pool){
+  var k=_fsNorm(step.he), best=null;
+  pool.forEach(function(r){ if(_fsNorm(r.he)===k){ var au=r.audio||r.audio_url; if(!best || (au && !(best.audio||best.audio_url))) best=r; } });
+  var row=best?Object.assign({},best):{he:step.he, ar:step.ar, trans:step.trans||''};
+  if(!row.audio && !row.audio_url){ try{ row.audio=_descAudioFor(row)||''; }catch(e){} }
+  return row;
+}
+function _fsSteps(seq){
+  if(seq.key==='veh'){ try{ return _checkpointSteps().map(function(x){ return x.row; }); }catch(e){ return []; } }
+  var pool=_fsPool(); return seq.steps.map(function(st){ return _fsResolve(st,pool); });
+}
+function _fsAu(r){ return r.audio||r.audio_url||''; }
+window._fsLists={};
+function _fsBox(seq, withList){
+  var rows=_fsSteps(seq); window._fsLists[seq.key]=rows;
+  var h='<div class="fs-box"><div class="fs-head"><span>'+seq.icon+' '+(withList?seq.title:'⚡ 10 השניות הראשונות')+'</span>'
+    +'<span class="fs-actions"><button onclick="fsPlayAll(\''+seq.key+'\',this)">▶ השמע הכל</button><button onclick="fsShowCiv(\''+seq.key+'\')">📢 לאזרח</button></span></div>';
+  if(withList){
+    rows.forEach(function(r,i){
+      h+='<div class="fs-step" onclick="fsOpen(\''+seq.key+'\','+i+')"><span class="fs-n">'+(i+1)+'</span><span class="fs-t"><b>'+r.he+'</b><span class="fs-ar">'+r.ar+'</span>'+(r.trans?'<span class="fs-tr">'+r.trans+'</span>':'')+'</span>'+(_fsAu(r)?'':'<span class="fs-nr" title="אין הקלטה">🔇</span>')+'</div>';
+    });
+  } else {
+    h+='<div class="fs-mini">'+rows.map(function(r,i){ return '<span onclick="fsOpen(\''+seq.key+'\','+i+')">'+(i+1)+'. '+r.he+'</span>'; }).join('')+'</div>';
+  }
+  return h+'</div>';
+}
+function fsOpen(key,i){ var rows=window._fsLists[key]||[]; window._dbCatRows=window._dbCatRows||{}; window._dbCatRows['__fs_'+key]=rows; _openDbCatItem('__fs_'+key, i, window._fieldCurTab||'first'); }
+function rFirst(){ var el=document.getElementById('first-list'); if(!el) return; el.innerHTML=FIRST_SEQ.map(function(q){ return _fsBox(q,true); }).join(''); }
+function _fsRenderOn(screen){
+  FIRST_SEQ.forEach(function(q){
+    if(q.screen!==screen) return;
+    var el=document.getElementById(screen==='veh'?'fs-veh-play':'fs-'+screen); if(!el) return;
+    if(screen==='veh'){ window._fsLists.veh=_fsSteps(q); el.innerHTML='<div class="fs-actions fs-veh"><button onclick="fsPlayAll(\'veh\',this)">▶ השמע את כל הרצף</button><button onclick="fsShowCiv(\'veh\')">📢 הצג לאזרח</button></div>'; }
+    else el.innerHTML=_fsBox(q,false);
+  });
+}
+// Play the whole sequence, one recording after another (tap again to stop).
+function fsPlayAll(key, btn){
+  try{
+    if(window._fsPlaying){ window._fsPlaying.stop(); return; }
+    var rows=(window._fsLists[key]||[]).filter(_fsAu); if(!rows.length){ alert('אין עדיין הקלטות לרצף הזה'); return; }
+    var i=0, a=null, label=btn.textContent;
+    var ctl={stop:function(){ try{ if(a) a.pause(); }catch(e){} window._fsPlaying=null; btn.textContent=label; document.querySelectorAll('.fs-step.on').forEach(function(x){x.classList.remove('on');}); }};
+    window._fsPlaying=ctl; btn.textContent='⏹ עצור';
+    var steps=document.querySelectorAll('#first-list .fs-step');
+    (function next(){
+      if(window._fsPlaying!==ctl) return;
+      if(i>=rows.length){ ctl.stop(); return; }
+      var r=rows[i++]; a=new Audio(_fsAu(r));
+      a.onended=function(){ setTimeout(next,700); }; a.onerror=function(){ setTimeout(next,200); };
+      a.play().catch(function(){ setTimeout(next,200); });
+    })();
+  }catch(e){}
+}
+function fsShowCiv(key){ var rows=window._fsLists[key]||[]; if(!rows.length) return; civShowList(rows.map(function(r){ return {ar:r.ar, he:r.he, audio:_fsAu(r)}; }), 0); }
 
 // ===== 📶 "Works without reception" — a live, honest indicator =====
 // Offline is a core feature in the field, so it is shown where the soldier looks
@@ -22976,6 +23099,12 @@ function rQK(){
   h+='<div style="color:#a0b8c8;font-size:12px;margin-top:2px;">שמעתם ערבית ולא הבנתם? כתבו איך שזה נשמע</div></div>';
   h+='<div class="emerg-cube-name">◀</div>';
   h+='</div>';
+  h+='<div class="emerg-cube gold" style="grid-column:1/-1;flex-direction:row;min-height:0;padding:12px 16px;gap:12px;justify-content:flex-start;text-align:right;" onclick="navToTab(\'first\')">';
+  h+='<div class="emerg-cube-emoji" style="font-size:28px;">⚡</div>';
+  h+='<div style="flex:1;"><div class="emerg-cube-name">10 השניות הראשונות</div>';
+  h+='<div style="color:#a0b8c8;font-size:12px;margin-top:2px;">מחסום · בית · פצוע · חשוד · קהל — מה אומרים קודם</div></div>';
+  h+='<div class="emerg-cube-name">◀</div>';
+  h+='</div>';
   h+='<div class="emerg-cube crit" style="grid-column:1/-1;flex-direction:row;min-height:0;padding:12px 16px;gap:12px;justify-content:flex-start;text-align:right;" onclick="navToTab(\'ten\')">';
   h+='<div class="emerg-cube-emoji" style="font-size:28px;">🎖️</div>';
   h+='<div style="flex:1;"><div class="emerg-cube-name">10 משפטי חובה</div>';
@@ -23954,6 +24083,7 @@ document.addEventListener('click', function(e){
 // scenario play-all chain. Called on every tab switch so audio started in
 // one screen never keeps talking under another (no two-voices-at-once).
 function stopAllAudio(){
+  try{ if(window._fsPlaying) window._fsPlaying.stop(); }catch(e){}
   try{
     if (typeof stopAllRecordings === 'function') stopAllRecordings();
     if (typeof _scnStopAll === 'function') _scnStopAll();
@@ -23996,12 +24126,23 @@ function _civFit(){
   var guard=0;
   while(guard++<60 && size>26 && (inner.scrollWidth>t.clientWidth-8 || inner.scrollHeight>t.clientHeight-8)){ size-=Math.max(2,Math.round(size*0.07)); inner.style.fontSize=size+'px'; }
 }
-function civShow(ar, he, audio){
+// Show a whole sequence: tap the text = next phrase, small counter on top.
+function civShowList(list, i){
+  window._civList=list; window._civI=i||0;
+  var it=list[window._civI]; civShow(it.ar, it.he, it.audio, true);
+}
+function civNext(){
+  var L=window._civList; if(!L) return;
+  window._civI=(window._civI+1)%L.length; var it=L[window._civI]; civShow(it.ar, it.he, it.audio, true);
+}
+function civShow(ar, he, audio, fromList){
   if(!ar) return;
+  if(!fromList) window._civList=null;
   var o=_civEl();
   try{ if(localStorage.getItem('civ_dark')==='1') o.classList.add('dark'); else o.classList.remove('dark'); }catch(e){}
   var t=document.getElementById('civ-text'); t.innerHTML=''; var sp=document.createElement('div'); sp.textContent=ar; t.appendChild(sp);
-  document.getElementById('civ-he').textContent=he||'';
+  document.getElementById('civ-he').textContent=(window._civList?((window._civI+1)+'/'+window._civList.length+' · הקישו על המסך למשפט הבא · '):'')+(he||'');
+  document.getElementById('civ-text').onclick=window._civList?civNext:null;
   window._civAudio=audio||'';
   var pb=document.getElementById('civ-play'); pb.style.display=audio?'block':'none'; pb.textContent='🔊 השמע בקול';
   o.style.display='flex';
@@ -24037,7 +24178,7 @@ function civClose(){
 window.addEventListener('resize',function(){ var o=document.getElementById('civ-overlay'); if(o && o.style.display==='flex') _civFit(); });
 
 // ── Field mode (מצב שטח): keep the screen on + large text on emergency screens ──
-var FIELD_TABS=['qk','heard','ten','veh','ord','threat','answers','chk','triage','desc','visual','calm','crowd','kids'];
+var FIELD_TABS=['qk','heard','first','ten','veh','ord','threat','answers','chk','triage','desc','visual','calm','crowd','kids'];
 window._fieldWake=null; window._fieldCurTab='home';
 function _fieldPref(k,d){ try{ var v=localStorage.getItem(k); return v===null?d:v==='1'; }catch(e){ return d; } }
 function _fieldSet(k,v){ try{ localStorage.setItem(k,v?'1':'0'); }catch(e){} }
@@ -24144,6 +24285,8 @@ function navToTab(tabId){
     if (tabId === 'verbs') {
       setTimeout(function(){ try { if (typeof rVerbs === 'function') rVerbs(); } catch(e) { console.warn('rVerbs error:', e); } }, 50);
     }
+    if (tabId === 'first') { setTimeout(function(){ try { rFirst(); } catch(e) {} }, 30); }
+    if (tabId === 'ord' || tabId === 'triage' || tabId === 'crowd' || tabId === 'veh') { setTimeout(function(){ try { _fsRenderOn(tabId); } catch(e) {} }, 60); }
     if (tabId === 'heard') {
       try { if (window._navPrevTab && window._navPrevTab!=='heard') window._heardFrom = window._navPrevTab; } catch(e) {}
       setTimeout(function(){ try { rHeard(); } catch(e) {} }, 30);
@@ -24292,7 +24435,7 @@ window.addEventListener('load', function(){
 <script>
 // Version stamp — shown in the admin panel so we can confirm which build is live
 // on a device (stale service-worker caches were causing "my changes don't show").
-window.APP_VERSION = 'v317';
+window.APP_VERSION = 'v318';
 
 // Register the service worker for full offline use in the field, WITH update
 // detection: when a new version installs, offer a one-tap refresh instead of the
