@@ -11885,10 +11885,10 @@ var FIRST_SEQ=[
   {key:'veh',   icon:'🛑', title:'מחסום / רכב', screen:'veh', steps:null},
   {key:'house', icon:'🏠', title:'כניסה לבית', steps:[
     {he:'פתח את הדלת', ar:'افتح الباب'},
-    {he:'כולם החוצה', ar:'كلّكم لبرّة'},
-    {he:'צאו אחד-אחד, ידיים מורמות מעל הראש.', ar:'اطلعوا واحد واحد، الإيدين مرفوعة فوق الراس.'},
     {he:'מי בבית?', ar:'مين بالبيت؟'},
     {he:'כמה אנשים בבית?', ar:'كم واحد بالبيت؟'},
+    {he:'כולם החוצה', ar:'كلّكم لبرّة'},
+    {he:'צאו אחד-אחד, ידיים מורמות מעל הראש.', ar:'اطلعوا واحد واحد، الإيدين مرفوعة فوق الراس.'},
     {he:'אל תפחד', ar:'لا تخاف'}]},
   {key:'triage',icon:'🩺', title:'פצוע', screen:'triage', steps:[
     {he:'יש פצוע?', ar:'فيه مجروح؟'},
@@ -18621,15 +18621,15 @@ function _checkpointSteps(){
    {s:1,ar:'إطفي الموتور',he:'כבה את המנוע'},
    {s:1,ar:'اطلع من السيارة شوي شوي'},
    {s:1,ar:'حطّ المفاتيح على سطح السيارة',he:'שים מפתחות על גג הרכב'},
+   {s:1,ar:'ارفع القميص'},
+   {s:1,ar:'إيديك لفوق'},
+   {s:1,ar:'لا تتحرّك'},
    {s:2,ar:'كل اللي بالسيارة إيديكم لفوق',he:'כל מי שברכב — ידיים למעלה'},
-   {s:2,ar:'كل واحد يطلع وإيديه لفوق',he:'כל אחד יוצא עם ידיים למעלה'},
-   {s:2,ar:'ارفع القميص'},
-   {s:2,ar:'إيديك لفوق'},
-   {s:2,ar:'لا تتحرّك'}
+   {s:2,ar:'كل واحد يطلع وإيديه لفوق',he:'כל אחד יוצא עם ידיים למעלה'}
   ];
   return SEQ.map(function(it){ return {s:it.s, row:match(it.ar,it.he)}; }).filter(function(x){ return x.row; });
 }
-var _CP_TITLES={1:'\u05d7\u05dc\u05e7 \u05d0\u05f3 \u2014 \u05e2\u05e6\u05d9\u05e8\u05d4 \u05d5\u05d4\u05d5\u05e8\u05d3\u05ea \u05d4\u05e0\u05d4\u05d2', 2:'\u05d0\u05d5 \u05dc\u05d7\u05d9\u05dc\u05d5\u05e4\u05d9\u05df \u2014 \u05de\u05e1\u05e4\u05e8 \u05e0\u05d5\u05e1\u05e2\u05d9\u05dd'};
+var _CP_TITLES={1:'עצירה והורדת הנהג', 2:'ואם יש נוסעים נוספים'};
 function _renderCheckpointList(elId, returnTab){
   var el=document.getElementById(elId); if(!el)return;
   window._dbCatRows=window._dbCatRows||{}; window._dbCatRows['__checkpoint']=[];
@@ -24434,7 +24434,7 @@ window.addEventListener('load', function(){
 <script>
 // Version stamp — shown in the admin panel so we can confirm which build is live
 // on a device (stale service-worker caches were causing "my changes don't show").
-window.APP_VERSION = 'v320';
+window.APP_VERSION = 'v321';
 
 // Register the service worker for full offline use in the field, WITH update
 // detection: when a new version installs, offer a one-tap refresh instead of the
