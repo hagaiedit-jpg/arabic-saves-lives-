@@ -15910,52 +15910,35 @@ function opNavyP(i){
 }
 
 function getPhraseOfTheDay(){
-  // Pick phrase based on date - SAME phrase all day, changes only at midnight
+  // ONE phrase for everyone per day (Israel date), the same on phone and computer,
+  // changing only the next day. Chosen by "highest hash of (date + phrase id)" over
+  // the server phrases — deterministic on every device, and adding a new phrase
+  // during the day almost never changes today's pick. Cached per device for the day.
   try {
     if (!DB || DB.length === 0) return null;
-    
-    var now = new Date();
-    var year = now.getFullYear();
-    var month = now.getMonth() + 1;
-    var day = now.getDate();
-    var todayKey = year + '-' + month + '-' + day;
-    
-    // Check if we already picked a phrase today - return THE SAME ONE
+    var todayKey;
+    try { todayKey = new Intl.DateTimeFormat('en-CA',{timeZone:'Asia/Jerusalem'}).format(new Date()); }
+    catch(e){ var n=new Date(); todayKey=n.getFullYear()+'-'+(n.getMonth()+1)+'-'+n.getDate(); }
     try {
-      var savedKey = localStorage.getItem('potd_date');
-      var savedId = localStorage.getItem('potd_id');
-      if (savedKey === todayKey && savedId) {
-        var existing = DB.find(function(p){ return String(p.id) === String(savedId); });
-        if (existing) return existing;
+      if (localStorage.getItem('potd_date') === todayKey) {
+        var sid = localStorage.getItem('potd_id');
+        var ex = DB.find(function(p){ return String(p.id) === String(sid); });
+        if (ex) return ex;
       }
     } catch(e) {}
-    
-    // Prefer phrases with audio, fallback to all
-    var withAudio = DB.filter(function(p){ return p.audio && p.he; });
-    var pool = withAudio.length > 5 ? withAudio : DB.filter(function(p){return p.he;});
-    if (pool.length === 0) return null;
-    
-    // Sort pool by ID for stable order (CRITICAL!)
-    pool.sort(function(a, b){
-      var aId = String(a.id);
-      var bId = String(b.id);
-      return aId < bId ? -1 : (aId > bId ? 1 : 0);
+    // Server rows only (built-ins merged on the device have no shared id), field phrases with a recording.
+    var pool = DB.filter(function(p){
+      if(!p || !p.he || !p.ar || p.id==null) return false;
+      var id=String(p.id); if(/^bi-/.test(id) || /^c\d/.test(id)) return false;
+      var c=String(p.cat||''); if(c.indexOf('יסודות')===0 || c.indexOf('זיהוי')===0) return false;
+      return !!(p.audio || p.audio_url);
     });
-    
-    // Create a unique seed from year+month+day
-    var seed = year * 10000 + month * 100 + day;
-    
-    // Pick deterministic phrase
-    var idx = (seed * 7919) % pool.length;
-    if (idx < 0) idx += pool.length;
-    var chosen = pool[idx];
-    
-    // Save today's pick to localStorage
-    try {
-      localStorage.setItem('potd_date', todayKey);
-      localStorage.setItem('potd_id', String(chosen.id));
-    } catch(e) {}
-    
+    if (!pool.length) pool = DB.filter(function(p){ return p && p.he && p.ar && p.id!=null; });
+    if (!pool.length) return null;
+    var h=function(str){ var x=2166136261; for(var i=0;i<str.length;i++){ x^=str.charCodeAt(i); x=Math.imul(x,16777619); } return x>>>0; };
+    var chosen=null, best=-1;
+    pool.forEach(function(p){ var v=h(todayKey+'|'+String(p.id)); if(v>best){ best=v; chosen=p; } });
+    try { localStorage.setItem('potd_date', todayKey); localStorage.setItem('potd_id', String(chosen.id)); } catch(e) {}
     return chosen;
   } catch(e) {
     console.warn('potd error:', e);
@@ -24586,7 +24569,7 @@ window.addEventListener('load', function(){
 <script>
 // Version stamp — shown in the admin panel so we can confirm which build is live
 // on a device (stale service-worker caches were causing "my changes don't show").
-window.APP_VERSION = 'v329';
+window.APP_VERSION = 'v330';
 
 // Register the service worker for full offline use in the field, WITH update
 // detection: when a new version installs, offer a one-tap refresh instead of the
