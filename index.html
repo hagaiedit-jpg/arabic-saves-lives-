@@ -9248,7 +9248,8 @@ var BUILTIN_TASHAUL=[
   {section:'military', cat:'רכב ומחסום', he:'פתח חלון', ar:'افتح الشباك', trans:'אִפְתַח אִלשֻּבַּּאכּ'},              // [verify]
   {section:'military', cat:'רכב ומחסום', he:'צא מהרכב לאט', ar:'اطلع من السيارة شوي شوي', trans:'אֻטְלַע מִן אִלסַּייַּארַה שְוַי שְוַי'}, // [verify]
   {section:'military', cat:'רפואה ועזרה', he:'יש פצוע?', ar:'فيه مجروح؟', trans:'פִיה מַגְ׳רוּח?'},                    // [verified]
-  {section:'military', cat:'רפואה ועזרה', he:'אל תפחד, באנו לעזור', ar:'لا تخاف، إجينا نساعدك', trans:'לַא תְחַ׳אף, אִגִ׳ינַא נְסַאעְדַכּ'}, // [verified]
+  {section:'military', cat:'קהל ואירועים', he:'לכו הביתה, כולכם', ar:'روحوا كلكم عالبيت', trans:'רוּחוּ כֻּלְכֹּם עַאלְבֵּית'},
+  {section:'military', cat:'רפואה ועזרה', he:'אל תפחד, באנו לעזור', ar:'لا تخاف، جينا نساعدك', trans:'לַא תְחַ׳אף, גִ׳ינַא נְסַאעְדַכּ'}, // [verified]
   {section:'military', cat:'הוראות מיידיות', he:'אל תזוז!', ar:'لا تتحرك', trans:'לַא תִתְחַרַכּ'},                     // [verified]
   {section:'military', cat:'הוראות מיידיות', he:'ידיים למעלה!', ar:'إيديك لفوق', trans:'אִידֵיכּ לַפוֹק'},             // [verified]
   {section:'military', cat:'הוראות מיידיות', he:'תסתובב לאט', ar:'لفّ شوي شوي', trans:'לִףּ שְוַי שְוַי'},              // [verified]
@@ -11601,7 +11602,7 @@ var TRIAGE = [
   ]},
   {label:'הרגעה וטיפול', icon:'🤲', options:[
     {he:'אל תפחד', ar:'لا تخاف', trans:'לַא תְחַ׳אף'},
-    {he:'באנו לעזור', ar:'إجينا نساعدك', trans:'אִגִ׳ינַא נְסַאעְדַכּ'},
+    {he:'באנו לעזור', ar:'جينا نساعدك', trans:'גִ׳ינַא נְסַאעְדַכּ'},
     {he:'תישאר איתי', ar:'ضلّ معي', trans:'ד׳ל מַעִי'},
     {he:'צריך אמבולנס?', ar:'بدك إسعاف؟', trans:'בִּדַּכּ אִסְעַאף?'},
     {he:'עזרה בדרך', ar:'الإسعاف جاي', trans:'אִלאִסְעַאף גַׄאי', _new:true},
@@ -11894,16 +11895,17 @@ var FIRST_SEQ=[
     {he:'אתה שומע אותי?', ar:'بتسمعني؟'},
     {he:'איפה כואב?', ar:'وين بيوجعك؟'},
     {he:'אתה מדמם?', ar:'عم بتنزف؟'},
-    {he:'אל תפחד, באנו לעזור', ar:'لا تخاف، إجينا نساعدك'}]},
+    {he:'אל תפחד, באנו לעזור', ar:'لا تخاف، جينا نساعدك', trans:'לַא תְחַ׳אף, גִ׳ינַא נְסַאעְדַכּ'}]},
   {key:'ord',   icon:'⚠️', title:'חשוד / איום', screen:'ord', steps:[
     {he:'עצור! אל תתקרב!', ar:'وقّف! ما تقرّب!'},
     {he:'זרוק את מה שיש לך ביד!', ar:'ارمي اللي بإيدك!'},
     {he:'הרם ידיים', ar:'ارفع إيديك'},
     {he:'תסתובב לאט', ar:'لفّ شوي شوي'},
-    {he:'אל תזוז! ידיים על הראש!', ar:'ما تتحرّك! إيديك ع راسك!'}]},
+    {he:'אל תזוז! ידיים על הראש!', ar:'ما تتحرّك! إيديك عالراس!', trans:'מַא תְתְחַרַּכּ! אִידֵיכּ עַאלְרַאס!'}]},
   {key:'crowd', icon:'👥', title:'קהל', screen:'crowd', steps:[
     {he:'אסור לעבור כאן עכשיו!', ar:'ممنوع تعبّر من هون هلّق!'},
     {he:'תחזור אחורה', ar:'ارجع لورا'},
+    {he:'לכו הביתה, כולכם', ar:'روحوا كلكم عالبيت', trans:'רוּחוּ כֻּלְכֹּם עַאלְבֵּית'},
     {he:'אחד אחד — לא כולם ביחד.', ar:'واحد واحد — مش كلكم مع بعض.'},
     {he:'תהיה בשקט עכשיו', ar:'كون ساكت هلّق'}]}
 ];
@@ -11918,6 +11920,8 @@ function _fsResolve(step, pool){
   var k=_fsNorm(step.he), best=null;
   pool.forEach(function(r){ if(_fsNorm(r.he)===k){ var au=r.audio||r.audio_url; if(!best || (au && !(best.audio||best.audio_url))) best=r; } });
   var row=best?Object.assign({},best):{he:step.he, ar:step.ar, trans:step.trans||''};
+  // The sequence text is the approved wording (keeps the recording of the matched row).
+  if(step.ar) row.ar=step.ar; if(step.trans) row.trans=step.trans;
   if(!row.audio && !row.audio_url){ try{ row.audio=_descAudioFor(row)||''; }catch(e){} }
   return row;
 }
@@ -12996,7 +13000,7 @@ var ZIKUY_SCENARIOS = [
   {cat:'זיכוי ובידוק', step:'step13', he:'שים אותו על הרצפה ותתרחק!', ar:'حطّه ع الأرض وابعد!', trans:'חֻטּה עַ (אִל)אַרְד׳ וַאבְּעֵד!'},
   {cat:'זיכוי ובידוק', step:'step14', x:'civilian', he:'טוב, אני מניח אותו.', ar:'طيّب، بحطّه.', trans:'טַיֶּב, בַּחֻטּה.'},
   {cat:'זיכוי ובידוק', step:'step15', x:'divider', he:'מקרה ג׳ — הנבדק מתנגד', ar:'', trans:''},
-  {cat:'זיכוי ובידוק', step:'step16', he:'אל תזוז! ידיים על הראש!', ar:'ما تتحرّك! إيديك ع راسك!', trans:'מַא תְתְחַרַּכּ! אִידֵיכּ עַ רַאסַכּ!'},
+  {cat:'זיכוי ובידוק', step:'step16', he:'אל תזוז! ידיים על הראש!', ar:'ما تتحرّك! إيديك عالراس!', trans:'מַא תְתְחַרַּכּ! אִידֵיכּ עַאלְרַאס!'},
   {cat:'זיכוי ובידוק', step:'step17', x:'civilian', he:'למה? מה עשיתי?!', ar:'ليش؟ شو عملت؟!', trans:'לֵיש? שוּ עְמֵלְת?!'},
   {cat:'זיכוי ובידוק', step:'step18', he:'אני לא אחזור על זה! ברך על הקרקע!', ar:'مش رح أعيد! اركع ع الأرض!', trans:'מֻש רַח אַעִיד! אִרְכַּע עַ (אִל)אַרְד׳!'},
   {cat:'זיכוי ובידוק', step:'step19', he:'אם תשתף פעולה זה ייגמר מהר.', ar:'إذا بتتعاون بيخلص بسرعة.', trans:'אִזַא בִּתְעַאוַן בִּיחְלַץ בְּסֻרְעַה.'},
@@ -13348,7 +13352,7 @@ async function addHealthScenario(btn){
 // === סיוע הומניטרי — קשיש או נכה (from the Khan-Younis survey story) ===
 var HUMAN_SCN_ID = 'סיוע הומניטרי';
 var HUMAN_SCENARIO = [
-  {step:'step1', he:'אל תפחדי, באנו לעזור לך.', ar:'لا تخافي، إجينا نساعدك.', trans:'לַא תְחַ׳אפִי, אִגִ׳ינַא נְסַאעְדֵכּ.'},
+  {step:'step1', he:'אל תפחדי, באנו לעזור לך.', ar:'لا تخافي، جينا نساعدك.', trans:'לַא תְחַ׳אפִי, גִ׳ינַא נְסַאעְדֵכּ.'},
   {step:'step2', he:'את לבד? מי נשאר איתך?', ar:'إنتِ لحالك؟ مين ضل معك؟', trans:'אִנְתִ לַחַאִלֵכּ? מִין צַ׳ל מַעֵכּ?'},
   {step:'step3', civ:true, he:'אני לא יכולה ללכת, הרגליים חלשות.', ar:'ما بقدر أمشي، إجريي ضعيفات.', trans:'מַא בַּקְדַר אַמְשִי, אִגְ׳רַיִּי צַ׳עִיפַאת.'},
   {step:'step4', he:'יש לך מים? אוכל? תרופות?', ar:'في عندك مي؟ أكل؟ أدوية؟', trans:'פִי עִנְדֵכּ מַי? אַכֶּל? אַדְוִיֶה?'},
@@ -24435,7 +24439,7 @@ window.addEventListener('load', function(){
 <script>
 // Version stamp — shown in the admin panel so we can confirm which build is live
 // on a device (stale service-worker caches were causing "my changes don't show").
-window.APP_VERSION = 'v318';
+window.APP_VERSION = 'v319';
 
 // Register the service worker for full offline use in the field, WITH update
 // detection: when a new version installs, offer a one-tap refresh instead of the
