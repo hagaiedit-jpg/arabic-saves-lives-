@@ -2534,9 +2534,24 @@ function showLanding() {
       <div onclick="openDailyDrills()" style="position:relative;background:#1F3147;border:1px solid #2A3D52;border-radius:12px;padding:11px 6px;text-align:center;cursor:pointer;"><div id="home-emerg-badge" style="display:none;position:absolute;top:5px;right:5px;background:#e74c3c;color:#fff;font-size:10px;font-weight:900;border-radius:50%;width:18px;height:18px;line-height:18px;text-align:center;">1</div><div style="font-size:20px;line-height:1;margin-bottom:5px;">🔁</div><div style="color:#E8D9B8;font-size:13px;font-weight:700;line-height:1.25;">אתגר יומי</div></div>
     </div>
 
+    <div id="home-potd-card" style="display:none;background:#18293E;border:1px solid rgba(212,162,78,0.25);border-right:3px solid #D4A24E;border-radius:12px;padding:8px 10px;margin-bottom:14px;">
+      <div style="display:flex;align-items:center;gap:10px;">
+        <button id="home-potd-play" onclick="homePotdPlay()" style="flex-shrink:0;background:transparent;border:1px solid #D4A24E;color:#D4A24E;border-radius:50%;width:36px;height:36px;font-size:14px;cursor:pointer;font-family:inherit;padding:0;">▶</button>
+        <div style="flex:1;min-width:0;">
+          <div style="color:#D4A24E;font-size:10.5px;font-weight:700;">✨ ביטוי היום</div>
+          <div id="home-potd-he" style="color:#E8D9B8;font-size:14.5px;font-weight:700;line-height:1.3;"></div>
+          <div style="display:flex;gap:8px;align-items:baseline;flex-wrap:wrap;">
+            <span id="home-potd-ar" style="color:#E8D9B8;font-size:15px;font-family:Georgia,serif;line-height:1.3;direction:rtl;"></span>
+            <span id="home-potd-trans" style="color:#7a9ab5;font-size:12px;line-height:1.3;"></span>
+          </div>
+        </div>
+        <div onclick="homePotdDismiss()" title="הסתר" aria-label="הסתר" style="color:#5e7a92;font-size:16px;line-height:1;cursor:pointer;padding:0;min-width:36px;min-height:36px;display:flex;align-items:center;justify-content:center;">✕</div>
+      </div>
+    </div>
+
     <!-- Daily extras — collapsed so they don't compete with the three actions -->
     <details id="home-more" class="home-more">
-      <summary>📊 ההתקדמות שלי וביטוי היום ▾</summary>
+      <summary>📊 ההתקדמות שלי ▾</summary>
     <!-- Continue where you left off (small & compact) -->
     <div id="home-continue-card" style="display:none;background:linear-gradient(135deg,#D4A24E 0%,#b87325 100%);border:1px solid rgba(255,255,255,0.2);border-radius:12px;padding:10px 14px;margin-bottom:14px;cursor:pointer;box-shadow:0 2px 8px rgba(212,134,46,0.25);" onclick="homeContinue()">
       <div style="display:flex;align-items:center;justify-content:space-between;gap:10px;">
@@ -2569,22 +2584,6 @@ function showLanding() {
     </div>
 
     <!-- Phrase of the Day (ביטוי היום) — kept high on the page, right under the greeting, so it isn't missed -->
-    <div id="home-potd-card" style="display:none;background:#18293E;border:1px solid rgba(212,162,78,0.25);border-right:3px solid #D4A24E;border-radius:12px;padding:8px 10px;margin-bottom:14px;">
-      <div style="display:flex;align-items:center;gap:10px;">
-        <button id="home-potd-play" onclick="homePotdPlay()" style="flex-shrink:0;background:transparent;border:1px solid #D4A24E;color:#D4A24E;border-radius:50%;width:36px;height:36px;font-size:14px;cursor:pointer;font-family:inherit;padding:0;">▶</button>
-        <div style="flex:1;min-width:0;">
-          <div style="color:#D4A24E;font-size:10.5px;font-weight:700;">✨ ביטוי היום</div>
-          <div id="home-potd-he" style="color:#E8D9B8;font-size:14.5px;font-weight:700;line-height:1.3;"></div>
-          <div style="display:flex;gap:8px;align-items:baseline;flex-wrap:wrap;">
-            <span id="home-potd-ar" style="color:#E8D9B8;font-size:15px;font-family:Georgia,serif;line-height:1.3;direction:rtl;"></span>
-            <span id="home-potd-trans" style="color:#7a9ab5;font-size:12px;line-height:1.3;"></span>
-          </div>
-        </div>
-        <div onclick="homePotdDismiss()" title="הסתר" aria-label="הסתר" style="color:#5e7a92;font-size:16px;line-height:1;cursor:pointer;padding:0;min-width:36px;min-height:36px;display:flex;align-items:center;justify-content:center;">✕</div>
-      </div>
-    </div>
-
-
     <!-- 🗓️ Weekly readiness ritual (shown once per week) -->
     <div id="home-weekly-ritual" style="display:none;margin-bottom:16px;"></div>
 
@@ -24587,7 +24586,7 @@ window.addEventListener('load', function(){
 <script>
 // Version stamp — shown in the admin panel so we can confirm which build is live
 // on a device (stale service-worker caches were causing "my changes don't show").
-window.APP_VERSION = 'v328';
+window.APP_VERSION = 'v329';
 
 // Register the service worker for full offline use in the field, WITH update
 // detection: when a new version installs, offer a one-tap refresh instead of the
