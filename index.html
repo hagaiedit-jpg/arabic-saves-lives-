@@ -11971,7 +11971,8 @@ function _annBox(){
   window._fsLists=window._fsLists||{};
   var all=[]; cats.forEach(function(c){ A.forEach(function(a){ if(a.cat===c) all.push(a); }); });
   window._fsLists.ann_all=all;
-  var h='<div class="fs-box"><div class="fs-head"><span>📢 כריזה</span><span class="fs-actions"><button onclick="fsPlayAll(\'ann_all\',this)">▶ השמע הכל</button></span></div>';
+  // No "play all" across types — each announcement is for a different place; play per type only.
+  var h='<div class="fs-box"><div class="fs-head"><span>📢 כריזה</span></div>';
   cats.forEach(function(c,ci){
     var list=A.filter(function(a){ return a.cat===c; }); window._fsLists['ann_'+ci]=list;
     var hasAu=list.some(function(a){ return a.audio||a.audio_url; });
@@ -24577,7 +24578,7 @@ window.addEventListener('load', function(){
 <script>
 // Version stamp — shown in the admin panel so we can confirm which build is live
 // on a device (stale service-worker caches were causing "my changes don't show").
-window.APP_VERSION = 'v325';
+window.APP_VERSION = 'v326';
 
 // Register the service worker for full offline use in the field, WITH update
 // detection: when a new version installs, offer a one-tap refresh instead of the
