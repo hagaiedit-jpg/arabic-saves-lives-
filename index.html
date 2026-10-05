@@ -597,6 +597,14 @@ body.day-mode #home-prep-card.home-cont-strip, body.day-mode #home-prep-card.hom
 .fm-door .emerg-cube-name{font-size:13.5px!important;line-height:1.25;}
 .fm-say-h{color:#E8D9B8;font-size:15px;font-weight:800;margin:10px 2px 0;padding-right:9px;border-right:4px solid #D4A24E;}
 body.day-mode .fm-say-h{color:#0e1b2e;}
+/* ⭐ My kit */
+.pop-main-actions .kit-btn{flex:1;}
+.pop-main-actions .civ-show-btn{flex:1.6!important;font-size:15px!important;}
+.kit-empty{background:rgba(212,162,78,0.08);border:1px dashed rgba(212,162,78,0.5);border-radius:12px;padding:10px 12px;color:#E8D9B8;font-size:13px;line-height:1.55;margin-bottom:4px;}
+.kit-ed{display:flex;gap:4px;flex-shrink:0;}
+.kit-ed button{width:36px;height:36px;border-radius:9px;background:#0E1B2E;border:1px solid #2A3D52;color:#E8D9B8;font-size:14px;cursor:pointer;}
+body.day-mode .kit-empty{background:#fff;color:#0e1b2e;}
+body.day-mode .kit-ed button{background:#fff;color:#0e1b2e;border-color:rgba(168,82,0,0.3);}
 /* ⚡ First 10 seconds */
 .fs-box{background:#18293E;border:2px solid #D4A24E;border-radius:14px;padding:12px;margin-bottom:14px;}
 .fs-head{display:flex;align-items:center;justify-content:space-between;gap:8px;flex-wrap:wrap;color:#D4A24E;font-size:16px;font-weight:900;margin-bottom:8px;}
@@ -2947,6 +2955,7 @@ function showLanding() {
       <div class="pop-main-actions">
         <button onclick="civShowFromPopup()" class="civ-show-btn">📢 הצג לאזרח</button>
         <button onclick="toggleFav()" id="fav-btn" class="popup-action-btn fav">☆ שמור</button>
+        <button onclick="kitToggleFromPopup()" id="kit-btn" class="popup-action-btn fav kit-btn">🎒 לערכה</button>
       </div>
       
       <!-- Go-to-category button (shown only when opened from dictionary) -->
@@ -11974,6 +11983,61 @@ function fsPlayAll(key, btn){
 }
 function fsShowCiv(key){ var rows=window._fsLists[key]||[]; if(!rows.length) return; civShowList(rows.map(function(r){ return {ar:r.ar, he:r.he, audio:_fsAu(r)}; }), 0); }
 
+// ===== ⭐ "הערכה שלי" — a personal field kit of up to 15 phrases =====
+// Prepared before a mission from any phrase card ("🎒 לערכה"), shown first in field
+// mode with play-all and show-to-civilian. Stored on the device (snapshot, so it
+// works offline and for built-in phrases too).
+var KIT_MAX=15;
+function _kitGet(){ try{ return JSON.parse(localStorage.getItem('my_kit')||'[]'); }catch(e){ return []; } }
+function _kitSet(a){ try{ localStorage.setItem('my_kit', JSON.stringify(a)); }catch(e){} }
+function _kitKey(he,ar){ return String(he||'').replace(/[^\u05D0-\u05EA]/g,'')+'|'+String(ar||'').replace(/[\u064B-\u0652\s]/g,''); }
+function _kitCur(){
+  var he=((document.getElementById('phe')||{}).textContent||'').trim(), ar=((document.getElementById('parsm')||{}).textContent||'').trim();
+  var tr=((document.getElementById('ptrans')||{}).textContent||'').trim();
+  var au=window._popupAudio||''; if(String(au).indexOf('blob:')===0) au='';
+  return {he:he, ar:ar, trans:tr, audio:au, id:window._currentPopupId||''};
+}
+function _kitBtnRefresh(){
+  var b=document.getElementById('kit-btn'); if(!b) return;
+  var c=_kitCur(), k=_kitKey(c.he,c.ar), inKit=_kitGet().some(function(x){ return _kitKey(x.he,x.ar)===k; });
+  b.style.display=c.ar?'':'none';
+  b.textContent=inKit?'✓ בערכה':'🎒 לערכה'; b.classList.toggle('active',inKit);
+}
+function kitToggleFromPopup(){
+  var c=_kitCur(); if(!c.ar) return;
+  var a=_kitGet(), k=_kitKey(c.he,c.ar), i=-1;
+  a.forEach(function(x,j){ if(_kitKey(x.he,x.ar)===k) i=j; });
+  if(i>=0){ a.splice(i,1); try{ showToast('הוסר מהערכה שלך'); }catch(e){} }
+  else {
+    if(a.length>=KIT_MAX){ alert('בערכה יש כבר '+KIT_MAX+' משפטים — הסירו משפט כדי להוסיף חדש (במצב שטח, ✕ ליד המשפט).'); return; }
+    a.push(c); try{ showToast('נוסף לערכה שלך ('+a.length+'/'+KIT_MAX+') — מופיע ראשון במצב שטח'); }catch(e){}
+  }
+  _kitSet(a); _kitBtnRefresh();
+}
+function kitRemove(i){ var a=_kitGet(); a.splice(i,1); _kitSet(a); _kitRender(); }
+function kitMove(i,d){ var a=_kitGet(), j=i+d; if(j<0||j>=a.length) return; var t=a[i]; a[i]=a[j]; a[j]=t; _kitSet(a); _kitRender(); }
+function _kitRender(){
+  var el=document.getElementById('mykit-box'); if(!el) return;
+  var a=_kitGet();
+  if(!a.length){
+    el.innerHTML='<div class="kit-empty">⭐ <b>הכינו ערכה אישית לפני פעילות:</b> פתחו משפט ולחצו "🎒 לערכה" — עד '+KIT_MAX+' משפטים, והם יופיעו כאן ראשונים.</div>';
+    return;
+  }
+  // resolve recordings that were missing when saved
+  a.forEach(function(r){ if(!r.audio){ try{ r.audio=_descAudioFor(r)||''; }catch(e){} } });
+  window._fsLists=window._fsLists||{}; window._fsLists.mykit=a;
+  var edit=!!window._kitEdit;
+  var h='<div class="fs-box kit-box"><div class="fs-head"><span>⭐ הערכה שלי ('+a.length+')</span>'
+    +'<span class="fs-actions"><button onclick="fsPlayAll(\'mykit\',this)">▶ הכל</button><button onclick="fsShowCiv(\'mykit\')">📢 לאזרח</button><button onclick="window._kitEdit=!window._kitEdit;_kitRender();" aria-label="עריכה">'+(edit?'✓':'✏️')+'</button></span></div>';
+  a.forEach(function(r,i){
+    h+='<div class="fs-step" onclick="'+(edit?'':'fsOpen(\'mykit\','+i+')')+'"><span class="fs-n">'+(i+1)+'</span><span class="fs-t"><b>'+r.he+'</b><span class="fs-ar">'+r.ar+'</span>'+(r.trans?'<span class="fs-tr">'+r.trans+'</span>':'')+'</span>';
+    if(edit) h+='<span class="kit-ed"><button onclick="event.stopPropagation();kitMove('+i+',-1)" aria-label="למעלה">▲</button><button onclick="event.stopPropagation();kitMove('+i+',1)" aria-label="למטה">▼</button><button onclick="event.stopPropagation();kitRemove('+i+')" aria-label="הסר">✕</button></span>';
+    else if(r.audio) h+='<button class="cl-play" aria-label="השמע" onclick="event.stopPropagation();playResponseAudio(\''+String(r.audio).replace(/'/g,"\\'")+'\',this)">▶</button>';
+    h+='</div>';
+  });
+  el.innerHTML=h+'</div>';
+}
+
 // ===== 📶 "Works without reception" — a live, honest indicator =====
 // Offline is a core feature in the field, so it is shown where the soldier looks
 // (Home + field mode): ready ✓ (recordings saved on the phone), a one-tap prompt to
@@ -19484,7 +19548,7 @@ function goToDictCategory(){
 function shV(id){
   ['vcats','vlist','vsrch','vpop'].forEach(v=>{document.getElementById(v).className='scr'+(v===id?' on':'');});
   try{ document.getElementById('tab-lib').classList.toggle('pop-open', id==='vpop'); }catch(e){}
-  try{ if(id==='vpop'){ var pm=document.getElementById('pmore'); if(pm) pm.open=false; } }catch(e){}
+  try{ if(id==='vpop'){ var pm=document.getElementById('pmore'); if(pm) pm.open=false; _kitBtnRefresh(); } }catch(e){}
   // When showing the phrase popup: hide audio controls if there is no recording
   // (e.g. informational categories like Customs that have no audio by design)
   if(id==='vpop'){
@@ -23097,6 +23161,8 @@ function rQK(){
 
   var h='';
   // The 10 must-know phrases — full-width at the very top.
+  // ⭐ The soldier's own pre-mission kit comes first.
+  h+='<div id="mykit-box" style="grid-column:1/-1;"></div>';
   // What is happening right now? — three big doors before the situation grid.
   h+='<div style="grid-column:1/-1;display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;">';
   h+='<div class="emerg-cube green fm-door" onclick="navToTab(\'heard\')"><div class="emerg-cube-emoji">👂</div><div class="emerg-cube-name">אמרו לי משהו</div></div>';
@@ -23144,6 +23210,7 @@ function rQK(){
     +'<span class="urg-legend-item">🟢 רגיל</span>'
     +'</div>';
   grid.innerHTML=h;
+  try{ _kitRender(); }catch(e){}
   // Admin-only: one-click marking of the approved critical set.
   var rec=document.getElementById('emerg-recmark');
   if(!rec){ rec=document.createElement('div'); rec.id='emerg-recmark'; grid.parentNode.insertBefore(rec, grid.nextSibling); }
@@ -24008,6 +24075,7 @@ try { renderHome(); } catch(_){}
   </div>
   <div class="mm-h">⭐ שלי</div>
   <div class="mm-grid">
+    <div class="mm-tile" onclick="navToTab('qk')"><div class="mm-ic">🎒</div><div class="mm-lb">הערכה שלי</div></div>
     <div class="mm-tile" onclick="navToTab('fav')"><div class="mm-ic">⭐</div><div class="mm-lb">שמורים</div></div>
     <div class="mm-tile" onclick="navToTab('progress')"><div class="mm-ic">📊</div><div class="mm-lb">ההתקדמות שלי</div></div>
   </div>
@@ -24434,7 +24502,7 @@ window.addEventListener('load', function(){
 <script>
 // Version stamp — shown in the admin panel so we can confirm which build is live
 // on a device (stale service-worker caches were causing "my changes don't show").
-window.APP_VERSION = 'v321';
+window.APP_VERSION = 'v322';
 
 // Register the service worker for full offline use in the field, WITH update
 // detection: when a new version installs, offer a one-tap refresh instead of the
