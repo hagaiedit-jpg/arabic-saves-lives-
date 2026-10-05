@@ -619,6 +619,9 @@ body.day-mode .kit-ed button{background:#fff;color:#0e1b2e;border-color:rgba(168
 .fs-tr{color:#D4A24E;font-size:12.5px;}
 .fs-nr{opacity:0.6;}
 .fs-sub{color:#E8D9B8;font-size:13.5px;font-weight:800;margin:10px 2px 6px;padding-right:8px;border-right:3px solid #D4A24E;}
+.fs-sub-row{display:flex;align-items:center;justify-content:space-between;gap:8px;}
+.fs-sub-play{background:rgba(212,162,78,0.16);border:1px solid #D4A24E;color:#E8D9B8;border-radius:9px;padding:6px 10px;font-size:12px;font-weight:800;cursor:pointer;font-family:inherit;min-height:36px;}
+body.day-mode .fs-sub-play{color:#0e1b2e;}
 .fs-clip{display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;}
 body.day-mode .fs-sub{color:#0e1b2e;}
 .fs-mini{display:flex;flex-wrap:wrap;gap:6px;}
@@ -11965,9 +11968,14 @@ function _annBox(){
   var A=(typeof ANNOUNCE!=='undefined'&&ANNOUNCE)?ANNOUNCE:[]; if(!A.length) return '';
   var cats=[]; A.forEach(function(a){ if(a&&a.cat&&cats.indexOf(a.cat)<0) cats.push(a.cat); });
   cats.sort(function(x,y){ return _annPrio(x)-_annPrio(y); });
-  var h='<div class="fs-box"><div class="fs-head"><span>📢 כריזה</span></div>';
-  cats.forEach(function(c){
-    h+='<div class="fs-sub">'+c+'</div>';
+  window._fsLists=window._fsLists||{};
+  var all=[]; cats.forEach(function(c){ A.forEach(function(a){ if(a.cat===c) all.push(a); }); });
+  window._fsLists.ann_all=all;
+  var h='<div class="fs-box"><div class="fs-head"><span>📢 כריזה</span><span class="fs-actions"><button onclick="fsPlayAll(\'ann_all\',this)">▶ השמע הכל</button></span></div>';
+  cats.forEach(function(c,ci){
+    var list=A.filter(function(a){ return a.cat===c; }); window._fsLists['ann_'+ci]=list;
+    var hasAu=list.some(function(a){ return a.audio||a.audio_url; });
+    h+='<div class="fs-sub fs-sub-row"><span>'+c+'</span>'+(hasAu&&list.length>1?'<button class="fs-sub-play" onclick="fsPlayAll(\'ann_'+ci+'\',this)">▶ השמע הכל</button>':'')+'</div>';
     A.forEach(function(a,i){ if(a.cat!==c) return;
       h+='<div class="fs-step" onclick="fsOpenAnn('+i+')"><span class="fs-n">📢</span><span class="fs-t"><b>'+(a.he||'')+'</b>'+(a.trans?'<span class="fs-tr fs-clip">'+a.trans+'</span>':'')+'</span>'
         +(a.audio?'<button class="cl-play" aria-label="השמע" onclick="event.stopPropagation();playResponseAudio(\''+String(a.audio).replace(/'/g,"\\'")+'\',this)">▶</button>':'<span class="fs-nr" title="אין הקלטה">🔇</span>')+'</div>';
@@ -24569,7 +24577,7 @@ window.addEventListener('load', function(){
 <script>
 // Version stamp — shown in the admin panel so we can confirm which build is live
 // on a device (stale service-worker caches were causing "my changes don't show").
-window.APP_VERSION = 'v324';
+window.APP_VERSION = 'v325';
 
 // Register the service worker for full offline use in the field, WITH update
 // detection: when a new version installs, offer a one-tap refresh instead of the
