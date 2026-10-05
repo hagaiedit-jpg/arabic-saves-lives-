@@ -591,6 +591,12 @@ body.day-mode .home-cont-strip{background:#fff!important;border-color:rgba(31,79
 body.day-mode #home-prep-card.home-cont-strip, body.day-mode #home-prep-card.home-cont-strip *{color:#0e1b2e!important;}
 /* Home: no "streak in danger" banner — the streak is shown in progress; daily challenge has its own badge */
 #home-daily-nudge{display:none!important;}
+/* Field mode: the three "what is happening" doors */
+.fm-door{min-height:96px!important;padding:12px 6px!important;}
+.fm-door .emerg-cube-emoji{font-size:30px;}
+.fm-door .emerg-cube-name{font-size:13.5px!important;line-height:1.25;}
+.fm-say-h{color:#E8D9B8;font-size:15px;font-weight:800;margin:10px 2px 0;padding-right:9px;border-right:4px solid #D4A24E;}
+body.day-mode .fm-say-h{color:#0e1b2e;}
 /* ⚡ First 10 seconds */
 .fs-box{background:#18293E;border:2px solid #D4A24E;border-radius:14px;padding:12px;margin-bottom:14px;}
 .fs-head{display:flex;align-items:center;justify-content:space-between;gap:8px;flex-wrap:wrap;color:#D4A24E;font-size:16px;font-weight:900;margin-bottom:8px;}
@@ -833,8 +839,11 @@ body.day-mode .tb-tab-sec.active{color:#a85200;border-bottom-color:#a85200;}
 .tb-tab-sec.active{color:#E8D9B8;border-bottom-color:#D4A24E;}
 .scr{display:none;max-width:480px;margin-left:auto;margin-right:auto;}.scr.on{display:block;}
 /* Accessibility: larger text for field use (zoom scales the on-screen content) */
+/* Zoom the screen content but keep it inside the viewport (no sideways scroll) */
 body.text-lg .scr{ zoom:1.12; }
 body.text-xl .scr{ zoom:1.25; }
+/* Flex search fields must be allowed to shrink (inputs have a wide intrinsic min-width) */
+.scr input{min-width:0;}
 /* Sun mode: higher contrast + larger tap targets for bright outdoors / gloves */
 body.sun-mode .scr{ filter:contrast(1.2) saturate(1.05); }
 body.sun-mode #bottom-nav{ padding-top:11px; padding-bottom:11px; }
@@ -2463,38 +2472,18 @@ function showLanding() {
     <div onclick="navToTab('qk')" style="background:linear-gradient(135deg,#c0392b 0%,#8e1f15 100%);border-radius:18px;padding:20px 18px;margin-bottom:12px;cursor:pointer;box-shadow:0 6px 18px rgba(192,57,43,0.35);display:flex;align-items:center;gap:14px;">
       <div style="font-size:40px;line-height:1;flex-shrink:0;">🚨</div>
       <div style="flex:1;min-width:0;">
-        <div class="keep-white" style="color:#fff;font-size:22px;font-weight:900;line-height:1.2;">אני בשטח עכשיו</div>
-        <div style="color:rgba(255,255,255,0.9);font-size:13.5px;margin-top:3px;">מה אומרים לך ומה עונים — תוך שניות</div>
+        <div class="keep-white" style="color:#fff;font-size:22px;font-weight:900;line-height:1.2;">אני צריך ערבית עכשיו</div>
+        <div style="color:rgba(255,255,255,0.9);font-size:13.5px;margin-top:3px;">מצב שטח — מה לומר, מה אמרו לי, מה קודם</div>
       </div>
       <div class="keep-white" style="color:#fff;font-size:24px;flex-shrink:0;">◀</div>
     </div>
 
-    <div class="offline-chip" data-offline-chip></div>
-    <!-- Global search across the whole app -->
-    <div style="display:flex;align-items:center;gap:8px;margin-bottom:12px;">
-      <div onclick="openGlobalSearch()" style="flex:1;background:#1F3147;border:1px solid #2A3D52;border-radius:12px;padding:15px 14px;display:flex;align-items:center;gap:10px;border-width:2px;border-color:#D4A24E;cursor:pointer;user-select:none;-webkit-user-select:none;-webkit-touch-callout:none;">
-        <span style="color:#D4A24E;font-size:21px;">🔍</span>
-        <span class="home-search-ph" style="flex:1;color:#9fb4c8;font-size:15px;font-weight:600;">חיפוש מהיר: עצור, ידיים, תעודה, פצוע, נשק...</span>
-      </div>
-      <button onclick="gsHomeVoice()" title="חיפוש קולי" style="background:rgba(212,162,78,0.18);border:1px solid #D4A24E;color:#D4A24E;width:54px;height:54px;border-radius:12px;cursor:pointer;font-size:19px;flex-shrink:0;">🎤</button>
-    </div>
-
-    <!-- 👂 Primary action — "what did they say to me?" (reverse lookup by sound) -->
-    <div onclick="navToTab('heard')" style="background:linear-gradient(135deg,#17785a 0%,#0e5a3f 100%);border-radius:18px;padding:14px 18px;margin-bottom:12px;cursor:pointer;box-shadow:0 4px 12px rgba(0,0,0,0.22);display:flex;align-items:center;gap:14px;">
-      <div style="font-size:32px;line-height:1;flex-shrink:0;">👂</div>
-      <div style="flex:1;min-width:0;">
-        <div class="keep-white" style="color:#fff;font-size:19px;font-weight:900;line-height:1.2;">מה אמרו לי?</div>
-        <div style="color:rgba(255,255,255,0.88);font-size:13px;margin-top:3px;">שמעתם ערבית? כתבו איך שזה נשמע</div>
-      </div>
-      <div class="keep-white" style="color:#fff;font-size:22px;flex-shrink:0;">◀</div>
-    </div>
-
     <!-- 🎯 Primary action #3 — training (prepare for next time) -->
-    <div onclick="navToTab('train')" style="background:linear-gradient(135deg,#1f4f86 0%,#163a63 100%);border:1px solid rgba(120,170,230,0.3);border-radius:18px;padding:16px 18px;margin-bottom:12px;cursor:pointer;box-shadow:0 4px 12px rgba(0,0,0,0.25);display:flex;align-items:center;gap:14px;">
-      <div style="font-size:34px;line-height:1;flex-shrink:0;">🎯</div>
+    <div onclick="navToTab('train')" style="background:linear-gradient(135deg,#1f4f86 0%,#163a63 100%);border:1px solid rgba(120,170,230,0.3);border-radius:18px;padding:20px 18px;margin-bottom:12px;cursor:pointer;box-shadow:0 4px 12px rgba(0,0,0,0.25);display:flex;align-items:center;gap:14px;">
+      <div style="font-size:40px;line-height:1;flex-shrink:0;">🎯</div>
       <div style="flex:1;min-width:0;">
-        <div class="keep-white" style="color:#fff;font-size:19px;font-weight:900;line-height:1.2;">אני רוצה להתאמן</div>
-        <div style="color:rgba(255,255,255,0.85);font-size:13px;margin-top:3px;">תרגול, תרחישים, מבחנים ומסלול 30 יום</div>
+        <div class="keep-white" style="color:#fff;font-size:22px;font-weight:900;line-height:1.2;">אני רוצה להתכונן</div>
+        <div style="color:rgba(255,255,255,0.85);font-size:13px;margin-top:3px;">אימון ולמידה · תרחישים · מסלול הכנה לגיוס</div>
       </div>
       <div class="keep-white" style="color:#fff;font-size:22px;flex-shrink:0;">◀</div>
     </div>
@@ -2504,6 +2493,17 @@ function showLanding() {
       <!-- Content set by JS -->
     </div>
 
+    <!-- Global search across the whole app -->
+    <div style="display:flex;align-items:center;gap:8px;margin-bottom:12px;">
+      <div onclick="openGlobalSearch()" style="flex:1;background:#1F3147;border:1px solid #2A3D52;border-radius:12px;padding:19px 16px;display:flex;align-items:center;gap:10px;border-width:2px;border-color:#D4A24E;cursor:pointer;user-select:none;-webkit-user-select:none;-webkit-touch-callout:none;">
+        <span style="color:#D4A24E;font-size:21px;">🔍</span>
+        <span class="home-search-ph" style="flex:1;color:#9fb4c8;font-size:17px;font-weight:700;">מה אתה צריך לומר או להבין?</span>
+      </div>
+      <button onclick="gsHomeVoice()" title="חיפוש קולי" style="background:rgba(212,162,78,0.18);border:1px solid #D4A24E;color:#D4A24E;width:62px;height:62px;border-radius:12px;cursor:pointer;font-size:19px;flex-shrink:0;">🎤</button>
+    </div>
+
+    <div class="offline-chip" data-offline-chip></div>
+    <div style="height:1px;background:rgba(122,154,181,0.25);margin:6px 0 14px;"></div>
     <!-- Secondary — quieter: everything else -->
     <div style="color:#7a9ab5;font-size:12px;font-weight:700;margin:0 2px 8px;">עוד בערכה</div>
     <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:16px;">
@@ -23097,18 +23097,13 @@ function rQK(){
 
   var h='';
   // The 10 must-know phrases — full-width at the very top.
-  h+='<div class="emerg-cube green" style="grid-column:1/-1;flex-direction:row;min-height:0;padding:12px 16px;gap:12px;justify-content:flex-start;text-align:right;" onclick="navToTab(\'heard\')">';
-  h+='<div class="emerg-cube-emoji" style="font-size:28px;">👂</div>';
-  h+='<div style="flex:1;"><div class="emerg-cube-name">מה אמרו לי?</div>';
-  h+='<div style="color:#a0b8c8;font-size:12px;margin-top:2px;">שמעתם ערבית ולא הבנתם? כתבו איך שזה נשמע</div></div>';
-  h+='<div class="emerg-cube-name">◀</div>';
+  // What is happening right now? — three big doors before the situation grid.
+  h+='<div style="grid-column:1/-1;display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;">';
+  h+='<div class="emerg-cube green fm-door" onclick="navToTab(\'heard\')"><div class="emerg-cube-emoji">👂</div><div class="emerg-cube-name">אמרו לי משהו</div></div>';
+  h+='<div class="emerg-cube red fm-door" onclick="navToTab(\'threat\')"><div class="emerg-cube-emoji">⚠️</div><div class="emerg-cube-name">שמעתי מילה חשודה</div></div>';
+  h+='<div class="emerg-cube gold fm-door" onclick="navToTab(\'first\')"><div class="emerg-cube-emoji">⚡</div><div class="emerg-cube-name">10 השניות הראשונות</div></div>';
   h+='</div>';
-  h+='<div class="emerg-cube gold" style="grid-column:1/-1;flex-direction:row;min-height:0;padding:12px 16px;gap:12px;justify-content:flex-start;text-align:right;" onclick="navToTab(\'first\')">';
-  h+='<div class="emerg-cube-emoji" style="font-size:28px;">⚡</div>';
-  h+='<div style="flex:1;"><div class="emerg-cube-name">10 השניות הראשונות</div>';
-  h+='<div style="color:#a0b8c8;font-size:12px;margin-top:2px;">מחסום · בית · פצוע · חשוד · קהל — מה אומרים קודם</div></div>';
-  h+='<div class="emerg-cube-name">◀</div>';
-  h+='</div>';
+  h+='<div class="fm-say-h" style="grid-column:1/-1;">🗣️ אני צריך לומר משהו — בחרו סיטואציה</div>';
   h+='<div class="emerg-cube crit" style="grid-column:1/-1;flex-direction:row;min-height:0;padding:12px 16px;gap:12px;justify-content:flex-start;text-align:right;" onclick="navToTab(\'ten\')">';
   h+='<div class="emerg-cube-emoji" style="font-size:28px;">🎖️</div>';
   h+='<div style="flex:1;"><div class="emerg-cube-name">10 משפטי חובה</div>';
@@ -24439,7 +24434,7 @@ window.addEventListener('load', function(){
 <script>
 // Version stamp — shown in the admin panel so we can confirm which build is live
 // on a device (stale service-worker caches were causing "my changes don't show").
-window.APP_VERSION = 'v319';
+window.APP_VERSION = 'v320';
 
 // Register the service worker for full offline use in the field, WITH update
 // detection: when a new version installs, offer a one-tap refresh instead of the
