@@ -597,6 +597,15 @@ body.day-mode #home-prep-card.home-cont-strip, body.day-mode #home-prep-card.hom
 .fm-door .emerg-cube-name{font-size:13.5px!important;line-height:1.25;}
 .fm-say-h{color:#E8D9B8;font-size:15px;font-weight:800;margin:10px 2px 0;padding-right:9px;border-right:4px solid #D4A24E;}
 body.day-mode .fm-say-h{color:#0e1b2e;}
+/* Home: tools row light; daily extras collapsed */
+.home-tools > div{padding:8px 4px!important;border-radius:10px!important;background:transparent!important;}
+.home-tools > div > div:first-child{font-size:17px!important;margin-bottom:3px!important;}
+.home-tools > div > div:last-child{font-size:12px!important;font-weight:600!important;color:#a0b8c8!important;}
+body.day-mode .home-tools > div > div:last-child{color:#4a5b6c!important;}
+.home-more{border:1px solid rgba(122,154,181,0.3);border-radius:12px;padding:0 10px;margin-bottom:10px;}
+.home-more > summary{list-style:none;cursor:pointer;padding:11px 2px;color:#7a9ab5;font-size:13px;font-weight:700;text-align:center;}
+.home-more > summary::-webkit-details-marker{display:none;}
+.home-more[open]{padding-bottom:10px;}
 /* ⭐ My kit */
 .pop-main-actions .kit-btn{flex:1;}
 .pop-main-actions .civ-show-btn{flex:1.6!important;font-size:15px!important;}
@@ -2287,11 +2296,7 @@ body, body *, .scr, .scr *, button, input, textarea, select {
         <div style="color:#E8D9B8;font-size:20px;font-weight:800;letter-spacing:3px;margin-bottom:14px;">להבין · להגיב · לפעול</div>
         <div style="color:#E8D9B8;font-size:17px;font-weight:700;letter-spacing:0.3px;margin-bottom:14px;">לא קורס. לא עוד אפליקציה. שכבת הגנה.</div>
         <div style="color:#E8D9B8;font-size:15.5px;line-height:1.75;max-width:440px;margin:0 auto;font-weight:600;">
-          מה אומרים לך · מה עונים · מה כתוב בשטח<br>
-          <span style="color:#a0b8c8;font-weight:400;">כלי שטח מיידי, תרחישים ואימון — תשובה בשניות.</span>
-        </div>
-        <div style="color:#a0b8c8;font-size:14px;line-height:1.6;max-width:430px;margin:12px auto 0;">
-          מילה אחת שלא הבנת יכולה להכריע אירוע שלם.
+          כלי שטח לערבית מדוברת — להבין מה אומרים לך, לדעת מה לענות ולפעול במהירות.
         </div>
         <div style="color:#7a9ab5;font-size:12.5px;margin-top:10px;">📶 עובד גם ללא קליטה · 📲 מותקן למסך הבית</div>
       </div>
@@ -2516,11 +2521,11 @@ function showLanding() {
       <button onclick="gsHomeVoice()" title="חיפוש קולי" style="background:rgba(212,162,78,0.18);border:1px solid #D4A24E;color:#D4A24E;width:62px;height:62px;border-radius:12px;cursor:pointer;font-size:19px;flex-shrink:0;">🎤</button>
     </div>
 
+    <div style="height:1px;background:rgba(122,154,181,0.3);margin:18px 0 14px;"></div>
     <div class="offline-chip" data-offline-chip></div>
-    <div style="height:1px;background:rgba(122,154,181,0.25);margin:6px 0 14px;"></div>
-    <!-- Secondary — quieter: everything else -->
-    <div style="color:#7a9ab5;font-size:12px;font-weight:700;margin:0 2px 8px;">עוד בערכה</div>
-    <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:16px;">
+    <!-- Secondary — light: tools -->
+    <div style="color:#7a9ab5;font-size:12px;font-weight:700;margin:0 2px 8px;">כלים נוספים</div>
+    <div class="home-tools" style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px;margin-bottom:12px;">
       <div onclick="navToTab('lib')" style="position:relative;background:#1F3147;border:1px solid #2A3D52;border-radius:12px;padding:11px 6px;text-align:center;cursor:pointer;"><div style="font-size:20px;line-height:1;margin-bottom:5px;">📚</div><div style="color:#E8D9B8;font-size:13px;font-weight:700;line-height:1.25;">ספרייה מבצעית</div></div>
       <div onclick="navToTab('scn')" style="position:relative;background:#1F3147;border:1px solid #2A3D52;border-radius:12px;padding:11px 6px;text-align:center;cursor:pointer;"><div style="font-size:20px;line-height:1;margin-bottom:5px;">💬</div><div style="color:#E8D9B8;font-size:13px;font-weight:700;line-height:1.25;">תרחישים</div></div>
       <div onclick="navToTab('fav')" style="position:relative;background:#1F3147;border:1px solid #2A3D52;border-radius:12px;padding:11px 6px;text-align:center;cursor:pointer;"><div style="font-size:20px;line-height:1;margin-bottom:5px;">⭐</div><div style="color:#E8D9B8;font-size:13px;font-weight:700;line-height:1.25;">שמורים</div></div>
@@ -2529,6 +2534,9 @@ function showLanding() {
       <div onclick="openDailyDrills()" style="position:relative;background:#1F3147;border:1px solid #2A3D52;border-radius:12px;padding:11px 6px;text-align:center;cursor:pointer;"><div id="home-emerg-badge" style="display:none;position:absolute;top:5px;right:5px;background:#e74c3c;color:#fff;font-size:10px;font-weight:900;border-radius:50%;width:18px;height:18px;line-height:18px;text-align:center;">1</div><div style="font-size:20px;line-height:1;margin-bottom:5px;">🔁</div><div style="color:#E8D9B8;font-size:13px;font-weight:700;line-height:1.25;">אתגר יומי</div></div>
     </div>
 
+    <!-- Daily extras — collapsed so they don't compete with the three actions -->
+    <details id="home-more" class="home-more">
+      <summary>📊 ההתקדמות שלי וביטוי היום ▾</summary>
     <!-- Continue where you left off (small & compact) -->
     <div id="home-continue-card" style="display:none;background:linear-gradient(135deg,#D4A24E 0%,#b87325 100%);border:1px solid rgba(255,255,255,0.2);border-radius:12px;padding:10px 14px;margin-bottom:14px;cursor:pointer;box-shadow:0 2px 8px rgba(212,134,46,0.25);" onclick="homeContinue()">
       <div style="display:flex;align-items:center;justify-content:space-between;gap:10px;">
@@ -2630,6 +2638,7 @@ function showLanding() {
 
     <!-- Phrase of the Day moved up, right under the greeting -->
 
+    </details>
   </div>
 </div>
 
@@ -24578,7 +24587,7 @@ window.addEventListener('load', function(){
 <script>
 // Version stamp — shown in the admin panel so we can confirm which build is live
 // on a device (stale service-worker caches were causing "my changes don't show").
-window.APP_VERSION = 'v326';
+window.APP_VERSION = 'v327';
 
 // Register the service worker for full offline use in the field, WITH update
 // detection: when a new version installs, offer a one-tap refresh instead of the
