@@ -11582,7 +11582,7 @@ var SUSPECT_DESC = [
 var TRIAGE = [
   {label:'הכרה ומגע', icon:'🗣️', options:[
     {he:'אתה בסדר?', ar:'انت منيح؟', trans:'אִנְתַ מְנִיח'},
-    {he:'אתה שומע אותי?', ar:'بتسمعني؟', trans:'בְּתִסְמַעְנִי', _new:true}
+    {he:'אתה שומע אותי?', ar:'إنت سامعني؟', trans:'אִנְתֶ סַאמְעְנִי?'}
   ]},
   {label:'פציעה וכאב', icon:'🩹', options:[
     {he:'אתה פצוע?', ar:'انت مجروح؟', trans:'אִנְתַ מַגׄרוּח'},
@@ -11901,7 +11901,7 @@ var FIRST_SEQ=[
     {he:'אל תפחד', ar:'لا تخاف'}]},
   {key:'triage',icon:'🩺', title:'פצוע', screen:'triage', steps:[
     {he:'יש פצוע?', ar:'فيه مجروح؟'},
-    {he:'אתה שומע אותי?', ar:'بتسمعني؟'},
+    {he:'אתה שומע אותי?', ar:'إنت سامعني؟', trans:'אִנְתֶ סַאמְעְנִי?'},
     {he:'איפה כואב?', ar:'وين بيوجعك؟'},
     {he:'אתה מדמם?', ar:'عم بتنزف؟'},
     {he:'אל תפחד, באנו לעזור', ar:'لا تخاف، جينا نساعدك', trans:'לַא תְחַ׳אף, גִ׳ינַא נְסַאעְדַכּ'}]},
@@ -12049,7 +12049,11 @@ function _offlineChipsRefresh(){
     var html, cls, click='';
     if(offline){ cls='off'; html='📵<span>אין קליטה עכשיו — הכל עובד מהטלפון ✓<span class="oc-sub">'+(n?n+' הקלטות שמורות במכשיר':'ההקלטות שכבר הושמעו זמינות')+'</span></span>'; }
     else if(at && n){ cls='ready'; html='📶<span>מוכן לשטח גם בלי קליטה ✓<span class="oc-sub">'+n+' הקלטות שמורות בטלפון · עודכן '+at+'</span></span>'; }
-    else { cls='todo'; click='downloadAllOffline()'; html='📶<span>עובד גם ללא קליטה<span class="oc-sub">הורידו את ההקלטות לטלפון — פעם אחת, מומלץ ב-WiFi</span></span><span class="oc-btn">⬇️ הורדה</span>'; }
+    else {
+      var unlocked=false; try{ unlocked=!!window._adminAuth || localStorage.getItem('offline_unlock_ok')==='1'; }catch(e){}
+      if(!unlocked){ document.querySelectorAll('[data-offline-chip]').forEach(function(el){ el.className='offline-chip'; el.innerHTML=''; el.removeAttribute('onclick'); }); return; }
+      cls='todo'; click='downloadAllOffline()'; html='📶<span>עובד גם ללא קליטה<span class="oc-sub">הורידו את ההקלטות לטלפון — פעם אחת, מומלץ ב-WiFi</span></span><span class="oc-btn">⬇️ הורדה</span>';
+    }
     document.querySelectorAll('[data-offline-chip]').forEach(function(el){
       el.className='offline-chip '+cls; el.innerHTML=html;
       if(click){ el.setAttribute('onclick',click); el.setAttribute('role','button'); el.setAttribute('tabindex','0'); }
@@ -22072,6 +22076,40 @@ async function _fixNumberTrans(){
 }
 
 // Admin list
+// Editor's Arabic corrections, applied to the database copies too (idempotent):
+// جينا (not إجينا) · إيديك عالراس · "אתה שומע אותי?" = إنت سامعني؟
+async function _fixKnownArabic(){
+  if(window._knownArabicFixed) return; window._knownArabicFixed=true;
+  var rows=await sbFetchAllRows('/rest/v1/phrases?select=id,he,ar,trans');
+  var n=0;
+  for(var i=0;i<(rows||[]).length;i++){
+    var r=rows[i], ar=String(r.ar||''), tr=String(r.trans||''), nar=ar, ntr=tr;
+    if(nar.indexOf('إجينا')>=0){ nar=nar.replace(/إجينا/g,'جينا'); ntr=ntr.replace(/אִגִ׳ינַא/g,'גִ׳ינַא'); }
+    if(nar.indexOf('إيديك ع راسك')>=0){ nar=nar.replace(/إيديك ع راسك/g,'إيديك عالراس'); ntr=ntr.replace(/עַ רַאסַכּ/g,'עַאלְרַאס'); }
+    if(String(r.he||'').replace(/[^א-ת]/g,'')==='אתהשומעאותי' && nar.indexOf('بتسمعني')>=0){ nar='إنت سامعني؟'; ntr='אִנְתֶ סַאמְעְנִי?'; }
+    if(nar!==ar || ntr!==tr){ try{ await sbFetch('/rest/v1/phrases?id=eq.'+encodeURIComponent(r.id),'PATCH',{ar:nar,trans:ntr}); n++; }catch(e){} }
+  }
+  if(n){ try{ showToast('✓ תוקנו '+n+' משפטים לכתיב הערבי המאושר'); }catch(e){} try{ await loadData(); }catch(e){} }
+}
+// Field-screen phrases that exist only in the app's templates get a real DB row,
+// so they appear in the admin list and can be recorded (e.g. "אתה מדמם?").
+async function _syncFieldTemplates(){
+  if(window._fieldTplSynced) return; window._fieldTplSynced=true;
+  var norm=function(x){ return String(x||'').replace(/[^א-ת]/g,''); };
+  var have={}; (await sbFetchAllRows('/rest/v1/phrases?select=he')||[]).forEach(function(p){ have[norm(p.he)]=1; });
+  var MAP=[[typeof ORDERS!=='undefined'?ORDERS:[],'ניהול מרחב והוראות'],[typeof CHECK!=='undefined'?CHECK:[],'בידוק וזיהוי'],[typeof VEHICLE!=='undefined'?VEHICLE:[],'עצירת תנועה ורכב'],[typeof TRIAGE!=='undefined'?TRIAGE:[],'רפואה ועזרה ראשונה'],[typeof SUSPECT_DESC!=='undefined'?SUSPECT_DESC:[],'תשאול: תיאור אדם']];
+  var todo=[];
+  MAP.forEach(function(m){ (m[0]||[]).forEach(function(sl){ (sl.options||[]).forEach(function(o){ todo.push({cat:m[1],he:o.he,ar:o.ar,trans:o.trans||''}); }); }); });
+  var SEQCAT={house:'שליטה בבית',triage:'רפואה ועזרה ראשונה',ord:'ניהול מרחב והוראות',crowd:'קהל ואירועים'};
+  try{ FIRST_SEQ.forEach(function(q){ (q.steps||[]).forEach(function(st){ todo.push({cat:SEQCAT[q.key]||'ניהול מרחב והוראות',he:st.he,ar:st.ar,trans:st.trans||''}); }); }); }catch(e){}
+  var added=0;
+  for(var i=0;i<todo.length;i++){
+    var t=todo[i], k=norm(t.he); if(!k || have[k] || !t.ar) continue;
+    if(_delBlockList().indexOf(_delBlockKey('military',t.cat,t.he))!==-1) continue;
+    try{ await sbFetch('/rest/v1/phrases','POST',{cat:t.cat,he:t.he,trans:t.trans,ar:t.ar,tags:'',why:'',tone:'',audio_url:'',is_new:true,section:'military'}); have[k]=1; added++; }catch(e){}
+  }
+  if(added){ window._autoSyncAdded=(window._autoSyncAdded||0)+added; }
+}
 async function renderAdminList(){
   const el=document.getElementById('admin-list');
   try{ var _vs=document.getElementById('admin-version-stamp'); if(_vs) _vs.textContent=(window.APP_VERSION||'?'); }catch(e){}
@@ -22083,6 +22121,8 @@ async function renderAdminList(){
     try{ await _purgeRemovedCats(); }catch(e){ console.warn('purge skipped', e); }
     try{ await _moveTenLeftovers(); }catch(e){ console.warn('ten move skipped', e); }
     try{ await _fixNumberTrans(); }catch(e){ console.warn('num trans fix skipped', e); }
+    try{ await _fixKnownArabic(); }catch(e){ console.warn('arabic fix skipped', e); }
+    try{ await _syncFieldTemplates(); }catch(e){ console.warn('field template sync skipped', e); }
     // Make sure everything shipped in code is available for editing/recording — automatic, once per session.
     try{ await autoSyncBuiltins(); }catch(e){ console.warn('autoSync skipped', e); }
     const data=await sbFetchAllRows('/rest/v1/phrases?select=*&order=created_at.desc,id.desc');
@@ -24502,7 +24542,7 @@ window.addEventListener('load', function(){
 <script>
 // Version stamp — shown in the admin panel so we can confirm which build is live
 // on a device (stale service-worker caches were causing "my changes don't show").
-window.APP_VERSION = 'v322';
+window.APP_VERSION = 'v323';
 
 // Register the service worker for full offline use in the field, WITH update
 // detection: when a new version installs, offer a one-tap refresh instead of the
