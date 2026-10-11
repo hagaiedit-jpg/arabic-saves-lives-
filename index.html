@@ -10305,24 +10305,48 @@ async function migrateDictSentences(btn){
 function auditScreenRecordings(btn){
   var panel=document.getElementById('audit-screens-panel'); if(!panel) return;
   var groups=[];
-  function tpl(name,data){ var miss=[], tot=0; (data||[]).forEach(function(slot){ (slot.options||[]).forEach(function(o){ tot++; var rd=_descResolve(o); if(!rd.audio) miss.push(rd); }); }); groups.push({name:name,tot:tot,miss:miss}); }
-  try{ tpl('🚨 הוראות מיידיות',ORDERS); }catch(e){}
-  try{ tpl('🚗 רכב במחסום',VEHICLE); }catch(e){}
-  try{ tpl('🪪 בידוק וזיהוי',CHECK); }catch(e){}
-  try{ tpl('🩺 רפואה וטריאז׳',TRIAGE); }catch(e){}
-  try{ tpl('🎯 תיאור חשוד',SUSPECT_DESC); }catch(e){}
+  function tpl(name,data,cat){ var miss=[], tot=0; (data||[]).forEach(function(slot){ (slot.options||[]).forEach(function(o){ tot++; var rd=_descResolve(o); if(!rd.audio) miss.push({he:o.he,ar:o.ar,trans:o.trans||'',cat:cat}); }); }); groups.push({name:name,tot:tot,miss:miss}); }
+  try{ tpl('🚨 הוראות מיידיות',ORDERS,'ניהול מרחב והוראות'); }catch(e){}
+  try{ tpl('🚗 רכב במחסום',VEHICLE,'עצירת תנועה ורכב'); }catch(e){}
+  try{ tpl('🪪 בידוק וזיהוי',CHECK,'בידוק וזיהוי'); }catch(e){}
+  try{ tpl('🩺 רפואה וטריאז׳',TRIAGE,'רפואה ועזרה ראשונה'); }catch(e){}
+  try{ tpl('🎯 תיאור חשוד',SUSPECT_DESC,'תשאול: תיאור אדם'); }catch(e){}
   try{ var cp=_checkpointSteps().map(function(x){return x.row;}); groups.push({name:'🛑 רצף המחסום',tot:cp.length,miss:cp.filter(function(r){ return !(r.audio||r.audio_url||_descAudioFor(r)); })}); }catch(e){}
   try{ var th=(BUILTIN_THREAT||[]).map(function(t){ var hit=(DB||[]).filter(function(d){ return d.cat===t.cat&&d.he===t.he&&(d.audio||d.audio_url); })[0]; return hit||t; }); groups.push({name:'👂 מה שומעים בשטח',tot:th.length,miss:th.filter(function(r){ return !(r.audio||r.audio_url||_descAudioFor(r)); })}); }catch(e){}
   try{ var tn=getTenList(); groups.push({name:'🎖️ 10 משפטי חובה',tot:tn.length,miss:tn.filter(function(r){ return !(r.audio||r.audio_url||_descAudioFor(r)); })}); }catch(e){}
   var totMiss=groups.reduce(function(a,g){ return a+g.miss.length; },0);
+  window._auditMiss=[];
   var h='<div style="background:#13263c;border:1px solid #2A3D52;border-radius:10px;padding:12px;">';
   h+='<div style="color:'+(totMiss?'#e6a23c':'#4fd0a0')+';font-size:14px;font-weight:800;margin-bottom:8px;">'+(totMiss?('⚠️ '+totMiss+' משפטים מוצגים בלי הקלטה'):'✅ כל המשפטים במסכי השטח מוקלטים')+'</div>';
   groups.forEach(function(g){
     h+='<div style="margin-top:8px;color:#E8D9B8;font-size:13px;font-weight:700;">'+g.name+' — '+(g.tot-g.miss.length)+'/'+g.tot+' מוקלטים</div>';
-    g.miss.forEach(function(r){ h+='<div style="color:#a0b8c8;font-size:12px;padding:3px 10px;">• '+(r.he||'')+' — <span style="font-family:Georgia,serif;color:#E8D9B8;">'+(r.ar||'')+'</span></div>'; });
+    g.miss.forEach(function(r){ var i=window._auditMiss.length; window._auditMiss.push({he:r.he,ar:r.ar,trans:r.trans||'',cat:r.cat||'ניהול מרחב והוראות'});
+      h+='<div style="display:flex;align-items:center;gap:8px;color:#a0b8c8;font-size:12.5px;padding:5px 6px 5px 0;">• <span style="flex:1;">'+(r.he||'')+' — <span style="font-family:Georgia,serif;color:#E8D9B8;">'+(r.ar||'')+'</span></span>'
+        +'<button onclick="auditRecordNow('+i+',this)" style="flex-shrink:0;background:#1D9E75;border:none;color:#fff;border-radius:8px;padding:7px 10px;font-size:12px;font-weight:800;cursor:pointer;font-family:inherit;">🎙️ הקלט עכשיו</button></div>'; });
   });
-  h+='<div style="color:#7a9ab5;font-size:11px;margin-top:10px;">כדי להוסיף הקלטה: מוצאים את המשפט בספרייה (חיפוש) ומקליטים — המסך יקבל אותה אוטומטית.</div></div>';
+  h+='<div style="color:#7a9ab5;font-size:11px;margin-top:10px;">לחצו "🎙️ הקלט עכשיו" ליד המשפט — נפתח מסך ההקלטה שלו. אחרי השמירה המסך בשטח יקבל את ההקלטה אוטומטית.</div></div>';
   panel.innerHTML=h;
+}
+
+// Open the recorder for a field-screen phrase straight from the audit: use its DB row
+// (same Hebrew + similar Arabic) or create it, then jump to the record button.
+async function auditRecordNow(i, btn){
+  var t=(window._auditMiss||[])[i]; if(!t) return;
+  var old=btn?btn.textContent:''; if(btn){ btn.disabled=true; btn.textContent='פותח…'; }
+  try{
+    var norm=function(x){ return String(x||'').replace(/[^א-ת]/g,''); };
+    var rows=await sbFetchAllRows('/rest/v1/phrases?select=*');
+    var row=(rows||[]).filter(function(r){ return norm(r.he)===norm(t.he) && _arSimilar(r.ar,t.ar); })[0];
+    if(!row){
+      await sbFetch('/rest/v1/phrases','POST',{cat:t.cat,he:t.he,trans:t.trans,ar:t.ar,tags:'',why:'',tone:'',audio_url:'',is_new:true,section:'military'});
+      var again=await sbFetch('/rest/v1/phrases?select=*&section=eq.military&cat=eq.'+encodeURIComponent(t.cat)+'&order=created_at.desc&limit=20');
+      row=(again||[]).filter(function(r){ return norm(r.he)===norm(t.he); })[0];
+    }
+    if(!row){ alert('לא הצלחתי לפתוח את המשפט — נסי שוב'); return; }
+    openEditRow(row);
+    setTimeout(function(){ try{ window._quickRecAutoSave=true; var b=document.getElementById('edit-rec'); if(b){ b.scrollIntoView({behavior:'smooth',block:'center'}); b.focus(); } }catch(e){} }, 250);
+  }catch(e){ alert('שגיאה: '+(e&&e.message?e.message:e)); }
+  finally{ if(btn){ btn.disabled=false; btn.textContent=old; } }
 }
 // === Recording audit — "יישור קו" =========================================
 // Goal: every sentence we uploaded should have a recording, and anything Edith
@@ -11775,6 +11799,15 @@ var VEHICLE = [
 
 // Look up a recording for a he/ar pair across all loaded sections (same matching
 // as getTenList) so template chips play audio when it exists.
+// Same Hebrew can mean different phrases (e.g. "אתה יכול ללכת" = فيك تروح "you may go"
+// vs. triage بتقدر تمشي "can you walk?"). Treat a Hebrew match as the same phrase only
+// when the Arabic is also close (spelling fixes allowed, different wording not).
+function _arSimilar(a,b){
+  var x=_tenNormAr(a), y=_tenNormAr(b);
+  if(!x||!y||x===y||x.indexOf(y)>=0||y.indexOf(x)>=0) return true;
+  var d=(typeof _auditLev==='function')?_auditLev(x,y):99;
+  return d<=Math.max(2,Math.round(Math.max(x.length,y.length)*0.3));
+}
 function _descMatchAudio(he, ar){
   var pool=[];
   [typeof DB!=='undefined'?DB:null, typeof DAILY!=='undefined'?DAILY:null,
@@ -11784,7 +11817,7 @@ function _descMatchAudio(he, ar){
   var heN=_tenNormHe(he), arN=_tenNormAr(ar);
   for(var i=0;i<pool.length;i++){
     var r=pool[i]; if(!r)continue;
-    if(_tenNormHe(r.he)===heN || (arN && _tenNormAr(r.ar)===arN)){ if(r.audio)return r.audio; }
+    if((_tenNormHe(r.he)===heN && _arSimilar(r.ar,ar)) || (arN && _tenNormAr(r.ar)===arN)){ if(r.audio)return r.audio; }
   }
   return '';
 }
@@ -22123,7 +22156,7 @@ async function _fixKnownArabic(){
 async function _syncFieldTemplates(){
   if(window._fieldTplSynced) return; window._fieldTplSynced=true;
   var norm=function(x){ return String(x||'').replace(/[^א-ת]/g,''); };
-  var have={}; (await sbFetchAllRows('/rest/v1/phrases?select=he')||[]).forEach(function(p){ have[norm(p.he)]=1; });
+  var have={}; (await sbFetchAllRows('/rest/v1/phrases?select=he,ar')||[]).forEach(function(p){ var k=norm(p.he); (have[k]=have[k]||[]).push(p.ar||''); });
   var MAP=[[typeof ORDERS!=='undefined'?ORDERS:[],'ניהול מרחב והוראות'],[typeof CHECK!=='undefined'?CHECK:[],'בידוק וזיהוי'],[typeof VEHICLE!=='undefined'?VEHICLE:[],'עצירת תנועה ורכב'],[typeof TRIAGE!=='undefined'?TRIAGE:[],'רפואה ועזרה ראשונה'],[typeof SUSPECT_DESC!=='undefined'?SUSPECT_DESC:[],'תשאול: תיאור אדם']];
   var todo=[];
   MAP.forEach(function(m){ (m[0]||[]).forEach(function(sl){ (sl.options||[]).forEach(function(o){ todo.push({cat:m[1],he:o.he,ar:o.ar,trans:o.trans||''}); }); }); });
@@ -22131,9 +22164,10 @@ async function _syncFieldTemplates(){
   try{ FIRST_SEQ.forEach(function(q){ (q.steps||[]).forEach(function(st){ todo.push({cat:SEQCAT[q.key]||'ניהול מרחב והוראות',he:st.he,ar:st.ar,trans:st.trans||''}); }); }); }catch(e){}
   var added=0;
   for(var i=0;i<todo.length;i++){
-    var t=todo[i], k=norm(t.he); if(!k || have[k] || !t.ar) continue;
+    var t=todo[i], k=norm(t.he); if(!k || !t.ar) continue;
+    if((have[k]||[]).some(function(a){ return _arSimilar(a,t.ar); })) continue;
     if(_delBlockList().indexOf(_delBlockKey('military',t.cat,t.he))!==-1) continue;
-    try{ await sbFetch('/rest/v1/phrases','POST',{cat:t.cat,he:t.he,trans:t.trans,ar:t.ar,tags:'',why:'',tone:'',audio_url:'',is_new:true,section:'military'}); have[k]=1; added++; }catch(e){}
+    try{ await sbFetch('/rest/v1/phrases','POST',{cat:t.cat,he:t.he,trans:t.trans,ar:t.ar,tags:'',why:'',tone:'',audio_url:'',is_new:true,section:'military'}); (have[k]=have[k]||[]).push(t.ar); added++; }catch(e){}
   }
   if(added){ window._autoSyncAdded=(window._autoSyncAdded||0)+added; }
 }
@@ -24569,7 +24603,7 @@ window.addEventListener('load', function(){
 <script>
 // Version stamp — shown in the admin panel so we can confirm which build is live
 // on a device (stale service-worker caches were causing "my changes don't show").
-window.APP_VERSION = 'v330';
+window.APP_VERSION = 'v331';
 
 // Register the service worker for full offline use in the field, WITH update
 // detection: when a new version installs, offer a one-tap refresh instead of the
