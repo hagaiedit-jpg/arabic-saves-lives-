@@ -23531,18 +23531,25 @@ function emergSearch(){
   if(challenge)challenge.style.display='none';
   if(challengeDone)challengeDone.style.display='none';
   var qn=_sqNorm((inp&&inp.value)||''), qw=qn.split(' ').filter(Boolean);
-  var pool=(DB||[]).filter(function(p){ var c=String(p.cat||''); return visibleToRole(p) && c.indexOf('יסודות')!==0 && c.indexOf('זיהוי')!==0; }).concat(_sqFieldRows());
+  // Whole app: field phrases first (operational + field screens), then everything else.
+  var pool=[], seenK={};
+  function addP(p,bonus,tag){ if(!p||!p.he) return; var k=_sqNorm(p.he)+'|'+_sqNorm(p.ar||''); if(seenK[k]) return; seenK[k]=1; pool.push({p:p,bonus:bonus,tag:tag}); }
+  (DB||[]).forEach(function(p){ var c=String(p.cat||''); if(visibleToRole(p) && c.indexOf('יסודות')!==0 && c.indexOf('זיהוי')!==0) addP(p,10+(_isEmergPhrase(p)?5:0),''); });
+  _sqFieldRows().forEach(function(p){ addP(p,12,''); });
+  try{ (SCENARIO||[]).forEach(function(p){ if(!/divider/.test(String(p.tags||''))) addP(p,4,'💬 תרחישים'); }); }catch(e){}
+  [[typeof ANNOUNCE!=='undefined'?ANNOUNCE:[],'📢 כריזה'],[typeof NAVY!=='undefined'?NAVY:[],'⚓ ימי'],[typeof DAILY!=='undefined'?DAILY:[],'☕ יומיומי'],[typeof HEART!=='undefined'?HEART:[],'🤝 פותחים לב'],[typeof DICT!=='undefined'?DICT:[],'📖 מילון']].forEach(function(x){ (x[0]||[]).forEach(function(p){ addP(p,0,x[1]); }); });
   var scored=[];
-  pool.forEach(function(p){ var sc=_sqScore(_sqNorm((p.he||'')+' '+(p.trans||'')+' '+(p.ar||'')), qn, qw); if(sc>0) scored.push({p:p, sc:sc+(_isEmergPhrase(p)?5:0)+((p.audio||p.audio_url)?1:0)}); });
+  pool.forEach(function(o){ var p=o.p, sc=_sqScore(_sqNorm((p.he||'')+' '+(p.trans||'')+' '+(p.ar||'')), qn, qw); if(sc>0) scored.push({p:p, tag:o.tag, sc:sc+o.bonus+((p.audio||p.audio_url)?1:0)}); });
   scored.sort(function(a,b){ return b.sc-a.sc; });
-  var matches=scored.slice(0,40).map(function(x){ return x.p; });
+  scored=scored.slice(0,40);
+  var matches=scored.map(function(x){ return x.p; });
   results.style.display='block';
   var _cl=''; try{ _cl=_clusterHtml((inp&&inp.value)||'', 'qk'); }catch(e){}
   if(!matches.length){ results.innerHTML=_cl || '<div class="empty">לא נמצאו משפטים ל"'+q+'".</div>'; return; }
   var h=_cl;
   window._dbCatRows=window._dbCatRows||{}; window._dbCatRows['__esr']=matches;
   for(var i=0;i<matches.length;i++){ var m=matches[i], au=m.audio||m.audio_url||'';
-    h+='<div class="cl-row" onclick="_openDbCatItem(\'__esr\','+i+',\'qk\')"><div class="cl-txt"><div class="cl-he">'+(m.he||'')+'</div><div class="cl-ar">'+(m.ar||'')+'</div>'+(m.trans?'<div class="cl-tr">'+m.trans+'</div>':'')+'</div>'
+    h+='<div class="cl-row" onclick="_openDbCatItem(\'__esr\','+i+',\'qk\')"><div class="cl-txt">'+(scored[i].tag?'<div class="cl-q">'+scored[i].tag+'</div>':'')+'<div class="cl-he">'+(m.he||'')+'</div><div class="cl-ar">'+(m.ar||'')+'</div>'+(m.trans?'<div class="cl-tr">'+m.trans+'</div>':'')+'</div>'
       +(au?'<button class="cl-play" aria-label="השמע" onclick="event.stopPropagation();playResponseAudio(\''+String(au).replace(/'/g,"\\'")+'\',this)">▶</button>':'')+'</div>'; }
   results.innerHTML=h;
 }
@@ -24644,7 +24651,7 @@ window.addEventListener('load', function(){
 <script>
 // Version stamp — shown in the admin panel so we can confirm which build is live
 // on a device (stale service-worker caches were causing "my changes don't show").
-window.APP_VERSION = 'v333';
+window.APP_VERSION = 'v334';
 
 // Register the service worker for full offline use in the field, WITH update
 // detection: when a new version installs, offer a one-tap refresh instead of the
