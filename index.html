@@ -606,6 +606,8 @@ body.day-mode .home-tools > div > div:last-child{color:#4a5b6c!important;}
 .home-more > summary{list-style:none;cursor:pointer;padding:11px 2px;color:#7a9ab5;font-size:13px;font-weight:700;text-align:center;}
 .home-more > summary::-webkit-details-marker{display:none;}
 .home-more[open]{padding-bottom:10px;}
+/* Field-mode search: show only the results */
+body.emerg-searching .qk-prep, body.emerg-searching #emerg-challenge-card, body.emerg-searching #emerg-challenge-done{display:none!important;}
 /* ⭐ My kit */
 .pop-main-actions .kit-btn{flex:1;}
 .pop-main-actions .civ-show-btn{flex:1.6!important;font-size:15px!important;}
@@ -2842,8 +2844,8 @@ function showLanding() {
       <div id="emerg-search-results" style="display:none;margin-bottom:8px;"></div>
       <div class="emerg-grid" id="emerg-grid"></div>
       <!-- Prep & training — below the situations, not in the soldier's way -->
-      <div style="color:#7a9ab5;font-size:12px;font-weight:700;margin:20px 2px 8px;">הכנה ותרגול</div>
-      <button onclick="printPocketCard()" style="width:100%;background:transparent;border:1px dashed #7a9ab5;color:#a0b8c8;border-radius:10px;padding:9px;font-size:12.5px;font-weight:600;cursor:pointer;font-family:inherit;margin-bottom:14px;display:flex;align-items:center;justify-content:center;gap:6px;">🖨️ דף כיס להדפסה (גיבוי נייר לשטח)</button>
+      <div class="qk-prep" style="color:#7a9ab5;font-size:12px;font-weight:700;margin:20px 2px 8px;">הכנה ותרגול</div>
+      <button class="qk-prep" onclick="printPocketCard()" style="width:100%;background:transparent;border:1px dashed #7a9ab5;color:#a0b8c8;border-radius:10px;padding:9px;font-size:12.5px;font-weight:600;cursor:pointer;font-family:inherit;margin-bottom:14px;display:flex;align-items:center;justify-content:center;gap:6px;">🖨️ דף כיס להדפסה (גיבוי נייר לשטח)</button>
 
       <!-- Daily Emergency Challenge Card -->
       <div id="emerg-challenge-card" class="emerg-panel" style="display:none;background:linear-gradient(160deg,#1F3147 0%,#243a55 100%);border:1px solid rgba(212,162,78,0.35);border-radius:14px;padding:14px 16px;margin-bottom:14px;cursor:pointer;box-shadow:0 4px 12px rgba(0,0,0,0.25);position:relative;overflow:hidden;" onclick="startEmergencyChallenge()">
@@ -21523,6 +21525,40 @@ function _gsDestHtml(q){
   return h;
 }
 
+// ===== Sentence-tolerant search (typing or voice) =====
+// Voice dictation adds punctuation ("עצור את הרכב.") and people phrase things a bit
+// differently, so match WORD BY WORD (Hebrew prefixes ו/ה/ב/ל/מ/ש/כ ignored) instead of
+// requiring the exact text: exact phrase first, then all words, then most words.
+function _sqNorm(x){ return _gsNorm(x).replace(/[.,!?؟،;:"'״׳()\[\]\-–—…\/]/g,' ').replace(/\s+/g,' ').trim(); }
+function _sqWordIn(hay, w){
+  if(hay.indexOf(w)>=0) return true;
+  if(w.length>=4 && 'והבלמשכת'.indexOf(w[0])>=0 && hay.indexOf(w.slice(1))>=0) return true;
+  return false;
+}
+function _sqScore(hay, qn, words){
+  if(!qn) return 0;
+  if(hay.indexOf(qn)>=0) return 100;
+  if(words.length<2) return 0;
+  var sig=words.filter(function(w){ return w.length>=2; }); if(!sig.length) sig=words;
+  var found=sig.filter(function(w){ return _sqWordIn(hay,w); }).length;
+  if(found===sig.length) return 80;
+  if(sig.length>=3 && found>=Math.max(2,Math.round(sig.length*0.67))) return 40+Math.round(30*found/sig.length);
+  return 0;
+}
+// Field-screen phrases (orders, ID check, vehicle, triage, suspect description, threat
+// lines) that are not in the database are searchable too.
+window._sqTplCache=null; window._sqTplKey='';
+function _sqFieldRows(){
+  var key=(typeof DB!=='undefined'&&DB?DB.length:0);
+  if(window._sqTplCache && window._sqTplKey===key) return window._sqTplCache;
+  var out=[], norm=function(x){ return String(x||'').replace(/[^\u05D0-\u05EA]/g,''); };
+  var have={}; (DB||[]).forEach(function(p){ var k=norm(p.he); (have[k]=have[k]||[]).push(p.ar||''); });
+  function add(o){ if(!o||!o.he||!o.ar) return; var k=norm(o.he); if((have[k]||[]).some(function(a){ return _arSimilar(a,o.ar); })) return; (have[k]=have[k]||[]).push(o.ar); out.push(o); }
+  try{ [ORDERS,CHECK,VEHICLE,TRIAGE,SUSPECT_DESC].forEach(function(T){ (T||[]).forEach(function(sl){ (sl.options||[]).forEach(function(o){ var r=_descResolve(o); add({he:o.he, ar:o.ar, trans:o.trans||r.trans||'', audio:r.audio||''}); }); }); }); }catch(e){}
+  try{ (BUILTIN_THREAT||[]).forEach(function(t){ add({he:t.he, ar:t.ar, trans:t.trans||'', audio:_descMatchAudio(t.he,t.ar)}); }); }catch(e){}
+  window._sqTplCache=out; window._sqTplKey=key; return out;
+}
+
 function globalSearch(){
   var out = document.getElementById('gs-results'); if(!out) return;
   var inp = document.getElementById('gs-input');
@@ -21535,13 +21571,17 @@ function globalSearch(){
   var destHtml = _gsDestHtml(rawQ);
   // 2) Phrase-level matches (existing behavior).
   var results = [];
-  _gsSections().forEach(function(s){
+  var qn=_sqNorm(rawQ), qw=qn.split(' ').filter(Boolean);
+  var secs=_gsSections().concat([{arr:_sqFieldRows(), label:'מסכי שטח', icon:'🚨'}]);
+  secs.forEach(function(s){
     (s.arr||[]).forEach(function(p){
       if(!p) return;
-      var hay = _gsNorm((p.he||'')+' '+(p.trans||'')+' '+(p.ar||'')+' '+(p.dict||'')+' '+(p.field||''));
-      if(hay.indexOf(q)!==-1) results.push({ p:p, label:s.label, icon:s.icon });
+      var hay = _sqNorm((p.he||'')+' '+(p.trans||'')+' '+(p.ar||'')+' '+(p.dict||'')+' '+(p.field||''));
+      var sc=_sqScore(hay, qn, qw);
+      if(sc>0) results.push({ p:p, label:s.label, icon:s.icon, sc:sc + (p.audio?1:0) });
     });
   });
+  results.sort(function(a,b){ return b.sc-a.sc; });
   if(!destHtml && !results.length && !clHtml){
     var sug=_gsSuggest(rawQ);
     var nh='<div style="text-align:center;color:#7a9ab5;font-size:13px;padding:26px 10px 8px;">לא נמצאו תוצאות ל"'+rawQ+'".</div>';
@@ -23480,29 +23520,29 @@ function emergSearch(){
   if(!results)return;
   if(!q){
     results.style.display='none'; results.innerHTML='';
+    document.body.classList.remove('emerg-searching');
     if(grid)grid.style.display='';
     if(typeof updateEmergencyChallengeBadge==='function'){ try{updateEmergencyChallengeBadge();}catch(e){} }
     return;
   }
   if(grid)grid.style.display='none';
+  document.body.classList.add('emerg-searching');
   if(challenge)challenge.style.display='none';
   if(challengeDone)challengeDone.style.display='none';
-  var matches=DB.filter(function(p){
-    if(!visibleToRole(p))return false;
-    if(!_isEmergPhrase(p))return false;
-    var hay=((p.he||'')+' '+(p.trans||'')+' '+(p.ar||'')).toLowerCase();
-    return hay.indexOf(q)!==-1;
-  });
-  matches.sort(function(a,b){
-    var ga=isGoldPhrase(a)?0:1, gb=isGoldPhrase(b)?0:1;
-    if(ga!==gb)return ga-gb;
-    return (a.he||'').localeCompare(b.he||'','he');
-  });
+  var qn=_sqNorm((inp&&inp.value)||''), qw=qn.split(' ').filter(Boolean);
+  var pool=(DB||[]).filter(function(p){ var c=String(p.cat||''); return visibleToRole(p) && c.indexOf('יסודות')!==0 && c.indexOf('זיהוי')!==0; }).concat(_sqFieldRows());
+  var scored=[];
+  pool.forEach(function(p){ var sc=_sqScore(_sqNorm((p.he||'')+' '+(p.trans||'')+' '+(p.ar||'')), qn, qw); if(sc>0) scored.push({p:p, sc:sc+(_isEmergPhrase(p)?5:0)+((p.audio||p.audio_url)?1:0)}); });
+  scored.sort(function(a,b){ return b.sc-a.sc; });
+  var matches=scored.slice(0,40).map(function(x){ return x.p; });
   results.style.display='block';
   var _cl=''; try{ _cl=_clusterHtml((inp&&inp.value)||'', 'qk'); }catch(e){}
   if(!matches.length){ results.innerHTML=_cl || '<div class="empty">לא נמצאו משפטים ל"'+q+'".</div>'; return; }
   var h=_cl;
-  for(var i=0;i<matches.length;i++){ h+=_emergCardHTML(matches[i]); }
+  window._dbCatRows=window._dbCatRows||{}; window._dbCatRows['__esr']=matches;
+  for(var i=0;i<matches.length;i++){ var m=matches[i], au=m.audio||m.audio_url||'';
+    h+='<div class="cl-row" onclick="_openDbCatItem(\'__esr\','+i+',\'qk\')"><div class="cl-txt"><div class="cl-he">'+(m.he||'')+'</div><div class="cl-ar">'+(m.ar||'')+'</div>'+(m.trans?'<div class="cl-tr">'+m.trans+'</div>':'')+'</div>'
+      +(au?'<button class="cl-play" aria-label="השמע" onclick="event.stopPropagation();playResponseAudio(\''+String(au).replace(/'/g,"\\'")+'\',this)">▶</button>':'')+'</div>'; }
   results.innerHTML=h;
 }
 
@@ -24603,7 +24643,7 @@ window.addEventListener('load', function(){
 <script>
 // Version stamp — shown in the admin panel so we can confirm which build is live
 // on a device (stale service-worker caches were causing "my changes don't show").
-window.APP_VERSION = 'v331';
+window.APP_VERSION = 'v333';
 
 // Register the service worker for full offline use in the field, WITH update
 // detection: when a new version installs, offer a one-tap refresh instead of the
