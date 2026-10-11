@@ -1,0 +1,10 @@
+# Files that must NOT be published on the site (internal business docs, DB scripts, repo metadata).
+.git
+.gitignore
+.assetsignore
+wrangler.jsonc
+commercial
+tests
+tools
+*.md
+*.sql
