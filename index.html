@@ -6,7 +6,9 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="theme-color" content="#18293E">
 <link rel="manifest" href="./manifest.json">
-<link rel="apple-touch-icon" href="./icon.svg">
+<link rel="apple-touch-icon" sizes="180x180" href="./apple-touch-icon.png">
+<meta name="apple-mobile-web-app-title" content="ערבית מצילה">
+<meta name="mobile-web-app-capable" content="yes">
 <link rel="icon" href="./icon.svg" type="image/svg+xml">
 <title>ערבית מצילה חיים</title>
 <!-- Google Analytics — loaded only AFTER explicit user consent (see consent banner) -->
@@ -608,6 +610,12 @@ body.day-mode .home-tools > div > div:last-child{color:#4a5b6c!important;}
 .home-more[open]{padding-bottom:10px;}
 /* Field-mode search: show only the results */
 body.emerg-searching .qk-prep, body.emerg-searching #emerg-challenge-card, body.emerg-searching #emerg-challenge-done{display:none!important;}
+/* iPhone (installed app): keep bottom bars above the home indicator */
+#bottom-nav{padding-bottom:calc(8px + env(safe-area-inset-bottom))!important;}
+#consent-banner{padding-bottom:calc(16px + env(safe-area-inset-bottom))!important;}
+#landing-overlay{padding-bottom:env(safe-area-inset-bottom);padding-top:env(safe-area-inset-top);}
+#consent-banner, #consent-banner div{color:#E8D9B8!important;}
+#consent-banner a{color:#D4A24E!important;}
 /* ⭐ My kit */
 .pop-main-actions .kit-btn{flex:1;}
 .pop-main-actions .civ-show-btn{flex:1.6!important;font-size:15px!important;}
@@ -3172,7 +3180,7 @@ function showLanding() {
     <div style="background:#18293E;border:1px solid #2A3D52;border-radius:12px;padding:14px 16px;margin-bottom:12px;">
       <div style="color:#D4A24E;font-size:15px;font-weight:800;margin-bottom:8px;">📲 התקנה למסך הבית</div>
       <div style="color:#E8D9B8;font-size:13px;line-height:1.7;">
-        <b>אייפון (Safari):</b> פתחו את האתר ב-Safari ← לחצו על כפתור השיתוף (⬆️) ← «הוסף למסך הבית» ← «הוסף».<br>
+        <b>אייפון:</b> חשוב לפתוח ב-<b>Safari עצמו</b>, לא בתוך וואטסאפ. אם הקישור נפתח בתוך וואטסאפ — לחצו על סמל המצפן 🧭 בפינה כדי לעבור ל-Safari. ב-Safari: כפתור השיתוף (⬆️) ← גללו למטה ← «הוסף למסך הבית» ← «הוסף».<br>
         <b>אנדרואיד (Chrome):</b> פתחו את האתר ב-Chrome ← תפריט (⋮) ← «התקן אפליקציה» או «הוסף למסך הבית».<br>
         <span style="color:#7a9ab5;">אחרי ההתקנה האפליקציה נפתחת כמו אפליקציה רגילה, גם בלי קליטה.</span>
       </div>
@@ -24661,7 +24669,7 @@ window.addEventListener('load', function(){
 <script>
 // Version stamp — shown in the admin panel so we can confirm which build is live
 // on a device (stale service-worker caches were causing "my changes don't show").
-window.APP_VERSION = 'v335';
+window.APP_VERSION = 'v337';
 
 // Register the service worker for full offline use in the field, WITH update
 // detection: when a new version installs, offer a one-tap refresh instead of the

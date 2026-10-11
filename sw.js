@@ -1,10 +1,10 @@
 /* Service worker for "ערבית מצילה חיים" — offline-first field use.
    Bump CACHE when shipping changes that must invalidate old caches. */
-const CACHE = 'asl-v344';
+const CACHE = 'asl-v346';
 // Recordings + fonts live in a separate cache that SURVIVES app updates —
 // otherwise every version bump would silently wipe the downloaded offline pack.
 const MEDIA = 'asl-media-v1';
-const SHELL = ['./', './index.html', './manifest.json', './icon.svg'];
+const SHELL = ['./', './index.html', './manifest.json', './icon.svg', './apple-touch-icon.png', './icon-192.png'];
 
 self.addEventListener('install', function(e){
   self.skipWaiting();
