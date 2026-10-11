@@ -2362,6 +2362,7 @@ body, body *, .scr, .scr *, button, input, textarea, select {
       <div style="text-align:center;margin-top:10px;color:#a0b8c8;font-size:12px;line-height:1.6;">
         בלחיצה על «כניסה לערכה» את/ה מאשר/ת את <a href="#" onclick="openLegal('terms');return false;" style="color:#D4A24E;">תנאי השימוש</a> ואת <a href="#" onclick="openLegal('privacy');return false;" style="color:#D4A24E;">מדיניות הפרטיות</a>.
       </div>
+      <div class="gift-entry" onclick="openGift()" style="display:none;margin-top:14px;text-align:center;background:rgba(212,162,78,0.10);border:1px solid rgba(212,162,78,0.45);border-radius:12px;padding:11px 12px;cursor:pointer;color:#D4A24E;font-size:14px;font-weight:800;font-family:inherit;">🎁 מתנת גיוס · הכנה לשירות קרבי</div>
       <div style="text-align:center;margin-top:14px;color:#5e7a92;font-size:12px;letter-spacing:0.3px;">
         ערכה שנבנתה מסיטואציות אמיתיות בשטח — לא תיאוריה
       </div>
@@ -24673,7 +24674,7 @@ window.addEventListener('load', function(){
 <script>
 // Version stamp — shown in the admin panel so we can confirm which build is live
 // on a device (stale service-worker caches were causing "my changes don't show").
-window.APP_VERSION = 'v342';
+window.APP_VERSION = 'v343';
 
 // Register the service worker for full offline use in the field, WITH update
 // detection: when a new version installs, offer a one-tap refresh instead of the
@@ -24814,7 +24815,7 @@ document.getElementById('legal-modal').addEventListener('click', function(e){ if
 </div>
 
 <!-- ===== Pending activation (logged in but not yet paid/activated) ===== -->
-<div id="activate-overlay" style="display:none;position:fixed;inset:0;z-index:11000;background:rgba(9,17,29,.98);direction:rtl;overflow-y:auto;padding:24px 16px;">
+<div id="activate-overlay" class="force-dark" style="display:none;position:fixed;inset:0;z-index:11000;background:rgba(9,17,29,.98);direction:rtl;overflow-y:auto;padding:24px 16px;">
   <div style="max-width:380px;margin:8vh auto 0;background:linear-gradient(180deg,#1c2f47,#152539);border:1px solid #2a3d54;border-radius:16px;padding:22px 20px;text-align:center;">
     <div style="font-size:34px;">⏳</div>
     <div class="keep-white" style="color:#fff;font-size:20px;font-weight:800;margin-top:4px;">החשבון עדיין לא הופעל</div>
@@ -24826,6 +24827,7 @@ document.getElementById('legal-modal').addEventListener('click', function(e){ if
       <a href="mailto:hagaiedit@gmail.com" style="color:#D4A24E;">hagaiedit@gmail.com</a>
     </div>
     <div style="color:#7a9ab5;font-size:12px;line-height:1.6;">אחרי אישור התשלום נפעיל את החשבון, ותקבלו גישה מלאה.</div>
+    <div class="gift-entry" onclick="openGift()" style="display:none;margin-top:12px;text-align:center;background:rgba(212,162,78,0.10);border:1px solid rgba(212,162,78,0.45);border-radius:12px;padding:11px 12px;cursor:pointer;color:#D4A24E;font-size:14px;font-weight:800;font-family:inherit;">🎁 מתנת גיוס · הכנה לשירות קרבי</div>
     <button onclick="memberRecheck()" style="width:100%;margin-top:16px;padding:13px;background:#1D9E75;border:none;border-radius:10px;color:#fff;font-size:15px;font-weight:800;cursor:pointer;font-family:inherit;">כבר שילמתי — בדוק שוב</button>
     <button onclick="memberLogout()" style="width:100%;margin-top:8px;padding:11px;background:#2A3D52;border:none;border-radius:10px;color:#E8D9B8;font-size:13px;font-weight:700;cursor:pointer;font-family:inherit;">התנתקות</button>
   </div>
@@ -24858,12 +24860,12 @@ document.getElementById('legal-modal').addEventListener('click', function(e){ if
 </div>
 
 <!-- ===== Upsell / subscribe screen — dormant unless window.PAYWALL ===== -->
-<div id="upsell-overlay" style="display:none;position:fixed;inset:0;z-index:11000;background:rgba(9,17,29,.97);direction:rtl;overflow-y:auto;padding:24px 16px;">
+<div id="upsell-overlay" class="force-dark" style="display:none;position:fixed;inset:0;z-index:11000;background:rgba(9,17,29,.97);direction:rtl;overflow-y:auto;padding:24px 16px;">
   <div style="max-width:400px;margin:5vh auto 0;background:linear-gradient(180deg,#1c2f47,#152539);border:1px solid #2a3d54;border-radius:16px;padding:24px;box-shadow:0 12px 40px rgba(0,0,0,.5);position:relative;">
     <button onclick="closeUpsell()" style="position:absolute;top:12px;left:12px;background:none;border:none;color:#7a9ab5;font-size:22px;cursor:pointer;font-family:inherit;">✕</button>
     <div style="text-align:center;margin-bottom:16px;">
       <div style="font-size:40px;">🔓</div>
-      <div style="color:#fff;font-size:21px;font-weight:800;margin-top:6px;">פתחו את הערכה המלאה</div>
+      <div class="keep-white" style="color:#fff;font-size:21px;font-weight:800;margin-top:6px;">פתחו את הערכה המלאה</div>
       <div style="color:#9fb2c6;font-size:13px;margin-top:4px;">כל מה שחייל צריך כדי לתקשר בערבית בשטח</div>
     </div>
     <div style="background:#0E1B2E;border:1px solid #2A3D52;border-radius:12px;padding:14px 16px;margin-bottom:16px;color:#E8D9B8;font-size:14px;line-height:2;">
@@ -24875,14 +24877,82 @@ document.getElementById('legal-modal').addEventListener('click', function(e){ if
       <div>✓ תרחישים מהשטח</div>
     </div>
     <div style="text-align:center;margin-bottom:14px;">
-      <span style="color:#fff;font-size:34px;font-weight:900;">₪149</span>
+      <span class="keep-white" style="color:#fff;font-size:34px;font-weight:900;">₪149</span>
       <div style="color:#7eecc1;font-size:13px;font-weight:800;margin-top:3px;">תשלום חד־פעמי · גישה לכל החיים</div>
       <div style="color:#7a9ab5;font-size:11px;margin-top:2px;">בלי מנוי ובלי חידושים — משלמים פעם אחת</div>
     </div>
     <button onclick="onUpsellCTA()" style="width:100%;padding:14px;background:#1D9E75;border:none;border-radius:10px;color:#fff;font-size:16px;font-weight:800;cursor:pointer;font-family:inherit;">פְּתחו הכול לתמיד — ₪149</button>
     <div style="text-align:center;margin-top:12px;"><button onclick="upsellLogin()" style="background:none;border:none;color:#D4A24E;font-size:13px;cursor:pointer;font-family:inherit;text-decoration:underline;">כבר רכשת? התחבר/י</button></div>
+    <div class="gift-entry" onclick="openGift()" style="display:none;margin-top:12px;text-align:center;background:rgba(212,162,78,0.10);border:1px solid rgba(212,162,78,0.45);border-radius:12px;padding:11px 12px;cursor:pointer;color:#D4A24E;font-size:14px;font-weight:800;font-family:inherit;">🎁 מתנת גיוס · הכנה לשירות קרבי</div>
   </div>
 </div>
+
+<!-- ===== Parent gift: "מתנת גיוס · הכנה לשירות קרבי" =====
+     Entry rows (.gift-entry) stay hidden until window.GIFT_LIVE (launch).
+     ?gift=1 opens this screen directly — the link shared in parents' groups. -->
+<div id="gift-overlay" class="force-dark" role="dialog" aria-modal="true" aria-label="מתנת גיוס" style="display:none;position:fixed;inset:0;z-index:11600;background:rgba(9,17,29,.98);direction:rtl;overflow-y:auto;padding:20px 16px calc(28px + env(safe-area-inset-bottom));">
+  <div style="max-width:420px;margin:3vh auto 0;background:linear-gradient(180deg,#1c2f47,#152539);border:1px solid #2a3d54;border-radius:16px;padding:22px 20px;position:relative;">
+    <button onclick="closeGift()" aria-label="סגירה" style="position:absolute;top:10px;left:12px;background:none;border:none;color:#7a9ab5;font-size:22px;cursor:pointer;font-family:inherit;">✕</button>
+    <div style="text-align:center;">
+      <div style="display:inline-block;background:rgba(212,162,78,.15);border:1px solid rgba(212,162,78,.45);border-radius:20px;padding:4px 14px;color:#D4A24E;font-size:13px;font-weight:800;">🎁 מתנת גיוס</div>
+      <div class="keep-white" style="color:#fff;font-size:25px;font-weight:900;margin-top:10px;line-height:1.25;">הכנה לשירות קרבי</div>
+      <div style="color:#E8D9B8;font-size:14.5px;font-weight:700;margin-top:4px;">מתנה שהורים נותנים לפני הגיוס</div>
+      <div style="color:#a0b8c8;font-size:13.5px;line-height:1.7;margin-top:10px;">ערבית מדוברת לשטח: לדעת מה לומר, להבין מה עונים ולפעול נכון.</div>
+    </div>
+    <div style="background:#0E1B2E;border:1px solid #2A3D52;border-radius:12px;padding:14px 14px;margin:16px 0 4px;display:flex;flex-direction:column;gap:10px;">
+      <div style="color:#E8D9B8;font-size:13.5px;line-height:1.55;">🪖 <b style="color:#E9BE6A;">מסלול הכנה לשירות קרבי</b>: מסלול יומי מובנה של 30, 60 או 90 יום</div>
+      <div style="color:#E8D9B8;font-size:13.5px;line-height:1.55;">🗣️ <b style="color:#E9BE6A;">מה לומר בשטח</b>: מחסום, רכב, בית, פצוע וקהל, ומה סביר שיענו</div>
+      <div style="color:#E8D9B8;font-size:13.5px;line-height:1.55;">👂 <b style="color:#E9BE6A;">"מה אמרו לי?"</b>: שמעו משהו ולא הבינו? כותבים איך שזה נשמע ומקבלים פירוש</div>
+      <div style="color:#E8D9B8;font-size:13.5px;line-height:1.55;">⚡ <b style="color:#E9BE6A;">10 השניות הראשונות</b>: רצפים מוכנים להשמעה ברגעים הקריטיים</div>
+      <div style="color:#E8D9B8;font-size:13.5px;line-height:1.55;">🎙️ <b style="color:#E9BE6A;">הקלטות בקול אמיתי</b> של דוברת ערבית שפת אם, לא קול מחשב</div>
+      <div style="color:#E8D9B8;font-size:13.5px;line-height:1.55;">📴 <b style="color:#E9BE6A;">הורדה לשימוש גם בלי קליטה</b></div>
+    </div>
+    <div style="text-align:center;margin:16px 0 14px;">
+      <span class="keep-white" style="color:#fff;font-size:34px;font-weight:900;">₪149</span>
+      <div style="color:#7eecc1;font-size:13px;font-weight:800;margin-top:2px;">תשלום חד־פעמי · בלי מנוי</div>
+      <div style="color:#7a9ab5;font-size:11.5px;margin-top:3px;">גישה כל עוד השירות פעיל, בכפוף ל<a href="#" onclick="openLegal('terms');return false;" style="color:#D4A24E;">תנאי השימוש</a></div>
+    </div>
+    <div style="background:rgba(255,255,255,0.03);border:1px solid #2A3D52;border-radius:12px;padding:12px 14px;margin-bottom:16px;">
+      <div style="color:#D4A24E;font-size:13px;font-weight:800;margin-bottom:6px;">איך זה עובד</div>
+      <div style="color:#E8D9B8;font-size:13px;line-height:1.75;">1. שולחים לנו הודעה עם המייל של הבן או הבת.<br>2. מקבלים פרטים לתשלום ומשלמים ₪149.<br>3. שולחים להם את הקישור לאפליקציה. הם נרשמים עם המייל הזה, והערכה פתוחה.</div>
+    </div>
+    <button onclick="giftBuy('wa')" class="keep-white" style="width:100%;padding:14px;background:#1D9E75;border:none;border-radius:10px;color:#fff;font-size:16px;font-weight:800;cursor:pointer;font-family:inherit;">🎁 לרכישת המתנה בוואטסאפ</button>
+    <div style="text-align:center;margin-top:10px;"><button onclick="giftBuy('mail')" style="background:none;border:none;color:#D4A24E;font-size:13px;cursor:pointer;font-family:inherit;text-decoration:underline;">או במייל</button></div>
+    <button onclick="giftShare()" style="width:100%;margin-top:12px;padding:11px;background:#2A3D52;border:none;border-radius:10px;color:#E8D9B8;font-size:13.5px;font-weight:700;cursor:pointer;font-family:inherit;">📤 שיתוף העמוד</button>
+  </div>
+</div>
+<script>
+// Flip to true at launch: shows the "🎁 מתנת גיוס" rows on the landing, purchase
+// and activation screens. Until then the screen opens only via ?gift=1.
+window.GIFT_LIVE = false;
+var GIFT_WA='972529247768', GIFT_MAIL='hagaiedit@gmail.com';
+function _giftEntriesRefresh(){
+  var on=!!(window.GIFT_LIVE || window._giftPreview);
+  document.querySelectorAll('.gift-entry').forEach(function(e){ e.style.display=on?'block':'none'; });
+}
+function openGift(){ var o=document.getElementById('gift-overlay'); if(o){ o.style.display='block'; o.scrollTop=0; } }
+function closeGift(){ var o=document.getElementById('gift-overlay'); if(o) o.style.display='none'; }
+function _giftUrl(){ return location.origin + location.pathname.replace(/index\.html$/,'') + '?gift=1'; }
+// Until a payment provider is wired: the parent contacts us, pays, and gives the
+// soldier's email, which is added to the members list (see runGate).
+function giftBuy(via){
+  var msg='שלום, אני רוצה לרכוש מתנת גיוס · הכנה לשירות קרבי (₪149).\nהמייל של החייל/ת: \nשמי: ';
+  if(via==='mail'){ location.href='mailto:'+GIFT_MAIL+'?subject='+encodeURIComponent('מתנת גיוס')+'&body='+encodeURIComponent(msg); return; }
+  window.open('https://wa.me/'+GIFT_WA+'?text='+encodeURIComponent(msg),'_blank');
+}
+function giftShare(){
+  var url=_giftUrl(), text='🎁 מתנת גיוס · הכנה לשירות קרבי: ערבית מדוברת לשטח, בקול אמיתי של דוברת ערבית';
+  if(navigator.share){ navigator.share({title:'ערבית מצילה חיים', text:text, url:url}).catch(function(){}); return; }
+  window.open('https://wa.me/?text='+encodeURIComponent(text+'\n'+url),'_blank');
+}
+(function(){
+  function init(){
+    try{ if(/[?&]gift=1/.test(location.search||'')){ window._giftPreview=true; openGift(); } }catch(e){}
+    _giftEntriesRefresh();
+  }
+  if(document.readyState==='loading') document.addEventListener('DOMContentLoaded', init); else init();
+})();
+</script>
 <script>
 // Commerce login via Supabase Auth REST (phone OTP) — same fetch style as adminLogin.
 function _clStatus(m,ok){ var e=document.getElementById('cl-status'); if(e){ e.textContent=m||''; e.style.color=ok?'#7eecc1':'#ff9a8f'; } }
