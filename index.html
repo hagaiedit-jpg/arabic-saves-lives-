@@ -23297,6 +23297,7 @@ function rQK(){
 
   // Reset quick search
   var si=document.getElementById('emerg-search'); if(si)si.value='';
+  document.body.classList.remove('emerg-searching');
   var sr=document.getElementById('emerg-search-results'); if(sr){sr.style.display='none';sr.innerHTML='';}
   grid.style.display='';
 
