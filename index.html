@@ -2355,7 +2355,7 @@ body, body *, .scr, .scr *, button, input, textarea, select {
     
     <!-- CTA at bottom for thumb reach -->
     <div>
-      <button onclick="termsRecordAcceptance('landing');closeLanding()" style="background:linear-gradient(135deg,#1D9E75 0%,#0e5a3f 100%);border:none;color:#fff;border-radius:14px;padding:18px 32px;font-size:17px;font-weight:800;cursor:pointer;font-family:inherit;width:100%;letter-spacing:0.8px;">
+      <button class="keep-white" onclick="termsRecordAcceptance('landing');closeLanding()" style="background:linear-gradient(135deg,#1D9E75 0%,#0e5a3f 100%);border:none;color:#fff;border-radius:14px;padding:18px 32px;font-size:17px;font-weight:800;cursor:pointer;font-family:inherit;width:100%;letter-spacing:0.8px;">
         כניסה לערכה
       </button>
       
@@ -3199,24 +3199,25 @@ function showLanding() {
 
     <div style="background:#18293E;border:1px solid #2A3D52;border-radius:12px;padding:14px 16px;margin-bottom:12px;">
       <div style="color:#D4A24E;font-size:15px;font-weight:800;margin-bottom:8px;">🔒 מדיניות פרטיות</div>
-      <div style="color:#E8D9B8;font-size:13px;line-height:1.7;">
-        • השימוש באפליקציה אינו דורש הרשמה או מסירת פרטים אישיים.<br>
-        • <b>מיקרופון:</b> לחיפוש קולי בלבד; הקול אינו נשמר אצלנו (ראו למעלה).<br>
-        • <b>נתוני שימוש:</b> ייתכן איסוף אנונימי של נתוני שימוש (Google Analytics) לצורך שיפור האפליקציה, בכפוף להסכמה. אפשר לכבות זאת ב«מצב מאובטח» (בתפריט העליון).<br>
-        • <b>תוכן והקלטות:</b> נשמרים בשירותי ענן (Supabase, Cloudinary) ומיועדים ללימוד בלבד.<br>
-        • <b>אחסון מקומי:</b> תוכן והעדפות נשמרים במכשיר שלכם לצורך עבודה במצב לא מקוון.<br>
-        <span style="color:#7a9ab5;">שאלות פרטיות: <a href="mailto:hagaiedit@gmail.com" style="color:#D4A24E;">hagaiedit@gmail.com</a></span>
+      <div class="legal-txt" style="color:#E8D9B8;font-size:13px;line-height:1.75;">
+        השירות מופעל על ידי דרכי המזרח בע״מ, ח.פ. 515975845 (״החברה״).<br>
+        • <b>הרשמה:</b> בעת הרשמה נשמרים כתובת דוא״ל, תאריך ההרשמה ותאריך אישור תנאי השימוש — לצורך זיהוי וניהול הגישה בלבד. הסיסמה נשמרת מוצפנת אצל ספק ההזדהות (Supabase) ואינה גלויה לחברה.<br>
+        • <b>תשלום:</b> פרטי אמצעי התשלום מעובדים על ידי ספק הסליקה בלבד ואינם נשמרים אצל החברה.<br>
+        • <b>מיקרופון:</b> לחיפוש קולי בלבד; זיהוי הדיבור מתבצע במכשיר/בדפדפן, והקול אינו נשמר אצלנו.<br>
+        • <b>נתוני שימוש:</b> ייתכן איסוף אנונימי (Google Analytics) לשיפור השירות, בכפוף להסכמה; אפשר לכבות ב«מצב מאובטח».<br>
+        • <b>אחסון במכשיר:</b> תוכן, העדפות, "הערכה שלי" והתקדמות נשמרים במכשיר לצורך עבודה גם ללא קליטה.<br>
+        • <b>שירותי צד שלישי:</b> אחסון ותוכן בשירותי ענן (Supabase, Cloudinary, Cloudflare).<br>
+        • החברה אינה מוכרת מידע אישי לצד שלישי. אפשר לבקש עיון או מחיקה של החשבון בפנייה בדוא״ל.<br>
+        <span style="color:#7a9ab5;">פניות בנושא פרטיות: <a href="mailto:hagaiedit@gmail.com" style="color:#D4A24E;">hagaiedit@gmail.com</a></span>
       </div>
     </div>
 
     <div style="background:#18293E;border:1px solid #2A3D52;border-radius:12px;padding:14px 16px;margin-bottom:12px;">
-      <div style="color:#D4A24E;font-size:15px;font-weight:800;margin-bottom:8px;">📜 תנאי שימוש</div>
-      <div style="color:#E8D9B8;font-size:13px;line-height:1.7;">
-        • התוכן לימודי/מבצעי ונועד לסייע בהבנת ערבית מדוברת. <b>אינו תחליף להכשרה, לנהלים או לפקודות רשמיות.</b><br>
-        • התוכן מסופק «כפי שהוא» (AS-IS), במאמץ מיטבי לדיוק, ללא אחריות. מצאתם טעות? נשמח לדיווח.<br>
-        • יש להשתמש באפליקציה בהתאם לחוק ולנהלים החלים עליכם.<br>
-        • כל זכויות התוכן שמורות ליוצרי הערכה. אין להעתיק או להפיץ ללא אישור.<br>
-        <span style="color:#7a9ab5;">יצירת קשר: <a href="mailto:hagaiedit@gmail.com" style="color:#D4A24E;">hagaiedit@gmail.com</a></span>
+      <div style="color:#D4A24E;font-size:15px;font-weight:800;margin-bottom:8px;">📜 תנאי שימוש ורכישה</div>
+      <div class="legal-txt" style="color:#E8D9B8;font-size:13px;line-height:1.75;">
+        <span style="color:#a0b8c8;">גרסה 1.0 · אוקטובר 2026. השירות «ערבית מצילה חיים» (״השירות״) מופעל על ידי דרכי המזרח בע״מ, ח.פ. 515975845, תל אביב (״החברה״).</span>
+<p style="margin:10px 0 0;"><b>1. הסכמה.</b> השימוש בשירות, ההרשמה אליו או רכישתו מהווים הסכמה מלאה לתנאים אלה ולמדיניות הפרטיות. מי שאינו מסכים — אינו רשאי להשתמש בשירות. השימוש מיועד לבני 18 ומעלה. התנאים מנוסחים בלשון זכר מטעמי נוחות ומכוונים לכל המגדרים.</p><p style="margin:10px 0 0;"><b>2. מהות השירות.</b> השירות הוא כלי עזר לימודי לערבית מדוברת. <b>הוא אינו תחליף להכשרה, לנהלים, לפקודות, להנחיות גורם מוסמך, לשיקול דעת מבצעי, לייעוץ רפואי או למתורגמן מוסמך.</b> השירות אינו קשור לצה״ל, למשרד הביטחון או לכל גוף ממשלתי, ואינו מאושר או ממומן על ידם.</p><p style="margin:10px 0 0;"><b>3. אחריות המשתמש.</b> ההחלטה אם, מתי וכיצד להשתמש בכל משפט, הקלטה או תוכן — באחריות המשתמש בלבד, ובהתאם לחוק, לנהלים ולהוראות החלים עליו. אין להסתמך על השירות כאמצעי יחיד לתקשורת במצב מסכן חיים. במצב חירום יש לפעול לפי הנהלים ולפנות לגורמי החירום (משטרה 100 · מד״א 101 · כיבוי 102).</p><p style="margin:10px 0 0;"><b>4. דיוק התוכן.</b> ערבית מדוברת משתנה בין אזורים, ניבים ודוברים. התרגומים, התעתיק, ההקלטות והתרחישים ניתנים במאמץ מיטבי, אך עשויים לכלול טעויות, אי־דיוקים או ניסוח שאינו מתאים לכל מצב. אין התחייבות שהצד השני יבין, יגיב באופן מסוים או ישתף פעולה.</p><p style="margin:10px 0 0;"><b>5. השירות «כפי שהוא».</b> השירות ניתן «כפי שהוא» (AS-IS) ו«כפי שהוא זמין» (AS-AVAILABLE), ללא אחריות מכל סוג, מפורשת או משתמעת, לרבות להתאמה למטרה מסוימת. אין התחייבות לפעולה רציפה, ללא תקלות או בכל מכשיר ודפדפן. פעולה ללא קליטה תלויה במכשיר, בדפדפן ובהורדה מוקדמת של התוכן.</p><p style="margin:10px 0 0;"><b>6. הגבלת אחריות.</b> במידה המרבית המותרת על פי דין, החברה, בעליה, עובדיה, דוברת ההקלטות וכל מי שפועל מטעמה לא יישאו באחריות לכל נזק — ישיר או עקיף, תוצאתי, נזק גוף, רכוש, אובדן הזדמנות או נזק שאינו ממוני — הנובע מהשימוש בשירות, מהסתמכות על תוכנו או מאי־יכולת להשתמש בו, לרבות בפעילות מבצעית או במצב חירום. בכל מקרה, אחריותה הכוללת של החברה לא תעלה על הסכום ששילם המשתמש בפועל עבור השירות בשנים־עשר החודשים שקדמו לאירוע.</p><p style="margin:10px 0 0;"><b>7. שיפוי.</b> המשתמש ישפה את החברה בגין כל תביעה, נזק, הפסד או הוצאה (לרבות שכר טרחת עורך דין) שייגרמו לה עקב שימוש בשירות בניגוד לתנאים אלה או לדין.</p><p style="margin:10px 0 0;"><b>8. רכישה ורישיון שימוש.</b> הרכישה מקנה רישיון אישי, לא בלעדי ולא ניתן להעברה, לשימוש פרטי של המשתמש בלבד. אין לשתף את החשבון או את הסיסמה. <b>«רכישה חד־פעמית» או «גישה לכל החיים» פירושן גישה כל עוד השירות פעיל ומופעל על ידי החברה</b>, ואין בהן התחייבות להפעלת השירות לתקופה מסוימת. המחיר הוא המחיר שהוצג במועד הרכישה; החברה רשאית לשנות מחירים לרכישות עתידיות.</p><p style="margin:10px 0 0;"><b>9. ביטול והחזרים.</b> ניתן לבטל את העסקה ולקבל החזר בתוך 14 ימים ממועד הרכישה, ובלבד שלא נעשה שימוש מהותי בשירות. לאחר מכן, או לאחר שימוש מהותי, לא יינתן החזר — למעט כנדרש בחוק הגנת הצרכן, התשמ״א־1981 ובתקנות שמכוחו. בקשות ביטול: בדוא״ל.</p><p style="margin:10px 0 0;"><b>10. שינוי והפסקת השירות.</b> החברה רשאית לעדכן, לשנות, להוסיף או להסיר תוכן, להשעות או להפסיק את השירות (כולו או חלקו) בכל עת, ככל הניתן בהודעה סבירה מראש. הפסקת השירות כשלעצמה אינה מקנה זכות להחזר מעבר לאמור בסעיף 9 או לנדרש בדין. החברה רשאית לחסום חשבון שהפר את התנאים, ללא החזר.</p><p style="margin:10px 0 0;"><b>11. קניין רוחני.</b> כל התוכן — טקסטים, תרגומים, תעתיקים, הקלטות קול, תרחישים, תמונות, עיצוב, קוד ובסיס הנתונים — שייך לחברה ומוגן בדין. אין להעתיק, להקליט, להוריד שלא באמצעות הכלים שבשירות, לשכפל, למכור, לפרסם, להפיץ, לחלץ באופן אוטומטי (scraping) או לבצע הנדסה לאחור, ללא אישור מראש ובכתב.</p><p style="margin:10px 0 0;"><b>12. שינוי התנאים.</b> החברה רשאית לעדכן תנאים אלה. הגרסה המעודכנת תפורסם בשירות, והמשך השימוש לאחר הפרסום מהווה הסכמה לה.</p><p style="margin:10px 0 0;"><b>13. דין וסמכות שיפוט.</b> על תנאים אלה ועל השימוש בשירות יחולו דיני מדינת ישראל בלבד. סמכות השיפוט הייחודית נתונה לבתי המשפט המוסמכים בתל אביב־יפו.</p><p style="margin:10px 0 0;"><b>14. כללי.</b> סעיף שייקבע כבלתי תקף או בלתי אכיף — לא יפגע בתוקף שאר הסעיפים. אי־הפעלת זכות על ידי החברה אינה מהווה ויתור עליה.</p>
+        <p style="margin:12px 0 0;color:#7a9ab5;">יצירת קשר: <a href="mailto:hagaiedit@gmail.com" style="color:#D4A24E;">hagaiedit@gmail.com</a> · דרכי המזרח בע״מ, ח.פ. 515975845</p>
       </div>
     </div>
 
@@ -24672,7 +24673,7 @@ window.addEventListener('load', function(){
 <script>
 // Version stamp — shown in the admin panel so we can confirm which build is live
 // on a device (stale service-worker caches were causing "my changes don't show").
-window.APP_VERSION = 'v337';
+window.APP_VERSION = 'v338';
 
 // Register the service worker for full offline use in the field, WITH update
 // detection: when a new version installs, offer a one-tap refresh instead of the
@@ -24792,7 +24793,7 @@ document.getElementById('legal-modal').addEventListener('click', function(e){ if
   <div style="max-width:380px;margin:6vh auto 0;background:linear-gradient(180deg,#1c2f47,#152539);border:1px solid #2a3d54;border-radius:16px;padding:22px;box-shadow:0 12px 40px rgba(0,0,0,.5);">
     <div style="text-align:center;margin-bottom:16px;">
       <div style="font-size:34px;">🔐</div>
-      <div style="color:#fff;font-size:20px;font-weight:800;margin-top:4px;">התחברות לערכה</div>
+      <div class="keep-white" style="color:#fff;font-size:20px;font-weight:800;margin-top:4px;">התחברות לערכה</div>
       <div id="cl-sub" style="color:#9fb2c6;font-size:13px;margin-top:4px;">הרשמה עם אימייל וסיסמה</div>
     </div>
     <label style="display:block;color:#7a9ab5;font-size:11px;margin-bottom:4px;">כתובת מייל</label>
@@ -24816,7 +24817,7 @@ document.getElementById('legal-modal').addEventListener('click', function(e){ if
 <div id="activate-overlay" style="display:none;position:fixed;inset:0;z-index:11000;background:rgba(9,17,29,.98);direction:rtl;overflow-y:auto;padding:24px 16px;">
   <div style="max-width:380px;margin:8vh auto 0;background:linear-gradient(180deg,#1c2f47,#152539);border:1px solid #2a3d54;border-radius:16px;padding:22px 20px;text-align:center;">
     <div style="font-size:34px;">⏳</div>
-    <div style="color:#fff;font-size:20px;font-weight:800;margin-top:4px;">החשבון עדיין לא הופעל</div>
+    <div class="keep-white" style="color:#fff;font-size:20px;font-weight:800;margin-top:4px;">החשבון עדיין לא הופעל</div>
     <div style="color:#9fb2c6;font-size:13px;line-height:1.7;margin-top:10px;">
       התחברת בהצלחה. כדי לפתוח את הערכה יש להשלים רכישה חד־פעמית (₪149 — גישה כל עוד השירות פעיל, בכפוף ל<a href="#" onclick="openLegal('terms');return false;" style="color:#D4A24E;">תנאי השימוש</a>).
     </div>
