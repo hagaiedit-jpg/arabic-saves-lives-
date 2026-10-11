@@ -21532,17 +21532,25 @@ function _gsDestHtml(q){
 function _sqNorm(x){ return _gsNorm(x).replace(/[.,!?؟،;:"'״׳()\[\]\-–—…\/]/g,' ').replace(/\s+/g,' ').trim(); }
 function _sqWordIn(hay, w){
   if(hay.indexOf(w)>=0) return true;
-  if(w.length>=4 && 'והבלמשכת'.indexOf(w[0])>=0 && hay.indexOf(w.slice(1))>=0) return true;
-  return false;
+  var v=[w];
+  if(w.length>=4 && 'והבלמשכת'.indexOf(w[0])>=0) v.push(w.slice(1));
+  v.slice().forEach(function(x){ if(x.length>=5 && /(ים|ימ|ות)$/.test(x)) v.push(x.slice(0,-2)); });   // ילדים → ילד
+  return v.some(function(x){ return x.length>=2 && hay.indexOf(x)>=0; });
 }
+// Question / function words: they help ranking but never decide a match on their own.
+var _SQ_STOP=['איפה','יש','אין','כאן','פה','שם','מה','מי','למה','איך','כמה','מתי','לאן','מאיפה','את','אתה','אתם','אני','הוא','היא','הם','לי','לך','לו','לה','זה','זאת','של','עם','על','אל','לא','כן','גם','רק','עוד','כל','או','אם','כי','בבקשה','תגיד','תגידי'];
 function _sqScore(hay, qn, words){
   if(!qn) return 0;
   if(hay.indexOf(qn)>=0) return 100;
-  if(words.length<2) return 0;
-  var sig=words.filter(function(w){ return w.length>=2; }); if(!sig.length) sig=words;
-  var found=sig.filter(function(w){ return _sqWordIn(hay,w); }).length;
-  if(found===sig.length) return 80;
-  if(sig.length>=3 && found>=Math.max(2,Math.round(sig.length*0.67))) return 40+Math.round(30*found/sig.length);
+  if(words.length===1) return _sqWordIn(hay, words[0]) ? 90 : 0;
+  if(!window._SQ_STOPN) window._SQ_STOPN=_SQ_STOP.map(_sqNorm);   // same final-letter normalization as the query
+  var content=words.filter(function(w){ return w.length>=2 && window._SQ_STOPN.indexOf(w)<0; });
+  if(!content.length) content=words.filter(function(w){ return w.length>=2; });
+  if(!content.length) return 0;
+  var cFound=content.filter(function(w){ return _sqWordIn(hay,w); }).length;
+  var aFound=words.filter(function(w){ return _sqWordIn(hay,w); }).length;
+  if(cFound===content.length) return 50+Math.round(30*aFound/words.length);
+  if(content.length>=3 && cFound>=Math.round(content.length*0.67)) return 30+Math.round(20*cFound/content.length)+Math.round(10*aFound/words.length);
   return 0;
 }
 // Field-screen phrases (orders, ID check, vehicle, triage, suspect description, threat
@@ -21578,7 +21586,7 @@ function globalSearch(){
       if(!p) return;
       var hay = _sqNorm((p.he||'')+' '+(p.trans||'')+' '+(p.ar||'')+' '+(p.dict||'')+' '+(p.field||''));
       var sc=_sqScore(hay, qn, qw);
-      if(sc>0) results.push({ p:p, label:s.label, icon:s.icon, sc:sc + (p.audio?1:0) });
+      if(sc>0) results.push({ p:p, label:s.label, icon:s.icon, sc:sc + (p.audio?1:0) + (s.label==='מבצעי'||s.label==='מסכי שטח'?2:0) });
     });
   });
   results.sort(function(a,b){ return b.sc-a.sc; });
@@ -21588,7 +21596,7 @@ function globalSearch(){
     if(sug){ nh+='<div style="text-align:center;padding:4px 10px 20px;color:#a0b8c8;font-size:13px;">האם התכוונת ל־ <button onclick="gsUseRecent(\''+String(sug).replace(/'/g,"\\'")+'\')" style="background:rgba(212,162,78,0.15);border:1px solid #D4A24E;border-radius:12px;padding:6px 14px;color:#D4A24E;font-size:14px;font-weight:700;cursor:pointer;font-family:inherit;">'+sug+' ‹</button> ?</div>'; }
     out.innerHTML=nh; return;
   }
-  var h = clHtml + destHtml;
+  var h = clHtml;
   if(results.length){
     if(clHtml) h += '<div style="color:#7a9ab5;font-size:12px;font-weight:700;margin:14px 2px 8px;">כל התוצאות</div>';
     var counts = {}; results.forEach(function(r){ counts[r.label]=(counts[r.label]||0)+1; });
@@ -21615,6 +21623,8 @@ function globalSearch(){
       h += '</div>';
     });
   }
+  // Categories / scenarios that match — after the phrases, never instead of them.
+  if(destHtml) h += '<div style="color:#7a9ab5;font-size:12px;font-weight:700;margin:16px 2px 6px;">📂 גם בקטגוריות ובתרחישים</div>' + destHtml.replace('<div style="color:#D4A24E;font-size:12px;font-weight:800;margin:2px 0 8px;">⚡ קפיצה מהירה</div>','');
   out.innerHTML = h;
 }
 function gsPlay(url, btn){
@@ -24651,7 +24661,7 @@ window.addEventListener('load', function(){
 <script>
 // Version stamp — shown in the admin panel so we can confirm which build is live
 // on a device (stale service-worker caches were causing "my changes don't show").
-window.APP_VERSION = 'v334';
+window.APP_VERSION = 'v335';
 
 // Register the service worker for full offline use in the field, WITH update
 // detection: when a new version installs, offer a one-tap refresh instead of the
