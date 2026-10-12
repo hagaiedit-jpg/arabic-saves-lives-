@@ -70,6 +70,7 @@ async function main() {
         return r.fulfill({ status: 400, contentType: 'application/json', body: '{"msg":"invalid"}' });
       }
       if (u.includes('/rest/v1/subscriptions')) return r.fulfill({ status: 200, contentType: 'application/json', body: opts.subActive ? JSON.stringify([{ status: 'active', current_period_end: '2030-01-01T00:00:00Z' }]) : '[]' });
+      if (opts.openDb && u.includes('/rest/v1/phrases')) return r.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify([{ id: 1, he: 'עצור!', ar: 'وقّف!', trans: 'וַקֵּף', cat: 'ניהול מרחב והוראות', section: 'military', tags: '' }]) });
       if (u.includes('supabase')) return r.fulfill({ status: 200, contentType: 'application/json', body: '[]' });
       if (u.includes('cloudinary')) return r.fulfill({ status: 200, contentType: 'audio/mpeg', headers: { 'access-control-allow-origin': '*' }, body: 'FAKEAUDIO' });
       if (u.includes('fonts.g') || u.includes('gstatic') || u.includes('googletagmanager')) return r.fulfill({ status: 200, body: '' });
@@ -145,9 +146,12 @@ async function main() {
   // ---------------------------------------------------------------- suite 3
   console.log('\n[3] שכבת מסחר רדומה (COMMERCE_LOGIN)');
   {
-    const off = await newPage();
-    check('ברירת מחדל: מסך התחברות מוסתר', (await off.evaluate(() => document.getElementById('cl-overlay').style.display)) !== 'block');
+    const off = await newPage({ openDb: true });
+    check('מאגר פתוח: מסך התחברות מוסתר', (await off.evaluate(() => document.getElementById('cl-overlay').style.display)) !== 'block');
     await off.close();
+    const locked = await newPage();
+    check('מאגר נעול (אפס שורות לאנונימי): מסך התחברות מוצג מעצמו', (await locked.evaluate(() => document.getElementById('cl-overlay').style.display)) === 'block');
+    await locked.close();
     const p = await newPage({ query: '?login=1', subActive: true });
     check('עם ?login=1 המסך מוצג', (await p.evaluate(() => document.getElementById('cl-overlay').style.display)) === 'block');
     await p.fill('#cl-phone', '050-123-4567');
