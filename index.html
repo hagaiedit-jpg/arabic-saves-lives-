@@ -11105,6 +11105,31 @@ try{
 // Phrases removed from the kit by the editor — filtered out wherever they load from
 // (built-in lists and the database), so they never appear anywhere.
 var REMOVED_PHRASES=['אני רוצה לעשות חיפוש ברפת'];
+// The same phrase sometimes exists twice in one list (an older copy, a spelling
+// variant, or a template row synced later). Lists and search show it once: a ⭐
+// copy wins, then one with a recording. Display only — nothing is deleted from the
+// database, and the admin list still shows every row.
+var _DUP_HE_ALIAS={'כמהאנשיםישברכב':'כמהאנשיםברכב'};
+function _dupHeKey(he){ var k=String(he||'').replace(/[\u0591-\u05C7]/g,'').replace(/[^א-תA-Za-z0-9]/g,''); return _DUP_HE_ALIAS[k]||k; }
+function _dupScore(p){
+  var s=0;
+  try{ if(typeof isGoldPhrase==='function' && isGoldPhrase(p)) s+=5; }catch(e){}
+  if(p.audio || p.audio_url) s+=4;
+  if(String(p.trans||'').trim()) s+=1;
+  if(/(^|\s)في\s+في(?=\s|$|[؟?!.,])/.test(String(p.ar||''))) s-=6;   // "في في" typo copy
+  return s;
+}
+function _dedupePhrases(arr){
+  var by={}, out=[];
+  (arr||[]).forEach(function(p){
+    var k=_dupHeKey(p&&p.he);
+    if(!k){ out.push({p:p}); return; }
+    var sc=_dupScore(p);
+    if(!by[k]){ by[k]={p:p,s:sc}; out.push(by[k]); }
+    else if(sc>by[k].s){ by[k].p=p; by[k].s=sc; }
+  });
+  return out.map(function(o){ return o.p; });
+}
 function _notRemoved(p){ var h=String(p&&p.he||'').replace(/[\s?!.,]/g,''); return !REMOVED_PHRASES.some(function(r){ return h===r.replace(/[\s?!.,]/g,''); }); }
 function populateFromData(data){
   data=(data||[]).filter(_notRemoved);
@@ -12411,6 +12436,7 @@ function _renderDbCat(cat, containerId, opener){
   [typeof DB!=='undefined'?DB:[], typeof DICT!=='undefined'?DICT:[]].forEach(function(a){
     (a||[]).forEach(function(r){ if(r && r.cat===cat && (r.he||r.ar) && !_hidden(r.he)) rows.push(r); });
   });
+  rows=_dedupePhrases(rows);
   var _capped=false;
   if(typeof _previewLocked==='function' && _previewLocked() && rows.length>FREE_PREVIEW_N){ rows=rows.slice(0,FREE_PREVIEW_N); _capped=true; }
   window._dbCatRows[cat]=rows;
@@ -15446,7 +15472,7 @@ function opC(cat,special){
     }
   } else {
     // Regular category - intro + Learning Mode + (optional) subcategories
-    const catPhrases = _sortCatFlow(cat, DB.filter(p=>p.cat===cat));
+    const catPhrases = _sortCatFlow(cat, _dedupePhrases(DB.filter(p=>p.cat===cat)));
     const learned = JSON.parse(localStorage.getItem('learned_phrases') || '{}');
     const learnedInCat = catPhrases.filter(p=>learned[p.id]).length;
     const totalInCat = catPhrases.length;
@@ -21606,6 +21632,7 @@ function globalSearch(){
     });
   });
   results.sort(function(a,b){ return b.sc-a.sc; });
+  var _seenGs={}; results=results.filter(function(r){ var k=_dupHeKey(r.p.he); if(!k) return true; k=r.label+'|'+k; if(_seenGs[k]) return false; _seenGs[k]=1; return true; });
   if(!destHtml && !results.length && !clHtml){
     var sug=_gsSuggest(rawQ);
     var nh='<div style="text-align:center;color:#7a9ab5;font-size:13px;padding:26px 10px 8px;">לא נמצאו תוצאות ל"'+rawQ+'".</div>';
@@ -22213,6 +22240,7 @@ async function _fixKnownArabic(){
     if(nar.indexOf('إجينا')>=0){ nar=nar.replace(/إجينا/g,'جينا'); ntr=ntr.replace(/אִגִ׳ינַא/g,'גִ׳ינַא'); }
     if(nar.indexOf('إيديك ع راسك')>=0){ nar=nar.replace(/إيديك ع راسك/g,'إيديك عالراس'); ntr=ntr.replace(/עַ רַאסַכּ/g,'עַאלְרַאס'); }
     if(String(r.he||'').replace(/[^א-ת]/g,'')==='אתהשומעאותי' && nar.indexOf('بتسمعني')>=0){ nar='إنت سامعني؟'; ntr='אִנְתֶ סַאמְעְנִי?'; }
+    if(/(^|\s)في\s+في(?=\s|$|[؟?!.,])/.test(nar)){ nar=nar.replace(/(^|\s)في\s+في(?=\s|$|[؟?!.,])/g,'$1في').replace(/\?$/,'؟'); ntr=ntr.replace(/פִיה\s+פי\s+/g,'פִי '); }
     if(nar!==ar || ntr!==tr){ try{ await sbFetch('/rest/v1/phrases?id=eq.'+encodeURIComponent(r.id),'PATCH',{ar:nar,trans:ntr}); n++; }catch(e){} }
   }
   if(n){ try{ showToast('✓ תוקנו '+n+' משפטים לכתיב הערבי המאושר'); }catch(e){} try{ await loadData(); }catch(e){} }
@@ -23227,14 +23255,14 @@ function sortPhrasesByScenario(phrases){
 
 // All phrases in an emergency category (unfiltered by ⭐), sorted by encounter stage.
 function _emergAllForCat(emergCat){
-  var matches = DB.filter(function(p){
+  var matches = _dedupePhrases(DB.filter(function(p){
     if(!visibleToRole(p))return false;
     var pcat=(p.cat||'').trim();
     for(var i=0;i<emergCat.cats.length;i++){
       if(pcat===emergCat.cats[i]||pcat.indexOf(emergCat.cats[i])!==-1)return true;
     }
     return false;
-  });
+  }));
   matches.sort(function(a, b){
     var oa = _getScenarioOrder(a, emergCat.key);
     var ob = _getScenarioOrder(b, emergCat.key);
@@ -23567,6 +23595,7 @@ function emergSearch(){
   var scored=[];
   pool.forEach(function(o){ var p=o.p, sc=_sqScore(_sqNorm((p.he||'')+' '+(p.trans||'')+' '+(p.ar||'')), qn, qw); if(sc>0) scored.push({p:p, tag:o.tag, sc:sc+o.bonus+((p.audio||p.audio_url)?1:0)}); });
   scored.sort(function(a,b){ return b.sc-a.sc; });
+  var _seenHe={}; scored=scored.filter(function(x){ var k=_dupHeKey(x.p.he); if(!k) return true; if(_seenHe[k]) return false; _seenHe[k]=1; return true; });
   scored=scored.slice(0,40);
   var matches=scored.map(function(x){ return x.p; });
   results.style.display='block';
@@ -24677,7 +24706,7 @@ window.addEventListener('load', function(){
 <script>
 // Version stamp — shown in the admin panel so we can confirm which build is live
 // on a device (stale service-worker caches were causing "my changes don't show").
-window.APP_VERSION = 'v348';
+window.APP_VERSION = 'v349';
 
 // Register the service worker for full offline use in the field, WITH update
 // detection: when a new version installs, offer a one-tap refresh instead of the
