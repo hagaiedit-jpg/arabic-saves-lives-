@@ -4330,6 +4330,27 @@ async function _adminRefreshToken(){
   } catch(e){}
   return false;
 }
+// Members stay logged in: their access token lasts about an hour, so a read
+// rejected with 401 renews it once with the saved refresh token and retries.
+var _clRefreshing=null;
+function _clRefreshToken(){
+  if(_clRefreshing) return _clRefreshing;
+  _clRefreshing=(async function(){
+    var rt=''; try{ rt=localStorage.getItem('cl_rt')||''; }catch(e){}
+    if(!rt) return false;
+    try{
+      const r=await fetch(SUPA_URL+'/auth/v1/token?grant_type=refresh_token',{method:'POST',headers:{'apikey':SUPA_KEY,'Content-Type':'application/json'},body:JSON.stringify({refresh_token:rt})});
+      const d=await r.json();
+      if(d && d.access_token){
+        try{ localStorage.setItem('cl_at',d.access_token); localStorage.setItem('cl_rt',d.refresh_token||rt); if(d.user) localStorage.setItem('cl_user',JSON.stringify(d.user)); }catch(e){}
+        return true;
+      }
+    }catch(e){}
+    return false;
+  })();
+  _clRefreshing.then(function(){ setTimeout(function(){ _clRefreshing=null; }, 0); });
+  return _clRefreshing;
+}
 function adminLogout(){
   window._adminToken=''; window._adminRefresh=''; window._adminAuth=false;
   try{ sessionStorage.removeItem('admin_at'); sessionStorage.removeItem('admin_rt'); }catch(e){}
@@ -4367,6 +4388,10 @@ async function sbFetch(path,method='GET',body=null){
   // If an admin write was rejected (e.g. token expired), refresh once and retry.
   if(res && res.status===401 && method && method!=='GET' && _adminTokenGet()){
     if(await _adminRefreshToken()) res = await doFetch();
+  }
+  // A member read with an expired login: renew it once and retry.
+  if(res && res.status===401 && (!method || method==='GET') && !_adminTokenGet() && _clTokenGet()){
+    if(await _clRefreshToken()) res = await doFetch();
   }
   if(!res.ok)throw new Error(await res.text());
   const t=await res.text();
@@ -24810,7 +24835,7 @@ window.addEventListener('load', function(){
 <script>
 // Version stamp — shown in the admin panel so we can confirm which build is live
 // on a device (stale service-worker caches were causing "my changes don't show").
-window.APP_VERSION = 'v351';
+window.APP_VERSION = 'v352';
 
 // Register the service worker for full offline use in the field, WITH update
 // detection: when a new version installs, offer a one-tap refresh instead of the
@@ -25283,8 +25308,9 @@ async function memberActivated(){
   }catch(e){}
   var s=clSession(); if(!s) return false;
   try{
-    var r=await fetch(SUPA_URL+'/rest/v1/members?select=email&email=eq.'+encodeURIComponent(email),
-      {headers:{'apikey':SUPA_KEY,'Authorization':'Bearer '+s.access_token}});
+    var _mq=SUPA_URL+'/rest/v1/members?select=email&email=eq.'+encodeURIComponent(email);
+    var r=await fetch(_mq,{headers:{'apikey':SUPA_KEY,'Authorization':'Bearer '+s.access_token}});
+    if(r.status===401 && await _clRefreshToken()){ s=clSession(); r=await fetch(_mq,{headers:{'apikey':SUPA_KEY,'Authorization':'Bearer '+s.access_token}}); }
     if(!r.ok){ return _memberActivatedCached(email); }     // transient error -> keep grace
     var rows=await r.json(); var ok=Array.isArray(rows)&&rows.length>0;
     try{ localStorage.setItem('member_ok', JSON.stringify({email:email, ok:ok, at:Date.now()})); }catch(e){}
