@@ -8,3 +8,7 @@ tests
 tools
 *.md
 *.sql
+worker
+package.json
+package-lock.json
+node_modules

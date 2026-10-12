@@ -11400,12 +11400,28 @@ async function spSave(phrase,section){
   return await sbFetch('/rest/v1/phrases','POST',row);
 }
 
+// Uploads are signed by the site's own server (/api/sign-upload, worker/index.js),
+// which signs only for the admin — so the Cloudinary preset can be closed to the
+// public. Until the Cloudinary keys are set there (or on an older deploy), this
+// returns null and the upload uses the open preset, so recording never breaks
+// during the switch.
+async function _cloudSign(){
+  if(!_adminTokenGet()) return null;
+  function ask(){ return fetch('/api/sign-upload',{method:'POST',headers:{'authorization':'Bearer '+_adminTokenGet()}}); }
+  var r;
+  try{ r=await ask(); if(r.status===401 && await _adminRefreshToken()) r=await ask(); }catch(e){ return null; }
+  if(r.ok){ try{ return await r.json(); }catch(e){ return null; } }
+  if(r.status===403) throw new Error('רק המנהלת יכולה להעלות הקלטות. התחברי לניהול ונסי שוב.');
+  return null;
+}
 async function cloudUp(file){
   // Retry transient upload failures so a network hiccup doesn't silently lose a recording.
   var lastErr=null;
+  var sig=await _cloudSign();
   for(var attempt=0;attempt<3;attempt++){
     try{
-      const fd=new FormData();fd.append('file',file);fd.append('upload_preset',PRESET);fd.append('resource_type','video');
+      const fd=new FormData();fd.append('file',file);fd.append('upload_preset',sig?sig.upload_preset:PRESET);fd.append('resource_type','video');
+      if(sig){ fd.append('api_key',sig.api_key); fd.append('timestamp',String(sig.timestamp)); fd.append('signature',sig.signature); }
       const r=await fetch(`https://api.cloudinary.com/v1_1/${CLOUD}/video/upload`,{method:'POST',body:fd});
       const d=await r.json();
       if(d && d.secure_url) return d.secure_url;
@@ -14403,6 +14419,24 @@ async function dbSecurityCheck(btn){
   lines.push(w);
   var a=null; try{ var mine=await sbFetch('/rest/v1/phrases?select=id&limit=1'); a=Array.isArray(mine)&&mine.length>0; }catch(e){ a=false; }
   lines.push([a,'המנהלת (את) רואה את התוכן', a?'כן':'לא, צריך לבדוק']);
+  // Recordings upload channel: can anyone upload to Cloudinary without permission?
+  // Sends a few invalid bytes, so even an open channel stores nothing; the error
+  // text tells whether the preset still accepts unsigned uploads.
+  var up;
+  try{
+    var fdu=new FormData(); fdu.append('file',new Blob(['x'],{type:'audio/webm'}),'security-check.webm'); fdu.append('upload_preset',PRESET);
+    var ru=await fetch('https://api.cloudinary.com/v1_1/'+CLOUD+'/video/upload',{method:'POST',body:fdu});
+    var du={}; try{ du=await ru.json(); }catch(e){}
+    var msg=String((du&&du.error&&du.error.message)||'');
+    up=/unsigned|whitelist|signature|api_key/i.test(msg) ? [true,'העלאת קבצים להקלטות בלי הרשאה','חסום'] : [false,'העלאת קבצים להקלטות בלי הרשאה','פתוח ('+(msg||ru.status)+')'];
+  }catch(e){ up=[null,'העלאת קבצים להקלטות בלי הרשאה','אין חיבור']; }
+  lines.push(up);
+  var sg;
+  try{ var rs=await fetch('/api/sign-upload',{method:'POST',headers:{'authorization':'Bearer '+_adminTokenGet()}});
+    if(rs.status===401 && await _adminRefreshToken()) rs=await fetch('/api/sign-upload',{method:'POST',headers:{'authorization':'Bearer '+_adminTokenGet()}});
+    sg = rs.ok ? [true,'אישור העלאה מהשרת (למנהלת)','פעיל'] : (rs.status===503 ? [null,'אישור העלאה מהשרת (למנהלת)','עוד לא הוגדרו המפתחות ב-Cloudflare'] : [null,'אישור העלאה מהשרת (למנהלת)','לא זמין ('+rs.status+')']);
+  }catch(e){ sg=[null,'אישור העלאה מהשרת (למנהלת)','לא זמין']; }
+  lines.push(sg);
   var exposed=lines.slice(0,3).some(function(l){ return l[0]===false; });
   var html='<div style="background:#18293E;border:1px solid '+(exposed?'#c0392b':'#1D9E75')+';border-radius:10px;padding:10px 12px;">'
     +'<div style="color:'+(exposed?'#ff9a8f':'#7eecc1')+';font-size:14px;font-weight:800;margin-bottom:6px;">'+(exposed?'⚠️ המאגר חשוף לגישה בלי התחברות':'✅ המאגר מוגן')+'</div>';
@@ -24835,7 +24869,7 @@ window.addEventListener('load', function(){
 <script>
 // Version stamp — shown in the admin panel so we can confirm which build is live
 // on a device (stale service-worker caches were causing "my changes don't show").
-window.APP_VERSION = 'v352';
+window.APP_VERSION = 'v353';
 
 // Register the service worker for full offline use in the field, WITH update
 // detection: when a new version installs, offer a one-tap refresh instead of the

@@ -5,8 +5,17 @@
   "observability": {
     "enabled": true
   },
+  // The Worker only answers /api/sign-upload; everything else is the static site.
+  "main": "worker/index.js",
   "assets": {
-    "directory": "."
+    "directory": ".",
+    "binding": "ASSETS"
+  },
+  "vars": {
+    "SUPABASE_URL": "https://ukynfcwxsrzpuqecfjuz.supabase.co",
+    "SUPABASE_KEY": "sb_publishable_ugMP9beQh9-TJVGL3uzIAA_xhAgWJQP",
+    "CLOUDINARY_CLOUD": "dvjuflgqs",
+    "CLOUDINARY_PRESET": "arabic_audio"
   },
   "compatibility_flags": [
     "nodejs_compat"
