@@ -20916,27 +20916,27 @@ async function autoSyncBuiltins(){
       var exT=await sbFetchAllRows('/rest/v1/phrases?select=cat,he&section=eq.military');
       // Dedup by category + Hebrew only (Arabic-based matching wrongly merged distinct
       // conjugation forms that share an Arabic word).
-      var haveT={}; (exT||[]).forEach(function(p){ haveT[(p.cat||'')+'|'+normT(p.he)]=1; });
+      var haveT={}; (exT||[]).forEach(function(p){ haveT[(p.cat||'')+'|'+normT(p.he)]=1; haveT['~'+(p.cat||'')+'|'+_dupHeKey(p.he)]=1; });
       for(var t=0;t<BUILTIN_TASHAUL.length;t++){
         var bt=BUILTIN_TASHAUL[t];
         var kt=bt.cat+'|'+normT(bt.he);
-        if(haveT[kt])continue;
+        if(haveT[kt] || haveT['~'+bt.cat+'|'+_dupHeKey(bt.he)])continue;
         if(_delBlockList().indexOf(_delBlockKey('military',bt.cat,bt.he))!==-1)continue;   // admin deleted for good
         var _btBody={cat:bt.cat,he:bt.he,trans:bt.trans||'',ar:bt.ar||'',tags:'',why:bt.why||'',tone:'',audio_url:'',is_new:true,section:'military'};
         // interrogation questions carry citizen answers — seed them so they're recordable
         if(bt.responses&&bt.responses.length){ _btBody.responses=JSON.stringify(bt.responses.map(function(r){return {he:r.he,trans:r.trans||'',ar:r.ar||'',audio_url:''};})); }
         await sbFetch('/rest/v1/phrases','POST',_btBody);
-        haveT[kt]=1; addedT++;
+        haveT[kt]=1; haveT['~'+bt.cat+'|'+_dupHeKey(bt.he)]=1; addedT++;
       }
     }
     // --- threat recognition + curses (military), keyed by cat + normalized Hebrew ---
     if(typeof BUILTIN_THREAT!=='undefined' && BUILTIN_THREAT.length){
       for(var z=0;z<BUILTIN_THREAT.length;z++){
         var bz=BUILTIN_THREAT[z]; var kz=bz.cat+'|'+normT(bz.he);
-        if(haveT[kz])continue;
+        if(haveT[kz] || haveT['~'+bz.cat+'|'+_dupHeKey(bz.he)])continue;
         if(_delBlockList().indexOf(_delBlockKey('military',bz.cat,bz.he))!==-1)continue;
         await sbFetch('/rest/v1/phrases','POST',{cat:bz.cat,he:bz.he,trans:bz.trans||'',ar:bz.ar||'',tags:'',why:'',tone:'',audio_url:'',is_new:true,section:'military'});
-        haveT[kz]=1;
+        haveT[kz]=1; haveT['~'+bz.cat+'|'+_dupHeKey(bz.he)]=1;
       }
     }
     // --- checkpoint first-moment (military), keyed by cat + normalized Hebrew ---
@@ -22245,12 +22245,60 @@ async function _fixKnownArabic(){
   }
   if(n){ try{ showToast('✓ תוקנו '+n+' משפטים לכתיב הערבי המאושר'); }catch(e){} try{ await loadData(); }catch(e){} }
 }
+// Duplicate cleanup (military phrases), run on every admin visit. Within ONE
+// category, extra copies of the same phrase (same Hebrew) are deleted and the
+// recorded copy stays, so the list never shows an unrecorded twin. A copy in a
+// DIFFERENT category is never deleted (it belongs to that list); if its Arabic
+// matches a recorded copy it simply gets that recording. Recorded copies, and
+// copies with recorded citizen answers, are never deleted. A ⭐ moves to the keeper.
+function _rowHasAudio(r){
+  if(r.audio_url) return true;
+  try{ var rs=typeof r.responses==='string'?JSON.parse(r.responses||'[]'):(r.responses||[]); return (rs||[]).some(function(x){ return x&&x.audio_url; }); }catch(e){ return false; }
+}
+async function _cleanupDuplicates(){
+  if(window._dupCleanupRan) return; window._dupCleanupRan=true;
+  var rows=await sbFetchAllRows('/rest/v1/phrases?select=id,he,ar,trans,cat,audio_url,tags,responses&section=eq.military&order=created_at.asc');
+  var byHe={};
+  (rows||[]).forEach(function(r){ var k=_dupHeKey(r.he); if(k) (byHe[k]=byHe[k]||[]).push(r); });
+  var dels=[], shares=[], golds=[];
+  Object.keys(byHe).forEach(function(k){
+    var g=byHe[k]; if(g.length<2) return;
+    var recAll=g.filter(function(r){ return r.audio_url; });
+    // 1) other categories: borrow a matching recording (text follows the recording)
+    g.forEach(function(r){
+      if(r.audio_url) return;
+      var src=recAll.filter(function(x){ return x.cat!==r.cat && _arSimilar(x.ar,r.ar); })[0];
+      if(src && !g.some(function(x){ return x.cat===r.cat && x!==r && x.audio_url; })){ shares.push({r:r, src:src}); r._shared=true; }
+    });
+    // 2) same category: keep one (recorded first, then ⭐, then with transliteration)
+    var byCat={}; g.forEach(function(r){ (byCat[r.cat||'']=byCat[r.cat||'']||[]).push(r); });
+    Object.keys(byCat).forEach(function(c){
+      var cg=byCat[c]; if(cg.length<2) return;
+      var keep=cg.slice().sort(function(a,b){
+        var sa=(a.audio_url?8:0)+(isGoldPhrase(a)?4:0)+(String(a.trans||'').trim()?1:0)-(/(^|\s)في\s+في(?=\s|$|[؟?!.,])/.test(a.ar||'')?6:0);
+        var sb=(b.audio_url?8:0)+(isGoldPhrase(b)?4:0)+(String(b.trans||'').trim()?1:0)-(/(^|\s)في\s+في(?=\s|$|[؟?!.,])/.test(b.ar||'')?6:0);
+        return sb-sa; })[0];
+      cg.forEach(function(r){
+        if(r===keep || _rowHasAudio(r) || r._shared) return;
+        dels.push(r);
+        if(isGoldPhrase(r) && !isGoldPhrase(keep) && golds.indexOf(keep)===-1) golds.push(keep);
+      });
+    });
+  });
+  if(!dels.length && !shares.length) return;
+  if(dels.length && !confirm('🧹 נמצאו '+dels.length+' עותקים כפולים בלי הקלטה (באותה קטגוריה).\nבכל מקרה נשאר עותק אחד, המוקלט אם יש.\n\nלמחוק את הכפולים?')) dels=[];
+  var n=0, m=0;
+  for(var i=0;i<golds.length;i++){ try{ await sbFetch('/rest/v1/phrases?id=eq.'+encodeURIComponent(golds[i].id),'PATCH',{tags:(String(golds[i].tags||'')+' @gold').trim()}); }catch(e){} }
+  for(var j=0;j<dels.length;j++){ try{ _delBlockAdd('military',dels[j].cat,dels[j].he); await sbFetch('/rest/v1/phrases?id=eq.'+encodeURIComponent(dels[j].id),'DELETE'); n++; }catch(e){} }
+  for(var q=0;q<shares.length;q++){ var sh=shares[q]; try{ await sbFetch('/rest/v1/phrases?id=eq.'+encodeURIComponent(sh.r.id),'PATCH',{audio_url:sh.src.audio_url, ar:sh.src.ar, trans:sh.src.trans||sh.r.trans||''}); m++; }catch(e){} }
+  if(n||m){ try{ showToast('🧹 '+(n?'נמחקו '+n+' כפולים':'')+(n&&m?' · ':'')+(m?m+' קיבלו את ההקלטה הקיימת':'')); }catch(e){} try{ await loadData(); }catch(e){} }
+}
 // Field-screen phrases that exist only in the app's templates get a real DB row,
 // so they appear in the admin list and can be recorded (e.g. "אתה מדמם?").
 async function _syncFieldTemplates(){
   if(window._fieldTplSynced) return; window._fieldTplSynced=true;
   var norm=function(x){ return String(x||'').replace(/[^א-ת]/g,''); };
-  var have={}; (await sbFetchAllRows('/rest/v1/phrases?select=he,ar')||[]).forEach(function(p){ var k=norm(p.he); (have[k]=have[k]||[]).push(p.ar||''); });
+  var have={}, haveCK={}; (await sbFetchAllRows('/rest/v1/phrases?select=he,ar,cat,section')||[]).forEach(function(p){ var k=norm(p.he); (have[k]=have[k]||[]).push(p.ar||''); if(p.section==='military') haveCK[(p.cat||'')+'|'+_dupHeKey(p.he)]=1; });
   var MAP=[[typeof ORDERS!=='undefined'?ORDERS:[],'ניהול מרחב והוראות'],[typeof CHECK!=='undefined'?CHECK:[],'בידוק וזיהוי'],[typeof VEHICLE!=='undefined'?VEHICLE:[],'עצירת תנועה ורכב'],[typeof TRIAGE!=='undefined'?TRIAGE:[],'רפואה ועזרה ראשונה'],[typeof SUSPECT_DESC!=='undefined'?SUSPECT_DESC:[],'תשאול: תיאור אדם']];
   var todo=[];
   MAP.forEach(function(m){ (m[0]||[]).forEach(function(sl){ (sl.options||[]).forEach(function(o){ todo.push({cat:m[1],he:o.he,ar:o.ar,trans:o.trans||''}); }); }); });
@@ -22260,8 +22308,9 @@ async function _syncFieldTemplates(){
   for(var i=0;i<todo.length;i++){
     var t=todo[i], k=norm(t.he); if(!k || !t.ar) continue;
     if((have[k]||[]).some(function(a){ return _arSimilar(a,t.ar); })) continue;
+    if(haveCK[t.cat+'|'+_dupHeKey(t.he)]) continue;   // already in this category (kept copy of a cleaned duplicate)
     if(_delBlockList().indexOf(_delBlockKey('military',t.cat,t.he))!==-1) continue;
-    try{ await sbFetch('/rest/v1/phrases','POST',{cat:t.cat,he:t.he,trans:t.trans,ar:t.ar,tags:'',why:'',tone:'',audio_url:'',is_new:true,section:'military'}); (have[k]=have[k]||[]).push(t.ar); added++; }catch(e){}
+    try{ await sbFetch('/rest/v1/phrases','POST',{cat:t.cat,he:t.he,trans:t.trans,ar:t.ar,tags:'',why:'',tone:'',audio_url:'',is_new:true,section:'military'}); (have[k]=have[k]||[]).push(t.ar); haveCK[t.cat+'|'+_dupHeKey(t.he)]=1; added++; }catch(e){}
   }
   if(added){ window._autoSyncAdded=(window._autoSyncAdded||0)+added; }
 }
@@ -22278,6 +22327,7 @@ async function renderAdminList(){
     try{ await _fixNumberTrans(); }catch(e){ console.warn('num trans fix skipped', e); }
     try{ await _fixKnownArabic(); }catch(e){ console.warn('arabic fix skipped', e); }
     try{ await _syncFieldTemplates(); }catch(e){ console.warn('field template sync skipped', e); }
+    try{ await _cleanupDuplicates(); }catch(e){ console.warn('duplicate cleanup skipped', e); }
     // Make sure everything shipped in code is available for editing/recording — automatic, once per session.
     try{ await autoSyncBuiltins(); }catch(e){ console.warn('autoSync skipped', e); }
     const data=await sbFetchAllRows('/rest/v1/phrases?select=*&order=created_at.desc,id.desc');
@@ -24706,7 +24756,7 @@ window.addEventListener('load', function(){
 <script>
 // Version stamp — shown in the admin panel so we can confirm which build is live
 // on a device (stale service-worker caches were causing "my changes don't show").
-window.APP_VERSION = 'v349';
+window.APP_VERSION = 'v350';
 
 // Register the service worker for full offline use in the field, WITH update
 // detection: when a new version installs, offer a one-tap refresh instead of the
