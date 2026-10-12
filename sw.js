@@ -1,6 +1,6 @@
 /* Service worker for "ערבית מצילה חיים" — offline-first field use.
    Bump CACHE when shipping changes that must invalidate old caches. */
-const CACHE = 'asl-v356';
+const CACHE = 'asl-v357';
 // Recordings + fonts live in a separate cache that SURVIVES app updates —
 // otherwise every version bump would silently wipe the downloaded offline pack.
 const MEDIA = 'asl-media-v1';
@@ -56,12 +56,18 @@ self.addEventListener('fetch', function(e){
   try { url = new URL(req.url); } catch(_) { return; }
 
   // App page -> network first, fall back to cached shell (so the app opens with no signal)
+  // Only the app itself (/ or /index.html) refreshes the cached shell — other pages
+  // on the site (e.g. /pakal, /10.html) must never overwrite it.
   if (req.mode === 'navigate') {
+    var isShell = /\/(index\.html)?$/.test(url.pathname);
     e.respondWith(
       fetch(req).then(function(r){
-        var cl = r.clone(); caches.open(CACHE).then(function(c){ c.put('./index.html', cl); });
+        if (isShell && r.ok) { var cl = r.clone(); caches.open(CACHE).then(function(c){ c.put('./index.html', cl); }); }
         return r;
-      }).catch(function(){ return caches.match('./index.html').then(function(r){ return r || caches.match('./'); }); })
+      }).catch(function(){
+        if (isShell) return caches.match('./index.html').then(function(r){ return r || caches.match('./'); });
+        return caches.match(req).then(function(r){ return r || caches.match('./index.html'); });
+      })
     );
     return;
   }
