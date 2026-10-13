@@ -217,6 +217,8 @@ export async function audio(request, env, url) {
 
 // ---------------------------------------------------------------- admin: close/open recordings
 // body: { action: 'protect' | 'unprotect' | 'probe', items: [{ pid, ext }] }  (max 20 per call)
+//       { action: 'listclosed' } → { ids: [...] } every closed (authenticated) recording, so a
+//       re-run skips what is already done.
 export async function audioAdmin(request, env) {
   if (request.method !== 'POST') return reply(405, { error: 'method' });
   let role;
@@ -229,11 +231,35 @@ export async function audioAdmin(request, env) {
   try { body = await request.json(); } catch (e) { return reply(400, { error: 'bad_json' }); }
   const items = Array.isArray(body && body.items) ? body.items.slice(0, 20) : [];
   const action = body && body.action;
-  const results = [];
-  for (const it of items) {
+  if (action === 'listclosed') {
+    const basic = 'Basic ' + btoa(apiKey + ':' + apiSecret);
+    const ids = [];
+    let cursor = '';
+    for (let page = 0; page < 20; page++) {
+      let r;
+      try {
+        r = await fetch(`https://api.cloudinary.com/v1_1/${env.CLOUDINARY_CLOUD}/resources/video/authenticated?max_results=500` + (cursor ? '&next_cursor=' + encodeURIComponent(cursor) : ''), { headers: { authorization: basic } });
+      } catch (e) { return reply(502, { error: 'cloudinary_unreachable' }); }
+      if (!r.ok) return reply(502, { error: 'cloudinary_' + r.status });
+      const d = await r.json();
+      for (const x of d.resources || []) ids.push(x.public_id);
+      cursor = d.next_cursor || '';
+      if (!cursor) break;
+    }
+    return reply(200, { action, ids, complete: !cursor });
+  }
+  // Four at a time (order kept): a 20-item call takes seconds, not half a minute.
+  const results = new Array(items.length);
+  let next = 0;
+  await Promise.all(Array.from({ length: Math.min(4, items.length) }, async () => {
+    while (next < items.length) { const i = next++; results[i] = await oneItem(items[i]); }
+  }));
+  return reply(200, { action, results });
+
+  async function oneItem(it) {
     const pid = String((it && it.pid) || '');
     const ext = String((it && it.ext) || 'webm');
-    if (!safeId(pid)) { results.push({ pid, ok: false, error: 'bad_id' }); continue; }
+    if (!safeId(pid)) return { pid, ok: false, error: 'bad_id' };
     if (action === 'probe') {
       // Each address, with Cloudinary's own error text; plus what Cloudinary's
       // admin API knows about the file (does it exist as closed / open, its format).
@@ -271,10 +297,9 @@ export async function audioAdmin(request, env) {
           st.details.push(label + ':' + code + (r.headers.get('x-cld-error') ? '(' + r.headers.get('x-cld-error').slice(0, 80) + ')' : ''));
         } catch (e) { st.details.push(label + ':net'); }
       }
-      results.push({ pid, ok: true, ...st });
-      continue;
+      return { pid, ok: true, ...st };
     }
-    if (action !== 'protect' && action !== 'unprotect') { results.push({ pid, ok: false, error: 'bad_action' }); continue; }
+    if (action !== 'protect' && action !== 'unprotect') return { pid, ok: false, error: 'bad_action' };
     const from = action === 'protect' ? 'upload' : 'authenticated';
     const to = action === 'protect' ? 'authenticated' : 'upload';
     const params = {
@@ -287,13 +312,12 @@ export async function audioAdmin(request, env) {
       const r = await fetch(`https://api.cloudinary.com/v1_1/${env.CLOUDINARY_CLOUD}/video/rename`, { method: 'POST', body: form });
       let d = {};
       try { d = await r.json(); } catch (e) {}
-      if (r.ok) results.push({ pid, ok: true, type: d.type || to });
-      else results.push({ pid, ok: false, status: r.status, error: (d.error && d.error.message) || String(r.status) });
+      if (r.ok) return { pid, ok: true, type: d.type || to };
+      return { pid, ok: false, status: r.status, error: (d.error && d.error.message) || String(r.status) };
     } catch (e) {
-      results.push({ pid, ok: false, error: 'net' });
+      return { pid, ok: false, error: 'net' };
     }
   }
-  return reply(200, { action, results });
 }
 
 export async function digestHex(algo, text) {
