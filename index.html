@@ -123,7 +123,7 @@ function _cldAudio(url){
 //   'off'    → direct Cloudinary links (as before)
 //   'opt-in' → only on a device opened once with ?audioproxy=1 (testing)
 //   'on'     → every member's device
-window.AUDIO_PROXY_MODE = 'opt-in';
+window.AUDIO_PROXY_MODE = 'on';   // verified live 13.10.2026 (closed copies play via the route, English + Hebrew ids)
 function _audioProxyActive(){
   if(window.AUDIO_PROXY_MODE==='off') return false;
   try{
@@ -11503,7 +11503,9 @@ async function cloudUp(file){
       if(sig){ fd.append('api_key',sig.api_key); fd.append('timestamp',String(sig.timestamp)); fd.append('signature',(useSha256&&sig.signature256)?sig.signature256:sig.signature); if(sig.type==='authenticated') fd.append('type','authenticated'); }
       const r=await fetch(`https://api.cloudinary.com/v1_1/${CLOUD}/video/upload`,{method:'POST',body:fd});
       const d=await r.json();
-      if(d && d.secure_url) return d.secure_url;
+      // A closed upload comes back with a signed link that would play for anyone forever:
+      // store it without the signature, so only the members-only route can play it.
+      if(d && d.secure_url) return String(d.secure_url).replace(/\/(video\/authenticated)\/s--[^\/]+--\//,'/$1/');
       var _m=(d&&d.error&&d.error.message)||('HTTP '+r.status);
       window._lastUploadErr=_m;
       // Account set to SHA-256 signatures: switch once and retry right away.
@@ -25089,7 +25091,7 @@ window.addEventListener('load', function(){
     // ?audioproxy=1 → this device plays recordings through the members-only route (testing phase); =0 turns it off
     if(/[?&]audioproxy=1/.test(_q)){ try{ localStorage.setItem('audio_proxy_opt','1'); }catch(e){} setTimeout(function(){ _audioSessionRefresh(true); }, 800); }
     if(/[?&]audioproxy=0/.test(_q)){ try{ localStorage.removeItem('audio_proxy_opt'); }catch(e){} }
-    setTimeout(function(){ try{ _audioSessionRefresh(false); }catch(e){} }, 2500);
+    setTimeout(function(){ try{ _audioSessionRefresh(false); }catch(e){} }, 300);
     setInterval(function(){ try{ _audioSessionRefresh(false); }catch(e){} }, 3*3600000);
     if(/[?&]login=0/.test(_q)){ try{ localStorage.setItem('login_gate','0'); localStorage.removeItem('member_ok'); }catch(e){} window.LOGIN_GATE=(function(){ try{ return localStorage.getItem('db_locked')==='1'; }catch(e){ return false; } })(); }
   }catch(e){}
@@ -25101,7 +25103,7 @@ window.addEventListener('load', function(){
 <script>
 // Version stamp — shown in the admin panel so we can confirm which build is live
 // on a device (stale service-worker caches were causing "my changes don't show").
-window.APP_VERSION = 'v363';
+window.APP_VERSION = 'v364';
 
 // Register the service worker for full offline use in the field, WITH update
 // detection: when a new version installs, offer a one-tap refresh instead of the
