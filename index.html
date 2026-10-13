@@ -141,7 +141,9 @@ function _cldAudioId(u){
   else { if(/^s--.+--$/.test(parts[0])) i=1; while(i<parts.length-1 && /^[a-z]{1,3}_[^\/]*$/.test(parts[i])) i++; }
   var rest=parts.slice(i).join('/'), dot=rest.lastIndexOf('.');
   if(dot<1) return null;
-  return {cloud:m[1], type:m[2], pid:rest.slice(0,dot), ext:rest.slice(dot+1)};
+  // Ids can be Hebrew file names, stored %-encoded in the link: keep the real id.
+  var pid=rest.slice(0,dot); try{ pid=decodeURIComponent(pid); }catch(e){}
+  return {cloud:m[1], type:m[2], pid:pid, ext:rest.slice(dot+1)};
 }
 function _audioRoute(u){
   if(!u || typeof u!=='string' || u.indexOf('res.cloudinary.com/')===-1 || !_audioProxyActive()) return u;
@@ -14466,7 +14468,7 @@ function skipFieldCmd(idx){
 }
 
 // === Recordings protection (admin) ===========================================
-function _audioDirectUrl(a){ return 'https://res.cloudinary.com/'+a.cloud+'/video/upload/f_mp3/'+a.pid+'.'+a.ext; }
+function _audioDirectUrl(a){ return 'https://res.cloudinary.com/'+a.cloud+'/video/upload/f_mp3/'+a.pid.split('/').map(encodeURIComponent).join('/')+'.'+a.ext; }
 function _audioRoutePath(a){ return '/api/audio/'+a.pid.split('/').map(encodeURIComponent).join('/')+'.'+a.ext; }
 async function _audioAdminCall(action, items){
   function go(){ return fetch('/api/audio-admin',{method:'POST',headers:{'authorization':'Bearer '+_adminTokenGet(),'content-type':'application/json'},body:JSON.stringify({action:action,items:items})}); }
@@ -25078,7 +25080,7 @@ window.addEventListener('load', function(){
 <script>
 // Version stamp — shown in the admin panel so we can confirm which build is live
 // on a device (stale service-worker caches were causing "my changes don't show").
-window.APP_VERSION = 'v357';
+window.APP_VERSION = 'v358';
 
 // Register the service worker for full offline use in the field, WITH update
 // detection: when a new version installs, offer a one-tap refresh instead of the

@@ -91,7 +91,8 @@ const COOKIE_DAYS = 7;
 const AUDIO_EXT = /^[A-Za-z0-9]{1,6}$/;   // the file type Cloudinary reports (webm, mp4, mkv, …)
 // A Cloudinary public id: no control chars, no backslash, no ".." segment.
 const safeId = (pid) => pid.length >= 1 && pid.length <= 300 && !/[\u0000-\u001f\\]/.test(pid) && !pid.split('/').some((x) => x === '..' || x === '.' || x === '');
-const encId = (pid) => pid.split('/').map(encodeURIComponent).join('/');
+// As Cloudinary's SDKs write ids in URLs (and sign them): %-encoded, ':' kept.
+const encId = (pid) => pid.split('/').map((x) => encodeURIComponent(x).replace(/%3A/g, ':')).join('/');
 
 async function hmacKey(apiSecret) {
   return crypto.subtle.importKey('raw', new TextEncoder().encode(apiSecret + '|asl-audio-cookie-v1'),
@@ -147,9 +148,9 @@ export function parseAudioPath(pathname) {
 // Cloudinary signed delivery URL: "s--" + first 8 chars of URL-safe base64 of
 // SHA-1(transformation/public_id.ext + api_secret) + "--". No version in the URL.
 export async function signedAudioUrl(cloud, apiSecret, pid, ext) {
-  const toSign = 'f_mp3/' + pid + '.' + ext;
+  const toSign = 'f_mp3/' + encId(pid) + '.' + ext;
   const sha = await crypto.subtle.digest('SHA-1', new TextEncoder().encode(toSign + apiSecret));
-  return `https://res.cloudinary.com/${cloud}/video/authenticated/s--${b64url(sha).slice(0, 8)}--/f_mp3/${encId(pid)}.${ext}`;
+  return `https://res.cloudinary.com/${cloud}/video/authenticated/s--${b64url(sha).slice(0, 8)}--/${toSign}`;
 }
 export function publicAudioUrl(cloud, pid, ext) {
   return `https://res.cloudinary.com/${cloud}/video/upload/f_mp3/${encId(pid)}.${ext}`;
