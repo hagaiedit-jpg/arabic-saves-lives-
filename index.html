@@ -25234,7 +25234,7 @@ window.addEventListener('load', function(){
 <script>
 // Version stamp — shown in the admin panel so we can confirm which build is live
 // on a device (stale service-worker caches were causing "my changes don't show").
-window.APP_VERSION = 'v367';
+window.APP_VERSION = 'v368';
 
 // Register the service worker for full offline use in the field, WITH update
 // detection: when a new version installs, offer a one-tap refresh instead of the
@@ -25374,7 +25374,7 @@ document.getElementById('legal-modal').addEventListener('click', function(e){ if
     </label>
     <button id="cl-login-btn" onclick="clSubmit()" style="width:100%;margin-top:14px;padding:13px;background:#1D9E75;border:none;border-radius:10px;color:#fff;font-size:15px;font-weight:800;cursor:pointer;font-family:inherit;">הרשמה</button>
     <div style="text-align:center;margin-top:12px;"><button id="cl-mode-toggle" onclick="clToggleMode()" style="background:none;border:none;color:#D4A24E;font-size:13px;cursor:pointer;font-family:inherit;text-decoration:underline;">כבר יש לך חשבון? התחברות</button></div>
-    <div id="cl-status" style="text-align:center;color:#ff9a8f;font-size:12.5px;margin-top:12px;min-height:16px;"></div>
+    <div id="cl-status" style="text-align:center;color:#ff9a8f;font-size:12.5px;margin-top:12px;min-height:16px;white-space:pre-line;line-height:1.6;"></div>
   </div>
 </div>
 
@@ -25569,18 +25569,21 @@ async function clLogin(){
     var r=await fetch(SUPA_URL+'/auth/v1/token?grant_type=password',{method:'POST',headers:{'apikey':SUPA_KEY,'Content-Type':'application/json'},body:JSON.stringify({email:email,password:pass})});
     var d=await r.json().catch(function(){return{};});
     if(!r.ok || !d.access_token){ throw new Error(_clLoginErr(d)); }
-    clStoreSession(d);
-    _clStatus('התחברת בהצלחה ✓',true);
-    setTimeout(function(){
-      clCloseAfterLogin();
-      if(typeof _loginGateActive==='function' && _loginGateActive()){ try{ _afterMemberLogin(); }catch(e){} }
-    },400);
+    _clLoginOk(d);
   }catch(err){ _clStatus((err&&err.message)||'ההתחברות נכשלה'); }
   if(btn){ btn.disabled=false; btn.textContent=old; }
 }
+function _clLoginOk(d){
+  clStoreSession(d);
+  _clStatus('התחברת בהצלחה ✓',true);
+  setTimeout(function(){
+    clCloseAfterLogin();
+    if(typeof _loginGateActive==='function' && _loginGateActive()){ try{ _afterMemberLogin(); }catch(e){} }
+  },400);
+}
 function _clLoginErr(d){
   var m=(d && (d.msg||d.error_description||d.error||d.message))||'';
-  if(/invalid|credent|grant/i.test(m)) return 'אימייל או סיסמה שגויים';
+  if(/invalid|credent|grant/i.test(m)) return 'אימייל או סיסמה שגויים. אפשר ללחוץ על 👁 כדי לראות מה הוקלד.';
   if(/confirm/i.test(m)) return 'החשבון עדיין לא אושר';
   return m||'ההתחברות נכשלה';
 }
@@ -25605,7 +25608,27 @@ function clToggleMode(){
   }
   _clStatus('');
 }
-function clSubmit(){ return (window._clMode==='signup') ? clSignup() : clLogin(); }
+// "הרשמה" pressed by someone who already has an account (a new phone, or after a
+// password change): sign in quietly first; only an unknown email goes on to sign-up
+// (and its terms checkbox).
+async function clSubmit(){
+  if(window._clMode!=='signup') return clLogin();
+  var email=String(document.getElementById('cl-phone').value||'').trim();
+  var pass=String(document.getElementById('cl-pass').value||'');
+  if(clValidEmail(email) && pass){
+    var btn=document.getElementById('cl-login-btn'), old=btn?btn.textContent:''; if(btn){ btn.disabled=true; btn.textContent='בודק...'; }
+    var d=null;
+    try{
+      var r=await fetch(SUPA_URL+'/auth/v1/token?grant_type=password',{method:'POST',headers:{'apikey':SUPA_KEY,'Content-Type':'application/json'},body:JSON.stringify({email:email,password:pass})});
+      d=await r.json().catch(function(){return{};}); if(!r.ok) d=null;
+    }catch(e){}
+    if(btn){ btn.disabled=false; btn.textContent=old; }
+    if(d && d.access_token){ clToggleMode(); _clLoginOk(d); return; }
+    var tc=document.getElementById('cl-terms');
+    if(tc && !tc.checked){ _clStatus('יש לך כבר חשבון? הסיסמה לא נכונה (אפשר ללחוץ על 👁 כדי לבדוק).\nהרשמה חדשה? יש לאשר את תנאי השימוש.'); return; }
+  }
+  return clSignup();
+}
 async function clSignup(){
   var email=String(document.getElementById('cl-phone').value||'').trim();
   var pass=String(document.getElementById('cl-pass').value||'');
@@ -25683,6 +25706,7 @@ async function clVerify(){
 }
 function clStoreSession(d){
   try{
+    if(d.user && d.user.email) localStorage.setItem('cl_last_email', String(d.user.email).toLowerCase());   // next login on this device: email filled in
     localStorage.setItem('cl_at', d.access_token||'');
     localStorage.setItem('cl_rt', d.refresh_token||'');
     localStorage.setItem('cl_user', JSON.stringify(d.user||{}));
@@ -25707,7 +25731,13 @@ async function clSubscribed(){
     return true;
   }catch(e){ return false; }
 }
-function clOpen(){ var o=document.getElementById('cl-overlay'); if(o) o.style.display='block'; }
+function clOpen(){
+  var o=document.getElementById('cl-overlay');
+  // This device logged in before: open on "התחברות" with the email filled in.
+  try{ var le=localStorage.getItem('cl_last_email')||'', f=document.getElementById('cl-phone');
+    if(le && f && !f.value){ f.value=le; if(window._clMode==='signup') clToggleMode(); } }catch(e){}
+  if(o) o.style.display='block';
+}
 function clCloseAfterLogin(){ var o=document.getElementById('cl-overlay'); if(o) o.style.display='none'; }
 
 // ===== Paid-access gate (login + activation) =================================
