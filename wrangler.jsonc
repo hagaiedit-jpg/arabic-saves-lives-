@@ -7,6 +7,9 @@
   },
   // The Worker only answers /api/sign-upload; everything else is the static site.
   "main": "worker/index.js",
+  // Keep variables added in the Cloudflare dashboard (e.g. the Cloudinary keys)
+  // when a new version deploys from git.
+  "keep_vars": true,
   "assets": {
     "directory": ".",
     "binding": "ASSETS"

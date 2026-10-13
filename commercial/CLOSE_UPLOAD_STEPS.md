@@ -39,7 +39,7 @@ Cloudflare ← **Workers & Pages** ← **arabicsaveslives** ← **Settings** ←
 | **Secret** | `CLOUDINARY_API_KEY` | ה־API Key |
 | **Secret** | `CLOUDINARY_API_SECRET` | ה־API Secret |
 
-לוחצים **Deploy** (או **Save**). חשוב שהסוג יהיה **Secret** ולא Text, כדי שהערכים יישמרו מוצפנים ולא יימחקו בעדכון הבא.
+לוחצים **Deploy** (או **Save**). ⚠️ בשדה **Type** ברירת המחדל היא **Text**, וצריך לשנות ל-**Secret**. ערך מסוג Text נמחק כשהאתר מתעדכן מהקוד (מאז 13.10 מוגדר גם `keep_vars`, שמשאיר אותו, אבל Secret עדיף כי הוא מוצפן).
 
 ## 4. לבדוק שהשרת עובד (2 דקות)
 1. בערכה, מרעננים את הדף ← ניהול ← **🔐 בדיקת הגנת המאגר**. צריך לראות: ✅ אישור העלאה מהשרת: **פעיל**.
