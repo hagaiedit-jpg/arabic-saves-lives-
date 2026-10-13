@@ -20,7 +20,10 @@ const reply = (status, body) => new Response(JSON.stringify(body), { status, hea
 
 export async function signUpload(request, env) {
   if (request.method !== 'POST') return reply(405, { error: 'method' });
-  if (!env.CLOUDINARY_API_KEY || !env.CLOUDINARY_API_SECRET) return reply(503, { error: 'not_configured' });
+  // Trim: a value pasted into the dashboard with a stray space/newline breaks the signature.
+  const apiKey = String(env.CLOUDINARY_API_KEY || '').trim();
+  const apiSecret = String(env.CLOUDINARY_API_SECRET || '').trim();
+  if (!apiKey || !apiSecret) return reply(503, { error: 'not_configured' });
   const auth = request.headers.get('authorization') || '';
   if (!/^Bearer\s+\S+$/.test(auth)) return reply(401, { error: 'login' });
 
@@ -43,14 +46,17 @@ export async function signUpload(request, env) {
   const timestamp = Math.floor(Date.now() / 1000);
   const params = { timestamp: String(timestamp), upload_preset: env.CLOUDINARY_PRESET };
   const toSign = Object.keys(params).sort().map((k) => k + '=' + params[k]).join('&');
-  const signature = await sha1hex(toSign + env.CLOUDINARY_API_SECRET);
+  // SHA-1 is Cloudinary's default; accounts set to SHA-256 need the other one.
+  const signature = await digestHex('SHA-1', toSign + apiSecret);
+  const signature256 = await digestHex('SHA-256', toSign + apiSecret);
   return reply(200, {
-    signature, timestamp, api_key: env.CLOUDINARY_API_KEY,
+    signature, signature256, timestamp, api_key: apiKey,
     upload_preset: env.CLOUDINARY_PRESET, cloud: env.CLOUDINARY_CLOUD,
   });
 }
 
-export async function sha1hex(text) {
-  const buf = await crypto.subtle.digest('SHA-1', new TextEncoder().encode(text));
+export async function digestHex(algo, text) {
+  const buf = await crypto.subtle.digest(algo, new TextEncoder().encode(text));
   return [...new Uint8Array(buf)].map((b) => b.toString(16).padStart(2, '0')).join('');
 }
+export const sha1hex = (text) => digestHex('SHA-1', text);

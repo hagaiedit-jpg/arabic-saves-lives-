@@ -11412,20 +11412,26 @@ async function _cloudSign(){
   try{ r=await ask(); if(r.status===401 && await _adminRefreshToken()) r=await ask(); }catch(e){ return null; }
   if(r.ok){ try{ return await r.json(); }catch(e){ return null; } }
   if(r.status===403) throw new Error('רק המנהלת יכולה להעלות הקלטות. התחברי לניהול ונסי שוב.');
+  if(r.status===401){ window._lastUploadErr='ההתחברות לניהול פגה'; throw new Error('ההתחברות לניהול פגה. צאי מהניהול, התחברי שוב, ואז לחצי "שמור".'); }
   return null;
 }
 async function cloudUp(file){
   // Retry transient upload failures so a network hiccup doesn't silently lose a recording.
   var lastErr=null;
-  var sig=await _cloudSign();
+  var sig=await _cloudSign(), useSha256=false;
+  window._lastUploadErr='';
   for(var attempt=0;attempt<3;attempt++){
     try{
       const fd=new FormData();fd.append('file',file);fd.append('upload_preset',sig?sig.upload_preset:PRESET);fd.append('resource_type','video');
-      if(sig){ fd.append('api_key',sig.api_key); fd.append('timestamp',String(sig.timestamp)); fd.append('signature',sig.signature); }
+      if(sig){ fd.append('api_key',sig.api_key); fd.append('timestamp',String(sig.timestamp)); fd.append('signature',(useSha256&&sig.signature256)?sig.signature256:sig.signature); }
       const r=await fetch(`https://api.cloudinary.com/v1_1/${CLOUD}/video/upload`,{method:'POST',body:fd});
       const d=await r.json();
       if(d && d.secure_url) return d.secure_url;
-      lastErr=new Error((d&&d.error&&d.error.message)||'העלאה נכשלה');
+      var _m=(d&&d.error&&d.error.message)||('HTTP '+r.status);
+      window._lastUploadErr=_m;
+      // Account set to SHA-256 signatures: switch once and retry right away.
+      if(sig && !useSha256 && sig.signature256 && /signature/i.test(_m)){ useSha256=true; attempt--; continue; }
+      lastErr=new Error(_m);
     }catch(e){ lastErr=e; }
     if(attempt<2) await new Promise(function(res){ setTimeout(res, 900*(attempt+1)); });
   }
@@ -14435,6 +14441,19 @@ async function dbSecurityCheck(btn){
   try{ var rs=await fetch('/api/sign-upload',{method:'POST',headers:{'authorization':'Bearer '+_adminTokenGet()}});
     if(rs.status===401 && await _adminRefreshToken()) rs=await fetch('/api/sign-upload',{method:'POST',headers:{'authorization':'Bearer '+_adminTokenGet()}});
     sg = rs.ok ? [true,'אישור העלאה מהשרת (למנהלת)','פעיל'] : (rs.status===503 ? [null,'אישור העלאה מהשרת (למנהלת)','עוד לא הוגדרו המפתחות ב-Cloudflare'] : [null,'אישור העלאה מהשרת (למנהלת)','לא זמין ('+rs.status+')']);
+    if(rs.ok){
+      // Does Cloudinary accept the signature? A few invalid bytes, so nothing is stored:
+      // "unsupported file" = signature accepted; "Invalid Signature" = keys/algorithm problem.
+      var sj=await rs.json();
+      var tryOne=async function(sigv){
+        var f=new FormData(); f.append('file',new Blob(['x'],{type:'audio/webm'}),'security-check.webm'); f.append('upload_preset',sj.upload_preset); f.append('api_key',sj.api_key); f.append('timestamp',String(sj.timestamp)); f.append('signature',sigv);
+        var rr=await fetch('https://api.cloudinary.com/v1_1/'+CLOUD+'/video/upload',{method:'POST',body:f}); var dd={}; try{ dd=await rr.json(); }catch(e){}
+        return String((dd&&dd.error&&dd.error.message)||(rr.ok?'ok':rr.status));
+      };
+      var m1=await tryOne(sj.signature), okSig=!/signature|api_key|api key|unknown/i.test(m1), note='SHA-1';
+      if(!okSig && sj.signature256){ var m2=await tryOne(sj.signature256); if(!/signature|api_key|api key|unknown/i.test(m2)){ okSig=true; note='SHA-256'; } else m1=m2; }
+      lines.push(okSig ? [true,'Cloudinary מקבל את החתימה','כן ('+note+')'] : [false,'Cloudinary מקבל את החתימה','לא: '+m1]);
+    }
   }catch(e){ sg=[null,'אישור העלאה מהשרת (למנהלת)','לא זמין']; }
   lines.push(sg);
   var exposed=lines.slice(0,3).some(function(l){ return l[0]===false; });
@@ -23034,7 +23053,7 @@ async function saveEdit(advance){
     // A recording was waiting but its upload failed — do NOT save a "success"
     // that silently drops the audio. Keep the clip in the form so she can retry.
     btn.textContent=btnTxt;
-    alert('⚠️ ההקלטה לא הועלתה — כנראה תקלת רשת.\nלא שמרתי, כדי לא לאבד את ההקלטה.\nבדקי חיבור ולחצי שוב "שמור" (ההקלטה עדיין שמורה בטופס).');
+    alert('⚠️ ההקלטה לא הועלתה.\nלא שמרתי, כדי לא לאבד את ההקלטה.\nבדקי חיבור ולחצי שוב "שמור" (ההקלטה עדיין שמורה בטופס).'+(window._lastUploadErr?('\n\nפירוט מ-Cloudinary: '+window._lastUploadErr):''));
     return;
   }
   try{
@@ -24869,7 +24888,7 @@ window.addEventListener('load', function(){
 <script>
 // Version stamp — shown in the admin panel so we can confirm which build is live
 // on a device (stale service-worker caches were causing "my changes don't show").
-window.APP_VERSION = 'v353';
+window.APP_VERSION = 'v354';
 
 // Register the service worker for full offline use in the field, WITH update
 // detection: when a new version installs, offer a one-tap refresh instead of the
