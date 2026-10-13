@@ -4032,7 +4032,10 @@ function showLanding() {
           <div id="audprot-mode" style="color:#7a9ab5;font-size:11px;margin-top:3px;line-height:1.6;"></div>
           <button id="tool-audtest" onclick="audioProtectTest(this)" style="width:100%;padding:12px;margin-top:8px;border:none;border-radius:10px;color:#fff;font-size:13px;font-weight:800;cursor:pointer;font-family:inherit;background:linear-gradient(135deg,#3a6d8c 0%,#24485e 100%);">🧪 שלב 1: בדיקה על הקלטה אחת</button>
           <button id="tool-audall" onclick="audioProtectAll(this,'protect')" style="width:100%;padding:12px;margin-top:8px;border:none;border-radius:10px;color:#fff;font-size:13px;font-weight:800;cursor:pointer;font-family:inherit;background:linear-gradient(135deg,#8c2f39 0%,#5e1f27 100%);">🔒 שלב 2: סגירת כל ההקלטות</button>
-          <button id="tool-audundo" onclick="audioProtectAll(this,'unprotect')" style="width:100%;padding:12px;margin-top:8px;border:none;border-radius:10px;color:#fff;font-size:13px;font-weight:800;cursor:pointer;font-family:inherit;background:#2A3D52;">↩️ פתיחה חזרה של כל ההקלטות (ביטול)</button>
+          <details style="margin-top:10px;">
+            <summary style="cursor:pointer;color:#7a9ab5;font-size:11.5px;">🆘 ביטול ההגנה (רק אם הקלטות לא מתנגנות)</summary>
+            <button id="tool-audundo" onclick="audioProtectAll(this,'unprotect')" style="width:100%;padding:12px;margin-top:8px;border:1px dashed #c0392b;border-radius:10px;color:#ff9a8f;font-size:13px;font-weight:800;cursor:pointer;font-family:inherit;background:transparent;">↩️ פתיחה חזרה של כל ההקלטות (ביטול ההגנה)</button>
+          </details>
           <div id="audprot-panel" style="margin-top:8px;"></div>
         </div>
         <div style="margin-top:14px;border-top:1px solid #2A3D52;padding-top:10px;">
@@ -14625,14 +14628,19 @@ async function audioProtectAll(btn, action){
   try{
     try{ if(navigator.wakeLock) wl=await navigator.wakeLock.request('screen'); }catch(e){}
     var all=await _audioAllIds();
-    var closed=null; try{ closed=await _audioListClosed(); }catch(e){}
+    var closed=null, listErr=''; try{ closed=await _audioListClosed(); }catch(e){ listErr=(e && e.message) || 'error'; }
     var list=all.filter(function(a){
       if(action==='protect') return a.type==='upload' && !(closed && closed[a.pid]);
       return closed ? !!closed[a.pid] : true;
     });
     var skipped=all.length-list.length;
     if(!list.length){ box.innerHTML='<div style="color:#7eecc1;font-size:12.5px;">'+(action==='protect'?'✓ כל ההקלטות כבר סגורות ('+all.length+').':'אין הקלטות סגורות לפתוח.')+'</div>'; return; }
-    if(!confirm((action==='protect'?'לסגור ':'לפתוח חזרה ')+list.length+' הקלטות ב-Cloudinary?'+(closed && action==='protect' && skipped?'\n('+skipped+' כבר סגורות, מדלגת עליהן)':''))) return;
+    if(action==='protect'){
+      if(!confirm('🔒 לסגור '+list.length+' הקלטות ב-Cloudinary?'+(closed && skipped?'\n('+skipped+' כבר סגורות, מדלגת עליהן)':''))) return;
+    } else {
+      if(!confirm('⚠️ ביטול ההגנה!\n\n'+list.length+' הקלטות יחזרו להיות פתוחות לכל מי שיש לו קישור.\nזה נועד רק למקרה שהקלטות לא מתנגנות.\n\nלבטל את ההגנה?')) return;
+      if(prompt('כדי לאשר את ביטול ההגנה, כתבי: פתיחה')!=='פתיחה') return;
+    }
     box.innerHTML='<div style="color:#7a9ab5;font-size:12px;line-height:1.6;">⏳ עובדת… לא לסגור את הדף הזה ולא לרענן עד שמופיעה התוצאה.</div>';
     var done=0, okN=0, already=(action==='protect'?skipped:0), fail=0, errs=[];
     for(var i=0;i<list.length;i+=20){
@@ -14644,7 +14652,8 @@ async function audioProtectAll(btn, action){
       btn.textContent=(action==='protect'?'סוגרת ':'פותחת ')+done+'/'+list.length;
     }
     box.innerHTML='<div style="background:#18293E;border:1px solid '+(fail?'#c0392b':'#1D9E75')+';border-radius:10px;padding:10px 12px;color:#E8D9B8;font-size:12.5px;line-height:1.8;">'
-      +(action==='protect'?'🔒 נסגרו: ':'↩️ נפתחו: ')+okN+'<br>כבר היו במצב הזה / לא נמצאו: '+already+(fail?'<br>⚠️ נכשלו: '+fail+' ('+errs.join(' · ')+'). אפשר ללחוץ שוב, ימשיך מהן.':'')+'</div>';
+      +(action==='protect'?'🔒 נסגרו: ':'↩️ נפתחו: ')+okN+'<br>כבר היו במצב הזה / לא נמצאו: '+already
+      +(listErr?'<br><span style="color:#7a9ab5;font-size:11px;">(רשימת הסגורות לא התקבלה: '+_fcEsc(listErr)+', עברתי על הכול)</span>':'')+(fail?'<br>⚠️ נכשלו: '+fail+' ('+errs.join(' · ')+'). אפשר ללחוץ שוב, ימשיך מהן.':'')+'</div>';
   }catch(e){ box.innerHTML='<div style="color:#ff9a8f;font-size:12.5px;">שגיאה: '+(e&&e.message?e.message:e)+'</div>'; }
   finally{
     window._aslBusy=false; window.removeEventListener('beforeunload', stay);
@@ -25225,7 +25234,7 @@ window.addEventListener('load', function(){
 <script>
 // Version stamp — shown in the admin panel so we can confirm which build is live
 // on a device (stale service-worker caches were causing "my changes don't show").
-window.APP_VERSION = 'v366';
+window.APP_VERSION = 'v367';
 
 // Register the service worker for full offline use in the field, WITH update
 // detection: when a new version installs, offer a one-tap refresh instead of the
