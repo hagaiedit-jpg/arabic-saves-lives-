@@ -4035,6 +4035,16 @@ function showLanding() {
           <button id="tool-audundo" onclick="audioProtectAll(this,'unprotect')" style="width:100%;padding:12px;margin-top:8px;border:none;border-radius:10px;color:#fff;font-size:13px;font-weight:800;cursor:pointer;font-family:inherit;background:#2A3D52;">↩️ פתיחה חזרה של כל ההקלטות (ביטול)</button>
           <div id="audprot-panel" style="margin-top:8px;"></div>
         </div>
+        <div style="margin-top:14px;border-top:1px solid #2A3D52;padding-top:10px;">
+          <div style="color:#E8D9B8;font-size:13px;font-weight:800;">🔑 שינוי הסיסמה שלך</div>
+          <div style="color:#7a9ab5;font-size:11px;margin-top:3px;line-height:1.6;">אותה סיסמה משמשת לכניסה לערכה ולכניסה לניהול, במחשב ובטלפון. כדאי: אותיות קטנות באנגלית ומספרים, בלי אות גדולה (הטלפון מוסיף אותה לבד).</div>
+          <input id="pwc-cur" type="password" autocomplete="current-password" autocapitalize="off" autocorrect="off" spellcheck="false" placeholder="הסיסמה הנוכחית" style="width:100%;margin-top:8px;background:#0E1B2E;border:1px solid #2A3D52;border-radius:10px;color:#E8D9B8;font-family:inherit;padding:11px;font-size:16px;direction:ltr;text-align:center;">
+          <input id="pwc-new" type="password" autocomplete="new-password" autocapitalize="off" autocorrect="off" spellcheck="false" placeholder="סיסמה חדשה (8 תווים לפחות)" style="width:100%;margin-top:8px;background:#0E1B2E;border:1px solid #2A3D52;border-radius:10px;color:#E8D9B8;font-family:inherit;padding:11px;font-size:16px;direction:ltr;text-align:center;">
+          <input id="pwc-new2" type="password" autocomplete="new-password" autocapitalize="off" autocorrect="off" spellcheck="false" placeholder="הסיסמה החדשה שוב" style="width:100%;margin-top:8px;background:#0E1B2E;border:1px solid #2A3D52;border-radius:10px;color:#E8D9B8;font-family:inherit;padding:11px;font-size:16px;direction:ltr;text-align:center;">
+          <label style="display:flex;align-items:center;gap:8px;margin-top:8px;color:#7a9ab5;font-size:12.5px;cursor:pointer;"><input id="pwc-show" type="checkbox" onchange="['pwc-cur','pwc-new','pwc-new2'].forEach(function(i){ var e=document.getElementById(i); if(e) e.type=this.checked?'text':'password'; }, this)" style="width:18px;height:18px;accent-color:#1D9E75;"> הצגת הסיסמאות</label>
+          <button id="tool-pwchange" class="keep-white" onclick="adminChangePassword(this)" style="width:100%;padding:12px;margin-top:8px;border:none;border-radius:10px;color:#fff;font-size:13px;font-weight:800;cursor:pointer;font-family:inherit;background:linear-gradient(135deg,#1f8a70 0%,#0e5a48 100%);">🔑 שמירת הסיסמה החדשה</button>
+          <div id="pwc-panel" style="margin-top:8px;"></div>
+        </div>
         <button id="tool-zikuy" onclick="addZikuyScenarios(this)" style="width:100%;padding:12px;margin-top:10px;background:linear-gradient(135deg,#2c6fb0 0%,#1d4f80 100%);border:none;border-radius:10px;color:#fff;font-size:13px;font-weight:800;cursor:pointer;font-family:inherit;">👋 הוסף תרחישי "זיכוי מרחוק" + "זיכוי ובידוק" (חד-פעמי)</button>
         <div style="text-align:center;color:#7a9ab5;font-size:11px;margin-top:5px;">פקודות בידוק וזיכוי + כמה מקרים לדוגמה (מהסס, נמצא חפץ, מתנגד, אישה…) — אחר כך אפשר לערוך ולהקליט מהרשימה</div>
         <button id="tool-health" onclick="addHealthScenario(this)" style="width:100%;padding:12px;margin-top:10px;background:linear-gradient(135deg,#1f8a70 0%,#14624f 100%);border:none;border-radius:10px;color:#fff;font-size:13px;font-weight:800;cursor:pointer;font-family:inherit;">🩺 הוסף תרחיש "בירור מצב בריאותי של עצור" (חד-פעמי)</button>
@@ -4400,10 +4410,17 @@ function _clRefreshToken(){
     if(!rt) return false;
     try{
       const r=await fetch(SUPA_URL+'/auth/v1/token?grant_type=refresh_token',{method:'POST',headers:{'apikey':SUPA_KEY,'Content-Type':'application/json'},body:JSON.stringify({refresh_token:rt})});
-      const d=await r.json();
+      const d=await r.json().catch(function(){ return {}; });
       if(d && d.access_token){
         try{ localStorage.setItem('cl_at',d.access_token); localStorage.setItem('cl_rt',d.refresh_token||rt); if(d.user) localStorage.setItem('cl_user',JSON.stringify(d.user)); }catch(e){}
         return true;
+      }
+      // The login itself was ended (password changed on another device, user
+      // removed): forget it and show the login screen. Offline never gets here.
+      if((r.status===400 || r.status===401) && /refresh|token|session/i.test((d && (d.error_code||d.code||d.msg||d.error_description||d.error||d.message))||'')){
+        try{ ['cl_at','cl_rt','cl_user','member_ok'].forEach(function(k){ localStorage.removeItem(k); }); }catch(e){}
+        window._clUser=null;
+        setTimeout(function(){ try{ if(typeof runGate==='function') runGate(); }catch(e){} }, 0);
       }
     }catch(e){}
     return false;
@@ -4431,23 +4448,52 @@ function adminLogout(){
   try{ sessionStorage.removeItem('admin_at'); sessionStorage.removeItem('admin_rt'); }catch(e){}
   var t=document.getElementById('admin-tab'); if(t) t.style.display='none';
 }
+// Show / hide what was typed in a password field (the 👁 button next to it).
+function _pwToggle(id, btn){
+  var el=document.getElementById(id); if(!el) return;
+  var show=el.type==='password'; el.type=show?'text':'password';
+  if(btn){ btn.textContent=show?'🙈':'👁'; btn.setAttribute('aria-label', show?'הסתרת הסיסמה':'הצגת הסיסמה'); }
+}
+// Admin login form. The email is remembered on this device so only the
+// password has to be typed.
 function promptAdminLogin(){
-  var email = prompt('מייל מנהל:'); if(!email) return;
-  var pw = prompt('סיסמת ניהול:'); if(!pw) return;
-  adminLogin(email.trim(), pw).then(function(ok){
-    if(ok){
-      var at=document.getElementById('admin-tab'); if(at) at.style.display='block';
-      window._adminAuth=true;
-      try{ _audioSessionRefresh(true); }catch(e){}
-      alert('✓ התחברת כמנהל. הלשונית "ניהול" הופיעה.');
-    } else {
-      var why = window._adminLoginError || '';
-      var hint = /not confirmed|confirm/i.test(why) ? '\n\n➜ צריך לאשר את המשתמש: ב-Supabase → Authentication → Users → לחצי על המשתמש → "Confirm email" (או למחוק וליצור מחדש עם "Auto Confirm User" דלוק).'
-               : /invalid login|credentials/i.test(why) ? '\n\n➜ המייל או הסיסמה שגויים. בדקי שאין רווח/אות גדולה בטעות.'
-               : '';
-      alert('התחברות נכשלה.\nסיבה: ' + (why || 'לא ידועה') + hint);
-    }
-  });
+  var o=document.getElementById('adm-login-overlay'); if(!o) return;
+  var em=document.getElementById('adm-email'), pw=document.getElementById('adm-pass');
+  var last=''; try{ last=localStorage.getItem('adm_email')||''; }catch(e){}
+  if(em && !em.value) em.value=last;
+  if(pw){ pw.value=''; pw.type='password'; }
+  _admLoginStatus('');
+  o.style.display='block';
+  setTimeout(function(){ try{ ((em && !em.value) ? em : pw).focus(); }catch(e){} }, 60);
+}
+function _admLoginStatus(t){ var e=document.getElementById('adm-login-status'); if(e) e.innerHTML=t||''; }
+function admLoginClose(){
+  var o=document.getElementById('adm-login-overlay'); if(o) o.style.display='none';
+  try{ var pw=document.getElementById('adm-pass'); pw.value=''; pw.type='password'; }catch(e){}
+}
+async function admLoginSubmit(){
+  var email=String((document.getElementById('adm-email')||{}).value||'').trim().toLowerCase();
+  var pw=String((document.getElementById('adm-pass')||{}).value||'');
+  if(!email || !pw){ _admLoginStatus('נא למלא מייל וסיסמה'); return; }
+  var btn=document.getElementById('adm-login-btn'), old=btn?btn.textContent:'';
+  if(btn){ btn.disabled=true; btn.textContent='מתחברת…'; }
+  _admLoginStatus('');
+  var ok=false;
+  try{ ok=await adminLogin(email, pw); }catch(e){}
+  if(btn){ btn.disabled=false; btn.textContent=old; }
+  if(ok){
+    try{ localStorage.setItem('adm_email', email); document.getElementById('adm-email').value=email; }catch(e){}
+    admLoginClose();
+    var at=document.getElementById('admin-tab'); if(at) at.style.display='block';
+    window._adminAuth=true;
+    try{ _audioSessionRefresh(true); }catch(e){}
+    alert('✓ התחברת כמנהל. הלשונית "ניהול" הופיעה.');
+    return;
+  }
+  var why = window._adminLoginError || '';
+  _admLoginStatus(/invalid login|credentials/i.test(why) ? 'המייל או הסיסמה שגויים.<br>אפשר ללחוץ על 👁 כדי לראות מה הוקלד.'
+    : /not confirmed|confirm/i.test(why) ? 'המשתמש עוד לא אושר ב-Supabase (Authentication ← Users ← Confirm email).'
+    : 'הכניסה נכשלה: ' + _fcEsc(why || 'סיבה לא ידועה'));
 }
 
 async function sbFetch(path,method='GET',body=null){
@@ -14582,6 +14628,60 @@ async function audioProtectAll(btn, action){
     box.innerHTML='<div style="background:#18293E;border:1px solid '+(fail?'#c0392b':'#1D9E75')+';border-radius:10px;padding:10px 12px;color:#E8D9B8;font-size:12.5px;line-height:1.8;">'
       +(action==='protect'?'🔒 נסגרו: ':'↩️ נפתחו: ')+okN+'<br>כבר היו במצב הזה / לא נמצאו: '+already+(fail?'<br>⚠️ נכשלו: '+fail+' ('+errs.join(' · ')+'). אפשר ללחוץ שוב, ימשיך מהן.':'')+'</div>';
   }catch(e){ box.innerHTML='<div style="color:#ff9a8f;font-size:12.5px;">שגיאה: '+(e&&e.message?e.message:e)+'</div>'; }
+  finally{ btn.disabled=false; btn.textContent=old; }
+}
+
+// === Change the admin's own password ========================================
+// One Supabase account logs in to both the kit and admin. The current password
+// is checked first; that fresh login is also what Supabase wants before a
+// password change. Supabase then ends the account's other logins, so this
+// device's admin + kit logins are renewed here; other devices log in again.
+function _jwtEmail(t){
+  try{ var p=String(t||'').split('.')[1].replace(/-/g,'+').replace(/_/g,'/'); while(p.length%4) p+='=';
+    return String(JSON.parse(decodeURIComponent(escape(atob(p)))).email||'').toLowerCase(); }catch(e){ return ''; }
+}
+async function adminChangePassword(btn){
+  var box=document.getElementById('pwc-panel');
+  function say(ok,t){ box.innerHTML='<div style="background:#18293E;border:1px solid '+(ok?'#1D9E75':'#c0392b')+';border-radius:10px;padding:10px 12px;color:#E8D9B8;font-size:12.5px;line-height:1.8;">'+t+'</div>'; }
+  function v(id){ var e=document.getElementById(id); return e?String(e.value||''):''; }
+  var cur=v('pwc-cur'), nw=v('pwc-new'), nw2=v('pwc-new2');
+  var email=_jwtEmail(_adminTokenGet()); if(!email){ try{ email=localStorage.getItem('adm_email')||''; }catch(e){} }
+  if(!email){ say(false,'צריך לצאת ולהיכנס לניהול מחדש, ואז לנסות שוב.'); return; }
+  if(!cur){ say(false,'נא להקליד את הסיסמה הנוכחית.'); return; }
+  if(nw.length<8){ say(false,'הסיסמה החדשה צריכה לפחות 8 תווים.'); return; }
+  if(nw!==nw2){ say(false,'שתי הסיסמאות החדשות לא זהות. אפשר לסמן "הצגת הסיסמאות" ולבדוק.'); return; }
+  if(nw===cur){ say(false,'הסיסמה החדשה זהה לנוכחית.'); return; }
+  if(/^\s|\s$/.test(nw)){ say(false,'יש רווח בתחילת הסיסמה החדשה או בסופה. כדאי למחוק אותו.'); return; }
+  var old=btn.textContent; btn.disabled=true; btn.textContent='שומרת…';
+  var H={'apikey':SUPA_KEY,'Content-Type':'application/json'};
+  function login(pw){ return fetch(SUPA_URL+'/auth/v1/token?grant_type=password',{method:'POST',headers:H,body:JSON.stringify({email:email,password:pw})})
+    .then(function(r){ return r.json().catch(function(){ return {}; }); }); }
+  try{
+    var d=await login(cur);
+    if(!d || !d.access_token){
+      var lm=String((d && (d.error_code||d.msg||d.error_description||d.error||d.message))||'');
+      say(false, /invalid|credential|grant/i.test(lm) ? 'הסיסמה הנוכחית שגויה.' : 'הבדיקה של הסיסמה הנוכחית נכשלה.'+_ltr(lm));
+      return;
+    }
+    var u=await fetch(SUPA_URL+'/auth/v1/user',{method:'PUT',headers:Object.assign({'Authorization':'Bearer '+d.access_token},H),body:JSON.stringify({password:nw})});
+    var ud=await u.json().catch(function(){ return {}; });
+    if(!u.ok){
+      var m=String((ud && (ud.error_code||ud.code||'')) +' '+ (ud && (ud.msg||ud.error_description||ud.message||ud.error)||'')).trim();
+      say(false,'הסיסמה <b>לא</b> שונתה. '+(/same_password|different from the old/i.test(m) ? 'הסיסמה החדשה זהה לישנה.'
+        : /weak|at least|characters|should contain/i.test(m) ? 'Supabase מבקש סיסמה חזקה יותר.'+_ltr(m)
+        : /reauth/i.test(m) ? 'Supabase מבקש אימות נוסף. צאי מהניהול, היכנסי שוב ונסי מיד.'+_ltr(m)
+        : 'שגיאה '+u.status+_ltr(m)));
+      return;
+    }
+    // Saved. This login (from the check above) stays valid: use it for admin here.
+    window._adminToken=d.access_token; window._adminRefresh=d.refresh_token||'';
+    try{ sessionStorage.setItem('admin_at',d.access_token); sessionStorage.setItem('admin_rt',window._adminRefresh); }catch(e){}
+    // The kit login on this device was ended too; renew it with the new password.
+    if(_memberEmail()===email){ try{ var k=await login(nw); if(k && k.access_token) clStoreSession(k); }catch(e){} }
+    ['pwc-cur','pwc-new','pwc-new2'].forEach(function(i){ var e=document.getElementById(i); if(e){ e.value=''; e.type='password'; } });
+    var sh=document.getElementById('pwc-show'); if(sh) sh.checked=false;
+    say(true,'✓ הסיסמה שונתה.<br>מעכשיו נכנסים איתה לערכה ולניהול, בטלפון ובמחשב.<br>במכשירים אחרים שהיית מחוברת בהם, הערכה תבקש להתחבר מחדש.');
+  }catch(e){ say(false,'אין חיבור לשרת. הסיסמה לא שונתה. '+_fcEsc(e && e.message || '')); }
   finally{ btn.disabled=false; btn.textContent=old; }
 }
 
@@ -25103,7 +25203,7 @@ window.addEventListener('load', function(){
 <script>
 // Version stamp — shown in the admin panel so we can confirm which build is live
 // on a device (stale service-worker caches were causing "my changes don't show").
-window.APP_VERSION = 'v364';
+window.APP_VERSION = 'v365';
 
 // Register the service worker for full offline use in the field, WITH update
 // detection: when a new version installs, offer a one-tap refresh instead of the
@@ -25227,12 +25327,15 @@ document.getElementById('legal-modal').addEventListener('click', function(e){ if
       <div id="cl-sub" style="color:#9fb2c6;font-size:13px;margin-top:4px;">הרשמה עם אימייל וסיסמה</div>
     </div>
     <label style="display:block;color:#7a9ab5;font-size:11px;margin-bottom:4px;">כתובת מייל</label>
-    <input id="cl-phone" type="email" inputmode="email" placeholder="name@example.com" autocomplete="username"
+    <input id="cl-phone" type="email" inputmode="email" placeholder="name@example.com" autocomplete="username" autocapitalize="off" autocorrect="off" spellcheck="false"
       style="width:100%;background:#0E1B2E;border:1px solid #2A3D52;border-radius:10px;color:#E8D9B8;font-family:inherit;padding:13px;font-size:16px;direction:ltr;text-align:center;">
     <label style="display:block;color:#7a9ab5;font-size:11px;margin:12px 0 4px;">סיסמה</label>
-    <input id="cl-pass" type="password" autocomplete="current-password" placeholder="בחרו סיסמה (6 תווים לפחות)"
+    <div style="position:relative;">
+    <input id="cl-pass" type="password" autocomplete="current-password" autocapitalize="off" autocorrect="off" spellcheck="false" placeholder="בחרו סיסמה (6 תווים לפחות)"
       onkeydown="if(event.key==='Enter'){clSubmit();}"
-      style="width:100%;background:#0E1B2E;border:1px solid #2A3D52;border-radius:10px;color:#E8D9B8;font-family:inherit;padding:13px;font-size:16px;text-align:center;">
+      style="width:100%;background:#0E1B2E;border:1px solid #2A3D52;border-radius:10px;color:#E8D9B8;font-family:inherit;padding:13px 44px;font-size:16px;text-align:center;">
+    <button type="button" onclick="_pwToggle('cl-pass',this)" aria-label="הצגת הסיסמה" style="position:absolute;left:4px;top:50%;transform:translateY(-50%);background:none;border:none;font-size:18px;padding:8px;cursor:pointer;line-height:1;">👁</button>
+    </div>
     <label id="cl-terms-row" style="display:flex;align-items:flex-start;gap:8px;margin-top:12px;color:#c9d6e3;font-size:12.5px;line-height:1.5;cursor:pointer;">
       <input id="cl-terms" type="checkbox" style="width:20px;height:20px;flex-shrink:0;margin-top:1px;accent-color:#1D9E75;">
       <span>קראתי ואני מסכים/ה ל<a href="#" onclick="openLegal('terms');return false;" style="color:#D4A24E;">תנאי השימוש</a> ול<a href="#" onclick="openLegal('privacy');return false;" style="color:#D4A24E;">מדיניות הפרטיות</a></span>
@@ -25240,6 +25343,29 @@ document.getElementById('legal-modal').addEventListener('click', function(e){ if
     <button id="cl-login-btn" onclick="clSubmit()" style="width:100%;margin-top:14px;padding:13px;background:#1D9E75;border:none;border-radius:10px;color:#fff;font-size:15px;font-weight:800;cursor:pointer;font-family:inherit;">הרשמה</button>
     <div style="text-align:center;margin-top:12px;"><button id="cl-mode-toggle" onclick="clToggleMode()" style="background:none;border:none;color:#D4A24E;font-size:13px;cursor:pointer;font-family:inherit;text-decoration:underline;">כבר יש לך חשבון? התחברות</button></div>
     <div id="cl-status" style="text-align:center;color:#ff9a8f;font-size:12.5px;margin-top:12px;min-height:16px;"></div>
+  </div>
+</div>
+
+<!-- ===== Admin login (a real form: the browser's prompt box capitalised the first letter on phones) ===== -->
+<div id="adm-login-overlay" class="force-dark" style="display:none;position:fixed;inset:0;z-index:12000;background:rgba(9,17,29,.97);direction:rtl;overflow-y:auto;padding:24px 16px;">
+  <div style="max-width:380px;margin:8vh auto 0;background:linear-gradient(180deg,#1c2f47,#152539);border:1px solid #2a3d54;border-radius:16px;padding:22px;box-shadow:0 12px 40px rgba(0,0,0,.5);">
+    <div style="text-align:center;margin-bottom:14px;">
+      <div style="font-size:30px;">🛠️</div>
+      <div class="keep-white" style="color:#fff;font-size:19px;font-weight:800;margin-top:4px;">כניסה לניהול</div>
+    </div>
+    <label style="display:block;color:#7a9ab5;font-size:11px;margin-bottom:4px;">מייל</label>
+    <input id="adm-email" type="email" inputmode="email" autocomplete="username" autocapitalize="off" autocorrect="off" spellcheck="false"
+      style="width:100%;background:#0E1B2E;border:1px solid #2A3D52;border-radius:10px;color:#E8D9B8;font-family:inherit;padding:13px;font-size:16px;direction:ltr;text-align:center;">
+    <label style="display:block;color:#7a9ab5;font-size:11px;margin:12px 0 4px;">סיסמה</label>
+    <div style="position:relative;">
+      <input id="adm-pass" type="password" autocomplete="current-password" autocapitalize="off" autocorrect="off" spellcheck="false"
+        onkeydown="if(event.key==='Enter'){admLoginSubmit();}"
+        style="width:100%;background:#0E1B2E;border:1px solid #2A3D52;border-radius:10px;color:#E8D9B8;font-family:inherit;padding:13px 44px;font-size:16px;direction:ltr;text-align:center;">
+      <button type="button" onclick="_pwToggle('adm-pass',this)" aria-label="הצגת הסיסמה" style="position:absolute;left:4px;top:50%;transform:translateY(-50%);background:none;border:none;font-size:18px;padding:8px;cursor:pointer;line-height:1;">👁</button>
+    </div>
+    <button id="adm-login-btn" class="keep-white" onclick="admLoginSubmit()" style="width:100%;margin-top:14px;padding:13px;background:#1D9E75;border:none;border-radius:10px;color:#fff;font-size:15px;font-weight:800;cursor:pointer;font-family:inherit;">כניסה</button>
+    <button onclick="admLoginClose()" style="width:100%;margin-top:8px;padding:11px;background:#2A3D52;border:none;border-radius:10px;color:#E8D9B8;font-size:14px;cursor:pointer;font-family:inherit;">ביטול</button>
+    <div id="adm-login-status" style="text-align:center;color:#ff9a8f;font-size:12.5px;margin-top:12px;min-height:16px;line-height:1.6;"></div>
   </div>
 </div>
 
@@ -25455,9 +25581,12 @@ async function clSignup(){
   if(pass.length<6){ _clStatus('הסיסמה צריכה לפחות 6 תווים'); return; }
   var tc=document.getElementById('cl-terms'); if(tc && !tc.checked){ _clStatus('כדי להירשם יש לאשר את תנאי השימוש'); return; }
   var btn=document.getElementById('cl-login-btn'), old=btn?btn.textContent:''; if(btn){ btn.disabled=true; btn.textContent='נרשם...'; } _clStatus('');
+  var existing=false;
   try{
     var r=await fetch(SUPA_URL+'/auth/v1/signup',{method:'POST',headers:{'apikey':SUPA_KEY,'Content-Type':'application/json'},body:JSON.stringify({email:email,password:pass,data:{terms_version:TERMS_VERSION,terms_accepted_at:new Date().toISOString()}})});
     var d=await r.json().catch(function(){return{};});
+    // Already has an account (e.g. pressed "הרשמה" on a new phone): sign in instead.
+    if(!r.ok && /already|registered|exists/i.test((d && (d.msg||d.error_description||d.error||d.message||d.error_code||d.code))||'')){ existing=true; throw new Error(''); }
     if(!r.ok){ throw new Error(_clSignupErr(d)); }
     termsRecordAcceptance('signup');
     if(d.access_token){
@@ -25468,8 +25597,9 @@ async function clSignup(){
       // Email confirmation is ON in Supabase — no instant session.
       _clStatus('נרשמת! נשלח מייל אישור — יש לאשר ואז להתחבר.',true);
     }
-  }catch(err){ _clStatus((err&&err.message)||'ההרשמה נכשלה'); }
+  }catch(err){ if(!existing) _clStatus((err&&err.message)||'ההרשמה נכשלה'); }
   if(btn){ btn.disabled=false; btn.textContent=old; }
+  if(existing){ clToggleMode(); return clLogin(); }
 }
 function _clSignupErr(d){
   var m=(d && (d.msg||d.error_description||d.error||d.message))||'';
