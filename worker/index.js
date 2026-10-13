@@ -227,21 +227,28 @@ export async function audioAdmin(request, env) {
       // Each address, with Cloudinary's own error text; plus what Cloudinary's
       // admin API knows about the file (does it exist as closed / open, its format).
       const st = { details: [] };
-      for (const [label, u] of [...(await closedCandidates(env.CLOUDINARY_CLOUD, apiSecret, pid, ext)), ['public', publicAudioUrl(env.CLOUDINARY_CLOUD, pid, ext)]]) {
+      const basic = 'Basic ' + btoa(apiKey + ':' + apiSecret);
+      let ver = '';
+      for (const t of ['authenticated', 'upload']) {
+        try {
+          const r = await fetch(`https://api.cloudinary.com/v1_1/${env.CLOUDINARY_CLOUD}/resources/video/${t}/${encId(pid)}`, { headers: { authorization: basic } });
+          if (r.ok) { const d = await r.json(); ver = ver || String(d.version || ''); st.details.push('api:' + t + '=exists v' + d.version + ' ' + d.format); st['api_' + t] = true; }
+          else st.details.push('api:' + t + '=' + r.status);
+        } catch (e) { st.details.push('api:' + t + '=net'); }
+      }
+      const enc = encId(pid), base = `https://res.cloudinary.com/${env.CLOUDINARY_CLOUD}/video/authenticated/`;
+      const extra = ver ? [
+        ['auth+ver', base + (await signPath(apiSecret, 'f_mp3/' + enc + '.' + ext)) + '/f_mp3/v' + ver + '/' + enc + '.' + ext],
+        ['auth+ver-signed', base + (await signPath(apiSecret, 'f_mp3/v' + ver + '/' + enc + '.' + ext)) + '/f_mp3/v' + ver + '/' + enc + '.' + ext],
+        ['public+ver', `https://res.cloudinary.com/${env.CLOUDINARY_CLOUD}/video/upload/f_mp3/v${ver}/${enc}.${ext}`],
+      ] : [];
+      for (const [label, u] of [...(await closedCandidates(env.CLOUDINARY_CLOUD, apiSecret, pid, ext)), ...extra, ['public', publicAudioUrl(env.CLOUDINARY_CLOUD, pid, ext)]]) {
         try {
           const r = await fetch(u, { method: 'GET', headers: { range: 'bytes=0-1' } });
           const code = r.ok ? 200 : r.status;
           if (label === 'authenticated' || label === 'public') st[label] = code;
           st.details.push(label + ':' + code + (r.headers.get('x-cld-error') ? '(' + r.headers.get('x-cld-error').slice(0, 80) + ')' : ''));
         } catch (e) { st.details.push(label + ':net'); }
-      }
-      const basic = 'Basic ' + btoa(apiKey + ':' + apiSecret);
-      for (const t of ['authenticated', 'upload']) {
-        try {
-          const r = await fetch(`https://api.cloudinary.com/v1_1/${env.CLOUDINARY_CLOUD}/resources/video/${t}/${encId(pid)}`, { headers: { authorization: basic } });
-          if (r.ok) { const d = await r.json(); st.details.push('api:' + t + ' exists v' + d.version + ' ' + d.format); }
-          else st.details.push('api:' + t + ' ' + r.status);
-        } catch (e) { st.details.push('api:' + t + ' net'); }
       }
       results.push({ pid, ok: true, ...st });
       continue;

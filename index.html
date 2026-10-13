@@ -14499,11 +14499,16 @@ async function _audioProbeRoute(a){
 async function _audioProbeDirect(a){
   try{ return (await fetch(_audioDirectUrl(a)+'?cb='+Date.now(),{method:'HEAD',cache:'no-store'})).status; }catch(e){ return 'net'; }
 }
+// A recording to test with: prefer a plain English id (fewer variables than a Hebrew file name).
 function _audioSample(){
-  var s=null;
-  (typeof DB!=='undefined'?DB:[]).some(function(p){ var a=_cldAudioId(p&&p.audio); if(a){ s=a; return true; } return false; });
-  return s;
+  var s=null, any=null;
+  (typeof DB!=='undefined'?DB:[]).some(function(p){ var a=_cldAudioId(p&&p.audio); if(!a) return false; if(!any) any=a; if(/^[A-Za-z0-9_\-\/]+$/.test(a.pid)){ s=a; return true; } return false; });
+  return s||any;
 }
+async function _audioProbeDetails(a){
+  try{ var pr=(await _audioAdminCall('probe',[{pid:a.pid, ext:a.ext}]))[0]||{}; return (pr.details||[]).join(' | '); }catch(e){ return 'probe: '+(e&&e.message); }
+}
+function _ltr(t){ return '<br><span style="direction:ltr;unicode-bidi:embed;color:#a0b8c8;font-size:11px;">'+_fcEsc(t)+'</span>'; }
 function _audprotModeRefresh(){
   var el=document.getElementById('audprot-mode'); if(!el) return;
   var m=window.AUDIO_PROXY_MODE, dev=_audioProxyActive();
@@ -14516,7 +14521,7 @@ async function audioProtectTest(btn){
     var a=_audioSample(); if(!a){ line(false,'לא נמצאה הקלטה לבדיקה'); return; }
     if(!(await _audioSessionRefresh(true))){ line(false,'השרת לא פתח הרשאת השמעה (בדקי שאת מחוברת, ושמפתחות Cloudinary מוגדרים ב-Cloudflare)'); return; }
     line(true,'הרשאת השמעה מהשרת: פעילה');
-    var b=await _audioProbeRoute(a); line(b.ok,'לפני: ההקלטה מתנגנת דרך השרת'+(b.ok?'':' ('+b.status+(b.up?' · '+b.up:'')+')'));
+    var b=await _audioProbeRoute(a); line(b.ok,'לפני: ההקלטה מתנגנת דרך השרת · '+_fcEsc(a.pid+'.'+a.ext)+(b.ok?'':' ('+b.status+')'+_ltr((b.up||'')+' || '+(await _audioProbeDetails(a)))));
     if(!b.ok) return;
     var r=(await _audioAdminCall('protect',[{pid:a.pid, ext:a.ext}]))[0]||{};
     if(!r.ok && !/not found/i.test(r.error||'')){ line(false,'סגירת ההקלטה ב-Cloudinary נכשלה: '+(r.error||'')); return; }
@@ -14526,7 +14531,7 @@ async function audioProtectTest(btn){
     if(!(after.ok && after.source==='authenticated')){
       var pr={}; try{ pr=(await _audioAdminCall('probe',[{pid:a.pid, ext:a.ext}]))[0]||{}; }catch(e){}
       await _audioAdminCall('unprotect',[{pid:a.pid, ext:a.ext}]);
-      line(false,'ההקלטה הסגורה לא התנגנה דרך השרת. פתחתי אותה חזרה, לא השתנה כלום. שלחי לי צילום של המסך הזה.<br><span style="direction:ltr;unicode-bidi:embed;color:#a0b8c8;font-size:11px;">'+String(after.status)+' · '+_fcEsc(after.up||'')+'<br>'+_fcEsc((pr.details||[]).join(' | '))+'</span>');
+      line(false,'ההקלטה הסגורה לא התנגנה דרך השרת. פתחתי אותה חזרה, לא השתנה כלום. שלחי לי צילום של המסך הזה.'+_ltr(String(after.status)+' · '+(after.up||'')+' || '+(pr.details||[]).join(' | ')));
       return;
     }
     line(true,'אחרי הסגירה: ההקלטה מתנגנת דרך השרת, מהעותק הסגור');
@@ -14637,7 +14642,8 @@ async function dbSecurityCheck(btn){
       lines.push(ds==='net' ? [null,'הקלטה בקישור ישיר, בלי התחברות','אין חיבור'] : (ds===200 ? [false,'הקלטה בקישור ישיר, בלי התחברות','פתוחה'] : [true,'הקלטה בקישור ישיר, בלי התחברות','סגורה ('+ds+')']));
       if(await _audioSessionRefresh(true)){
         var rp=await _audioProbeRoute(smp);
-        lines.push(rp.ok ? [true,'הקלטה דרך השרת (לחברים)','מתנגנת'+(rp.source==='authenticated'?' מהעותק הסגור':'')] : [null,'הקלטה דרך השרת (לחברים)','לא מתנגנת ('+rp.status+(rp.up?' · '+rp.up:'')+' · קובץ לדוגמה: '+smp.pid+'.'+smp.ext+')']);
+        if(rp.ok) lines.push([true,'הקלטה דרך השרת (לחברים)','מתנגנת'+(rp.source==='authenticated'?' מהעותק הסגור':'')+' · '+smp.pid+'.'+smp.ext]);
+        else { var _det=window._adminAuth?await _audioProbeDetails(smp):''; lines.push([null,'הקלטה דרך השרת (לחברים)','לא מתנגנת ('+rp.status+') · '+smp.pid+'.'+smp.ext+' · '+(rp.up||'')+(_det?' || '+_det:'')]); }
       } else lines.push([null,'הקלטה דרך השרת (לחברים)','הרשאת השמעה לא נפתחה']);
     }
   }catch(e){}
@@ -25080,7 +25086,7 @@ window.addEventListener('load', function(){
 <script>
 // Version stamp — shown in the admin panel so we can confirm which build is live
 // on a device (stale service-worker caches were causing "my changes don't show").
-window.APP_VERSION = 'v359';
+window.APP_VERSION = 'v360';
 
 // Register the service worker for full offline use in the field, WITH update
 // detection: when a new version installs, offer a one-tap refresh instead of the
