@@ -152,6 +152,20 @@ export async function signedAudioUrl(cloud, apiSecret, pid, ext) {
   const sha = await crypto.subtle.digest('SHA-1', new TextEncoder().encode(toSign + apiSecret));
   return `https://res.cloudinary.com/${cloud}/video/authenticated/s--${b64url(sha).slice(0, 8)}--/${toSign}`;
 }
+// The ways a closed recording can be addressed (tried in order; the first that plays wins).
+async function signPath(apiSecret, path) {
+  const sha = await crypto.subtle.digest('SHA-1', new TextEncoder().encode(path + apiSecret));
+  return 's--' + b64url(sha).slice(0, 8) + '--';
+}
+export async function closedCandidates(cloud, apiSecret, pid, ext) {
+  const base = `https://res.cloudinary.com/${cloud}/video/authenticated/`;
+  const enc = encId(pid);
+  return [
+    ['authenticated', base + (await signPath(apiSecret, 'f_mp3/' + enc + '.' + ext)) + '/f_mp3/' + enc + '.' + ext],
+    ['authenticated-raw-sig', base + (await signPath(apiSecret, 'f_mp3/' + pid + '.' + ext)) + '/f_mp3/' + enc + '.' + ext],
+    ['authenticated-original', base + (await signPath(apiSecret, enc + '.' + ext)) + '/' + enc + '.' + ext],
+  ];
+}
 export function publicAudioUrl(cloud, pid, ext) {
   return `https://res.cloudinary.com/${cloud}/video/upload/f_mp3/${encId(pid)}.${ext}`;
 }
@@ -172,7 +186,7 @@ export async function audio(request, env, url) {
   const tried = [];
   // Closed copy first (after the move), then the open one (before / during the move).
   for (const [label, u] of [
-    ['authenticated', await signedAudioUrl(env.CLOUDINARY_CLOUD, apiSecret, a.pid, a.ext)],
+    ...(await closedCandidates(env.CLOUDINARY_CLOUD, apiSecret, a.pid, a.ext)),
     ['public', publicAudioUrl(env.CLOUDINARY_CLOUD, a.pid, a.ext)],
   ]) {
     let r;
@@ -181,10 +195,11 @@ export async function audio(request, env, url) {
       const h = new Headers();
       for (const k of PASS) { const v = r.headers.get(k); if (v) h.set(k, v); }
       h.set('cache-control', 'private, max-age=86400');
-      h.set('x-asl-source', label);
+      h.set('x-asl-source', label.startsWith('authenticated') ? 'authenticated' : label);
+      h.set('x-asl-variant', label);
       return new Response(r.body, { status: r.status, headers: h });
     }
-    tried.push(label + ':' + r.status);
+    tried.push(label + ':' + r.status + (r.headers.get('x-cld-error') ? '(' + r.headers.get('x-cld-error').slice(0, 60) + ')' : ''));
   }
   return reply(404, { error: 'not_found', tried }, { 'x-asl-upstream': tried.join(',') });
 }
@@ -209,9 +224,24 @@ export async function audioAdmin(request, env) {
     const ext = String((it && it.ext) || 'webm');
     if (!safeId(pid)) { results.push({ pid, ok: false, error: 'bad_id' }); continue; }
     if (action === 'probe') {
-      const st = {};
-      for (const [label, u] of [['authenticated', await signedAudioUrl(env.CLOUDINARY_CLOUD, apiSecret, pid, ext)], ['public', publicAudioUrl(env.CLOUDINARY_CLOUD, pid, ext)]]) {
-        try { st[label] = (await fetch(u, { method: 'HEAD' })).status; } catch (e) { st[label] = 'net'; }
+      // Each address, with Cloudinary's own error text; plus what Cloudinary's
+      // admin API knows about the file (does it exist as closed / open, its format).
+      const st = { details: [] };
+      for (const [label, u] of [...(await closedCandidates(env.CLOUDINARY_CLOUD, apiSecret, pid, ext)), ['public', publicAudioUrl(env.CLOUDINARY_CLOUD, pid, ext)]]) {
+        try {
+          const r = await fetch(u, { method: 'GET', headers: { range: 'bytes=0-1' } });
+          const code = r.ok ? 200 : r.status;
+          if (label === 'authenticated' || label === 'public') st[label] = code;
+          st.details.push(label + ':' + code + (r.headers.get('x-cld-error') ? '(' + r.headers.get('x-cld-error').slice(0, 80) + ')' : ''));
+        } catch (e) { st.details.push(label + ':net'); }
+      }
+      const basic = 'Basic ' + btoa(apiKey + ':' + apiSecret);
+      for (const t of ['authenticated', 'upload']) {
+        try {
+          const r = await fetch(`https://api.cloudinary.com/v1_1/${env.CLOUDINARY_CLOUD}/resources/video/${t}/${encId(pid)}`, { headers: { authorization: basic } });
+          if (r.ok) { const d = await r.json(); st.details.push('api:' + t + ' exists v' + d.version + ' ' + d.format); }
+          else st.details.push('api:' + t + ' ' + r.status);
+        } catch (e) { st.details.push('api:' + t + ' net'); }
       }
       results.push({ pid, ok: true, ...st });
       continue;

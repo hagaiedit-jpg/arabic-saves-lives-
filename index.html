@@ -14526,7 +14526,7 @@ async function audioProtectTest(btn){
     if(!(after.ok && after.source==='authenticated')){
       var pr={}; try{ pr=(await _audioAdminCall('probe',[{pid:a.pid, ext:a.ext}]))[0]||{}; }catch(e){}
       await _audioAdminCall('unprotect',[{pid:a.pid, ext:a.ext}]);
-      line(false,'ההקלטה הסגורה לא התנגנה דרך השרת ('+after.status+(after.up?' · '+after.up:'')+' · בדיקה ישירה: סגור='+pr.authenticated+', פתוח='+pr.public+'). פתחתי אותה חזרה, לא השתנה כלום. שלחי לי צילום של המסך הזה.');
+      line(false,'ההקלטה הסגורה לא התנגנה דרך השרת. פתחתי אותה חזרה, לא השתנה כלום. שלחי לי צילום של המסך הזה.<br><span style="direction:ltr;unicode-bidi:embed;color:#a0b8c8;font-size:11px;">'+String(after.status)+' · '+_fcEsc(after.up||'')+'<br>'+_fcEsc((pr.details||[]).join(' | '))+'</span>');
       return;
     }
     line(true,'אחרי הסגירה: ההקלטה מתנגנת דרך השרת, מהעותק הסגור');
@@ -25080,7 +25080,7 @@ window.addEventListener('load', function(){
 <script>
 // Version stamp — shown in the admin panel so we can confirm which build is live
 // on a device (stale service-worker caches were causing "my changes don't show").
-window.APP_VERSION = 'v358';
+window.APP_VERSION = 'v359';
 
 // Register the service worker for full offline use in the field, WITH update
 // detection: when a new version installs, offer a one-tap refresh instead of the
