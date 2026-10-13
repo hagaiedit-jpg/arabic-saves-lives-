@@ -4040,7 +4040,7 @@ function showLanding() {
         </div>
         <div style="margin-top:14px;border-top:1px solid #2A3D52;padding-top:10px;">
           <div style="color:#E8D9B8;font-size:13px;font-weight:800;">🔑 שינוי הסיסמה שלך</div>
-          <div style="color:#7a9ab5;font-size:11px;margin-top:3px;line-height:1.6;">אותה סיסמה משמשת לכניסה לערכה ולכניסה לניהול, במחשב ובטלפון. כדאי: אותיות קטנות באנגלית ומספרים, בלי אות גדולה (הטלפון מוסיף אותה לבד).</div>
+          <div style="color:#7a9ab5;font-size:11px;margin-top:3px;line-height:1.6;">אותה סיסמה משמשת לכניסה לערכה ולכניסה לניהול, במחשב ובטלפון. כדאי: אותיות קטנות באנגלית ומספרים, בלי עברית ובלי אות גדולה (בטלפון המקלדת בשדה סיסמה עוברת לאנגלית ומוסיפה אות גדולה לבד).</div>
           <input id="pwc-cur" type="password" autocomplete="current-password" autocapitalize="off" autocorrect="off" spellcheck="false" placeholder="הסיסמה הנוכחית" style="width:100%;margin-top:8px;background:#0E1B2E;border:1px solid #2A3D52;border-radius:10px;color:#E8D9B8;font-family:inherit;padding:11px;font-size:16px;direction:ltr;text-align:center;">
           <input id="pwc-new" type="password" autocomplete="new-password" autocapitalize="off" autocorrect="off" spellcheck="false" placeholder="סיסמה חדשה (8 תווים לפחות)" style="width:100%;margin-top:8px;background:#0E1B2E;border:1px solid #2A3D52;border-radius:10px;color:#E8D9B8;font-family:inherit;padding:11px;font-size:16px;direction:ltr;text-align:center;">
           <input id="pwc-new2" type="password" autocomplete="new-password" autocapitalize="off" autocorrect="off" spellcheck="false" placeholder="הסיסמה החדשה שוב" style="width:100%;margin-top:8px;background:#0E1B2E;border:1px solid #2A3D52;border-radius:10px;color:#E8D9B8;font-family:inherit;padding:11px;font-size:16px;direction:ltr;text-align:center;">
@@ -14683,6 +14683,7 @@ async function adminChangePassword(btn){
   if(nw!==nw2){ say(false,'שתי הסיסמאות החדשות לא זהות. אפשר לסמן "הצגת הסיסמאות" ולבדוק.'); return; }
   if(nw===cur){ say(false,'הסיסמה החדשה זהה לנוכחית.'); return; }
   if(/^\s|\s$/.test(nw)){ say(false,'יש רווח בתחילת הסיסמה החדשה או בסופה. כדאי למחוק אותו.'); return; }
+  if(/[\u0590-\u05FF]/.test(nw) && !confirm('בסיסמה החדשה יש אותיות בעברית.\nבטלפון, בשדה סיסמה, המקלדת עוברת בדרך כלל לאנגלית, ויהיה קשה להיכנס.\nמומלץ: אותיות קטנות באנגלית ומספרים.\n\nבכל זאת לשמור סיסמה בעברית?')) return;
   var old=btn.textContent; btn.disabled=true; btn.textContent='שומרת…';
   var H={'apikey':SUPA_KEY,'Content-Type':'application/json'};
   function login(pw){ return fetch(SUPA_URL+'/auth/v1/token?grant_type=password',{method:'POST',headers:H,body:JSON.stringify({email:email,password:pw})})
@@ -25234,7 +25235,7 @@ window.addEventListener('load', function(){
 <script>
 // Version stamp — shown in the admin panel so we can confirm which build is live
 // on a device (stale service-worker caches were causing "my changes don't show").
-window.APP_VERSION = 'v368';
+window.APP_VERSION = 'v369';
 
 // Register the service worker for full offline use in the field, WITH update
 // detection: when a new version installs, offer a one-tap refresh instead of the
