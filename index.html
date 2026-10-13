@@ -14440,7 +14440,8 @@ async function dbSecurityCheck(btn){
   var sg;
   try{ var rs=await fetch('/api/sign-upload',{method:'POST',headers:{'authorization':'Bearer '+_adminTokenGet()}});
     if(rs.status===401 && await _adminRefreshToken()) rs=await fetch('/api/sign-upload',{method:'POST',headers:{'authorization':'Bearer '+_adminTokenGet()}});
-    sg = rs.ok ? [true,'אישור העלאה מהשרת (למנהלת)','פעיל'] : (rs.status===503 ? [null,'אישור העלאה מהשרת (למנהלת)','עוד לא הוגדרו המפתחות ב-Cloudflare'] : [null,'אישור העלאה מהשרת (למנהלת)','לא זמין ('+rs.status+')']);
+    var _cfg=''; if(rs.status===503){ try{ var _j=await rs.clone().json(); _cfg=' (חסר: '+((_j.missing||[]).join(', ')||'—')+' · השרת רואה: '+((_j.seen||[]).join(', ')||'כלום')+')'; }catch(e){} }
+    sg = rs.ok ? [true,'אישור העלאה מהשרת (למנהלת)','פעיל'] : (rs.status===503 ? [null,'אישור העלאה מהשרת (למנהלת)','עוד לא הוגדרו המפתחות ב-Cloudflare'+_cfg] : [null,'אישור העלאה מהשרת (למנהלת)','לא זמין ('+rs.status+')']);
     if(rs.ok){
       // Does Cloudinary accept the signature? A few invalid bytes, so nothing is stored:
       // "unsupported file" = signature accepted; "Invalid Signature" = keys/algorithm problem.
@@ -24888,7 +24889,7 @@ window.addEventListener('load', function(){
 <script>
 // Version stamp — shown in the admin panel so we can confirm which build is live
 // on a device (stale service-worker caches were causing "my changes don't show").
-window.APP_VERSION = 'v354';
+window.APP_VERSION = 'v355';
 
 // Register the service worker for full offline use in the field, WITH update
 // detection: when a new version installs, offer a one-tap refresh instead of the

@@ -20,10 +20,6 @@ const reply = (status, body) => new Response(JSON.stringify(body), { status, hea
 
 export async function signUpload(request, env) {
   if (request.method !== 'POST') return reply(405, { error: 'method' });
-  // Trim: a value pasted into the dashboard with a stray space/newline breaks the signature.
-  const apiKey = String(env.CLOUDINARY_API_KEY || '').trim();
-  const apiSecret = String(env.CLOUDINARY_API_SECRET || '').trim();
-  if (!apiKey || !apiSecret) return reply(503, { error: 'not_configured' });
   const auth = request.headers.get('authorization') || '';
   if (!/^Bearer\s+\S+$/.test(auth)) return reply(401, { error: 'login' });
 
@@ -41,6 +37,17 @@ export async function signUpload(request, env) {
     return reply(502, { error: 'auth_unreachable' });
   }
   if (!isAdmin) return reply(403, { error: 'not_admin' });
+
+  // Trim: a value pasted into the dashboard with a stray space/newline breaks the signature.
+  const apiKey = String(env.CLOUDINARY_API_KEY || '').trim();
+  const apiSecret = String(env.CLOUDINARY_API_SECRET || '').trim();
+  if (!apiKey || !apiSecret) {
+    // For the admin only: which names are missing, and which similar names exist
+    // (names only, never values) — catches typos and keys saved in the wrong place.
+    const missing = ['CLOUDINARY_API_KEY', 'CLOUDINARY_API_SECRET'].filter((n) => !String(env[n] || '').trim());
+    const seen = Object.keys(env).filter((n) => /cloud|api|key|secret/i.test(n) && n !== 'CLOUDINARY_CLOUD');
+    return reply(503, { error: 'not_configured', missing, seen });
+  }
 
   // Cloudinary signature: sorted params joined with '&', then the API secret, SHA-1 hex.
   const timestamp = Math.floor(Date.now() / 1000);
