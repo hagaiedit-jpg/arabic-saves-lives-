@@ -14499,12 +14499,17 @@ async function _audioProbeRoute(a){
 async function _audioProbeDirect(a){
   try{ return (await fetch(_audioDirectUrl(a)+'?cb='+Date.now(),{method:'HEAD',cache:'no-store'})).status; }catch(e){ return 'net'; }
 }
-// A recording to test with: prefer a plain English id (fewer variables than a Hebrew file name).
-function _audioSample(){
-  var s=null, any=null;
-  (typeof DB!=='undefined'?DB:[]).some(function(p){ var a=_cldAudioId(p&&p.audio); if(!a) return false; if(!any) any=a; if(/^[A-Za-z0-9_\-\/]+$/.test(a.pid)){ s=a; return true; } return false; });
-  return s||any;
+// Recordings to test with: one with a plain English id and one with a Hebrew file name.
+function _audioSamples(){
+  var en=null, he=null;
+  (typeof DB!=='undefined'?DB:[]).some(function(p){
+    var a=_cldAudioId(p&&p.audio); if(!a) return false;
+    if(/^[A-Za-z0-9_\-\/]+$/.test(a.pid)){ if(!en) en=a; } else if(!he) he=a;
+    return !!(en&&he);
+  });
+  return [en,he].filter(Boolean);
 }
+function _audioSample(){ return _audioSamples()[0]||null; }
 async function _audioProbeDetails(a){
   try{ var pr=(await _audioAdminCall('probe',[{pid:a.pid, ext:a.ext}]))[0]||{}; return (pr.details||[]).join(' | '); }catch(e){ return 'probe: '+(e&&e.message); }
 }
@@ -14518,13 +14523,17 @@ async function audioProtectTest(btn){
   var box=document.getElementById('audprot-panel'); var old=btn.textContent; btn.disabled=true; btn.textContent='בודקת…';
   var out=[]; function line(ok,t){ out.push((ok===true?'✅ ':ok===false?'⚠️ ':'❔ ')+t); box.innerHTML='<div style="background:#18293E;border:1px solid #2A3D52;border-radius:10px;padding:10px 12px;color:#E8D9B8;font-size:12.5px;line-height:1.8;">'+out.join('<br>')+'</div>'; }
   try{
-    var a=_audioSample(); if(!a){ line(false,'לא נמצאה הקלטה לבדיקה'); return; }
+    var samples=_audioSamples(); if(!samples.length){ line(false,'לא נמצאה הקלטה לבדיקה'); return; }
     if(!(await _audioSessionRefresh(true))){ line(false,'השרת לא פתח הרשאת השמעה (בדקי שאת מחוברת, ושמפתחות Cloudinary מוגדרים ב-Cloudflare)'); return; }
     line(true,'הרשאת השמעה מהשרת: פעילה');
+    var passed=0;
+    for(var si=0; si<samples.length; si++){
+    var a=samples[si];
+    out.push('<b>'+(/^[A-Za-z0-9_\-\/]+$/.test(a.pid)?'הקלטה עם שם באנגלית':'הקלטה עם שם בעברית')+': '+_fcEsc(a.pid)+'</b>');
     var b=await _audioProbeRoute(a); line(b.ok,'לפני: ההקלטה מתנגנת דרך השרת · '+_fcEsc(a.pid+'.'+a.ext)+(b.ok?'':' ('+b.status+')'+_ltr((b.up||'')+' || '+(await _audioProbeDetails(a)))));
-    if(!b.ok) return;
+    if(!b.ok) continue;
     var r=(await _audioAdminCall('protect',[{pid:a.pid, ext:a.ext}]))[0]||{};
-    if(!r.ok && !/not found/i.test(r.error||'')){ line(false,'סגירת ההקלטה ב-Cloudinary נכשלה: '+(r.error||'')); return; }
+    if(!r.ok && !/not found/i.test(r.error||'')){ line(false,'סגירת ההקלטה ב-Cloudinary נכשלה: '+(r.error||'')); continue; }
     line(true,'ההקלטה נסגרה ב-Cloudinary');
     await new Promise(function(res){ setTimeout(res,2500); });
     var after=await _audioProbeRoute(a);
@@ -14532,15 +14541,16 @@ async function audioProtectTest(btn){
       var pr={}; try{ pr=(await _audioAdminCall('probe',[{pid:a.pid, ext:a.ext}]))[0]||{}; }catch(e){}
       await _audioAdminCall('unprotect',[{pid:a.pid, ext:a.ext}]);
       line(false,'ההקלטה הסגורה לא התנגנה דרך השרת. פתחתי אותה חזרה, לא השתנה כלום. שלחי לי צילום של המסך הזה.'+_ltr(String(after.status)+' · '+(after.up||'')+' || '+(pr.details||[]).join(' | ')));
-      return;
+      continue;
     }
     line(true,'אחרי הסגירה: ההקלטה מתנגנת דרך השרת, מהעותק הסגור');
     var d=await _audioProbeDirect(a);
     line(d!==200, d===200 ? 'הקישור הישיר הישן עדיין עובד (ייתכן שלוקח כמה דקות עד שהעותק הישן נמחק מהרשת)' : 'הקישור הישיר הישן כבר לא עובד ('+d+')');
-    if(window.AUDIO_PROXY_MODE!=='on'){
-      await _audioAdminCall('unprotect',[{pid:a.pid, ext:a.ext}]);
-      line(true,'✓ הבדיקה עברה. פתחתי את ההקלטה חזרה עד שההשמעה דרך השרת תודלק לכולם.');
-    } else line(true,'✓ הבדיקה עברה.');
+    if(window.AUDIO_PROXY_MODE!=='on'){ await _audioAdminCall('unprotect',[{pid:a.pid, ext:a.ext}]); line(true,'עברה. פתחתי אותה חזרה עד שההשמעה דרך השרת תודלק לכולם.'); }
+    else line(true,'עברה.');
+    passed++;
+    }
+    line(passed===samples.length, passed===samples.length ? '✓ הבדיקה עברה ('+passed+'/'+samples.length+').' : 'עברו '+passed+' מתוך '+samples.length+'. שלחי לי צילום של המסך הזה.');
   }catch(e){ line(false,'שגיאה: '+(e&&e.message?e.message:e)); }
   finally{ btn.disabled=false; btn.textContent=old; _audprotModeRefresh(); }
 }
@@ -25086,7 +25096,7 @@ window.addEventListener('load', function(){
 <script>
 // Version stamp — shown in the admin panel so we can confirm which build is live
 // on a device (stale service-worker caches were causing "my changes don't show").
-window.APP_VERSION = 'v360';
+window.APP_VERSION = 'v361';
 
 // Register the service worker for full offline use in the field, WITH update
 // detection: when a new version installs, offer a one-tap refresh instead of the
