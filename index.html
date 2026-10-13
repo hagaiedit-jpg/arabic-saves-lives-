@@ -14538,15 +14538,19 @@ async function audioProtectTest(btn){
     line(true,'ההקלטה נסגרה ב-Cloudinary');
     await new Promise(function(res){ setTimeout(res,2500); });
     var after=await _audioProbeRoute(a);
-    if(!(after.ok && after.source==='authenticated')){
-      var pr={}; try{ pr=(await _audioAdminCall('probe',[{pid:a.pid, ext:a.ext}]))[0]||{}; }catch(e){}
+    // The real test: at Cloudinary itself (past its CDN memory), is the closed copy there,
+    // with our signature, and is the open copy gone?
+    var pv={}; try{ pv=(await _audioAdminCall('probe',[{pid:a.pid, ext:a.ext}]))[0]||{}; }catch(e){}
+    if(!(after.ok && pv.closedFresh===200)){
+      var pr=pv;
       await _audioAdminCall('unprotect',[{pid:a.pid, ext:a.ext}]);
       line(false,'ההקלטה הסגורה לא התנגנה דרך השרת. פתחתי אותה חזרה, לא השתנה כלום. שלחי לי צילום של המסך הזה.'+_ltr(String(after.status)+' · '+(after.up||'')+' || '+(pr.details||[]).join(' | ')));
       continue;
     }
-    line(true,'אחרי הסגירה: ההקלטה מתנגנת דרך השרת, מהעותק הסגור');
+    line(true,'אחרי הסגירה: ההקלטה מתנגנת דרך השרת, והעותק הסגור נמצא ב-Cloudinary');
+    line(pv.openFresh!==200, pv.openFresh!==200 ? 'העותק הפתוח נסגר ב-Cloudinary ('+pv.openFresh+')' : 'העותק הפתוח עדיין קיים ב-Cloudinary');
     var d=await _audioProbeDirect(a);
-    line(d!==200, d===200 ? 'הקישור הישיר הישן עדיין עובד (ייתכן שלוקח כמה דקות עד שהעותק הישן נמחק מהרשת)' : 'הקישור הישיר הישן כבר לא עובד ('+d+')');
+    if(d===200) line(null,'הקישור הישן עוד עובד מהזיכרון של הרשת, וייסגר תוך כמה דקות');
     if(window.AUDIO_PROXY_MODE!=='on'){ await _audioAdminCall('unprotect',[{pid:a.pid, ext:a.ext}]); line(true,'עברה. פתחתי אותה חזרה עד שההשמעה דרך השרת תודלק לכולם.'); }
     else line(true,'עברה.');
     passed++;
@@ -25097,7 +25101,7 @@ window.addEventListener('load', function(){
 <script>
 // Version stamp — shown in the admin panel so we can confirm which build is live
 // on a device (stale service-worker caches were causing "my changes don't show").
-window.APP_VERSION = 'v362';
+window.APP_VERSION = 'v363';
 
 // Register the service worker for full offline use in the field, WITH update
 // detection: when a new version installs, offer a one-tap refresh instead of the

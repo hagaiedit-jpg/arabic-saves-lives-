@@ -191,10 +191,14 @@ export async function audio(request, env, url) {
   const range = request.headers.get('range');
   if (range) fwd.range = range;
   const tried = [];
-  // Closed copy first (after the move), then the open one (before / during the move).
+  // Open copy first, closed copy second. Never asking for the closed link while a file
+  // is still open keeps Cloudinary's CDN from caching a "not found" for it (seen live).
+  // Last resort: the closed link with a unique query, which skips the CDN cache.
+  const closed = await closedCandidates(env.CLOUDINARY_CLOUD, apiSecret, a.pid, a.ext, a.ver);
   for (const [label, u] of [
-    ...(await closedCandidates(env.CLOUDINARY_CLOUD, apiSecret, a.pid, a.ext, a.ver)),
     ['public', publicAudioUrl(env.CLOUDINARY_CLOUD, a.pid, a.ext, a.ver)],
+    ...closed,
+    ['authenticated-fresh', closed[0][1] + '?cb=' + Date.now()],
   ]) {
     let r;
     try { r = await fetch(u, { method: request.method, headers: fwd }); } catch (e) { tried.push(label + ':net'); continue; }
@@ -244,6 +248,16 @@ export async function audioAdmin(request, env) {
         } catch (e) { st.details.push('api:' + t + '=net'); }
       }
       const enc = encId(pid), base = `https://res.cloudinary.com/${env.CLOUDINARY_CLOUD}/video/authenticated/`;
+      if (ver) {
+        try {
+          const fresh = (await closedCandidates(env.CLOUDINARY_CLOUD, apiSecret, pid, ext, ver))[0][1] + '?cb=' + Date.now();
+          const r = await fetch(fresh, { headers: { range: 'bytes=0-1' } });
+          st.closedFresh = r.ok ? 200 : r.status;
+          const rp = await fetch(publicAudioUrl(env.CLOUDINARY_CLOUD, pid, ext, ver) + '?cb=' + Date.now(), { headers: { range: 'bytes=0-1' } });
+          st.openFresh = rp.ok ? 200 : rp.status;
+          st.details.push('closed-fresh:' + st.closedFresh + ' | open-fresh:' + st.openFresh);
+        } catch (e) { st.details.push('fresh:net'); }
+      }
       const extra = ver ? [
         ['auth+ver', base + (await signPath(apiSecret, 'f_mp3/' + enc + '.' + ext)) + '/f_mp3/v' + ver + '/' + enc + '.' + ext],
         ['auth+ver-signed', base + (await signPath(apiSecret, 'f_mp3/v' + ver + '/' + enc + '.' + ext)) + '/f_mp3/v' + ver + '/' + enc + '.' + ext],
