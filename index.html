@@ -14635,7 +14635,7 @@ async function dbSecurityCheck(btn){
       lines.push(ds==='net' ? [null,'הקלטה בקישור ישיר, בלי התחברות','אין חיבור'] : (ds===200 ? [false,'הקלטה בקישור ישיר, בלי התחברות','פתוחה'] : [true,'הקלטה בקישור ישיר, בלי התחברות','סגורה ('+ds+')']));
       if(await _audioSessionRefresh(true)){
         var rp=await _audioProbeRoute(smp);
-        lines.push(rp.ok ? [true,'הקלטה דרך השרת (לחברים)','מתנגנת'+(rp.source==='authenticated'?' מהעותק הסגור':'')] : [null,'הקלטה דרך השרת (לחברים)','לא מתנגנת ('+rp.status+(rp.up?' · '+rp.up:'')+')']);
+        lines.push(rp.ok ? [true,'הקלטה דרך השרת (לחברים)','מתנגנת'+(rp.source==='authenticated'?' מהעותק הסגור':'')] : [null,'הקלטה דרך השרת (לחברים)','לא מתנגנת ('+rp.status+(rp.up?' · '+rp.up:'')+' · קובץ לדוגמה: '+smp.pid+'.'+smp.ext+')']);
       } else lines.push([null,'הקלטה דרך השרת (לחברים)','הרשאת השמעה לא נפתחה']);
     }
   }catch(e){}
@@ -25078,7 +25078,7 @@ window.addEventListener('load', function(){
 <script>
 // Version stamp — shown in the admin panel so we can confirm which build is live
 // on a device (stale service-worker caches were causing "my changes don't show").
-window.APP_VERSION = 'v356';
+window.APP_VERSION = 'v357';
 
 // Register the service worker for full offline use in the field, WITH update
 // detection: when a new version installs, offer a one-tap refresh instead of the

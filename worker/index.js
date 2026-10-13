@@ -88,7 +88,10 @@ export async function signUpload(request, env, url) {
 // ---------------------------------------------------------------- audio
 const COOKIE = 'asl_audio';
 const COOKIE_DAYS = 7;
-const AUDIO_EXT = /^(webm|weba|mp4|m4a|mp3|ogg|oga|opus|wav|aac|caf|3gp|mov|amr|flac)$/i;
+const AUDIO_EXT = /^[A-Za-z0-9]{1,6}$/;   // the file type Cloudinary reports (webm, mp4, mkv, …)
+// A Cloudinary public id: no control chars, no backslash, no ".." segment.
+const safeId = (pid) => pid.length >= 1 && pid.length <= 300 && !/[\u0000-\u001f\\]/.test(pid) && !pid.split('/').some((x) => x === '..' || x === '.' || x === '');
+const encId = (pid) => pid.split('/').map(encodeURIComponent).join('/');
 
 async function hmacKey(apiSecret) {
   return crypto.subtle.importKey('raw', new TextEncoder().encode(apiSecret + '|asl-audio-cookie-v1'),
@@ -137,7 +140,7 @@ export function parseAudioPath(pathname) {
   const dot = rest.lastIndexOf('.');
   if (dot < 1) return null;
   const pid = rest.slice(0, dot), ext = rest.slice(dot + 1);
-  if (!/^[A-Za-z0-9_\-/.]{1,200}$/.test(pid) || pid.includes('..') || !AUDIO_EXT.test(ext)) return null;
+  if (!safeId(pid) || !AUDIO_EXT.test(ext)) return null;
   return { pid, ext };
 }
 
@@ -146,10 +149,10 @@ export function parseAudioPath(pathname) {
 export async function signedAudioUrl(cloud, apiSecret, pid, ext) {
   const toSign = 'f_mp3/' + pid + '.' + ext;
   const sha = await crypto.subtle.digest('SHA-1', new TextEncoder().encode(toSign + apiSecret));
-  return `https://res.cloudinary.com/${cloud}/video/authenticated/s--${b64url(sha).slice(0, 8)}--/${toSign}`;
+  return `https://res.cloudinary.com/${cloud}/video/authenticated/s--${b64url(sha).slice(0, 8)}--/f_mp3/${encId(pid)}.${ext}`;
 }
 export function publicAudioUrl(cloud, pid, ext) {
-  return `https://res.cloudinary.com/${cloud}/video/upload/f_mp3/${pid}.${ext}`;
+  return `https://res.cloudinary.com/${cloud}/video/upload/f_mp3/${encId(pid)}.${ext}`;
 }
 
 const PASS = ['content-type', 'content-length', 'content-range', 'accept-ranges', 'etag', 'last-modified'];
@@ -160,7 +163,7 @@ export async function audio(request, env, url) {
   if (!apiSecret) return notConfigured(env);
   if (!(await cookieValid(apiSecret, readCookie(request, COOKIE)))) return reply(401, { error: 'login' });
   const a = parseAudioPath(url.pathname);
-  if (!a) return reply(400, { error: 'bad_path' });
+  if (!a) return reply(400, { error: 'bad_path' }, { 'x-asl-upstream': 'bad_path:' + url.pathname.slice(11, 80) });
 
   const fwd = {};
   const range = request.headers.get('range');
@@ -203,7 +206,7 @@ export async function audioAdmin(request, env) {
   for (const it of items) {
     const pid = String((it && it.pid) || '');
     const ext = String((it && it.ext) || 'webm');
-    if (!/^[A-Za-z0-9_\-/.]{1,200}$/.test(pid) || pid.includes('..')) { results.push({ pid, ok: false, error: 'bad_id' }); continue; }
+    if (!safeId(pid)) { results.push({ pid, ok: false, error: 'bad_id' }); continue; }
     if (action === 'probe') {
       const st = {};
       for (const [label, u] of [['authenticated', await signedAudioUrl(env.CLOUDINARY_CLOUD, apiSecret, pid, ext)], ['public', publicAudioUrl(env.CLOUDINARY_CLOUD, pid, ext)]]) {
