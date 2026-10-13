@@ -143,12 +143,13 @@ function _cldAudioId(u){
   if(dot<1) return null;
   // Ids can be Hebrew file names, stored %-encoded in the link: keep the real id.
   var pid=rest.slice(0,dot); try{ pid=decodeURIComponent(pid); }catch(e){}
-  return {cloud:m[1], type:m[2], pid:pid, ext:rest.slice(dot+1)};
+  // The version number: closed (authenticated) files are found only with it.
+  return {cloud:m[1], type:m[2], pid:pid, ext:rest.slice(dot+1), ver:(vi>=0?parts[vi].slice(1):'')};
 }
 function _audioRoute(u){
   if(!u || typeof u!=='string' || u.indexOf('res.cloudinary.com/')===-1 || !_audioProxyActive()) return u;
   var a=_cldAudioId(u); if(!a) return u;
-  return '/api/audio/'+a.pid.split('/').map(encodeURIComponent).join('/')+'.'+a.ext;
+  return '/api/audio/'+(a.ver?'v'+a.ver+'/':'')+a.pid.split('/').map(encodeURIComponent).join('/')+'.'+a.ext;
 }
 (function(){
   try{
@@ -14469,7 +14470,7 @@ function skipFieldCmd(idx){
 
 // === Recordings protection (admin) ===========================================
 function _audioDirectUrl(a){ return 'https://res.cloudinary.com/'+a.cloud+'/video/upload/f_mp3/'+a.pid.split('/').map(encodeURIComponent).join('/')+'.'+a.ext; }
-function _audioRoutePath(a){ return '/api/audio/'+a.pid.split('/').map(encodeURIComponent).join('/')+'.'+a.ext; }
+function _audioRoutePath(a){ return '/api/audio/'+(a.ver?'v'+a.ver+'/':'')+a.pid.split('/').map(encodeURIComponent).join('/')+'.'+a.ext; }
 async function _audioAdminCall(action, items){
   function go(){ return fetch('/api/audio-admin',{method:'POST',headers:{'authorization':'Bearer '+_adminTokenGet(),'content-type':'application/json'},body:JSON.stringify({action:action,items:items})}); }
   var r=await go(); if(r.status===401 && await _adminRefreshToken()) r=await go();
@@ -25096,7 +25097,7 @@ window.addEventListener('load', function(){
 <script>
 // Version stamp — shown in the admin panel so we can confirm which build is live
 // on a device (stale service-worker caches were causing "my changes don't show").
-window.APP_VERSION = 'v361';
+window.APP_VERSION = 'v362';
 
 // Register the service worker for full offline use in the field, WITH update
 // detection: when a new version installs, offer a one-tap refresh instead of the

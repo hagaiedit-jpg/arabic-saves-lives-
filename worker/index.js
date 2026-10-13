@@ -134,15 +134,19 @@ export async function audioSession(request, env) {
   });
 }
 
-// "<public_id>.<ext>" from the request path; public ids may contain folders.
+// "[v<version>/]<public_id>.<ext>" from the request path; public ids may contain folders.
+// Closed (authenticated) files are only found WITH their version number in the link.
 export function parseAudioPath(pathname) {
   let rest;
   try { rest = decodeURIComponent(pathname.slice('/api/audio/'.length)); } catch (e) { return null; }
+  let ver = '';
+  const vm = /^v(\d{1,12})\/(.+)$/.exec(rest);
+  if (vm) { ver = vm[1]; rest = vm[2]; }
   const dot = rest.lastIndexOf('.');
   if (dot < 1) return null;
   const pid = rest.slice(0, dot), ext = rest.slice(dot + 1);
   if (!safeId(pid) || !AUDIO_EXT.test(ext)) return null;
-  return { pid, ext };
+  return { pid, ext, ver };
 }
 
 // Cloudinary signed delivery URL: "s--" + first 8 chars of URL-safe base64 of
@@ -157,17 +161,20 @@ async function signPath(apiSecret, path) {
   const sha = await crypto.subtle.digest('SHA-1', new TextEncoder().encode(path + apiSecret));
   return 's--' + b64url(sha).slice(0, 8) + '--';
 }
-export async function closedCandidates(cloud, apiSecret, pid, ext) {
+export async function closedCandidates(cloud, apiSecret, pid, ext, ver) {
   const base = `https://res.cloudinary.com/${cloud}/video/authenticated/`;
   const enc = encId(pid);
+  // Verified live: closed files need the version in the link; the signature covers
+  // transformation + id (not the version), as in Cloudinary's SDKs.
+  if (ver) return [['authenticated', base + (await signPath(apiSecret, 'f_mp3/' + enc + '.' + ext)) + '/f_mp3/v' + ver + '/' + enc + '.' + ext]];
   return [
     ['authenticated', base + (await signPath(apiSecret, 'f_mp3/' + enc + '.' + ext)) + '/f_mp3/' + enc + '.' + ext],
     ['authenticated-raw-sig', base + (await signPath(apiSecret, 'f_mp3/' + pid + '.' + ext)) + '/f_mp3/' + enc + '.' + ext],
     ['authenticated-original', base + (await signPath(apiSecret, enc + '.' + ext)) + '/' + enc + '.' + ext],
   ];
 }
-export function publicAudioUrl(cloud, pid, ext) {
-  return `https://res.cloudinary.com/${cloud}/video/upload/f_mp3/${encId(pid)}.${ext}`;
+export function publicAudioUrl(cloud, pid, ext, ver) {
+  return `https://res.cloudinary.com/${cloud}/video/upload/f_mp3/${ver ? 'v' + ver + '/' : ''}${encId(pid)}.${ext}`;
 }
 
 const PASS = ['content-type', 'content-length', 'content-range', 'accept-ranges', 'etag', 'last-modified'];
@@ -186,8 +193,8 @@ export async function audio(request, env, url) {
   const tried = [];
   // Closed copy first (after the move), then the open one (before / during the move).
   for (const [label, u] of [
-    ...(await closedCandidates(env.CLOUDINARY_CLOUD, apiSecret, a.pid, a.ext)),
-    ['public', publicAudioUrl(env.CLOUDINARY_CLOUD, a.pid, a.ext)],
+    ...(await closedCandidates(env.CLOUDINARY_CLOUD, apiSecret, a.pid, a.ext, a.ver)),
+    ['public', publicAudioUrl(env.CLOUDINARY_CLOUD, a.pid, a.ext, a.ver)],
   ]) {
     let r;
     try { r = await fetch(u, { method: request.method, headers: fwd }); } catch (e) { tried.push(label + ':net'); continue; }
