@@ -1450,6 +1450,13 @@ body.day-mode .force-dark [style*="color:#E8D9B8"]{color:#E8D9B8 !important;}
 body.day-mode .force-dark [style*="color:#a0b8c8"]{color:#a0b8c8 !important;}
 body.day-mode .force-dark [style*="color:#7a9ab5"]{color:#7a9ab5 !important;}
 body.day-mode .force-dark [style*="color:#D4A24E"]{color:#D4A24E !important;}
+body.day-mode .force-dark [style*="color:#9fb2c6"]{color:#9fb2c6 !important;}
+body.day-mode .force-dark [style*="color:#c9d6e3"]{color:#c9d6e3 !important;}
+body.day-mode .force-dark [style*="color:#7eecc1"]{color:#7eecc1 !important;}
+body.day-mode .force-dark [style*="color:#ff9a8f"]{color:#ff9a8f !important;}
+body.day-mode .force-dark [style*="color:#E9BE6A"]{color:#E9BE6A !important;}
+body.day-mode .force-dark input{color:#E8D9B8 !important;background:#0E1B2E !important;}
+body.day-mode .force-dark input::placeholder{color:#7a9ab5 !important;}
 
 /* Weekly ritual card: match the app's light theme in day mode (was a dark accent) */
 body.day-mode #home-weekly-ritual > div{
@@ -3717,14 +3724,18 @@ function showLanding() {
     <div id="at-mem" style="display:none;">
       <div class="acard">
         <div style="color:#E8D9B8;font-size:14px;font-weight:800;margin-bottom:4px;">👥 משתתפים עם גישה לערכה</div>
-        <div style="color:#7a9ab5;font-size:11.5px;line-height:1.7;margin-bottom:10px;">מי שנרשם לערכה רואה "החשבון עדיין לא הופעל" עד שמוסיפים אותו כאן.<br>מדביקים מייל (אפשר כמה, כל אחד בשורה) ← <b>הוספה</b> ← המשתתף לוחץ אצלו "✓ אושרתי — בדוק שוב".</div>
+        <div style="color:#7a9ab5;font-size:11.5px;line-height:1.7;margin-bottom:10px;">מי שנרשם לערכה מופיע כאן ב"ממתינים לאישור". לוחצים <b>✓ אישור</b>, והמשתתף לוחץ אצלו "✓ אושרתי — בדוק שוב".<br>אפשר גם להדביק מייל ידנית (אפשר כמה, כל אחד בשורה) ← <b>הוספה</b>.</div>
+        <div style="background:rgba(233,190,106,0.07);border:1px solid rgba(233,190,106,0.35);border-radius:12px;padding:10px 12px;margin-bottom:12px;">
+          <div id="mem-pending-title" style="color:#E9BE6A;font-size:13px;font-weight:800;">⏳ נרשמו וממתינים לאישור</div>
+          <div id="mem-pending" style="margin-top:6px;"></div>
+        </div>
         <textarea id="mem-emails" dir="ltr" rows="3" placeholder="name@example.com" autocapitalize="off" autocorrect="off" spellcheck="false" style="width:100%;background:#0E1B2E;border:1px solid #2A3D52;border-radius:10px;color:#E8D9B8;font-family:inherit;padding:11px;font-size:15px;text-align:left;resize:vertical;"></textarea>
         <input id="mem-note" value="פיילוט" placeholder="הערה (לא חובה)" style="width:100%;margin-top:8px;background:#0E1B2E;border:1px solid #2A3D52;border-radius:10px;color:#E8D9B8;font-family:inherit;padding:10px;font-size:14px;">
         <button id="mem-add" class="keep-white" onclick="membersAdd(this)" style="width:100%;padding:12px;margin-top:8px;border:none;border-radius:10px;color:#fff;font-size:14px;font-weight:800;cursor:pointer;font-family:inherit;background:linear-gradient(135deg,#1f8a70 0%,#0e5a48 100%);">➕ הוספה</button>
         <div id="mem-result" style="margin-top:8px;"></div>
         <div style="display:flex;align-items:center;justify-content:space-between;gap:8px;margin-top:16px;">
           <div id="mem-count" style="color:#E8D9B8;font-size:13px;font-weight:800;">רשימת המשתתפים</div>
-          <button onclick="membersRender()" style="background:#2A3D52;border:none;border-radius:8px;color:#E8D9B8;font-size:12px;padding:6px 10px;cursor:pointer;font-family:inherit;">🔄 רענון</button>
+          <button onclick="membersRender();membersPendingRender()" style="background:#2A3D52;border:none;border-radius:8px;color:#E8D9B8;font-size:12px;padding:6px 10px;cursor:pointer;font-family:inherit;">🔄 רענון</button>
         </div>
         <input id="mem-filter" dir="ltr" placeholder="חיפוש…" oninput="membersRender(true)" autocapitalize="off" style="width:100%;margin-top:8px;background:#0E1B2E;border:1px solid #2A3D52;border-radius:10px;color:#E8D9B8;font-family:inherit;padding:9px;font-size:14px;">
         <div id="mem-list" style="margin-top:8px;"></div>
@@ -4474,7 +4485,7 @@ function adminLogout(){
 function _pwToggle(id, btn){
   var el=document.getElementById(id); if(!el) return;
   var show=el.type==='password'; el.type=show?'text':'password';
-  if(btn){ btn.textContent=show?'🙈':'👁'; btn.setAttribute('aria-label', show?'הסתרת הסיסמה':'הצגת הסיסמה'); }
+  if(btn){ btn.textContent=show?'🙈':'👁️'; btn.setAttribute('aria-label', show?'הסתרת הסיסמה':'הצגת הסיסמה'); }
 }
 // Admin login form. The email is remembered on this device so only the
 // password has to be typed.
@@ -14706,12 +14717,62 @@ async function membersRender(useCache){
   if(!rows.length){ el.innerHTML='<div style="color:#7a9ab5;font-size:12px;">'+(q?'לא נמצא.':'אין עדיין משתתפים.')+'</div>'; return; }
   el.innerHTML=rows.map(function(r){
     var e=String(r.email||''), me=e.toLowerCase()===admin;
-    return '<div style="display:flex;align-items:center;gap:8px;padding:8px 10px;border:1px solid #2A3D52;border-radius:10px;margin-top:6px;background:#132235;">'
+    return '<div style="display:flex;align-items:center;gap:8px;padding:8px 10px;border:1px solid #2A3D52;border-radius:10px;margin-top:6px;background:#18293E;">'
       +'<div style="flex:1;min-width:0;"><div dir="ltr" style="color:#E8D9B8;font-size:13px;text-align:left;overflow-wrap:anywhere;">'+_fcEsc(e)+'</div>'
       +'<div style="color:#7a9ab5;font-size:11px;">'+_fcEsc([r.note||'', _memWhen(r)].filter(Boolean).join(' · '))+(me?' · 👑 את':'')+'</div></div>'
       +(me?'':'<button data-email="'+_fcEsc(e)+'" onclick="membersRemove(this)" style="background:transparent;border:1px solid #5e1f27;color:#ff9a8f;border-radius:8px;font-size:12px;padding:6px 9px;cursor:pointer;font-family:inherit;flex-shrink:0;">הסרה</button>')
       +'</div>';
   }).join('');
+}
+// Add one email to the members list (with a note when the table has that column).
+async function _memInsert(e, note){
+  try{ await sbFetch('/rest/v1/members','POST', note?{email:e, note:note}:{email:e}); }
+  catch(err){ if(note && /note/i.test(String(err&&err.message))) await sbFetch('/rest/v1/members','POST',{email:e}); else throw err; }
+}
+function _memWaBtn(){ return '<button onclick="membersTellWhatsApp()" class="keep-white" style="width:100%;margin-top:8px;padding:10px;background:#25D366;border:none;border-radius:10px;color:#fff;font-size:13px;font-weight:800;cursor:pointer;font-family:inherit;">📲 הודעה למשתתף: "הערכה פתוחה לך"</button>'; }
+// Registered in the kit but not approved yet: an admin-only database function
+// (commercial/06_pending_signups.sql). Until it is installed, a short hint shows.
+async function membersPendingRender(){
+  var el=document.getElementById('mem-pending'), t=document.getElementById('mem-pending-title'); if(!el) return;
+  el.innerHTML='<div style="color:#7a9ab5;font-size:12px;">טוען…</div>';
+  var rows;
+  try{ rows=await sbFetch('/rest/v1/rpc/pending_signups','POST',{}); }
+  catch(e){
+    var m=String(e&&e.message||e);
+    if(t) t.textContent='⏳ נרשמו וממתינים לאישור';
+    el.innerHTML='<div style="color:'+(/PGRST202|Could not find the function/i.test(m)?'#7a9ab5':'#ff9a8f')+';font-size:12px;line-height:1.7;">'
+      +(/PGRST202|Could not find the function/i.test(m) ? 'כדי לראות כאן את מי שנרשם, צריך להריץ פעם אחת ב-Supabase את <b>06_pending_signups.sql</b>. עד אז הבקשות מגיעות אלייך בוואטסאפ.'
+        : /permission|JWT|401|403/i.test(m) ? 'אין הרשאה: צריך להיכנס לניהול מחדש.'
+        : 'לא הצלחתי לטעון את הממתינים.'+_ltr(m.slice(0,160)))+'</div>';
+    return;
+  }
+  rows=Array.isArray(rows)?rows:[];
+  if(t) t.textContent='⏳ נרשמו וממתינים לאישור ('+rows.length+')';
+  if(!rows.length){ el.innerHTML='<div style="color:#7a9ab5;font-size:12px;">אין כרגע ממתינים. מי שנרשם לערכה יופיע כאן.</div>'; return; }
+  el.innerHTML=rows.map(function(r){
+    var e=String(r.email||'');
+    return '<div style="display:flex;align-items:center;gap:8px;padding:8px 10px;border:1px solid #2A3D52;border-radius:10px;margin-top:6px;background:#18293E;">'
+      +'<div style="flex:1;min-width:0;"><div dir="ltr" style="color:#E8D9B8;font-size:13px;text-align:left;overflow-wrap:anywhere;">'+_fcEsc(e)+'</div>'
+      +'<div style="color:#7a9ab5;font-size:11px;">'+(_memWhen(r)?'נרשם/ה: '+_fcEsc(_memWhen(r)):'')+'</div></div>'
+      +'<button data-email="'+_fcEsc(e)+'" onclick="membersApprove(this)" class="keep-white" style="background:#1D9E75;border:none;color:#fff;border-radius:8px;font-size:12.5px;font-weight:800;padding:7px 11px;cursor:pointer;font-family:inherit;flex-shrink:0;">✓ אישור</button>'
+      +'</div>';
+  }).join('');
+}
+async function membersApprove(btn){
+  var e=String(btn && btn.getAttribute('data-email')||'').trim().toLowerCase(); if(!e) return;
+  var note=String((document.getElementById('mem-note')||{}).value||'').trim().slice(0,80);
+  btn.disabled=true; btn.textContent='…';
+  try{ await _memInsert(e, note); }
+  catch(err){
+    var m=String(err&&err.message||err);
+    if(!/duplicate|23505|already exists/i.test(m)){
+      alert('האישור נכשל: '+(/row-level|JWT|permission|401|403/i.test(m)?'אין הרשאה, צריך להיכנס לניהול מחדש.':m.slice(0,160)));
+      btn.disabled=false; btn.textContent='✓ אישור'; return;
+    }
+  }
+  var box=document.getElementById('mem-result');
+  if(box) box.innerHTML='<div style="background:#18293E;border:1px solid #1D9E75;border-radius:10px;padding:10px 12px;color:#E8D9B8;font-size:12.5px;line-height:1.8;">✅ אושר/ה:'+_ltr(e)+_memWaBtn()+'</div>';
+  await membersPendingRender(); await membersRender();
 }
 async function membersAdd(btn){
   var box=document.getElementById('mem-result'), ta=document.getElementById('mem-emails');
@@ -14727,8 +14788,7 @@ async function membersAdd(btn){
       var e=emails[i];
       if(have[e]){ had.push(e); continue; }
       try{
-        try{ await sbFetch('/rest/v1/members','POST', note?{email:e, note:note}:{email:e}); }
-        catch(err){ if(note && /note/i.test(String(err&&err.message))) await sbFetch('/rest/v1/members','POST',{email:e}); else throw err; }
+        await _memInsert(e, note);
         added.push(e); have[e]=1;
       }catch(err){ var em=String(err&&err.message||err); failed.push(e+' ('+(/row-level|JWT|permission|401|403/i.test(em)?'אין הרשאה: צריך להיכנס לניהול מחדש':em.slice(0,120))+')'); }
     }
@@ -14738,10 +14798,11 @@ async function membersAdd(btn){
   if(added.length) h.push('✅ נוספו ('+added.length+'):'+added.map(function(x){ return _ltr(x); }).join(''));
   if(had.length) h.push('כבר ברשימה ('+had.length+'):'+had.map(function(x){ return _ltr(x); }).join(''));
   if(failed.length) h.push('⚠️ לא נוספו ('+failed.length+'):'+failed.map(function(x){ return _ltr(x); }).join(''));
-  if(added.length) h.push('<button onclick="membersTellWhatsApp()" class="keep-white" style="width:100%;margin-top:8px;padding:10px;background:#25D366;border:none;border-radius:10px;color:#fff;font-size:13px;font-weight:800;cursor:pointer;font-family:inherit;">📲 הודעה למשתתף: "הערכה פתוחה לך"</button>');
+  if(added.length) h.push(_memWaBtn());
   say(!failed.length, h.join('<br>'));
   if(added.length && ta) ta.value='';
   await membersRender();
+  if(added.length) membersPendingRender();
 }
 function membersTellWhatsApp(){
   var link=location.origin+'/';
@@ -20809,7 +20870,7 @@ function aT(t,el){
   if(el){ el.classList.add('active'); try{ el.scrollIntoView({behavior:'smooth',inline:'center',block:'nearest'}); }catch(e){} }
   ['mem','ap','ad','ah','ak','an','adict','asem','ac','al','audit','qrec','acat','cov','dup','trc'].forEach(id=>{var e=document.getElementById('at-'+id); if(e)e.style.display='none';});
   document.getElementById('at-'+t).style.display='block';
-  if(t==='mem')membersRender();
+  if(t==='mem'){ membersRender(); membersPendingRender(); }
   if(t==='al')renderAdminList();if(t==='acat')renderCatList();if(t==='audit')renderQuestionAudit();if(t==='qrec')renderRespRecList();if(t==='cov')renderCoverage();if(t==='dup')checkFieldVocab();if(t==='trc')checkTranslitConsistency();
   try{ renderTabList(t); }catch(e){ console.warn('renderTabList',e); }
 }
@@ -25331,7 +25392,7 @@ window.addEventListener('load', function(){
 <script>
 // Version stamp — shown in the admin panel so we can confirm which build is live
 // on a device (stale service-worker caches were causing "my changes don't show").
-window.APP_VERSION = 'v371';
+window.APP_VERSION = 'v372';
 
 // Register the service worker for full offline use in the field, WITH update
 // detection: when a new version installs, offer a one-tap refresh instead of the
@@ -25448,7 +25509,7 @@ document.getElementById('legal-modal').addEventListener('click', function(e){ if
 </script>
 
 <!-- ===== Commerce login (phone/OTP) — dormant unless window.COMMERCE_LOGIN ===== -->
-<div id="cl-overlay" style="display:none;position:fixed;inset:0;z-index:11000;background:rgba(9,17,29,.97);direction:rtl;overflow-y:auto;padding:24px 16px;">
+<div id="cl-overlay" class="force-dark" style="display:none;position:fixed;inset:0;z-index:11000;background:rgba(9,17,29,.97);direction:rtl;overflow-y:auto;padding:24px 16px;">
   <div style="max-width:380px;margin:6vh auto 0;background:linear-gradient(180deg,#1c2f47,#152539);border:1px solid #2a3d54;border-radius:16px;padding:22px;box-shadow:0 12px 40px rgba(0,0,0,.5);">
     <div style="text-align:center;margin-bottom:16px;">
       <div style="font-size:34px;">🔐</div>
@@ -25463,13 +25524,13 @@ document.getElementById('legal-modal').addEventListener('click', function(e){ if
     <input id="cl-pass" type="password" autocomplete="current-password" autocapitalize="off" autocorrect="off" spellcheck="false" placeholder="בחרו סיסמה (6 תווים לפחות)"
       onkeydown="if(event.key==='Enter'){clSubmit();}"
       style="width:100%;background:#0E1B2E;border:1px solid #2A3D52;border-radius:10px;color:#E8D9B8;font-family:inherit;padding:13px 44px;font-size:16px;text-align:center;">
-    <button type="button" onclick="_pwToggle('cl-pass',this)" aria-label="הצגת הסיסמה" style="position:absolute;left:4px;top:50%;transform:translateY(-50%);background:none;border:none;font-size:18px;padding:8px;cursor:pointer;line-height:1;">👁</button>
+    <button type="button" onclick="_pwToggle('cl-pass',this)" aria-label="הצגת הסיסמה" style="position:absolute;left:4px;top:50%;transform:translateY(-50%);background:none;border:none;font-size:18px;padding:8px;cursor:pointer;line-height:1;color:#c9d6e3;">👁️</button>
     </div>
     <label id="cl-terms-row" style="display:flex;align-items:flex-start;gap:8px;margin-top:12px;color:#c9d6e3;font-size:12.5px;line-height:1.5;cursor:pointer;">
       <input id="cl-terms" type="checkbox" style="width:20px;height:20px;flex-shrink:0;margin-top:1px;accent-color:#1D9E75;">
       <span>קראתי ואני מסכים/ה ל<a href="#" onclick="openLegal('terms');return false;" style="color:#D4A24E;">תנאי השימוש</a> ול<a href="#" onclick="openLegal('privacy');return false;" style="color:#D4A24E;">מדיניות הפרטיות</a></span>
     </label>
-    <button id="cl-login-btn" onclick="clSubmit()" style="width:100%;margin-top:14px;padding:13px;background:#1D9E75;border:none;border-radius:10px;color:#fff;font-size:15px;font-weight:800;cursor:pointer;font-family:inherit;">הרשמה</button>
+    <button id="cl-login-btn" class="keep-white" onclick="clSubmit()" style="width:100%;margin-top:14px;padding:13px;background:#1D9E75;border:none;border-radius:10px;color:#fff;font-size:15px;font-weight:800;cursor:pointer;font-family:inherit;">הרשמה</button>
     <div style="text-align:center;margin-top:12px;"><button id="cl-mode-toggle" onclick="clToggleMode()" style="background:none;border:none;color:#D4A24E;font-size:13px;cursor:pointer;font-family:inherit;text-decoration:underline;">כבר יש לך חשבון? התחברות</button></div>
     <div id="cl-status" style="text-align:center;color:#ff9a8f;font-size:12.5px;margin-top:12px;min-height:16px;white-space:pre-line;line-height:1.6;"></div>
   </div>
@@ -25490,7 +25551,7 @@ document.getElementById('legal-modal').addEventListener('click', function(e){ if
       <input id="adm-pass" type="password" autocomplete="current-password" autocapitalize="off" autocorrect="off" spellcheck="false"
         onkeydown="if(event.key==='Enter'){admLoginSubmit();}"
         style="width:100%;background:#0E1B2E;border:1px solid #2A3D52;border-radius:10px;color:#E8D9B8;font-family:inherit;padding:13px 44px;font-size:16px;direction:ltr;text-align:center;">
-      <button type="button" onclick="_pwToggle('adm-pass',this)" aria-label="הצגת הסיסמה" style="position:absolute;left:4px;top:50%;transform:translateY(-50%);background:none;border:none;font-size:18px;padding:8px;cursor:pointer;line-height:1;">👁</button>
+      <button type="button" onclick="_pwToggle('adm-pass',this)" aria-label="הצגת הסיסמה" style="position:absolute;left:4px;top:50%;transform:translateY(-50%);background:none;border:none;font-size:18px;padding:8px;cursor:pointer;line-height:1;color:#c9d6e3;">👁️</button>
     </div>
     <button id="adm-login-btn" class="keep-white" onclick="admLoginSubmit()" style="width:100%;margin-top:14px;padding:13px;background:#1D9E75;border:none;border-radius:10px;color:#fff;font-size:15px;font-weight:800;cursor:pointer;font-family:inherit;">כניסה</button>
     <button onclick="admLoginClose()" style="width:100%;margin-top:8px;padding:11px;background:#2A3D52;border:none;border-radius:10px;color:#E8D9B8;font-size:14px;cursor:pointer;font-family:inherit;">ביטול</button>
